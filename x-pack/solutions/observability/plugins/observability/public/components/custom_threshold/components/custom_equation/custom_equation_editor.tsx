@@ -147,6 +147,7 @@ export function CustomEquationEditor({
       onChange={handleChange}
       errors={errors}
       dataView={dataView}
+      isOneRow={customMetrics?.length === 1}
     />
   ));
 
@@ -174,84 +175,86 @@ export function CustomEquationEditor({
           />
         </EuiButtonEmpty>
       </EuiFlexGroup>
-      <EuiSpacer size={'m'} />
-      <EuiFlexItem>
-        <EuiPopover
-          button={
-            <EuiFormRow
-              data-test-subj="equationAndThreshold"
-              fullWidth
-              label={i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
-                { defaultMessage: 'Equation and threshold' }
-              )}
-              error={[errors.equation as string]}
-            >
-              <>
-                <EuiSpacer size="xs" />
-                <EuiExpression
-                  data-test-subj="customEquation"
-                  description={i18n.translate(
-                    'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationLabel',
-                    { defaultMessage: 'Equation' }
-                  )}
-                  value={equation ?? placeholder}
-                  display={'columns'}
-                  onClick={() => {
-                    setCustomEqPopoverOpen(true);
-                  }}
-                  isInvalid={errors.equation != null}
-                />
-              </>
-            </EuiFormRow>
-          }
-          isOpen={customEqPopoverOpen}
-          closePopover={() => {
-            setCustomEqPopoverOpen(false);
-          }}
-          display="block"
-          ownFocus
-          anchorPosition={'downLeft'}
-          repositionOnScroll
-        >
-          <div>
-            <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
-              <span>
-                <FormattedMessage
-                  id="xpack.observability.customThreshold.rule.alertFlyout.customEquationLabel"
-                  defaultMessage="Custom equation"
-                />
-                &nbsp;
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.customThreshold.rule.alertFlyout.customEquationTooltip',
-                    {
-                      defaultMessage:
-                        'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
-                    }
-                  )}
-                  position="top"
-                />
-              </span>
-            </ClosablePopoverTitle>
-            <EuiFormRow
-              fullWidth
-              helpText={EQUATION_HELP_MESSAGE}
-              isInvalid={errors.equation != null}
-            >
-              <EuiFieldText
-                data-test-subj="thresholdRuleCustomEquationEditorFieldText"
-                isInvalid={errors.equation != null}
-                compressed
+      <EuiSpacer size={'s'} />
+      {customMetrics?.length > 1 && (
+        <EuiFlexItem>
+          <EuiPopover
+            button={
+              <EuiFormRow
+                data-test-subj="equationAndThreshold"
                 fullWidth
-                placeholder={placeholder}
-                onChange={handleEquationChange}
-                value={equation ?? ''}
-              />
-            </EuiFormRow>
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
+                label={i18n.translate(
+                  'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
+                  { defaultMessage: 'Equation and threshold' }
+                )}
+                error={[errors.equation as string]}
+              >
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiExpression
+                    data-test-subj="customEquation"
+                    description={i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationLabel',
+                      { defaultMessage: 'Equation' }
+                    )}
+                    value={equation ?? placeholder}
+                    display={'columns'}
+                    onClick={() => {
+                      setCustomEqPopoverOpen(true);
+                    }}
+                    isInvalid={errors.equation != null}
+                  />
+                </>
+              </EuiFormRow>
+            }
+            isOpen={customEqPopoverOpen}
+            closePopover={() => {
+              setCustomEqPopoverOpen(false);
+            }}
+            display="block"
+            ownFocus
+            anchorPosition={'downLeft'}
+            repositionOnScroll
+          >
+            <div>
+              <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
+                <span>
+                  <FormattedMessage
+                    id="xpack.observability.customThreshold.rule.alertFlyout.customEquationLabel"
+                    defaultMessage="Custom equation"
+                  />
+                  &nbsp;
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationTooltip',
+                      {
+                        defaultMessage:
+                          'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+                      }
+                    )}
+                    position="top"
+                  />
+                </span>
+              </ClosablePopoverTitle>
+              <EuiFormRow
+                fullWidth
+                helpText={EQUATION_HELP_MESSAGE}
+                isInvalid={errors.equation != null}
+              >
+                <EuiFieldText
+                  data-test-subj="thresholdRuleCustomEquationEditorFieldText"
+                  isInvalid={errors.equation != null}
+                  compressed
+                  fullWidth
+                  placeholder={placeholder}
+                  onChange={handleEquationChange}
+                  value={equation ?? ''}
+                />
+              </EuiFormRow>
+            </div>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
     </div>
   );
 }

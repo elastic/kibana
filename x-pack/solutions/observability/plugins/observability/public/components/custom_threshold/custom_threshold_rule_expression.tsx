@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import {
-  EuiButtonEmpty,
+  EuiAccordion,
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
@@ -23,7 +23,6 @@ import {
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase } from '@kbn/es-query';
-import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -34,6 +33,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -70,6 +70,7 @@ export default function Expressions(props: Props) {
     data,
     dataViews,
     dataViewEditor,
+    dataViewFieldEditor,
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -98,6 +99,156 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || dataView?.isPersisted();
+
+  // WIP: This is a temporary solution to determine the dominant category of the index patterns
+  useEffect(() => {
+    function getDominantIndexCategory(indexPatternString: string): string {
+      const apmPatterns = [
+        /^traces-apm.*/,
+        /^apm-.*/,
+        /^logs-apm.*/,
+        /^metrics-apm.*/,
+        /^traces-.*\.otel-.*/,
+        /^logs-.*\.otel-.*/,
+        /^metrics-.*\.otel-.*/,
+        /^apm-span-.*/,
+        /^apm-transaction-.*/,
+        /^apm-error-.*/,
+        /^apm-metric-.*/,
+        /^apm-onboarding-.*/,
+        /^\.apm-agent-configuration$/,
+      ];
+
+      const metricsPatterns = [
+        /^metrics-.*/,
+        /^monitoring-.*/,
+        /^system-metric-.*/,
+        /^os-metric-.*/,
+        /^docker-metric-.*/,
+        /^kubernetes-metric-.*/,
+        /^cloud-metric-.*/,
+        /^host-metric-.*/,
+        /^metricbeat-.*/,
+      ];
+
+      const logsPatterns = [
+        /^logs-.*/,
+        /^logstash-.*/,
+        /^eventlog-.*/,
+        /^application-logs-.*/,
+        /^security-logs-.*/,
+        /^audit-logs-.*/,
+        /^system-logs-.*/,
+        /^server-logs-.*/,
+        /^http-logs-.*/,
+        /^firewall-logs-.*/,
+      ];
+
+      const inventoryPatterns = [
+        /^inventory-.*/,
+        /^host-inventory-.*/,
+        /^kubernetes-inventory-.*/,
+        /^docker-inventory-.*/,
+        /^cloud-inventory-.*/,
+      ];
+
+      // Split the string into an array of index patterns
+      const indexPatterns = indexPatternString.split(',');
+
+      const counts = {
+        APM: 0,
+        Metrics: 0,
+        Logs: 0,
+        Inventory: 0,
+      };
+
+      indexPatterns.forEach((index) => {
+        if (apmPatterns.some((pattern) => pattern.test(index))) counts.APM++;
+        else if (metricsPatterns.some((pattern) => pattern.test(index))) counts.Metrics++;
+        else if (logsPatterns.some((pattern) => pattern.test(index))) counts.Logs++;
+        else if (inventoryPatterns.some((pattern) => pattern.test(index))) counts.Inventory++;
+      });
+
+      // Determine the dominant category
+      const dominantCategory = Object.entries(counts).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+
+      return dominantCategory;
+    }
+    console.log('DominantIndexCategory', getDominantIndexCategory(dataView?.title || '')); // Outputs the dominant category
+  }, [dataView]);
+  const editField = useMemo(
+    () =>
+      canEditDataView
+        ? async (fieldName?: string) => {
+            if (dataView?.id) {
+              const dataViewInstance = await data.dataViews.get(dataView.id);
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
+                ctx: {
+                  dataView: dataViewInstance,
+                },
+                fieldName,
+                onSave: async () => {},
+              });
+            }
+          }
+        : undefined,
+    [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor]
+  );
+  const onSelectDataView = useCallback(
+    (newDataView: DataView) => {
+      const ruleCriteria = (ruleParams.criteria ? ruleParams.criteria.slice() : []).map(
+        (criterion) => {
+          criterion.metrics?.forEach((metric) => {
+            metric.field = undefined;
+          });
+          return criterion;
+        }
+      );
+      setRuleParams('criteria', ruleCriteria);
+      searchSource?.setParent(undefined).setField('index', newDataView);
+      setRuleParams(
+        'searchConfiguration',
+        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
+      );
+      setDataView(newDataView);
+    },
+    [ruleParams.criteria, searchSource, setRuleParams]
+  );
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: (savedDataView) => {
+        onSelectDataView(savedDataView);
+      },
+      allowAdHocDataView: true,
+    });
+  }, [dataViewEditor, onSelectDataView]);
+
+  const addField = useMemo(
+    () => (canEditDataView && editField ? () => editField() : undefined),
+    [editField, canEditDataView]
+  );
+  const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
+    return {
+      trigger: {
+        label: dataView?.getName() || '',
+        'data-test-subj': 'custom-threshold-rule-dataView',
+        title: dataView?.getIndexPattern() || '',
+      },
+      currentDataViewId: dataView?.id,
+      onAddField: addField,
+      onDataViewCreated: createNewDataView,
+      onChangeDataView: async (changedDataView: DataView | string) => {
+        if (typeof changedDataView === 'string') {
+          const newDataView = await dataViews.get(changedDataView);
+          onSelectDataView(newDataView);
+        }
+      },
+    };
+  }, [addField, createNewDataView, dataView, dataViews, onSelectDataView]);
 
   useEffect(() => {
     const initSearchSource = async () => {
@@ -196,27 +347,6 @@ export default function Expressions(props: Props) {
         (!hasGroupBy && !!ruleParams.alertOnNoData)
     );
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const onSelectDataView = useCallback(
-    (newDataView: DataView) => {
-      const ruleCriteria = (ruleParams.criteria ? ruleParams.criteria.slice() : []).map(
-        (criterion) => {
-          criterion.metrics?.forEach((metric) => {
-            metric.field = undefined;
-          });
-          return criterion;
-        }
-      );
-      setRuleParams('criteria', ruleCriteria);
-      searchSource?.setParent(undefined).setField('index', newDataView);
-      setRuleParams(
-        'searchConfiguration',
-        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
-      );
-      setDataView(newDataView);
-    },
-    [ruleParams.criteria, searchSource, setRuleParams]
-  );
 
   const updateParams = useCallback(
     (id: any, e: MetricExpression) => {
@@ -371,9 +501,10 @@ export default function Expressions(props: Props) {
   const placeHolder = i18n.translate(
     'xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder',
     {
-      defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
+      defaultMessage: 'Define query filter (optional) e.g. host.name:host-1',
     }
   );
+
   return (
     <>
       {!!paramsWarning && (
@@ -403,7 +534,7 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <DataViewSelectPopover
+      {/* <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
         metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
@@ -411,14 +542,14 @@ export default function Expressions(props: Props) {
         onChangeMetaData={({ adHocDataViewList }) => {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
-      />
+      /> */}
       {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
           {dataViewTimeFieldError}
         </EuiFormErrorText>
       )}
-      <EuiSpacer size="l" />
-      <EuiTitle size="xs">
+      {/* <EuiSpacer size="l" /> */}
+      {/* <EuiTitle size="xs">
         <h5>
           <FormattedMessage
             id="xpack.observability.customThreshold.rule.alertFlyout.defineTextQueryPrompt"
@@ -426,7 +557,7 @@ export default function Expressions(props: Props) {
           />
         </h5>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="s" /> */}
       <SearchBar
         appName="Custom threshold rule"
         iconType="search"
@@ -442,6 +573,7 @@ export default function Expressions(props: Props) {
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
+        dataViewPickerComponentProps={dataViewPickerProps}
         filters={ruleParams.searchConfiguration?.filter}
         onFiltersUpdated={(filter) => {
           setRuleParams(
@@ -461,12 +593,20 @@ export default function Expressions(props: Props) {
           {errors.filterQuery as React.ReactNode}
         </EuiFormErrorText>
       )}
-      <EuiSpacer size="l" />
+      {/* <EuiSpacer size="l" /> */}
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
             <div key={idx}>
-              {idx > 0 && <EuiHorizontalRule margin="s" />}
+              {idx > 0 && <EuiHorizontalRule margin="xs" />}
+              <PreviewChart
+                metricExpression={e}
+                dataView={dataView}
+                searchConfiguration={ruleParams.searchConfiguration}
+                groupBy={ruleParams.groupBy}
+                error={(errors[idx] as IErrorObject) || emptyError}
+                timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+              />
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
                 fields={derivedIndexPattern.fields}
@@ -493,29 +633,20 @@ export default function Expressions(props: Props) {
                   )
                 }
               >
-                <PreviewChart
-                  metricExpression={e}
-                  dataView={dataView}
-                  searchConfiguration={ruleParams.searchConfiguration}
-                  groupBy={ruleParams.groupBy}
-                  error={(errors[idx] as IErrorObject) || emptyError}
-                  timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+                <ForLastExpression
+                  timeWindowSize={timeSize}
+                  timeWindowUnit={timeUnit}
+                  errors={emptyError}
+                  onChangeWindowSize={updateTimeSize}
+                  onChangeWindowUnit={updateTimeUnit}
+                  display="fullWidth"
                 />
               </ExpressionRow>
             </div>
           );
         })}
 
-      <ForLastExpression
-        timeWindowSize={timeSize}
-        timeWindowUnit={timeUnit}
-        errors={emptyError}
-        onChangeWindowSize={updateTimeSize}
-        onChangeWindowUnit={updateTimeUnit}
-        display="fullWidth"
-      />
-
-      <EuiSpacer size="m" />
+      {/* <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
           data-test-subj="thresholdRuleExpressionsAddConditionButton"
@@ -530,86 +661,109 @@ export default function Expressions(props: Props) {
             defaultMessage="Add condition"
           />
         </EuiButtonEmpty>
-      </div>
+      </div> */}
       <EuiSpacer size="m" />
-      <EuiFormRow
-        label={i18n.translate(
+
+      <EuiAccordion
+        id={'customThresholdRuleGroupByOptions'}
+        buttonContent={i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.createAlertPerText',
           {
             defaultMessage: 'Group alerts by (optional)',
           }
         )}
-        helpText={i18n.translate(
-          'xpack.observability.customThreshold.rule.alertFlyout.createAlertPerHelpText',
+      >
+        <EuiFormRow
+          // label={i18n.translate(
+          //   'xpack.observability.customThreshold.rule.alertFlyout.createAlertPerText',
+          //   {
+          //     defaultMessage: 'Group alerts by (optional)',
+          //   }
+          // )}
+          helpText={i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.createAlertPerHelpText',
+            {
+              defaultMessage:
+                'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
+            }
+          )}
+          fullWidth
+          display="rowCompressed"
+        >
+          <GroupBy
+            onChange={onGroupByChange}
+            fields={derivedIndexPattern.fields as MetricsExplorerFields}
+            options={{
+              groupBy: ruleParams.groupBy || null,
+            }}
+          />
+        </EuiFormRow>
+      </EuiAccordion>
+
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        id={'customThresholdRuleGroupByOptions'}
+        buttonContent={i18n.translate(
+          'xpack.observability.customThreshold.rule.alertFlyout.extraAlertingOptions',
           {
-            defaultMessage:
-              'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
+            defaultMessage: 'Extra alerting options',
           }
         )}
-        fullWidth
-        display="rowCompressed"
       >
-        <GroupBy
-          onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields as MetricsExplorerFields}
-          options={{
-            groupBy: ruleParams.groupBy || null,
-          }}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiCheckbox
-        id="metrics-alert-group-disappear-toggle"
-        data-test-subj="thresholdRuleAlertOnNoDataCheckbox"
-        label={
-          <>
-            {i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.alertOnGroupDisappear',
-              {
-                defaultMessage: "Alert me if there's no data",
-              }
-            )}{' '}
-            <EuiIconTip
-              type="questionInCircle"
-              color="subdued"
-              content={
-                hasGroupBy
-                  ? i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                      }
-                    )
-              }
-            />
-          </>
-        }
-        checked={isNoDataChecked}
-        onChange={(e) => {
-          const checked = e.target.checked;
-          setIsNoDataChecked(checked);
-          if (!checked) {
-            setRuleParams('alertOnGroupDisappear', false);
-            setRuleParams('alertOnNoData', false);
-          } else {
-            if (hasGroupBy) {
-              setRuleParams('alertOnGroupDisappear', true);
+        <EuiCheckbox
+          id="metrics-alert-group-disappear-toggle"
+          data-test-subj="thresholdRuleAlertOnNoDataCheckbox"
+          label={
+            <>
+              {i18n.translate(
+                'xpack.observability.customThreshold.rule.alertFlyout.alertOnGroupDisappear',
+                {
+                  defaultMessage: "Alert me if there's no data",
+                }
+              )}{' '}
+              <EuiIconTip
+                type="questionInCircle"
+                color="subdued"
+                content={
+                  hasGroupBy
+                    ? i18n.translate(
+                        'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
+                        {
+                          defaultMessage:
+                            'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText',
+                        {
+                          defaultMessage:
+                            'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                        }
+                      )
+                }
+              />
+            </>
+          }
+          checked={isNoDataChecked}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            setIsNoDataChecked(checked);
+            if (!checked) {
+              setRuleParams('alertOnGroupDisappear', false);
               setRuleParams('alertOnNoData', false);
             } else {
-              setRuleParams('alertOnGroupDisappear', false);
-              setRuleParams('alertOnNoData', true);
+              if (hasGroupBy) {
+                setRuleParams('alertOnGroupDisappear', true);
+                setRuleParams('alertOnNoData', false);
+              } else {
+                setRuleParams('alertOnGroupDisappear', false);
+                setRuleParams('alertOnNoData', true);
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
+      </EuiAccordion>
+
       <EuiSpacer size="m" />
     </>
   );
