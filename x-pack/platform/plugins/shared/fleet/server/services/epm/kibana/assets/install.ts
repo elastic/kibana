@@ -120,12 +120,12 @@ export async function installKibanaAssets(options: {
   let assetsToInstall: ArchiveAsset[] = [];
   let res: SavedObjectsImportSuccess[] = [];
 
-  const installManagedIndexPatternOnce = once(() => {
+  const installManagedIndexPatternOnce = once(() =>
     installManagedIndexPattern({
       savedObjectsClient,
       savedObjectsImporter,
-    });
-  });
+    })
+  );
 
   async function flushAssetsToInstall() {
     await installManagedIndexPatternOnce();
