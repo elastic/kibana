@@ -319,7 +319,7 @@ describe('LensEditConfigurationFlyout', () => {
     // @ts-ignore
     newProps.attributes.state.datasourceStates.testDatasource = 'state';
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
   it('save button should be disabled if expression cannot be generated', async () => {
     const updateByRefInputSpy = jest.fn();
@@ -339,6 +339,6 @@ describe('LensEditConfigurationFlyout', () => {
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
 });

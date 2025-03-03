@@ -58,7 +58,7 @@ describe('Flyout wrapper', () => {
       mountFlyoutWrapper();
 
       expect(screen.queryByRole('button', { name: 'Edit in Lens' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Apply changes' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Apply and close' })).toBeInTheDocument();
       // make sure the read only warning is not shown
       expect(
         screen.queryByText('Read-only: Changes will be reverted on close')
@@ -73,7 +73,7 @@ describe('Flyout wrapper', () => {
 
       // make sure edit actions are not shown
       expect(screen.queryByRole('button', { name: 'Edit in Lens' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Apply changes' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Apply and close' })).not.toBeInTheDocument();
     });
 
     it('should show the only a single and consistent title no matter the context', async () => {
