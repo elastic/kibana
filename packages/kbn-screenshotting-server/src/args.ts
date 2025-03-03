@@ -83,6 +83,7 @@ export const args = ({
   } else {
     flags.push('--disable-gpu');
     // see: https://chromium.googlesource.com/chromium/src/+/main/docs/gpu/swiftshader.md#automatic-swiftshader-webgl-fallback-is-deprecated
+    flags.push('--enable-unsafe-swiftshader');
     flags.push('--use-gl=angle');
     flags.push('--use-angle=swiftshader');
   }
