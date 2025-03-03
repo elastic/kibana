@@ -163,6 +163,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(Object.keys(results[0]).sort()).to.eql([
             'alertDetailsUrl',
             'environment',
+            'grouping',
             'interval',
             'reason',
             'serviceName',

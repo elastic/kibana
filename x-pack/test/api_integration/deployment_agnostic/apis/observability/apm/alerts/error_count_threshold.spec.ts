@@ -211,6 +211,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             'environment',
             'errorGroupingKey',
             'errorGroupingName',
+            'grouping',
             'interval',
             'reason',
             'serviceName',

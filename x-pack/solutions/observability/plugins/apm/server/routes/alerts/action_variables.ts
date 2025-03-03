@@ -84,9 +84,9 @@ export const apmActionVariables = {
     name: 'errorGroupingName' as const,
   },
   grouping: {
-    description: i18n.translate('xpack.apm.alerts.action_variables.groupings', {
+    description: i18n.translate('xpack.apm.alerts.action_variables.grouping', {
       defaultMessage: 'The object containing groups that are reporting data',
     }),
-    name: 'groupings' as const,
+    name: 'grouping' as const,
   },
 };
