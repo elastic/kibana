@@ -9,8 +9,9 @@
 
 /* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
-import { resolve } from 'path';
-import webpack, { Configuration } from 'webpack';
+import { resolve, join, parse } from 'path';
+import webpack, { type Configuration, type Compiler } from 'webpack';
+import fs from 'fs';
 import { merge as webpackMerge } from 'webpack-merge';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
@@ -59,6 +60,64 @@ function getTsPreset(preset: Preset) {
 function isDesiredPreset(preset: Preset) {
   return !getPresetPath(preset)?.includes('preset-flow');
 }
+
+const MOCKS_DIRECTORY = '__storybook_mocks__';
+const EXTENSIONS = ['.ts', '.js'];
+
+// This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
+// changes to packages to cause a refresh in Storybook.
+const IGNORE_GLOBS = [
+  '**/node_modules/**',
+  '!**/node_modules/@kbn/**',
+  '!**/node_modules/@kbn/*/**',
+  '!**/node_modules/@kbn/*/!(node_modules)/**',
+];
+
+const createMockPlugin = (pattern: RegExp) => {
+  return {
+    apply(compiler: Compiler) {
+      compiler.hooks.normalModuleFactory.tap('MockReplacementPlugin', (factory) => {
+        factory.hooks.beforeResolve.tap('MockReplacementPlugin', (resolveData: any) => {
+          if (!resolveData) return;
+
+          const { request, context, contextInfo } = resolveData;
+
+          // Skip node_modules
+          if (contextInfo.issuer?.includes('node_modules')) return;
+
+          // Only process requests matching our pattern
+          if (pattern.test(request)) {
+            if (request.startsWith('./')) {
+              // Handle ./ imports
+              const mockedPath = resolve(context, MOCKS_DIRECTORY, request.slice(2));
+
+              for (const ext of EXTENSIONS) {
+                if (fs.existsSync(mockedPath + ext)) {
+                  resolveData.request = './' + join(MOCKS_DIRECTORY, request.slice(2));
+                  break;
+                }
+              }
+            } else if (request.startsWith('../')) {
+              // Handle ../ imports
+              const prs = parse(request);
+              const mockedPath = resolve(context, prs.dir, MOCKS_DIRECTORY, prs.base);
+
+              for (const ext of EXTENSIONS) {
+                if (fs.existsSync(mockedPath + ext)) {
+                  resolveData.request = prs.dir + '/' + join(MOCKS_DIRECTORY, prs.base);
+                  break;
+                }
+              }
+            }
+          }
+
+          // Don't return anything (or return undefined) to continue with the module
+          // Return false only if you want to prevent the module from being created
+        });
+      });
+    },
+  };
+};
 
 // Extend the Storybook Webpack config with some customizations
 /**
@@ -144,6 +203,20 @@ export default async ({ config: storybookConfig }: { config: Configuration }) =>
       },
     },
     stats: 'errors-only',
+  };
+
+  if (process.env.CI) {
+    config.parallelism = 4;
+    config.cache = true;
+  }
+
+  config.plugins = config.plugins || [];
+  config.plugins.push(createMockPlugin(/^\.\//)); // For ./ imports
+  config.plugins.push(createMockPlugin(/^\.\.\//)); // For ../ imports
+
+  config.watchOptions = {
+    ...config.watchOptions,
+    ignored: IGNORE_GLOBS,
   };
 
   // Override storybookConfig mainFields instead of merging with config

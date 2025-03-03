@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import { defaultConfig } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
 import { Configuration } from 'webpack';
+import webpackConfig from '@kbn/storybook/src/webpack.config';
 import { KIBANA_ROOT } from './constants';
 
 export const canvasWebpack: Configuration = {
@@ -61,6 +62,22 @@ export const canvasWebpack: Configuration = {
 
 export const canvasStorybookConfig: StorybookConfig = {
   ...defaultConfig,
-  addons: [...(defaultConfig.addons || []), require.resolve('./addon/register')],
-  ...mergeWebpackFinal(canvasWebpack),
+  webpackFinal: (config) => {
+    return webpackConfig({
+      config: {
+        ...config,
+        module: {
+          ...config.module,
+          rules: [...config.module.rules, ...canvasWebpack.module.rules],
+        },
+        resolve: {
+          ...config.resolve,
+          alias: {
+            ...config.resolve.alias,
+            ...canvasWebpack.resolve.alias,
+          },
+        },
+      },
+    });
+  },
 };

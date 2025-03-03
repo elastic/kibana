@@ -7,27 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as path from 'path';
-import fs from 'fs';
+import { resolve } from 'path';
 import type { StorybookConfig } from '@storybook/react-webpack5';
-import type { Configuration, Compiler } from 'webpack';
+import type { Configuration } from 'webpack';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { default as webpackConfig } from '../webpack.config';
 
-const MOCKS_DIRECTORY = '__storybook_mocks__';
-const EXTENSIONS = ['.ts', '.js'];
-
 export type { StorybookConfig };
-
-// This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
-// changes to packages to cause a refresh in Storybook.
-const IGNORE_GLOBS = [
-  '**/node_modules/**',
-  '!**/node_modules/@kbn/**',
-  '!**/node_modules/@kbn/*/**',
-  '!**/node_modules/@kbn/*/!(node_modules)/**',
-];
 
 export const defaultConfig: StorybookConfig = {
   addons: [
@@ -49,7 +36,7 @@ export const defaultConfig: StorybookConfig = {
     disableTelemetry: true,
     enableCrashReports: false,
   },
-  previewAnnotations: [path.resolve(__dirname, './preview.ts')],
+  previewAnnotations: [resolve(__dirname, './preview.ts')],
   previewHead: (head) => `
   ${head}
       <script>
@@ -77,7 +64,7 @@ export const defaultConfig: StorybookConfig = {
     UiSharedDepsNpm.distDir,
     UiSharedDepsSrc.distDir,
     {
-      from: path.resolve(__dirname, '../../../../../plugins/shared/kibana_react/public/assets'),
+      from: resolve(__dirname, '../../../../../plugins/shared/kibana_react/public/assets'),
       to: 'plugins/kibanaReact/assets',
     },
   ],
@@ -97,68 +84,6 @@ export const defaultConfig: StorybookConfig = {
     return options;
   },
   webpackFinal: async (config: Configuration) => {
-    if (process.env.CI) {
-      config.parallelism = 4;
-      config.cache = true;
-    }
-
-    // Create a custom mock replacement plugin
-    const createMockPlugin = (pattern: RegExp) => {
-      return {
-        apply(compiler: Compiler) {
-          compiler.hooks.normalModuleFactory.tap('MockReplacementPlugin', (factory) => {
-            factory.hooks.beforeResolve.tap('MockReplacementPlugin', (resolveData: any) => {
-              if (!resolveData) return;
-
-              const { request, context, contextInfo } = resolveData;
-
-              // Skip node_modules
-              if (contextInfo.issuer?.includes('node_modules')) return;
-
-              // Only process requests matching our pattern
-              if (pattern.test(request)) {
-                if (request.startsWith('./')) {
-                  // Handle ./ imports
-                  const mockedPath = path.resolve(context, MOCKS_DIRECTORY, request.slice(2));
-
-                  for (const ext of EXTENSIONS) {
-                    if (fs.existsSync(mockedPath + ext)) {
-                      resolveData.request = './' + path.join(MOCKS_DIRECTORY, request.slice(2));
-                      break;
-                    }
-                  }
-                } else if (request.startsWith('../')) {
-                  // Handle ../ imports
-                  const prs = path.parse(request);
-                  const mockedPath = path.resolve(context, prs.dir, MOCKS_DIRECTORY, prs.base);
-
-                  for (const ext of EXTENSIONS) {
-                    if (fs.existsSync(mockedPath + ext)) {
-                      resolveData.request = prs.dir + '/' + path.join(MOCKS_DIRECTORY, prs.base);
-                      break;
-                    }
-                  }
-                }
-              }
-
-              // Don't return anything (or return undefined) to continue with the module
-              // Return false only if you want to prevent the module from being created
-            });
-          });
-        },
-      };
-    };
-
-    // Add custom plugins for ./ and ../ imports
-    config.plugins = config.plugins || [];
-    config.plugins.push(createMockPlugin(/^\.\//)); // For ./ imports
-    config.plugins.push(createMockPlugin(/^\.\.\//)); // For ../ imports
-
-    config.watchOptions = {
-      ...config.watchOptions,
-      ignored: IGNORE_GLOBS,
-    };
-
     return webpackConfig({ config });
   },
 };
