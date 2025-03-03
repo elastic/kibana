@@ -9,27 +9,31 @@
 
 import React from 'react';
 import * as jest from 'jest-mock';
-import { addDecorator } from '@storybook/react';
 
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 
+import type { Preview } from '@storybook/react';
 import { servicesContextDecorator } from './decorator';
-
-addDecorator(servicesContextDecorator);
 
 // @ts-ignore
 window.jest = jest;
 
-export const parameters = {
-  docs: {
-    page: () => (
-      <>
-        <Title />
-        <Subtitle />
-        <Description />
-        <Primary />
-        <Stories />
-      </>
-    ),
+const preview: Preview = {
+  decorators: [servicesContextDecorator],
+  parameters: {
+    docs: {
+      page: () => (
+        <>
+          <Title />
+          <Subtitle />
+          <Description />
+          <Primary />
+          <Stories />
+        </>
+      ),
+    },
   },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default preview;

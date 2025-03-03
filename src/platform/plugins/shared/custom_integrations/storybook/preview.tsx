@@ -8,22 +8,26 @@
  */
 
 import React from 'react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
-
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
+import type { Preview } from '@storybook/react';
 import { getCustomIntegrationsContextDecorator } from './decorator';
 
-export const decorators = [getCustomIntegrationsContextDecorator()];
-
-export const parameters = {
-  docs: {
-    page: () => (
-      <>
-        <Title />
-        <Subtitle />
-        <Description />
-        <Primary />
-        <Stories />
-      </>
-    ),
+const preview: Preview = {
+  parameters: {
+    docs: {
+      page: () => (
+        <>
+          <Title />
+          <Subtitle />
+          <Description />
+          <Primary />
+          <Stories />
+        </>
+      ),
+    },
   },
+  decorators: [getCustomIntegrationsContextDecorator()],
 };
+
+// eslint-disable-next-line import/no-default-export
+export default preview;

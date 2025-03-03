@@ -10,8 +10,9 @@ import { createStore } from 'redux';
 import { Provider as ReduxProvider } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import type { Decorator } from '@storybook/react';
 
-import { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
+import type { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
 
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../public/lib/elements_registry';
@@ -28,7 +29,7 @@ export interface Params {
   assets?: CanvasAsset[];
 }
 
-export const reduxDecorator = (params: Params = {}) => {
+export const reduxDecorator = (params: Params = {}): Decorator => {
   const state = cloneDeep(getInitialState());
   const { workpad, elements, assets, pages } = params;
 
@@ -55,7 +56,7 @@ export const reduxDecorator = (params: Params = {}) => {
     );
   }
 
-  return (story: Function) => {
+  return (story) => {
     const store = createStore(getReducer(), state, getMiddleware());
     store.dispatch = patchDispatch(store, store.dispatch);
     return <ReduxProvider store={store}>{story()}</ReduxProvider>;

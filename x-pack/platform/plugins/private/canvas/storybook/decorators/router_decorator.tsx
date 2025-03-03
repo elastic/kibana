@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { Decorator } from '@storybook/react';
 
-export const routerContextDecorator = (story: Function) => (
+export const routerContextDecorator: Decorator = (story) => (
   <MemoryRouter initialEntries={['/']}>{story()}</MemoryRouter>
 );

@@ -6,12 +6,17 @@
  */
 
 import type { Preview } from '@storybook/react';
-import { addDecorators } from './decorators';
 
 // Import Canvas CSS
 import '../public/style/index.scss';
+import { kibanaContextDecorator } from './decorators/kibana_decorator';
+import { routerContextDecorator } from './decorators/router_decorator';
+import { legacyContextDecorator, servicesContextDecorator } from './decorators/services_decorator';
 
-addDecorators();
+if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('babel-plugin-require-context-hook/register')();
+}
 
 const preview: Preview = {
   parameters: {
@@ -19,6 +24,12 @@ const preview: Preview = {
       hideNoControlsWarning: true,
     },
   },
+  decorators: [
+    kibanaContextDecorator,
+    routerContextDecorator,
+    legacyContextDecorator(),
+    servicesContextDecorator(),
+  ],
 };
 
 // eslint-disable-next-line import/no-default-export

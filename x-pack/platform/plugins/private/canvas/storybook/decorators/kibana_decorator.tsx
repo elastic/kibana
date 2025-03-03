@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Decorator } from '@storybook/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const settings = new Map();
@@ -22,6 +23,6 @@ const platform = {
   uiSettings: settings,
 };
 
-export const kibanaContextDecorator = (story: Function) => (
+export const kibanaContextDecorator: Decorator = (story) => (
   <KibanaContextProvider services={platform}>{story()}</KibanaContextProvider>
 );

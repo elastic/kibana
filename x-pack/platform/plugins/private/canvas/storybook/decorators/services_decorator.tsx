@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { LegacyServicesProvider } from '../../public/services/legacy';
 import { setStubKibanaServices } from '../../public/services/mocks';
 
-export const servicesContextDecorator = (): DecoratorFn => {
-  return (story: Function, storybook) => {
+export const servicesContextDecorator = (): Decorator => {
+  return (story, storybook) => {
     if (process.env.JEST_WORKER_ID !== undefined) {
       storybook.args.useStaticData = true;
     }
@@ -23,8 +23,8 @@ export const servicesContextDecorator = (): DecoratorFn => {
   };
 };
 
-export const legacyContextDecorator = () => {
+export const legacyContextDecorator = (): Decorator => {
   setStubKibanaServices();
 
-  return (story: Function) => <LegacyServicesProvider>{story()}</LegacyServicesProvider>;
+  return (story) => <LegacyServicesProvider>{story()}</LegacyServicesProvider>;
 };

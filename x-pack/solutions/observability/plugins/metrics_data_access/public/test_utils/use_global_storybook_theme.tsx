@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
-type StoryContext = Parameters<DecoratorFn>[1];
+type StoryContext = Parameters<Decorator>[1];
 
 export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext) => {
   const theme = useMemo(() => euiThemeFromId(euiTheme), [euiTheme]);
@@ -40,7 +40,7 @@ export const GlobalStorybookThemeProviders: React.FC<{
   );
 };
 
-export const decorateWithGlobalStorybookThemeProviders: DecoratorFn = (
+export const decorateWithGlobalStorybookThemeProviders: Decorator = (
   wrappedStory,
   storyContext
 ) => (

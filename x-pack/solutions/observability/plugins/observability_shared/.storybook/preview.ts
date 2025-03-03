@@ -6,12 +6,15 @@
  */
 
 import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import { addDecorator } from '@storybook/react';
-import { KibanaReactStorybookDecorator } from './storybook_decorator';
+import type { Preview } from '@storybook/react';
 import * as jest from 'jest-mock';
-
-export const decorators = [EuiThemeProviderDecorator];
+import { KibanaReactStorybookDecorator } from './storybook_decorator';
 
 window.jest = jest;
 
-addDecorator(KibanaReactStorybookDecorator);
+const preview: Preview = {
+  decorators: [EuiThemeProviderDecorator, KibanaReactStorybookDecorator],
+};
+
+// eslint-disable-next-line import/no-default-export
+export default preview;

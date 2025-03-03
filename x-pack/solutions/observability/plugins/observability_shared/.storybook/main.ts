@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export default {
-  title: 'logsShared/LogStream/Overview',
-};
+import { defaultConfig } from '@kbn/storybook';
+
+// eslint-disable-next-line import/no-default-export
+export default defaultConfig;

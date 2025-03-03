@@ -6,23 +6,27 @@
  */
 
 import React from 'react';
-import { addDecorator } from '@storybook/react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs';
+import type { Preview } from '@storybook/react';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 
 import { decorator } from './decorator';
 
-addDecorator(decorator);
-
-export const parameters = {
-  docs: {
-    page: () => (
-      <>
-        <Title />
-        <Subtitle />
-        <Description />
-        <Primary />
-        <Stories />
-      </>
-    ),
+const preview: Preview = {
+  decorators: [decorator],
+  parameters: {
+    docs: {
+      page: () => (
+        <>
+          <Title />
+          <Subtitle />
+          <Description />
+          <Primary />
+          <Stories />
+        </>
+      ),
+    },
   },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default preview;
