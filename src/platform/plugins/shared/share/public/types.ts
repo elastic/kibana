@@ -38,7 +38,6 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
     dataTestSubj: string;
     label: string;
   };
-  snapshotShareWarning?: string;
   disabled?: boolean;
 } & E;
 
@@ -195,15 +194,24 @@ export interface SharingData {
   };
 }
 
+interface ShareRegistryInternalApi {
+  registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
+  registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+
+  resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+}
+
 export abstract class ShareRegistryPublicApi {
-  abstract start(
-    args: ShareRegistryApiStart
-  ): ShareRegistryPublicApi['resolveShareItemsForShareContext'];
+  abstract setup(): {
+    /**
+     * @description registers a share menu provider for a specific object type
+     */
+    registerShareIntegration: ShareRegistryInternalApi['registerShareIntegration'];
+  };
 
-  abstract registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
-  abstract registerShareIntegration<I extends ShareIntegration>(arg: I): void;
-
-  abstract resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+  abstract start(args: ShareRegistryApiStart): {
+    resolveShareItemsForShareContext: ShareRegistryInternalApi['resolveShareItemsForShareContext'];
+  };
 }
 
 export type BrowserUrlService = UrlService<
