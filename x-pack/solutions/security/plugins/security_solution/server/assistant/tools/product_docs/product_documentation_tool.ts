@@ -41,37 +41,39 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
     // This check is here in order to satisfy TypeScript
     if (llmTasks == null || connectorId == null) return null;
 
-    return tool(async ({ query, product }) => {
-      const response = await llmTasks.retrieveDocumentation({
-        searchTerm: query,
-        products: product ? [product] : undefined,
-        max: 3,
-        connectorId,
-        request,
-        functionCalling: 'auto',
-      });
+    return tool(
+      async ({ query, product }) => {
+        const response = await llmTasks.retrieveDocumentation({
+          searchTerm: query,
+          products: product ? [product] : undefined,
+          max: 3,
+          connectorId,
+          request,
+          functionCalling: 'auto',
+        });
 
-      const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
+        const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
 
-      return {
-        content: {
-          documents: enrichedDocuments,
-        },
-      };
-    }, {
-      name: toolDetails.name,
-      description: params.description || toolDetails.description,
-      schema: z.object({
-        query: z.string().describe(
-          `The query to use to retrieve documentation
+        return {
+          content: {
+            documents: enrichedDocuments,
+          },
+        };
+      },
+      {
+        name: toolDetails.name,
+        description: params.description || toolDetails.description,
+        schema: z.object({
+          query: z.string().describe(
+            `The query to use to retrieve documentation
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Security?"`
-        ),
-        product: z
-          .enum(['kibana', 'elasticsearch', 'observability', 'security'])
-          .describe(
-            `If specified, will filter the products to retrieve documentation for
+          ),
+          product: z
+            .enum(['kibana', 'elasticsearch', 'observability', 'security'])
+            .describe(
+              `If specified, will filter the products to retrieve documentation for
             Possible options are:
             - "kibana": Kibana product
             - "elasticsearch": Elasticsearch product
@@ -79,11 +81,12 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
             - "security": Elastic Security solution
             If not specified, will search against all products
             `
-          )
-          .optional(),
-      }),
-      tags: ['product-documentation'],
-    });
+            )
+            .optional(),
+        }),
+        tags: ['product-documentation'],
+      }
+    );
   },
 };
 

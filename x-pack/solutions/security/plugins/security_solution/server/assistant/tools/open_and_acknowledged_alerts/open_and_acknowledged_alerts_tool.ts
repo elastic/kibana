@@ -62,47 +62,50 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       size,
       contentReferencesStore,
     } = params as OpenAndAcknowledgedAlertsToolParams;
-    return tool(async () => {
-      const query = getOpenAndAcknowledgedAlertsQuery({
-        alertsIndexPattern,
-        anonymizationFields: anonymizationFields ?? [],
-        size,
-      });
+    return tool(
+      async () => {
+        const query = getOpenAndAcknowledgedAlertsQuery({
+          alertsIndexPattern,
+          anonymizationFields: anonymizationFields ?? [],
+          size,
+        });
 
-      const result = await esClient.search<SearchResponse>(query);
+        const result = await esClient.search<SearchResponse>(query);
 
-      // Accumulate replacements locally so we can, for example use the same
-      // replacement for a hostname when we see it in multiple alerts:
-      let localReplacements: Replacements = replacements ?? {};
-      const localOnNewReplacements = (newReplacements: Replacements) => {
-        localReplacements = { ...localReplacements, ...newReplacements };
-        onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
-        return Promise.resolve(localReplacements);
-      };
+        // Accumulate replacements locally so we can, for example use the same
+        // replacement for a hostname when we see it in multiple alerts:
+        let localReplacements: Replacements = replacements ?? {};
+        const localOnNewReplacements = (newReplacements: Replacements) => {
+          localReplacements = { ...localReplacements, ...newReplacements };
+          onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
+          return Promise.resolve(localReplacements);
+        };
 
-      return JSON.stringify(
-        result.hits?.hits?.map((hit) => {
-          const transformed = transformRawData({
-            anonymizationFields,
-            currentReplacements: localReplacements, // <-- the latest local replacements
-            getAnonymizedValue,
-            onNewReplacements: localOnNewReplacements, // <-- the local callback
-            rawData: getRawDataOrDefault(hit.fields),
-          });
+        return JSON.stringify(
+          result.hits?.hits?.map((hit) => {
+            const transformed = transformRawData({
+              anonymizationFields,
+              currentReplacements: localReplacements, // <-- the latest local replacements
+              getAnonymizedValue,
+              onNewReplacements: localOnNewReplacements, // <-- the local callback
+              rawData: getRawDataOrDefault(hit.fields),
+            });
 
-          const hitId = hit._id;
-          const reference = hitId
-            ? contentReferencesStore?.add((p) => securityAlertReference(p.id, hitId))
-            : undefined;
-          const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
+            const hitId = hit._id;
+            const reference = hitId
+              ? contentReferencesStore?.add((p) => securityAlertReference(p.id, hitId))
+              : undefined;
+            const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
 
-          return `${transformed}${citation ?? ''}`;
-        })
-      );
-    }, {
-      name: 'OpenAndAcknowledgedAlertsTool',
-      description: params.description || OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
-      tags: ['alerts', 'open-and-acknowledged-alerts'],
-    });
+            return `${transformed}${citation ?? ''}`;
+          })
+        );
+      },
+      {
+        name: 'OpenAndAcknowledgedAlertsTool',
+        description: params.description || OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
+        tags: ['alerts', 'open-and-acknowledged-alerts'],
+      }
+    );
   },
 };

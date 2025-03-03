@@ -9,9 +9,9 @@ import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import { z } from '@kbn/zod';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './common';
-import { z } from '@kbn/zod';
 
 // select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
@@ -57,21 +57,24 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
       );
     };
 
-    return tool(async (input) => {
-      const generateEvent = await callNaturalLanguageToEsql(input.question);
-      const answer = generateEvent.content ?? 'An error occurred in the tool';
+    return tool(
+      async (input) => {
+        const generateEvent = await callNaturalLanguageToEsql(input.question);
+        const answer = generateEvent.content ?? 'An error occurred in the tool';
 
-      logger.debug(`Received response from NL to ESQL tool: ${answer}`);
-      return answer;
-    },{
-      name: toolDetails.name,
-      description:
-        (params.description || toolDetails.description) +
-        (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
-      schema: z.object({
-        question: z.string().describe(`The user's exact question about ESQL`),
-      }),
-      tags: ['esql', 'query-generation', 'knowledge-base'],
-    });
+        logger.debug(`Received response from NL to ESQL tool: ${answer}`);
+        return answer;
+      },
+      {
+        name: toolDetails.name,
+        description:
+          (params.description || toolDetails.description) +
+          (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
+        schema: z.object({
+          question: z.string().describe(`The user's exact question about ESQL`),
+        }),
+        tags: ['esql', 'query-generation', 'knowledge-base'],
+      }
+    );
   },
 };

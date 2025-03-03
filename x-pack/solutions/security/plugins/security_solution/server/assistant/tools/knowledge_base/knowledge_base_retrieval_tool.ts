@@ -41,26 +41,29 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       params as KnowledgeBaseRetrievalToolParams;
     if (kbDataClient == null) return null;
 
-    return tool(async (input) => {
-      logger.debug(
-        () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
-      );
+    return tool(
+      async (input) => {
+        logger.debug(
+          () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
+        );
 
-      const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-        query: input.query,
-        kbResource: 'user',
-        required: false,
-      });
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          query: input.query,
+          kbResource: 'user',
+          required: false,
+        });
 
-      return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
-    }, {
-      name: toolDetails.name,
-      description: params.description || toolDetails.description,
-      schema: z.object({
-        query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
-      }),
-      tags: ['knowledge-base'],
-    });
+        return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
+      },
+      {
+        name: toolDetails.name,
+        description: params.description || toolDetails.description,
+        schema: z.object({
+          query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
+        }),
+        tags: ['knowledge-base'],
+      }
+    );
   },
 };
 

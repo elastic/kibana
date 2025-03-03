@@ -1,15 +1,16 @@
-import { ConversationResponse } from "@kbn/elastic-assistant-common";
-import { BaseMessage } from "@langchain/core/messages";
-import { Annotation } from "@langchain/langgraph";
-import { AgentStep, AgentAction, AgentFinish } from "langchain/agents";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-export const getStateAnnotation = (
-  {
-    getFormattedTime,
-  }: {
-    getFormattedTime?: () => string;
-  }
-) => {
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { BaseMessage } from '@langchain/core/messages';
+import { Annotation } from '@langchain/langgraph';
+import { AgentStep, AgentAction, AgentFinish } from 'langchain/agents';
+
+export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: () => string }) => {
   const graphAnnotation = Annotation.Root({
     input: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,
@@ -81,5 +82,5 @@ export const getStateAnnotation = (
     }),
   });
 
-  return graphAnnotation
-}
+  return graphAnnotation;
+};

@@ -35,20 +35,23 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
     if (!this.isSupported(params)) return null;
     const { alertsIndexPattern, esClient, contentReferencesStore } =
       params as AlertCountsToolParams;
-    return tool(async () => {
-      const query = getAlertsCountQuery(alertsIndexPattern);
-      const result = await esClient.search<SearchResponse>(query);
-      const alertsCountReference = contentReferencesStore?.add((p) =>
-        securityAlertsPageReference(p.id)
-      );
+    return tool(
+      async () => {
+        const query = getAlertsCountQuery(alertsIndexPattern);
+        const result = await esClient.search<SearchResponse>(query);
+        const alertsCountReference = contentReferencesStore?.add((p) =>
+          securityAlertsPageReference(p.id)
+        );
 
-      const reference = `\n${contentReferenceString(alertsCountReference)}`;
+        const reference = `\n${contentReferenceString(alertsCountReference)}`;
 
-      return `${JSON.stringify(result)}${reference}`;
-    }, {
-      name: 'AlertCountsTool',
-      description: params.description || ALERT_COUNTS_TOOL_DESCRIPTION,
-      tags: ['alerts', 'alerts-count'],
-    });
+        return `${JSON.stringify(result)}${reference}`;
+      },
+      {
+        name: 'AlertCountsTool',
+        description: params.description || ALERT_COUNTS_TOOL_DESCRIPTION,
+        tags: ['alerts', 'alerts-count'],
+      }
+    );
   },
 };
