@@ -36,7 +36,7 @@ export default function upgradeAssistantFunctionalTests({
           body: {
             persistent: {
               cluster: {
-                max_shards_per_node: 40,
+                max_shards_per_node: 5,
               },
             },
           },
