@@ -140,5 +140,6 @@
     "@kbn/response-ops-rule-params",
     "@kbn/unsaved-changes-prompt",
     "@kbn/core-analytics-browser",
+    "@kbn/deeplinks-analytics",
   ]
 }
