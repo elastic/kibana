@@ -37,7 +37,7 @@ export type IndexManagementLocatorParams = SerializableRecord &
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
 
 export interface SearchIndicesAppMountParams {
-  element: HTMLElement | null;
+  element: HTMLElement;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
 }

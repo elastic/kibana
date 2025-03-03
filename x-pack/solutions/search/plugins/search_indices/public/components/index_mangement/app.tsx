@@ -48,16 +48,24 @@ export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPlug
   );
 
   useEffect(() => {
-    const unmount = () => {
-      indexManagement.indexManagementApp({
-        element: indexManagementRef.current,
+    // mount
+    let indexManagementUnmount: () => void | undefined;
+    indexManagement
+      .indexManagementApp({
+        element: indexManagementRef.current!,
         setBreadcrumbs,
         history,
+      })
+      .then((unmount) => {
+        indexManagementUnmount = unmount;
       });
-    };
 
-    return unmount();
-  }, [indexManagement, indexManagementRef, setBreadcrumbs, history, cloud]);
+    return () => {
+      // unmount
+      indexManagementUnmount?.();
+    };
+  }, [indexManagement, indexManagementRef, setBreadcrumbs, history]);
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -67,7 +75,7 @@ export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPlug
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section>
-        <div ref={indexManagementRef} />
+        <div ref={indexManagementRef!} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
