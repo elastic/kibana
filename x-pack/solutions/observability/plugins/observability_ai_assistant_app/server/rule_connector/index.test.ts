@@ -135,6 +135,17 @@ describe('observabilityAIAssistant rule_connector', () => {
             };
           },
         },
+        alerting: {
+          start: async () => {
+            return {
+              getRulesClientWithRequest: jest.fn().mockResolvedValue({
+                async get() {
+                  return { createdBy: 'user_1' };
+                },
+              }),
+            };
+          },
+        },
       },
     } as unknown as ObservabilityAIAssistantRouteHandlerResources);
 
@@ -226,7 +237,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          isPublic: false,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message),
@@ -258,7 +269,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          isPublic: false,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message),
@@ -294,7 +305,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          isPublic: false,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message),
@@ -303,7 +314,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          isPublic: false,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message2),
