@@ -41,7 +41,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte43a30a93
 [discrete]
 ==== KQL and Lucene query translation into ES|QL
 
-Moving from Discover’s data view to ES|QL is now easier than ever. Your existing KQL or Lucene query is automatically carried over, saving time and preserving context. This enhancement keeps you focused on uncovering insights instead of re-rentering queries. 
+Moving from Discover’s data view mode to ES|QL mode is now easier than ever. Your existing KQL or Lucene query is automatically carried over and translated into ES|QL, saving time and preserving context. This enhancement keeps you focused on uncovering insights instead of re-rentering queries. 
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6e2ccb4a24507225/67c244de39a3cace2a10fccb/transition-to-esql-demo.gif[Query is copied over when switching to ES|QL]
 
