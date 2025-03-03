@@ -65,9 +65,9 @@ const ExportContentUi = ({
       generateExportButton,
       helpText,
       warnings = [],
-      renderCopyURLButton,
+      renderCopyURIButton: renderCopyURLButton,
       generateAssetExport: generateExport,
-      generateValueExport: generateExportUrl,
+      generateAssetURIValue: generateExportUrl,
       renderLayoutOptionSwitch,
     },
   } = useMemo(() => {
