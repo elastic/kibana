@@ -84,6 +84,7 @@ export interface PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
+    keepFailedInstallation?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -225,10 +226,17 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
+    keepFailedInstallation?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
-    const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = false } = options;
+    const {
+      pkgName,
+      pkgVersion,
+      spaceId = DEFAULT_SPACE_ID,
+      force = false,
+      keepFailedInstallation,
+    } = options;
 
     // If pkgVersion isn't specified, find the latest package version
     const pkgKeyProps = pkgVersion
@@ -244,6 +252,7 @@ class PackageClientImpl implements PackageClient {
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
+      keepFailedInstallation,
     });
   }
 

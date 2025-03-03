@@ -37,11 +37,6 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  is_default: {
-    type: 'boolean',
-    array: false,
-    required: false,
-  },
   updated_at: {
     type: 'date',
     array: false,
