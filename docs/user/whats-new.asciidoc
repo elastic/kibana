@@ -39,7 +39,7 @@ We’ve introduced support for the LOOKUP JOIN command to enable a smooth autoco
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte43a30a93241d650/67c23670045f5839e5bfd1e4/lookup-join-demo.gif[Using the LOOKUP JOIN command to autocomplete an ES|QL query]
 
 [discrete]
-==== Transition to ES|QL with KQL or Lucene
+==== KQL and Lucene query translation into ES|QL
 
 Moving from Discover’s data view to ES|QL is now easier than ever. Your existing KQL or Lucene query is automatically carried over, saving time and preserving context. This enhancement keeps you focused on uncovering insights instead of re-rentering queries. 
 
