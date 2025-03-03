@@ -396,7 +396,7 @@ export async function getPackage(
     const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,
       contentType,
-      useStreaming: options?.fetchFullAssetsMap,
+      useStreaming: options?.fetchFullAssetsMap === false,
     });
 
     if (!packageInfo) {
