@@ -54,6 +54,7 @@ export const shared = createSlice({
   reducers: {
     setDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
       state.dataViews = action.payload;
+      state.status = 'ready';
     },
     addDataView: (state, action: PayloadAction<DataView>) => {
       const dataViewSpec = action.payload.toSpec();
