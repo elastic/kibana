@@ -36,6 +36,7 @@ export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
   Partial<PublishesTitle & PublishesDisabledActionIds & HasCustomPrepend> &
+  Partial<CanClearSelections> &
   HasType &
   HasUniqueId &
   HasSerializableState<DefaultControlState> &
