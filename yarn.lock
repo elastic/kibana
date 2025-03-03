@@ -5578,6 +5578,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-types@link:src/platform/packages/shared/kbn-esql-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:src/platform/packages/shared/kbn-esql-utils":
   version "0.0.0"
   uid ""
@@ -5587,10 +5591,6 @@
   uid ""
 
 "@kbn/esql-validation-example-plugin@link:examples/esql_validation_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-variables-types@link:src/platform/packages/shared/kbn-esql-variables-types":
   version "0.0.0"
   uid ""
 
