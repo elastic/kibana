@@ -78,6 +78,7 @@ export const SearchIndexPipelines: React.FC = () => {
         if (pipelinesButton) {
           pipelinesButton.focus();
         }
+        setRevertPipeline(false);
       }
     } else if (buttonRef.current) {
       buttonRef.current.focus();
