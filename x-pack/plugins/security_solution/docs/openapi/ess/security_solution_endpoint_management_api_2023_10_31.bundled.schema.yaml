@@ -250,7 +250,7 @@ paths:
               multiple_endpoints:
                 summary: Isolates several hosts; includes a comment
                 value:
-                  comment: Locked down, pending further investigation
+                  comment: 'Locked down, pending further investigation'
                   endpoint_ids:
                     - 9972d10e-4b9e-41aa-a534-a85e2a28ea42
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
@@ -406,7 +406,7 @@ paths:
               multipleHosts:
                 summary: 'Releases several hosts; includes a comment:'
                 value:
-                  comment: Benign process identified, releasing group
+                  comment: 'Benign process identified, releasing group'
                   endpoint_ids:
                     - 9972d10e-4b9e-41aa-a534-a85e2a28ea42
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
@@ -423,7 +423,7 @@ paths:
                 value:
                   case_ids:
                     - 4976be38-c134-4554-bd5e-0fd89ce63667
-                  comment: Remediation complete, restoring network
+                  comment: 'Remediation complete, restoring network'
                   endpoint_ids:
                     - 1aa1f8fd-0fb0-4fe4-8c30-92068272d3f0
                     - b30a11bf-1395-4707-b508-fbb45ef9793e
@@ -856,7 +856,6 @@ components:
         - endpoint
         - sentinel_one
         - crowdstrike
-        - microsoft_defender_endpoint
       example: endpoint
       type: string
     AlertIds:
@@ -1263,23 +1262,6 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
-    HostPathScriptParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments.
-          minLength: 1
-          type: string
-        hostPath:
-          description: Absolute or relative path of script on host machine.
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in seconds.
-          minimum: 1
-          type: integer
-      required:
-        - hostPath
     HostStatuses:
       description: A set of agent health statuses to filter by.
       example:
