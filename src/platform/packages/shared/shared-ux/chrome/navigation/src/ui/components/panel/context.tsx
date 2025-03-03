@@ -45,17 +45,6 @@ interface Props {
   setSelectedNode?: (node: PanelSelectedNode | null) => void;
 }
 
-const getSelectedNodeEl = (selectedNode: PanelSelectedNode | null) => {
-  if (!selectedNode || !selectedNode.path) {
-    return null;
-  }
-
-  return (
-    document.querySelector(`[data-test-subj~="panelOpener-${selectedNode.path}"]`) ??
-    document.querySelector(`[data-test-subj~="nav-item-${selectedNode.path}"]`)
-  );
-};
-
 export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   children,
   contentProvider,
@@ -97,7 +86,6 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
     if (selectedNodeProp === undefined) return;
 
     setActiveNode(selectedNodeProp);
-    selectedNodeEl.current = getSelectedNodeEl(selectedNodeProp);
 
     if (selectedNodeProp) {
       setIsOpen(true);
