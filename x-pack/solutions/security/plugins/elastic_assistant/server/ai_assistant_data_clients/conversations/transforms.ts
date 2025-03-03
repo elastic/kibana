@@ -11,6 +11,7 @@ import {
   Replacements,
   replaceOriginalValuesWithUuidValues,
 } from '@kbn/elastic-assistant-common';
+import _ from 'lodash';
 import { EsConversationSchema } from './types';
 
 export const transformESSearchToConversations = (
@@ -153,7 +154,7 @@ export const transformESToConversations = (
                 },
               }
             : {}),
-        })) ?? [],
+        })),
       updatedAt: conversationSchema.updated_at,
       replacements,
       namespace: conversationSchema.namespace,
@@ -161,5 +162,28 @@ export const transformESToConversations = (
     };
 
     return conversation;
+  });
+};
+
+export const transformFieldNamesToSourceScheme = (fields: string[]) => {
+  return fields.map((f) => {
+    switch (f) {
+      case 'timestamp':
+        return '@timestamp';
+      case 'apiConfig':
+        return 'api_config';
+      case 'apiConfig.actionTypeId':
+        return 'api_config.action_type_id';
+      case 'apiConfig.connectorId':
+        return 'api_config.connector_id';
+      case 'apiConfig.defaultSystemPromptId':
+        return 'api_config.default_system_prompt_id';
+      case 'apiConfig.model':
+        return 'api_config.model';
+      case 'apiConfig.provider':
+        return 'api_config.provider';
+      default:
+        return _.snakeCase(f);
+    }
   });
 };
