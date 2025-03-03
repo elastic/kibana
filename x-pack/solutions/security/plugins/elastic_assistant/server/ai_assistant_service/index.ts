@@ -17,7 +17,7 @@ import {
   IndicesGetFieldMappingResponse,
   IndicesIndexSettings,
 } from '@elastic/elasticsearch/lib/api/types';
-import { omit } from 'lodash';
+import { last, omit } from 'lodash';
 import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
@@ -247,7 +247,7 @@ export class AIAssistantService {
 
       const isUsingDedicatedInferenceEndpoint =
         (
-          Object.values(mappings)[-1]?.mappings?.semantic_text?.mapping?.semantic_text as {
+          last(Object.values(mappings))?.mappings?.semantic_text?.mapping?.semantic_text as {
             inference_id: string;
           }
         )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
