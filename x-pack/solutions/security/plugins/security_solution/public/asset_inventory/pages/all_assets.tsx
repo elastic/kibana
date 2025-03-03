@@ -51,6 +51,7 @@ import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
 import { Filters } from '../components/filters/filters';
 import { EmptyState } from '../components/empty_state';
+import { TopAssetsBarChart } from '../components/top_assets_bar_chart';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -60,6 +61,7 @@ import {
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
 import { useFetchData } from '../hooks/use_fetch_data';
+import { useFetchChartData } from '../hooks/use_fetch_chart_data';
 import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
@@ -152,7 +154,7 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
 
 const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
-const AllAssets = ({
+export const AllAssets = ({
   nonPersistedFilters,
   height,
   hasDistributionBar = true,
@@ -218,6 +220,17 @@ const AllAssets = ({
     pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
+  const {
+    data: chartData,
+    // error: fetchChartDataError,
+    isFetching: isFetchingChartData,
+    isLoading: isLoadingChartData,
+  } = useFetchChartData({
+    query,
+    sort,
+    enabled: !queryError,
+  });
+
   const rows = getRowsFromPages(rowsData?.pages);
   const totalHits = rowsData?.pages[0].total || 0;
 
@@ -253,7 +266,7 @@ const AllAssets = ({
     };
   }, [persistedSettings]);
 
-  const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
+  const { dataView } = useDataViewContext();
 
   const {
     uiActions,
@@ -398,14 +411,7 @@ const AllAssets = ({
     },
   ];
 
-  const loadingStyle = {
-    opacity: isLoading ? 1 : 0,
-  };
-
-  const loadingState =
-    isLoading || isFetching || dataViewIsLoading || dataViewIsRefetching || !dataView
-      ? DataLoadingState.loading
-      : DataLoadingState.loaded;
+  const loadingState = isLoading || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <I18nProvider>
@@ -447,6 +453,13 @@ const AllAssets = ({
             setUrlQuery({ filters: newFilters });
           }}
         />
+        {dataView ? (
+          <TopAssetsBarChart
+            isLoading={isLoadingChartData}
+            isFetching={isFetchingChartData}
+            entities={!!chartData && chartData.length > 0 ? chartData : []}
+          />
+        ) : null}
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
             data-test-subj={rest['data-test-subj']}
@@ -455,7 +468,7 @@ const AllAssets = ({
               height: computeDataTableRendering.wrapperHeight,
             }}
           >
-            <EuiProgress size="xs" color="accent" style={loadingStyle} />
+            <EuiProgress size="xs" color="accent" style={{ opacity: isFetching ? 1 : 0 }} />
             {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
               <EmptyState onResetFilters={onResetFilters} />
             ) : (
@@ -501,6 +514,3 @@ const AllAssets = ({
     </I18nProvider>
   );
 };
-
-// we need to use default exports to import it via React.lazy
-export default AllAssets; // eslint-disable-line import/no-default-export

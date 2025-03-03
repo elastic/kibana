@@ -57,46 +57,44 @@ export async function fetchThreadPoolRejectionStats(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clustersIds,
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clustersIds,
             },
-            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-            {
-              range: {
-                timestamp: {
-                  gte: `now-${duration}`,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            field: 'cluster_uuid',
-            size,
           },
-          aggs: {
-            nodes: {
-              terms: {
-                field: 'source_node.uuid',
-                size,
+          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+          {
+            range: {
+              timestamp: {
+                gte: `now-${duration}`,
               },
-              aggs: {
-                most_recent: {
-                  ...getTopHits(threadType, 'desc' as const),
-                },
-                least_recent: {
-                  ...getTopHits(threadType, 'asc' as const),
-                },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'cluster_uuid',
+          size,
+        },
+        aggs: {
+          nodes: {
+            terms: {
+              field: 'source_node.uuid',
+              size,
+            },
+            aggs: {
+              most_recent: {
+                ...getTopHits(threadType, 'desc' as const),
+              },
+              least_recent: {
+                ...getTopHits(threadType, 'asc' as const),
               },
             },
           },
@@ -108,7 +106,7 @@ export async function fetchThreadPoolRejectionStats(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

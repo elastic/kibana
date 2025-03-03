@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
+  const { common, solutionNavigation, header } = getPageObjects([
+    'common',
+    'solutionNavigation',
+    'header',
+  ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
 
@@ -24,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Create a space with the observability solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'oblt' }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {

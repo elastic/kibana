@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleFilter } from '../../../../../../common/api/detection_engine';
+import type { PrebuiltRulesFilter } from '../../../../../../common/api/detection_engine';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { RuleVersions } from '../diff/calculate_rule_diff';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
@@ -17,7 +17,7 @@ interface GetRuleVersionsMapArgs {
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   versionSpecifiers?: RuleVersionSpecifier[];
-  filter?: PrebuiltRuleFilter;
+  filter?: PrebuiltRulesFilter;
 }
 
 export async function fetchRuleVersionsTriad({

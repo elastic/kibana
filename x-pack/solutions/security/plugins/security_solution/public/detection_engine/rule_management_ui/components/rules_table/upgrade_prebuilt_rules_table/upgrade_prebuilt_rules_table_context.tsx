@@ -9,7 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import type {
   FindRulesSortField,
-  PrebuiltRuleFilter,
+  PrebuiltRulesFilter,
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
@@ -29,6 +29,15 @@ export interface UpgradePrebuiltRulesSortingOptions {
   order: SortOrder;
 }
 
+export interface UpgradePrebuiltRulesSortingOptions {
+  field:
+    | 'current_rule.name'
+    | 'current_rule.risk_score'
+    | 'current_rule.severity'
+    | 'current_rule.last_updated';
+  order: SortOrder;
+}
+
 export interface UpgradePrebuiltRulesTableState {
   /**
    * Rule upgrade state after applying `filterOptions`
@@ -37,7 +46,7 @@ export interface UpgradePrebuiltRulesTableState {
   /**
    * Currently selected table filter
    */
-  filterOptions: PrebuiltRuleFilter;
+  filterOptions: PrebuiltRulesFilter;
   /**
    * All unique tags for all rules
    */
@@ -89,7 +98,7 @@ export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   upgradeAllRules: () => void;
-  setFilterOptions: Dispatch<SetStateAction<PrebuiltRuleFilter>>;
+  setFilterOptions: Dispatch<SetStateAction<PrebuiltRulesFilter>>;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   setSortingOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesSortingOptions>>;
   openRulePreview: (ruleId: string) => void;
@@ -125,7 +134,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     (prebuiltRulesStatusResponse?.stats.num_prebuilt_rules_to_upgrade ?? 0) > 0;
   const tags = prebuiltRulesStatusResponse?.aggregated_fields?.upgradeable_rules.tags;
 
-  const [filterOptions, setFilterOptions] = useState<PrebuiltRuleFilter>({});
+  const [filterOptions, setFilterOptions] = useState<PrebuiltRulesFilter>({});
   const [pagination, setPagination] = useState({
     page: 1,
     perPage: RULES_TABLE_INITIAL_PAGE_SIZE,

@@ -10,8 +10,12 @@ import {
   REVIEW_RULE_UPGRADE_URL,
   ReviewRuleUpgradeRequestBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import {
+  PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+  PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY,
+} from '../../constants';
 import { reviewRuleUpgradeHandler } from './review_rule_upgrade_handler';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
@@ -25,6 +29,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
         },
       },
       options: {
+        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

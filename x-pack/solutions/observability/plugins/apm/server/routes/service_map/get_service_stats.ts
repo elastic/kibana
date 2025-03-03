@@ -32,31 +32,29 @@ export async function getServiceStats({
         ProcessorEvent.error as const,
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...termsQuery(SERVICE_NAME, serviceName),
-            ...kqlQuery(serviceGroupKuery),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...termsQuery(SERVICE_NAME, serviceName),
+          ...kqlQuery(serviceGroupKuery),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: maxNumberOfServices,
-          },
-          aggs: {
-            agent_name: {
-              terms: {
-                field: AGENT_NAME,
-              },
+    },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+          size: maxNumberOfServices,
+        },
+        aggs: {
+          agent_name: {
+            terms: {
+              field: AGENT_NAME,
             },
           },
         },

@@ -7,8 +7,8 @@
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import type {
-  PrebuiltRuleFilter,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
   ReviewRuleUpgradeSort,
@@ -35,7 +35,7 @@ export const reviewRuleUpgradeHandler = async (
   response: KibanaResponseFactory
 ) => {
   const siemResponse = buildSiemResponse(response);
-  const { page = 1, per_page: perPage = 10_000, sort = DEFAULT_SORT, filter } = request.body ?? {};
+  const { page = 1, per_page: perPage = 20, sort = DEFAULT_SORT, filter } = request.body ?? {};
 
   try {
     const ctx = await context.resolve(['core', 'alerting']);
@@ -82,7 +82,7 @@ interface CalculateUpgradeableRulesDiffArgs {
   page: number;
   perPage: number;
   sort: ReviewRuleUpgradeSort;
-  filter: PrebuiltRuleFilter | undefined;
+  filter: ReviewPrebuiltRuleUpgradeFilter | undefined;
 }
 
 async function calculateUpgradeableRulesDiff({
@@ -96,11 +96,17 @@ async function calculateUpgradeableRulesDiff({
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
   const latestVersionsMap = new Map(allLatestVersions.map((version) => [version.rule_id, version]));
 
-  const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions({
-    filter,
-    sortField: sort.field,
-    sortOrder: sort.order,
-  });
+  const currentRuleVersions = filter?.rule_ids
+    ? await ruleObjectsClient.fetchInstalledRuleVersionsByIds({
+        ruleIds: filter.rule_ids,
+        sortField: sort.field,
+        sortOrder: sort.order,
+      })
+    : await ruleObjectsClient.fetchInstalledRuleVersions({
+        filter,
+        sortField: sort.field,
+        sortOrder: sort.order,
+      });
   const upgradeableRuleIds = currentRuleVersions
     .filter((rule) => {
       const targetVersion = latestVersionsMap.get(rule.rule_id);
