@@ -9,6 +9,7 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
+import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
 
@@ -43,15 +44,26 @@ export class AssetInventoryDataClient {
   constructor(private readonly options: AssetInventoryClientOpts) {}
 
   // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
-  public async enable() {
-    // Utility function to defer execution to the next tick using setTimeout.
-    const run = <T>(fn: () => Promise<T>) =>
-      new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
+  public async enable(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext,
+    requestBodyOverrides: InitEntityStoreRequestBody
+  ) {
+    const { logger } = this.options;
 
-    // Defer and execute the initialization process.
-    await run(() => this.init());
+    try {
+      logger.debug(`Enabling asset inventory`);
 
-    return { succeeded: true };
+      const entityStoreEnableResponse = await secSolutionContext
+        .getEntityStoreDataClient()
+        .enable(requestBodyOverrides);
+
+      logger.debug(`Enabled asset inventory`);
+
+      return entityStoreEnableResponse;
+    } catch (err) {
+      logger.error(`Error enabling asset inventory: ${err.message}`);
+      throw err;
+    }
   }
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
