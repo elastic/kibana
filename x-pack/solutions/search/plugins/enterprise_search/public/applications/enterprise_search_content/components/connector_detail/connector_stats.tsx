@@ -408,7 +408,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="enterpriseSearchConnectorStatsElasticConnectorsButton"
                     isDisabled={!connector.service_type}
                     iconType="plugs"
                     color="text"
@@ -418,10 +417,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       })
                     )}
                   >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectorStats.elasticConnectorsButtonEmptyLabel',
-                      { defaultMessage: 'Elastic Connectors' }
-                    )}
+                    Elastic Connectors
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -457,7 +453,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agentlessAgentExists && (
                     <EuiButtonEmpty
-                      data-test-subj="enterpriseSearchConnectorStatsHostOverviewButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
                       size="s"
                       href={http.basePath.prepend(
@@ -478,7 +473,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agnetlessPolicyExists ? (
                     <EuiButtonEmpty
-                      data-test-subj="enterpriseSearchConnectorStatsManagePolicyButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.policy.id}
                       size="s"
                       href={http.basePath.prepend(
