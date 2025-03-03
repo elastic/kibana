@@ -188,7 +188,16 @@ const prepareSimulationProcessors = (
     } as ProcessorDefinition;
   });
 
-  return formatToIngestProcessors(processors);
+  const dotExpanderProcessor: Pick<IngestProcessorContainer, 'dot_expander'> = {
+    dot_expander: {
+      field: '*',
+      override: true,
+    },
+  };
+
+  const formattedProcessors = formatToIngestProcessors(processors);
+
+  return [dotExpanderProcessor, ...formattedProcessors];
 };
 
 const prepareSimulationData = (params: ProcessingSimulationParams) => {
@@ -433,15 +442,20 @@ const extractProcessorMetrics = ({
 };
 
 const getDocumentStatus = (doc: SuccessfulIngestSimulateDocumentResult): DocSimulationStatus => {
-  if (doc.processor_results.every(isSkippedProcessor)) return 'skipped';
+  // Remove the always present base processor for dot expander
+  const processorResults = doc.processor_results.slice(1);
 
-  if (
-    doc.processor_results.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))
-  ) {
+  if (processorResults.every(isSkippedProcessor)) {
+    return 'skipped';
+  }
+
+  if (processorResults.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))) {
     return 'parsed';
   }
 
-  if (doc.processor_results.some(isSuccessfulProcessor)) return 'partially_parsed';
+  if (processorResults.some(isSuccessfulProcessor)) {
+    return 'partially_parsed';
+  }
 
   return 'failed';
 };
@@ -449,8 +463,10 @@ const getDocumentStatus = (doc: SuccessfulIngestSimulateDocumentResult): DocSimu
 const getLastDoc = (docResult: SuccessfulIngestSimulateDocumentResult, sample: FlattenRecord) => {
   const status = getDocumentStatus(docResult);
   const lastDocSource =
-    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
-    sample;
+    docResult.processor_results
+      .slice(1) // Remove the always present base processor for dot expander
+      .filter((proc) => !isSkippedProcessor(proc))
+      .at(-1)?.doc?._source ?? sample;
 
   if (status === 'parsed') {
     return {
@@ -478,7 +494,7 @@ const computeSimulationDocDiff = (
   const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
-    { processor_id: 'sample', value: sample },
+    { processor_id: 'base', value: docResult.processor_results[0]!.doc!._source },
     ...successfulProcessors.map((proc) => ({
       processor_id: proc.tag,
       value: omit(proc.doc._source, ['_errors']),
@@ -564,6 +580,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
       },
     },
     failure_rate: 1,
+    skipped_rate: 0,
     success_rate: 0,
     is_non_additive_simulation: isNonAdditiveSimulationError(error),
   };
