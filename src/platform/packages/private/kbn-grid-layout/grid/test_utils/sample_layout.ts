@@ -9,10 +9,12 @@
 
 import { GridLayoutData } from '../types';
 
-export const getSampleLayout = (): GridLayoutData => [
-  {
+export const getSampleLayout = (): GridLayoutData => ({
+  first: {
     title: 'Large section',
     isCollapsed: false,
+    id: 'first',
+    order: 0,
     panels: {
       panel1: {
         id: 'panel1',
@@ -72,9 +74,11 @@ export const getSampleLayout = (): GridLayoutData => [
       },
     },
   },
-  {
+  second: {
     title: 'Small section',
     isCollapsed: false,
+    id: 'second',
+    order: 1,
     panels: {
       panel9: {
         id: 'panel9',
@@ -85,9 +89,11 @@ export const getSampleLayout = (): GridLayoutData => [
       },
     },
   },
-  {
+  third: {
     title: 'Another small section',
     isCollapsed: false,
+    id: 'third',
+    order: 2,
     panels: {
       panel10: {
         id: 'panel10',
@@ -98,4 +104,4 @@ export const getSampleLayout = (): GridLayoutData => [
       },
     },
   },
-];
+});

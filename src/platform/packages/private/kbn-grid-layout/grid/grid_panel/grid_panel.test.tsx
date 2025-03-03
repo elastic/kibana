@@ -25,7 +25,7 @@ describe('GridPanel', () => {
     } as GridLayoutContextType;
     const panelProps = {
       panelId: 'panel1',
-      rowIndex: 0,
+      rowId: 'first',
       ...(overrides?.propsOverrides ?? {}),
     };
     const { rerender, ...rtlRest } = render(
