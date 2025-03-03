@@ -6,11 +6,14 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllPrebuiltRuleAssets, getCustomQueryRuleParams } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
-import { combineToNdJson } from '../../../../utils/combine_to_ndjson';
-import { createPrebuiltRuleAssetSavedObjects, createRuleAssetSavedObject } from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { deleteAllPrebuiltRuleAssets, getCustomQueryRuleParams } from '../../../../../utils';
+import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { combineToNdJson } from '../../../../../utils/combine_to_ndjson';
+import {
+  createPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObject,
+} from '../../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -24,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    it(`does NOT import customized prebuilt rules when rule customization is disabled`, async () => {
+    it(`does NOT import customized prebuilt rules`, async () => {
       const ruleId = 'prebuilt-rule-to-be-customized';
       const ruleParams = getCustomQueryRuleParams({
         rule_id: ruleId,

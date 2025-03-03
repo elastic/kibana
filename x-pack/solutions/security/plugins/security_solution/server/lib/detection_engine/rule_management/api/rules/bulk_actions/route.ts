@@ -43,7 +43,6 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // Set a lower limit for bulk edit as the rules client might fail with a "Query
@@ -278,21 +277,13 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.export: {
-              const prebuiltRulesCustomizationStatus =
-                detectionRulesClient.getRuleCustomizationStatus();
-
-              const isPrebuiltRulesExportAllowed =
-                prebuiltRulesCustomizationStatus.customizationDisabledReason ===
-                PrebuiltRulesCustomizationDisabledReason.License;
-
               const exported = await getExportByObjectIds(
                 rulesClient,
                 exceptionsClient,
                 rules.map(({ params }) => params.ruleId),
                 exporter,
                 request,
-                actionsClient,
-                isPrebuiltRulesExportAllowed
+                actionsClient
               );
 
               const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;
