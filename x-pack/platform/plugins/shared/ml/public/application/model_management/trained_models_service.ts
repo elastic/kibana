@@ -39,7 +39,10 @@ import {
   type ModelDownloadState,
   type TrainedModelUIItem,
 } from '../../../common/types/trained_models';
-import type { UpdateAllocationParams } from '../services/ml_api_service/trained_models';
+import type {
+  UpdateAllocationParams,
+  DeleteModelParams,
+} from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { ITelemetryClient } from '../services/telemetry/types';
@@ -77,7 +80,12 @@ export class TrainedModelsService {
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
   private setScheduledDeployments?: (deployingModels: ScheduledDeployment[]) => void;
-  private displayErrorToast?: (error: ErrorType, title?: string) => void;
+  private displayErrorToast?: (
+    error: ErrorType,
+    title?: string,
+    toastLifeTimeMs?: number,
+    toastMessage?: string
+  ) => void;
   private displaySuccessToast?: (toast: { title: string; text: string }) => void;
   private subscription!: Subscription;
   private _scheduledDeployments$ = new BehaviorSubject<ScheduledDeployment[]>([]);
@@ -219,6 +227,45 @@ export class TrainedModelsService {
           );
         },
       });
+  }
+
+  public async deleteModels(modelIds: string[], options: DeleteModelParams['options']) {
+    const results = await Promise.allSettled(
+      modelIds.map((modelId) =>
+        this.trainedModelsApiService
+          .deleteTrainedModel({
+            modelId,
+            options,
+          })
+          .then(() => this.removeScheduledDeployments({ modelId }))
+      )
+    );
+
+    // Handle failures
+    const failures = results
+      .map((result, index) => ({
+        modelId: modelIds[index],
+        failed: result.status === 'rejected',
+        error: result.status === 'rejected' ? result.reason : null,
+      }))
+      .filter((r) => r.failed);
+
+    if (failures.length > 0) {
+      const failedModelIds = failures.map((f) => f.modelId).join(', ');
+      this.displayErrorToast?.(
+        failures[0].error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorTitle', {
+          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+          values: {
+            modelsCount: failures.length,
+          },
+        }),
+        undefined,
+        failedModelIds
+      );
+    }
+
+    this.fetchModels();
   }
 
   public stopModelDeployment(

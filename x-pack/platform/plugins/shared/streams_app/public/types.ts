@@ -20,6 +20,7 @@ import {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -50,6 +51,7 @@ export interface StreamsAppStartDependencies {
   navigation: NavigationPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

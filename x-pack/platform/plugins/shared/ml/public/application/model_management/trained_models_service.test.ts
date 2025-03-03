@@ -46,6 +46,8 @@ describe('TrainedModelsService', () => {
         queue_capacity: 1024,
         deployment_id: 'my-deployment-id',
         cache_size: '1mb',
+        per_deployment_memory_bytes: '1mb',
+        per_allocation_memory_bytes: '1mb',
       },
       node_count: 1,
       routing_table: {
@@ -96,6 +98,7 @@ describe('TrainedModelsService', () => {
       startModelAllocation: jest.fn(),
       updateModelDeployment: jest.fn(),
       getModelsDownloadStatus: jest.fn(),
+      deleteTrainedModel: jest.fn(),
     } as unknown as jest.Mocked<TrainedModelsApiService>;
 
     mockSavedObjectsApiService = {
@@ -398,6 +401,57 @@ describe('TrainedModelsService', () => {
       expect.objectContaining({
         text: expect.stringContaining('my-deployment-id'),
       })
+    );
+  });
+
+  it('deletes multiple models successfully', async () => {
+    const modelIds = ['model-1', 'model-2'];
+
+    mockTrainedModelsApiService.deleteTrainedModel.mockResolvedValue({ acknowledge: true });
+
+    await trainedModelsService.deleteModels(modelIds, {
+      with_pipelines: false,
+      force: false,
+    });
+
+    expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledTimes(2);
+    expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
+      modelId: 'model-1',
+      options: {
+        with_pipelines: false,
+        force: false,
+      },
+    });
+    expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
+      modelId: 'model-2',
+      options: {
+        with_pipelines: false,
+        force: false,
+      },
+    });
+  });
+
+  it('handles deleteModels error', async () => {
+    const modelIds = ['model-1', 'model-2'];
+    const error = new Error('Deletion failed');
+
+    mockTrainedModelsApiService.deleteTrainedModel.mockRejectedValue(error);
+
+    await trainedModelsService.deleteModels(modelIds, {
+      with_pipelines: false,
+      force: false,
+    });
+
+    expect(mockDisplayErrorToast).toHaveBeenCalledWith(
+      error,
+      i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorTitle', {
+        defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+        values: {
+          modelsCount: modelIds.length,
+        },
+      }),
+      undefined,
+      modelIds.join(', ')
     );
   });
 });
