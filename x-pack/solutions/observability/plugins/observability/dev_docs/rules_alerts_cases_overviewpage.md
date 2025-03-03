@@ -53,7 +53,7 @@ That will generate data in
 > [!NOTE]
 >
 > - Create rules with and without groupBy.
-> - Create rules with and without filers.
+> - Create rules with and without filters.
 > - Create rules with different types of aggregations (if applicable).
 > - Create rules with check and unchecked Alert on no data.
 > - Create rules with Actions (Log connector), and check if the action variables are logged.
