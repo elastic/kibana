@@ -233,8 +233,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         describe('The system message', () => {
           it('has the primary system message', () => {
-            expect(systemMessageAsArray(firstRequestBody.messages[0].content as string)).to.eql(
-              systemMessageAsArray(primarySystemMessage)
+            expect(sortSystemMessage(firstRequestBody.messages[0].content as string)).to.eql(
+              sortSystemMessage(primarySystemMessage)
             );
           });
 
@@ -495,6 +495,10 @@ async function createSyntheticApmData(
   return { apmSynthtraceEsClient };
 }
 
-function systemMessageAsArray(message: string) {
-  return message.split('\n\n').map((line) => line.trim());
+// order of instructions can vary, so we sort to compare them
+function sortSystemMessage(message: string) {
+  return message
+    .split('\n\n')
+    .map((line) => line.trim())
+    .sort();
 }
