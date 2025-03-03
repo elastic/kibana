@@ -94,6 +94,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 title: selections.title$.getValue(),
               },
               references: [],
+              id: uuid,
             };
           },
           clearSelections: () => {

@@ -93,6 +93,7 @@ export const buildStateSubscribe =
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
+    const esqlVariablesChanged = !isEqual(nextState.esqlVariables, prevState.esqlVariables);
 
     let savedSearchDataView;
 
@@ -144,7 +145,8 @@ export const buildStateSubscribe =
       sampleSizeChanged ||
       docTableSortChanged ||
       dataSourceChanged ||
-      queryChanged
+      queryChanged ||
+      esqlVariablesChanged
     ) {
       const logData = {
         chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),

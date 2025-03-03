@@ -34,6 +34,7 @@ export const DiscoverHistogramLayout = ({
   const { dataState } = stateContainer;
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
   const hideChart = useAppStateSelector((state) => state.hideChart);
+  const esqlVariables = useAppStateSelector((state) => state.esqlVariables);
   const isEsqlMode = useIsEsqlMode();
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
@@ -64,6 +65,7 @@ export const DiscoverHistogramLayout = ({
       css={histogramLayoutCss}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
       abortController={stateContainer.dataState.getAbortController()}
+      esqlVariables={esqlVariables}
     >
       <DiscoverMainContent
         {...mainContentProps}

@@ -9,6 +9,7 @@
 
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { hasTransformationalCommand, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -37,11 +38,13 @@ export function useEsqlMode({
     query: string;
     allColumns: string[];
     defaultColumns: string[];
+    esqlVariables: ESQLControlVariable[];
   }>({
     initialFetch: true,
     query: '',
     allColumns: [],
     defaultColumns: [],
+    esqlVariables: [],
   });
 
   const cleanup = useCallback(() => {
@@ -55,6 +58,7 @@ export function useEsqlMode({
       query: '',
       allColumns: [],
       defaultColumns: [],
+      esqlVariables: [],
     };
   }, []);
 

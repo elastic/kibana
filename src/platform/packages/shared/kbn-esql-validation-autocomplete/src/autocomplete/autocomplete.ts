@@ -84,10 +84,10 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import type {
-  ESQLCallbacks,
-  ESQLSourceResult,
-  ESQLControlVariable,
+import {
+  type ESQLCallbacks,
+  type ESQLSourceResult,
+  type ESQLControlVariable,
   ESQLVariableType,
 } from '../shared/types';
 import {
@@ -106,6 +106,7 @@ import {
 import { FunctionParameter, isParameterType, FunctionDefinitionTypes } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+import { getControlSuggestionIfSupported } from './factories';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -168,13 +169,22 @@ export async function suggest(
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever
+    resourceRetriever,
+    innerText
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const getESQLVariables = resourceRetriever?.getESQLVariables;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
+  const lastChar = innerText[innerText.length - 1];
 
+  let controlSuggestions: SuggestionRawDefinition[] = [];
+  if (lastChar === '?') {
+    controlSuggestions = getControlSuggestionIfSupported(
+      Boolean(supportsControls),
+      ESQLVariableType.UNKNOWN
+    );
+  }
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // filter source commands if already defined
@@ -192,7 +202,8 @@ export async function suggest(
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
-          resourceRetriever
+          resourceRetriever,
+          innerText
         );
         recommendedQueriesSuggestions.push(
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
@@ -211,7 +222,7 @@ export async function suggest(
     (astContext.type === 'option' && astContext.command?.name === 'dissect') ||
     (astContext.type === 'option' && astContext.command?.name === 'from')
   ) {
-    return getSuggestionsWithinCommandExpression(
+    const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -219,11 +230,12 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       getPolicies,
-      getVariablesByType,
+      getESQLVariables,
       resourceRetriever?.getPreferences,
       resourceRetriever,
       supportsControls
     );
+    return [...commandsSpecificSuggestions, ...controlSuggestions];
   }
   if (astContext.type === 'setting') {
     return getSettingArgsSuggestions(
@@ -250,7 +262,7 @@ export async function suggest(
     }
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
+    const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -258,9 +270,10 @@ export async function suggest(
       getFieldsMap,
       fullText,
       offset,
-      getVariablesByType,
+      getESQLVariables,
       supportsControls
     );
+    return [...functionsSpecificSuggestions, ...controlSuggestions];
   }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(
@@ -272,16 +285,22 @@ export async function suggest(
       getPolicyMetadata
     );
   }
-  return [];
+
+  return [...controlSuggestions];
 }
 
 export function getFieldsByTypeRetriever(
-  queryString: string,
-  resourceRetriever?: ESQLCallbacks
+  queryForFields: string,
+  resourceRetriever?: ESQLCallbacks,
+  fullQuery?: string
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
-  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
-  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const helpers = getFieldsByTypeHelper(queryForFields, resourceRetriever);
+  const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+
+  const queryString = fullQuery ?? queryForFields;
+  const lastChar = queryString[queryString.length - 1];
+  const lastCharIsQuestionMark = lastChar === '?';
+  const getESQLVariables = resourceRetriever?.getESQLVariables;
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -290,10 +309,10 @@ export function getFieldsByTypeRetriever(
     ) => {
       const updatedOptions = {
         ...options,
-        supportsControls,
+        supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getESQLVariables);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -395,7 +414,7 @@ async function getSuggestionsWithinCommandExpression(
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getESQLVariables?: () => ESQLControlVariable[] | undefined,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   callbacks?: ESQLCallbacks,
   supportsControls?: boolean
@@ -425,7 +444,7 @@ async function getSuggestionsWithinCommandExpression(
       getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
       previousCommands: commands,
       callbacks,
-      getVariablesByType,
+      getESQLVariables,
       supportsControls,
     });
   } else {
@@ -953,7 +972,7 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getESQLVariables?: () => ESQLControlVariable[] | undefined,
   supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
@@ -1084,7 +1103,7 @@ async function getFunctionArgsSuggestions(
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           supportsControls,
         },
-        getVariablesByType
+        getESQLVariables
       )
     );
 

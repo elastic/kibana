@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
 
 /** @internal **/
@@ -47,6 +48,13 @@ export enum ESQLVariableType {
   FIELDS = 'fields',
   VALUES = 'values',
   FUNCTIONS = 'functions',
+  // When we can't predict what variable type the user wants to create
+  UNKNOWN = 'unknown',
+}
+
+export enum ESQLVariableESType {
+  IDENTIFIER = 'identifier',
+  VALUE = 'value',
 }
 
 export interface ESQLCallbacks {
@@ -58,9 +66,10 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getESQLVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
+  getHoverData?: ({ query }: { query: string }) => Promise<Datatable | undefined>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

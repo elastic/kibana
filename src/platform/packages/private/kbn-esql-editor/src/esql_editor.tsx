@@ -58,6 +58,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import './decorations.scss';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
 
 // for editor width smaller than this value we want to start hiding some text
@@ -70,7 +71,8 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ESQLEditorProps['onSaveControl'],
-  onCancelControl?: ESQLEditorProps['onCancelControl']
+  onCancelControl?: ESQLEditorProps['onCancelControl'],
+  initialState?: unknown
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -79,6 +81,7 @@ const triggerControl = async (
     esqlVariables,
     onSaveControl,
     onCancelControl,
+    initialState,
   });
 };
 
@@ -106,6 +109,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   onCancelControl,
   supportsControls,
   esqlVariables,
+  esqlControls,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -222,6 +226,42 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
+  const addVariablesDecoration = useCallback(() => {
+    // we need to remove the previous decorations first
+    const lineCount = editorModel.current?.getLineCount() || 1;
+    for (let i = 1; i <= lineCount; i++) {
+      const decorations = editor1?.current?.getLineDecorations(i) ?? [];
+      editor1?.current?.removeDecorations(decorations.map((d) => d.id));
+    }
+
+    const variables = variablesService?.esqlVariables ?? [];
+
+    for (let i = 0; i < variables.length; i++) {
+      const variable = variables[i];
+      const matches =
+        editorModel.current?.findMatches(`?${variable.key}`, true, false, true, null, true) || [];
+
+      matches.forEach((match) => {
+        const range = new monaco.Range(
+          match.range.startLineNumber,
+          match.range.startColumn,
+          match.range.endLineNumber,
+          match.range.endColumn
+        );
+
+        editor1?.current?.createDecorationsCollection([
+          {
+            range,
+            options: {
+              isWholeLine: false,
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              inlineClassName: 'variableBadge',
+            },
+          },
+        ]);
+      });
+    }
+  }, [variablesService?.esqlVariables]);
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
     if (supportsControls) {
@@ -233,11 +273,12 @@ export const ESQLEditor = memo(function ESQLEditor({
         esqlVariables?.forEach((variable) => {
           variablesService?.addVariable(variable);
         });
+        addVariablesDecoration();
       }
     } else {
       variablesService?.disableSuggestions();
     }
-  }, [variablesService, supportsControls, esqlVariables]);
+  }, [variablesService, supportsControls, esqlVariables, addVariablesDecoration]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -313,6 +354,19 @@ export const ESQLEditor = memo(function ESQLEditor({
     await triggerControl(
       query.esql,
       ESQLVariableType.VALUES,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.unknown.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.UNKNOWN,
       position,
       uiActions,
       esqlVariables,
@@ -409,7 +463,16 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
+      (
+        ...args: [
+          { esql: string },
+          ExpressionsStart,
+          TimeRange,
+          AbortController?,
+          string?,
+          ESQLControlVariable[]?
+        ]
+      ) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -449,7 +512,9 @@ export const ESQLEditor = memo(function ESQLEditor({
               esqlQuery,
               expressions,
               timeRange,
-              abortController
+              abortController,
+              undefined,
+              esqlVariables
             ).result;
             const columns: ESQLRealField[] =
               table?.columns.map((c) => {
@@ -466,6 +531,29 @@ export const ESQLEditor = memo(function ESQLEditor({
         }
         return [];
       },
+      getHoverData: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+        if (queryToExecute) {
+          const esqlQuery = {
+            esql: `${queryToExecute} | limit 5`,
+          };
+          const timeRange = data.query.timefilter.timefilter.getTime();
+          try {
+            const table = await memoizedFieldsFromESQL(
+              esqlQuery,
+              expressions,
+              timeRange,
+              abortController,
+              undefined,
+              variablesService?.esqlVariables
+            ).result;
+
+            return table;
+          } catch (e) {
+            // no action yet
+          }
+        }
+        return undefined;
+      },
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -481,8 +569,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
-      getVariablesByType: (type: ESQLVariableType) => {
-        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
+      getESQLVariables: () => {
+        return variablesService?.esqlVariables;
       },
       canSuggestVariables: () => {
         return variablesService?.areSuggestionsEnabled ?? false;
@@ -492,6 +580,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
+    esqlVariables,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
@@ -708,6 +797,46 @@ export const ESQLEditor = memo(function ESQLEditor({
     [isDisabled]
   );
 
+  // this is fixing a bug between the EUIPopover and the monaco editor
+  // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+  // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+  // and the user needs to click again the editor.
+  // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+  editor1.current?.onMouseDown(async (e) => {
+    setTimeout(() => {
+      editor1.current?.focus();
+    }, 100);
+    if (datePickerOpenStatusRef.current) {
+      setPopoverPosition({});
+    }
+
+    const mousePosition = e.target.position;
+    if (mousePosition) {
+      const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
+      const variables = variablesService?.esqlVariables ?? [];
+      const clickedVariable = variables.find((v) => currentWord?.word.includes(v.key));
+
+      if (clickedVariable) {
+        const position = editor1.current?.getPosition();
+        const initialState = esqlControls?.find((c) =>
+          clickedVariable.key.includes(c.variableName)
+        );
+        if (initialState) {
+          await triggerControl(
+            editor1.current?.getValue() ?? code,
+            clickedVariable.type,
+            position,
+            uiActions,
+            esqlVariables,
+            onSaveControl,
+            onCancelControl,
+            initialState
+          );
+        }
+      }
+    }
+  });
+
   const editorPanel = (
     <>
       {Boolean(editorIsInline) && !hideRunQueryButton && (
@@ -780,19 +909,11 @@ export const ESQLEditor = memo(function ESQLEditor({
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
+                      addVariablesDecoration();
                     }
-                    // this is fixing a bug between the EUIPopover and the monaco editor
-                    // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                    // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                    // and the user needs to click again the editor.
-                    // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
-                      setTimeout(() => {
-                        editor.focus();
-                      }, 100);
-                      if (datePickerOpenStatusRef.current) {
-                        setPopoverPosition({});
-                      }
+
+                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
                     });
 
                     editor.onDidFocusEditorText(() => {
@@ -815,7 +936,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
-                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+                    editor.onDidChangeModelContent(() => {
+                      // addVariablesDecoration();
+                      showSuggestionsIfEmptyQuery();
+                    });
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {
