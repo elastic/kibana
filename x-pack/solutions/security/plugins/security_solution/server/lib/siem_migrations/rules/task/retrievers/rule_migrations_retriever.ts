@@ -40,13 +40,12 @@ export class RuleMigrationsRetriever {
   }
 
   public async initialize() {
-    this.resources.initialize();
     // Run only one populateIndices promise at a time, if one is already running, wait for it to finish
     if (RuleMigrationsRetriever.populatePromise === null) {
       RuleMigrationsRetriever.populatePromise = this.populateIndices().finally(() => {
         RuleMigrationsRetriever.populatePromise = null;
       });
     }
-    await RuleMigrationsRetriever.populatePromise;
+    await Promise.all([RuleMigrationsRetriever.populatePromise, this.resources.initialize()]);
   }
 }
