@@ -34,7 +34,6 @@ function addMessagingConnections(
   connections: Connection[],
   destinationServices: ExitSpanDestination[]
 ): Connection[] {
-  // Index discoveredServices by SPAN_DESTINATION_SERVICE_RESOURCE for quick lookups
   const serviceMap = new Map(
     destinationServices.map(({ from, to }) => [from[SPAN_DESTINATION_SERVICE_RESOURCE], to])
   );
@@ -59,7 +58,6 @@ function addMessagingConnections(
 function getAllNodes(services: ServicesResponse[], connections: Connection[]) {
   const allNodesMap = new Map<string, ConnectionNode>();
 
-  // Process connections in one pass
   connections.forEach((connection) => {
     const sourceId = connection.source.id;
     const destinationId = connection.destination.id;

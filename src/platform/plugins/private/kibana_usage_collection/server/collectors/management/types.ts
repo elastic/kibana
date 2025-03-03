@@ -48,7 +48,6 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
-  'observability:apmEnableServiceMapV2': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;

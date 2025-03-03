@@ -45,7 +45,6 @@ import {
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
   searchExcludedDataTiers,
-  apmEnableServiceMapV2,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -363,23 +362,6 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
-    type: 'boolean',
-    solution: 'oblt',
-  },
-  [apmEnableServiceMapV2]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMapV2', {
-      defaultMessage: 'Service Map API V2',
-    }),
-    description: i18n.translate('xpack.observability.apmEnableServiceMapV2Description', {
-      defaultMessage: '{technicalPreviewLabel} Enables the new service map API.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
     type: 'boolean',
     solution: 'oblt',
   },

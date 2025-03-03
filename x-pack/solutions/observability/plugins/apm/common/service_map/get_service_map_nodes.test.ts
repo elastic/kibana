@@ -251,7 +251,7 @@ describe('getServiceMapNodes', () => {
     expect(elements.length).toBe(3);
   });
 
-  it('maps routing services child transasctions to their corresponding upstream service', () => {
+  it('should return connections when exit spans point to a load balancer', () => {
     const response: ServiceMapConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
       exitSpanDestinations: [

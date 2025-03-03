@@ -23,7 +23,6 @@ import {
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapV2,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -57,7 +56,6 @@ function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
     enableAgentExplorerView,
     apmEnableTableSearchBar,
     apmEnableServiceInventoryTableSearchBar,
-    apmEnableServiceMapV2,
   ];
 
   if (isProfilingIntegrationEnabled) {

@@ -7,10 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import {
-  apmEnableServiceMapV2,
-  apmServiceGroupMaxNumberOfServices,
-} from '@kbn/observability-plugin/common';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
@@ -67,19 +64,17 @@ const serviceMapRoute = createApmServerRoute({
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices, serviceMapV2Enabled] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        serviceGroupId
-          ? getServiceGroup({
-              savedObjectsClient,
-              serviceGroupId,
-            })
-          : Promise.resolve(null),
-        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-        uiSettingsClient.get<boolean>(apmEnableServiceMapV2),
-      ]);
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
+      getMlClient(resources),
+      getApmEventClient(resources),
+      serviceGroupId
+        ? getServiceGroup({
+            savedObjectsClient,
+            serviceGroupId,
+          })
+        : Promise.resolve(null),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -102,7 +97,6 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
-      serviceMapV2Enabled,
     });
   },
 });

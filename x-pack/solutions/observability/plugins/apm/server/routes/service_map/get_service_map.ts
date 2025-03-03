@@ -35,7 +35,6 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
-  serviceMapV2Enabled?: boolean;
 }
 
 async function getConnectionData({
@@ -48,7 +47,6 @@ async function getConnectionData({
   serviceGroupKuery,
   kuery,
   logger,
-  serviceMapV2Enabled = false,
 }: IEnvOptions): Promise<
   { tracesCount: number } & (
     | { connections: Connection[]; discoveredServices: ExitSpanDestination[] }
@@ -70,7 +68,7 @@ async function getConnectionData({
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
 
-    if (serviceMapV2Enabled) {
+    if (config.serviceMapV2Enabled) {
       const spans = await withApmSpan(
         'get_service_map_exit_spans_and_transactions_from_traces',
         () =>
@@ -88,8 +86,18 @@ async function getConnectionData({
       };
     }
 
+    if (!traceIds.length) {
+      return {
+        connections: [],
+        discoveredServices: [],
+        tracesCount: 0,
+      };
+    }
+
     const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () => {
       const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
+      logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
+
       return Promise.all(
         chunks.map((traceIdsChunk) =>
           getServiceMapFromTraceIds({
