@@ -54,10 +54,8 @@ export async function reIndexKnowledgeBase({
     // Perform reindex to temporary index
     logger.debug(`Re-indexing knowledge base to temporary index "${tempIndex}"...`);
     await esClient.asInternalUser.reindex({
-      body: {
-        source: { index: originalIndex },
-        dest: { index: tempIndex },
-      },
+      source: { index: originalIndex },
+      dest: { index: tempIndex },
       refresh: true,
       wait_for_completion: true,
     });
@@ -70,10 +68,8 @@ export async function reIndexKnowledgeBase({
     // Perform reindex back to original index
     logger.debug(`Re-indexing knowledge base back to original index "${originalIndex}"...`);
     await esClient.asInternalUser.reindex({
-      body: {
-        source: { index: tempIndex },
-        dest: { index: originalIndex },
-      },
+      source: { index: tempIndex },
+      dest: { index: originalIndex },
       refresh: true,
       wait_for_completion: true,
     });

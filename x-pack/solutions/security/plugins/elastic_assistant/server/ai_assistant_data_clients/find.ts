@@ -13,7 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
 
 interface FindOptions {
@@ -69,12 +69,12 @@ export const findDocuments = async <TSearchSchema>({
   try {
     if (mSearch == null) {
       const response = await esClient.search<TSearchSchema>({
-        body: {
-          query,
-          track_total_hits: true,
-          sort,
+        query,
+        track_total_hits: true,
+        sort,
+        _source: {
+          includes: fields,
         },
-        _source: true,
         from: (page - 1) * perPage,
         ignore_unavailable: true,
         index,
@@ -94,7 +94,7 @@ export const findDocuments = async <TSearchSchema>({
       };
     }
     const mSearchQueryBody = {
-      body: [
+      searches: [
         { index },
         {
           query,
@@ -103,7 +103,9 @@ export const findDocuments = async <TSearchSchema>({
           seq_no_primary_term: true,
           from: (page - 1) * perPage,
           sort,
-          _source: true,
+          _source: {
+            includes: fields,
+          },
         },
         { index },
         {
@@ -113,7 +115,9 @@ export const findDocuments = async <TSearchSchema>({
           seq_no_primary_term: true,
           from: (page - 1) * mSearch.perPage,
           sort,
-          _source: true,
+          _source: {
+            includes: fields,
+          },
         },
       ],
       ignore_unavailable: true,
