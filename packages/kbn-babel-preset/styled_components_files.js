@@ -20,8 +20,8 @@ module.exports = {
    * Used by `kbn-babel-preset` and `kbn-eslint-config`.
    */
   USES_STYLED_COMPONENTS: [
-    /packages[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
-    /packages[\/\\]kbn-ui-shared-deps-src[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-src[\/\\]/,
 
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]assistant_overlay[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
@@ -193,10 +193,10 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]ux[\/\\]public[\/\\]components[\/\\]app[\/\\]rum_dashboard[\/\\]visitor_breakdown[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]ux[\/\\]public[\/\\]components[\/\\]app[\/\\]rum_dashboard[\/\\]visitor_breakdown_map[\/\\]embedded_map.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]ux[\/\\]public[\/\\]components[\/\\]app[\/\\]rum_dashboard[\/\\]visitor_breakdown_map[\/\\]map_tooltip.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data_table[\/\\]components[\/\\]data_table[\/\\]data_table.stories.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data_table[\/\\]components[\/\\]data_table[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data_table[\/\\]components[\/\\]toolbar[\/\\]unit[\/\\]styles.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data_table[\/\\]mock[\/\\]test_providers.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]components[\/\\]data_table[\/\\]data_table.stories.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]components[\/\\]data_table[\/\\]index.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]components[\/\\]toolbar[\/\\]unit[\/\\]styles.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]mock[\/\\]test_providers.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]lists[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]and_or_badge[\/\\]rounded_badge.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]lists[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]and_or_badge[\/\\]rounded_badge_antenna.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]lists[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]builder[\/\\]and_badge.tsx/,

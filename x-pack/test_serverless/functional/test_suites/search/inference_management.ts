@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-
 import { testHasEmbeddedConsole } from './embedded_console';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -19,20 +16,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
-  const browser = getService('browser');
-  const ml = getService('ml');
 
   describe('Serverless Inference Management UI', function () {
-    const endpoint = 'endpoint-1';
-    const taskType = 'sparse_embedding';
-    const modelConfig = {
-      service: 'elasticsearch',
-      service_settings: {
-        num_allocations: 1,
-        num_threads: 1,
-        model_id: '.elser_model_2',
-      },
-    };
+    // see details: https://github.com/elastic/kibana/issues/204539
+    this.tags(['failsOnMKI']);
 
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -56,42 +43,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('copy endpoint id action', () => {
       it('can copy an endpoint id', async () => {
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectToCopyEndpoint();
-      });
-    });
-
-    describe('delete action', () => {
-      const usageIndex = 'elser_index';
-      beforeEach(async () => {
-        await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
-        await browser.refresh();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await ml.api.deleteIndices(usageIndex);
-        await ml.api.deleteIngestPipeline(endpoint);
-      });
-
-      it('deletes modal successfully without any usage', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectEndpointWithoutUsageTobeDelete();
-      });
-
-      it('deletes modal successfully with usage', async () => {
-        const indexMapping: estypes.MappingTypeMapping = {
-          properties: {
-            content: {
-              type: 'text',
-            },
-            content_embedding: {
-              type: 'semantic_text',
-              inference_id: endpoint,
-            },
-          },
-        };
-        await ml.api.createIngestPipeline(endpoint);
-        await ml.api.createIndex(usageIndex, indexMapping);
-
-        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectEndpointWithUsageTobeDelete();
       });
     });
 

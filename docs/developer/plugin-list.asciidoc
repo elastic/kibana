@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
+  You can update the template within src/platform/packages/shared/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 
@@ -922,12 +922,16 @@ routes, etc.
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams/README.md[streams]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/streams/README.md[streams]
 |This plugin provides an interface to manage streams
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams_app/README.md[streamsApp]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/streams_app/README.md[streamsApp]
 |Home of the Streams app plugin, which allows users to manage Streams via the UI.
+
+
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_streams_wrapper/README.md[streamsAppWrapper]
+|Observability-specific wrapper for the streams app. This is responsible for actually registering the app and making it accessible in observability contexts
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/synthetics/README.md[synthetics]

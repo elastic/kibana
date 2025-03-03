@@ -20,7 +20,7 @@ The process takes a few steps:
 ### Re-configure deployment for Kibana and Elasticsearch
 We use [kibana-ops-e2e-perf](https://kibana-ops-e2e-perf.kb.us-central1.gcp.cloud.es.io/) cluster to monitor performance testing.
 
-If you would like to report APM metrics to this cluster, copy `SECRET_TOKEN` and `SERVER_URL` values from [packages/kbn-journeys/journey/journey_apm_config.ts](https://github.com/elastic/kibana/blob/60c82765779419d356a131e212682b69b035804b/packages/kbn-journeys/journey/journey_apm_config.ts#L10-L11)
+If you would like to report APM metrics to this cluster, copy `SECRET_TOKEN` and `SERVER_URL` values from [src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts](https://github.com/elastic/kibana/blob/60c82765779419d356a131e212682b69b035804b/src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts#L10-L11)
 
 #### Change Elasticsearch configuration
 In the ESS Admin Console, find your deployment and navigate to `Security` page. Click `Add Settings` under `Elasticsearch keystore` and add new entry:

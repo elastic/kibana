@@ -19,12 +19,13 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptDictionary } from '../../../prompt';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
+
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
@@ -84,7 +85,14 @@ describe('callAssistantGraph', () => {
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
-    contentReferencesStore: contentReferencesStoreFactoryMock(),
+    contentReferencesStore: newContentReferencesStoreMock(),
+    core: {
+      uiSettings: {
+        client: {
+          get: jest.fn().mockResolvedValue('Browser'),
+        },
+      },
+    },
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {

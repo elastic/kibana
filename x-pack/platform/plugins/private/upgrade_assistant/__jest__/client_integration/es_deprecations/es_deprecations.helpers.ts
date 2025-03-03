@@ -50,18 +50,28 @@ const createActions = (testBed: TestBed) => {
     },
   };
 
-  const searchBar = {
-    clickTypeFilterDropdownAt: async (index: number) => {
-      await act(async () => {
-        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('searchBarContainer')
-          .find('.euiPopover')
-          .find('button.euiFilterButton')
-          .at(index)
-          .simulate('click');
-      });
+  const clickFilterByIndex = async (index: number) => {
+    await act(async () => {
+      // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+      find('searchBarContainer')
+        .find('.euiPopover')
+        .find('button.euiFilterButton')
+        .at(index)
+        .simulate('click');
+    });
 
-      component.update();
+    component.update();
+
+    // Wait for the filter dropdown to be displayed
+    await new Promise(requestAnimationFrame);
+  };
+
+  const searchBar = {
+    clickTypeFilterDropdown: async () => {
+      await clickFilterByIndex(1); // Type filter is the second filter button
+    },
+    clickStatusFilterDropdown: async () => {
+      await clickFilterByIndex(0); // Status filter is the first filter button
     },
     setSearchInputValue: async (searchValue: string) => {
       await act(async () => {
@@ -72,10 +82,17 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
-    clickCriticalFilterButton: async () => {
+    clickFilterByTitle: async (title: string) => {
+      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
+      // is added in a portalled popover and not inside the component DOM tree.
+      const filterButton: HTMLButtonElement | null = document.body.querySelector(
+        `.euiSelectableListItem[title=${title}]`
+      );
+
+      expect(filterButton).not.toBeNull();
+
       await act(async () => {
-        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('searchBarContainer').find('button.euiFilterButton').at(0).simulate('click');
+        filterButton!.click();
       });
 
       component.update();

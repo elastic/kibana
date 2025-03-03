@@ -168,6 +168,17 @@ export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeployme
   };
 };
 
+export interface StartTrainedModelDeploymentResponse {
+  // TODO update types in elasticsearch-specification
+  assignment: estypes.MlStartTrainedModelDeploymentResponse['assignment'] & {
+    adaptive_allocations?: {
+      enabled: boolean;
+      min_number_of_allocations?: number;
+      max_number_of_allocations?: number;
+    };
+  };
+}
+
 export interface AllocatedModel {
   key: string;
   deployment_id: string;
@@ -418,6 +429,7 @@ export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDown
 
 export const isBuiltInModel = (item: TrainedModelConfigResponse | TrainedModelUIItem) =>
   item.tags.includes(BUILT_IN_MODEL_TAG);
+
 /**
  * This type represents a union of different model entities:
  * - Any existing trained model returned by the API, e.g., lang_ident_model_1, DFA models, etc.
