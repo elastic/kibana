@@ -1923,6 +1923,7 @@
     "tough-cookie": "^5.1.2",
     "trace": "^3.2.0",
     "tree-kill": "^1.2.2",
+    "ts-graphviz": "^2.1.6",
     "ts-morph": "^15.1.0",
     "tsd": "^0.31.1",
     "typescript": "5.1.6",
