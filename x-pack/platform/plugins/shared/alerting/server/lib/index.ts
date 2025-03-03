@@ -49,3 +49,4 @@ export { trimRecoveredAlerts } from './trim_recovered_alerts';
 export { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
 export type { GetAlertIndicesAlias } from './create_get_alert_indices_alias';
 export { getEsRequestTimeout } from './get_es_request_timeout';
+export { spaceIdToNamespace } from './space_id_to_namespace';
