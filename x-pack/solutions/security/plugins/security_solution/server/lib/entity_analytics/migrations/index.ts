@@ -13,6 +13,7 @@ import { assetCrticalityCopyTimestampToEventIngested } from './asset_criticality
 import { riskScoreCopyTimestampToEventIngested } from './risk_score_copy_timestamp_to_event_ingested';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
+import { deleteRiskScoreComponent } from '../risk_engine/migrations/delete_risk_score_component_template';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -44,6 +45,7 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateAssetCriticalityMappings({ ...params, logger: scopedLogger });
   await scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
   await updateRiskScoreMappings({ ...params, logger: scopedLogger });
+  await deleteRiskScoreComponent({ ...params, logger: scopedLogger });
 };
 
 export const scheduleAssetCriticalityCopyTimestampToEventIngested = async (
