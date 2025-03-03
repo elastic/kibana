@@ -17,15 +17,13 @@ import {
   getViewModeSubject,
   HasReadOnlyCapabilities,
   hasReadOnlyCapabilities,
-  apiHasParentApi,
-  apiPublishesWritableViewMode,
-  hasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import {
   Action,
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
+import { map } from 'rxjs';
 import { ACTION_SHOW_CONFIG_PANEL } from './constants';
 
 export type ShowConfigPanelActionApi = CanAccessViewMode & HasReadOnlyCapabilities;
@@ -45,34 +43,18 @@ export class ShowConfigPanelAction
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    // check permissions to show a dynamic name
-    const { write } = embeddable.isReadOnlyEnabled();
-    return write
-      ? i18n.translate('presentationPanel.action.editPanel.displayName', {
-          defaultMessage: 'Edit {value} configuration',
-          values: {
-            value: embeddable.getTypeDisplayName(),
-          },
-        })
-      : i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
-          defaultMessage: 'View {value} configuration',
-          values: {
-            value: embeddable.getTypeDisplayName(),
-          },
-        });
+    return i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
+      defaultMessage: 'View {value} configuration',
+      values: {
+        value: embeddable.getTypeDisplayName(),
+      },
+    });
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
-  ) {
-    if (!isApiCompatible(embeddable)) return;
-    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
-      onChange(
-        viewMode === 'view' && isApiCompatible(embeddable) && embeddable.isReadOnlyEnabled().read,
-        this
-      );
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return apiCanAccessViewMode(embeddable)
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
+      : undefined;
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
@@ -81,8 +63,7 @@ export class ShowConfigPanelAction
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const { write } = embeddable.isReadOnlyEnabled();
-    return write ? 'pencil' : 'glasses';
+    return 'glasses';
   }
 
   /**
@@ -90,10 +71,13 @@ export class ShowConfigPanelAction
    * Note: it does not take into account write permissions
    */
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'view') {
+      return false;
+    }
+    const { read: canRead, write: canWrite } = embeddable.isReadOnlyEnabled();
     return Boolean(
-      isApiCompatible(embeddable) &&
-        getInheritedViewMode(embeddable) === 'view' &&
-        embeddable.isReadOnlyEnabled().read
+      // No option to view or edit the configuration is offered for users with write permission.
+      canRead && !canWrite
     );
   }
 
@@ -104,24 +88,6 @@ export class ShowConfigPanelAction
    */
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const { write } = embeddable.isReadOnlyEnabled();
-    const currentViewMode = getInheritedViewMode(embeddable);
-    const shouldChangeMode = write && currentViewMode !== 'edit';
-    if (
-      shouldChangeMode &&
-      apiHasParentApi(embeddable) &&
-      apiPublishesWritableViewMode(embeddable.parentApi) &&
-      hasEditCapabilities(embeddable)
-    ) {
-      await embeddable.parentApi.setViewMode('edit');
-      if (embeddable.isEditingEnabled()) {
-        await embeddable.onEdit();
-        return;
-      }
-      // if user has no edit capabilities once switched to edit mode,
-      // restore the previous mode and show the config as read only
-      await embeddable.parentApi.setViewMode(currentViewMode ?? 'view');
-    }
     await embeddable.onShowConfig();
   }
 }
