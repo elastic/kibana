@@ -455,7 +455,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         const renderCount = useStateFromPublishingSubject(renderCount$);
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const domNode = useRef<HTMLDivElement>(null);
-        const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const { error, isLoading, Component } = useExpressionRenderer(domNode, expressionParams);
         const errorTextStyle = useErrorTextStyle();
 
         useEffect(() => {
@@ -504,6 +504,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                   }
                 />
               )}
+              {Component && <Component />}
             </EuiFlexGroup>
           </div>
         );

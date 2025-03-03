@@ -148,7 +148,7 @@ export const ContentEditorKibanaProvider: FC<
           <QueryClientProvider client={queryClient}>
             <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
           </QueryClientProvider>,
-          startServices
+          { ...startServices, legacyRoot: false }
         ),
         options
       );

@@ -419,6 +419,8 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
+      performance.mark('anton:rendering-start');
+
       this.rendering.start({
         application,
         chrome,
@@ -428,6 +430,7 @@ export class CoreSystem {
         theme,
         targetDomElement: coreUiTargetDomElement,
         userProfile,
+        notifications,
       });
 
       performance.mark(KBN_LOAD_MARKS, {
