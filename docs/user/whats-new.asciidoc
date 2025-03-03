@@ -34,7 +34,7 @@ image::images/ai-assistant-for-logs-discover.png[Elastic AI Assistant in the log
 [discrete]
 ==== Support for LOOKUP JOINs in the ES|QL editor
 
-We’ve introduced support for the LOOKUP JOIN command to enable a smooth autocomplete experience and client-side validation. The editor now suggests lookup mode indexes and join condition fields, letting you craft accurate ES|QL queries more quickly and keep your data exploration flowing. 
+We’ve introduced support for the LOOKUP JOIN command to enable a smooth autocomplete experience and client-side validation. The editor now suggests lookup mode indices and join condition fields, letting you craft accurate ES|QL queries more quickly and keep your data exploration flowing. 
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte43a30a93241d650/67c23670045f5839e5bfd1e4/lookup-join-demo.gif[Using the LOOKUP JOIN command to autocomplete an ES|QL query]
 
