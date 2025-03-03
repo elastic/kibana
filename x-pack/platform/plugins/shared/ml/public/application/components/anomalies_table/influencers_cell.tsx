@@ -44,7 +44,6 @@ export const InfluencersCell: FC<InfluencerCellProps> = ({
   const { filterButton } = useEntityCellStyles();
 
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
-  // const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
   const toggleAllInfluencers = () => setShowAllInfluencers((prev) => !prev);
 
   let numberToDisplay = showAllInfluencers === false ? limit : influencers.length;
