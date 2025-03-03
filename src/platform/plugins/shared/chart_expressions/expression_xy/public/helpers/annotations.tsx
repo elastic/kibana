@@ -9,9 +9,15 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, useEuiFontSize } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiIconProps,
+  EuiText,
+  useEuiFontSize,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UseEuiTheme } from '@elastic/eui';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
