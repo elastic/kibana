@@ -33,10 +33,6 @@ export const ProductDocumentationManagement = React.memo<{
   }, [installProductDoc]);
 
   const content = useMemo(() => {
-    // Status is undefined when the status is loading from useKnowledgeBaseStatus
-    if (!status) {
-      return <EuiLoadingSpinner data-test-subj="statusLoading" size="m" />;
-    }
     if (isInstalling) {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
@@ -58,7 +54,7 @@ export const ProductDocumentationManagement = React.memo<{
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isInstalling, onClickInstall, status]);
+  }, [isInstalling, onClickInstall]);
 
   // The last condition means that the installation was started by the plugin
   if (

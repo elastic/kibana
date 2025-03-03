@@ -104,7 +104,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }
 
   public getProductDocumentationStatus = async () => {
-    return this.options.getProductDocumentationStatus();
+    return this.options.getProductDocumentationStatus() ?? 'uninstalled';
   };
 
   /**

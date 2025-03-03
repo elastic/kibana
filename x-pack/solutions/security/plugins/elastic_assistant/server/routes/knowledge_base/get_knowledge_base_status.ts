@@ -65,14 +65,14 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
 
           return response.ok({
             body: {
-              elser_exists: isInferenceEndpointExists,
-              index_exists: indexExists,
-              is_setup_in_progress: kbDataClient.isSetupInProgress,
-              is_setup_available: setupAvailable,
-              security_labs_exists: securityLabsExists,
+              elser_exists: !!isInferenceEndpointExists,
+              index_exists: !!indexExists,
+              is_setup_in_progress: !!kbDataClient.isSetupInProgress,
+              is_setup_available: !!setupAvailable,
+              security_labs_exists: !!securityLabsExists,
               // If user data exists, we should have at least one document in the Security Labs index
-              user_data_exists: userDataExists || !!loadedSecurityLabsDocsCount,
-              pipeline_exists: pipelineExists,
+              user_data_exists: !!(userDataExists || !!loadedSecurityLabsDocsCount),
+              pipeline_exists: !!pipelineExists,
               product_documentation_status: productDocumentationStatus,
             },
           });

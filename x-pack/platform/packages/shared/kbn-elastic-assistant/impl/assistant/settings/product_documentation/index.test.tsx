@@ -25,11 +25,6 @@ describe('ProductDocumentationManagement', () => {
     jest.clearAllMocks();
   });
 
-  it('renders loading spinner when status is loading', async () => {
-    render(<ProductDocumentationManagement />);
-    expect(screen.getByTestId('statusLoading')).toBeInTheDocument();
-  });
-
   it('renders install button when not installed', () => {
     render(<ProductDocumentationManagement status="uninstalled" />);
     expect(screen.getByText(i18n.INSTALL)).toBeInTheDocument();

@@ -12,7 +12,6 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { getKnowledgeBaseStatus } from './api';
 
 const KNOWLEDGE_BASE_STATUS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-status'];
@@ -39,10 +38,7 @@ export const useKnowledgeBaseStatus = ({
   resource,
   toasts,
   enabled,
-}: UseKnowledgeBaseStatusParams): UseQueryResult<
-  ReadKnowledgeBaseResponse & { product_documentation_status: InstallationStatus },
-  IHttpFetchError
-> => {
+}: UseKnowledgeBaseStatusParams): UseQueryResult<ReadKnowledgeBaseResponse, IHttpFetchError> => {
   return useQuery(
     KNOWLEDGE_BASE_STATUS_QUERY_KEY,
     async ({ signal }) => {
