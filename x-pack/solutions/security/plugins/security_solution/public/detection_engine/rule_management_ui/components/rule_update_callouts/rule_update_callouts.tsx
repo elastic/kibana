@@ -21,8 +21,8 @@ import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
 export const RuleUpdateCallouts = () => {
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_to_install ?? 0;
-  const rulesToUpgradeCount = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+  const rulesToInstallCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_install ?? 0;
+  const rulesToUpgradeCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
   // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
   const shouldDisplayNewRulesCallout = rulesToInstallCount > 0;
