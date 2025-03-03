@@ -43,11 +43,8 @@ steps:
       - "arm64"
 
   - command: |
-      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-        --message "Linux headless chromium build completed at: $BUILDKITE_BUILD_URL" \
-        --context "chromium-linux-build-job-completion" \
-        --clear-previous
-    label: Comment with job URL on issue
+      .buildkite/scripts/pipelines/chromium_linux_build/create_pr.sh
+    label: Create PR updating puppeteer and related config for chromium
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2004
