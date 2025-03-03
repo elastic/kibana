@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
+import { ATTR_SERVICE_ENVIRONMENT } from '@kbn/observability-ui-semantic-conventions';
 import { Environment } from './environment_rt';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
@@ -47,7 +47,7 @@ export function getEnvironmentEsField(environment: string) {
     return {};
   }
 
-  return { [SERVICE_ENVIRONMENT]: environment };
+  return { [ATTR_SERVICE_ENVIRONMENT]: environment };
 }
 
 // returns the environment url param that should be used

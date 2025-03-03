@@ -6,6 +6,7 @@
  */
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { ATTR_TIMESTAMP } from '@kbn/observability-ui-semantic-conventions';
 import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export function getEstimatedSizeForDocumentsInIndex({
@@ -53,7 +54,7 @@ export async function getDailyDataGenerationSize({
         filter: {
           ...kqlQuery(kuery),
           range: {
-            '@timestamp': {
+            [ATTR_TIMESTAMP]: {
               gte: String(timeFrom),
               lt: String(timeTo),
               format: 'epoch_second',

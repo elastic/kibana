@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ATTR_TRANSACTION_URL } from '@kbn/observability-ui-semantic-conventions';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
 import { useFilterValues } from '../../series_editor/use_filter_values';
 
 interface Props {
@@ -20,9 +20,9 @@ export const useUrlSearch = ({ series, query, seriesId, seriesConfig }: Props) =
     {
       series,
       seriesId,
-      field: TRANSACTION_URL,
+      field: ATTR_TRANSACTION_URL,
       baseFilters: seriesConfig.baseFilters,
-      label: seriesConfig.labels[TRANSACTION_URL],
+      label: seriesConfig.labels[ATTR_TRANSACTION_URL],
     },
     query
   );

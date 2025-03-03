@@ -6,8 +6,8 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
+import { ATTR_SERVICE_ENVIRONMENT } from '@kbn/observability-ui-semantic-conventions';
 
-import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -21,8 +21,8 @@ export function environmentQuery(environment: string): QueryDslQueryContainer[] 
   }
 
   if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
+    return [{ bool: { must_not: { exists: { field: ATTR_SERVICE_ENVIRONMENT } } } }];
   }
 
-  return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
+  return [{ term: { [ATTR_SERVICE_ENVIRONMENT]: environment } }];
 }

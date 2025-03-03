@@ -5,6 +5,27 @@
  * 2.0.
  */
 
+import {
+  ATTR_CLIENT_GEO_COUNTRY_NAME,
+  ATTR_PROCESSOR_EVENT,
+  ATTR_SERVICE_ENVIRONMENT,
+  ATTR_SERVICE_NAME,
+  ATTR_TIMESTAMP,
+  ATTR_TRANSACTION_DURATION_US,
+  ATTR_TRANSACTION_EXPERIENCE_CLS,
+  ATTR_TRANSACTION_EXPERIENCE_FID,
+  ATTR_TRANSACTION_EXPERIENCE_TBT,
+  ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
+  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+  ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
+  ATTR_TRANSACTION_TYPE,
+  ATTR_TRANSACTION_URL,
+  ATTR_USER_AGENT_DEVICE_NAME,
+  ATTR_USER_AGENT_NAME,
+  ATTR_USER_AGENT_OS_NAME,
+  ATTR_USER_AGENT_VERSION,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -17,25 +38,6 @@ import {
   ReportTypes,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import {
-  CLIENT_GEO_COUNTRY_NAME,
-  CLS_FIELD,
-  FCP_FIELD,
-  FID_FIELD,
-  LCP_FIELD,
-  PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TBT_FIELD,
-  TRANSACTION_DURATION,
-  TRANSACTION_TYPE,
-  USER_AGENT_DEVICE,
-  USER_AGENT_NAME,
-  USER_AGENT_OS,
-  USER_AGENT_VERSION,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
-  TRANSACTION_URL,
-} from '../constants/elasticsearch_fieldnames';
 import {
   BACKEND_TIME_LABEL,
   CLS_LABEL,
@@ -54,7 +56,7 @@ export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig 
     seriesTypes: [],
     reportType: ReportTypes.KPI,
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: ATTR_TIMESTAMP,
     },
     yAxisColumns: [
       {
@@ -64,49 +66,74 @@ export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig 
     ],
     hasOperationType: false,
     filterFields: [
-      TRANSACTION_URL,
-      USER_AGENT_OS,
-      CLIENT_GEO_COUNTRY_NAME,
-      USER_AGENT_DEVICE,
+      ATTR_TRANSACTION_URL,
+      ATTR_USER_AGENT_OS_NAME,
+      ATTR_CLIENT_GEO_COUNTRY_NAME,
+      ATTR_USER_AGENT_DEVICE_NAME,
       {
-        field: USER_AGENT_NAME,
-        nested: USER_AGENT_VERSION,
+        field: ATTR_USER_AGENT_NAME,
+        nested: ATTR_USER_AGENT_VERSION,
       },
       LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [
-      USER_AGENT_NAME,
-      USER_AGENT_OS,
-      CLIENT_GEO_COUNTRY_NAME,
-      USER_AGENT_DEVICE,
+      ATTR_USER_AGENT_NAME,
+      ATTR_USER_AGENT_OS_NAME,
+      ATTR_CLIENT_GEO_COUNTRY_NAME,
+      ATTR_USER_AGENT_DEVICE_NAME,
       PERCENTILE,
       LABEL_FIELDS_BREAKDOWN,
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
+      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, PROCESSOR_EVENT_VALUE_TRANSACTION, dataView),
     ],
-    labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
-    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    labels: { ...FieldLabels, [ATTR_SERVICE_NAME]: WEB_APPLICATION_LABEL },
+    definitionFields: [ATTR_SERVICE_NAME, ATTR_SERVICE_ENVIRONMENT],
     metricOptions: [
       { field: RECORDS_FIELD, id: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
       {
         label: PAGE_LOAD_TIME_LABEL,
-        field: TRANSACTION_DURATION,
-        id: TRANSACTION_DURATION,
+        field: ATTR_TRANSACTION_DURATION_US,
+        id: ATTR_TRANSACTION_DURATION_US,
         columnType: OPERATION_COLUMN,
       },
       {
         label: BACKEND_TIME_LABEL,
-        field: TRANSACTION_TIME_TO_FIRST_BYTE,
-        id: TRANSACTION_TIME_TO_FIRST_BYTE,
+        field: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
+        id: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
         columnType: OPERATION_COLUMN,
       },
-      { label: FCP_LABEL, field: FCP_FIELD, id: FCP_FIELD, columnType: OPERATION_COLUMN },
-      { label: TBT_LABEL, field: TBT_FIELD, id: TBT_FIELD, columnType: OPERATION_COLUMN },
-      { label: LCP_LABEL, field: LCP_FIELD, id: LCP_FIELD, columnType: OPERATION_COLUMN },
-      { label: FID_LABEL, field: FID_FIELD, id: FID_FIELD, columnType: OPERATION_COLUMN },
-      { label: CLS_LABEL, field: CLS_FIELD, id: CLS_FIELD, columnType: OPERATION_COLUMN },
+      {
+        label: FCP_LABEL,
+        field: ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
+        id: ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
+        columnType: OPERATION_COLUMN,
+      },
+      {
+        label: TBT_LABEL,
+        field: ATTR_TRANSACTION_EXPERIENCE_TBT,
+        id: ATTR_TRANSACTION_EXPERIENCE_TBT,
+        columnType: OPERATION_COLUMN,
+      },
+      {
+        label: LCP_LABEL,
+        field: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+        id: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+        columnType: OPERATION_COLUMN,
+      },
+      {
+        label: FID_LABEL,
+        field: ATTR_TRANSACTION_EXPERIENCE_FID,
+        id: ATTR_TRANSACTION_EXPERIENCE_FID,
+        columnType: OPERATION_COLUMN,
+      },
+      {
+        label: CLS_LABEL,
+        field: ATTR_TRANSACTION_EXPERIENCE_CLS,
+        id: ATTR_TRANSACTION_EXPERIENCE_CLS,
+        columnType: OPERATION_COLUMN,
+      },
     ],
   };
 }

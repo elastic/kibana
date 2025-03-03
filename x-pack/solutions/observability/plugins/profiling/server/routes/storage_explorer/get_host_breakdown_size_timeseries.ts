@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '@kbn/profiling-utils';
+import { ATTR_HOST_ID, ATTR_TIMESTAMP } from '@kbn/observability-ui-semantic-conventions';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
 import type { StorageExplorerHostDetailsTimeseries } from '../../../common/storage_explorer';
 import {
@@ -43,7 +43,7 @@ export async function getHostBreakdownSizeTimeseries({
             ...kqlQuery(kuery),
             {
               range: {
-                [ProfilingESField.Timestamp]: {
+                [ATTR_TIMESTAMP]: {
                   gte: String(timeFrom),
                   lt: String(timeTo),
                   format: 'epoch_second',
@@ -59,12 +59,12 @@ export async function getHostBreakdownSizeTimeseries({
       aggs: {
         hosts: {
           terms: {
-            field: ProfilingESField.HostID,
+            field: ATTR_HOST_ID,
           },
           aggs: {
             storageTimeseries: {
               date_histogram: {
-                field: ProfilingESField.Timestamp,
+                field: ATTR_TIMESTAMP,
                 fixed_interval: `${bucketWidth}s`,
               },
               aggs: {

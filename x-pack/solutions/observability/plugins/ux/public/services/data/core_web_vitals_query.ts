@@ -8,11 +8,12 @@
 import type { ESSearchResponse } from '@kbn/es-types';
 import { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
-  TBT_FIELD,
-  FCP_FIELD,
-  CLS_FIELD,
-  LCP_FIELD,
-} from '../../../common/elasticsearch_fieldnames';
+  ATTR_TRANSACTION_EXPERIENCE,
+  ATTR_TRANSACTION_EXPERIENCE_CLS,
+  ATTR_TRANSACTION_EXPERIENCE_TBT,
+  ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
+  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+} from '@kbn/observability-ui-semantic-conventions';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageLoadTransactionsProjection } from './projections';
@@ -88,44 +89,44 @@ export function coreWebVitalsQuery(
       coreVitalPages: {
         filter: {
           exists: {
-            field: 'transaction.experience',
+            field: ATTR_TRANSACTION_EXPERIENCE,
           },
         },
       },
       lcp: {
         percentiles: {
-          field: LCP_FIELD,
+          field: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
           percents: [percentile],
         },
       },
       cls: {
         percentiles: {
-          field: CLS_FIELD,
+          field: ATTR_TRANSACTION_EXPERIENCE_CLS,
           percents: [percentile],
         },
       },
       tbt: {
         percentiles: {
-          field: TBT_FIELD,
+          field: ATTR_TRANSACTION_EXPERIENCE_TBT,
           percents: [percentile],
         },
       },
       fcp: {
         percentiles: {
-          field: FCP_FIELD,
+          field: ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
           percents: [percentile],
         },
       },
       lcpRanks: {
         percentile_ranks: {
-          field: LCP_FIELD,
+          field: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
           values: [2500, 4000],
           keyed: false,
         },
       },
       clsRanks: {
         percentile_ranks: {
-          field: CLS_FIELD,
+          field: ATTR_TRANSACTION_EXPERIENCE_CLS,
           values: [0.1, 0.25],
           keyed: false,
         },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { ATTR_SERVICE_NAME } from '@kbn/observability-ui-semantic-conventions';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
@@ -25,7 +25,7 @@ export function serviceNameQuery(start: number, end: number, uiFilters?: UxUIFil
     aggs: {
       services: {
         terms: {
-          field: SERVICE_NAME,
+          field: ATTR_SERVICE_NAME,
           size: 1000,
         },
       },

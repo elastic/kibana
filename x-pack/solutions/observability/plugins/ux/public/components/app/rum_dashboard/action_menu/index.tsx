@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { ATTR_SERVICE_NAME } from '@kbn/observability-ui-semantic-conventions';
 import { RECORDS_FIELD, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { UxInspectorHeaderLink } from './inpector_link';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
@@ -46,7 +46,7 @@ export function UXActionMenu({
           name: `${serviceName}-page-views`,
           time: { from: rangeFrom!, to: rangeTo! },
           reportDefinitions: {
-            [SERVICE_NAME]: serviceName ? [serviceName] : [],
+            [ATTR_SERVICE_NAME]: serviceName ? [serviceName] : [],
           },
           selectedMetricField: RECORDS_FIELD,
         },

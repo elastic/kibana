@@ -7,7 +7,7 @@
 
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '@kbn/profiling-utils';
+import { ATTR_TIMESTAMP } from '@kbn/observability-ui-semantic-conventions';
 
 export interface ProjectTimeQuery {
   bool: QueryDslBoolQuery;
@@ -28,7 +28,7 @@ export function createCommonFilter({
         ...kqlQuery(kuery),
         {
           range: {
-            [ProfilingESField.Timestamp]: {
+            [ATTR_TIMESTAMP]: {
               gte: String(timeFrom),
               lt: String(timeTo),
               format: 'epoch_second',

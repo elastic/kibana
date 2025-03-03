@@ -8,6 +8,12 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_TIMESTAMP,
+  ATTR_TRANSACTION_NAME,
+  ATTR_TRANSACTION_PROFILER_STACK_TRACE_IDS,
+} from '@kbn/observability-ui-semantic-conventions';
 import { keyBy } from 'lodash';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
@@ -72,10 +78,10 @@ export function registerTopNFunctionsAPMTransactionsRoute({
               query: {
                 bool: {
                   filter: [
-                    ...termQuery('service.name', serviceName),
+                    ...termQuery(ATTR_SERVICE_NAME, serviceName),
                     {
                       range: {
-                        ['@timestamp']: {
+                        [ATTR_TIMESTAMP]: {
                           gte: String(startSecs),
                           lt: String(endSecs),
                           format: 'epoch_second',
@@ -85,9 +91,9 @@ export function registerTopNFunctionsAPMTransactionsRoute({
                   ],
                 },
               },
-              aggregationFields: ['transaction.name'],
+              aggregationFields: [ATTR_TRANSACTION_NAME],
               indices: transactionIndices.split(','),
-              stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+              stacktraceIdsField: ATTR_TRANSACTION_PROFILER_STACK_TRACE_IDS,
               limit: 1000,
               totalSeconds: endSecs - startSecs,
             });

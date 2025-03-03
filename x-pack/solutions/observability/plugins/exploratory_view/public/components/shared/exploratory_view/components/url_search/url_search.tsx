@@ -8,11 +8,11 @@
 import React, { useEffect, useState } from 'react';
 import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ATTR_TRANSACTION_URL } from '@kbn/observability-ui-semantic-conventions';
 import { SelectableUrlList, UrlOption } from './selectable_url_list';
 import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 import { useUrlSearch } from './use_url_search';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
 
 interface Props {
   seriesId: number;
@@ -73,7 +73,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
   useEffect(() => {
     const queryLabel = getWildcardLabel(query);
     const currFilter: UrlFilter | undefined = (series.filters ?? []).find(
-      ({ field }) => field === TRANSACTION_URL
+      ({ field }) => field === ATTR_TRANSACTION_URL
     );
 
     const {
@@ -81,7 +81,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
       notWildcards = [],
       values: currValues = [],
       notValues: currNotValues = [],
-    } = currFilter ?? { field: TRANSACTION_URL };
+    } = currFilter ?? { field: ATTR_TRANSACTION_URL };
 
     setItems((prevItems) => {
       const { includedItems, excludedItems } = processSelectedItems(prevItems);
@@ -145,7 +145,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
 
   useEffect(() => {
     const currFilter: UrlFilter | undefined = (series.filters ?? []).find(
-      ({ field }) => field === TRANSACTION_URL
+      ({ field }) => field === ATTR_TRANSACTION_URL
     );
 
     const {
@@ -153,7 +153,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
       notWildcards = [],
       values: currValues = [],
       notValues: currNotValues = [],
-    } = currFilter ?? { field: TRANSACTION_URL };
+    } = currFilter ?? { field: ATTR_TRANSACTION_URL };
 
     setItems((prevItems) => {
       const newItems: UrlOption[] = (prevItems ?? []).map((item) => {
@@ -182,7 +182,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
       processSelectedItems(items);
 
     replaceFilter({
-      field: TRANSACTION_URL,
+      field: ATTR_TRANSACTION_URL,
       values: includedItems,
       notValues: excludedItems,
       wildcards: includedWildcards,
@@ -197,7 +197,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
     const { includedItems, excludedItems, includedWildcards, excludedWildcards } =
       processSelectedItems(items);
     const currFilter: UrlFilter | undefined = (series.filters ?? []).find(
-      ({ field }) => field === TRANSACTION_URL
+      ({ field }) => field === ATTR_TRANSACTION_URL
     );
 
     const {
@@ -205,7 +205,7 @@ export function URLSearch({ series, seriesConfig, seriesId }: Props) {
       notWildcards = [],
       values: currValues = [],
       notValues: currNotValues = [],
-    } = currFilter ?? { field: TRANSACTION_URL };
+    } = currFilter ?? { field: ATTR_TRANSACTION_URL };
 
     return (
       !isEqual(includedItems.sort(), currValues.sort()) ||

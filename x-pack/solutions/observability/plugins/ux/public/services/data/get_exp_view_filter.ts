@@ -6,7 +6,7 @@
  */
 
 import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
-import { TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
+import { ATTR_TRANSACTION_URL } from '@kbn/observability-ui-semantic-conventions';
 import { UrlParams } from '../../context/url_params_context/types';
 import { uxLocalUIFilterNames, uxLocalUIFilters } from '../../../common/ux_ui_filter';
 import { UxUIFilters } from '../../../typings/ui_filters';
@@ -42,12 +42,12 @@ export function getExploratoryViewFilter(uiFilters: UxUIFilters, urlParams: UrlP
 
   if (searchTerm) {
     const urlFilter: UrlFilter = {
-      field: TRANSACTION_URL,
+      field: ATTR_TRANSACTION_URL,
     };
     if (searchTerm) {
       urlFilter.wildcards = [searchTerm];
     }
-    filters[TRANSACTION_URL] = { ...urlFilter, ...filters[TRANSACTION_URL] };
+    filters[ATTR_TRANSACTION_URL] = { ...urlFilter, ...filters[ATTR_TRANSACTION_URL] };
   }
 
   return Object.values(filters);

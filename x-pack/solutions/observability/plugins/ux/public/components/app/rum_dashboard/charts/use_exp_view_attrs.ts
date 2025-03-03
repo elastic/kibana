@@ -6,8 +6,11 @@
  */
 
 import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
+import {
+  ATTR_SERVICE_ENVIRONMENT,
+  ATTR_SERVICE_NAME,
+} from '@kbn/observability-ui-semantic-conventions';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 export const useExpViewAttributes = () => {
@@ -16,11 +19,11 @@ export const useExpViewAttributes = () => {
   const { start, end } = urlParams;
 
   const reportDefinitions = {
-    [SERVICE_ENVIRONMENT]:
+    [ATTR_SERVICE_ENVIRONMENT]:
       !uxUiFilters?.environment || uxUiFilters.environment === ENVIRONMENT_ALL.value
         ? [ALL_VALUES_SELECTED]
         : [uxUiFilters.environment],
-    [SERVICE_NAME]: uxUiFilters?.serviceName ?? [ALL_VALUES_SELECTED],
+    [ATTR_SERVICE_NAME]: uxUiFilters?.serviceName ?? [ALL_VALUES_SELECTED],
   };
 
   return {
