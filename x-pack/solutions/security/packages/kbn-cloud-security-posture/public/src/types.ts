@@ -23,11 +23,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import type { BoolQuery } from '@kbn/es-query';
-export interface FindingsBaseEsQuery {
+export interface BaseEsQuery {
   query?: {
     bool: BoolQuery;
   };
