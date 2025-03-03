@@ -33,6 +33,7 @@ import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ReactElement } from 'react';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import type { RuleUiAction } from './types';
 
@@ -85,7 +86,6 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
