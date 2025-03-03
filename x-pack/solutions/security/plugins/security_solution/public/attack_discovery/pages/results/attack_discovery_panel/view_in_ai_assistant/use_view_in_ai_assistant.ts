@@ -49,7 +49,7 @@ export const useViewInAiAssistant = ({
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showAssistantOverlay = useCallback(() => {
-    showOverlay(true, true);
+    showOverlay(true);
   }, [showOverlay]);
 
   const disabled = !hasAssistantPrivilege || promptContextId == null;
