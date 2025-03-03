@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
@@ -80,7 +81,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/ui_actions/README.asciidoc',
+          href: 'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/ui_actions/README.asciidoc',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

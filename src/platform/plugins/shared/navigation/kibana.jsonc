@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/navigation-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "navigation",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "spaces"
+    ],
+    "requiredBundles": []
+  }
+}

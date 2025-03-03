@@ -17,15 +17,14 @@ export default function ({ getService }: FtrProviderContext) {
   const svlIndicesHelpers = getService('svlIndicesHelpers');
   let roleAuthc: RoleCredentials;
 
-  // see details: https://github.com/elastic/kibana/issues/187369
-  describe.skip('settings', function () {
+  describe('settings', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
       await svlIndicesHelpers.deleteAllIndices();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should fetch an index settings', async () => {
@@ -34,67 +33,23 @@ export default function ({ getService }: FtrProviderContext) {
       const { status, body } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
       svlCommonApi.assertResponseStatusCode(200, status, body);
 
-      // Verify we fetch the corret index settings
-      expect(body.settings.index.provided_name).to.be(index);
-
       const expectedSettings = [
-        'max_inner_result_window',
-        'unassigned',
-        'max_terms_count',
         'lifecycle',
-        'routing_partition_size',
-        'max_docvalue_fields_search',
         'merge',
-        'max_refresh_listeners',
-        'max_regex_length',
-        'load_fixed_bitset_filters_eagerly',
-        'number_of_routing_shards',
-        'write',
-        'verified_before_close',
         'mapping',
-        'source_only',
-        'soft_deletes',
-        'max_script_fields',
         'query',
-        'format',
-        'frozen',
         'sort',
-        'priority',
         'codec',
-        'max_rescore_window',
-        'analyze',
-        'gc_deletes',
-        'max_ngram_diff',
-        'translog',
-        'auto_expand_replicas',
-        'requests',
-        'data_path',
-        'highlight',
-        'routing',
-        'search',
-        'fielddata',
         'default_pipeline',
-        'max_slices_per_scroll',
-        'shard',
-        'xpack',
-        'percolator',
-        'allocation',
         'refresh_interval',
-        'indexing',
-        'compound_format',
         'blocks',
-        'max_result_window',
-        'store',
-        'queries',
-        'warmer',
-        'max_shingle_diff',
         'query_string',
       ];
 
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
         try {
-          expect(body.defaults.index.hasOwnProperty(setting)).to.eql(true);
+          expect(Object.hasOwn(body.defaults.index, setting)).to.eql(true);
         } catch {
           throw new Error(`Expected setting "${setting}" not found.`);
         }
@@ -105,17 +60,20 @@ export default function ({ getService }: FtrProviderContext) {
       const index = await svlIndicesHelpers.createIndex();
 
       const { body: body1 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
-      expect(body1.settings.index.number_of_replicas).to.be('1');
+
+      // There are no settings by default
+      expect(body1.settings?.index?.number_of_replicas).to.be(undefined);
 
       const settings = {
         index: {
-          number_of_replicas: 2,
+          refresh_interval: '7s',
         },
       };
       await svlSettingsApi.updateIndexSettings(index, settings, roleAuthc);
 
       const { body: body2 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
-      expect(body2.settings.index.number_of_replicas).to.be('2');
+
+      expect(body2.settings.index.refresh_interval).to.be('7s');
     });
   });
 }

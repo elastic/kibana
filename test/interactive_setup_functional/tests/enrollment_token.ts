@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { kibanaPackageJson } from '@kbn/repo-info';
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Enrollment token)', function () {
-    this.tags('skipCloud');
+    this.tags(['skipCloud', 'skipFIPS']);
 
     const elasticsearchConfig = config.get('servers.elasticsearch');
     let verificationCode: string;
@@ -42,13 +43,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     let enrollmentAPIKey: string;
     beforeEach(async function () {
-      const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
+      const apiResponse = await es.security.createApiKey({ name: 'enrollment_api_key' });
       enrollmentAPIKey = `${apiResponse.id}:${apiResponse.api_key}`;
       log.info(`API key for enrollment token: ${enrollmentAPIKey}`);
     });
 
     afterEach(async function () {
-      await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
+      await es.security.invalidateApiKey({ name: 'enrollment_api_key' });
     });
 
     it('should configure Kibana successfully', async function () {

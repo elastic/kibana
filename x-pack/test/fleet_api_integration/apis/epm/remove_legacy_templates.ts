@@ -11,13 +11,13 @@ import fs from 'fs';
 import { promisify } from 'util';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 const sleep = promisify(setTimeout);
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uploadPkgName = 'apache';
   const uploadPkgVersion = '0.1.4';
@@ -98,9 +98,12 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('Legacy component template removal', async () => {
+  describe('Legacy component template removal', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     afterEach(async () => {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;

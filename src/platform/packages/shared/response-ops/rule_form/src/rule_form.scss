@@ -1,0 +1,55 @@
+.ruleForm__container {
+  container-type: inline-size;
+}
+
+.ruleFormFlyout__container {
+  container-type: inline-size;
+}
+
+.actionConnectorModal__container {
+  container-type: inline-size;
+}
+
+@container (max-width: 767px) {
+  .euiDescribedFormGroup {
+    flex-direction: column;
+  }
+  .euiDescribedFormGroup > .euiFlexItem {
+    width: 100%;
+  }
+  .ruleDefinitionHeader {
+    flex-direction: column;
+    gap: $euiSizeM;
+  }
+  .ruleDefinitionHeaderRuleTypeName {
+    font-size: $euiFontSizeM;
+    margin-bottom: $euiSizeXS;
+  }
+  .ruleDefinitionHeaderRuleTypeDescription, .ruleDefinitionHeaderDocsLink {
+    font-size: $euiFontSizeS;
+  }
+}
+
+[class*='showForContainer'] {
+  display: none;
+}
+
+@container (max-width: 767px) and (min-width: 575px) {
+  .hideForContainer--s {
+    display: none;
+  }
+
+  .showForContainer--s {
+    display: initial !important;
+  }
+}
+
+@container (max-width: 574px) {
+  .hideForContainer--xs {
+    display: none;
+  }
+
+  .showForContainer--xs {
+    display: initial !important;
+  }
+}

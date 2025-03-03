@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const sampleDashboard = {
@@ -71,16 +72,19 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/s/${ATestSpace}/api/content_management/rpc/create`)
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(sampleDashboard);
 
       await supertest
         .post(`/s/${ATestSpace}/api/content_management/rpc/create`)
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(sampleDashboard);
 
       await supertest
         .get(`/internal/spaces/${ATestSpace}/content_summary`)
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((response) => {
           const { summary, total } = response.body;
@@ -100,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/s/${BTestSpace}/api/content_management/rpc/create`)
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(sampleDashboard);
 
       await supertest
@@ -111,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(`/internal/spaces/${BTestSpace}/content_summary`)
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((response) => {
           const { summary, total } = response.body;
@@ -137,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get('/internal/spaces/not-found-space/content_summary')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',

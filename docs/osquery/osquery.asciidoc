@@ -36,7 +36,8 @@ view live and scheduled query results, but you cannot run live queries or edit.
 To inspect hosts, run a query against one or more agents or policies,
 then view the results.
 
-. Open the main menu, and then click *Osquery*.
+. Go to *Osquery* using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . In the *Live queries* view, click **New live query**.
 . Choose to run a single query or a query pack.
 . Select one or more agents or groups to query. Start typing in the search field,

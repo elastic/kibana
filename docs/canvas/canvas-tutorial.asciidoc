@@ -9,15 +9,11 @@ To familiarize yourself with *Canvas*, add the Sample eCommerce orders data, the
 
 To create a workpad of the eCommerce store data, add the data set, then create the workpad.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the eCommerce sample data>>.
 
-. Click *Other sample data sets*. 
+. Go to **Canvas** using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
-. On the *Sample eCommerce orders* card, click *Add data*.
-
-. Open the main menu, then click *Canvas*.
-
-. On the *Canvas workpads* page, click *Create workpad*.
+. Select *Create workpad*.
 
 [float]
 === Customize your workpad with images

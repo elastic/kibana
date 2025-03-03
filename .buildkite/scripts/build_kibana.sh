@@ -31,7 +31,6 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --docker-push \
   --skip-docker-ubi \
   --skip-docker-fips \
-  --skip-docker-ubuntu \
   --skip-docker-wolfi \
   --skip-docker-serverless \
   --skip-docker-contexts
@@ -44,7 +43,8 @@ EOF
 fi
 
 echo "--- Archive Kibana Distribution"
-linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+version="$(jq -r '.version' package.json)"
+linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1

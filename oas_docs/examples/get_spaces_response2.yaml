@@ -1,0 +1,41 @@
+summary: Get all spaces with custom options
+description: >
+  The user has read-only access to the Sales space.
+  Get all spaces with the following query parameters:
+  "purpose=shareSavedObjectsIntoSpace&include_authorized_purposes=true"
+value:
+  - id: default
+    name: Default
+    description: This is the Default Space
+    disabledFeatures: []
+    imageUrl: ""
+    _reserved: true
+    authorizedPurposes:
+      any: true
+      copySavedObjectsIntoSpace: true
+      findSavedObjects: true
+      shareSavedObjectsIntoSpace: true
+  - id: marketing
+    name: Marketing
+    description: This is the Marketing Space
+    color: #aabbcc
+    disabledFeatures:
+      - apm
+    initials: MK
+    imageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSU"
+    authorizedPurposes:
+      any: true
+      copySavedObjectsIntoSpace: true
+      findSavedObjects: true
+      shareSavedObjectsIntoSpace: true
+  - id: sales
+    name: Sales
+    initials: MK
+    disabledFeatures: 
+      - discover
+    imageUrl: ""
+    authorizedPurposes:
+      any: true
+      copySavedObjectsIntoSpace: false
+      findSavedObjects: true
+      shareSavedObjectsIntoSpace: false

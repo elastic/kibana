@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         {
           searchQuery:
-            'cloud.provider : "azure" and rule.benchmark.rule_number : "7.1" and result.evaluation : "failed"',
+            'cloud.provider : "azure" and rule.benchmark.rule_number : "9.1" and result.evaluation : "failed"',
           provider: 'azure',
           expectedRowsCount: 1,
           expectedGroupCount: '1 cloud account',
@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(rowsCount).to.be(expectedRowsCount);
             const groupSelector = await findings.groupSelector();
             await groupSelector.openDropDown();
-            await groupSelector.setValue('Cloud account');
+            await groupSelector.setValue('Cloud account ID');
             const grouping = await findings.findingsGrouping();
             // Check that the group count and unit count matches the expected values
             const groupCount = await grouping.getGroupCount();

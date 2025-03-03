@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 
-import { readFileSync, writeFileSync, statSync, existsSync } from 'fs';
+import { statSync } from 'fs';
 import { resolve } from 'path';
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { getConfigFromFiles } from '@kbn/config';
@@ -34,11 +35,6 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
 
   if (dev && devConfig !== false) {
     configs.push(resolveConfig('kibana.dev.yml'));
-  }
-
-  if (dev && serverless) {
-    writeProjectSwitcherConfig('serverless.recent.dev.yml', serverless);
-    configs.push(resolveConfig('serverless.recent.dev.yml'));
   }
 
   // Filter out all config paths that didn't exist
@@ -82,27 +78,6 @@ function resolveConfig(fileName) {
 }
 
 /**
- * @param {string} fileName
- * @param {object} opts
- */
-function writeProjectSwitcherConfig(fileName, serverlessOption) {
-  const path = resolve(getConfigDirectory(), fileName);
-  const configAlreadyExists = existsSync(path);
-
-  const preserveExistingConfig = serverlessOption === true;
-  const serverlessMode = validateServerlessMode(serverlessOption) || 'es';
-
-  if (configAlreadyExists && preserveExistingConfig) {
-    return;
-  } else {
-    const content = `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${serverlessMode}\n`;
-    if (!configAlreadyExists || readFileSync(path).toString() !== content) {
-      writeFileSync(path, content);
-    }
-  }
-}
-
-/**
  * @param {string} filePath Path to the config file
  * @returns {boolean} Whether the file exists
  */
@@ -142,7 +117,6 @@ function validateServerlessMode(serverlessMode) {
   }
 
   if (serverlessMode === true) {
-    // Defaulting to read the project-switcher's settings in `serverless.recent.dev.yml`
     return null;
   }
 

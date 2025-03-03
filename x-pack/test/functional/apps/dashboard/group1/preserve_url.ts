@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'spaceSelector', 'header']);
+  const { common, dashboard, spaceSelector, header } = getPageObjects([
+    'common',
+    'dashboard',
+    'spaceSelector',
+    'header',
+  ]);
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
@@ -34,46 +39,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('goes back to last opened url', async function () {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
-      await PageObjects.common.navigateToApp('home');
-      await PageObjects.dashboard.navigateToAppFromAppsMenu();
-      await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('A Dashboard');
+      await common.navigateToApp('home');
+      await dashboard.navigateToAppFromAppsMenu();
+      await dashboard.loadSavedDashboard('A Dashboard');
+      await header.waitUntilLoadingHasFinished();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Dashboard');
     });
 
     it('remembers url after switching spaces', async function () {
       // default space
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('A Dashboard');
 
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('another-space');
-      await PageObjects.spaceSelector.expectHomePage('another-space');
+      await spaceSelector.openSpacesNav();
+      await spaceSelector.clickSpaceAvatar('another-space');
+      await spaceSelector.expectHomePage('another-space');
 
       // other space
-      await PageObjects.dashboard.navigateToAppFromAppsMenu();
-      await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
+      await dashboard.navigateToAppFromAppsMenu();
+      await dashboard.loadSavedDashboard('A Dashboard in another space');
 
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('default');
-      await PageObjects.spaceSelector.expectHomePage('default');
+      await spaceSelector.openSpacesNav();
+      await spaceSelector.clickSpaceAvatar('default');
+      await spaceSelector.expectHomePage('default');
 
       // default space
-      await PageObjects.dashboard.navigateToAppFromAppsMenu();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.navigateToAppFromAppsMenu();
+      await dashboard.waitForRenderComplete();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Dashboard');
 
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('another-space');
-      await PageObjects.spaceSelector.expectHomePage('another-space');
+      await spaceSelector.openSpacesNav();
+      await spaceSelector.clickSpaceAvatar('another-space');
+      await spaceSelector.expectHomePage('another-space');
 
       // other space
-      await PageObjects.dashboard.navigateToAppFromAppsMenu();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.navigateToAppFromAppsMenu();
+      await dashboard.waitForRenderComplete();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Dashboard in another space');
     });

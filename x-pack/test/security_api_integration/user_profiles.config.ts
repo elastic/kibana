@@ -6,7 +6,10 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -15,6 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const userProfilesConsumerPlugin = resolve(__dirname, './plugins/user_profiles_consumer');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/user_profiles')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },

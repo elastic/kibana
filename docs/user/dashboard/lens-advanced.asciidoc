@@ -1,12 +1,12 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Analyze time series data
+== Create a dashboard with time series charts
 
 In this tutorial, you'll use the ecommerce sample data to analyze sales trends, but you can use any type of data to complete the tutorial.
 
 When you're done, you'll have a complete overview of the sample web logs data. 
 
 [role="screenshot"]
-image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with ecommerce sample data]
+image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with eCommerce sample data]
 
 Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
@@ -14,17 +14,11 @@ Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 [[add-the-data-and-create-the-dashboard-advanced]]
 === Add the data and create the dashboard
 
-Add the sample ecommerce data, and create and set up the dashboard.
+Add the sample eCommerce data, and create and set up the dashboard.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the eCommerce sample data set>>.
 
-. Click *Other sample data sets*. 
-
-. On the *Sample eCommerce orders* card, click *Add data*.
-
-Create the dashboard where you'll display the visualization panels.
-
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 
@@ -42,7 +36,7 @@ Open the visualization editor, then make sure the correct fields appear.
 [[custom-time-interval]]
 === Create visualizations with custom time intervals
 
-When you create visualizations with time series data, you can use the default time interval, or increase and decrease the interval. For performance reasons, the visualization editor allows you to choose the minimum time interval, but not the exact time interval. The interval limit is controlled by the <<histogram-maxbars, `histogram:maxBars`>> setting and <<set-time-filter,time range>>. 
+When you create visualizations with time series data, you can use the default time interval or increase and decrease the interval. For performance reasons, the visualization editor allows you to choose the minimum time interval, but not the exact time interval. The interval limit is controlled by the <<histogram-maxbars, `histogram:maxBars`>> setting and <<set-time-filter,time range>>. 
 
 To analyze the data with a custom time interval, create a bar chart that shows you how many orders were made at your store every hour:
 
@@ -55,13 +49,13 @@ The visualization editor creates a bar chart.
 [role="screenshot"]
 image::images/lens_clickAndDragZoom_7.16.gif[Cursor clicking and dragging across the bars to zoom in on the data]
 
-. In the layer pane, click *Count of Records*.
+. In the layer pane, click *Count of records*.
 
 .. Click *Advanced*. 
 
 .. From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
 +
-*Normalize by unit* converts `Count of Records` into `Count of records per hour` by dividing by 24.
+*Normalize by unit* converts `Count of records` into `Count of records per hour` by dividing by 24.
 
 .. In the *Name* field, enter `Number of orders`.
 
@@ -87,7 +81,7 @@ To identify the 75th percentile of orders, add a reference line:
 
 .. To display the name, select *Name* from *Text decoration*.
 
-.. From the *Icon* dropdown, select *Tag*.
+.. From the *Icon decoration* dropdown, select *Tag*.
 
 .. In the *Color* field, enter `#E7664C`.
 
@@ -120,12 +114,12 @@ Create the 95th price distribution percentile:
 
 . In the *Name* field, enter `95th`, then click *Close*.
 
-To copy a function, you drag it to the *Drop a field or click to add* field within the same group. To create the 90th percentile, duplicate the `95th` percentile:
+To copy a function, you drag it to the *Add or drag-and-drop a field* area within the same group. To create the 90th percentile, duplicate the `95th` percentile:
 
 . Drag the *95th* field to *Add or drag-and-drop a field* for *Vertical axis*.
 +
 [role="screenshot"]
-image::images/lens_advanced_2_2.gif[Easily duplicate the items with drag and drop]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt8fb6969daa820faf/6700642c363a96bb08f48bee/drag-and-drop-a-field-8.16.0.gif[Easily duplicate the items with drag and drop]
 
 . Click *95th [1]*, then enter `90` in the *Percentile* field.
 
@@ -162,7 +156,7 @@ To analyze multiple visualization types, create an area chart that displays the 
 
 Add a layer to display the customer traffic:
 
-. In the layer pane, click *Add layer > Visualization*.
+. In the layer pane, click *Add layer > Visualization > Line*.
 
 . From the *Available fields* list, drag *customer_id* to the *Vertical Axis* field in the second layer.
 
@@ -177,11 +171,6 @@ Add a layer to display the customer traffic:
 image::images/lens_advancedTutorial_numberOfCustomers_8.5.0.png[Number of customers area chart in Lens]
 
 . From the *Available fields* list, drag *order_date* to the *Horizontal Axis* field in the second layer.
-
-. In the second layer, open the *Layer visualization type* menu, then click *Line*.
-+
-[role="screenshot"]
-image::images/lens_layerVisualizationTypeMenu_7.16.png[Layer visualization type menu]
 
 . To change the position of the legend, open the *Legend* menu, then select the *Alignment* arrow that points up.
 +
@@ -251,7 +240,7 @@ Configure the cumulative sum of store orders:
 
 . From the *Available fields* list, drag *Records* to the workspace.
 
-. In the layer pane, click *Count of Records*.
+. In the layer pane, click *Count of records*.
 
 . Click the *Cumulative sum* function.
 
@@ -271,6 +260,8 @@ Filter the results to display the data for only Saturday and Sunday:
 +
 The <<kuery-query,KQL filter>> displays all documents where `day_of_week` matches `Saturday` or `Sunday`.
 
+. Click *Close*.
+
 . Open the *Legend* menu, then click *Hide* next to *Display*.
 +
 [role="screenshot"]
@@ -282,7 +273,7 @@ image::images/lens_areaChartCumulativeNumberOfSalesOnWeekend_7.16.png[Area chart
 [[compare-time-ranges]]
 === Compare time ranges
 
-With *Time shift*, you can compare the data from different time ranges. To make sure the data correctly displays, choose a multiple of the date histogram interval when you use multiple time shifts. For example, you are unable to use a *36h* time shift for one series, and a *1d* time shift for the second series if the interval is *days*.   
+With *Time shift*, you can compare the data from different time ranges. To make sure the data displays correctly, choose a multiple of the date histogram interval when you use multiple time shifts. For example, you are unable to use a *36h* time shift for one series, and a *1d* time shift for the second series if the interval is *days*.   
 
 To compare two time ranges, create a line chart that compares the sales in the current week with sales from the previous week: 
 
@@ -292,11 +283,11 @@ To compare two time ranges, create a line chart that compares the sales in the c
 
 . From the *Available fields* list, drag *Records* to the workspace.
 
-. To duplicate *Count of Records*, drag *Count of Records* to *Add or drag-and-drop a field* for *Vertical axis* in the layer pane.
+. To duplicate *Count of records*, drag *Count of records* to *Add or drag-and-drop a field* for *Vertical axis* in the layer pane.
 
-To create a week-over-week comparison, shift *Count of Records [1]* by one week:
+To create a week-over-week comparison, shift *Count of records [1]* by one week:
 
-. In the layer pane, click *Count of Records [1]*.
+. In the layer pane, click *Count of records [1]*.
 
 . Click *Advanced*, select *1 week ago* from the *Time shift* dropdown, then click *Close*.
 +
@@ -322,9 +313,9 @@ To compare time range changes as a percent, create a bar chart that compares the
 
 . From the *Available fields* list, drag *Records* to the workspace.
 
-. In the layer pane, click *Count of Records*.
+. In the layer pane, click *Count of records*.
 
-. Click *Formula*, then enter `count() / count(shift='1w') - 1`.
+. Click *Formula*, then enter `count() / count(shift='1w') - 1` in the *Formula* field.
 
 . In the *Name* field, enter `Percent of change`.
 
@@ -375,15 +366,15 @@ image::images/lens_table_over_time.png[Date histogram table with groups for the 
 [discrete]
 === Save the dashboard
 
-Now that you have a complete overview of your ecommerce sales data, save the dashboard.
+Now that you have a complete overview of your eCommerce sales data, save the dashboard.
 
 . In the toolbar, click *Save*.
 
-. On the *Save dashboard* window, enter `Ecommerce sales`, then click *Save*.
+. On the *Save dashboard* window, enter `eCommerce sales`.
 
 . Select *Store time with dashboard*.
 
 . Click *Save*.
 
 [role="screenshot"]
-image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with ecommerce sample data]
+image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with eCommerce sample data]

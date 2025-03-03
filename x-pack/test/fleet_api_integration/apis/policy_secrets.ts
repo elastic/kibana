@@ -18,7 +18,6 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
-import { setupFleetAndAgents } from './agents/services';
 
 const secretVar = (id: string) => `$co.elastic.secret{${id}}`;
 
@@ -53,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
     const es: Client = getService('es');
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertest');
+    const fleetAndAgents = getService('fleetAndAgents');
 
     const createAgentPolicy = async () => {
       const { body: agentPolicyResponse } = await supertest
@@ -108,33 +108,24 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       }
 
-      try {
-        await es.deleteByQuery({
+      await Promise.all([
+        es.deleteByQuery({
           index: ENROLLMENT_API_KEYS_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
-        });
-      } catch (err) {
-        // index doesn't exist
-      }
-
-      try {
-        await es.deleteByQuery({
+        }),
+        es.deleteByQuery({
           index: AGENT_POLICY_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
-        });
-      } catch (err) {
+        }),
+      ]).catch((err) => {
         // index doesn't exist
-      }
+      });
     };
 
     const cleanupAgents = async () => {
@@ -142,10 +133,8 @@ export default function (providerContext: FtrProviderContext) {
         await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         });
       } catch (err) {
@@ -157,10 +146,9 @@ export default function (providerContext: FtrProviderContext) {
       try {
         await es.deleteByQuery({
           index: SECRETS_INDEX_NAME,
-          body: {
-            query: {
-              match_all: {},
-            },
+          refresh: true,
+          query: {
+            match_all: {},
           },
         });
       } catch (err) {
@@ -169,13 +157,13 @@ export default function (providerContext: FtrProviderContext) {
 
       // Reset the global settings object to disable secrets between tests.
       // Each test can re-run setup as part of its setup if it needs to enable secrets
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           secret_storage_requirements_met: false,
         },
-        overwrite: false,
+        overwrite: true,
       });
     };
 
@@ -235,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['test.fr:2000'],
           auth_type: 'user_pass',
           username: 'user',
-          topics: [{ topic: 'topic1' }],
+          topic: 'topic1',
           config_yaml: 'shipper: {}',
           shipper: {
             disk_queue_enabled: true,
@@ -243,7 +231,8 @@ export default function (providerContext: FtrProviderContext) {
             disk_queue_encryption_enabled: true,
           },
           secrets: { password: 'pass' },
-        });
+        })
+        .expect(200);
 
       return res.body.item;
     };
@@ -257,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
       const agentResponse = await es.index({
         index: '.fleet-agents',
         refresh: true,
-        body: {
+        document: {
           access_api_key_id: 'api-key-3',
           active: true,
           policy_id: policyId,
@@ -286,9 +275,7 @@ export default function (providerContext: FtrProviderContext) {
       const query = ids ? { terms: { _id: ids } } : { match_all: {} };
       return es.search({
         index: SECRETS_INDEX_NAME,
-        body: {
-          query,
-        },
+        query,
       });
     };
 
@@ -305,27 +292,25 @@ export default function (providerContext: FtrProviderContext) {
     const getLatestPolicyRevision = async (id: string): Promise<{ data: FullAgentPolicy }> => {
       const res = await es.search({
         index: '.fleet-policies',
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    policy_id: id,
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  policy_id: id,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            revision_idx: {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              revision_idx: {
-                order: 'desc',
-              },
-            },
-          ],
-          size: 1,
-        },
+        ],
+        size: 1,
       });
       return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
@@ -377,9 +362,10 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await fleetAndAgents.setup();
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -389,12 +375,7 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
-    });
-
-    afterEach(async () => {
-      await cleanupAgents();
-      await cleanupPolicies();
-      await cleanupSecrets();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('create package policy with secrets', () => {
@@ -402,7 +383,7 @@ export default function (providerContext: FtrProviderContext) {
       let fleetServerAgentPolicy: any;
       let packagePolicyWithSecrets: any;
 
-      beforeEach(async () => {
+      before(async () => {
         // Policy secrets require at least one Fleet server on v8.10+
         const createFleetServerAgentPolicyRes = await createFleetServerAgentPolicy();
         fleetServerAgentPolicy = createFleetServerAgentPolicyRes.fleetServerAgentPolicy;
@@ -414,6 +395,11 @@ export default function (providerContext: FtrProviderContext) {
 
         testAgentPolicy = await createAgentPolicy();
         packagePolicyWithSecrets = await createPackagePolicyWithSecrets(testAgentPolicy.id);
+      });
+
+      after(async () => {
+        await Promise.all([cleanupAgents(), cleanupSecrets()]);
+        await cleanupPolicies();
       });
 
       it('should correctly create the policy with secrets', async () => {
@@ -598,7 +584,7 @@ export default function (providerContext: FtrProviderContext) {
       let packagePolicyWithSecrets: any;
       let updatedPackagePolicy: any;
 
-      beforeEach(async () => {
+      before(async () => {
         // Policy secrets require at least one Fleet server on v8.10+
         const createFleetServerAgentPolicyRes = await createFleetServerAgentPolicy();
         fleetServerAgentPolicy = createFleetServerAgentPolicyRes.fleetServerAgentPolicy;
@@ -621,6 +607,12 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         updatedPackagePolicy = updateRes.body.item;
+      });
+
+      after(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
       });
 
       it('should allow secret values to be updated (single policy update API)', async () => {
@@ -698,7 +690,7 @@ export default function (providerContext: FtrProviderContext) {
       let duplicatedAgentPolicy: any;
       let duplicatedPackagePolicy: any;
 
-      beforeEach(async () => {
+      before(async () => {
         // Policy secrets require at least one Fleet server on v8.10+
         const createFleetServerAgentPolicyRes = await createFleetServerAgentPolicy();
         fleetServerAgentPolicy = createFleetServerAgentPolicyRes.fleetServerAgentPolicy;
@@ -725,6 +717,12 @@ export default function (providerContext: FtrProviderContext) {
         policyDoc = data;
 
         duplicatedPackagePolicy = duplicatedAgentPolicy.package_policies[0];
+      });
+
+      after(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
       });
 
       it('should not duplicate secrets after duplicating agent policy', async () => {
@@ -813,7 +811,7 @@ export default function (providerContext: FtrProviderContext) {
       let fleetServerAgentPolicy: any;
       let packagePolicyWithSecrets: any;
 
-      beforeEach(async () => {
+      before(async () => {
         // Policy secrets require at least one Fleet server on v8.10+
         const createFleetServerAgentPolicyRes = await createFleetServerAgentPolicy();
         fleetServerAgentPolicy = createFleetServerAgentPolicyRes.fleetServerAgentPolicy;
@@ -825,6 +823,12 @@ export default function (providerContext: FtrProviderContext) {
 
         testAgentPolicy = await createAgentPolicy();
         packagePolicyWithSecrets = await createPackagePolicyWithSecrets(testAgentPolicy.id);
+      });
+
+      after(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
       });
 
       it('should delete all secrets on package policy delete', async () => {
@@ -844,9 +848,16 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('fleet server version requirements', () => {
+      afterEach(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
+      });
       it('should not store secrets if fleet server does not meet minimum version', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
         await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0');
+        const { fleetServerAgentPolicy: fleetServerPolicy2 } = await createFleetServerAgentPolicy(); // extra policy to verify `or` condition
+        await createFleetServerAgent(fleetServerPolicy2.id, 'server_1', '8.12.0');
 
         await callFleetSetup();
 
@@ -865,7 +876,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should not store secrets if there are no fleet servers', async () => {
+        await createFleetServerAgentPolicy();
         const agentPolicy = await createAgentPolicy();
+        // agent with new version shouldn't make storage secrets enabled
+        await createFleetServerAgent(agentPolicy.id, 'server_2', '8.12.0');
         const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
 
         // secret should be in plain text i.e not a secret refrerence
@@ -1112,41 +1126,53 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // TODO: Output secrets should be moved to another test suite
-    it('should return output secrets if policy uses output with secrets', async () => {
-      // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
-      const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
-      await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '8.12.0');
-      await callFleetSetup();
+    describe('output secrets', () => {
+      afterEach(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
+      });
 
-      const outputWithSecret = await createOutputWithSecret();
+      // TODO: Output secrets should be moved to another test suite
+      it('should return output secrets if policy uses output with secrets', async () => {
+        // ensure output is created
+        await callFleetSetup();
 
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: `Test policy ${uuidv4()}`,
-          namespace: 'default',
-          data_output_id: outputWithSecret.id,
-          monitoring_output_id: outputWithSecret.id,
-        })
-        .expect(200);
+        // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '8.12.0');
+        await callFleetSetup();
 
-      const fullAgentPolicy = await getFullAgentPolicyById(agentPolicyResponse.item.id);
+        const outputWithSecret = await createOutputWithSecret();
 
-      const passwordSecretId = outputWithSecret!.secrets?.password?.id;
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Test policy ${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: outputWithSecret.id,
+            monitoring_output_id: outputWithSecret.id,
+          })
+          .expect(200);
 
-      expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
+        const fullAgentPolicy = await getFullAgentPolicyById(agentPolicyResponse.item.id);
 
-      const output = Object.entries(fullAgentPolicy.outputs)[0][1];
-      // @ts-expect-error
-      expect(output.secrets.password.id).to.eql(passwordSecretId);
+        const passwordSecretId = outputWithSecret!.secrets?.password?.id;
 
-      // delete output with secret
-      await supertest
-        .delete(`/api/fleet/outputs/${outputWithSecret.id}`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+        expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
+
+        const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+
+        // @ts-expect-error
+        expect(output?.secrets?.password?.id).to.eql(passwordSecretId);
+
+        // delete output with secret
+        await supertest
+          .delete(`/api/fleet/outputs/${outputWithSecret.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
     });
   });
 }

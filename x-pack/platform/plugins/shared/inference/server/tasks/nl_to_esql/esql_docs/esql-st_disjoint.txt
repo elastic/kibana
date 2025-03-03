@@ -1,0 +1,35 @@
+# ST_DISJOINT
+
+The ST_DISJOINT function checks if two geometries or geometry columns are disjoint, meaning they do not intersect. This function is the inverse of the ST_INTERSECTS function. In mathematical terms, if A and B are two geometries, ST_Disjoint(A, B) is true if and only if the intersection of A and B is empty.
+
+## Syntax
+
+`ST_DISJOINT(geomA, geomB)`
+
+### Parameters
+
+#### geomA
+
+This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`.
+
+#### geomB
+
+This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`.
+
+## Examples
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((30 10, 40 40, 20 40, 10 20, 30 10))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+## Limitations
+
+It's important to note that the second parameter must have the same coordinate system as the first. This means you cannot combine `geo_*` and `cartesian_*` parameters.

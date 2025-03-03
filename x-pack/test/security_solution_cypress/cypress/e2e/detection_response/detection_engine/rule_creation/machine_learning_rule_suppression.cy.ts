@@ -8,20 +8,19 @@
 import { getMachineLearningRule } from '../../../../objects/rule';
 import { TOOLTIP } from '../../../../screens/common';
 import {
-  ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_WARNING,
 } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 import {
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   forceStopAndCloseJob,
+  setupMlModulesWithRetry,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -43,17 +42,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Machine Learning Detection Rules - Creation',
   {
-    // Skipped in MKI as tests depend on feature flag alertSuppressionForMachineLearningRuleEnabled
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForMachineLearningRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
@@ -94,7 +83,7 @@ describe(
       describe('when ML jobs have run', () => {
         before(() => {
           cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
-          executeSetupModuleRequest({ moduleName: 'security_linux_v3' });
+          setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
           forceStartDatafeeds({ jobIds: [jobId] });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });
@@ -113,7 +102,7 @@ describe(
 
           it('displays a warning message on the suppression fields', () => {
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
-            cy.get(ALERT_SUPPRESSION_FIELDS).should(
+            cy.get(ALERT_SUPPRESSION_WARNING).should(
               'contain.text',
               'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.'
             );
@@ -139,9 +128,6 @@ describe(
                 'have.text',
                 'Suppress and group alerts for events with missing fields'
               );
-
-              // suppression functionality should be under Tech Preview
-              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
             });
 
             fillAboutRuleMinimumAndContinue(mlRule);
@@ -173,9 +159,6 @@ describe(
                 'have.text',
                 'Do not suppress alerts for events with missing fields'
               );
-
-              // suppression functionality should be under Tech Preview
-              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
             });
 
             fillAboutRuleMinimumAndContinue(mlRule);

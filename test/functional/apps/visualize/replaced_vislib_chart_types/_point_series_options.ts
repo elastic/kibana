@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
+  const { visualize, header, timePicker, visEditor, visChart, common } = getPageObjects([
     'visualize',
     'header',
     'timePicker',
@@ -29,46 +30,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function initChart() {
     log.debug('navigateToApp visualize');
-    await PageObjects.visualize.navigateToNewAggBasedVisualization();
+    await visualize.navigateToNewAggBasedVisualization();
     log.debug('clickLineChart');
-    await PageObjects.visualize.clickLineChart();
-    await PageObjects.visualize.clickNewSearch();
+    await visualize.clickLineChart();
+    await visualize.clickNewSearch();
     log.debug('Bucket = X-axis');
-    await PageObjects.visEditor.clickBucket('X-axis');
+    await visEditor.clickBucket('X-axis');
     log.debug('Aggregation = Date Histogram');
-    await PageObjects.visEditor.selectAggregation('Date Histogram');
+    await visEditor.selectAggregation('Date Histogram');
     log.debug('Field = @timestamp');
-    await PageObjects.visEditor.selectField('@timestamp');
+    await visEditor.selectField('@timestamp');
     // add another metrics
     log.debug('Metric = Value Axis');
-    await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
+    await visEditor.clickBucket('Y-axis', 'metrics');
     log.debug('Aggregation = Average');
-    await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+    await visEditor.selectAggregation('Average', 'metrics');
     log.debug('Field = memory');
-    await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+    await visEditor.selectField('machine.ram', 'metrics');
     // go to options page
     log.debug('Going to axis options');
-    await PageObjects.visEditor.clickMetricsAndAxes();
+    await visEditor.clickMetricsAndAxes();
     // add another value axis
     log.debug('adding axis');
-    await PageObjects.visEditor.clickAddAxis();
+    await visEditor.clickAddAxis();
     // set average count to use second value axis
-    await PageObjects.visEditor.toggleAccordion('visEditorSeriesAccordion3');
+    await visEditor.toggleAccordion('visEditorSeriesAccordion3');
     log.debug('Average memory value axis - ValueAxis-2');
-    await PageObjects.visEditor.setSeriesAxis(1, 'ValueAxis-2');
-    await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-    await PageObjects.visEditor.clickGo(true);
+    await visEditor.setSeriesAxis(1, 'ValueAxis-2');
+    await visChart.waitForVisualizationRenderingStabilized();
+    await visEditor.clickGo();
   }
 
   describe('point series', function describeIndexTests() {
     before(async () => {
-      await PageObjects.visualize.initTests();
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await visualize.initTests();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await initChart();
     });
 
     after(async () => {
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     describe('secondary value axis', function () {
@@ -87,14 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ];
 
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getLineChartData(xyChartSelector, 'Count');
+          const data = await visChart.getLineChartData(xyChartSelector, 'Count');
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
           expect(data).to.eql(expectedChartValues[0]);
         });
 
         await retry.try(async () => {
-          const avgMemoryData = await PageObjects.visChart.getLineChartData(
+          const avgMemoryData = await visChart.getLineChartData(
             xyChartSelector,
             'Average machine.ram'
           );
@@ -112,29 +113,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = await PageObjects.visChart.getAxesCountByPosition('right', xyChartSelector);
+        const length = await visChart.getAxesCountByPosition('right', xyChartSelector);
         expect(length).to.be(1);
       });
     });
 
     describe('multiple chart types', function () {
       it('should change average series type to histogram', async function () {
-        await PageObjects.visEditor.setSeriesType(1, 'histogram');
-        await PageObjects.visEditor.clickGo(true);
-        const length = await PageObjects.visChart.getHistogramSeriesCount(xyChartSelector);
+        await visEditor.setSeriesType(1, 'histogram');
+        await visEditor.clickGo();
+        const length = await visChart.getHistogramSeriesCount(xyChartSelector);
         expect(length).to.be(1);
       });
     });
 
     describe('grid lines', function () {
       before(async function () {
-        await PageObjects.visEditor.clickOptionsTab();
+        await visEditor.clickOptionsTab();
       });
 
       it('should show category grid lines', async function () {
-        await PageObjects.visEditor.toggleGridCategoryLines();
-        await PageObjects.visEditor.clickGo(true);
-        const gridLines = await PageObjects.visChart.getGridLines(xyChartSelector);
+        await visEditor.toggleGridCategoryLines();
+        await visEditor.clickGo();
+        const gridLines = await visChart.getGridLines(xyChartSelector);
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
         expect(gridLines.length).to.be.greaterThan(0);
@@ -144,10 +145,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show value axis grid lines', async function () {
-        await PageObjects.visEditor.setGridValueAxis('ValueAxis-2');
-        await PageObjects.visEditor.toggleGridCategoryLines();
-        await PageObjects.visEditor.clickGo(true);
-        const gridLines = await PageObjects.visChart.getGridLines(xyChartSelector);
+        await visEditor.setGridValueAxis('ValueAxis-2');
+        await visEditor.toggleGridCategoryLines();
+        await visEditor.clickGo();
+        const gridLines = await visChart.getGridLines(xyChartSelector);
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
         expect(gridLines.length).to.be.greaterThan(0);
@@ -159,31 +160,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('show values on chart', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickVerticalBarChart();
-        await PageObjects.visualize.clickNewSearch();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickVerticalBarChart();
+        await visualize.clickNewSearch();
         log.debug('Bucket = X-axis');
-        await PageObjects.visEditor.clickBucket('X-axis');
+        await visEditor.clickBucket('X-axis');
         log.debug('Aggregation = Terms');
-        await PageObjects.visEditor.selectAggregation('Terms');
+        await visEditor.selectAggregation('Terms');
         log.debug('Field = geo.src');
-        await PageObjects.visEditor.selectField('geo.src');
-        await PageObjects.visEditor.clickGo(true);
+        await visEditor.selectField('geo.src');
+        await visEditor.clickGo();
         log.debug('Open Options tab');
-        await PageObjects.visEditor.clickOptionsTab();
+        await visEditor.clickOptionsTab();
       });
 
       it('should show values on bar chart', async () => {
-        await PageObjects.visEditor.toggleValuesOnChart();
-        await PageObjects.visEditor.clickGo(true);
-        const values = await PageObjects.visChart.getChartValues(xyChartSelector);
+        await visEditor.toggleValuesOnChart();
+        await visEditor.clickGo();
+        const values = await visChart.getChartValues(xyChartSelector);
         expect(values).to.eql(['2,592', '2,373', '1,194', '489', '415']);
       });
 
       it('should hide values on bar chart', async () => {
-        await PageObjects.visEditor.toggleValuesOnChart();
-        await PageObjects.visEditor.clickGo(true);
-        const values = await PageObjects.visChart.getChartValues(xyChartSelector);
+        await visEditor.toggleValuesOnChart();
+        await visEditor.clickGo();
+        const values = await visChart.getChartValues(xyChartSelector);
         expect(values.length).to.be(0);
       });
     });
@@ -193,44 +194,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const customLabel = 'myLabel';
       const axisTitle = 'myTitle';
       before(async function () {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickLineChart();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
-        await PageObjects.visEditor.clickGo(true);
-        await PageObjects.visEditor.clickMetricsAndAxes();
-        await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickLineChart();
+        await visualize.clickNewSearch();
+        await visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
+        await visEditor.clickGo();
+        await visEditor.clickMetricsAndAxes();
+        await visEditor.clickYAxisOptions('ValueAxis-1');
       });
 
       it('should render a custom label when one is set', async function () {
-        const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
+        const title = await visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(customLabel);
       });
 
       it('should render a custom axis title when one is set, overriding the custom label', async function () {
-        await PageObjects.visEditor.setAxisTitle(axisTitle);
-        await PageObjects.visEditor.clickGo(true);
-        const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
+        await visEditor.setAxisTitle(axisTitle);
+        await visEditor.clickGo();
+        const title = await visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(axisTitle);
       });
 
       it('should preserve saved axis titles after a vis is saved and reopened', async function () {
-        await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
-        await PageObjects.visChart.waitForVisualization();
-        await PageObjects.visualize.loadSavedVisualization(visName);
-        await PageObjects.visChart.waitForRenderingCount();
-        await PageObjects.visEditor.clickDataTab();
-        await PageObjects.visEditor.toggleOpenEditor(1);
-        await PageObjects.visEditor.setCustomLabel('test', 1);
-        await PageObjects.visEditor.clickGo(true);
-        await PageObjects.visEditor.clickMetricsAndAxes();
-        await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
-        const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
+        await visualize.saveVisualizationExpectSuccess(visName);
+        await visChart.waitForVisualization();
+        await visualize.loadSavedVisualization(visName);
+        await visChart.waitForRenderingCount();
+        await visEditor.clickDataTab();
+        await visEditor.toggleOpenEditor(1);
+        await visEditor.setCustomLabel('test', 1);
+        await visEditor.clickGo();
+        await visEditor.clickMetricsAndAxes();
+        await visEditor.clickYAxisOptions('ValueAxis-1');
+        const title = await visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(axisTitle);
       });
     });
 
-    describe('timezones', async function () {
+    describe('timezones', function () {
       it('should show round labels in default timezone', async function () {
         const expectedLabels = [
           '2015-09-20 00:00',
@@ -239,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '2015-09-23 00:00',
         ];
         await initChart();
-        const labels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
+        const labels = await visChart.getXAxisLabels(xyChartSelector);
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
@@ -253,10 +254,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
-        await PageObjects.header.awaitKibanaChrome();
+        await header.awaitKibanaChrome();
         await initChart();
 
-        const labels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
+        const labels = await visChart.getXAxisLabels(xyChartSelector);
 
         expect(labels.join()).to.contain(expectedLabels.join());
       });
@@ -265,14 +266,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Sep 22, 2015 @ 09:05:47.415';
         const toTime = 'Sep 22, 2015 @ 16:08:34.554';
         // note that we're setting the absolute time range while we're in 'America/Phoenix' tz
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visChart.waitForRenderingCount();
+        await timePicker.setAbsoluteRange(fromTime, toTime);
+        await visChart.waitForRenderingCount();
 
         await retry.waitForWithTimeout(
           'wait for x-axis labels to match expected for Phoenix',
           5000,
           async () => {
-            const labels = (await PageObjects.visChart.getXAxisLabels(xyChartSelector)) ?? '';
+            const labels = (await visChart.getXAxisLabels(xyChartSelector)) ?? '';
             log.debug(`Labels: ${labels}`);
 
             const xLabels = [
@@ -329,16 +330,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // the absolute time range so the timepicker is going to shift +7 hours.
         await browser.refresh();
         // wait some time before trying to check for rendering count
-        await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.visualize.clickRefresh(true);
-        await PageObjects.visChart.waitForRenderingCount();
+        await header.awaitKibanaChrome();
+        await visualize.clickRefresh();
+        await visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 
         await retry.waitForWithTimeout(
           'wait for x-axis labels to match expected for UTC',
           5000,
           async () => {
-            const labels2 = (await PageObjects.visChart.getXAxisLabels(xyChartSelector)) ?? '';
+            const labels2 = (await visChart.getXAxisLabels(xyChartSelector)) ?? '';
             log.debug(`Labels: ${labels2}`);
 
             const xLabels2 = [

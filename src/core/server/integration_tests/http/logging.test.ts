@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -27,10 +28,28 @@ describe('request logging', () => {
 
   describe('http server response logging', () => {
     describe('configuration', () => {
+      let root: ReturnType<typeof createRoot>;
+
+      afterEach(async () => {
+        await root?.shutdown();
+      });
       it('does not log with a default config', async () => {
-        const root = createRoot({
+        root = createRoot({
           plugins: { initialize: false },
           elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
+          logging: {
+            appenders: {
+              'test-console': { type: 'console', layout: { type: 'json' } },
+            },
+            loggers: [
+              {
+                name: 'http.server.response',
+                appenders: ['test-console'],
+                level: 'off',
+              },
+            ],
+          },
         });
         await root.preboot();
         const { http } = await root.setup();
@@ -45,12 +64,10 @@ describe('request logging', () => {
 
         await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).not.toHaveBeenCalled();
-
-        await root.shutdown();
       });
 
       it('logs at the correct level and with the correct context', async () => {
-        const root = createRoot({
+        root = createRoot({
           logging: {
             appenders: {
               'test-console': {
@@ -73,6 +90,7 @@ describe('request logging', () => {
             initialize: false,
           },
           elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
         });
         await root.preboot();
         const { http } = await root.setup();
@@ -90,8 +108,6 @@ describe('request logging', () => {
         const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(level).toBe('DEBUG');
         expect(logger).toBe('http.server.response');
-
-        await root.shutdown();
       });
     });
 
@@ -120,6 +136,7 @@ describe('request logging', () => {
           initialize: false,
         },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       };
 
       beforeEach(() => {
@@ -127,7 +144,7 @@ describe('request logging', () => {
       });
 
       afterEach(async () => {
-        await root.shutdown();
+        await root?.shutdown();
       });
 
       it('handles a GET request', async () => {
@@ -331,6 +348,7 @@ describe('request logging', () => {
               initialize: false,
             },
             elasticsearch: { skipStartupConnectionCheck: true },
+            server: { restrictInternalApis: false },
           });
           await root.preboot();
           const { http } = await root.setup();
@@ -430,6 +448,7 @@ describe('request logging', () => {
               initialize: false,
             },
             elasticsearch: { skipStartupConnectionCheck: true },
+            server: { restrictInternalApis: false },
           });
           await root.preboot();
           const { http } = await root.setup();

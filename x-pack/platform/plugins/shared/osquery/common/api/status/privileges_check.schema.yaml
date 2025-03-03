@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: Osquery privileges Schema
+  version: '1'
+paths:
+  /internal/osquery/privileges_check:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ReadPrivilegesCheck
+      summary: Get Osquery privileges check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}

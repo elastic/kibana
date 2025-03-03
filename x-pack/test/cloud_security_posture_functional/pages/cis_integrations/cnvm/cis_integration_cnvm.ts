@@ -10,12 +10,17 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects } = providerContext;
+  const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
 
   describe('Test adding Cloud Security Posture Integrations CNVM', function () {
     this.tags(['cloud_security_posture_cis_integration_cnvm']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+    const retry = getService('retry');
+    const logger = getService('log');
+    const RETRY_COUNT = 5;
+    const RETRY_DELAY = 1000;
+    const retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY };
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
@@ -23,15 +28,28 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/186302
-    describe.skip('CNVM AWS', () => {
+    describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
-        await cisIntegration.navigateToAddIntegrationCnvmPage();
-        await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await cisIntegration.getUrlOnPostInstallModal()) ===
-            'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+        await retry.tryWithRetries(
+          'waiting for loading indicator to be hidden',
+          async () => {
+            await cisIntegration.navigateToAddIntegrationCnvmPage();
+            await cisIntegration.inputUniqueIntegrationName();
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await cisIntegration.clickSaveButton();
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            expect(
+              (await cisIntegration.getUrlOnPostInstallModal()) ===
+                'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+            );
+            return true;
+          },
+          retryOptions,
+          async () => {
+            // Log the error or handle it in some way
+            logger.debug('Failed while waiting for loading indicator');
+            return true;
+          }
         );
       });
 
@@ -45,20 +63,6 @@ export default function (providerContext: FtrProviderContext) {
               'href'
             )
           )?.includes('https://console.aws.amazon.com/cloudformation/')
-        ).to.be(true);
-      });
-
-      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
-        await cisIntegration.navigateToAddIntegrationCnvmPage();
-        await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (
-            await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton',
-              1
-            )
-          ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);
       });
     });

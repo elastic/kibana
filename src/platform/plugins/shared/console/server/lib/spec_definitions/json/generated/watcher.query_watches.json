@@ -1,0 +1,22 @@
+{
+  "watcher.query_watches": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/_query/watches"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/watcher-api-query-watches.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

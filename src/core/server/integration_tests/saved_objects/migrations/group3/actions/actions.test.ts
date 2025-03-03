@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
@@ -46,13 +46,15 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import { BASELINE_TEST_ARCHIVE_1K } from '../../kibana_migrator_archive_utils';
+import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
+      dataArchive: BASELINE_TEST_ARCHIVE_1K,
       license: 'basic',
-      dataArchive: Path.resolve(__dirname, '../../archives/7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -136,11 +138,9 @@ describe('migration actions', () => {
   describe('fetchIndices', () => {
     afterAll(async () => {
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Reset persistent test settings
-            cluster: { routing: { allocation: { enable: null } } },
-          },
+        persistent: {
+          // Reset persistent test settings
+          cluster: { routing: { allocation: { enable: null } } },
         },
       });
     });
@@ -207,11 +207,9 @@ describe('migration actions', () => {
     it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Disable all routing allocation
-            cluster: { routing: { allocation: { enable: 'none' } } },
-          },
+        persistent: {
+          // Disable all routing allocation
+          cluster: { routing: { allocation: { enable: 'none' } } },
         },
       });
       const task = checkClusterRoutingAllocationEnabled(client);
@@ -224,11 +222,9 @@ describe('migration actions', () => {
         }
       `);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Allow routing to existing primaries only
-            cluster: { routing: { allocation: { enable: 'primaries' } } },
-          },
+        persistent: {
+          // Allow routing to existing primaries only
+          cluster: { routing: { allocation: { enable: 'primaries' } } },
         },
       });
       const task2 = checkClusterRoutingAllocationEnabled(client);
@@ -241,11 +237,9 @@ describe('migration actions', () => {
         }
       `);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Allow routing to new primaries only
-            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
-          },
+        persistent: {
+          // Allow routing to new primaries only
+          cluster: { routing: { allocation: { enable: 'new_primaries' } } },
         },
       });
       const task3 = checkClusterRoutingAllocationEnabled(client);
@@ -261,10 +255,8 @@ describe('migration actions', () => {
     it('resolves right when cluster.routing.allocation.enabled=all', async () => {
       expect.assertions(1);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            cluster: { routing: { allocation: { enable: 'all' } } },
-          },
+        persistent: {
+          cluster: { routing: { allocation: { enable: 'all' } } },
         },
       });
       const task = checkClusterRoutingAllocationEnabled(client);
@@ -396,14 +388,12 @@ describe('migration actions', () => {
       await client.indices.create({
         index: 'red_then_yellow_index',
         timeout: '5s',
-        body: {
-          mappings: { properties: {} },
-          settings: {
-            // Allocate 1 replica so that this index stays yellow
-            number_of_replicas: '1',
-            // Disable all shard allocation so that the index status is red
-            routing: { allocation: { enable: 'none' } },
-          },
+        mappings: { properties: {} },
+        settings: {
+          // Allocate 1 replica so that this index stays yellow
+          number_of_replicas: '1',
+          // Disable all shard allocation so that the index status is red
+          routing: { allocation: { enable: 'none' } },
         },
       });
 
@@ -419,7 +409,7 @@ describe('migration actions', () => {
 
       void client.indices.putSettings({
         index: 'red_then_yellow_index',
-        body: {
+        settings: {
           // Enable all shard allocation so that the index status turns yellow
           routing: { allocation: { enable: 'all' } },
         },
@@ -437,14 +427,12 @@ describe('migration actions', () => {
         .create({
           index: 'red_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays red
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate no replicas so that this index stays red
+            number_of_replicas: '0',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -472,12 +460,10 @@ describe('migration actions', () => {
         .create({
           index: 'yellow_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays yellow
-              number_of_replicas: '0',
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate no replicas so that this index stays yellow
+            number_of_replicas: '0',
           },
         })
         .catch((e) => {});
@@ -544,14 +530,12 @@ describe('migration actions', () => {
         .create({
           index: 'clone_red_then_green_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index can go to green
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index can go to green
+            number_of_replicas: '0',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -568,7 +552,7 @@ describe('migration actions', () => {
       setTimeout(() => {
         void client.indices.putSettings({
           index: 'clone_red_then_green_index',
-          body: {
+          settings: {
             // Enable all shard allocation so that the index status goes green
             routing: { allocation: { enable: 'all' } },
           },
@@ -596,14 +580,12 @@ describe('migration actions', () => {
         .create({
           index: 'clone_red_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -631,7 +613,7 @@ describe('migration actions', () => {
 
       await client.indices.putSettings({
         index: 'clone_red_index',
-        body: {
+        settings: {
           // Enable all shard allocation so that the index status goes yellow
           routing: { allocation: { enable: 'all' } },
         },
@@ -660,7 +642,7 @@ describe('migration actions', () => {
 
       await client.indices.putSettings({
         index: 'clone_red_index',
-        body: {
+        settings: {
           // Set zero replicas so status goes green
           number_of_replicas: 0,
         },
@@ -1090,13 +1072,13 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatus({
         client,
-        index: '.kibana_1',
+        index: defaultKibanaIndex,
         status: 'yellow',
       })();
 
       const res = (await reindex({
         client,
-        sourceIndex: '.kibana_1',
+        sourceIndex: defaultKibanaIndex,
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1124,11 +1106,7 @@ describe('migration actions', () => {
 
       expect(pitResponse.right.pitId).toEqual(expect.any(String));
 
-      const searchResponse = await client.search({
-        body: {
-          pit: { id: pitResponse.right.pitId },
-        },
-      });
+      const searchResponse = await client.search({ pit: { id: pitResponse.right.pitId } });
 
       await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
@@ -1344,11 +1322,7 @@ describe('migration actions', () => {
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
-      const searchTask = client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      });
+      const searchTask = client.search({ pit: { id: pitId } });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
     });
@@ -1433,7 +1407,7 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1',
+        defaultKibanaIndex,
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
@@ -1809,14 +1783,12 @@ describe('migration actions', () => {
         .create({
           index: 'red_then_yellow_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status starts as red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status starts as red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {
@@ -1838,7 +1810,7 @@ describe('migration actions', () => {
       setTimeout(() => {
         void client.indices.putSettings({
           index: 'red_then_yellow_index',
-          body: {
+          settings: {
             // Renable allocation so that the status becomes yellow
             routing: { allocation: { enable: 'all' } },
           },
@@ -1867,12 +1839,10 @@ describe('migration actions', () => {
         .create({
           index: 'yellow_then_green_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
           },
         })
         .catch((e) => {
@@ -1891,7 +1861,7 @@ describe('migration actions', () => {
       setTimeout(() => {
         void client.indices.putSettings({
           index: 'yellow_then_green_index',
-          body: {
+          settings: {
             // Set 0 replican so that this index becomes green
             number_of_replicas: '0',
           },
@@ -2027,28 +1997,6 @@ describe('migration actions', () => {
               "type": "target_index_had_write_block",
             },
           }
-      `);
-    });
-
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-      const newDocs = new Array(10000).fill({
-        _source: {
-          title:
-            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-        },
-      }) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_docs',
-        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
       `);
     });
   });

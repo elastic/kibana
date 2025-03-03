@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['maps', 'common']);
+  const { maps } = getPageObjects(['maps']);
   const testSubjects = getService('testSubjects');
 
   return {
@@ -28,10 +28,10 @@ export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
         throw new Error('Layer total requests not found');
       }
       if (isRequestByCountry) {
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+        await maps.toggleLayerVisibility('Total Requests by Country');
       }
       if (isRequestByDestination) {
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
+        await maps.toggleLayerVisibility('Total Requests by Destination');
       }
     },
   };

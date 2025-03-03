@@ -6,8 +6,17 @@
  */
 
 import type SuperTest from 'supertest';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { getCommonRequestHeader } from '../../../../../functional/services/ml/common_api';
+
+interface ModuleJob {
+  id: string;
+  success: boolean;
+  error?: {
+    status: number;
+  };
+}
 
 export const executeSetupModuleRequest = async ({
   module,
@@ -17,7 +26,7 @@ export const executeSetupModuleRequest = async ({
   module: string;
   rspCode: number;
   supertest: SuperTest.Agent;
-}) => {
+}): Promise<{ jobs: ModuleJob[] }> => {
   const { body } = await supertest
     .post(`/internal/ml/modules/setup/${module}`)
     .set(getCommonRequestHeader('1'))
@@ -33,6 +42,35 @@ export const executeSetupModuleRequest = async ({
 
   return body;
 };
+
+export const setupMlModulesWithRetry = async ({
+  module,
+  retry,
+  supertest,
+}: {
+  module: string;
+  retry: RetryService;
+  supertest: SuperTest.Agent;
+}) =>
+  retry.try(async () => {
+    const response = await executeSetupModuleRequest({
+      module,
+      rspCode: 200,
+      supertest,
+    });
+
+    const allJobsSucceeded = response?.jobs.every((job) => {
+      return job.success || (job.error?.status && job.error.status < 500);
+    });
+
+    if (!allJobsSucceeded) {
+      throw new Error(
+        `Expected all jobs to set up successfully, but got ${JSON.stringify(response)}`
+      );
+    }
+
+    return response;
+  });
 
 export const forceStartDatafeeds = async ({
   jobId,

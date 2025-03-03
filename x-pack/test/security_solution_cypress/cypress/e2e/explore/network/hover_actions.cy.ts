@@ -48,6 +48,14 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
     mouseoverOnToOverflowItem();
   });
 
+  it('Copy value', () => {
+    cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
+
+    clickOnCopyValue();
+
+    cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
+  });
+
   it('Adds global filter - filter in', () => {
     clickOnFilterIn();
 
@@ -74,13 +82,5 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   it('Show topN', () => {
     clickOnShowTopN();
     cy.get(TOP_N_CONTAINER).should('exist').should('contain.text', 'Top destination.domain');
-  });
-
-  it('Copy value', () => {
-    cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
-
-    clickOnCopyValue();
-
-    cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
   });
 });

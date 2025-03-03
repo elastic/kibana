@@ -1,0 +1,82 @@
+title: Legacy alert response properties
+type: object
+properties:
+  actions:
+    type: array
+    items:
+      type: object
+  alertTypeId:
+    type: string
+    example: ".index-threshold"
+  apiKeyOwner:
+    type: string
+    nullable: true
+    example: elastic
+  createdAt:
+    type: string
+    description: The date and time that the alert was created.
+    format: date-time
+    example: '2022-12-05T23:36:58.284Z'
+  createdBy:
+    type: string
+    description: The identifier for the user that created the alert.
+    example: elastic
+  enabled:
+    type: boolean
+    description: Indicates whether the alert is currently enabled.
+    example: true
+  executionStatus:
+    type: object
+    properties:
+      lastExecutionDate:
+        type: string
+        format: date-time
+        example: '2022-12-06T00:13:43.890Z'
+      status:
+        type: string
+        example: ok
+  id:
+    type: string
+    description: The identifier for the alert.
+    example: b530fed0-74f5-11ed-9801-35303b735aef
+  muteAll:
+    type: boolean
+    example: false
+  mutedInstanceIds:
+    type: array
+    nullable: true
+    items:
+      type: string
+  name:
+    type: string
+    description: The name of the alert.
+    example: my alert
+  notifyWhen:
+    type: string
+    example: onActionGroupChange
+  params:
+    type: object
+    additionalProperties: true
+  schedule:
+    type: object
+    properties:
+      interval:
+        type: string
+  scheduledTaskId:
+    type: string
+    example: b530fed0-74f5-11ed-9801-35303b735aef
+  tags:
+    type: array
+    items:
+      type: string
+  throttle:
+    type: string
+    nullable: true
+  updatedAt:
+    type: string
+    example: '2022-12-05T23:36:58.284Z'
+  updatedBy:
+    type: string
+    description: The identifier for the user that updated this alert most recently.
+    nullable: true
+    example: elastic

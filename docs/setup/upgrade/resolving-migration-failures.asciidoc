@@ -18,24 +18,6 @@ When you address the root cause for the migration failure,
 {kib} automatically retries the migration.
 If you're unable to resolve a failed migration, contact Support.
 
-
-[float]
-==== Known issues with {fleet} beta
-If you see a`timeout_exception` or `receive_timeout_transport_exception` error,
-it might be from a known known issue in 7.12.0 if you tried the {fleet} beta.
-Upgrade migrations fail because of a large number of documents in the `.kibana` index,
-which causes {kib} to log errors such as:
-
-[source,sh]
---------------------------------------------
-Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [receive_timeout_transport_exception]: [instance-0000000002][10.32.1.112:19541][cluster:monitor/task/get] request_id [2648] timed out after [59940ms]
-
-Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [timeout_exception]: Timed out waiting for completion of [org.elasticsearch.index.reindex.BulkByScrollTask@6a74c54]
---------------------------------------------
-
-For instructions on how to mitigate the known issue, refer to https://github.com/elastic/kibana/issues/95321[the GitHub issue].
-
-
 [float]
 ==== Corrupt saved objects
 To find and remedy problems caused by corrupt documents, we highly recommend testing your {kib} upgrade in a development cluster,
@@ -56,7 +38,7 @@ To delete the documents that cause migrations to fail, take the following steps:
 
 . Create a role as follows:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 PUT _security/role/grant_kibana_system_indices
 {
@@ -76,7 +58,7 @@ PUT _security/role/grant_kibana_system_indices
 
 . Create a user with the role above and `superuser` built-in role:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 POST /_security/user/temporarykibanasuperuser
 {
@@ -87,7 +69,7 @@ POST /_security/user/temporarykibanasuperuser
 
 . Remove the write block which the migration system has placed on the previous index:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 PUT .kibana_7.12.1_001/_settings
 {
@@ -99,7 +81,7 @@ PUT .kibana_7.12.1_001/_settings
 
 . Delete the corrupt document:
 +
-[source,sh]
+[source,console]
 --------------------------------------------
 DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275
 --------------------------------------------
@@ -138,10 +120,7 @@ If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:
 
 [source,sh]
 --------------------------------------------
-Unable to complete saved object migrations for the [.kibana] index: Migration failed because some documents were found which use unknown saved object types:
-- "firstDocId" (type "someType")
-- "secondtDocId" (type "someType")
-- "thirdDocId" (type "someOtherType")
+Unable to complete saved object migrations for the [.kibana] index: Migration failed because some documents were found which use unknown saved object types: someType,someOtherType
 
 To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
 --------------------------------------------
@@ -185,7 +164,7 @@ The process is waiting for a yellow index status. There are two known causes:
 
 Before retrying the migration, inspect the output of the `_cluster/allocation/explain?index=${targetIndex}` API to identify why the index isn't yellow:
 
-[source,sh]
+[source,console]
 --------------------------------------------
 GET _cluster/allocation/explain
 {
@@ -220,7 +199,7 @@ Unable to complete saved object migrations for the [.kibana] index: [incompatibl
 --------------------------------------------
 
 To get around the issue, remove the transient and persisted routing allocation settings:
-[source,sh]
+[source,console]
 --------------------------------------------
 PUT /_cluster/settings
 {

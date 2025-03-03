@@ -1,0 +1,2 @@
+# Private configs for .http files
+http-client.private.env.json

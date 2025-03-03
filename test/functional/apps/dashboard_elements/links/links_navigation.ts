@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -213,9 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isDisabled).to.be('true');
       });
 
-      // TODO We should not be using an external website for our tests. This will be flaky
-      // if external network connectivity issues exist.
-      it.skip('should create an external link when openInNewTab is enabled', async () => {
+      it('should create an external link when openInNewTab is enabled', async () => {
         await testSubjects.clickWhenNotDisabled('externalLink--link999');
 
         // Should have opened another tab
@@ -226,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(currentUrl).to.be('https://example.com/1');
       });
 
-      it.skip('should open in same tab when openInNewTab is disabled', async () => {
+      it('should open in same tab when openInNewTab is disabled', async () => {
         await testSubjects.clickWhenNotDisabled('externalLink--link888');
 
         // Should have opened in the same tab

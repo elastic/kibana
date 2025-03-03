@@ -7,6 +7,7 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers/get_proxy_server';
 import {
@@ -14,12 +15,14 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function torqTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
 
   describe('Torq action', () => {
     let simulatedActionId = '';
@@ -159,6 +162,22 @@ export default function torqTest({ getService }: FtrProviderContext) {
         connector_id: simulatedActionId,
         data: `{"msg": "test"}`,
       });
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: simulatedActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { gte: 1 }],
+            ['execute', { gte: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(14);
     });
 
     it('should handle a 400 Torq error', async () => {

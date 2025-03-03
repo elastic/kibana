@@ -14,29 +14,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-plugins-server-mocks",
-        "id": "def-common.pluginServiceMock",
+        "id": "def-server.pluginServiceMock",
         "type": "Object",
         "tags": [],
         "label": "pluginServiceMock",
         "description": [],
-        "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+        "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.create",
+            "id": "def-server.pluginServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +36,7 @@
             "signature": [
               "() => PluginsServiceMock"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -52,23 +44,17 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createSetupContract",
+            "id": "def-server.pluginServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginsServiceSetup",
-                "text": "PluginsServiceSetup"
-              },
+              "PluginsServiceSetup",
               ">"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -76,23 +62,17 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createStartContract",
+            "id": "def-server.pluginServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginsServiceStart",
-                "text": "PluginsServiceStart"
-              },
+              "PluginsServiceStart",
               ">"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -100,7 +80,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createInternalSetupContract",
+            "id": "def-server.pluginServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -109,7 +89,7 @@
               "() => ",
               "InternalPluginsServiceSetup"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -117,7 +97,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createInternalStartContract",
+            "id": "def-server.pluginServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -126,7 +106,7 @@
               "() => ",
               "InternalPluginsServiceStart"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -134,7 +114,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-common.pluginServiceMock.createUiPlugins",
+            "id": "def-server.pluginServiceMock.createUiPlugins",
             "type": "Function",
             "tags": [],
             "label": "createUiPlugins",
@@ -142,7 +122,7 @@
             "signature": [
               "() => { browserConfigs: Map<any, any>; internal: Map<any, any>; public: Map<any, any>; }"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -152,5 +132,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

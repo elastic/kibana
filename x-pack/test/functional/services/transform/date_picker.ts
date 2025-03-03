@@ -37,7 +37,9 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       await find.selectValue(`[aria-label*="Time unit"]`, timeUnit);
 
       // Apply
-      const applyButton = await quickMenuElement.findByClassName('euiQuickSelect__applyButton');
+      const applyButton = await quickMenuElement.findByTestSubject(
+        'superDatePickerQuickSelectApplyButton'
+      );
       const actualApplyButtonText = await applyButton.getVisibleText();
       expect(actualApplyButtonText).to.be('Apply');
 

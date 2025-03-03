@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Get Action status schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action_status:
+    get:
+      summary: Get response actions status 
+      operationId: EndpointGetActionsStatus
+      description: Get the status of response actions for the specified agent IDs.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agent_ids:
+                $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentIds'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
+
+components:
+  schemas:
+    PendingActionsSchema:
+      oneOf:
+        - type: object
+          properties:
+              'isolate':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'unisolate':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'kill-process':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'suspend-process':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'running-processes':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'get-file':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'execute':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'upload':
+                $ref: '#/components/schemas/PendingActionDataType'
+              'scan':
+                $ref: '#/components/schemas/PendingActionDataType'
+        - type: object
+          additionalProperties: true
+
+    PendingActionDataType:
+      type: integer
+
+    ActionStatusSuccessResponse:
+        type: object
+        required: ['body']
+        properties:
+          body:
+            required: ['data']
+            type: object
+            properties:
+              data:
+                required: ['agent_id', 'pending_actions']
+                type: object
+                properties:
+                  agent_id:
+                    $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentId'
+                  pending_actions:
+                    $ref: '#/components/schemas/PendingActionsSchema'
+
+

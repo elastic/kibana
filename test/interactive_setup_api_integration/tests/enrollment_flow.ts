@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -20,7 +21,7 @@ export default function (context: FtrProviderContext) {
   const config = context.getService('config');
 
   describe('Interactive setup APIs - Enrollment flow', function () {
-    this.tags('skipCloud');
+    this.tags(['skipCloud', 'skipFIPS']);
 
     let kibanaVerificationCode: string;
     let elasticsearchCaFingerprint: string;
@@ -37,12 +38,12 @@ export default function (context: FtrProviderContext) {
 
     let enrollmentAPIKey: string;
     beforeEach(async () => {
-      const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
+      const apiResponse = await es.security.createApiKey({ name: 'enrollment_api_key' });
       enrollmentAPIKey = Buffer.from(`${apiResponse.id}:${apiResponse.api_key}`).toString('base64');
     });
 
     afterEach(async () => {
-      await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
+      await es.security.invalidateApiKey({ name: 'enrollment_api_key' });
     });
 
     it('fails to enroll with invalid authentication code', async () => {
@@ -98,7 +99,7 @@ export default function (context: FtrProviderContext) {
       log.debug(`Enroll payload ${JSON.stringify(enrollPayload)}`);
 
       // Invalidate API key.
-      await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
+      await es.security.invalidateApiKey({ name: 'enrollment_api_key' });
 
       await supertest
         .post('/internal/interactive_setup/enroll')

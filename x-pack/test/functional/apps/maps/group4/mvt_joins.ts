@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const security = getService('security');
   const find = getService('find');
 
@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
         { skipBrowserRefresh: true }
       );
-      await PageObjects.maps.loadSavedMap('mvt join example');
+      await maps.loadSavedMap('mvt join example');
     });
 
     after(async () => {
@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show dynamic data range in legend', async () => {
-      const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+      const layerTOCDetails = await maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
       // field display name
@@ -46,8 +46,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should show join metrics in tooltip', async () => {
       // zoom in on feature so tooltip click can not miss
-      await PageObjects.maps.setView(-1, 60, 9);
-      await PageObjects.maps.lockTooltipAtPosition(200, -200);
+      await maps.setView(-1, 60, 9);
+      await maps.lockTooltipAtPosition(200, -200);
 
       const tooltipRows = await find.allByCssSelector(`tr[class='mapFeatureTooltip_row']`);
       expect(tooltipRows.length).to.equal(2);
@@ -57,15 +57,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery('prop1 < 10');
+        await maps.setAndSubmitQuery('prop1 < 10');
       });
 
       after(async () => {
-        await PageObjects.maps.setAndSubmitQuery('');
+        await maps.setAndSubmitQuery('');
       });
 
       it('should update dynamic data range in legend', async () => {
-        const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+        const layerTOCDetails = await maps.getLayerTOCDetails('geo_shapes*');
         const split = layerTOCDetails.trim().split('\n');
 
         // field display name
@@ -83,9 +83,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('fit to bounds should exclude source features without join matches', async () => {
-        await PageObjects.maps.clickFitToData();
+        await maps.clickFitToData();
 
-        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        const { lat, lon, zoom } = await maps.getView();
         expect(Math.round(lat)).to.equal(0);
         expect(Math.round(lon)).to.equal(90);
         expect(Math.ceil(zoom)).to.equal(5);

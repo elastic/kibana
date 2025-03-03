@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const security = getService('security');
 
@@ -34,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should use the default row height', async () => {
@@ -52,13 +53,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeRowHeightValue('Single');
+      await testSubjects.missingOrFail('resetDisplaySelector');
+
+      await dataGrid.changeRowHeightValue('Auto');
 
       // toggle the popover
       await dataGrid.clickGridSettings();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
 
       // we hide "Reset to default" action in Discover
       await testSubjects.missingOrFail('resetDisplaySelector');
@@ -66,28 +69,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowHeightValue('Custom');
 
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
-
-      await testSubjects.missingOrFail('resetDisplaySelector');
-
-      await dataGrid.changeRowHeightValue('Auto fit');
-
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
     });
 
     it('should persist the row height selection after reloading the page', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeRowHeightValue('Single');
+      await dataGrid.changeRowHeightValue('Auto');
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
 
       await browser.refresh();
 
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
     });
 
     it('should use the default header row height', async () => {
@@ -102,13 +99,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeHeaderRowHeightValue('Single');
+      await dataGrid.changeHeaderRowHeightValue('Auto');
 
       // toggle the popover
       await dataGrid.clickGridSettings();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto');
 
       // we hide "Reset to default" action in Discover
       await testSubjects.missingOrFail('resetDisplaySelector');
@@ -116,28 +113,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeHeaderRowHeightValue('Custom');
 
       expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Custom');
-
-      await testSubjects.missingOrFail('resetDisplaySelector');
-
-      await dataGrid.changeHeaderRowHeightValue('Auto fit');
-
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto fit');
     });
 
     it('should persist the header row height selection after reloading the page', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeHeaderRowHeightValue('Single');
+      await dataGrid.changeHeaderRowHeightValue('Auto');
 
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto');
 
       await browser.refresh();
 
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
-      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Single');
+      expect(await dataGrid.getCurrentHeaderRowHeightValue()).to.be('Auto');
     });
   });
 }

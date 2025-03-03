@@ -78,7 +78,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   }
 
   registry.when('Annotations with a basic license', { config: 'basic', archives: [] }, () => {
-    describe('when creating an annotation', () => {
+    describe('when creating an annotation in basic license', function () {
+      this.tags('skipFIPS');
       it('fails with a 403 forbidden', async () => {
         const err = await expectToReject<ApmApiError>(() =>
           createAnnotation({
@@ -101,7 +102,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   });
 
   registry.when('Annotations with a trial license', { config: 'trial', archives: [] }, () => {
-    describe('when creating an annotation', () => {
+    describe('when creating an annotation in trial license', () => {
       afterEach(async () => {
         const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
         if (indexExists) {
@@ -210,25 +211,23 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         await es.indices.create({
           index: transactionIndexName,
-          body: {
-            mappings: {
-              properties: {
-                service: {
-                  properties: {
-                    name: {
-                      type: 'keyword',
-                    },
-                    version: {
-                      type: 'keyword',
-                    },
-                    environment: {
-                      type: 'keyword',
-                    },
+          mappings: {
+            properties: {
+              service: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  version: {
+                    type: 'keyword',
+                  },
+                  environment: {
+                    type: 'keyword',
                   },
                 },
-                '@timestamp': {
-                  type: 'date',
-                },
+              },
+              '@timestamp': {
+                type: 'date',
               },
             },
           },
@@ -236,7 +235,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         await es.index({
           index: transactionIndexName,
-          body: {
+          document: {
             '@timestamp': new Date(2020, 4, 2, 18, 30).toISOString(),
             processor: {
               event: 'transaction',
@@ -251,7 +250,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         await es.index({
           index: transactionIndexName,
-          body: {
+          document: {
             '@timestamp': new Date(2020, 4, 2, 19, 30).toISOString(),
             processor: {
               event: 'transaction',

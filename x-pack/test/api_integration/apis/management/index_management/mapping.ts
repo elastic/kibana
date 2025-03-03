@@ -28,8 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
       },
     };
 
-    after(async () => await deleteAllIndices());
-
     before(async () => {
       log.debug('Creating index');
       try {

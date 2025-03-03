@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { SearchSecureService } from '@kbn/test-suites-serverless/shared/services/search_secure';
+import { services as serverlessServices } from '@kbn/test-suites-serverless/api_integration/services';
+import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { SpacesServiceProvider } from '../../../common/services/spaces';
-import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
-import { services as serverlessServices } from '../../../../test_serverless/api_integration/services';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
 import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
 
 export const services = {
   ...serverlessServices,
   spaces: SpacesServiceProvider,
-  secureBsearch: BsearchSecureService,
+  secureSearch: SearchSecureService,
   securitySolutionUtils: SecuritySolutionServerlessUtils,
   supertest: SecuritySolutionServerlessSuperTest,
+  kibana_ebt_server: KibanaEBTServerProvider,
 };

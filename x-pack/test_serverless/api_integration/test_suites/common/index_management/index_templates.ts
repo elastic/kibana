@@ -27,16 +27,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   const getRandomString: () => string = () => randomness.string({ casing: 'lower', alpha: true });
 
-  // see details: https://github.com/elastic/kibana/issues/187368
-  describe.skip('Index templates', function () {
+  describe('Index templates', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
       await svlTemplatesApi.cleanUpTemplates(roleAuthc);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('get', () => {
@@ -46,9 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         templateName = `template-${getRandomString()}`;
         const indexTemplate = {
           name: templateName,
-          body: {
-            index_patterns: ['test*'],
-          },
+          index_patterns: ['test*'],
         };
         // Create a new index template to test against
         try {
@@ -91,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
           const expectedKeys = [
             'name',
             'indexPatterns',
+            'indexMode',
             'hasSettings',
             'hasAliases',
             'hasMappings',
@@ -115,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
           const expectedKeys = [
             'name',
             'indexPatterns',
+            'indexMode',
             'template',
             '_kbnMeta',
             'allowAutoCreate',
@@ -125,6 +124,50 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.name).to.eql(templateName);
           expect(Object.keys(body).sort()).to.eql(expectedKeys);
         });
+
+        describe('with logs-*-* index pattern', () => {
+          const logsdbTemplateName = 'test-logsdb-template';
+          before(async () => {
+            const template = svlTemplatesHelpers.getTemplatePayload(
+              logsdbTemplateName,
+              ['logs-*-*'],
+              false,
+              false
+            );
+            await svlTemplatesApi.createTemplate(template, roleAuthc).expect(200);
+          });
+
+          after(async () => {
+            await svlTemplatesApi.deleteTemplates([{ name: logsdbTemplateName }], roleAuthc);
+          });
+
+          const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+            { enabled: true, indexMode: 'logsdb' },
+            { enabled: false, indexMode: 'standard' },
+            { enabled: null, indexMode: 'logsdb' }, // In serverless Kibana, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+          ];
+
+          logsdbSettings.forEach(({ enabled, indexMode }) => {
+            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+              await es.cluster.putSettings({
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
+                    },
+                  },
+                },
+              });
+
+              const { body, status } = await supertestWithoutAuth
+                .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
+                .set(internalReqHeader)
+                .set(roleAuthc.apiKeyHeader);
+              expect(status).to.eql(200);
+              expect(body.indexMode).to.equal(indexMode);
+            });
+          });
+        });
       });
     });
 
@@ -134,8 +177,10 @@ export default function ({ getService }: FtrProviderContext) {
           `template-${getRandomString()}`,
           [getRandomString()],
           undefined,
-          false
+          false,
+          'logsdb'
         );
+
         const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
         expect(status).to.eql(200);
       });
@@ -214,12 +259,13 @@ export default function ({ getService }: FtrProviderContext) {
         const { status } = await svlTemplatesApi.createTemplate(indexTemplate, roleAuthc);
         expect(status).to.eql(200);
 
-        let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
-
+        const { body: templates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
         const { name, version } = indexTemplate;
         expect(
-          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        ).to.equal(version?.toString());
+          templates.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
+        ).to.equal(version);
 
         // Update template with new version
         const updatedVersion = 2;
@@ -230,11 +276,13 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(updateStatus).to.eql(200);
 
-        ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
+        const { body: templates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        ).to.equal(updatedVersion.toString());
+          templates2.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
+        ).to.equal(updatedVersion);
       });
 
       it('should parse the ES error and return the cause', async () => {
@@ -267,7 +315,8 @@ export default function ({ getService }: FtrProviderContext) {
           templateName,
           roleAuthc
         );
-        expect(updateStatus).to.eql(404);
+
+        expect(updateStatus).to.eql(400);
 
         expect(body.attributes).an('object');
         // one of the item of the cause array should point to our script
@@ -292,10 +341,10 @@ export default function ({ getService }: FtrProviderContext) {
         if (createStatus !== 200)
           throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
 
-        const { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
+        const { body: allTemplates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          catTemplateResponse.find((template) => template.name === payload.name)?.name
+          allTemplates.templates.find(({ name }: { name: string }) => name === payload.name)?.name
         ).to.equal(templateName);
 
         const { status: deleteStatus, body: deleteBody } = await svlTemplatesApi.deleteTemplates(
@@ -308,11 +357,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(deleteBody.errors).to.be.empty();
         expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
 
-        const { body: catTemplateResponse2 } = await svlTemplatesHelpers.catTemplate(templateName);
+        const { body: allTemplates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
-        expect(catTemplateResponse2.find((template) => template.name === payload.name)).to.equal(
-          undefined
-        );
+        expect(
+          allTemplates2.templates.find(({ name }: { name: string }) => name === payload.name)
+        ).to.equal(undefined);
       });
     });
 

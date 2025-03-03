@@ -7,14 +7,39 @@
 
 import Url from 'url';
 
+import { createEsClientForFtrConfig } from '@kbn/test';
+import { TransportResult } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../common/ftr_provider_context';
+import { tiAbusechMalware } from './pipelines/ti_abusech_malware';
+import { tiAbusechMalwareBazaar } from './pipelines/ti_abusech_malware_bazaar';
+import { tiAbusechUrl } from './pipelines/ti_abusech_url';
 
 export type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export async function SecuritySolutionConfigurableCypressTestRunner({
   getService,
 }: FtrProviderContext) {
+  const log = getService('log');
   const config = getService('config');
+  const es = createEsClientForFtrConfig(config);
+
+  const pipelines = [tiAbusechMalware, tiAbusechMalwareBazaar, tiAbusechUrl];
+
+  log.info('configure pipelines');
+
+  for (const pipeline of pipelines) {
+    const res: TransportResult<unknown, any> = await es.transport.request({
+      method: 'PUT',
+      path: `_ingest/pipeline/${pipeline.name}`,
+      body: {
+        processors: pipeline.processors,
+        on_failure: pipeline.on_failure,
+      },
+    });
+
+    log.info(`PUT pipeline ${pipeline.name}: ${res.statusCode}`);
+  }
+
   return {
     FORCE_COLOR: '1',
     BASE_URL: Url.format(config.get('servers.kibana')),

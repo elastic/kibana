@@ -1,0 +1,25 @@
+title: Create or upate case request properties for Cases Webhook connector
+required:
+  - fields
+  - id
+  - name
+  - type
+description: Defines properties for connectors when type is `.cases-webhook`.
+type: object
+properties:
+  fields:
+    type: string
+    nullable: true
+    example: null  
+  id:
+    description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+    type: string
+  name:
+    description: The name of the connector.
+    type: string
+  type:
+    description: The type of connector.
+    type: string
+    example: .cases-webhook
+    enum:
+      - .cases-webhook

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import querystring from 'querystring';
-import rison from '@kbn/rison';
-import expect from '@kbn/expect';
-import { TimeUnitId } from '@elastic/eui';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
+  datasetQualityDetailsUrlSchemaV1,
   datasetQualityUrlSchemaV1,
 } from '@kbn/data-quality-plugin/common';
 import {
-  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+  DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+  DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
+import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -26,15 +27,18 @@ const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
     page: 0,
   },
   filters: {},
-  flyout: {
-    degradedFields: {
-      table: {
-        page: 0,
-        rowsPerPage: 10,
-        sort: {
-          field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-          direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-        },
+};
+
+const defaultDetailsPageState: datasetQualityDetailsUrlSchemaV1.UrlSchema = {
+  v: 1,
+  dataStream: 'logs-synth.1-default',
+  degradedFields: {
+    table: {
+      page: 0,
+      rowsPerPage: 10,
+      sort: {
+        field: DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
       },
     },
   },
@@ -49,7 +53,10 @@ type SummaryPanelKpi = Record<
   string
 >;
 
-type FlyoutKpi = Record<'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs', string>;
+type SummaryPanelKPI = Record<
+  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs',
+  string
+>;
 
 const texts = {
   noActivityText: 'No activity in the selected timeframe',
@@ -58,11 +65,23 @@ const texts = {
   datasetHealthGood: 'Good',
   activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
-  docsCountTotal: 'Docs count (total)',
+  docsCountTotal: 'Total count',
   size: 'Size',
   services: 'Services',
   hosts: 'Hosts',
   degradedDocs: 'Degraded docs',
+  datasetNameColumn: 'Data set name',
+  datasetNamespaceColumn: 'Namespace',
+  datasetTypeColumn: 'Type',
+  datasetSizeColumn: 'Size',
+  datasetQualityColumn: 'Data set quality',
+  datasetDegradedDocsColumn: 'Degraded docs (%)',
+  datasetFailedDocsColumn: 'Failed docs (%)',
+  datasetLastActivityColumn: 'Last activity',
+  datasetActionsColumn: 'Actions',
+  datasetIssueColumn: 'Issue',
+  datasetDocsCountColumn: 'Docs count',
+  datasetLastOccurrenceColumn: 'Last Occurrence',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -71,6 +90,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const euiSelectable = getService('selectable');
   const find = getService('find');
   const retry = getService('retry');
+  const es = getService('es');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
@@ -79,27 +99,26 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetSearchInput: '[placeholder="Filter data sets"]',
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
-    superDatePickerApplyButton: '.euiQuickSelect__applyButton',
+    superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
   };
 
   const testSubjectSelectors = {
     datasetQualityTable: 'datasetQualityTable',
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
-    datasetQualityFlyout: 'datasetQualityFlyout',
-    datasetQualityFlyoutBody: 'datasetQualityFlyoutBody',
-    datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
-    datasetQualityFlyoutDegradedFieldTable: 'datasetQualityFlyoutDegradedFieldTable',
-    datasetQualityFlyoutDegradedTableNoData: 'datasetQualityFlyoutDegradedTableNoData',
+    datasetQualityDetailsDegradedFieldsExpandButton:
+      'datasetQualityDetailsQualityIssuesExpandButton',
+    datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
+    datasetDetailsContainer: 'datasetDetailsContainer',
+    datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
+    datasetQualityDetailsDegradedFieldTable: 'datasetQualityDetailsDegradedFieldTable',
+    datasetQualityDetailsDegradedTableNoData: 'datasetQualityDetailsDegradedTableNoData',
     datasetQualitySparkPlot: 'datasetQualitySparkPlot',
-    datasetQualityHeaderButton: 'datasetQualityHeaderButton',
-    datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
-    datasetQualityFlyoutFieldsListIntegrationDetails:
-      'datasetQualityFlyoutFieldsList-integration_details',
-    datasetQualityFlyoutIntegrationLoading: 'datasetQualityFlyoutIntegrationLoading',
-    datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
-    datasetQualityFlyoutIntegrationAction: (action: string) =>
-      `datasetQualityFlyoutIntegrationAction${action}`,
+    datasetQualityDetailsHeaderButton: 'datasetQualityDetailsHeaderButton',
+    datasetQualityDetailsIntegrationLoading: 'datasetQualityDetailsIntegrationLoading',
+    datasetQualityDetailsIntegrationActionsButton: 'datasetQualityDetailsIntegrationActionsButton',
+    datasetQualityDetailsIntegrationAction: (action: string) =>
+      `datasetQualityDetailsIntegrationAction${action}`,
     datasetQualityFilterBarFieldSearch: 'datasetQualityFilterBarFieldSearch',
     datasetQualityIntegrationsSelectable: 'datasetQualityIntegrationsSelectable',
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
@@ -107,22 +126,30 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
+    datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
+    datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
-    datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
-    datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
+    datasetQualityDetailsSummaryKpiValue: 'datasetQualityDetailsSummaryKpiValue',
+    datasetQualityDetailsIntegrationRowIntegration: 'datasetQualityDetailsFieldsList-integration',
+    datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
+    datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
-    datasetQualityNoDataEmptyState: 'datasetQualityNoDataEmptyState',
+    datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
-    euiFlyoutCloseButton: 'euiFlyoutCloseButton',
     unifiedHistogramBreakdownSelectorButton: 'unifiedHistogramBreakdownSelectorButton',
     unifiedHistogramBreakdownSelectorSelectorSearch:
       'unifiedHistogramBreakdownSelectorSelectorSearch',
     unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
     managementHome: 'managementHome',
+    euiFlyoutCloseButton: 'euiFlyoutCloseButton',
+    datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist:
+      'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
+    datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
+      'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
   };
 
   return {
@@ -156,26 +183,50 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async navigateToDetails(pageState: datasetQualityDetailsUrlSchemaV1.UrlSchema) {
+      const queryStringParams = querystring.stringify({
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
+          datasetQualityDetailsUrlSchemaV1.urlSchemaRT.encode({
+            ...defaultDetailsPageState,
+            ...pageState,
+          })
+        ),
+      });
+
+      return PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        '/data/data_quality/details',
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
+      );
+    },
+
     async waitUntilTableLoaded() {
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
-    async waitUntilTableInFlyoutLoaded() {
-      await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiBasicTable-loading', 20 * 1000);
-    },
-
-    async waitUntilIntegrationsInFlyoutLoaded() {
-      await find.waitForDeletedByCssSelector(
-        '.euiSkeletonTitle .datasetQualityFlyoutIntegrationLoading',
-        10 * 1000
-      );
-    },
-
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
-      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`, {
+        timeout: 5 * 1000, // Increasing timeout since tests were flaky
+      });
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
+    },
+
+    async waitUntilPossibleMitigationsLoaded() {
+      await find.waitForDeletedByCssSelector(
+        '.euiFlyoutBody .datasetQualityDetailsFlyoutManualMitigationsLoading',
+        20 * 1000
+      );
+    },
+
+    async waitUntilDegradedFieldFlyoutLoaded() {
+      await testSubjects.existOrFail(testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout);
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
@@ -209,18 +260,30 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    generateBackingIndexNameWithoutVersion({
+      type = 'logs',
+      dataset,
+      namespace = 'default',
+    }: {
+      type?: string;
+      dataset: string;
+      namespace?: string;
+    }) {
+      return `.ds-${type}-${dataset}-${namespace}-${getCurrentDateFormatted()}`;
+    },
+
     getDatasetsTable(): Promise<WebElementWrapper> {
       return testSubjects.find(testSubjectSelectors.datasetQualityTable);
     },
 
-    getDatasetQualityFlyoutDegradedFieldTable(): Promise<WebElementWrapper> {
-      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable);
+    getDatasetQualityDetailsDegradedFieldTable(): Promise<WebElementWrapper> {
+      return testSubjects.find(testSubjectSelectors.datasetQualityDetailsDegradedFieldTable);
     },
 
-    async getDatasetQualityFlyoutDegradedFieldTableRows(): Promise<WebElementWrapper[]> {
-      await this.waitUntilTableInFlyoutLoaded();
+    async getDatasetQualityDetailsDegradedFieldTableRows(): Promise<WebElementWrapper[]> {
+      await this.waitUntilTableLoaded();
       const table = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+        testSubjectSelectors.datasetQualityDetailsDegradedFieldTable
       );
       const tBody = await table.findByTagName('tbody');
       return tBody.findAllByTagName('tr');
@@ -253,21 +316,27 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
-        '0',
-        'Data Set Name',
-        'Namespace',
-        'Size',
-        'Data Set Quality',
-        'Degraded Docs (%)',
-        'Last Activity',
-        'Actions',
+        texts.datasetNameColumn,
+        texts.datasetNamespaceColumn,
+        texts.datasetTypeColumn,
+        texts.datasetSizeColumn,
+        texts.datasetQualityColumn,
+        texts.datasetDegradedDocsColumn,
+        texts.datasetFailedDocsColumn,
+        texts.datasetLastActivityColumn,
+        texts.datasetActionsColumn,
       ]);
     },
 
     async parseDegradedFieldTable() {
-      await this.waitUntilTableInFlyoutLoaded();
-      const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
-      return this.parseTable(table, ['Field', 'Docs count', 'Last Occurrence']);
+      await this.waitUntilTableLoaded();
+      const table = await this.getDatasetQualityDetailsDegradedFieldTable();
+      return this.parseTable(table, [
+        '0',
+        texts.datasetIssueColumn,
+        texts.datasetDocsCountColumn,
+        texts.datasetLastOccurrenceColumn,
+      ]);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -302,89 +371,47 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
-    async openDatasetFlyout(datasetName: string) {
-      await this.waitUntilTableLoaded();
-      const cols = await this.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
-        (dName) => dName === datasetName
+    async refreshDetailsPageData() {
+      const datasetDetailsContainer: WebElementWrapper = await testSubjects.find(
+        testSubjectSelectors.datasetDetailsContainer
       );
-
-      expect(testDatasetRowIndex).to.be.greaterThan(-1);
-
-      const expandColumn = cols['0'];
-      const expandButtons = await expandColumn.getCellChildren(
-        `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
-      );
-
-      expect(expandButtons.length).to.be.greaterThan(0);
-
-      const datasetExpandButton = expandButtons[testDatasetRowIndex];
-
-      // Check if 'title' attribute is "Expand" or "Collapse"
-      const isCollapsed = (await datasetExpandButton.getAttribute('title')) === 'Expand';
-
-      // Open if collapsed
-      if (isCollapsed) {
-        await datasetExpandButton.click();
-      }
-
-      await this.waitUntilIntegrationsInFlyoutLoaded();
-    },
-
-    async closeFlyout() {
-      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
-    },
-
-    async refreshFlyout() {
-      const flyoutContainer: WebElementWrapper = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyoutBody
-      );
-      const refreshButton = await flyoutContainer.findByTestSubject(
+      const refreshButton = await datasetDetailsContainer.findByTestSubject(
         testSubjectSelectors.superDatePickerApplyTimeButton
       );
       return refreshButton.click();
     },
 
-    async getFlyoutElementsByText(selector: string, text: string) {
-      const flyoutContainer: WebElementWrapper = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyout
-      );
+    async doesTextExist(selector: string, text: string) {
+      const textValues = await testSubjects.getVisibleTextAll(selector);
+      if (textValues && textValues.length > 0) {
+        const values = textValues[0].split('\n');
+        return values.includes(text);
+      }
 
-      return getAllByText(flyoutContainer, selector, text);
+      return false;
     },
 
-    getFlyoutLogsExplorerButton() {
-      return testSubjects.find(testSubjectSelectors.datasetQualityHeaderButton);
+    getDatasetQualityDetailsHeaderButton() {
+      return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
     },
 
     openIntegrationActionsMenu() {
-      return testSubjects.click(testSubjectSelectors.datasetQualityFlyoutIntegrationActionsButton);
+      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsIntegrationActionsButton);
     },
 
     getIntegrationActionButtonByAction(action: string) {
-      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutIntegrationAction(action));
+      return testSubjects.find(testSubjectSelectors.datasetQualityDetailsIntegrationAction(action));
     },
 
     getIntegrationDashboardButtons() {
       return testSubjects.findAll(
-        testSubjectSelectors.datasetQualityFlyoutIntegrationAction('Dashboard')
+        testSubjectSelectors.datasetQualityDetailsIntegrationAction('Dashboard')
       );
-    },
-
-    async doestTextExistInFlyout(text: string, elementSelector: string) {
-      const flyoutContainer: WebElementWrapper = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyoutBody
-      );
-
-      const elements = await getAllByText(flyoutContainer, elementSelector, text);
-      return elements.length > 0;
     },
 
     // `excludeKeys` needed to circumvent `_stats` not available in Serverless  https://github.com/elastic/kibana/issues/178954
     // TODO: Remove `excludeKeys` when `_stats` is available in Serverless
-    async parseFlyoutKpis(excludeKeys: string[] = []): Promise<FlyoutKpi> {
+    async parseOverviewSummaryPanelKpis(excludeKeys: string[] = []): Promise<SummaryPanelKPI> {
       const kpiTitleAndKeys = [
         { title: texts.docsCountTotal, key: 'docsCountTotal' },
         { title: texts.size, key: 'size' },
@@ -397,7 +424,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         kpiTitleAndKeys.map(async ({ title, key }) => ({
           key,
           value: await testSubjects.getVisibleText(
-            `${testSubjectSelectors.datasetQualityFlyoutKpiValue}-${title}`
+            `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`
           ),
         }))
       );
@@ -407,50 +434,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ...acc,
           [key]: value,
         }),
-        {} as FlyoutKpi
+        {} as SummaryPanelKPI
       );
-    },
-
-    async setDatePickerLastXUnits(
-      container: WebElementWrapper,
-      timeValue: number,
-      unit: TimeUnitId
-    ) {
-      // Only click the menu button found under the provided container
-      const datePickerToggleQuickMenuButton = await container.findByTestSubject(
-        testSubjectSelectors.superDatePickerToggleQuickMenuButton
-      );
-      await datePickerToggleQuickMenuButton.click();
-
-      const datePickerQuickMenu = await testSubjects.find(
-        testSubjectSelectors.superDatePickerQuickMenu
-      );
-
-      const timeTenseSelect = await datePickerQuickMenu.findByCssSelector(
-        `select[aria-label="Time tense"]`
-      );
-      const timeValueInput = await datePickerQuickMenu.findByCssSelector(
-        `input[aria-label="Time value"]`
-      );
-      const timeUnitSelect = await datePickerQuickMenu.findByCssSelector(
-        `select[aria-label="Time unit"]`
-      );
-
-      await timeTenseSelect.focus();
-      await timeTenseSelect.type('Last');
-
-      await timeValueInput.focus();
-      await timeValueInput.clearValue();
-      await timeValueInput.type(timeValue.toString());
-
-      await timeUnitSelect.focus();
-      await timeUnitSelect.type(unit);
-
-      await (
-        await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)
-      ).click();
-
-      return testSubjects.missingOrFail(testSubjectSelectors.superDatePickerQuickMenu);
     },
 
     /**
@@ -465,6 +450,62 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         fieldText,
         fieldText
       );
+    },
+
+    async openDegradedFieldFlyout(fieldName: string) {
+      await this.waitUntilTableLoaded();
+      const cols = await this.parseDegradedFieldTable();
+      const fieldNameCol = cols.Issue;
+      const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `${fieldName} field ignored`
+      );
+
+      expect(testDatasetRowIndex).to.be.greaterThan(-1);
+
+      const expandColumn = cols['0'];
+      const expandButtons = await expandColumn.getCellChildren(
+        `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
+      );
+
+      expect(expandButtons.length).to.be.greaterThan(0);
+
+      const fieldExpandButton = expandButtons[testDatasetRowIndex];
+
+      // Check if 'title' attribute is "Expand" or "Collapse"
+      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
+
+      // Open if collapsed
+      if (isCollapsed) {
+        await fieldExpandButton.click();
+      }
+
+      await this.waitUntilDegradedFieldFlyoutLoaded();
+    },
+
+    async closeFlyout() {
+      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
+    },
+
+    async setDataStreamSettings(name: string, settings: IndicesIndexSettings) {
+      return es.indices.putSettings({
+        index: name,
+        settings,
+      });
+    },
+
+    async rolloverDataStream(name: string) {
+      return es.indices.rollover({
+        alias: name,
+      });
+    },
+
+    async getQualityIssueSwitchState() {
+      const isSelected = await testSubjects.getAttribute(
+        testSubjectSelectors.datasetQualityDetailsOverviewDegradedFieldToggleSwitch,
+        'aria-checked'
+      );
+      return isSelected === 'true';
     },
 
     async parseTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {
@@ -555,27 +596,11 @@ async function getDatasetTableHeaderTexts(tableWrapper: WebElementWrapper) {
   );
 }
 
-/**
- * Get all elements matching the given selector and text
- * @example
- * const container = await testSubjects.find('myContainer');
- * const elements = await getAllByText(container, 'button', 'Click me');
- *
- * @param container { WebElementWrapper } The container to search within
- * @param selector { string } The selector to search for (or filter elements by)
- * @param text { string } The text to search for within the filtered elements
- */
-export async function getAllByText(container: WebElementWrapper, selector: string, text: string) {
-  const elements = await container.findAllByCssSelector(selector);
-  const matchingElements: WebElementWrapper[] = [];
+function getCurrentDateFormatted() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
-  for (let i = 0; i < elements.length; i++) {
-    const element = elements[i];
-    const elementText = await element.getVisibleText();
-    if (elementText === text) {
-      matchingElements.push(element);
-    }
-  }
-
-  return matchingElements;
+  return `${year}.${month}.${day}`;
 }

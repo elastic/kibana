@@ -1,0 +1,429 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`serviceDetails search strategy parse should parse data correctly 1`] = `
+Object {
+  "inspect": Object {
+    "dsl": Array [
+      "{
+  \\"allow_no_indices\\": true,
+  \\"index\\": [
+    \\"test_indices*\\"
+  ],
+  \\"ignore_unavailable\\": true,
+  \\"track_total_hits\\": false,
+  \\"aggregations\\": {
+    \\"service_id\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.id\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_name\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.name\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_address\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.address\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_environment\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.environment\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_ephemeral_id\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.ephemeral_id\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_node_name\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.node.name\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_node_roles\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.node.roles\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_node_role\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.node.role\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_state\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.state\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_type\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.type\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"service_version\\": {
+      \\"terms\\": {
+        \\"field\\": \\"service.version\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    }
+  },
+  \\"query\\": {
+    \\"bool\\": {
+      \\"filter\\": [
+        {
+          \\"bool\\": {
+            \\"must\\": [],
+            \\"filter\\": [
+              {
+                \\"match_all\\": {}
+              },
+              {
+                \\"match_phrase\\": {
+                  \\"service.name\\": {
+                    \\"query\\": \\"test_service\\"
+                  }
+                }
+              }
+            ],
+            \\"should\\": [],
+            \\"must_not\\": []
+          }
+        },
+        {
+          \\"term\\": {
+            \\"service.name\\": \\"bastion00.siem.estc.dev\\"
+          }
+        },
+        {
+          \\"range\\": {
+            \\"@timestamp\\": {
+              \\"format\\": \\"strict_date_optional_time\\",
+              \\"gte\\": \\"2020-09-02T15:17:13.678Z\\",
+              \\"lte\\": \\"2020-09-03T15:17:13.678Z\\"
+            }
+          }
+        }
+      ]
+    }
+  },
+  \\"size\\": 0
+}",
+    ],
+  },
+  "isPartial": false,
+  "isRunning": false,
+  "loaded": 2,
+  "rawResponse": Object {
+    "_shards": Object {
+      "failed": 0,
+      "skipped": 1,
+      "successful": 2,
+      "total": 2,
+    },
+    "aggregations": Object {
+      "aggregations": Object {
+        "service_address": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 3,
+              "key": "15.103.138.105",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 117,
+        },
+        "service_environment": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 57,
+              "key": "development",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "service_ephemeral_id": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 3,
+              "key": "EV8lINfcelHgHrJMwuNvQ",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 117,
+        },
+        "service_id": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 3,
+              "key": "I30s36URfOdZ7gtpC4dum",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 117,
+        },
+        "service_name": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 147,
+              "key": "Service-alarm",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "service_node_name": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 3,
+              "key": "corny-edger",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 117,
+        },
+        "service_node_role": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 30,
+              "key": "ingest",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "service_node_roles": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 42,
+              "key": "data",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+            Object {
+              "doc_count": 54,
+              "key": "ingest",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+            Object {
+              "doc_count": 51,
+              "key": "master",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "service_state": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 51,
+              "key": "running",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "service_type": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 147,
+              "key": "system",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "service_version": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 3,
+              "key": "2.1.9",
+              "timestamp": Object {
+                "value": 1736851996820,
+                "value_as_string": "2025-01-14T10:53:16.820Z",
+              },
+            },
+          ],
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 117,
+        },
+      },
+    },
+    "hits": Object {
+      "hits": Array [],
+      "max_score": null,
+    },
+    "timed_out": false,
+    "took": 1,
+  },
+  "serviceDetails": Object {},
+  "total": 2,
+}
+`;

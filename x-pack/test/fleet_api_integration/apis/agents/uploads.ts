@@ -12,7 +12,6 @@ import {
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -20,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENT_ACTIONS_INDEX,
         refresh: true,
         op_type: 'create',
-        body: {
+        document: {
           type: 'REQUEST_DIAGNOSTICS',
           action_id: `fleet_uploads_test-${fileName}-action`,
           agents: [opts.agentId],
@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENT_ACTIONS_RESULTS_INDEX,
         refresh: true,
         op_type: 'create',
-        body: {
+        document: {
           action_id: `fleet_uploads_test-${fileName}-action`,
           agent_id: opts.agentId,
           '@timestamp': opts.timestamp,
@@ -114,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         id: fileName,
         refresh: true,
         op_type: 'create',
-        body: {
+        document: {
           '@timestamp': opts.timestamp,
           upload_id: fileName,
           action_id: `fleet_uploads_test-${fileName}-action`,
@@ -142,7 +142,7 @@ export default function (providerContext: FtrProviderContext) {
         id: `${fileName}.0`,
         op_type: 'create',
         refresh: true,
-        body: {
+        document: {
           '@timestamp': opts.timestamp,
           last: true,
           bid: fileName,
@@ -155,9 +155,9 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_uploads', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       await cleanupFiles();

@@ -1,0 +1,167 @@
+{
+  "id": "@kbn/scout-info",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTestRunConfigCategory",
+        "type": "Enum",
+        "tags": [],
+        "label": "ScoutTestRunConfigCategory",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_OUTPUT_ROOT",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_OUTPUT_ROOT",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_REPORT_OUTPUT_ROOT",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_REPORT_OUTPUT_ROOT",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_REPORTER_ENABLED",
+        "type": "boolean",
+        "tags": [],
+        "label": "SCOUT_REPORTER_ENABLED",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_REPORTER_ES_API_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_REPORTER_ES_API_KEY",
+        "description": [],
+        "signature": [
+          "string | undefined"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_REPORTER_ES_URL",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_REPORTER_ES_URL",
+        "description": [],
+        "signature": [
+          "string | undefined"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_REPORTER_ES_VERIFY_CERTS",
+        "type": "boolean",
+        "tags": [],
+        "label": "SCOUT_REPORTER_ES_VERIFY_CERTS",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_SERVERS_ROOT",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_SERVERS_ROOT",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TEST_EVENTS_DATA_STREAM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TEST_EVENTS_DATA_STREAM_NAME",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TEST_EVENTS_INDEX_PATTERN",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TEST_EVENTS_INDEX_PATTERN",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TEST_EVENTS_TEMPLATE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TEST_EVENTS_TEMPLATE_NAME",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

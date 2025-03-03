@@ -28,7 +28,7 @@ export function MachineLearningAlertingProvider(
     async selectAnomalyDetectionAlertType() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('xpack.ml.anomaly_detection_alert-SelectOption');
-        await testSubjects.existOrFail(`mlAnomalyAlertForm`, { timeout: 1000 });
+        await testSubjects.existOrFail(`mlAnomalyAlertForm`);
       });
     },
 

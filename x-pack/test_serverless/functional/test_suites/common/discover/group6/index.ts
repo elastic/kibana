@@ -12,6 +12,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('discover/group6', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });

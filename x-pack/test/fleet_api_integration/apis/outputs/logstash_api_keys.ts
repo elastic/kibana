@@ -15,7 +15,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('fleet_output_logstash_api_keys', async function () {
+  describe('fleet_output_logstash_api_keys', function () {
     describe('POST /logstash_api_keys', () => {
       it('should allow to create an api key with the right permissions', async () => {
         const { body: apiKeyRes } = await supertest
@@ -30,22 +30,20 @@ export default function (providerContext: FtrProviderContext) {
           Buffer.from(apiKeyRes.api_key).toString('base64')
         ).security.hasPrivileges(
           {
-            body: {
-              cluster: ['monitor'],
-              index: [
-                {
-                  names: [
-                    'logs-*-*',
-                    'metrics-*-*',
-                    'traces-*-*',
-                    'synthetics-*-*',
-                    '.logs-endpoint.diagnostic.collection-*',
-                    '.logs-endpoint.action.responses-*',
-                  ],
-                  privileges: ['auto_configure', 'create_doc'],
-                },
-              ],
-            },
+            cluster: ['monitor'],
+            index: [
+              {
+                names: [
+                  'logs-*-*',
+                  'metrics-*-*',
+                  'traces-*-*',
+                  'synthetics-*-*',
+                  '.logs-endpoint.diagnostic.collection-*',
+                  '.logs-endpoint.action.responses-*',
+                ],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
           },
           { meta: true }
         );

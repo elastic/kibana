@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -23,5 +24,16 @@ export default createTestConfig({
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
+    `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
+    '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.enableExperimental=[]',
+    // dataUsage.autoops* config is set in kibana controller
+    '--xpack.dataUsage.autoops.enabled=true',
+    '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
+    `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
+    `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
+    // Enables /internal/cloud_security_posture/graph API
+    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
 });

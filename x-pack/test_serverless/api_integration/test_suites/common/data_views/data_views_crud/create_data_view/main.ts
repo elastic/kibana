@@ -20,11 +20,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     configArray.forEach((config) => {
       describe(config.name, () => {
@@ -254,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.body[config.serviceKey].fieldFormats.foo.params).to.eql({});
         });
 
-        it('can specify optional fieldFormats attribute when creating an index pattern', async () => {
+        it('can specify optional fieldFormats attribute with count and label when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)

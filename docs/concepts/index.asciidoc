@@ -27,6 +27,9 @@ with the *date histogram*, to see count over time. The *terms* aggregation shows
 
 [float]
 === Finding your apps and objects
+// putting ID here for backwards compatibility 
+[[kibana-concepts-finding-your-apps-objects]]
+
 
 {kib} offers a <<kibana-navigation-search,global search bar>> on every page that you can use to find any app or saved object.
 Open the search bar using the keyboard shortcut Ctrl+/ on Windows and Linux, Command+/ on MacOS.

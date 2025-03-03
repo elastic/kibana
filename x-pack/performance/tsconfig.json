@@ -22,5 +22,6 @@
     "@kbn/expect",
     "@kbn/dev-utils",
     "@kbn/apm-synthtrace-client",
+    "@kbn/test-suites-src",
   ]
 }

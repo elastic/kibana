@@ -76,7 +76,13 @@
             "description": [],
             "signature": [
               "(absolute: string) => ",
-              "ModuleId"
+              {
+                "pluginId": "@kbn/repo-source-classifier",
+                "scope": "common",
+                "docId": "kibKbnRepoSourceClassifierPluginApi",
+                "section": "def-common.ModuleId",
+                "text": "ModuleId"
+              }
             ],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
             "deprecated": false,
@@ -105,7 +111,133 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/repo-source-classifier",
+        "id": "def-common.ModuleId",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModuleId",
+        "description": [],
+        "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Type of the module"
+            ],
+            "signature": [
+              "\"non-package\" | \"tests or mocks\" | \"static\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.group",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "group",
+            "description": [
+              "Specifies the group to which this module belongs"
+            ],
+            "signature": [
+              "\"search\" | \"security\" | \"observability\" | \"platform\" | \"common\""
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.visibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visibility",
+            "description": [
+              "Specifies the module visibility, i.e. whether it can be accessed by everybody or only modules in the same group"
+            ],
+            "signature": [
+              "\"private\" | \"shared\""
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.repoRel",
+            "type": "string",
+            "tags": [],
+            "label": "repoRel",
+            "description": [
+              "repo relative path to the module's source file"
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.pkgInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "pkgInfo",
+            "description": [
+              "info about the package the source file is within, in the case the file is found within a package"
+            ],
+            "signature": [
+              "PkgInfo",
+              " | undefined"
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.manifest",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "manifest",
+            "description": [
+              "The type of package, as described in the manifest"
+            ],
+            "signature": [
+              "KibanaPackageManifest",
+              " | undefined"
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-source-classifier",
+            "id": "def-common.ModuleId.dirs",
+            "type": "Array",
+            "tags": [],
+            "label": "dirs",
+            "description": [
+              "path segments of the dirname of this"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

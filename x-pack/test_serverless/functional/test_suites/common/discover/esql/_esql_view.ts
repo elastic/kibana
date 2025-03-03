@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'svlCommonPage',
     'common',
@@ -29,27 +30,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
     'unifiedFieldList',
+    'unifiedSearch',
   ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', async function () {
+  describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('test', () => {
+    after(async () => {
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    describe('ES|QL in Discover', () => {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -72,13 +82,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
-        await testSubjects.existOrFail('TextBasedLangEditor');
+        await testSubjects.existOrFail('ESQLEditor');
         await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.existOrFail('dscViewModeToggle');
-        await testSubjects.existOrFail('dscViewModeDocumentButton');
+        await testSubjects.missingOrFail('dscViewModeToggle');
+        await testSubjects.missingOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
@@ -91,9 +101,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('discoverFieldListPanelEditItem');
       });
 
-      it('should perform test query correctly', async function () {
+      it('should not render the histogram for indices with no @timestamp field', async function () {
         await PageObjects.discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from kibana_sample_data_flights | limit 10`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
+        // I am not rendering the histogram for indices with no @timestamp field
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
+      });
+
+      it('should render the histogram for indices with no @timestamp field when the ?_tstart, ?_tend params are in the query', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?_tstart and timestamp <= ?_tend`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        const fromTime = 'Apr 10, 2018 @ 00:00:00.000';
+        const toTime = 'Nov 15, 2018 @ 00:00:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+      });
+
+      it('should perform test query correctly', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -102,18 +152,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // here Lens suggests a XY so it is rendered
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('xyVisChart');
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        let cell = await dataGrid.getCellElement(0, 2);
+        let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
@@ -125,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        cell = await dataGrid.getCellElement(0, 2);
+        cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
@@ -134,29 +187,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        const testQuery = `from logstash* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
       it('should render correctly if there are empty fields', async function () {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        const cell = await dataGrid.getCellElement(0, 3);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
-        expect(await dataGrid.getHeaders()).to.eql([
-          'Control column',
-          'Select column',
+        expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -171,7 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.discover.dragFieldToTable('a');
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
     });
@@ -217,32 +270,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
       });
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
         await find.clickByCssSelector(
-          '[data-test-subj="unifiedSearch_switch_modal"] .euiModal__closeIcon'
+          '[data-test-subj="discover-esql-to-dataview-modal"] .euiModal__closeIcon'
         );
         await retry.try(async () => {
-          await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+          await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
-        await PageObjects.discover.selectIndexPattern('logstash-*');
-        await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+        await testSubjects.click('switch-to-dataviews');
+        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
@@ -250,15 +305,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.saveSearch('esql_test2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views after switching to classic mode', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedSearch.switchToDataViewMode();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        if (await testSubjects.exists('~nav-item-observability_project_nav')) {
+          expect(availableDataViews).to.eql([
+            'All logs',
+            'kibana_sample_data_flights',
+            'logstash-*',
+          ]);
+        } else {
+          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        }
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 
@@ -303,15 +386,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'FROM logstash-* | LIMIT 10';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -326,15 +403,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should select a query from the history and submit it', async () => {
@@ -343,18 +417,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         // click a history item
         await esql.clickHistoryItem(1);
 
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should add a failed query to the history', async () => {
@@ -369,11 +440,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await testSubjects.click('TextBasedLangEditor-expand');
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
-        await testSubjects.click('TextBasedLangEditor-queryHistory-runQuery-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-history-starred-queries-run-button');
         const historyItem = await esql.getHistoryItem(0);
-        await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
+        await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });
     });
 
@@ -398,7 +468,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains an initial value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '1,623';
         });
@@ -412,9 +482,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the highest value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
@@ -427,9 +497,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await browser.refresh();
@@ -438,9 +508,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await PageObjects.discover.clickNewSearchButton();
@@ -456,9 +526,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same highest value after reopening',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 2);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
-            return text === '483';
+            return text === '17,966';
           }
         );
 
@@ -467,7 +537,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the lowest value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -484,7 +554,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
 
         await retry.waitFor('first cell contains the lowest value for extension', async () => {
-          const cell = await dataGrid.getCellElement(0, 3);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === 'css';
         });
@@ -499,7 +569,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the same lowest value after reload', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -507,7 +577,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value for extension after reload',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 3);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === 'css';
           }
@@ -525,7 +595,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 2);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
             return text === '0';
           }
@@ -534,7 +604,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the lowest value for extension as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 3);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === 'css';
           }

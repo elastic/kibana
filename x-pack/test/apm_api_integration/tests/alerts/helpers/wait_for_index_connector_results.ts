@@ -6,8 +6,11 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import pRetry from 'p-retry';
-import { APM_ACTION_VARIABLE_INDEX } from './alerting_api_helper';
+import { ToolingLog } from '@kbn/tooling-log';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { APM_ACTION_VARIABLE_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
+
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 
 async function getIndexConnectorResults(es: Client) {
   const res = await es.search({ index: APM_ACTION_VARIABLE_INDEX });
@@ -21,11 +24,16 @@ export async function waitForIndexConnectorResults({
   es: Client;
   minCount?: number;
 }) {
-  return pRetry(async () => {
-    const results = await getIndexConnectorResults(es);
-    if (results.length < minCount) {
-      throw new Error(`Expected ${minCount} but got ${results.length} results`);
-    }
-    return results;
+  return await retryForSuccess(new debugLog({ context: 'waitForIndexConnectorResults' }), {
+    timeout: 20_000,
+    methodName: 'waitForIndexConnectorResults',
+    block: async () => {
+      const results = await getIndexConnectorResults(es);
+      if (results.length < minCount)
+        throw new Error(`Expected ${minCount} but got ${results.length} results`);
+
+      return results;
+    },
+    retryCount: 10,
   });
 }

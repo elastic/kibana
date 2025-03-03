@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -16,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -39,8 +40,8 @@ export const getDataTableFactory = (
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
     const storage = new Storage(localStorage);
     const timeRange = initializeTimeRange(state);
-    const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const titleManager = initializeTitleManager(state);
     const allServices: UnifiedDataTableProps['services'] = {
       ...services,
       storage,
@@ -52,18 +53,18 @@ export const getDataTableFactory = (
     const api = buildApi(
       {
         ...timeRange.api,
-        ...titlesApi,
-        dataLoading: queryLoading$,
+        ...titleManager.api,
+        dataLoading$,
         serializeState: () => {
           return {
-            rawState: { ...serializeTitles(), ...timeRange.serialize() },
+            rawState: { ...titleManager.serialize(), ...timeRange.serialize() },
           };
         },
       },
-      { ...titleComparators, ...timeRange.comparators }
+      { ...titleManager.comparators, ...timeRange.comparators }
     );
 
-    const queryService = await initializeDataTableQueries(services, api, queryLoading$);
+    const queryService = await initializeDataTableQueries(services, api, dataLoading$);
 
     // Create the React Embeddable component
     return {
@@ -73,7 +74,7 @@ export const getDataTableFactory = (
         const [fields, rows, loading, dataView] = useBatchedPublishingSubjects(
           queryService.fields$,
           queryService.rows$,
-          queryLoading$,
+          dataLoading$,
           queryService.dataView$
         );
 
@@ -98,7 +99,7 @@ export const getDataTableFactory = (
                 width: 100%;
               `}
             >
-              <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+              <KibanaRenderContextProvider {...core}>
                 <KibanaContextProvider services={allServices}>
                   <CellActionsProvider
                     getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
@@ -111,7 +112,6 @@ export const getDataTableFactory = (
                       dataView={dataView}
                       sampleSizeState={100}
                       columns={fields ?? []}
-                      useNewFieldsApi={true}
                       services={allServices}
                       onSetColumns={() => {}}
                       ariaLabelledBy="dataTableReactEmbeddableAria"

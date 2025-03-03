@@ -1,0 +1,1367 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Netflow renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  .c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+.c4 {
+  margin-right: 5px;
+}
+
+.c3 {
+  margin-right: 5px;
+}
+
+.c2 {
+  margin-right: 3px;
+  position: relative;
+  top: -1px;
+}
+
+.c0 {
+  margin-right: 10px;
+}
+
+<div
+    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-center-center-column"
+    data-test-subj="netflow-rows"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-none-center-stretch-row"
+        data-test-subj="netflow-columns"
+      >
+        <div
+          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
+            data-test-subj="user-process"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-user.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <div
+                        data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                        tabindex="-1"
+                      >
+                        <span
+                          class="c1"
+                          data-test-subj="render-content-user.name"
+                        >
+                          <span
+                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          >
+                            <span
+                              class="euiBadge emotion-euiBadge-hollow"
+                              title=""
+                            >
+                              <span
+                                class="euiBadge__content emotion-euiBadge__content"
+                              >
+                                <span
+                                  class="euiBadge__icon emotion-euiBadge__icon-left"
+                                  color="inherit"
+                                  data-euiicon-type="user"
+                                />
+                                <span
+                                  class="euiBadge__text emotion-euiBadge__text"
+                                >
+                                  first.last
+                                </span>
+                              </span>
+                            </span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-process.name"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  >
+                    <span
+                      class="euiBadge emotion-euiBadge-hollow"
+                      title=""
+                    >
+                      <span
+                        class="euiBadge__content emotion-euiBadge__content"
+                      >
+                        <span
+                          class="euiBadge__icon emotion-euiBadge__icon-left"
+                          color="inherit"
+                          data-euiicon-type="console"
+                        />
+                        <span
+                          class="euiBadge__text emotion-euiBadge__text"
+                        >
+                          rat
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
+            data-test-subj="duration-and-start-group"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                data-provider-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-event.duration"
+                >
+                  <div
+                    class="euiText emotion-euiText-xs"
+                  >
+                    <span
+                      class="c2"
+                      data-euiicon-type="clock"
+                    />
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <div
+                        data-test-subj="formatted-duration"
+                      >
+                        1ms
+                      </div>
+                    </span>
+                  </div>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                data-provider-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-event.start"
+                >
+                  <div
+                    class="euiText emotion-euiText-xs"
+                  >
+                    <span
+                      class="c2"
+                      data-euiicon-type="clock"
+                    />
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      Nov 12, 2018 @ 19:03:25.836
+                    </span>
+                  </div>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-event.end"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <div
+                        data-provider-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                        tabindex="-1"
+                      >
+                        <span
+                          class="c1"
+                          data-test-subj="render-content-event.end"
+                        >
+                          <div
+                            class="euiText emotion-euiText-xs"
+                          >
+                            <span
+                              class="c2"
+                              data-euiicon-type="clock"
+                            />
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            >
+                              Nov 12, 2018 @ 19:03:25.936
+                            </span>
+                          </div>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-none-center-center-column"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-network.direction"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <span
+                          class="euiBadge emotion-euiBadge-hollow"
+                          title=""
+                        >
+                          <span
+                            class="euiBadge__content emotion-euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__icon emotion-euiBadge__icon-left"
+                              color="inherit"
+                              data-euiicon-type="arrowUp"
+                            />
+                            <span
+                              class="euiBadge__text emotion-euiBadge__text"
+                            >
+                              outgoing
+                            </span>
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-network.protocol"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <span
+                          class="euiBadge emotion-euiBadge-hollow"
+                          title=""
+                        >
+                          <span
+                            class="euiBadge__content emotion-euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text emotion-euiBadge__text"
+                            >
+                              http
+                            </span>
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    data-provider-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-network.bytes"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <div
+                          class="euiText emotion-euiText-xs"
+                        >
+                          <span>
+                            100B
+                          </span>
+                        </div>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    data-provider-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-network.packets"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <div
+                          class="euiText emotion-euiText-xs"
+                        >
+                          <span>
+                            3 pkts
+                          </span>
+                        </div>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-network.transport"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <span
+                          class="euiBadge emotion-euiBadge-hollow"
+                          title=""
+                        >
+                          <span
+                            class="euiBadge__content emotion-euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text emotion-euiBadge__text"
+                            >
+                              tcp
+                            </span>
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-network.community_id"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <span
+                          class="euiBadge emotion-euiBadge-hollow"
+                          title=""
+                        >
+                          <span
+                            class="euiBadge__content emotion-euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text emotion-euiBadge__text"
+                            >
+                              we.live.in.a
+                            </span>
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <span
+                    class="euiBadge emotion-euiBadge-hollow"
+                    data-test-subj="source-ip-badge"
+                    title=""
+                  >
+                    <span
+                      class="euiBadge__content emotion-euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text emotion-euiBadge__text"
+                      >
+                        <div
+                          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-column"
+                          data-test-subj="source-ip-group"
+                        >
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
+                          >
+                            <div
+                              class="css-fbtzpm"
+                            >
+                              Source
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
+                          >
+                            <div
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+                            >
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <a
+                                      class="euiLink emotion-euiLink-primary"
+                                      data-test-subj="network-details"
+                                      href="/ip/192.168.1.2/source/events"
+                                      rel="noreferrer"
+                                    >
+                                      192.168.1.2
+                                    </a>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                                  >
+                                    <div
+                                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+                                    >
+                                      <div
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                                      >
+                                        <span
+                                          class="css-7g9jn5"
+                                          data-test-subj="ip-port-separator"
+                                        >
+                                          :
+                                        </span>
+                                      </div>
+                                      <div
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                                      >
+                                        <div
+                                          class="css-ggf2mo"
+                                        >
+                                          <a
+                                            class="euiLink emotion-euiLink-primary"
+                                            data-test-subj="port-or-service-name-link"
+                                            href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=9987"
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                          >
+                                            9987
+                                            <span
+                                              class="emotion-EuiExternalLinkIcon"
+                                              data-euiicon-type="popout"
+                                              role="presentation"
+                                            />
+                                            <span
+                                              class="emotion-euiScreenReaderOnly"
+                                            >
+                                              (external, opens in a new tab or window)
+                                            </span>
+                                          </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-grow-1"
+                          >
+                            <div
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                            >
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-source.geo.continent_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          North America
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-source.geo.country_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          United States
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <span
+                                      class="css-19nn5cj"
+                                      data-test-subj="country-flag"
+                                    >
+                                      🇺🇸
+                                    </span>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-source.geo.country_iso_code"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          US
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-source.geo.region_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          Georgia
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-source.geo.city_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          Atlanta
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-center-center-column"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+                    >
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          class="css-10gmjt4"
+                          height="2.8"
+                        />
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <div
+                          data-provider-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                          tabindex="-1"
+                        >
+                          <span
+                            class="c1"
+                            data-test-subj="render-content-source.bytes"
+                          >
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            >
+                              <div
+                                class="euiText emotion-euiText-xs"
+                              >
+                                <span
+                                  class="css-2dse8b"
+                                >
+                                  (60.00%)
+                                </span>
+                                <span>
+                                  60B
+                                </span>
+                              </div>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          class="css-10gmjt4"
+                          height="2.8"
+                        />
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <div
+                          data-provider-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                          tabindex="-1"
+                        >
+                          <span
+                            class="c1"
+                            data-test-subj="render-content-source.packets"
+                          >
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            >
+                              <div
+                                class="euiText emotion-euiText-xs"
+                              >
+                                <span>
+                                  2 pkts
+                                </span>
+                              </div>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          class="css-10gmjt4"
+                          height="2.8"
+                        />
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          color="subdued"
+                          data-euiicon-type="arrowRight"
+                          data-test-subj="arrow-icon"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+                    >
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          color="subdued"
+                          data-euiicon-type="arrowLeft"
+                          data-test-subj="arrow-icon"
+                        />
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          class="css-1aksxv4"
+                          height="2.2"
+                        />
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <div
+                          data-test-subj="cellActions-renderContent-destination.bytes"
+                        >
+                          <div>
+                            <div
+                              class="euiPopover emotion-euiPopover-inline-block"
+                            >
+                              <div>
+                                <div
+                                  data-provider-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                  tabindex="-1"
+                                >
+                                  <span
+                                    class="c1"
+                                    data-test-subj="render-content-destination.bytes"
+                                  >
+                                    <span
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                    >
+                                      <div
+                                        class="euiText emotion-euiText-xs"
+                                      >
+                                        <span
+                                          class="css-2dse8b"
+                                        >
+                                          (40.00%)
+                                        </span>
+                                        <span>
+                                          40B
+                                        </span>
+                                      </div>
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          class="css-1aksxv4"
+                          height="2.2"
+                        />
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <div
+                          data-provider-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                          tabindex="-1"
+                        >
+                          <span
+                            class="c1"
+                            data-test-subj="render-content-destination.packets"
+                          >
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            >
+                              <div
+                                class="euiText emotion-euiText-xs"
+                              >
+                                <span>
+                                  1 pkts
+                                </span>
+                              </div>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <span
+                          class="css-1aksxv4"
+                          height="2.2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <span
+                    class="euiBadge emotion-euiBadge-hollow"
+                    data-test-subj="destination-ip-badge"
+                    title=""
+                  >
+                    <span
+                      class="euiBadge__content emotion-euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text emotion-euiBadge__text"
+                      >
+                        <div
+                          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-column"
+                          data-test-subj="destination-ip-group"
+                        >
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
+                          >
+                            <div
+                              class="css-fbtzpm"
+                            >
+                              Destination
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
+                          >
+                            <div
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+                            >
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <a
+                                      class="euiLink emotion-euiLink-primary"
+                                      data-test-subj="network-details"
+                                      href="/ip/10.1.2.3/source/events"
+                                      rel="noreferrer"
+                                    >
+                                      10.1.2.3
+                                    </a>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                                  >
+                                    <div
+                                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+                                    >
+                                      <div
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                                      >
+                                        <span
+                                          class="css-7g9jn5"
+                                          data-test-subj="ip-port-separator"
+                                        >
+                                          :
+                                        </span>
+                                      </div>
+                                      <div
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                                      >
+                                        <div
+                                          class="css-ggf2mo"
+                                        >
+                                          <a
+                                            class="euiLink emotion-euiLink-primary"
+                                            data-test-subj="port-or-service-name-link"
+                                            href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80"
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                          >
+                                            80
+                                            <span
+                                              class="emotion-EuiExternalLinkIcon"
+                                              data-euiicon-type="popout"
+                                              role="presentation"
+                                            />
+                                            <span
+                                              class="emotion-euiScreenReaderOnly"
+                                            >
+                                              (external, opens in a new tab or window)
+                                            </span>
+                                          </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-grow-1"
+                          >
+                            <div
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                            >
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-destination.geo.continent_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          North America
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-destination.geo.country_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          United States
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <span
+                                      class="css-19nn5cj"
+                                      data-test-subj="country-flag"
+                                    >
+                                      🇺🇸
+                                    </span>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-destination.geo.country_iso_code"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          US
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-destination.geo.region_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          New York
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
+                              >
+                                <div
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+                                >
+                                  <div
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                                  >
+                                    <div
+                                      data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                      tabindex="-1"
+                                    >
+                                      <span
+                                        class="c1"
+                                        data-test-subj="render-content-destination.geo.city_name"
+                                      >
+                                        <span
+                                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                        >
+                                          New York
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-center-center-column"
+        data-test-subj="fingerprints-group"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+            tabindex="-1"
+          >
+            <span
+              class="c1"
+              data-test-subj="render-content-tls.fingerprints.ja3.hash"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              >
+                <span
+                  class="euiBadge emotion-euiBadge-hollow"
+                  title=""
+                >
+                  <span
+                    class="euiBadge__content emotion-euiBadge__content"
+                  >
+                    <span
+                      class="euiBadge__icon emotion-euiBadge__icon-left"
+                      color="inherit"
+                      data-euiicon-type="snowflake"
+                    />
+                    <span
+                      class="euiBadge__text emotion-euiBadge__text"
+                    >
+                      <span
+                        class="c3"
+                      >
+                        ja3
+                      </span>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="ja3-fingerprint-link"
+                        href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        tls.fingerprints.ja3.hash-value
+                        <span
+                          class="emotion-EuiExternalLinkIcon"
+                          data-euiicon-type="popout"
+                          role="presentation"
+                        />
+                        <span
+                          class="emotion-euiScreenReaderOnly"
+                        >
+                          (external, opens in a new tab or window)
+                        </span>
+                      </a>
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+            tabindex="-1"
+          >
+            <span
+              class="c1"
+              data-test-subj="render-content-tls.client_certificate.fingerprint.sha1"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              >
+                <span
+                  class="euiBadge emotion-euiBadge-hollow"
+                  title=""
+                >
+                  <span
+                    class="euiBadge__content emotion-euiBadge__content"
+                  >
+                    <span
+                      class="euiBadge__icon emotion-euiBadge__icon-left"
+                      color="inherit"
+                      data-euiicon-type="snowflake"
+                    />
+                    <span
+                      class="euiBadge__text emotion-euiBadge__text"
+                    >
+                      <span
+                        class="c4"
+                      >
+                        client cert
+                      </span>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="certificate-fingerprint-link"
+                        href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        tls.client_certificate.fingerprint.sha1-value
+                        <span
+                          class="emotion-EuiExternalLinkIcon"
+                          data-euiicon-type="popout"
+                          role="presentation"
+                        />
+                        <span
+                          class="emotion-euiScreenReaderOnly"
+                        >
+                          (external, opens in a new tab or window)
+                        </span>
+                      </a>
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+            tabindex="-1"
+          >
+            <span
+              class="c1"
+              data-test-subj="render-content-tls.server_certificate.fingerprint.sha1"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              >
+                <span
+                  class="euiBadge emotion-euiBadge-hollow"
+                  title=""
+                >
+                  <span
+                    class="euiBadge__content emotion-euiBadge__content"
+                  >
+                    <span
+                      class="euiBadge__icon emotion-euiBadge__icon-left"
+                      color="inherit"
+                      data-euiicon-type="snowflake"
+                    />
+                    <span
+                      class="euiBadge__text emotion-euiBadge__text"
+                    >
+                      <span
+                        class="c4"
+                      >
+                        server cert
+                      </span>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="certificate-fingerprint-link"
+                        href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        tls.server_certificate.fingerprint.sha1-value
+                        <span
+                          class="emotion-EuiExternalLinkIcon"
+                          data-euiicon-type="popout"
+                          role="presentation"
+                        />
+                        <span
+                          class="emotion-euiScreenReaderOnly"
+                        >
+                          (external, opens in a new tab or window)
+                        </span>
+                      </a>
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

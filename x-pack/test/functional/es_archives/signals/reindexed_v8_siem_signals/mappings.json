@@ -1,0 +1,31 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".siem-signals-default": {
+        "is_write_index": true
+      },
+      ".siem-signals-default-000001": {}
+    },
+    "index": ".reindexed-v8-siem-signals-default-000001",
+    "mappings": {
+      "_meta": {
+        "version": 1
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "signal": { "type": "object" }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": ".siem-signals-default",
+          "rollover_alias": ".siem-signals-default"
+        }
+      }
+    }
+  }
+}

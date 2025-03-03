@@ -1,0 +1,107 @@
+openapi: 3.0.0
+info:
+  title: Bulk Delete API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_bulk_delete:
+    delete:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      operationId: BulkDeleteRules
+      deprecated: true
+      summary: Delete multiple detection rules
+      description: Delete detection rules in bulk.
+      tags:
+        - Bulk API
+      requestBody:
+        description: A JSON array of `id` or `rule_id` fields of the rules you want to delete.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+                  rule_id:
+                    $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../response_schema.schema.yaml#/components/schemas/BulkCrudRulesResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+    post:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      operationId: BulkDeleteRulesPost
+      deprecated: true
+      summary: Delete multiple detection rules
+      description: Deletes multiple rules.
+      tags:
+        - Bulk API
+      requestBody:
+        description: A JSON array of `id` or `rule_id` fields of the rules you want to delete.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+                  rule_id:
+                    $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../response_schema.schema.yaml#/components/schemas/BulkCrudRulesResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

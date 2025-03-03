@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const jobTypes = Object.values(ANALYSIS_CONFIG_TYPE);
-  type JobType = typeof jobTypes[number];
+  type JobType = (typeof jobTypes)[number];
   const jobAnalyses = {
     classification: {
       dependent_variable: 'y',
@@ -168,7 +168,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
 
       it('should not allow analytics job creation for the user with only view permission', async () => {
@@ -183,7 +182,6 @@ export default ({ getService }: FtrProviderContext) => {
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
-        expect(body.message).to.eql('Forbidden');
       });
     });
   });

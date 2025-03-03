@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -41,12 +42,12 @@ export function getTestScenariosForSpace(spaceId: string) {
 export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
   return es.search({
     index: ALL_SAVED_OBJECT_INDICES,
-    body: {
-      size: 0,
-      runtime_mappings: {
-        normalized_namespace: {
-          type: 'keyword',
-          script: `
+    request_cache: false,
+    size: 0,
+    runtime_mappings: {
+      normalized_namespace: {
+        type: 'keyword',
+        script: `
           if (doc["namespaces"].size() > 0) {
             emit(doc["namespaces"].value);
           } else if (doc["namespace"].size() > 0) {
@@ -55,14 +56,13 @@ export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
             emit(doc["legacy-url-alias.targetNamespace"].value);
           }
         `,
-        },
       },
-      query: { terms: { type: objectTypes } },
-      aggs: {
-        count: {
-          terms: { field: 'normalized_namespace', missing: DEFAULT_SPACE_ID, size: 10 },
-          aggs: { countByType: { terms: { field: 'type', missing: 'UNKNOWN', size: 10 } } },
-        },
+    },
+    query: { terms: { type: objectTypes } },
+    aggs: {
+      count: {
+        terms: { field: 'normalized_namespace', missing: DEFAULT_SPACE_ID, size: 10 },
+        aggs: { countByType: { terms: { field: 'type', missing: 'UNKNOWN', size: 10 } } },
       },
     },
   });

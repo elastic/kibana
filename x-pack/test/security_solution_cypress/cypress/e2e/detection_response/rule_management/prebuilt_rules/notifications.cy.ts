@@ -20,6 +20,7 @@ import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
@@ -32,9 +33,11 @@ const RULE_1 = createRuleAssetSavedObject({
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     beforeEach(() => {
+      preventPrebuiltRulesPackageInstallation();
+
       login();
       /* Make sure persisted rules table state is cleared */
       resetRulesTableState();
@@ -72,7 +75,7 @@ describe(
     });
 
     // https://github.com/elastic/kibana/issues/179968
-    describe('Notifications', { tags: ['@skipInServerlessMKI'] }, () => {
+    describe('Notifications', () => {
       beforeEach(() => {
         installPrebuiltRuleAssets([RULE_1]);
       });

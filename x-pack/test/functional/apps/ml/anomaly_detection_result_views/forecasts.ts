@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164381
-  describe.skip('forecasts', function () {
+  describe('forecasts', function () {
     this.tags(['ml']);
 
     describe('with single metric job', function () {
@@ -88,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.forecast.assertForecastButtonExists();
         await ml.forecast.assertForecastButtonEnabled(true);
         await ml.forecast.openForecastModal();
+        await ml.forecast.assertForecastNeverExpireSwitchExists();
         await ml.forecast.assertForecastModalRunButtonEnabled(true);
 
         await ml.testExecution.logTestStep('should run the forecast and close the modal');

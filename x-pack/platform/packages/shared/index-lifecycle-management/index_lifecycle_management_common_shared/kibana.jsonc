@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/index-lifecycle-management-common-shared",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

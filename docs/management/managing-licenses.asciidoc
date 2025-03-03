@@ -11,14 +11,16 @@ If you need more than 30 days to complete your evaluation,
 request an extended trial at {extendtrial}.
 
 To view the status of your license, start a trial, or install a new
-license, open the main menu, then click *Stack Management > License Management*.
+license, go to the *License Management* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [discrete]
 === Required permissions
 
 The `manage` cluster privilege is required to access *License Management*.
 
-To add the privilege, open the main menu, then click *Stack Management > Roles*.
+To add the privilege, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [discrete]
 [[license-expiration]]

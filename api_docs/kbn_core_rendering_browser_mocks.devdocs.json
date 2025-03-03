@@ -6,7 +6,38 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser-mocks",
+        "id": "def-public.renderingServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "renderingServiceMock",
+        "description": [],
+        "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-browser-mocks",
+            "id": "def-public.renderingServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<RenderingServiceContract>"
+            ],
+            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -22,37 +53,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-rendering-browser-mocks",
-        "id": "def-common.renderingServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "renderingServiceMock",
-        "description": [],
-        "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-rendering-browser-mocks",
-            "id": "def-common.renderingServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => jest.Mocked<RenderingServiceContract>"
-            ],
-            "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

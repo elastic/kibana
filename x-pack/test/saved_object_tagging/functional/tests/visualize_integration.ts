@@ -32,14 +32,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }
     await testSubjects.click('savedObjectTitle');
   };
-  // creates a simple markdown vis with a tag provided.
+  // creates a simple tsvb vis with a tag provided.
   const createSimpleMarkdownVis = async (opts: Record<string, string>) => {
-    const { visName, visText, tagName } = opts;
+    const { visName, tagName } = opts;
     await PageObjects.visualize.navigateToNewVisualization();
 
-    await PageObjects.visualize.clickMarkdownWidget();
-    await PageObjects.visEditor.setMarkdownTxt(visText);
-    await PageObjects.visEditor.clickGo();
+    await PageObjects.visualize.clickVisualBuilder();
 
     await PageObjects.visualize.ensureSavePanelOpen();
     await PageObjects.visualize.setSaveModalValues(visName, {
@@ -150,10 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.visualize.navigateToNewVisualization();
 
-        await PageObjects.visualize.clickMarkdownWidget();
-        await PageObjects.visEditor.setMarkdownTxt('Just some markdown');
-        await PageObjects.visEditor.clickGo();
-
+        await PageObjects.visualize.clickVisualBuilder();
         await PageObjects.visualize.ensureSavePanelOpen();
         await PageObjects.visualize.setSaveModalValues('vis-with-new-tag', {
           saveAsNew: false,

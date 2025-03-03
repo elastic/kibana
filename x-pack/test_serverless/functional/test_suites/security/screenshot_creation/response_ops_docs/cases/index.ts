@@ -16,5 +16,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./settings'));
   });
 }

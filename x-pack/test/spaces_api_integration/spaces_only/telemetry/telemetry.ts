@@ -6,21 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const usageAPI = getService('usageAPI');
 
-  describe('Verify disabledFeatures telemetry payloads', async () => {
+  describe('Verify disabledFeatures telemetry payloads', () => {
     before(async () => {
       await spacesService.create({
         id: 'space-1',
         name: 'space-1',
         description: 'This is your space-1!',
         color: '#00bfb3',
-        disabledFeatures: ['canvas', 'maps'],
+        disabledFeatures: ['canvas', 'maps', 'maps_v2'],
       });
 
       await spacesService.create({
@@ -29,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'This is your space-2!',
         color: '#00bfb3',
         solution: 'security',
-        disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
+        disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps', 'maps_v2'],
       });
 
       await spacesService.create({
@@ -65,26 +66,47 @@ export default function ({ getService }: FtrProviderContext) {
         maintenanceWindow: 0,
         stackAlerts: 0,
         generalCases: 0,
+        generalCasesV2: 0,
+        generalCasesV3: 0,
         maps: 2,
+        maps_v2: 2,
         canvas: 2,
         ml: 0,
         fleetv2: 0,
         fleet: 0,
         osquery: 0,
         observabilityCases: 0,
+        observabilityCasesV2: 0,
+        observabilityCasesV3: 0,
         uptime: 0,
         slo: 0,
         infrastructure: 0,
+        inventory: 0,
         logs: 0,
         monitoring: 0,
         apm: 0,
         enterpriseSearch: 0,
+        enterpriseSearchApplications: 0,
+        enterpriseSearchAnalytics: 0,
+        searchInferenceEndpoints: 0,
+        searchPlayground: 0,
+        searchSynonyms: 0,
         siem: 0,
+        siemV2: 0,
         securitySolutionCases: 0,
+        securitySolutionCasesV2: 0,
+        securitySolutionCasesV3: 0,
         securitySolutionAssistant: 0,
+        securitySolutionAttackDiscovery: 0,
+        securitySolutionTimeline: 0,
+        securitySolutionNotes: 0,
+        securitySolutionSiemMigrations: 0,
         discover: 0,
+        discover_v2: 0,
         visualize: 0,
+        visualize_v2: 0,
         dashboard: 0,
+        dashboard_v2: 0,
         dev_tools: 0,
         advancedSettings: 0,
         indexPatterns: 0,
@@ -92,6 +114,8 @@ export default function ({ getService }: FtrProviderContext) {
         filesSharedImage: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
+        dataQuality: 0,
+        entityManager: 0,
       });
     });
 

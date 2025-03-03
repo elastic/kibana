@@ -1,0 +1,45 @@
+{
+  "id": "@kbn/core-theme-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-theme-browser-internal",
+        "id": "def-public.browsersSupportsSystemTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "browsersSupportsSystemTheme",
+        "description": [],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/core/packages/theme/browser-internal/src/system_theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

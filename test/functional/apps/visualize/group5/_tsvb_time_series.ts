@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -145,8 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(actualCountMin).to.be('3 hours');
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/182136
-        describe.skip('Dark mode', () => {
+        describe('Dark mode', () => {
           before(async () => {
             await kibanaServer.uiSettings.update({
               'theme:darkMode': true,
@@ -156,7 +156,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it(`viz should have light class when background color is white`, async () => {
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setBackgroundColor('#FFFFFF');
-
             await retry.try(async () => {
               expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
             });
@@ -309,7 +308,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['apache', 'nginx']);
-          expect(areaColors).to.eql(['#54b399', '#6092c0']);
+          // We need to use OR condition here because of how visColors are set inconsistently
+          // See https://github.com/elastic/kibana/issues/206380
+          const [firstColor, secondColor] = areaColors!;
+          expect(['#16c5c0', '#54b399']).contain(firstColor); // first color in elastic palette
+          expect(['#a6edea', '#6092c0']).contain(secondColor); // second color in elastic palette
+          expect(areaColors).to.length(2);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
         });
@@ -435,7 +439,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             legendNames = await visualBuilder.getLegendNames();
             expect(legendNames).to.eql(['png', 'php']);
 
-            await visualize.clickRefresh(true);
+            await visualize.clickRefresh();
             legendNames = await visualBuilder.getLegendNames();
             expect(legendNames).to.eql(['png', 'php']);
           });

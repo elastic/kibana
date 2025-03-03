@@ -1,20 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { lastValueFrom } from 'rxjs';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
+  EuiButton,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiPanel,
@@ -22,7 +20,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  ControlGroupRendererApi,
+  DefaultControlApi,
+  OptionsListControlApi,
+} from '@kbn/controls-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
@@ -31,9 +38,11 @@ interface Props {
   navigation: NavigationPublicPluginStart;
 }
 
+const DEST_COUNTRY_CONTROL_ID = 'DEST_COUNTRY_CONTROL_ID';
+
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -47,8 +56,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
-      setControlFilters([...newFilters]);
+    const subscription = controlGroupAPI.filters$.subscribe((newFilters) => {
+      setControlFilters(newFilters ?? []);
     });
     return () => {
       subscription.unsubscribe();
@@ -105,7 +114,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
       <EuiText>
         <p>
           Pass filters, query, and time range to narrow controls. Combine search bar filters with
-          controls filters to narrow results.
+          controls filters to narrow results. Programmatically interact with individual controls by
+          accessing their API from controlGroupApi.children$.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -128,17 +138,22 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           query={query}
           showSearchBar={true}
         />
+
         <ControlGroupRenderer
           filters={filters}
-          getCreationOptions={async (initialInput, builder) => {
-            await builder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id!,
-              title: 'Destintion country',
-              fieldName: 'geo.dest',
-              width: 'medium',
-              grow: false,
-            });
-            await builder.addDataControlFromField(initialInput, {
+          getCreationOptions={async (initialState, builder) => {
+            await builder.addDataControlFromField(
+              initialState,
+              {
+                dataViewId: dataView.id!,
+                title: 'Destintion country',
+                fieldName: 'geo.dest',
+                width: 'medium',
+                grow: false,
+              },
+              DEST_COUNTRY_CONTROL_ID
+            );
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               fieldName: 'bytes',
               width: 'medium',
@@ -146,19 +161,49 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               title: 'Bytes',
             });
             return {
-              initialInput: {
-                ...initialInput,
-                viewMode: ViewMode.VIEW,
-              },
+              initialState,
             };
           }}
           query={query}
-          ref={setControlGroupAPI}
+          onApiAvailable={setControlGroupAPI}
           timeRange={timeRange}
         />
+        <EuiSpacer />
         <EuiCallOut title="Search results">
           {isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
         </EuiCallOut>
+
+        <EuiSpacer />
+        <EuiButton
+          color="text"
+          isDisabled={!Boolean(controlGroupAPI)}
+          onClick={() => {
+            if (controlGroupAPI) {
+              Object.values(controlGroupAPI.children$.getValue()).forEach((controlApi) => {
+                (controlApi as DefaultControlApi)?.clearSelections();
+              });
+            }
+          }}
+        >
+          Clear all controls
+        </EuiButton>
+        <EuiSpacer />
+        <EuiButton
+          color="text"
+          isDisabled={!Boolean(controlGroupAPI)}
+          onClick={() => {
+            if (controlGroupAPI) {
+              const controlApi = controlGroupAPI.children$.getValue()[
+                DEST_COUNTRY_CONTROL_ID
+              ] as Partial<OptionsListControlApi>;
+              if (controlApi && controlApi.setSelectedOptions) {
+                controlApi.setSelectedOptions(['CN']);
+              }
+            }
+          }}
+        >
+          Set destination country to CN
+        </EuiButton>
       </EuiPanel>
     </>
   );

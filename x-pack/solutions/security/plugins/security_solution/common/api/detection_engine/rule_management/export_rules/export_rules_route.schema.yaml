@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Export Rules API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_export:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ExportRules
+      summary: Export detection rules
+      description: |
+        Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
+        - Actions
+        - Exception lists
+        > info
+        > You cannot export prebuilt rules.
+      tags:
+        - Import/Export API
+      parameters:
+        - name: exclude_export_details
+          in: query
+          required: false
+          description: Determines whether a summary of the exported rules is returned.
+          schema:
+            type: boolean
+            default: false
+        - name: file_name
+          in: query
+          required: false
+          description: File name for saving the exported rules.
+          schema:
+            type: string
+            default: export.ndjson
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - objects
+              nullable: true
+              properties:
+                objects:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - rule_id
+                    properties:
+                      rule_id:
+                        $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/ndjson:
+              schema:
+                type: string
+                format: binary
+                description: An `.ndjson` file containing the returned rules.

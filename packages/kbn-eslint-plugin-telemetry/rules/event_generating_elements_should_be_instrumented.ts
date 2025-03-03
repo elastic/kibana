@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Rule } from 'eslint';
@@ -53,6 +54,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         }
 
         const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, () =>
+          // @ts-expect-error upgrade typescript v5.1.6
           sourceCode.getScope(node as TSNode)
         );
 
@@ -69,6 +71,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const appName = getAppName(fileName, cwd);
 
         // 2. Component name
+        // @ts-expect-error upgrade typescript v5.1.6
         const functionDeclaration = sourceCode.getScope(node as TSNode)
           .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);

@@ -14,29 +14,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-environment-server-mocks",
-        "id": "def-common.environmentServiceMock",
+        "id": "def-server.environmentServiceMock",
         "type": "Object",
         "tags": [],
         "label": "environmentServiceMock",
         "description": [],
-        "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+        "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-common.environmentServiceMock.create",
+            "id": "def-server.environmentServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<EnvironmentServiceContract>"
             ],
-            "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+            "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-common.environmentServiceMock.createPrebootContract",
+            "id": "def-server.environmentServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -62,7 +54,7 @@
               "InternalEnvironmentServicePreboot",
               ">"
             ],
-            "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+            "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -70,7 +62,7 @@
           },
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-common.environmentServiceMock.createSetupContract",
+            "id": "def-server.environmentServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -80,7 +72,7 @@
               "InternalEnvironmentServicePreboot",
               ">"
             ],
-            "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+            "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -90,5 +82,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

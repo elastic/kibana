@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
+import {
+  TemplateDeserialized,
+  TemplateSerialized,
+  IndexMode,
+} from '@kbn/index-management-plugin/common';
 import { INDEX_PATTERNS } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const templateMock = {
-  settings: {
-    number_of_shards: 1,
-  },
+  settings: {},
   mappings: {
     properties: {
       host_name: {
@@ -53,11 +55,13 @@ export function SvlTemplatesHelpers({ getService }: FtrProviderContext) {
     name: string,
     indexPatterns: string[] = INDEX_PATTERNS,
     isLegacy: boolean = false,
-    isMappingsSourceFieldEnabled: boolean = true
+    isMappingsSourceFieldEnabled: boolean = true,
+    indexMode?: IndexMode
   ) => {
     const baseTemplate: TemplateDeserialized = {
       name,
       indexPatterns,
+      indexMode,
       version: 1,
       template: { ...getTemplateMock(isMappingsSourceFieldEnabled) },
       _kbnMeta: {

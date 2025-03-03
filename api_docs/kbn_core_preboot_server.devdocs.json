@@ -11,31 +11,23 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-preboot-server",
-        "id": "def-common.PrebootServicePreboot",
+        "id": "def-server.PrebootServicePreboot",
         "type": "Interface",
         "tags": [],
         "label": "PrebootServicePreboot",
         "description": [
           "\nKibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met.\n"
         ],
-        "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+        "path": "src/core/packages/preboot/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-common.PrebootServicePreboot.isSetupOnHold",
+            "id": "def-server.PrebootServicePreboot.isSetupOnHold",
             "type": "Function",
             "tags": [],
             "label": "isSetupOnHold",
@@ -45,7 +37,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+            "path": "src/core/packages/preboot/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -53,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved",
+            "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved",
             "type": "Function",
             "tags": [],
             "label": "holdSetupUntilResolved",
@@ -63,13 +55,13 @@
             "signature": [
               "(reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>) => void"
             ],
-            "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+            "path": "src/core/packages/preboot/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$1",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$1",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -79,14 +71,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+                "path": "src/core/packages/preboot/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$2",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -96,7 +88,7 @@
                 "signature": [
                   "Promise<{ shouldReloadConfig: boolean; } | undefined>"
                 ],
-                "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+                "path": "src/core/packages/preboot/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -108,6 +100,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

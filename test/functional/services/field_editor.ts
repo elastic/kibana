@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -32,6 +33,13 @@ export class FieldEditorService extends FtrService {
   }
   public async setCustomDescription(description: string) {
     await this.testSubjects.setValue('customDescriptionRow > input', description);
+  }
+  public async setPopularity(value: number) {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.setEuiSwitch('popularityRow > toggle', 'check');
+    await this.testSubjects.setValue('editorFieldCount', String(value), {
+      clearWithKeyboard: true,
+    });
   }
   public async getFormError() {
     const alert = await this.find.byCssSelector(
@@ -89,9 +97,11 @@ export class FieldEditorService extends FtrService {
   public async setColorFormat(value: string, color: string, backgroundColor?: string) {
     await this.testSubjects.click('colorEditorAddColor');
     await this.testSubjects.setValue('~colorEditorKeyPattern', value);
-    await this.testSubjects.setValue('~colorEditorColorPicker', color);
+    await this.testSubjects.click('~colorEditorColorPicker');
+    await this.testSubjects.setValue('~euiColorPickerInput_bottom', color);
     if (backgroundColor) {
-      await this.testSubjects.setValue('~colorEditorBackgroundPicker', backgroundColor);
+      await this.testSubjects.click('~colorEditorBackgroundPicker');
+      await this.testSubjects.setValue('~euiColorPickerInput_bottom', backgroundColor);
     }
   }
 

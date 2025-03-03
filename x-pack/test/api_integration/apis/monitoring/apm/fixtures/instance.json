@@ -872,7 +872,7 @@
           "metricAgg": "max",
           "label": "Count",
           "title": "Requests Agent Configuration Management",
-          "description": "HTTP Requests received by agent configuration managemen",
+          "description": "HTTP Requests received by agent configuration management",
           "units": "/s",
           "format": "0,0.[00]",
           "hasCalculation": false,

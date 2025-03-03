@@ -75,6 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Autocompletion works', async () => {
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
+          await observability.alerts.common.clickOnQueryBar();
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
         });
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('alertsFlyout');
         });
 
-        describe('When open', async () => {
+        describe('When open', () => {
           before(async () => {
             await observability.alerts.common.openAlertsFlyout(20);
           });

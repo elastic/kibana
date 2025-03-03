@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { transform, keys, startsWith } from 'lodash';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+
+type IStorageEngine = typeof window.localStorage;
+
+export enum StorageKeys {
+  SIZE = 'panelSize',
+  FOLDS = 'folds',
+  VARIABLES = 'variables',
+  DEFAULT_LANGUAGE = 'defaultLanguage',
+}
+
+export class Storage {
+  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
+
+  encode(val: unknown) {
+    return JSON.stringify(val);
+  }
+
+  decode(val: string | null) {
+    if (typeof val === 'string') {
+      return JSON.parse(val);
+    }
+  }
+
+  encodeKey(key: string) {
+    return `${this.prefix}${key}`;
+  }
+
+  decodeKey(key: string) {
+    if (startsWith(key, this.prefix)) {
+      return `${key.slice(this.prefix.length)}`;
+    }
+  }
+
+  set(key: string, val: unknown) {
+    this.engine.setItem(this.encodeKey(key), this.encode(val));
+    return val;
+  }
+
+  has(key: string) {
+    return this.engine.getItem(this.encodeKey(key)) != null;
+  }
+
+  get<T>(key: string, _default?: T) {
+    if (this.has(key)) {
+      return this.decode(this.engine.getItem(this.encodeKey(key)));
+    } else {
+      return _default;
+    }
+  }
+
+  delete(key: string) {
+    return this.engine.removeItem(this.encodeKey(key));
+  }
+
+  keys(): string[] {
+    return transform(keys(this.engine), (ours, key) => {
+      const ourKey = this.decodeKey(key);
+      if (ourKey != null) ours.push(ourKey);
+    });
+  }
+}
+
+export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {
+  return new Storage(deps.engine, deps.prefix);
+}
+
+export const [getStorage, setStorage] = createGetterSetter<Storage>('storage');

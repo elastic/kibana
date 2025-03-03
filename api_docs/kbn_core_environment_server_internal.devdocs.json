@@ -13,18 +13,10 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-environment-server-internal",
-        "id": "def-common.PidConfigType",
+        "id": "def-server.PidConfigType",
         "type": "Type",
         "tags": [],
         "label": "PidConfigType",
@@ -32,7 +24,7 @@
         "signature": [
           "{ readonly file?: string | undefined; readonly exclusive: boolean; }"
         ],
-        "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+        "path": "src/core/packages/environment/server-internal/src/pid_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -41,29 +33,29 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-environment-server-internal",
-        "id": "def-common.pidConfig",
+        "id": "def-server.pidConfig",
         "type": "Object",
         "tags": [],
         "label": "pidConfig",
         "description": [],
-        "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+        "path": "src/core/packages/environment/server-internal/src/pid_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
-            "id": "def-common.pidConfig.path",
+            "id": "def-server.pidConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+            "path": "src/core/packages/environment/server-internal/src/pid_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
-            "id": "def-common.pidConfig.schema",
+            "id": "def-server.pidConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -94,7 +86,7 @@
               },
               "<boolean>; }>"
             ],
-            "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+            "path": "src/core/packages/environment/server-internal/src/pid_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -102,5 +94,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

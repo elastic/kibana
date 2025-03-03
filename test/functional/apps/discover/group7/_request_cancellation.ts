@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,30 +17,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const { common, discover, timePicker, header } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'header',
+  ]);
 
   describe('Discover request cancellation', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     it('should allow cancelling active requests', async () => {
-      await PageObjects.discover.selectIndexPattern('logstash-*');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.hasNoResults()).to.be(false);
+      await discover.selectIndexPattern('logstash-*');
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.hasNoResults()).to.be(false);
       await testSubjects.existOrFail('querySubmitButton');
       await testSubjects.missingOrFail('queryCancelButton');
       await filterBar.addDslFilter(
@@ -62,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await testSubjects.click('queryCancelButton');
       await retry.try(async () => {
-        expect(await PageObjects.discover.hasNoResults()).to.be(true);
+        expect(await discover.hasNoResults()).to.be(true);
         await testSubjects.existOrFail('querySubmitButton');
         await testSubjects.missingOrFail('queryCancelButton');
       });

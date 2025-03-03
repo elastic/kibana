@@ -9,7 +9,7 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
       "--metrics" "build/kibana/node_modules/@kbn/ui-shared-deps-src/shared_built_assets/metrics.json"
   )
 
-  if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]; then
+  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]] || [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-pull-request" ]]; then
     cmd+=("--validate")
   fi
 
@@ -19,7 +19,8 @@ fi
 
 echo "--- Upload Build Artifacts"
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
+version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
-cp kibana-*-linux-x86_64.tar.gz kibana-default.tar.gz
+cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-default.tar.gz
 buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -
