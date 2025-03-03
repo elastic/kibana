@@ -99,7 +99,7 @@ export const useMockDashboardApi = ({
           [newId]: {
             type: panelPackage.panelType,
             gridData: {
-              row: 0,
+              row: 'first',
               x: 0,
               y: 0,
               w: DEFAULT_PANEL_WIDTH,
