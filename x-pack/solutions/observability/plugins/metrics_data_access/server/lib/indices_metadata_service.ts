@@ -146,7 +146,7 @@ export class IndicesMetadataService {
           return {
             async run() {
               const { state } = taskInstance;
-              service.publishIndicesMetadata();
+              await service.publishIndicesMetadata();
               return { state };
             },
 
