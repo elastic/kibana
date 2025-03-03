@@ -12924,7 +12924,7 @@ paths:
       operationId: EndpointUploadAction
       requestBody:
         content:
-          multipart/form-data; Elastic-Api-Version=2023-10-31:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_UploadRouteRequestBody'
         required: true
