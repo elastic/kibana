@@ -106,10 +106,10 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
-            flyoutContainerStyles(euiThemeContext),
-            css`
+             css`
               box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
             `,
+            flyoutContainerStyles(euiThemeContext),
             dimensionContainerStyles.self(euiThemeContext),
           ]}
           onAnimationEnd={() => {

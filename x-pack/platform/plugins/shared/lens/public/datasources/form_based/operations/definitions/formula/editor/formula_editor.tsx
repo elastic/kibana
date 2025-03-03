@@ -707,12 +707,12 @@ export function FormulaEditor({
 
       <div
         className="lnsFormula"
-        css={{
+        css={css({
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           border: isFullscreen ? 'none' : euiTheme.border.thin,
           borderRadius: isFullscreen ? 0 : euiTheme.border.radius.medium,
           height: isFullscreen ? '100%' : 'auto',
-        }}
+        })}
       >
         <div className="lnsFormula__editor">
           <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
@@ -964,7 +964,7 @@ export function FormulaEditor({
 
 const sharedEditorStyles = {
   self: ({ euiTheme }: UseEuiTheme) => {
-    return `
+    return css`
       .lnsFormula {
         display: flex;
         flex-direction: column;
@@ -989,24 +989,24 @@ const sharedEditorStyles = {
       }
     `;
   },
-  formulaDocs: ({ euiTheme }: UseEuiTheme) => `
+  formulaDocs: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
     flex-direction: column;
     // make sure docs are rendered in front of monaco
     z-index: 1;        
     background: ${euiTheme.colors.backgroundBasePlain};
   `,
-  editorHeader: ({ euiTheme }: UseEuiTheme) => `
+  editorHeader: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${euiTheme.size.s};
   `,
-  editorFooter: ({ euiTheme }: UseEuiTheme) => `
+  editorFooter: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${euiTheme.size.s};
       // make sure docs are rendered in front of monaco
     z-index: 1;
     border-bottom-right-radius: ${euiTheme.border.radius.medium};
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
   `,
-  editorPlaceholder: ({ euiTheme }: UseEuiTheme) => `
+  editorPlaceholder: ({ euiTheme }: UseEuiTheme) => css`
     position: absolute;
     top: 0;
     left: ${euiTheme.size.base};
@@ -1016,14 +1016,14 @@ const sharedEditorStyles = {
     font-family: Menlo, Monaco, 'Courier New', monospace;
     pointer-events: none;
   `,
-  warningText: ({ euiTheme }: UseEuiTheme) => `
+  warningText: ({ euiTheme }: UseEuiTheme) => css`
     + .lnsFormula__warningText {
       margin-top: ${euiTheme.size.s};
       border-top: ${euiTheme.border.thin};
       padding-top: ${euiTheme.size.s};
     }
   `,
-  editorHelpLink: ({ euiTheme }: UseEuiTheme) => `
+  editorHelpLink: ({ euiTheme }: UseEuiTheme) => css`
     align-items: center;
     display: flex;
     padding: ${euiTheme.size.xs};
@@ -1034,7 +1034,7 @@ const sharedEditorStyles = {
 };
 
 const defaultEditorStyles = ({ euiTheme }: UseEuiTheme) => {
-  return `
+  return css`
    .lnsFormula__editorContent {
     height: 200px;
    }
@@ -1042,7 +1042,7 @@ const defaultEditorStyles = ({ euiTheme }: UseEuiTheme) => {
 };
 
 const fullscreenEditorStyles = ({ euiTheme }: UseEuiTheme) => {
-  return `
+  return css`
     position: absolute;
     left: 0;
     right: 0;
