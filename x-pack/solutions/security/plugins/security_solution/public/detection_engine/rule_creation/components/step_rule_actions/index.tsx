@@ -35,6 +35,7 @@ import { ResponseAction } from './response_action';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
+  ruleTypeId?: string;
   actionMessageParams: ActionVariables;
   summaryActionMessageParams: ActionVariables;
   form: FormHook<ActionsStepRule>;
@@ -72,6 +73,7 @@ const DisplayActionsHeader = () => {
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   ruleId,
+  ruleTypeId,
   isUpdateView = false,
   actionMessageParams,
   summaryActionMessageParams,
@@ -90,11 +92,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           componentProps={{
             messageVariables: actionMessageParams,
             summaryMessageVariables: summaryActionMessageParams,
+            ruleTypeId,
           }}
         />
       </>
     ),
-    [actionMessageParams, summaryActionMessageParams]
+    [actionMessageParams, ruleTypeId, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
     return (

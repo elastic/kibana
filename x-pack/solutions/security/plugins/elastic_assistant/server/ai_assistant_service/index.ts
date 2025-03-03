@@ -18,6 +18,7 @@ import {
   IndicesIndexSettings,
 } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
+import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -33,10 +34,7 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import {
-  conversationsFieldMap,
-  conversationsContentReferencesFieldMap,
-} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -104,12 +102,9 @@ export class AIAssistantService {
   private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
-  private isKBSetupInProgress: boolean = false;
+  private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
-  // Temporary 'feature flag' to determine if we should initialize the new message metadata mappings, toggled when citations should be enabled.
-  private contentReferencesEnabled: boolean = false;
-  private hasInitializedContentReferences: boolean = false;
   // Temporary 'feature flag' to determine if we should initialize the new knowledge base mappings
   private assistantDefaultInferenceEndpoint: boolean = false;
 
@@ -167,12 +162,12 @@ export class AIAssistantService {
     return this.initialized;
   }
 
-  public getIsKBSetupInProgress() {
-    return this.isKBSetupInProgress;
+  public getIsKBSetupInProgress(spaceId: string) {
+    return this.isKBSetupInProgress.get(spaceId) ?? false;
   }
 
-  public setIsKBSetupInProgress(isInProgress: boolean) {
-    this.isKBSetupInProgress = isInProgress;
+  public setIsKBSetupInProgress(spaceId: string, isInProgress: boolean) {
+    this.isKBSetupInProgress.set(spaceId, isInProgress);
   }
 
   private createDataStream: CreateDataStream = ({
@@ -226,17 +221,6 @@ export class AIAssistantService {
       if (this.productDocManager) {
         // install product documentation without blocking other resources
         void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
-      }
-
-      // If contentReferencesEnabled is true, re-install data stream resources for new mappings if it has not been done already
-      if (this.contentReferencesEnabled && !this.hasInitializedContentReferences) {
-        this.options.logger.debug(`Creating conversation datastream with content references`);
-        this.conversationsDataStream = this.createDataStream({
-          resource: 'conversations',
-          kibanaVersion: this.options.kibanaVersion,
-          fieldMap: conversationsContentReferencesFieldMap,
-        });
-        this.hasInitializedContentReferences = true;
       }
 
       await this.conversationsDataStream.install({
@@ -494,19 +478,6 @@ export class AIAssistantService {
       return null;
     }
 
-    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
-    // Remove this param and initialization when the `contentReferencesEnabled` feature flag is removed
-    if (opts.contentReferencesEnabled) {
-      this.contentReferencesEnabled = true;
-    }
-
-    // If contentReferences are enable but the conversation field mappings with content references have not been initialized,
-    // then call initializeResources which will create the datastreams with content references field mappings. After they have
-    // been created, hasInitializedContentReferences will ensure they dont get created again.
-    if (this.contentReferencesEnabled && !this.hasInitializedContentReferences) {
-      await this.initializeResources();
-    }
-
     return new AIAssistantConversationsDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -518,7 +489,10 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
-    opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
+    opts: CreateAIAssistantClientParams &
+      GetAIAssistantKnowledgeBaseDataClientParams & {
+        trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+      }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
     if (opts?.modelIdOverride != null) {
@@ -555,6 +529,7 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
       assistantDefaultInferenceEndpoint: this.assistantDefaultInferenceEndpoint,
+      trainedModelsProvider: opts.trainedModelsProvider,
     });
   }
 
@@ -703,9 +678,7 @@ export class AIAssistantService {
     const existingAnonymizationFields = await (
       await dataClient?.getReader()
     ).search({
-      body: {
-        size: 1,
-      },
+      size: 1,
       allow_no_indices: true,
     });
     if (existingAnonymizationFields.hits.total.value === 0) {

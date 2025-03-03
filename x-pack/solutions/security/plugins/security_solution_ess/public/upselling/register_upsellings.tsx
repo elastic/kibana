@@ -10,10 +10,11 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   ALERT_SUPPRESSION_RULE_DETAILS,
   ALERT_SUPPRESSION_RULE_FORM,
+  PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
   UPGRADE_ALERT_ASSIGNMENTS,
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_NOTES_MANAGEMENT_USER_FILTER,
-  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   MessageUpsellings,
@@ -30,6 +31,7 @@ import {
   AttackDiscoveryUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
 } from './lazy_upselling';
 
 interface UpsellingsConfig {
@@ -110,6 +112,11 @@ export const upsellingSections: UpsellingSections = [
     minimumLicenseRequired: 'platinum',
     component: EntityAnalyticsUpsellingSectionLazy,
   },
+  {
+    id: 'siem_migrations_start',
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsStartUpsellSectionLazy,
+  },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
@@ -142,6 +149,11 @@ export const upsellingMessages: UpsellingMessages = [
   {
     id: 'prebuilt_rule_customization',
     minimumLicenseRequired: 'enterprise',
-    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION('Enterprise'),
+    message: PREBUILT_RULE_CUSTOMIZATION('Enterprise', 'subscription'),
+  },
+  {
+    id: 'prebuilt_rule_customization_description',
+    minimumLicenseRequired: 'enterprise',
+    message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION('Enterprise', 'subscription'),
   },
 ];
