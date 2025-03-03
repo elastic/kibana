@@ -16,8 +16,13 @@ import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
 } from '../es_system_indices_migration';
-import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
+import {
+  type EsMetadata,
+  getCorrectiveAction,
+  isFrozenDeprecation,
+} from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
+import { ENT_SEARCH_DATASTREAM_PREFIXES, ENT_SEARCH_INDEX_PREFIX } from '../enterprise_search';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -127,12 +132,12 @@ export const getEnrichedDeprecations = async (
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
-  const indexSettingsIndexNames = Object.keys(deprecations.index_settings).map(
-    (indexName) => indexName!
-  );
+  const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
   const indexSettingsIndexStates = indexSettingsIndexNames.length
     ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
     : {};
+
+  const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
 
   return normalizeEsResponse(deprecations)
     .filter((deprecation) => {
@@ -159,13 +164,26 @@ export const getEnrichedDeprecations = async (
         }
       }
     })
-    .map((deprecation) => {
+    .flatMap((deprecation) => {
       const correctiveAction = getCorrectiveAction(
         deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
         deprecation.index
       );
+
+      // Early exclusion of deprecations
+      if (
+        (deprecation.type === 'index_settings' &&
+          correctiveAction?.type === 'reindex' &&
+          deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)) ||
+        (deprecation.type === 'data_streams' &&
+          correctiveAction?.type === 'dataStream' &&
+          correctiveAction.metadata.reindexRequired &&
+          ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix)))
+      ) {
+        return [];
+      }
 
       // If we have found deprecation information for index/indices
       // check whether the index is open or closed.
@@ -174,10 +192,39 @@ export const getEnrichedDeprecations = async (
           indexSettingsIndexStates[deprecation.index!] === 'closed' ? 'index-closed' : undefined;
       }
 
-      const enrichedDeprecation = _.omit(deprecation, 'metadata');
-      return {
-        ...enrichedDeprecation,
+      const enrichedDeprecation = {
+        ..._.omit(deprecation, 'metadata'),
         correctiveAction,
       };
+
+      if (deprecation.index) {
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index) || [];
+        indexDeprecations.push(enrichedDeprecation);
+        deprecationsByIndex.set(deprecation.index, indexDeprecations);
+      }
+
+      return enrichedDeprecation;
+    })
+    .filter((deprecation) => {
+      if (isFrozenDeprecation(deprecation.message, deprecation.index)) {
+        // frozen indices are created in 7.x, so they are old / incompatible as well
+        // no need to bubble up this deprecation IF THERE IS ANOTHER CRITICAL ONE FOR THE SAME INDEX
+        // in that case, in the critical deprecation we will propose:
+        // - reindexing => the new index will not be frozen
+        // - updating index => the operation will unfreeze the index (see routes/update_index.ts)
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index!);
+        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations?.find(
+          (elem) =>
+            elem.type === 'index_settings' &&
+            elem.index === deprecation.index &&
+            elem.correctiveAction?.type === 'reindex' &&
+            elem.isCritical
+        );
+        if (oldIndexDeprecation) {
+          return false;
+        }
+      }
+
+      return true;
     });
 };

@@ -9,41 +9,10 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext, RegisterDeprecationsConfig } from '@kbn/core-deprecations-server';
 
-import { hasFleetServers } from '@kbn/fleet-plugin/server';
-import { isAgentlessEnabled } from '@kbn/fleet-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
-
-const NATIVE_SERVICE_TYPES = [
-  'azure_blob_storage',
-  'box',
-  'confluence',
-  'dropbox',
-  'github',
-  'gmail',
-  'google_cloud_storage',
-  'google_drive',
-  'jira',
-  'mssql',
-  'mongodb',
-  'mysql',
-  'network_drive',
-  'notion',
-  'onedrive',
-  'oracle',
-  'outlook',
-  'postgresql',
-  's3',
-  'salesforce',
-  'servicenow',
-  'sharepoint_online',
-  'sharepoint_server',
-  'slack',
-  'microsoft_teams',
-  'zoom',
-];
 
 export const getRegisteredDeprecations = (
   config: ConfigType,
@@ -52,16 +21,10 @@ export const getRegisteredDeprecations = (
 ): RegisterDeprecationsConfig => {
   return {
     getDeprecations: async (ctx: GetDeprecationsContext) => {
-      const hasAgentless = isAgentlessEnabled();
-      const hasFleetServer = await hasFleetServers(
-        ctx.esClient.asInternalUser,
-        ctx.savedObjectsClient,
-        true // only counts if the Fleet Server is active
-      );
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
       const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([
-        await getCrawlerDeprecations(ctx, docsUrl),
-        await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
+        getCrawlerDeprecations(ctx, docsUrl),
+        getNativeConnectorDeprecations(ctx, docsUrl),
       ]);
       return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails];
     },
@@ -77,7 +40,7 @@ export function getEnterpriseSearchNodeDeprecation(
   cloud: CloudSetup,
   docsUrl: string
 ): DeprecationsDetails[] {
-  if (config.host) {
+  if (config.host || config.customHeaders) {
     const steps = [];
     let addendum: string = '';
     const isCloud = !!cloud?.cloudId;
@@ -124,6 +87,10 @@ export function getEnterpriseSearchNodeDeprecation(
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removeconfig', {
             defaultMessage: "Edit 'kibana.yml' to remove 'enterpriseSearch.host'",
           }),
+          i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removecustomconfig', {
+            defaultMessage:
+              "Edit 'kibana.yml' to remove 'enterpriseSearch.customHeaders' if it exists",
+          }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.restart', {
             defaultMessage: 'Restart Kibana',
           }),
@@ -135,7 +102,7 @@ export function getEnterpriseSearchNodeDeprecation(
         level: 'critical',
         deprecationType: 'feature',
         title: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.title', {
-          defaultMessage: 'Enterprise Search host(s) must be removed',
+          defaultMessage: 'Enterprise Search host(s) and configuration must be removed',
         }),
         message: {
           type: 'markdown',
@@ -148,6 +115,7 @@ export function getEnterpriseSearchNodeDeprecation(
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
               'Please note the following:\n' +
               '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
+              '- You must also remove any Enterprise Search configuration elements in your Kibana config.\n' +
               '- If you are currently using App Search, Workplace Search, or the Elastic Web Crawler, these features will ' +
               'cease to function if you remove Enterprise Search from your deployment. Therefore, it is critical to ' +
               'first [migrate your Enterprise Search use cases]({migration_link}) before decommissioning your ' +
@@ -223,15 +191,10 @@ export async function getCrawlerDeprecations(
 }
 
 /**
- * if the customer is using Native Connectors, agentless is available, but the integration server is missing, they are told that Integrations Server must be added
- * if the customer is using Native Connectors, and agentless is unavailable, they are told that they must convert their connectors to Connector Clients
- * if the customer was using "native" connectors that don't match our connector service types, they must delete them or convert them to connector clients.
+ * If the customer is using Native Connectors, they are told that they must convert their connectors to Connector Clients
  */
 export async function getNativeConnectorDeprecations(
   ctx: GetDeprecationsContext,
-  hasAgentless: boolean,
-  hasFleetServer: boolean,
-  cloud: CloudSetup,
   docsUrl: string
 ): Promise<DeprecationsDetails[]> {
   const client = ctx.esClient.asInternalUser;
@@ -242,173 +205,59 @@ export async function getNativeConnectorDeprecations(
   } else {
     const deprecations: DeprecationsDetails[] = [];
 
-    if (nativeConnectors.length > 0 && !hasAgentless) {
-      // you can't have elastic-managed connectors in an environment that Elastic doesn't manage
-      // ... and agentless is available in every Elastic-managed environment
-
+    if (nativeConnectors.length > 0) {
+      // There are some native connectors
       deprecations.push({
         level: 'critical',
         deprecationType: 'feature',
-        title: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.title', {
-          defaultMessage:
-            'Connectors with `is_native: true` are not supported in self-managed environments',
+        title: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.title', {
+          defaultMessage: 'Elastic-managed connectors are no longer supported',
         }),
         message: {
           type: 'markdown',
-          content: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.message', {
-            defaultMessage:
-              '"Native Connectors" are managed services in Elastic-managed environments such as Elastic Cloud Hosted and ' +
-              'Elastic Cloud Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
-              'before this upgrade can proceed.',
-          }),
+          content: i18n.translate(
+            'xpack.enterpriseSearch.deprecations.fauxNativeConnector.message',
+            {
+              values: {
+                connectorIds: nativeConnectors
+                  .map((connector) => `- \`${connector.id}\``)
+                  .join('\n'),
+              },
+              defaultMessage:
+                'Elastic-managed connectors are no longer supported.\n\n' +
+                'The following connectors need to be converted to self-managed connectors to continue using them:\n' +
+                '{connectorIds}\n\n' +
+                'This conversion is a lossless process and can be performed using "quick resolve".\n\n' +
+                'Alternatively, deleting these connectors will also unblock your upgrade.',
+            }
+          ),
         },
         documentationUrl: docsUrl,
         correctiveActions: {
           manualSteps: [
-            i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.listConnectors', {
-              defaultMessage: 'Enumerate all connector records',
-            }),
-            i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.convertPretenders', {
-              defaultMessage:
-                'On the connector Overview tab, select "Convert Connector" for any Native Connectors.',
-            }),
+            i18n.translate(
+              'xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors',
+              {
+                defaultMessage: 'Identify all Elastic-managed connectors in the Connectors UI.',
+              }
+            ),
+            i18n.translate(
+              'xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders',
+              {
+                defaultMessage:
+                  'Click on "Convert to self-managed" in the Connector Configuration tab for any connector with the "Elastic-managed connector" badge.',
+              }
+            ),
           ],
           api: {
             method: 'POST',
             path: '/internal/enterprise_search/deprecations/convert_connectors_to_client',
             body: {
-              ids: nativeConnectors.map((it) => it.id),
+              ids: nativeConnectors.map((connector) => connector.id),
             },
           },
         },
       });
-    } else {
-      const nativeTypesStr = '- `' + NATIVE_SERVICE_TYPES.join('`\n- `') + '`\n\n';
-      const fauxNativeConnectors = nativeConnectors.filter(
-        (hit) => !NATIVE_SERVICE_TYPES.includes(hit.service_type!)
-      );
-
-      if (fauxNativeConnectors.length > 0) {
-        // There are some illegal service_types in their native connectors
-        deprecations.push({
-          level: 'critical',
-          deprecationType: 'feature',
-          title: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.title', {
-            defaultMessage: 'Native connectors must be of supported service types',
-          }),
-          message: {
-            type: 'markdown',
-            content: i18n.translate(
-              'xpack.enterpriseSearch.deprecations.fauxNativeConnector.message',
-              {
-                values: { serviceTypes: nativeTypesStr },
-                defaultMessage:
-                  'Not all service types are supported by Elastic-managed connectors.\n\n' +
-                  'The following service types are supported for Elastic-managed connectors:\n' +
-                  '{serviceTypes}' +
-                  'Unsupported service types must be converted to Connector Clients before upgrading. ' +
-                  'This is a lossless operation, and can be attempted with "quick resolve".\n\n' +
-                  'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
-              }
-            ),
-          },
-          documentationUrl: docsUrl,
-          correctiveActions: {
-            manualSteps: [
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors',
-                {
-                  defaultMessage: 'Enumerate all connector records',
-                }
-              ),
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders',
-                {
-                  defaultMessage:
-                    'Select "Convert to Client" for any connectors where `is_native: true` but the `service_type` is NOT supported, per the list above.',
-                }
-              ),
-            ],
-            api: {
-              method: 'POST',
-              path: '/internal/enterprise_search/deprecations/convert_connectors_to_client',
-              body: {
-                ids: fauxNativeConnectors.map((it) => it.id),
-              },
-            },
-          },
-        });
-      }
-
-      if (hasAgentless && nativeConnectors.length > 0 && !hasFleetServer) {
-        // the Integration Server is a required component in your deployment, for Agentless
-        deprecations.push({
-          level: 'critical',
-          deprecationType: 'feature',
-          title: i18n.translate(
-            'xpack.enterpriseSearch.deprecations.missingIntegrationServer.title',
-            {
-              defaultMessage: 'Integration Server must be provisioned',
-            }
-          ),
-          message: {
-            type: 'markdown',
-            content: i18n.translate(
-              'xpack.enterpriseSearch.deprecations.missingIntegrationServer.message',
-              {
-                defaultMessage:
-                  'In versions >= 9.x, Elastic-managed connectors are run through the Elastic Integrations ecosystem. ' +
-                  'This requires the Integration Server to be present in your deployment.\n\n' +
-                  'Unless you are running more than 1000 connectors, a single instance of the smallest Integration Server' +
-                  'should be sufficient.\n\n' +
-                  'For full details, see the documentation.' +
-                  `\n\n[Click here to manage your deployment](${
-                    cloud.baseUrl + '/deployments/' + cloud.deploymentId
-                  }).`,
-              }
-            ),
-          },
-          documentationUrl: docsUrl,
-          correctiveActions: {
-            manualSteps: [
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.missingIntegrationServer.gotocloud',
-                {
-                  values: { baseUrl: cloud.baseUrl },
-                  defaultMessage:
-                    'Go to {baseUrl} and select this deployment. Or click the link above to go straight there.',
-                }
-              ),
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.missingIntegrationServer.clickedit',
-                {
-                  defaultMessage: "Click the 'Edit' tab",
-                }
-              ),
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.missingIntegrationServer.scrolldown',
-                {
-                  defaultMessage: "Scroll down to the 'Integration Server' section",
-                }
-              ),
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.missingIntegrationServer.addCapacity',
-                {
-                  defaultMessage:
-                    "Click the button to '+ Add capacity' and choose a size/count. For most customers," +
-                    'the smallest option in a single zone is sufficient.',
-                }
-              ),
-              i18n.translate(
-                'xpack.enterpriseSearch.deprecations.missingIntegrationServer.clicksave',
-                {
-                  defaultMessage: "Click 'Save' and confirm",
-                }
-              ),
-            ],
-          },
-        });
-      }
     }
 
     return deprecations;

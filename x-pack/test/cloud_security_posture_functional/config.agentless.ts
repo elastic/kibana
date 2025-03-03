@@ -7,7 +7,7 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,
         `--xpack.cloud.id=something-anything`,
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
-        `--xpack.fleet.packages.0.version=${CLOUD_CREDENTIALS_PACKAGE_VERSION}`,
+        `--xpack.fleet.packages.0.version=${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`,
       ],
     },
     // load tests in the index file

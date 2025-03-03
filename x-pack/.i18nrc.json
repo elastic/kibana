@@ -109,7 +109,7 @@
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "platform/packages/shared/logs_overview/src/components"
+      "platform/packages/shared/logs-overview/src/components"
     ],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
@@ -128,7 +128,7 @@
     ],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
-    "xpack.searchSharedUI": "solutions/search/packages/shared_ui",
+    "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchIndices": "solutions/search/plugins/search_indices",
     "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",

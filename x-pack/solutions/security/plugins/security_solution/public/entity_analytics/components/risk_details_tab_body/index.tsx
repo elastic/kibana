@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../risk_score/constants';
@@ -38,7 +38,7 @@ import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_eng
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeL};
+  margin-top: ${({ theme: { euiTheme } }) => euiTheme.size.l};
 `;
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;

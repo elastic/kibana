@@ -187,7 +187,10 @@ export const getTopNavConfig = (
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
-                input: { savedObjectId: id },
+                input: {
+                  serializedVis: vis.serialize(),
+                  savedObjectId: id,
+                },
                 embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },

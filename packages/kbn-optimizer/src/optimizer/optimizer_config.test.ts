@@ -22,6 +22,36 @@ jest.mock('os', () => {
     cpus() {
       return ['foo'] as any;
     },
+    totalmem() {
+      return 64000000000;
+    },
+    freemem() {
+      return 20000000000;
+    },
+  };
+});
+
+jest.mock('v8', () => {
+  return {
+    ...jest.requireActual('v8'),
+    getHeapStatistics() {
+      return {
+        total_heap_size: 5816320,
+        total_heap_size_executable: 262144,
+        total_physical_size: 6012928,
+        total_available_size: 4341242192,
+        used_heap_size: 4930768,
+        heap_size_limit: 4345298944,
+        malloced_memory: 262320,
+        peak_malloced_memory: 571392,
+        does_zap_garbage: 0,
+        number_of_native_contexts: 2,
+        number_of_detached_contexts: 0,
+        total_global_handles_size: 8192,
+        used_global_handles_size: 3296,
+        external_memory: 2209666,
+      };
+    },
   };
 });
 

@@ -18,3 +18,11 @@ export const UPGRADE_PRODUCT_MESSAGE = (requiredProduct: string) =>
       },
     }
   );
+
+export const ADDITIONAL_CHARGES_MESSAGE = i18n.translate(
+  'xpack.securitySolutionServerless.entityStoreEnablementCallout.additionalChargesMessage',
+  {
+    defaultMessage:
+      'Please be aware that activating these features may incur additional charges depending on your subscription plan. Review your plan details carefully to avoid unexpected costs before proceeding.',
+  }
+);

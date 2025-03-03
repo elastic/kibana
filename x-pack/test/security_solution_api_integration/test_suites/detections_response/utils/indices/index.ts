@@ -6,3 +6,4 @@
  */
 
 export * from './set_synthetic_source';
+export const SECURITY_ES_ARCHIVES_DIR = 'x-pack/test/security_solution_cypress/es_archives';

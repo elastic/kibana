@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
@@ -66,8 +66,8 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
 
 const StyledLinkButton = styled(EuiButton)`
   margin-left: 0;
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    margin-left: ${({ theme }) => theme.eui.euiSizeL};
+  @media only screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.m}) {
+    margin-left: ${({ theme }) => theme.euiTheme.size.l};
   }
 `;
 

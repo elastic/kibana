@@ -10,7 +10,6 @@
 import { uniq, uniqBy } from 'lodash';
 import type {
   AstProviderFn,
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -163,10 +162,6 @@ export async function suggest(
   const { ast } = await astProvider(correctedQuery);
   const astContext = getAstContext(innerText, ast, offset);
 
-  // But we also need the full ast for the full query
-  const correctedFullQuery = correctQuerySyntax(fullText, context);
-  const { ast: fullAst } = await astProvider(correctedFullQuery);
-
   if (astContext.type === 'comment') {
     return [];
   }
@@ -230,7 +225,6 @@ export async function suggest(
       getPolicies,
       getPolicyMetadata,
       resourceRetriever?.getPreferences,
-      fullAst,
       resourceRetriever
     );
   }
@@ -417,7 +411,6 @@ async function getSuggestionsWithinCommandExpression(
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullAst?: ESQLAst,
   callbacks?: ESQLCallbacks
 ) {
   const commandDef = getCommandDefinition(command.name);
@@ -438,7 +431,7 @@ async function getSuggestionsWithinCommandExpression(
       (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences,
-      fullAst,
+      commands,
       commandDef,
       callbacks
     );

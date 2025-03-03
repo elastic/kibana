@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiBasicTable,
   EuiButton,
@@ -39,7 +39,7 @@ import { AssetCriticalityBadge } from '../asset_criticality';
 
 const SpacedOrderedList = styled.ol`
   li {
-    margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
+    margin-bottom: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   }
 `;
 

@@ -209,13 +209,12 @@ export const initUiSettings = (
     },
     [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
       name: enableVisualizationsInFlyoutLabel,
-      value: false,
+      value: true,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
         {
           defaultMessage:
-            '<em>[technical preview]</em> Enable visualizations (analyzer and session viewer) in flyout.',
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+            'Enable visualizations (analyzer and session viewer) in document details flyout.',
         }
       ),
       type: 'boolean',
@@ -367,7 +366,7 @@ export const initUiSettings = (
       value: DEFAULT_MAX_UNASSOCIATED_NOTES,
       schema: schema.number({
         min: 1,
-        max: 1000,
+        max: 10000,
         defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
       }),
       category: [APP_ID],

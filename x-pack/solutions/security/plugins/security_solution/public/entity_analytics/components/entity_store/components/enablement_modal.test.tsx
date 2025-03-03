@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import { TestProviders } from '../../../../common/mock';
@@ -25,12 +26,17 @@ jest.mock('../../../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
 }));
 
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../../../common/hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
+}));
+
 const defaultProps = {
   visible: true,
   toggle: mockToggle,
   enableStore: mockEnableStore,
-  riskScore: { disabled: false, checked: false },
-  entityStore: { disabled: false, checked: false },
+  riskScore: { canToggle: false, checked: false },
+  entityStore: { canToggle: false, checked: false },
 };
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
@@ -77,8 +83,10 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   },
 };
 
-const renderComponent = (props = defaultProps) => {
-  return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+const renderComponent = async (props = defaultProps) => {
+  await act(async () => {
+    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+  });
 };
 
 describe('EntityStoreEnablementModal', () => {
@@ -138,6 +146,24 @@ describe('EntityStoreEnablementModal', () => {
       expect(enableButton).toBeDisabled();
     });
 
+    it('should show proceed warning when riskScore is enabled but entityStore is disabled and unchecked', () => {
+      renderComponent({
+        ...defaultProps,
+        riskScore: { canToggle: false, checked: false }, // Enabled & Checked
+        entityStore: { canToggle: true, checked: false }, // Disabled & Unchecked
+      });
+      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+    });
+
+    it('should show proceed warning when entityStore is enabled but riskScore is disabled and unchecked', () => {
+      renderComponent({
+        ...defaultProps,
+        entityStore: { canToggle: false, checked: false }, // Enabled & Checked
+        riskScore: { canToggle: true, checked: false }, // Disabled & Unchecked
+      });
+      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+    });
+
     it('should not show entity engine missing privileges warning when no missing privileges', () => {
       renderComponent();
       expect(
@@ -171,6 +197,17 @@ describe('EntityStoreEnablementModal', () => {
     it('should show risk engine missing privileges warning when missing privileges', () => {
       renderComponent();
       expect(screen.getByTestId('callout-missing-risk-engine-privileges')).toBeInTheDocument();
+    });
+
+    it('should render additional charges message when available', async () => {
+      const AdditionalChargesMessageMock = () => <span data-test-subj="enablement-modal-test" />;
+      mockUseContractComponents.mockReturnValue({
+        AdditionalChargesMessage: AdditionalChargesMessageMock,
+      });
+
+      await renderComponent();
+
+      expect(screen.queryByTestId('enablement-modal-test')).toBeInTheDocument();
     });
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ESQLAstItem, ESQLAst, ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
+import { type ESQLAstItem, ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from '../../../shared/types';
 import {
@@ -104,7 +104,7 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
   getSuggestedVariableName: () => string,
   getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullTextAst?: ESQLAst,
+  previousCommands?: ESQLCommand[],
   definition?: CommandDefinition<'join'>,
   callbacks?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> => {
