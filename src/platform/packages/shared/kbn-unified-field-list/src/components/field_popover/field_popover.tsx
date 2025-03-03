@@ -14,10 +14,9 @@ import {
   EuiPopover,
   EuiPopoverProps,
   EuiPopoverTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-import './field_popover.scss';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   renderHeader?: () => React.ReactNode;
@@ -33,6 +32,8 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   renderFooter,
   ...otherPopoverProps
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   let header: React.ReactNode | null = null;
   let content: React.ReactNode | null = null;
   let footer: React.ReactNode | null = null;
@@ -69,6 +70,14 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       anchorPosition="rightUp"
       data-test-subj="fieldPopover"
       panelClassName="unifiedFieldList__fieldPopover__fieldPopoverPanel"
+      panelProps={{
+        /* `important` is to ensure that even if styles ordering is different (like for some reason on Developer Examples page),
+        this one will be used instead of eui defaults */
+        css: css`
+          min-width: ${euiTheme.size.xxl} * 6.5 !important;
+          max-width: ${euiTheme.size.xxl} * 10 !important;
+        `,
+      }}
       {...otherPopoverProps}
     >
       {isOpen && (
@@ -81,7 +90,7 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
           {content ? (
             <EuiFlexItem
               className="eui-yScrollWithShadows"
-              css={({ euiTheme }) => css`
+              css={css`
                 padding: ${euiTheme.size.base};
                 margin: -${euiTheme.size.base};
               `}
