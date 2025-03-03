@@ -96,9 +96,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               references: [],
             };
           },
-          clearSelections: () => {
-            // do nothing, not allowed for now;
-          },
         },
         {
           ...defaultControl.comparators,
