@@ -7,13 +7,12 @@
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
-import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
@@ -37,10 +36,6 @@ export const useCellActionsOptions = (
   } = context ?? {};
   const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
   const dataViewId = useDataViewId(SourcererScopeName.detections);
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const viewMode =
-    useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
-    tableDefaults.viewMode;
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
     [dataViewId, tableId]

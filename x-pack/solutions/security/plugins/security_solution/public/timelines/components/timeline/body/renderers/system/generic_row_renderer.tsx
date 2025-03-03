@@ -184,7 +184,7 @@ export const createEndpointLibraryRowRenderer = ({
         data={data}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -307,7 +307,12 @@ export const createEndpointRegistryRowRenderer = ({
   },
   renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
-      <RegistryEventDetails contextId={`registry-event-${scopeId}`} data={data} text={text} />
+      <RegistryEventDetails
+        contextId={`registry-event-${scopeId}`}
+        data={data}
+        text={text}
+        scopeId={scopeId}
+      />
     </RowRendererContainer>
   ),
 });

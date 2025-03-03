@@ -73,6 +73,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -100,6 +101,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -127,6 +129,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -154,6 +157,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -181,6 +185,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -208,6 +213,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -235,6 +241,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -262,6 +269,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -289,6 +297,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="host-1"
@@ -316,6 +325,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             userName={undefined}
@@ -341,6 +351,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             hostName="some-host-name"
@@ -366,6 +377,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             userName="some-user-name"
@@ -391,6 +403,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             userName={undefined}
@@ -416,6 +429,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             processTitle="some-process-title"
@@ -441,6 +455,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             workingDirectory="some-working-directory"
@@ -466,6 +481,7 @@ describe('GenericDetails', () => {
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             args={['arg1', 'arg2', 'arg 3']}
