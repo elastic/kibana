@@ -29,11 +29,11 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const useGridLayoutEvents = ({
   interactionType,
-  rowIndex,
+  rowId,
   panelId,
 }: {
   interactionType: PanelInteractionEvent['type'];
-  rowIndex: number;
+  rowId: string;
   panelId: string;
 }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -45,8 +45,7 @@ export const useGridLayoutEvents = ({
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
 
-      const onStart = () =>
-        startAction(e, gridLayoutStateManager, interactionType, rowIndex, panelId);
+      const onStart = () => startAction(e, gridLayoutStateManager, interactionType, rowId, panelId);
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
@@ -74,7 +73,7 @@ export const useGridLayoutEvents = ({
         });
       }
     },
-    [gridLayoutStateManager, rowIndex, panelId, interactionType]
+    [gridLayoutStateManager, rowId, panelId, interactionType]
   );
 
   return startInteraction;

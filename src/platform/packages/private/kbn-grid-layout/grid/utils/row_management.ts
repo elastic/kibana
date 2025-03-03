@@ -18,7 +18,7 @@ import { resolveGridRow } from './resolve_grid_row';
  * @param newRow The destination row for the panels
  * @returns Updated layout with panels moved from `startingRow` to `newRow`
  */
-export const movePanelsToRow = (layout: GridLayoutData, startingRow: number, newRow: number) => {
+export const movePanelsToRow = (layout: GridLayoutData, startingRow: string, newRow: string) => {
   const newLayout = cloneDeep(layout);
   const panelsToMove = newLayout[startingRow].panels;
   const maxRow = Math.max(
@@ -37,8 +37,8 @@ export const movePanelsToRow = (layout: GridLayoutData, startingRow: number, new
  * @param rowIndex The row to be deleted
  * @returns Updated layout with the row at `rowIndex` deleted
  */
-export const deleteRow = (layout: GridLayoutData, rowIndex: number) => {
+export const deleteRow = (layout: GridLayoutData, rowId: string) => {
   const newLayout = cloneDeep(layout);
-  newLayout.splice(rowIndex, 1);
+  delete newLayout[rowId];
   return newLayout;
 };

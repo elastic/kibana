@@ -16,12 +16,12 @@ import {
   DataViewField,
 } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { StateComparators, SerializedPanelState } from '@kbn/presentation-publishing';
+import { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
 
 import { i18n } from '@kbn/i18n';
 import type { DefaultControlState, DefaultDataControlState } from '../../../common';
-import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
+import { dataViewsService } from '../../services/kibana_services';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import type { ControlApiInitialization, ControlStateManager } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
