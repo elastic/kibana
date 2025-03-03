@@ -678,7 +678,6 @@ export const WithDataviewPickerWithEsQl = {
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
     } as SearchBarProps),
 
@@ -698,7 +697,6 @@ export const WithDataviewPickerWithEsQlAndEsQlQuery = {
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>),
@@ -719,7 +717,6 @@ export const WithDataviewPickerWithEsQlAndLargeEsQlQuery = {
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       query: {
         esql: 'from dataview | project field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)',
@@ -742,7 +739,6 @@ export const WithDataviewPickerWithEsQlAndErrorsInEsQlQuery = {
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       textBasedLanguageModeErrors: [
         new Error(

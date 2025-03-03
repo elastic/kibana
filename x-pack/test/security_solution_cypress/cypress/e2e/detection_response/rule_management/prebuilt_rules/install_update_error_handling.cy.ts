@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../tasks/api_calls/common';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   getInstallSingleRuleButtonByRuleId,
@@ -42,6 +46,8 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     beforeEach(() => {
+      deletePrebuiltRulesAssets();
+      deleteAlertsAndRules();
       preventPrebuiltRulesPackageInstallation();
       login();
       visitRulesManagementTable();
