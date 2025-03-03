@@ -41,43 +41,46 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
     const { telemetry, kbDataClient, logger } = params as KnowledgeBaseWriteToolParams;
     if (kbDataClient == null) return null;
 
-    return tool(async (input) => {
-      logger.debug(
-        () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
-      );
+    return tool(
+      async (input) => {
+        logger.debug(
+          () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
+        );
 
-      const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
-        name: input.name,
-        kbResource: 'user',
-        source: 'conversation',
-        required: input.required,
-        text: input.query,
-        type: DocumentEntryType.value,
-      };
+        const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
+          name: input.name,
+          kbResource: 'user',
+          source: 'conversation',
+          required: input.required,
+          text: input.query,
+          type: DocumentEntryType.value,
+        };
 
-      logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
-      const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry, telemetry });
+        logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
+        const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry, telemetry });
 
-      if (resp == null) {
-        return "I'm sorry, but I was unable to add this entry to your knowledge base.";
+        if (resp == null) {
+          return "I'm sorry, but I was unable to add this entry to your knowledge base.";
+        }
+        return "I've successfully saved this entry to your knowledge base. You can ask me to recall this information at any time.";
+      },
+      {
+        name: toolDetails.name,
+        description: params.description || toolDetails.description,
+        schema: z.object({
+          name: z
+            .string()
+            .describe(`This is what the user will use to refer to the entry in the future.`),
+          query: z.string().describe(`Summary of items/things to save in the knowledge base`),
+          required: z
+            .boolean()
+            .describe(
+              `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
+            )
+            .default(false),
+        }),
+        tags: ['knowledge-base'],
       }
-      return "I've successfully saved this entry to your knowledge base. You can ask me to recall this information at any time.";
-    },{
-      name: toolDetails.name,
-      description: params.description || toolDetails.description,
-      schema: z.object({
-        name: z
-          .string()
-          .describe(`This is what the user will use to refer to the entry in the future.`),
-        query: z.string().describe(`Summary of items/things to save in the knowledge base`),
-        required: z
-          .boolean()
-          .describe(
-            `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
-          )
-          .default(false),
-      }),
-      tags: ['knowledge-base'],
-    });
+    );
   },
 };

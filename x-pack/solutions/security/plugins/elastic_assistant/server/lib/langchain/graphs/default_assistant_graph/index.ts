@@ -181,8 +181,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llmType,
     tools,
     isStream,
-    prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt)
-  })
+    prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
+  });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
