@@ -23,7 +23,7 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../contexts/kibana';
 import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import type { InferrerType } from './models';
@@ -54,6 +54,11 @@ export const SelectedModel: FC<Props> = ({
   setCurrentContext,
 }) => {
   const { trainedModels } = useMlApi();
+  const {
+    services: {
+      mlServices: { mlUsageCollection },
+    },
+  } = useMlKibana();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     const taskType = Object.keys(model.inference_config ?? {})[0];
@@ -65,14 +70,21 @@ export const SelectedModel: FC<Props> = ({
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          tempInferrer = new NerInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new NerInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            mlUsageCollection
+          );
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
           tempInferrer = new TextClassificationInference(
             trainedModels,
             model,
             inputType,
-            deploymentId
+            deploymentId,
+            mlUsageCollection
           );
           break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
@@ -80,7 +92,8 @@ export const SelectedModel: FC<Props> = ({
             trainedModels,
             model,
             inputType,
-            deploymentId
+            deploymentId,
+            mlUsageCollection
           );
           if (pipelineConfigValues) {
             const { labels, multi_label: multiLabel } = pipelineConfigValues;
@@ -91,30 +104,55 @@ export const SelectedModel: FC<Props> = ({
           }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          tempInferrer = new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextEmbeddingInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            mlUsageCollection
+          );
           break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          tempInferrer = new FillMaskInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new FillMaskInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            mlUsageCollection
+          );
           break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
           tempInferrer = new QuestionAnsweringInference(
             trainedModels,
             model,
             inputType,
-            deploymentId
+            deploymentId,
+            mlUsageCollection
           );
           if (pipelineConfigValues?.question) {
             tempInferrer.setQuestionText(pipelineConfigValues.question);
           }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
-          tempInferrer = new TextExpansionInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextExpansionInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            mlUsageCollection
+          );
           break;
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      tempInferrer = new LangIdentInference(trainedModels, model, inputType, deploymentId);
+      tempInferrer = new LangIdentInference(
+        trainedModels,
+        model,
+        inputType,
+        deploymentId,
+        mlUsageCollection
+      );
     }
     if (tempInferrer) {
       if (pipelineConfigValues) {

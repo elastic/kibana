@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import type { MlUsageCollection } from '../../../../services/usage_collection';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
@@ -37,9 +38,10 @@ export class NerInference extends InferenceBase<NerResponse> {
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    mlUsageCollection: MlUsageCollection
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, mlUsageCollection);
 
     this.initialize();
   }

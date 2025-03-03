@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
+import type { MlUsageCollection } from '../../../../services/usage_collection';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferenceType } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
@@ -32,9 +33,10 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    mlUsageCollection: MlUsageCollection
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, mlUsageCollection);
 
     this.initialize();
   }
