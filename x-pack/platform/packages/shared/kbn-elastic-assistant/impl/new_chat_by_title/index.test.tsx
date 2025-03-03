@@ -11,12 +11,9 @@ import userEvent from '@testing-library/user-event';
 
 import { NewChatByTitle } from '.';
 
-const mockUseAssistantContext = {
+const testProps = {
   showAssistantOverlay: jest.fn(),
 };
-jest.mock('../assistant_context', () => ({
-  useAssistantContext: () => mockUseAssistantContext,
-}));
 
 describe('NewChatByTitle', () => {
   afterEach(() => {
@@ -24,7 +21,7 @@ describe('NewChatByTitle', () => {
   });
 
   it('renders the default New Chat button with a discuss icon', () => {
-    render(<NewChatByTitle />);
+    render(<NewChatByTitle {...testProps} />);
 
     const newChatButton = screen.getByTestId('newChatByTitle');
 
@@ -32,7 +29,7 @@ describe('NewChatByTitle', () => {
   });
 
   it('renders the default "New Chat" text when children are NOT provided', () => {
-    render(<NewChatByTitle />);
+    render(<NewChatByTitle {...testProps} />);
 
     const newChatButton = screen.getByTestId('newChatByTitle');
 
@@ -40,7 +37,7 @@ describe('NewChatByTitle', () => {
   });
 
   it('renders custom children', async () => {
-    render(<NewChatByTitle>{'🪄✨'}</NewChatByTitle>);
+    render(<NewChatByTitle {...testProps}>{'🪄✨'}</NewChatByTitle>);
 
     const newChatButton = screen.getByTestId('newChatByTitle');
 
@@ -48,7 +45,7 @@ describe('NewChatByTitle', () => {
   });
 
   it('renders custom icons', async () => {
-    render(<NewChatByTitle iconType="help" />);
+    render(<NewChatByTitle {...testProps} iconType="help" />);
 
     const newChatButton = screen.getByTestId('newChatByTitle');
 
@@ -56,7 +53,7 @@ describe('NewChatByTitle', () => {
   });
 
   it('does NOT render an icon when iconType is null', () => {
-    render(<NewChatByTitle iconType={null} />);
+    render(<NewChatByTitle {...testProps} iconType={null} />);
 
     const newChatButton = screen.getByTestId('newChatByTitle');
 
@@ -64,7 +61,7 @@ describe('NewChatByTitle', () => {
   });
 
   it('renders button icon when iconOnly is true', async () => {
-    render(<NewChatByTitle iconOnly />);
+    render(<NewChatByTitle {...testProps} iconOnly />);
 
     const newChatButton = screen.getByTestId('newChatByTitle');
 
@@ -73,20 +70,11 @@ describe('NewChatByTitle', () => {
   });
 
   it('calls showAssistantOverlay on click', async () => {
-    const conversationTitle = 'test-conversation-id';
-    const promptContextId = 'test-prompt-context-id';
-
-    render(
-      <NewChatByTitle conversationTitle={conversationTitle} promptContextId={promptContextId} />
-    );
+    render(<NewChatByTitle {...testProps} />);
     const newChatButton = screen.getByTestId('newChatByTitle');
 
     await userEvent.click(newChatButton);
 
-    expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
-      conversationTitle,
-      promptContextId,
-      showOverlay: true,
-    });
+    expect(testProps.showAssistantOverlay).toHaveBeenCalledWith(true);
   });
 });
