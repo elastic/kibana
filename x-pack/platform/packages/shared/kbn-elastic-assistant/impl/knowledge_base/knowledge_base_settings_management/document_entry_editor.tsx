@@ -49,6 +49,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         setEntry((prevEntry) => ({
           ...prevEntry,
           users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : privateUsers,
+          global: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? true : false,
         })),
       [privateUsers, setEntry]
     );
