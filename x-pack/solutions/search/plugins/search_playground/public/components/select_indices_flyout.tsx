@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { getIndicesWithNoSourceFields } from '../utils/create_query';
 import { useIndicesFields } from '../hooks/use_indices_fields';
@@ -62,7 +63,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <EuiSpacer />
           <EuiSelectable
             searchable
-            height={650}
+            height="full"
             searchProps={{
               onChange: handleSearchChange,
             }}
@@ -92,6 +93,9 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
             }}
             isLoading={isIndicesLoading}
             renderOption={undefined}
+            css={css`
+              height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+            `}
           >
             {(list, search) => (
               <>
