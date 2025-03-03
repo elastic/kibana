@@ -12,7 +12,7 @@ import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-s
 import { DEFAULT_LOG_SOURCES } from './constants';
 
 /**
- * uiSettings definitions for the apm_sources_access plugin.
+ * uiSettings definitions for the logs_data_access plugin.
  */
 export const uiSettings: Record<string, UiSettingsParams> = {
   [OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID]: {
