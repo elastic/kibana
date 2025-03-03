@@ -4,7 +4,7 @@ import type { StructuredToolInterface } from "@langchain/core/tools";
 import { AgentRunnableSequence, createOpenAIToolsAgent, createStructuredChatAgent, createToolCallingAgent } from "langchain/agents"
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const TOOL_CALLING_LLM_TYPES = new Set(['bedrock', 'gemini'])
+export const TOOL_CALLING_LLM_TYPES = new Set(['bedrock', 'gemini'])
 
 export const agentRunableFacotry = async ({
     llm,

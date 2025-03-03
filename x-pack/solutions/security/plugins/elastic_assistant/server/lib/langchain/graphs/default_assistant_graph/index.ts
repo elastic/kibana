@@ -20,7 +20,7 @@ import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { formatPromptStructured } from './prompts';
+import { formatPrompt } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
@@ -175,13 +175,20 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
+  const chatPromptTemplate = formatPrompt({
+    prompt: defaultSystemPrompt,
+    additionalPrompt: systemPrompt,
+    llmType,
+    isOpenAI
+  })
+
   const agentRunnable = await agentRunableFacotry({
     llm: createLlmInstance(),
     isOpenAI,
     llmType,
     tools,
     isStream,
-    prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt)
+    prompt: chatPromptTemplate
   })
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
@@ -223,7 +230,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
     getFormattedTime: () =>
       getFormattedTime({
-        screenContextTimezone: request.body.screenContext?.timeZone,
+        screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
   });
