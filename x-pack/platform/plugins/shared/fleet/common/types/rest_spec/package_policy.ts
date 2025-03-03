@@ -13,7 +13,7 @@ import type {
   PackagePolicyPackage,
   FullAgentPolicyInput,
 } from '../models';
-import type { inputsFormat } from '../constants';
+import type { inputsFormat } from '../../constants';
 
 import type { BulkGetResult, ListResult, ListWithKuery } from './common';
 
@@ -37,7 +37,7 @@ export interface GetOnePackagePolicyResponse {
 export interface CreatePackagePolicyRequest {
   body: NewPackagePolicy & { force?: boolean };
   query: {
-    format?: inputsFormat.Simplified | inputsFormat.Legacy;
+    format?: typeof inputsFormat.Simplified | typeof inputsFormat.Legacy;
   };
 }
 
