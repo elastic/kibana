@@ -1,8 +1,15 @@
-# Alerting
 
-## Testing
+# Test plan for: Rules, Alerts, Overview page, and Cases
 
-1. Data generation 
+This plan will cover the UI part (not API) for:
+
+- Rules
+- Alerts
+- Overview page
+- Cases
+
+## Data generation
+
 > [!WARNING]
 > This guide will not cover how to run Kibana and ES locally. It assumes both instances are running before starting the data ingestion 
 
@@ -21,14 +28,8 @@ That will generate data in
 `traces-apm*,metrics-apm*,logs-apm*`,
 `logs-*-*,cloud-logs-*-*`
 
-> [!INFO]
+> [!NOTE]
 > The above indices will be used later to create the rules' data views.
-
-This section will cover the UI part (not API) for:
-
-- Rules and alerts
-- Overview page
-- Cases
 
 ## Rules and alerts
 
@@ -85,9 +86,9 @@ Visit the alerts page, then check and test:
 - Use the Search bar and see how it reflects the results in the alert table
 - Click on the Disabled and Snoozed at the top, it should lead to the rules page with the right filters
 
-### Overview page
+## Overview page
 
-Visit the overview page under Observability, then check and test:
+Visit the Overview page under Observability, then check and test:
 
 - The 4 sections (Alerts, Log Events, Hosts, and Services) are visible and show data.
 - Change the time range at the top of the page, it should change the data shown in the 4 sections.
@@ -97,7 +98,7 @@ Visit the overview page under Observability, then check and test:
 >
 > If there is not data showing, check if the data generation is working, and the time range is correct.
 
-### Cases
+## Cases
 
 Visit the Cases page under Observability, then check and test:
 
