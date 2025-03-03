@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { Replacements } from '../conversations/common_attributes.gen';
+import { ScreenContext } from '../common_attributes.gen';
 
 export type PostEvaluateBody = z.infer<typeof PostEvaluateBody>;
 export const PostEvaluateBody = z.object({
@@ -29,6 +30,7 @@ export const PostEvaluateBody = z.object({
   langSmithApiKey: z.string().optional(),
   langSmithProject: z.string().optional(),
   replacements: Replacements.optional().default({}),
+  screenContext: ScreenContext.optional(),
   size: z.number().optional().default(20),
 });
 

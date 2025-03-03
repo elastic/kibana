@@ -9,6 +9,10 @@ export interface IndicesStatusResponse {
   indexNames: string[];
 }
 
+export interface OnboardingTokenResponse {
+  token: string | null;
+}
+
 export interface UserStartPrivilegesResponse {
   privileges: {
     canCreateApiKeys: boolean;

@@ -26,7 +26,7 @@ import { getSloBurnRates } from './get_slo_burn_rates';
 import { getSLOSuggestionsRoute } from './get_suggestions';
 import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
-import { getSLOsOverview } from './get_slos_overview';
+import { getSLOStatsOverview } from './get_slo_stats_overview';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -51,6 +51,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
-    ...getSLOsOverview,
+    ...getSLOStatsOverview,
   };
 };
