@@ -96,7 +96,7 @@ export const LinkContent = ({
 
     if (!urlToCopy.current) {
       urlToCopy.current = delegatedShareUrlHandler
-        ? delegatedShareUrlHandler()
+        ? await delegatedShareUrlHandler()
         : allowShortUrl
         ? await createShortUrl()
         : snapshotUrl;
