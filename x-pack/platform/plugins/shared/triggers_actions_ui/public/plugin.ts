@@ -85,6 +85,7 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -152,6 +153,7 @@ interface PluginsStart {
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class Plugin
@@ -289,6 +291,7 @@ export class Plugin
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
           lens: pluginsStart.lens,
+          fieldsMetadata: pluginsStart.fieldsMetadata,
         });
       },
     });
@@ -385,6 +388,7 @@ export class Plugin
             isServerless: !!pluginsStart.serverless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
           });
         },
       });
