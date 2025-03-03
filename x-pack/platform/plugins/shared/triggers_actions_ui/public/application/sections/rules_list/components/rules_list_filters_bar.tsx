@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_TABLE_FILTERS } from '../../../../common/lib/apm/user_actions';
 import { RulesListStatuses } from './rules_list_statuses';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
@@ -73,6 +75,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+  const { startTransaction } = useStartTransaction();
 
   const getRuleTagFilter = () => {
     if (isRuleTagFilterEnabled) {
@@ -82,7 +85,10 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           refresh={refresh}
           canLoadRules={canLoadRules}
           selectedTags={filters.tags || []}
-          onChange={(value) => updateFilters({ filter: 'tags', value })}
+          onChange={(value) => {
+            startTransaction({ name: RULES_TABLE_FILTERS.TAGS });
+            updateFilters({ filter: 'tags', value });
+          }}
         />,
       ];
     }
@@ -94,7 +100,10 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       return (
         <RuleStatusFilter
           selectedStatuses={filters.ruleStatuses || []}
-          onChange={(value) => updateFilters({ filter: 'ruleStatuses', value })}
+          onChange={(value) => {
+            startTransaction({ name: RULES_TABLE_FILTERS.STATUS });
+            updateFilters({ filter: 'ruleStatuses', value });
+          }}
         />
       );
     }
@@ -107,7 +116,10 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         <RuleExecutionStatusFilter
           key="rule-status-filter"
           selectedStatuses={filters.ruleExecutionStatuses || []}
-          onChange={(value) => updateFilters({ filter: 'ruleExecutionStatuses', value })}
+          onChange={(value) => {
+            startTransaction({ name: RULES_TABLE_FILTERS.EXECUTION_STATUS });
+            updateFilters({ filter: 'ruleExecutionStatuses', value });
+          }}
         />,
       ];
     }
@@ -115,7 +127,10 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       <RuleLastRunOutcomeFilter
         key="rule-last-run-outcome-filter"
         selectedOutcomes={filters.ruleLastRunOutcomes || []}
-        onChange={(value) => updateFilters({ filter: 'ruleLastRunOutcomes', value })}
+        onChange={(value) => {
+          startTransaction({ name: RULES_TABLE_FILTERS.LAST_RESPONSE });
+          updateFilters({ filter: 'ruleLastRunOutcomes', value });
+        }}
       />,
     ];
   };
@@ -125,14 +140,20 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       key="type-filter"
       options={filterOptions}
       filters={filters.types || []}
-      onChange={(value) => updateFilters({ filter: 'types', value })}
+      onChange={(value) => {
+        startTransaction({ name: RULES_TABLE_FILTERS.TYPE });
+        updateFilters({ filter: 'types', value });
+      }}
     />,
     showActionFilter && (
       <ActionTypeFilter
         key="action-type-filter"
         actionTypes={actionTypes}
         filters={filters.actionTypes || []}
-        onChange={(value) => updateFilters({ filter: 'actionTypes', value })}
+        onChange={(value) => {
+          startTransaction({ name: RULES_TABLE_FILTERS.ACTION_TYPE });
+          updateFilters({ filter: 'actionTypes', value });
+        }}
       />
     ),
     ...getRuleOutcomeOrStatusFilter(),
@@ -141,13 +162,16 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
+
     if (e.target.value === '') {
+      startTransaction({ name: RULES_TABLE_FILTERS.SEARCH });
       updateFilters({ filter: 'searchText', value: e.target.value });
     }
   };
 
   const handleKeyup = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode === ENTER_KEY) {
+      startTransaction({ name: RULES_TABLE_FILTERS.SEARCH });
       updateFilters({ filter: 'searchText', value: inputText });
     }
   };
@@ -197,6 +221,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
             data-test-subj="refreshRulesButton"
             iconType="refresh"
             onClick={() => {
+              startTransaction({ name: RULES_TABLE_FILTERS.REFRESH });
               onClearSelection();
               onRefreshRules();
             }}

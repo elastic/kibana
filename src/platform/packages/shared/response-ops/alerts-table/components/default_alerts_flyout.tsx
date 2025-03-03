@@ -15,6 +15,7 @@ import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-
 import { AdditionalContext, FlyoutSectionProps } from '../types';
 import { defaultAlertsTableColumns } from '../configuration';
 import { DefaultCellValue } from './default_cell_value';
+import { ALERTS_ACTIONS, useStartTransaction } from '../hooks/use_start_transaction';
 
 export const DefaultAlertsFlyoutHeader = <AC extends AdditionalContext>({
   alert,
@@ -32,6 +33,7 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
   props: FlyoutSectionProps<AC>
 ) => {
   const { alert, columns } = props;
+  const { startTransaction } = useStartTransaction();
   const overviewTab = useMemo(
     () => ({
       id: 'overview',
@@ -82,10 +84,10 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
 
   const tabs = useMemo(() => [overviewTab, tableTab], [overviewTab, tableTab]);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
-  const handleTabClick = useCallback(
-    (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as TabId),
-    []
-  );
+  const handleTabClick = useCallback((tab: EuiTabbedContentTab) => {
+    startTransaction({ name: ALERTS_ACTIONS.FLYOUT_TABS });
+    setSelectedTabId(tab.id as TabId);
+  }, []);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

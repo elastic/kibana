@@ -1,14 +1,10 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "sourceMap": true,
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../../../typings/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     // optionalPlugins from ./kibana.json
@@ -82,9 +78,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/code-editor-mock",
     "@kbn/monaco",
-    "@kbn/code-editor",
+    "@kbn/code-editor"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

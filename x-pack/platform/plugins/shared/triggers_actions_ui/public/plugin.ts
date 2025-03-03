@@ -90,6 +90,7 @@ import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import { ApmBase } from '@elastic/apm-rum';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -169,6 +170,7 @@ interface PluginsStart {
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  apm?: ApmBase;
 }
 
 export class Plugin
@@ -267,6 +269,7 @@ export class Plugin
           PluginsStart,
           unknown
         ];
+        const { apm } = await import('@elastic/apm-rum');
 
         const { renderApp } = await import('./application/rules_app');
 
@@ -306,6 +309,7 @@ export class Plugin
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
           lens: pluginsStart.lens,
+          apm,
         });
       },
     });
@@ -370,6 +374,7 @@ export class Plugin
             PluginsStart,
             unknown
           ];
+          const { apm } = await import('@elastic/apm-rum');
           let kibanaFeatures: KibanaFeature[];
           try {
             kibanaFeatures = await pluginsStart.features.getFeatures();
@@ -402,6 +407,7 @@ export class Plugin
             isServerless: !!pluginsStart.serverless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            apm,
           });
         },
       });

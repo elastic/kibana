@@ -35,7 +35,10 @@ export const useStartTransaction = () => {
         type = DEFAULT_TRANSACTION_TYPE,
         options = DEFAULT_TRANSACTION_OPTIONS,
       }: StartTransactionOptions = {}
-    ) => apm?.startTransaction(name, type, options),
+    ) => {
+      console.log('cases use startTransaction', { name, type, options });
+      return apm?.startTransaction(name, type, options);
+    },
     [apm]
   );
 

@@ -15,6 +15,7 @@ import type { AdditionalContext, AlertActionsProps } from '../types';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { typedMemo } from '../utils/react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
+import { ALERTS_ACTIONS, useStartTransaction } from '../hooks/use_start_transaction';
 
 /**
  * Alerts table row action to mark the selected alert as untracked
@@ -28,10 +29,12 @@ export const MarkAsUntrackedAlertAction = typedMemo(
     const {
       services: { http, notifications },
     } = useAlertsTableContext();
+    const { startTransaction } = useStartTransaction();
     const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({ http, notifications });
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 
     const handleUntrackAlert = useCallback(async () => {
+      startTransaction({ name: ALERTS_ACTIONS.UNTRACK });
       await untrackAlerts({
         indices: [alert._index ?? ''],
         alertUuids: [alert._id],

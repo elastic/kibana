@@ -26,6 +26,7 @@ import {
   ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
+import type { ApmBase } from '@elastic/apm-rum';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
 import type {
@@ -248,6 +249,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     application: ApplicationStart;
     licensing: LicensingPluginStart;
     settings: SettingsStart;
+    apm?: ApmBase;
     /**
      * The cases service is optional: cases features will be disabled if not provided
      */

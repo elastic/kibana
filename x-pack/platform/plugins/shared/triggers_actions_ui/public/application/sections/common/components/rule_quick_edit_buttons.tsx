@@ -18,6 +18,8 @@ import {
 } from './with_bulk_rule_api_operations';
 import './rule_quick_edit_buttons.scss';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_BULK_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { UntrackAlertsModal } from './untrack_alerts_modal';
 
 export type ComponentOpts = {
@@ -52,6 +54,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   const {
     notifications: { toasts },
   } = useKibana().services;
+  const { startTransaction } = useStartTransaction();
 
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
@@ -232,6 +235,11 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     }
   }
 
+  const onEnableClick = useCallback(() => {
+    startTransaction({ name: RULES_LIST_BULK_ACTIONS.ENABLE });
+    onEnable();
+  }, [onEnable, startTransaction]);
+
   const onDisableClick = useCallback(() => {
     setIsUntrackAlertsModalOpen(true);
   }, []);
@@ -242,10 +250,11 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
 
   const onModalConfirm = useCallback(
     (untrack: boolean) => {
+      startTransaction({ name: RULES_LIST_BULK_ACTIONS.DISABLE });
       onModalClose();
       onDisable(untrack);
     },
-    [onModalClose, onDisable]
+    [onModalClose, onDisable, startTransaction]
   );
 
   return (
@@ -314,7 +323,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         )}
         <EuiFlexItem>
           <EuiButtonEmpty
-            onClick={onEnable}
+            onClick={onEnableClick}
             isLoading={isEnablingRules}
             isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
             data-test-subj="bulkEnable"

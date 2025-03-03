@@ -35,6 +35,11 @@ import {
   UNSNOOZE_SUCCESS_MESSAGE,
 } from './notify_badge';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import {
+  RULES_LIST_ACTIONS,
+  RULES_LIST_BULK_ACTIONS,
+} from '../../../../common/lib/apm/user_actions';
 
 export type ComponentOpts = {
   item: RuleTableItem;
@@ -68,6 +73,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     ruleTypeRegistry,
     notifications: { toasts },
   } = useKibana().services;
+  const { startTransaction } = useStartTransaction();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
@@ -196,6 +202,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   }, []);
 
   const onEnable = useCallback(async () => {
+    startTransaction({ name: RULES_LIST_BULK_ACTIONS.ENABLE });
     asyncScheduler.schedule(async () => {
       await bulkEnableRules({ ids: [item.id] });
       onRuleChanged();
@@ -206,6 +213,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 
   const onDisable = useCallback(
     async (untrack: boolean) => {
+      startTransaction({ name: RULES_LIST_BULK_ACTIONS.DISABLE });
       onDisableModalClose();
       await bulkDisableRules({ ids: [item.id], untrack });
       onRuleChanged();
@@ -250,6 +258,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
           'data-test-subj': 'cloneRule',
           onClick: async () => {
+            startTransaction({ name: RULES_LIST_ACTIONS.CLONE });
             setIsPopoverOpen(!isPopoverOpen);
             onCloneRule(item.id);
           },
@@ -262,6 +271,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           disabled: !item.isEditable || !isRuleTypeEditableInContext,
           'data-test-subj': 'editRule',
           onClick: () => {
+            startTransaction({ name: RULES_LIST_ACTIONS.EDIT });
             setIsPopoverOpen(!isPopoverOpen);
             onEditRule(item);
           },
@@ -286,6 +296,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           disabled: !item.isEditable,
           'data-test-subj': 'runRule',
           onClick: () => {
+            startTransaction({ name: RULES_LIST_ACTIONS.RUN_RULE });
             setIsPopoverOpen(!isPopoverOpen);
             onRunRule(item);
           },

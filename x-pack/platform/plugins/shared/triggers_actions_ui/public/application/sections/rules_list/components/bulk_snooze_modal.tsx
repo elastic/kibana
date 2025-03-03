@@ -27,6 +27,8 @@ import { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../type
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_BULK_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 export type BulkSnoozeModalProps = {
   rules: RuleTableItem[];
@@ -75,6 +77,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
+  const { startTransaction } = useStartTransaction();
 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
@@ -108,6 +111,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   };
 
   const onUnsnoozeRule = async () => {
+    startTransaction({ name: RULES_LIST_BULK_ACTIONS.UNSNOOZE });
     onClose();
     setIsBulkEditing(true);
     try {

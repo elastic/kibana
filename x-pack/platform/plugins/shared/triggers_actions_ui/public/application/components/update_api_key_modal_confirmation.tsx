@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
+import { useStartTransaction } from '../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_BULK_ACTIONS } from '../../common/lib/apm/user_actions';
 import { useBulkEditResponse } from '../hooks/use_bulk_edit_response';
 import { BulkEditResponse, RuleTableItem } from '../../types';
 
@@ -47,6 +49,7 @@ export const UpdateApiKeyModalConfirmation = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const { startTransaction } = useStartTransaction();
 
   const [updateModalFlyoutVisible, setUpdateModalVisibility] = useState<boolean>(false);
 
@@ -89,6 +92,7 @@ export const UpdateApiKeyModalConfirmation = ({
         onCancel();
       }}
       onConfirm={async () => {
+        startTransaction({ name: RULES_LIST_BULK_ACTIONS.UPDATE_API_KEY });
         setUpdateModalVisibility(false);
         setIsLoadingState(true);
         try {

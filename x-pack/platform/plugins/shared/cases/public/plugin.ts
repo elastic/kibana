@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
+import { init as initApm } from '@elastic/apm-rum';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -74,6 +75,13 @@ export class CasesUiPlugin
       persistableStateAttachmentTypeRegistry
     );
 
+    // const apm = initApm({
+    //   serviceName: 'cases',
+    //   serverUrl: 'https://6878dbed2f274e088d90d166594e547b.apm.us-central1.gcp.cloud.es.io:443',
+    //   serviceVersion: '1.0.0',
+    //   environment: 'production',
+    // });
+
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
     if (plugins.home) {
@@ -105,7 +113,10 @@ export class CasesUiPlugin
           return renderApp({
             mountParams: params,
             coreStart,
-            pluginsStart,
+            pluginsStart: {
+              ...pluginsStart,
+              // apm,
+            },
             storage,
             kibanaVersion,
             externalReferenceAttachmentTypeRegistry,

@@ -20,6 +20,7 @@ import { FilterGroupLoading } from './loading';
 import { DEFAULT_CONTROLS } from './constants';
 import { FilterGroup } from './filter_group';
 import { FilterControlConfig } from './types';
+import { ApmBase } from '@elastic/apm-rum';
 
 export type AlertFilterControlsProps = Omit<
   ComponentProps<typeof FilterGroup>,
@@ -46,6 +47,7 @@ export type AlertFilterControlsProps = Omit<
     notifications: NotificationsStart;
     dataViews: DataViewsPublicPluginStart;
     storage: typeof Storage;
+    apm?: ApmBase;
   };
 };
 
@@ -90,6 +92,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
       notifications: { toasts },
       dataViews,
       storage,
+      apm,
     },
     ...restFilterItemGroupProps
   } = props;
@@ -159,6 +162,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
       {...restFilterItemGroupProps}
       Storage={storage}
       defaultControls={defaultControls}
+      apm={apm}
     />
   );
 };

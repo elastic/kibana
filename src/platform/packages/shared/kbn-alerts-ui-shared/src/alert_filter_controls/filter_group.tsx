@@ -41,6 +41,7 @@ import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { ALERT_FILTER_CONTROLS, useStartTransaction } from './hooks/use_start_transaction';
 
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
@@ -60,7 +61,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     Storage,
     ruleTypeIds,
     storageKey,
+    apm,
   } = props;
+  const { startTransaction } = useStartTransaction(apm);
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
@@ -345,6 +348,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const discardChangesHandler = useCallback(async () => {
+    startTransaction({ name: ALERT_FILTER_CONTROLS.DISCARD });
     if (hasPendingChanges) {
       controlGroup?.updateInput({
         initialChildControlState: getStoredControlState()?.initialChildControlState,
@@ -387,6 +391,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [controlGroup, dataViewId, defaultControls]);
 
   const saveChangesHandler = useCallback(async () => {
+    startTransaction({ name: ALERT_FILTER_CONTROLS.SAVE });
     await upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);

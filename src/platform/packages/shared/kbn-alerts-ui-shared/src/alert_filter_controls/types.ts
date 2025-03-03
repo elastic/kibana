@@ -15,6 +15,7 @@ import type {
   ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ApmBase } from '@elastic/apm-rum';
 
 export type FilterUrlFormat = Record<
   string,
@@ -74,4 +75,5 @@ export interface FilterGroupProps extends Pick<ControlGroupRuntimeState, 'chaini
   ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
   storageKey?: string;
+  apm?: ApmBase;
 }
