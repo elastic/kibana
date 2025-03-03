@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { monaco } from '@kbn/monaco';
 import { untilPluginStartServicesReady } from '../../kibana_services';
