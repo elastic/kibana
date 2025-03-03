@@ -19,6 +19,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -102,7 +103,7 @@ export class AIAssistantService {
   private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
-  private isKBSetupInProgress: boolean = false;
+  private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
@@ -163,12 +164,12 @@ export class AIAssistantService {
     return this.initialized;
   }
 
-  public getIsKBSetupInProgress() {
-    return this.isKBSetupInProgress;
+  public getIsKBSetupInProgress(spaceId: string) {
+    return this.isKBSetupInProgress.get(spaceId) ?? false;
   }
 
-  public setIsKBSetupInProgress(isInProgress: boolean) {
-    this.isKBSetupInProgress = isInProgress;
+  public setIsKBSetupInProgress(spaceId: string, isInProgress: boolean) {
+    this.isKBSetupInProgress.set(spaceId, isInProgress);
   }
 
   public getIsProductDocumentationInProgress() {
@@ -512,7 +513,10 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
-    opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
+    opts: CreateAIAssistantClientParams &
+      GetAIAssistantKnowledgeBaseDataClientParams & {
+        trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+      }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
     if (opts?.modelIdOverride != null) {
@@ -550,6 +554,7 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
       assistantDefaultInferenceEndpoint: this.assistantDefaultInferenceEndpoint,
+      trainedModelsProvider: opts.trainedModelsProvider,
     });
   }
 

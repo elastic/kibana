@@ -86,7 +86,7 @@ export const useInvalidateKnowledgeBaseStatus = () => {
 
   return useCallback(() => {
     queryClient.invalidateQueries(KNOWLEDGE_BASE_STATUS_QUERY_KEY, {
-      refetchType: 'active',
+      refetchType: 'all',
     });
   }, [queryClient]);
 };

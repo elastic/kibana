@@ -75,6 +75,8 @@ const createKnowledgeBaseDataClientMock = () => {
     isSetupAvailable: jest.fn(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
+    getLoadedSecurityLabsDocsCount: jest.fn(),
+    getProductDocumentationStatus: jest.fn(),
   };
   return mocked;
 };
