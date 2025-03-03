@@ -9,15 +9,14 @@ import React from 'react';
 
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
-
-import type { InferenceEndpointUI } from './types';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 interface EndpointsTableProps {
-  columns: EuiBasicTableProps<InferenceEndpointUI>['columns'];
-  data: InferenceEndpointUI[];
-  onChange: EuiBasicTableProps<InferenceEndpointUI>['onChange'];
+  columns: EuiBasicTableProps<InferenceInferenceEndpointInfo>['columns'];
+  data: InferenceInferenceEndpointInfo[];
+  onChange: EuiBasicTableProps<InferenceInferenceEndpointInfo>['onChange'];
   pagination: Pagination;
-  sorting: EuiBasicTableProps<InferenceEndpointUI>['sorting'];
+  sorting: EuiBasicTableProps<InferenceInferenceEndpointInfo>['sorting'];
 }
 
 export const EndpointsTable: React.FC<EndpointsTableProps> = ({
