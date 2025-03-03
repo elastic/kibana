@@ -322,6 +322,7 @@ export const createCustomThresholdExecutor = ({
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
         }),
+        reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
       };
 
