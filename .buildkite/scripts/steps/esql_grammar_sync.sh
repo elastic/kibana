@@ -104,7 +104,7 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
-  cd ./src/platform/packages/shared/kbn-esql-ast
+  cd ./src/platform/packages/shared/kbn-esql-ast/src
   yarn build:antlr4:esql
 
   # Make a commit

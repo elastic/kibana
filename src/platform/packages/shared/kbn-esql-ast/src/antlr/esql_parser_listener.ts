@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Generated from src/antlr/esql_parser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
