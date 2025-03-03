@@ -15,7 +15,7 @@ export const useChat = () => {
 
   const send = useCallback(
     async (message: string) => {
-      const events$ = await chatService.callAgent();
+      const events$ = await chatService.callAgent({ message });
       events$.subscribe((event) => {
         setEvents((prevEvents) => [...prevEvents, event]);
       });

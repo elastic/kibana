@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import { css } from '@emotion/css';
 import React, { FC } from 'react';
-import { EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Chat } from '../components/chat';
+
+const pageSectionContentClassName = css`
+  width: 100%;
+  display: flex;
+  flex-grow: 1;
+  padding-top: 0;
+  padding-bottom: 0;
+  max-block-size: calc(100vh - 96px);
+`;
 
 export const WorkchatChatPage: FC<{}> = () => {
   return (
@@ -19,19 +29,30 @@ export const WorkchatChatPage: FC<{}> = () => {
       grow={false}
       panelled={false}
     >
-      <KibanaPageTemplate.Header paddingSize="m">
-        <EuiPageHeaderSection>
-          <EuiTitle>
-            <h2>WorkChat</h2>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>Hello</EuiPageHeaderSection>
-      </KibanaPageTemplate.Header>
+      <EuiFlexGroup
+        className={pageSectionContentClassName}
+        direction="column"
+        gutterSize="none"
+        justifyContent="center"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={false} hasShadow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiTitle>
+                  <h2>WorkChat</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText>You know, for chat!</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
 
-      <KibanaPageTemplate.Section>
-        <div>You know, for chat!</div>
         <Chat />
-      </KibanaPageTemplate.Section>
+      </EuiFlexGroup>
     </KibanaPageTemplate>
   );
 };

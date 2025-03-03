@@ -6,26 +6,32 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { useChat } from '../hooks/use_chat';
+import { ChatInputForm } from './chat_input_form';
 
 export const Chat: React.FC<{}> = () => {
   const { send, events } = useChat();
 
-  const onClick = useCallback(() => {
-    send('test');
-  }, [send]);
+  const onSubmit = useCallback(
+    (message: string) => {
+      send(message);
+    },
+    [send]
+  );
 
   return (
-    <EuiFlexGroup direction="column" alignItems="flexStart">
-      <EuiFlexItem grow={false}>
-        <EuiButton onClick={onClick}>Click to test</EuiButton>
+    <>
+      <EuiFlexItem grow css={{ overflow: 'auto' }}>
+        <div>
+          {events.map((event) => {
+            return <div>{JSON.stringify(event)}</div>;
+          })}
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {events.map((event) => {
-          return <div>{JSON.stringify(event)}</div>;
-        })}
+        <ChatInputForm disabled={false} loading={false} onSubmit={onSubmit} />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </>
   );
 };
