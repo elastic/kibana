@@ -8,7 +8,6 @@
  */
 
 import { createEsClientForTesting, KbnClient } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
 import { ScoutLogger } from './logger';
 import { ScoutTestConfig, EsClient } from '../../types';
 
@@ -17,7 +16,7 @@ interface ClientOptions {
   url: string;
   username: string;
   password: string;
-  log: ScoutLogger | ToolingLog;
+  log: ScoutLogger;
 }
 
 function createClientUrlWithAuth({ serviceName, url, username, password, log }: ClientOptions) {
@@ -25,9 +24,7 @@ function createClientUrlWithAuth({ serviceName, url, username, password, log }: 
   clientUrl.username = username;
   clientUrl.password = password;
 
-  if (log instanceof ScoutLogger) {
-    log.serviceLoaded(`${serviceName}Client`);
-  }
+  log.serviceLoaded(`${serviceName}Client`);
 
   return clientUrl.toString();
 }
@@ -35,7 +32,7 @@ function createClientUrlWithAuth({ serviceName, url, username, password, log }: 
 let esClientInstance: EsClient | null = null;
 let kbnClientInstance: KbnClient | null = null;
 
-export function getEsClient(config: ScoutTestConfig, log: ScoutLogger | ToolingLog) {
+export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
   if (!esClientInstance) {
     const { username, password } = config.auth;
     const elasticsearchUrl = createClientUrlWithAuth({
