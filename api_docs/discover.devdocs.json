@@ -1266,7 +1266,9 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              "TimefilterHook",
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
