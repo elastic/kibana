@@ -6,7 +6,7 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SanitizedRuleWithLegacyId } from '../../types';
 import { convertEsSortToEventLogSort } from '../../lib';
 import {

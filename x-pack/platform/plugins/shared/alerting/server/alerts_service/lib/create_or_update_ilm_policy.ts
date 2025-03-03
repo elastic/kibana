@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';

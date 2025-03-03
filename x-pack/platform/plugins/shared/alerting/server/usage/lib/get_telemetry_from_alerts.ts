@@ -8,7 +8,7 @@
 import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';

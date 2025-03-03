@@ -8,7 +8,7 @@
 import { remove } from 'lodash';
 import type { EsQueryConfig, KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuthorizedRuleTypes } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {

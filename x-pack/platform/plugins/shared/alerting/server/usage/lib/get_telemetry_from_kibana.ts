@@ -10,7 +10,7 @@ import type {
   AggregationsCardinalityAggregate,
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
 import type { ConnectorsByConsumersBucket } from './group_connectors_by_consumers';
