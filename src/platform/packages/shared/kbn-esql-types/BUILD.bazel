@@ -20,15 +20,11 @@ SRCS = glob(
   ],
 )
 
-SHARED_DEPS = [
-  "//src/platform/packages/shared/kbn-i18n",
-  "//src/platform/packages/shared/kbn-esql-types",
-  "@npm//fastest-levenshtein",
-]
+SHARED_DEPS = []
 
 js_library(
-  name = "kbn-esql-validation-autocomplete",
-  package_name = "@kbn/esql-validation-autocomplete",
+  name = "kbn-esql-types",
+  package_name = "@kbn/esql-types",
   srcs = ["package.json"] + SRCS,
   deps = SHARED_DEPS,
   visibility = ["//visibility:public"],
