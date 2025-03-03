@@ -35,8 +35,7 @@ import {
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
-import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
 import { buildObservableVariable } from './helper';
 
