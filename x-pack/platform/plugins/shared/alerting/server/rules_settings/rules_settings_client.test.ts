@@ -12,6 +12,7 @@ import {
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
+import { RulesSettingsAlertDeletionClient } from './alert_deletion/rules_settings_alert_deletion_client';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -31,5 +32,6 @@ describe('RulesSettingsClient', () => {
     const client = new RulesSettingsClient(rulesSettingsClientParams);
     expect(client.flapping()).toEqual(expect.any(RulesSettingsFlappingClient));
     expect(client.queryDelay()).toEqual(expect.any(RulesSettingsQueryDelayClient));
+    expect(client.alertDeletion()).toEqual(expect.any(RulesSettingsAlertDeletionClient));
   });
 });

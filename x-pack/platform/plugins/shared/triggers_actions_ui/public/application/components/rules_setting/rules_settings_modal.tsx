@@ -29,7 +29,7 @@ import {
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { useFetchAlertsDeletionSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_deletion_settings';
 import { RulesSettingsAlertsDeletionSection } from '@kbn/alerts-ui-shared/src/rule_settings/alert_deletion/rules_settings_alerts_deletion_section';
-import type { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -123,7 +123,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     hasAlertsDeletionChanged,
     setAlertsDeletionSettings,
     resetAlertsDeletionSettings,
-  ] = useResettableState<RulesSettingsAlertsDeletionProperties>();
+  ] = useResettableState<RulesSettingsAlertDeletionProperties>();
 
   const { isLoading: isFlappingLoading, isError: hasFlappingError } = useFetchFlappingSettings({
     http,
@@ -204,7 +204,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     key:
       | keyof RulesSettingsFlappingProperties
       | keyof RulesSettingsQueryDelayProperties
-      | keyof RulesSettingsAlertsDeletionProperties,
+      | keyof RulesSettingsAlertDeletionProperties,
     value: boolean | number
   ) => {
     if (setting === 'flapping') {
@@ -235,7 +235,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
       setQueryDelaySettings(newSettings);
     }
 
-    if (setting === 'alertsDeletion') {
+    if (setting === 'alertDeletion') {
       if (!alertsDeletionSettings) {
         return;
       }
@@ -258,7 +258,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
       setQueryDelaySettings(queryDelaySettings!, true);
     }
     if (canWriteAlertsDeletionSettings && hasAlertsDeletionChanged) {
-      updatedSettings.alertsDeletion = alertsDeletionSettings;
+      updatedSettings.alertDeletion = alertsDeletionSettings;
       setAlertsDeletionSettings(alertsDeletionSettings!, true);
     }
 
@@ -303,7 +303,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           <>
             <EuiSpacer />
             <RulesSettingsAlertsDeletionSection
-              onChange={(key, value) => handleSettingsChange('alertsDeletion', key, value)}
+              onChange={(key, value) => handleSettingsChange('alertDeletion', key, value)}
               settings={alertsDeletionSettings}
               canWrite={canWriteAlertsDeletionSettings}
               hasError={hasAlertsDeletionError}

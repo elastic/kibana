@@ -20,12 +20,12 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import type { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import * as i18n from './translations';
 
 interface Props {
-  onChange: (key: keyof RulesSettingsAlertsDeletionProperties, value: number | boolean) => void;
-  settings?: RulesSettingsAlertsDeletionProperties;
+  onChange: (key: keyof RulesSettingsAlertDeletionProperties, value: number | boolean) => void;
+  settings?: RulesSettingsAlertDeletionProperties;
   canWrite: boolean;
   hasError: boolean;
 }

@@ -13,7 +13,7 @@ import userEvent, { UserEvent } from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IToasts } from '@kbn/core/public';
 import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
-import type { RulesSettingsAlertsDeletion } from '@kbn/alerting-types';
+import type { RulesSettingsAlertDeletion } from '@kbn/alerting-types';
 import { RulesSettingsModal, RulesSettingsModalProps } from './rules_settings_modal';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
@@ -107,7 +107,7 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
   updatedAt: new Date().toISOString(),
 };
 
-const mockAlertDeletionSetting: RulesSettingsAlertsDeletion = {
+const mockAlertDeletionSetting: RulesSettingsAlertDeletion = {
   isActiveAlertsDeletionEnabled: true,
   isInactiveAlertsDeletionEnabled: true,
   activeAlertsDeletionThreshold: 80,
