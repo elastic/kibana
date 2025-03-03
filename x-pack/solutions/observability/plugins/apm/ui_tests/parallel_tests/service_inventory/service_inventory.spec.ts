@@ -23,28 +23,22 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test('shows the service inventory', async ({ page, pageObjects: { serviceInventoryPage } }) => {
     await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(start, end);
     expect(page.url()).toContain('/app/apm/services');
-    // cy.contains('h1', 'Services');
     await expect(page.getByRole('heading', { name: 'Services', level: 1 })).toBeVisible();
   });
 
   test('shows a list of services', async ({ page }) => {
-    // cy.contains('opbeans-node');
     await expect(page.getByText('opbeans-node')).toBeVisible();
     await expect(page.getByText('opbeans-java')).toBeVisible();
     await expect(page.getByText('opbeans-rum')).toBeVisible();
   });
 
   test('shows a list of environments', async ({ page }) => {
-    // cy.get('td:contains(production)').should('have.length', 3);
-    // const environmentEntrySelector = page.locator('td > div > span > span > span');
     const environmentEntrySelector = page.locator('td:has-text("production")');
     await expect(environmentEntrySelector).toHaveCount(3);
   });
 
   test('loads the service overview for a service when clicking on it', async ({ page }) => {
-    // cy.contains('opbeans-node').click({ force: true });
     await page.getByText('opbeans-node').click();
-    // cy.url().should('include', '/apm/services/opbeans-node/overview');
     expect(page.url()).toContain('/apm/services/opbeans-node/overview');
     await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-node');
   });
@@ -62,14 +56,6 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       .locator('button:has-text("production")')
       .click();
     await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue('production');
-
-    // Move similar checks to Jest? This is not exactly testing browser behavior
-    // There is no exact equivalent here: https://github.com/microsoft/playwright/issues/19536
-    //   cy.expectAPIsToHaveBeenCalledWith({
-    //     apisIntercepted: mainAliasNames,
-    //     value: 'environment=production',
-    //   });
-    // });
   });
 
   test('shows the filtered services when using the service name fast filter', async ({ page }) => {
