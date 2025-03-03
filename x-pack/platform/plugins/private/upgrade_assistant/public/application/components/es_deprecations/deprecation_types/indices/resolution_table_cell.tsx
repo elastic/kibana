@@ -101,7 +101,7 @@ const i18nTexts = {
   ),
 };
 
-export const canUserReindexRow = (reindexState: ReindexState) => {
+export const shouldPreventReindexing = (reindexState: ReindexState) => {
   return (
     reindexState.status === ReindexStatus.inProgress ||
     reindexState.status === ReindexStatus.completed ||
