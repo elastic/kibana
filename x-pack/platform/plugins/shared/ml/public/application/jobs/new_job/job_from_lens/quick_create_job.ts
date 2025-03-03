@@ -41,10 +41,10 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
-    shareService: SharePluginStart,
+    share: SharePluginStart,
     mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, shareService, mlApi);
+    super(dataViews, kibanaConfig, timeFilter, share, mlApi);
   }
 
   public async createAndSaveJob(

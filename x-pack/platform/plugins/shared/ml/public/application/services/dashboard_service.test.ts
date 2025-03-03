@@ -24,18 +24,17 @@ describe('DashboardService', () => {
     }),
   };
 
-  const share: SharePluginStart = {
+  const shareMock = {
     url: {
       locators: {
-        // @ts-expect-error Only partial mock of full plugin
         get: () => ({
           getUrl: getUrlMock,
         }),
       },
     },
-  };
+  } as unknown as SharePluginStart;
 
-  const dashboardService = dashboardServiceProvider(dashboard, share);
+  const dashboardService = dashboardServiceProvider(dashboard, shareMock);
 
   test('should fetch dashboard', async () => {
     // act

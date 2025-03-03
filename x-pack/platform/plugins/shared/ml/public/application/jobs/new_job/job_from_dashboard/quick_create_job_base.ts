@@ -53,7 +53,7 @@ export class QuickJobCreatorBase {
     protected readonly dataViews: DataViewsContract,
     protected readonly kibanaConfig: IUiSettingsClient,
     protected readonly timeFilter: TimefilterContract,
-    protected readonly shareService: SharePluginStart,
+    protected readonly share: SharePluginStart,
     protected readonly mlApi: MlApi
   ) {}
 
@@ -244,7 +244,7 @@ export class QuickJobCreatorBase {
       ),
     };
 
-    const location = await this.shareService.url.locators
+    const location = await this.share.url.locators
       .get(DASHBOARD_APP_LOCATOR)
       ?.getLocation(params);
     if (location === undefined) {

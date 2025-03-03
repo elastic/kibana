@@ -34,11 +34,11 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
-    shareService: SharePluginStart,
+    share: SharePluginStart,
     private data: DataPublicPluginStart,
     mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, shareService, mlApi);
+    super(dataViews, kibanaConfig, timeFilter, share, mlApi);
   }
 
   public async createAndSaveJob(
