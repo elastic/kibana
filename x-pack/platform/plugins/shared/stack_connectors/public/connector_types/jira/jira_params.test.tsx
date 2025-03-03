@@ -446,7 +446,7 @@ describe('JiraParamsFields renders', () => {
           },
         },
       };
-      const results = render(<JiraParamsFields {...newProps} />);
+      render(<JiraParamsFields {...newProps} />);
       const labels = within(screen.getByTestId('labelsComboBox'));
 
       fireEvent.focusOut(labels.getByTestId('comboBoxSearchInput'));

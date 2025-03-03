@@ -91,7 +91,7 @@ describe('BedrockConnectorFields renders', () => {
       mockDashboard.mockImplementation((id: string) => ({
         dashboardUrl: null,
       }));
-      const { queryByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={bedrockConnector}>
           <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>

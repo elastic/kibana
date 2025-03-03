@@ -293,7 +293,7 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
     expect(await screen.findByText('Channel')).toBeTruthy();
     expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
@@ -370,7 +370,7 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
     screen.getByTestId('slackApiChannelId').click();
     await userEvent.clear(screen.getByTestId('slackApiChannelId'));
@@ -437,7 +437,7 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
     expect(await screen.findByText('Channel ID')).toBeTruthy();
     expect(screen.getByTestId('slackChannelsComboBox')).toBeInTheDocument();

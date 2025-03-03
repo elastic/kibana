@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type RenderResult, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_utils';
 import MicrosoftDefenderEndpointActionConnectorFields from './microsoft_defender_endpoint_connector';
 import { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
@@ -15,7 +15,6 @@ import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('Microsoft Defender for Endpoint Connector UI', () => {
   let renderProps: ActionConnectorFieldsProps;
-  let render: () => RenderResult;
   let connectorFormProps: ConnectorFormSchema;
 
   beforeEach(() => {
