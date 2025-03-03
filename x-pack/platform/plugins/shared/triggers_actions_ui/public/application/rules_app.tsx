@@ -50,6 +50,7 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -84,6 +85,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   isServerless: boolean;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
