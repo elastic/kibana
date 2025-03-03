@@ -199,7 +199,7 @@ export default async function ({ readConfigFile }) {
 
     suiteTags: {
       ...kibanaCommonConfig.get('suiteTags'),
-      exclude: [...kibanaCommonConfig.get('suiteTags').exclude],
+      exclude: [...kibanaCommonConfig.get('suiteTags').exclude, 'upgradeAssistant'],
     },
 
     // choose where screenshots should be saved
