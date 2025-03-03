@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../../config/serverless/config.base.essentials';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
@@ -13,5 +13,9 @@ export default createTestConfig({
     reportName:
       'Rules Management - Rule Import Integration Tests - Importing customized prebuilt rules - Serverless Env',
   },
-  kbnTestServerArgs: [],
+  kbnTestServerArgs: [
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'prebuiltRulesCustomizationEnabled',
+    ])}`,
+  ],
 });

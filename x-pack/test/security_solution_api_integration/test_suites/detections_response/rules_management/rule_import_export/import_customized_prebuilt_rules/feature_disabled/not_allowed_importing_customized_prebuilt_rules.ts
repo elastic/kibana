@@ -6,14 +6,11 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
-import { deleteAllPrebuiltRuleAssets, getCustomQueryRuleParams } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
-import { combineToNdJson } from '../../../../../utils/combine_to_ndjson';
-import {
-  createPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
-} from '../../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllPrebuiltRuleAssets, getCustomQueryRuleParams } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { combineToNdJson } from '../../../../utils/combine_to_ndjson';
+import { createPrebuiltRuleAssetSavedObjects, createRuleAssetSavedObject } from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -55,8 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_id: 'prebuilt-rule-to-be-customized',
             error: {
               status_code: 400,
-              message:
-                'Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: prebuilt-rule-to-be-customized]',
+              message: expect.stringContaining('rule_id: prebuilt-rule-to-be-customized]'),
             },
           },
         ],

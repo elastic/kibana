@@ -85,7 +85,7 @@ export const importRules = async ({
               'xpack.securitySolution.detectionEngine.rules.licenseInsufficientToImportCustomizedPrebuiltRule',
               {
                 defaultMessage:
-                  'Upgrade your license to import customized prebuilt rules [rule_id: {ruleId}]', // Change this message
+                  'Upgrade your license to import customized prebuilt rules [rule_id: {ruleId}].',
                 values: { ruleId: rule.rule_id },
               }
             ),
