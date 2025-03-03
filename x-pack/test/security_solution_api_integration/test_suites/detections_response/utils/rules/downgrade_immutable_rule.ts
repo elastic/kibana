@@ -22,15 +22,13 @@ export const downgradeImmutableRule = async (
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           refresh: true,
           wait_for_completion: true,
-          body: {
-            script: {
-              lang: 'painless',
-              source: 'ctx._source.alert.params.version--',
-            },
-            query: {
-              term: {
-                'alert.params.ruleId': ruleId,
-              },
+          script: {
+            lang: 'painless',
+            source: 'ctx._source.alert.params.version--',
+          },
+          query: {
+            term: {
+              'alert.params.ruleId': ruleId,
             },
           },
         },

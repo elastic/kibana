@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { backgroundTaskNodeMapping, taskMappings } from './mappings';
 import { getMigrations } from './migrations';
 import { TaskManagerConfig } from '../config';
