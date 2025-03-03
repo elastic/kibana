@@ -22,6 +22,8 @@ import {
   transparentize,
   useIsWithinMinBreakpoint,
   EuiButton,
+  EuiButtonEmpty,
+  logicalCSS,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { useNavigation as useServices } from '../../services';
@@ -47,6 +49,7 @@ const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
 `;
 
 const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => css`
+  ${logicalCSS('width', '100%')}
   background-color: ${isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'};
   transform: none !important; /* don't translateY 1px */
   color: inherit;
@@ -72,6 +75,8 @@ interface Props {
 
 export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, activeNodes }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();
   const { title, deepLink, children } = item;
@@ -134,8 +139,10 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   );
 
   if (!hasLandingPage) {
+    const Button = isAmsterdam ? EuiButton : EuiButtonEmpty;
+
     return (
-      <EuiButton
+      <Button
         onClick={onLinkClick}
         iconSide="right"
         iconType="arrowRight"
@@ -145,7 +152,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
         data-test-subj={dataTestSubj}
       >
         {title}
-      </EuiButton>
+      </Button>
     );
   }
 
