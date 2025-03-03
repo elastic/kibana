@@ -80,7 +80,7 @@ describe('layers', () => {
       const dataName = 'this does not exist';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
   });
 
@@ -192,7 +192,7 @@ describe('layers', () => {
             { index: 0, value: 'nope' },
           ],
         })
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
   });
 });
