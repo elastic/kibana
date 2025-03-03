@@ -359,6 +359,8 @@ export function registerTransactionDurationRuleType({
           alertHits?.[ALERT_EVALUATION_VALUE]
         ).formatted;
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -371,6 +373,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 

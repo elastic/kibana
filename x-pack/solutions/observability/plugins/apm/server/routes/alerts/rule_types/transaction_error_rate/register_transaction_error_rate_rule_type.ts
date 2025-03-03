@@ -351,6 +351,8 @@ export function registerTransactionErrorRateRuleType({
         );
 
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -363,6 +365,7 @@ export function registerTransactionErrorRateRuleType({
           threshold: ruleParams.threshold,
           triggerValue: asDecimalOrInteger(alertHits?.[ALERT_EVALUATION_VALUE]),
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 

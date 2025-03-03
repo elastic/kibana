@@ -302,6 +302,8 @@ export function registerErrorCountRuleType({
           relativeViewInAppUrl
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -314,6 +316,7 @@ export function registerErrorCountRuleType({
           threshold: ruleParams.threshold,
           triggerValue: alertHits?.[ALERT_EVALUATION_VALUE],
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 
