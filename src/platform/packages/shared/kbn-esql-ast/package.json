@@ -1,4 +1,5 @@
 {
+<<<<<<< Updated upstream
     "name": "@kbn/esql-ast",
     "version": "1.0.0",
     "private": true,
@@ -10,3 +11,21 @@
     },
     "sideEffects": false
   }
+=======
+  "name": "@kbn/esql-ast",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",
+    "build:antlr4": "npm run build:antlr4:esql",
+    "build:antlr4:esql": "npm run build:antlr4:esql:parser && npm run build:antlr4:esql:lexer",
+    "postbuild:antlr4:esql": "mv src/antlr/esql_parserListener.ts src/antlr/esql_parser_listener.ts",
+    "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/antlr/parser src/antlr/esql_parser.g4",
+    "postbuild:antlr4:esql:parser": "sed -i '' -e '1s/^/\\/\\/ @ts-nocheck\\n/' src/antlr/esql_parser.ts",
+    "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4",
+    "postbuild:antlr4:esql:lexer": "sed -i '' -e '1s/^/\\/\\/ @ts-nocheck\\n/' src/antlr/esql_lexer.ts"
+  },
+  "sideEffects": false
+}
+>>>>>>> Stashed changes
