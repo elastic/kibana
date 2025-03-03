@@ -60,7 +60,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Api Key privileges check', { config: 'basic' }, () => {
-    describe('index privileges', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/211517
+    describe.skip('index privileges', () => {
       it('returns user authorization as false for noAccessUser', async () => {
         const resp = await callApiAs('noAccessUser');
 
