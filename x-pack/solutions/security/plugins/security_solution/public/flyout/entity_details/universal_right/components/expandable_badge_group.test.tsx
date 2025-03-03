@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiBadge } from '@elastic/eui';
 import { ExpandableBadgeGroup } from './expandable_badge_group';
 
-const badges = [
+const badges: Array<typeof EuiBadge> = [
   <EuiBadge key="1">{'Badge 1'}</EuiBadge>,
   <EuiBadge key="2">{'Badge 2'}</EuiBadge>,
   <EuiBadge key="3">{'Badge 3'}</EuiBadge>,

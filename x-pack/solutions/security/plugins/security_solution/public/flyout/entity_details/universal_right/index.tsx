@@ -37,13 +37,12 @@ export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelPro
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
   }, [entity]);
 
+  const timestamp = isDate(source['@timestamp']) ? source['@timestamp'] : undefined;
+
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <UniversalEntityFlyoutHeader
-        entity={entity}
-        timestamp={isDate(source?.['@timestamp']) ? source['@timestamp'] : undefined}
-      />
+      <UniversalEntityFlyoutHeader entity={entity} timestamp={timestamp} />
       <UniversalEntityFlyoutContent source={source} />
     </>
   );

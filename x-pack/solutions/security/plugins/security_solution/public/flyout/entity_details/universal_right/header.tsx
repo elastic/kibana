@@ -21,15 +21,15 @@ import { FlyoutTitle } from '../../shared/components/flyout_title';
 const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityEcs['labels'] }) => {
   const { euiTheme } = useEuiTheme();
 
-  const tagBadges: Array<typeof EuiBadge> | undefined = useMemo(
-    () => tags?.map((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>),
+  const tagBadges = useMemo(
+    () => tags?.map<Array<typeof EuiBadge>>((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>),
     [tags]
   );
 
-  const labelBadges: Array<typeof EuiBadge> | undefined = useMemo(
+  const labelBadges = useMemo(
     () =>
       labels &&
-      Object.entries(labels)?.map(([key, value]) => (
+      Object.entries(labels)?.map<Array<typeof EuiBadge>>(([key, value]) => (
         <EuiBadge color="hollow">
           <span
             css={css`
