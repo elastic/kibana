@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
-// import './help_popover.scss';
 import { useHelpPopoverStyles } from './help_popover_styles';
 
 export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {

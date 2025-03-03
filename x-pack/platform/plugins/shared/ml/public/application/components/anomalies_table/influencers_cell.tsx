@@ -26,7 +26,7 @@ interface Influencer {
 }
 
 interface InfluencerCellProps {
-  influencerFilter: InfluencerCellFilter;
+  influencerFilter: InfluencerCellFilter | undefined;
   influencers: Influencer[] | undefined;
   limit: number;
 }
@@ -44,7 +44,8 @@ export const InfluencersCell: FC<InfluencerCellProps> = ({
   const { filterButton } = useEntityCellStyles();
 
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
-  const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
+  // const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
+  const toggleAllInfluencers = () => setShowAllInfluencers((prev) => !prev);
 
   let numberToDisplay = showAllInfluencers === false ? limit : influencers.length;
   let othersCount = 0;
@@ -75,62 +76,64 @@ export const InfluencersCell: FC<InfluencerCellProps> = ({
       {displayInfluencers.map((influencer, index) => (
         <div key={index}>
           {influencer.influencerFieldName}: {influencer.influencerFieldValue}
-          <>
-            <EuiToolTip
-              content={
-                <FormattedMessage
-                  id="xpack.ml.anomaliesTable.influencersCell.addFilterTooltip"
-                  defaultMessage="Add filter"
+          {influencerFilter !== undefined && (
+            <>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.anomaliesTable.influencersCell.addFilterTooltip"
+                    defaultMessage="Add filter"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  size="s"
+                  css={filterButton}
+                  onClick={blurButtonOnClick(() => {
+                    influencerFilter(
+                      influencer.influencerFieldName,
+                      influencer.influencerFieldValue,
+                      '+'
+                    );
+                  })}
+                  iconType="plusInCircle"
+                  aria-label={i18n.translate(
+                    'xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel',
+                    {
+                      defaultMessage: 'Add filter',
+                    }
+                  )}
                 />
-              }
-            >
-              <EuiButtonIcon
-                size="s"
-                css={filterButton}
-                onClick={blurButtonOnClick(() => {
-                  influencerFilter(
-                    influencer.influencerFieldName,
-                    influencer.influencerFieldValue,
-                    '+'
-                  );
-                })}
-                iconType="plusInCircle"
-                aria-label={i18n.translate(
-                  'xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel',
-                  {
-                    defaultMessage: 'Add filter',
-                  }
-                )}
-              />
-            </EuiToolTip>
-            <EuiToolTip
-              content={
-                <FormattedMessage
-                  id="xpack.ml.anomaliesTable.influencersCell.removeFilterTooltip"
-                  defaultMessage="Remove filter"
+              </EuiToolTip>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.anomaliesTable.influencersCell.removeFilterTooltip"
+                    defaultMessage="Remove filter"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  size="s"
+                  css={filterButton}
+                  onClick={blurButtonOnClick(() => {
+                    influencerFilter(
+                      influencer.influencerFieldName,
+                      influencer.influencerFieldValue,
+                      '-'
+                    );
+                  })}
+                  iconType="minusInCircle"
+                  aria-label={i18n.translate(
+                    'xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel',
+                    {
+                      defaultMessage: 'Remove filter',
+                    }
+                  )}
                 />
-              }
-            >
-              <EuiButtonIcon
-                size="s"
-                css={filterButton}
-                onClick={blurButtonOnClick(() => {
-                  influencerFilter(
-                    influencer.influencerFieldName,
-                    influencer.influencerFieldValue,
-                    '-'
-                  );
-                })}
-                iconType="minusInCircle"
-                aria-label={i18n.translate(
-                  'xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel',
-                  {
-                    defaultMessage: 'Remove filter',
-                  }
-                )}
-              />
-            </EuiToolTip>
-          </>
+              </EuiToolTip>
+            </>
+          )}
         </div>
       ))}
       {othersCount > 0 && (
