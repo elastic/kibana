@@ -32,6 +32,7 @@ import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useKnowledgeBaseUpdater } from '../../assistant/settings/use_settings_updater/use_knowledge_base_updater';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
 import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
@@ -39,11 +40,6 @@ import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entr
 import { useAssistantContext } from '../../assistant_context';
 import { useKnowledgeBaseTable } from './use_knowledge_base_table';
 import { AssistantSettingsBottomBar } from '../../assistant/settings/assistant_settings_bottom_bar';
-import {
-  useSettingsUpdater,
-  DEFAULT_CONVERSATIONS,
-  DEFAULT_PROMPTS,
-} from '../../assistant/settings/use_settings_updater/use_settings_updater';
 import { AddEntryButton } from './add_entry_button';
 import * as i18n from './translations';
 import { Flyout } from '../../assistant/common/components/assistant_settings_management/flyout';
@@ -75,7 +71,10 @@ interface Params {
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
+    assistantTelemetry,
     http,
+    knowledgeBase,
+    setKnowledgeBase,
     toasts,
   } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -99,13 +98,12 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   );
 
   // Only needed for legacy settings management
-  const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
-    useSettingsUpdater(
-      DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
-      DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
-      false, // Knowledge Base settings do not require conversations
-      false // Knowledge Base settings do not require prompts
-    );
+  const {
+    knowledgeBaseSettings,
+    resetKnowledgeBaseSettings,
+    saveKnowledgeBaseSettings,
+    setUpdatedKnowledgeBaseSettings,
+  } = useKnowledgeBaseUpdater({ assistantTelemetry, knowledgeBase, setKnowledgeBase });
 
   const handleUpdateKnowledgeBaseSettings = useCallback<
     React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>
@@ -118,8 +116,8 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   );
 
   const handleSave = useCallback(
-    async (param?: { callback?: () => void }) => {
-      await saveSettings();
+    (param?: { callback?: () => void }) => {
+      saveKnowledgeBaseSettings();
       toasts?.addSuccess({
         iconType: 'check',
         title: SETTINGS_UPDATED_TOAST_TITLE,
@@ -127,13 +125,13 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       setHasPendingChanges(false);
       param?.callback?.();
     },
-    [saveSettings, toasts]
+    [saveKnowledgeBaseSettings, toasts]
   );
 
   const onCancelClick = useCallback(() => {
-    resetSettings();
+    resetKnowledgeBaseSettings();
     setHasPendingChanges(false);
-  }, [resetSettings]);
+  }, [resetKnowledgeBaseSettings]);
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
@@ -396,7 +394,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </EuiPanel>
       <EuiSpacer size="m" />
       <AlertsSettingsManagement
-        knowledgeBase={knowledgeBase}
+        knowledgeBase={knowledgeBaseSettings}
         setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
       />
       <AssistantSettingsBottomBar
