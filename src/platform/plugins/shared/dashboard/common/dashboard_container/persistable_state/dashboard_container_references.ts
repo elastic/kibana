@@ -12,6 +12,7 @@ import {
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
+import { REFERENCE_NAME_PREFIX } from '@kbn/controls-plugin/common';
 import { ParsedDashboardAttributesWithType } from '../../types';
 
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
@@ -23,7 +24,7 @@ export const getReferencesForPanelId = (id: string, references: Reference[]): Re
 };
 
 export const getReferencesForControls = (references: Reference[]): Reference[] => {
-  return references.filter((reference) => reference.name.startsWith(controlGroupReferencePrefix));
+  return references.filter((reference) => reference.name.startsWith(REFERENCE_NAME_PREFIX));
 };
 
 export const prefixReferencesFromPanel = (id: string, references: Reference[]): Reference[] => {
@@ -35,8 +36,6 @@ export const prefixReferencesFromPanel = (id: string, references: Reference[]): 
       name: `${prefix}${reference.name}`,
     }));
 };
-
-const controlGroupReferencePrefix = 'controlGroup_';
 
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService

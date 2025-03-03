@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const REFERENCE_NAME_PREFIX = 'controlGroup_';
+import { REFERENCE_NAME_PREFIX } from '../../../common';
 
 export function getReferenceName(controlId: string, referenceNameSuffix: string) {
   return `${REFERENCE_NAME_PREFIX}${controlId}:${referenceNameSuffix}`;

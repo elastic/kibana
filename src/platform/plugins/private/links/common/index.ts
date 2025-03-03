@@ -8,3 +8,4 @@
  */
 
 export { APP_ICON, APP_NAME, CONTENT_ID, DISPLAY_NAME, LATEST_VERSION } from './constants';
+export { extractReferences, injectReferences } from './persistable_state';

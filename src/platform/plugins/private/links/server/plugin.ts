@@ -8,11 +8,15 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { CONTENT_ID, LATEST_VERSION } from '../common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { CONTENT_ID, LATEST_VERSION, extractReferences, injectReferences } from '../common';
 import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
+import { LinksSerializedState } from '../common/types';
+import { LinksByValueSerializedState } from '../common/types';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -25,6 +29,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     core: CoreSetup,
     plugins: {
       contentManagement: ContentManagementServerSetup;
+      embeddable: EmbeddableSetup;
     }
   ) {
     plugins.contentManagement.register({
@@ -35,6 +40,39 @@ export class LinksServerPlugin implements Plugin<object, object> {
       }),
       version: {
         latest: LATEST_VERSION,
+      },
+    });
+
+    plugins.embeddable.registerEmbeddableFactory({
+      id: CONTENT_ID,
+      extract: (state) => {
+        const typedState = state as EmbeddableStateWithType & LinksSerializedState;
+        if (!('attributes' in typedState) || typedState.attributes === undefined) {
+          return { state, references: [] };
+        }
+
+        const { attributes, references } = extractReferences({
+          attributes: typedState.attributes,
+        } as LinksByValueSerializedState);
+        return {
+          state: { ...state, attributes },
+          references,
+        };
+      },
+      inject: (state, references) => {
+        const typedState = state as EmbeddableStateWithType & LinksSerializedState;
+        if (!('attributes' in typedState) || typedState.attributes === undefined) {
+          return typedState;
+        }
+
+        const { attributes } = injectReferences({
+          attributes: typedState.attributes,
+          references,
+        });
+        return {
+          ...typedState,
+          attributes,
+        };
       },
     });
 
