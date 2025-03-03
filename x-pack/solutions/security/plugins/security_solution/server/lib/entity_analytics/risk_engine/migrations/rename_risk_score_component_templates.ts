@@ -6,7 +6,6 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import { first } from 'lodash/fp';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
@@ -17,9 +16,9 @@ import { mappingComponentName } from '../../risk_score/configurations';
 export const MAX_PER_PAGE = 10_000;
 
 /**
- * This migration renames the Risk Score component templates to include the namespace in the name.
+ * This migration renames the Risk Score component templates to include the namespace in the name. Before 8.18 all spaces used the `.risk-score-mappings` component template, we now use `.risk-score-mappings-<spacename>`.
  *
- * To achieve that it needs to update the Index template and delete the old component template.
+ * The migration creates the new component template and updates the index template for each space, then finally deletes the old component template.
  */
 export const renameRiskScoreComponentTemplate = async ({
   auditLogger,
@@ -31,7 +30,7 @@ export const renameRiskScoreComponentTemplate = async ({
   const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  // Check if there are any existing component templates with the namespace in the name
+  // Check if the legacy component templates (without the namespace in the name) exists
   const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
     name: mappingComponentName,
   });
@@ -48,7 +47,7 @@ export const renameRiskScoreComponentTemplate = async ({
   });
 
   await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
-    const namespace = first(savedObject.namespaces); // We install one Risk Engine Configuration object per space
+    const namespace = savedObject.namespaces?.[0]; // We need to create one component template per space
 
     if (!namespace) {
       logger.error('Unexpected saved object. Risk Score saved objects must have a namespace');
