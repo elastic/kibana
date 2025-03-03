@@ -9,6 +9,10 @@ import { renderHook } from '@testing-library/react';
 import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 import { useKibana } from '../../common/lib/kibana';
 import { API_VERSIONS } from '../../../common/constants';
+import {
+  ASSET_INVENTORY_ENABLE_API_PATH,
+  ASSET_INVENTORY_STATUS_API_PATH,
+} from '../../../common/api/asset_inventory/constants';
 
 jest.mock('../../common/lib/kibana');
 
@@ -31,7 +35,7 @@ describe('useAssetInventoryRoutes', () => {
     await result.current.postEnableAssetInventory();
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch).toHaveBeenCalledWith('/api/asset_inventory/enable', {
+    expect(mockFetch).toHaveBeenCalledWith(ASSET_INVENTORY_ENABLE_API_PATH, {
       method: 'POST',
       version: API_VERSIONS.public.v1,
       body: JSON.stringify({}),
@@ -45,7 +49,7 @@ describe('useAssetInventoryRoutes', () => {
     const response = await result.current.getAssetInventoryStatus();
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch).toHaveBeenCalledWith('/api/asset_inventory/status', {
+    expect(mockFetch).toHaveBeenCalledWith(ASSET_INVENTORY_STATUS_API_PATH, {
       method: 'GET',
       version: API_VERSIONS.public.v1,
       query: {},

@@ -11,17 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import illustration from '../../common/images/illustration_product_no_results_magnifying_glass.svg';
+import { DOCS_URL, TEST_SUBJ_EMPTY_STATE } from '../constants';
 
-const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
-const EMPTY_STATE_TEST_SUBJ = 'assetInventory:empty-state';
-
-export const EmptyState = ({
-  onResetFilters,
-  docsUrl = ASSET_INVENTORY_DOCS_URL,
-}: {
-  onResetFilters: () => void;
-  docsUrl?: string;
-}) => {
+export const EmptyState = ({ onResetFilters }: { onResetFilters: () => void }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -35,7 +27,7 @@ export const EmptyState = ({
           margin-top: ${euiTheme.size.xxxl}};
         }
       `}
-      data-test-subj={EMPTY_STATE_TEST_SUBJ}
+      data-test-subj={TEST_SUBJ_EMPTY_STATE}
       icon={
         <EuiImage
           url={illustration}
@@ -74,7 +66,7 @@ export const EmptyState = ({
             defaultMessage="Reset filters"
           />
         </EuiButton>,
-        <EuiLink href={docsUrl} target="_blank">
+        <EuiLink href={DOCS_URL} target="_blank">
           <FormattedMessage
             id="xpack.securitySolution.assetInventory.emptyState.readDocsLink"
             defaultMessage="Read the docs"

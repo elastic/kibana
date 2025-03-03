@@ -12,8 +12,9 @@ import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import type { Filter } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { useDataViewContext } from '../../hooks/data_view_context';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useDataViewContext } from '../../hooks/data_view_context';
+import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_data_table';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../../constants';
 import { FilterGroupLoading } from './filters_loading';
 import { ASSET_INVENTORY_RULE_TYPE_IDS } from './rule_type_ids';
@@ -46,10 +47,10 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
 ];
 
 export interface FiltersProps {
-  onFiltersChange: (newFilters: Filter[]) => void;
+  setQuery: (v: Partial<AssetsURLQuery>) => void;
 }
 
-export const Filters = ({ onFiltersChange }: FiltersProps) => {
+export const Filters = ({ setQuery }: FiltersProps) => {
   const { dataView, dataViewIsLoading } = useDataViewContext();
   const spaceId = useSpaceId();
 
@@ -85,7 +86,9 @@ export const Filters = ({ onFiltersChange }: FiltersProps) => {
       <EuiSpacer size="l" />
       <FilterGroup
         dataViewId={dataViewSpec?.id || null}
-        onFiltersChange={onFiltersChange}
+        onFiltersChange={(filters: Filter[]) => {
+          setQuery({ filters });
+        }}
         ruleTypeIds={ASSET_INVENTORY_RULE_TYPE_IDS}
         Storage={Storage}
         defaultControls={DEFAULT_ASSET_INVENTORY_FILTERS}

@@ -8,26 +8,22 @@ import { type Dispatch, type SetStateAction, useCallback } from 'react';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 import { useUrlQuery } from './use_url_query';
 import { usePageSize } from './use_page_size';
-import { getDefaultQuery } from './utils';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
-
-const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'assetInventory:dataTable:columns';
 
 export interface AssetsBaseURLQuery {
   query: Query;
   filters: Filter[];
   /**
-   * Filters that are part of the query but not persisted in the URL or in the Filter Manager
-   */
-  nonPersistedFilters?: Filter[];
-  /**
    * Grouping component selection
    */
   groupBy?: string[];
 }
+
+export type AssetsURLQuery = Pick<AssetsBaseURLQuery, 'query' | 'filters'>;
 
 export type URLQuery = AssetsBaseURLQuery & Record<string, unknown>;
 
@@ -53,6 +49,13 @@ export interface AssetInventoryDataTableResult {
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
+const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
+  query,
+  filters,
+  sort: { field: '@timestamp', direction: 'desc' },
+  pageIndex: 0,
+});
+
 /*
   Hook for managing common table state and methods for the Asset Inventory DataTable
 */
@@ -60,12 +63,10 @@ export const useAssetInventoryDataTable = ({
   defaultQuery = getDefaultQuery,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
-  nonPersistedFilters,
 }: {
   defaultQuery?: (params: AssetsBaseURLQuery) => URLQuery;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
-  nonPersistedFilters?: Filter[];
 }): AssetInventoryDataTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery<URLQuery>(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
@@ -128,7 +129,6 @@ export const useAssetInventoryDataTable = ({
   const baseEsQuery = useBaseEsQuery({
     filters: urlQuery.filters,
     query: urlQuery.query,
-    ...(nonPersistedFilters ? { nonPersistedFilters } : {}),
   });
 
   const handleUpdateQuery = useCallback(
