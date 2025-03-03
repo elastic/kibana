@@ -121,11 +121,11 @@ export const moveAction = (
     let degrees = Math.abs(Math.atan(vertical / horizontal) * (180 / Math.PI));
     if (isNaN(degrees)) degrees = 90;
     else {
-      if (vertical > 0 && horizontal > 0) {
+      if (vertical >= 0 && horizontal >= 0) {
         // do nothing
-      } else if (vertical > 0 && horizontal < 0) {
+      } else if (vertical >= 0 && horizontal <= 0) {
         degrees = 180 - degrees;
-      } else if (vertical < 0 && horizontal < 0) {
+      } else if (vertical <= 0 && horizontal <= 0) {
         degrees += 180;
       } else {
         degrees = 360 - degrees;

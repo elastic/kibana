@@ -152,7 +152,7 @@ export const useGridLayoutState = ({
             width,
             row: rowNum,
             height: oldPanel.height * runtimeSettings.rowHeight,
-            zIndex: panelIndex, // 0
+            zIndex: panelIndex,
           };
           rowOffsets[rowNum] += width;
         });

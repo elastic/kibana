@@ -20,7 +20,6 @@ export const getResizePreviewRect = ({
   interactionEvent: PanelInteractionEvent;
 }) => {
   const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
-
   return {
     left: panelRect.left,
     top: panelRect.top,
@@ -37,6 +36,15 @@ export const getDragPreviewRect = ({
   pointerPixel: { clientX: number; clientY: number };
   interactionEvent: PanelInteractionEvent;
 }) => {
+  const styles = interactionEvent.panelDiv.computedStyleMap();
+  console.log(
+    interactionEvent.panelDiv.offsetWidth,
+    interactionEvent.panelDiv.style.transformOrigin,
+    interactionEvent.panelDiv.style.transform,
+    interactionEvent.panelDiv.style.transformBox,
+    styles.get('transform'),
+    styles.get('transform-box')
+  );
   return {
     left: pointerPixel.clientX - interactionEvent.pointerOffsets.left,
     top: pointerPixel.clientY - interactionEvent.pointerOffsets.top,
