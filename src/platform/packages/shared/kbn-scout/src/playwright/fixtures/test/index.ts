@@ -16,3 +16,4 @@ export { pageObjectsFixture, pageObjectsParallelFixture } from './page_objects';
 export type { PageObjects } from './page_objects';
 export { persistentContext } from './context';
 export { perfTrackerFixture } from './performance';
+export type { PerfTrackerFixture } from './performance';

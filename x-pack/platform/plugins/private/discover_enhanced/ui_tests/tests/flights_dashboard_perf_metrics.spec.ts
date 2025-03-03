@@ -44,7 +44,7 @@ test.describe(
       await page.gotoApp('home');
       await page.waitForLoadingIndicatorHidden();
       // wait for all the js bundles to load on Home page
-      await perfTracker.waitForJsResourcesToLoad(cdp);
+      await perfTracker.waitForJsLoad(cdp);
     });
 
     test.afterAll(async ({ kbnClient }) => {
@@ -55,19 +55,19 @@ test.describe(
       await pageObjects.collapsibleNav.clickItem('Dashboards');
       await pageObjects.dashboard.waitForListingTableToLoad();
       // wait for all the js bundles to load on Dashboard Listing page
-      await perfTracker.waitForJsResourcesToLoad(cdp);
+      await perfTracker.waitForJsLoad(cdp);
 
       // start tracking bundle responses
-      const loadingBundles = perfTracker.trackBundleResponses(cdp);
+      perfTracker.captureBundleResponses(cdp);
       await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
 
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/dashboards#/view');
       // wait for all the js bundles to load
-      await perfTracker.waitForJsResourcesToLoad(cdp);
+      await perfTracker.waitForJsLoad(cdp);
 
       // collect stats, attach them to the test and run some validations
-      const stats = perfTracker.collectBundleStats(currentUrl, loadingBundles);
+      const stats = perfTracker.collectJsBundleStats(currentUrl);
       expect(stats.totalSize).toBeLessThan(4 * 1024 * 1024); // 4 MB
       expect(stats.bundleCount).toBeLessThan(110);
       expect(stats.plugins.map((p) => p.name)).toStrictEqual([
@@ -110,7 +110,7 @@ test.describe(
       await pageObjects.dashboard.goto();
       await pageObjects.dashboard.waitForListingTableToLoad();
       await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
-      const before = await perfTracker.getPerformanceDomainMetrics(cdp);
+      const before = await perfTracker.capturePagePerformanceMetrics(cdp);
       await page.waitForLoadingIndicatorHidden();
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/dashboards#/view');
@@ -119,8 +119,8 @@ test.describe(
         '[data-test-subj="embeddablePanel"][data-render-complete="true"]',
         14
       );
-      const after = await perfTracker.getPerformanceDomainMetrics(cdp);
-      perfTracker.collectPerformanceStats(currentUrl, before, after);
+      const after = await perfTracker.capturePagePerformanceMetrics(cdp);
+      perfTracker.collectPagePerformanceStats(currentUrl, before, after);
     });
   }
 );

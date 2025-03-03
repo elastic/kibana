@@ -35,8 +35,7 @@ import {
   persistentContext,
   perfTrackerFixture,
 } from './test';
-import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
-import { PerfTrackerFixture } from './test/performance';
+import type { BrowserAuthFixture, ScoutPage, PageObjects, PerfTrackerFixture } from './test';
 export type { ScoutPage, PageObjects } from './test';
 
 export const scoutFixtures = mergeTests(

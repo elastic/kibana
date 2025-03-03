@@ -27,7 +27,7 @@ test.describe('Discover app performance', { tag: [...tags.DEPLOYMENT_AGNOSTIC, '
     await page.gotoApp('home');
     await page.waitForLoadingIndicatorHidden();
     // wait for all the js bundles to load on Home page
-    await perfTracker.waitForJsResourcesToLoad(cdp);
+    await perfTracker.waitForJsLoad(cdp);
   });
 
   test.afterAll(async ({ kbnClient, uiSettings }) => {
@@ -37,16 +37,16 @@ test.describe('Discover app performance', { tag: [...tags.DEPLOYMENT_AGNOSTIC, '
 
   test('collect all JS bundles with CDP', async ({ page, pageObjects, perfTracker }) => {
     // start tracking bundle responses
-    const loadingBundles = perfTracker.trackBundleResponses(cdp);
+    perfTracker.captureBundleResponses(cdp);
     // navigate to Discover app from left menu on Home page
     await pageObjects.collapsibleNav.clickItem('Discover');
     const currentUrl = page.url();
     expect(currentUrl).toContain('app/discover#/');
     // wait for all the js bundles to load
-    await perfTracker.waitForJsResourcesToLoad(cdp);
+    await perfTracker.waitForJsLoad(cdp);
 
     // collect stats, attach them to the test and run some validations
-    const stats = perfTracker.collectBundleStats(currentUrl, loadingBundles);
+    const stats = perfTracker.collectJsBundleStats(currentUrl);
     expect(stats.totalSize).toBeLessThan(3.5 * 1024 * 1024); // 3.5 MB
     expect(stats.bundleCount).toBeLessThan(90);
     expect(stats.plugins.map((p) => p.name)).toStrictEqual([
@@ -63,14 +63,14 @@ test.describe('Discover app performance', { tag: [...tags.DEPLOYMENT_AGNOSTIC, '
   });
 
   test('collect metrics after page is loaded', async ({ page, pageObjects, perfTracker }) => {
-    const before = await perfTracker.getPerformanceDomainMetrics(cdp);
+    const before = await perfTracker.capturePagePerformanceMetrics(cdp);
     // navigate to Discover app from left menu on Home page
     await pageObjects.collapsibleNav.clickItem('Discover');
     await page.waitForLoadingIndicatorHidden();
     const currentUrl = page.url();
     expect(currentUrl).toContain('app/discover#/');
     await pageObjects.discover.waitForHistogramRendered();
-    const after = await perfTracker.getPerformanceDomainMetrics(cdp);
-    perfTracker.collectPerformanceStats(currentUrl, before, after);
+    const after = await perfTracker.capturePagePerformanceMetrics(cdp);
+    perfTracker.collectPagePerformanceStats(currentUrl, before, after);
   });
 });
