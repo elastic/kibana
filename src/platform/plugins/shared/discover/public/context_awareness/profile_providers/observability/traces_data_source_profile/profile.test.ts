@@ -95,7 +95,7 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it("should NOT match when the root context isn't Observability", () => {
+  it("should match when the root context isn't Observability", () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
         rootContext: {
@@ -105,6 +105,6 @@ describe('tracesDataSourceProfileProvider', () => {
         dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
-    ).toEqual(RESOLUTION_MISMATCH);
+    ).toEqual(RESOLUTION_MATCH);
   });
 });
