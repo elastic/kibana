@@ -56,6 +56,7 @@ import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
 import { GetTimeRangeResult } from './lib/get_time_range';
+import { AlertDeletionClient } from './alert_deletion/alert_deletion_client';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -69,6 +70,7 @@ export interface AlertingApiRequestHandlerContext {
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
+  getAlertDeletionClient: () => AlertDeletionClient;
 }
 
 /**

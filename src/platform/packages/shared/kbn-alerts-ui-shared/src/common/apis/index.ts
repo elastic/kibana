@@ -14,4 +14,4 @@ export * from './fetch_connectors';
 export * from './fetch_connector_types';
 export * from './fetch_rule_type_aad_template_fields';
 export * from './fetch_ui_health_status';
-export * from './fetch_alerts_deletion_settings';
+export * from './alert_deletion_settings';
