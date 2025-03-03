@@ -48,6 +48,7 @@
     "@kbn/data-views-plugin",
     "@kbn/charts-theme",
     "@kbn/deeplinks-observability",
+    "@kbn/storybook",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
