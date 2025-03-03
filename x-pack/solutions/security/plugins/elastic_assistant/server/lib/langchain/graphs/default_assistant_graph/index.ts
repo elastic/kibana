@@ -179,8 +179,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
     llmType,
-    isOpenAI
-  })
+    isOpenAI,
+  });
 
   const agentRunnable = await agentRunableFacotry({
     llm: createLlmInstance(),
@@ -188,8 +188,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llmType,
     tools,
     isStream,
-    prompt: chatPromptTemplate
-  })
+    prompt: chatPromptTemplate,
+  });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
