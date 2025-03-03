@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 
+import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { sortBy } from 'lodash';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
