@@ -14,8 +14,6 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 
-import type { Nullable } from 'tough-cookie';
-
 import { normalizeHostsForAgents } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -151,7 +149,6 @@ class FleetServerHostService {
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<FleetServerHost> {
-    // add code to retrieve encrypted fields
     const res = await this.encryptedSoClient.get<FleetServerHostSOAttributes>(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       id
@@ -190,7 +187,6 @@ class FleetServerHostService {
     };
   }
 
-  // export async function deleteFleetServerHost(
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -243,7 +239,7 @@ class FleetServerHostService {
     logger.debug(`Updating fleet server host ${id}`);
 
     const originalItem = await this.get(soClient, id);
-    const updateData: Nullable<Partial<FleetServerHostSOAttributes>> = {
+    const updateData: Partial<FleetServerHostSOAttributes> = {
       ...omit(data, ['ssl', 'secrets']),
     };
 
@@ -354,9 +350,9 @@ class FleetServerHostService {
       );
   }
 
-  // /**
-  //  * Get the default Fleet server policy hosts or throw if it does not exists
-  //  */
+  /**
+   * Get the default Fleet server policy hosts or throw if it does not exists
+   */
   public async getDefaultFleetServerHost(
     soClient: SavedObjectsClientContract
   ): Promise<FleetServerHost | null> {
