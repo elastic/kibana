@@ -102,8 +102,8 @@ export const groupActionVariableDescription = i18n.translate(
   }
 );
 
-export const groupingsActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.groupingsActionVariableDescription',
+export const groupingObjectActionVariableDescription = i18n.translate(
+  'xpack.observability.customThreshold.rule.groupingObjectActionVariableDescription',
   {
     defaultMessage: 'The object containing groups that are reporting data',
   }

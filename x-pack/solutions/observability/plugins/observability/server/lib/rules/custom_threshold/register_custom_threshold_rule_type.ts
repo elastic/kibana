@@ -22,7 +22,7 @@ import {
   cloudActionVariableDescription,
   containerActionVariableDescription,
   groupActionVariableDescription,
-  groupingsActionVariableDescription,
+  groupingObjectActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   orchestratorActionVariableDescription,
@@ -78,7 +78,7 @@ export function thresholdRuleType(
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
-        { name: 'groupings', description: groupingsActionVariableDescription },
+        { name: 'grouping', description: groupingObjectActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,

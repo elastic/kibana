@@ -162,7 +162,7 @@ export const createCustomThresholdExecutor = ({
     }
 
     const groupByKeysObjectMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
-    const groupingsObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
+    const groupingObject = getGroupByObject(params.groupBy, resultGroupSet);
     const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
@@ -273,7 +273,7 @@ export const createCustomThresholdExecutor = ({
           context: {
             alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, uuid),
             group: groupByKeysObjectMapping[group],
-            groupings: groupingsObjectMapping[group],
+            grouping: groupingObject[group],
             reason,
             timestamp,
             value: alertResults.map((result) => {
@@ -306,7 +306,7 @@ export const createCustomThresholdExecutor = ({
       new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
     );
 
-    const groupingsObjectMappingForRecovered = getGroupByObject(
+    const groupingObjectForRecovered = getGroupByObject(
       params.groupBy,
       new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
     );
@@ -316,14 +316,14 @@ export const createCustomThresholdExecutor = ({
       const alertUuid = recoveredAlert.alert.getUuid();
       const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
       const group = groupByKeysObjectForRecovered[recoveredAlertId];
-      const groupings = groupingsObjectMappingForRecovered[recoveredAlertId];
+      const grouping = groupingObjectForRecovered[recoveredAlertId];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         group,
-        groupings,
+        grouping,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
           dataViewId,
