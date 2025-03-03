@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { StoryFn } from '@storybook/react';
-import { addDecorator } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -17,9 +16,6 @@ import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { AssetCriticalitySelector } from './asset_criticality_selector';
 import type { State } from './use_asset_criticality';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
 const criticality = {
   status: 'create',
   query: {},
@@ -32,13 +28,23 @@ const criticalityLoading = {
   query: { isLoading: true },
 } as State;
 
-export default {
+const meta: Meta<typeof AssetCriticalitySelector> = {
   component: AssetCriticalitySelector,
   title: 'Components/AssetCriticalitySelector',
+  decorators: [
+    (Story) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
 };
 
-export const Default: StoryFn = () => {
-  return (
+export default meta;
+type Story = StoryObj<typeof AssetCriticalitySelector>;
+
+export const Default: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
@@ -49,11 +55,11 @@ export const Default: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };
 
-export const Compressed: StoryFn = () => {
-  return (
+export const Compressed: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
@@ -65,11 +71,11 @@ export const Compressed: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };
 
-export const Loading: StoryFn = () => {
-  return (
+export const Loading: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
@@ -80,5 +86,5 @@ export const Loading: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };

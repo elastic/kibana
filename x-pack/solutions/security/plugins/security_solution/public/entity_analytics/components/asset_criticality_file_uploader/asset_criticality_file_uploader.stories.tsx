@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { StoryFn } from '@storybook/react';
-import { addDecorator } from '@storybook/react';
 import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
@@ -18,20 +17,26 @@ import { AssetCriticalityResultStep } from './components/result_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
-
 const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact\nservice,service-001,extreme_impact`;
 const invalidLinesAsText = `user,user-001,wow_impact\ntest,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
 
-export default {
+const meta: Meta<typeof AssetCriticalityFileUploader> = {
   component: AssetCriticalityFileUploader,
   title: 'Entity Analytics/AssetCriticalityFileUploader',
+  decorators: [
+    (Story) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
 };
 
-export const Default: StoryFn = () => {
-  return (
+export default meta;
+type Story = StoryObj<typeof AssetCriticalityFileUploader>;
+
+export const Default: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
@@ -41,11 +46,11 @@ export const Default: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };
 
-export const FilePickerStep: StoryFn = () => {
-  return (
+export const FilePickerStep: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
@@ -70,11 +75,11 @@ export const FilePickerStep: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };
 
-export const ValidationStep: StoryFn = () => {
-  return (
+export const ValidationStep: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
@@ -155,11 +160,11 @@ export const ValidationStep: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };
 
-export const ResultsStep: StoryFn = () => {
-  return (
+export const ResultsStep: Story = {
+  render: () => (
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
@@ -219,5 +224,5 @@ export const ResultsStep: StoryFn = () => {
         </div>
       </TestProvider>
     </StorybookProviders>
-  );
+  ),
 };

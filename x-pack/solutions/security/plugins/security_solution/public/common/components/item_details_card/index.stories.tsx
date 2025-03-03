@@ -6,18 +6,29 @@
  */
 
 import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { ItemDetailsAction, ItemDetailsCard, ItemDetailsPropertySummary } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+const meta: Meta<typeof ItemDetailsCard> = {
+  title: 'Components/ItemDetailsCard',
+  component: ItemDetailsCard,
+  decorators: [
+    (Story) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
+};
 
-storiesOf('Components/ItemDetailsCard', module).add('default', () => {
-  return (
+export default meta;
+type Story = StoryObj<typeof ItemDetailsCard>;
+
+export const Default: Story = {
+  render: () => (
     <ItemDetailsCard>
       <ItemDetailsPropertySummary name={'property 1'} value={'value 1'} />
       <ItemDetailsPropertySummary name={'property 2'} value={'value 2'} />
@@ -36,5 +47,5 @@ storiesOf('Components/ItemDetailsCard', module).add('default', () => {
         {'danger'}
       </ItemDetailsAction>
     </ItemDetailsCard>
-  );
-});
+  ),
+};

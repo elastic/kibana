@@ -5,46 +5,55 @@
  * 2.0.
  */
 
-import { storiesOf, addDecorator } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { LogicButtons } from './logic_buttons';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+const meta: Meta<typeof LogicButtons> = {
+  title: 'ThreatMatching/LogicButtons',
+  component: LogicButtons,
+  decorators: [
+    (Story) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <Story />
+      </ThemeProvider>
+    ),
+  ],
+};
 
-storiesOf('ThreatMatching|LogicButtons', module)
-  .add('and/or buttons', () => {
-    return (
-      <LogicButtons
-        isAndDisabled={false}
-        isOrDisabled={false}
-        onOrClicked={action('onClick')}
-        onAndClicked={action('onClick')}
-      />
-    );
-  })
-  .add('and disabled', () => {
-    return (
-      <LogicButtons
-        isAndDisabled
-        isOrDisabled={false}
-        onOrClicked={action('onClick')}
-        onAndClicked={action('onClick')}
-      />
-    );
-  })
-  .add('or disabled', () => {
-    return (
-      <LogicButtons
-        isAndDisabled={false}
-        isOrDisabled
-        onOrClicked={action('onClick')}
-        onAndClicked={action('onClick')}
-      />
-    );
-  });
+export default meta;
+type Story = StoryObj<typeof LogicButtons>;
+
+export const AndOrButtons: Story = {
+  name: 'and/or buttons',
+  args: {
+    isAndDisabled: false,
+    isOrDisabled: false,
+    onOrClicked: action('onClick'),
+    onAndClicked: action('onClick'),
+  },
+};
+
+export const AndDisabled: Story = {
+  name: 'and disabled',
+  args: {
+    isAndDisabled: true,
+    isOrDisabled: false,
+    onOrClicked: action('onClick'),
+    onAndClicked: action('onClick'),
+  },
+};
+
+export const OrDisabled: Story = {
+  name: 'or disabled',
+  args: {
+    isAndDisabled: false,
+    isOrDisabled: true,
+    onOrClicked: action('onClick'),
+    onAndClicked: action('onClick'),
+  },
+};
