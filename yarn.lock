@@ -5443,6 +5443,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/durable-functions-plugin@link:x-pack/platform/plugins/shared/durable_functions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""

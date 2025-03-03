@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/durable-functions-plugin",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "durableFunctions",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "durable_functions"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}

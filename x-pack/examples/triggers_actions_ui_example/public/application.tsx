@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient } from '@tanstack/react-query';
-import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiTitle, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -243,6 +243,19 @@ const TriggersActionsUiExampleApp = ({
                     ...startServices,
                   }}
                 />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/durable_functions"
+            render={() => (
+              <Page title="Durable functions demo">
+                <EuiButton onClick={() => {
+                  http.get('/internal/triggers_actions_ui_example/test');
+                }}>
+                  Start Orchestration
+                </EuiButton>
               </Page>
             )}
           />
