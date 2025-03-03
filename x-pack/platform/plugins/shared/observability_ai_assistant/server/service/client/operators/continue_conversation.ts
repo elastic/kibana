@@ -79,6 +79,7 @@ function executeFunctionAndCatchError({
         },
         args,
         signal,
+        logger,
         messages,
         connectorId,
         simulateFunctionCalling,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
