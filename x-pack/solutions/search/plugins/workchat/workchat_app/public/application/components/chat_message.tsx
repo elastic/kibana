@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiComment, EuiPanel } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiComment, EuiPanel, EuiAvatar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '../../../common/messages';
+import { ChatMessageText } from './chat_message_text';
 
 interface ChatMessageProps {
   message: Message;
@@ -26,15 +27,26 @@ const getUserLabel = (message: Message) => {
 };
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const isUserMessage = useMemo(() => {
+    return message.type === 'user';
+  }, [message]);
+
   return (
     <EuiComment
       username={getUserLabel(message)}
+      timelineAvatar={
+        isUserMessage ? (
+          <EuiAvatar name="User" initials="Y" color="subdued" />
+        ) : (
+          <EuiAvatar iconType="agentApp" name="WorkChat" color="subdued" />
+        )
+      }
       event=""
-      eventColor={message.type === 'user' ? 'primary' : 'subdued'}
+      eventColor={isUserMessage ? 'primary' : 'subdued'}
       actions={<></>}
     >
       <EuiPanel hasShadow={false} paddingSize="s">
-        {message.content}
+        <ChatMessageText content={message.content} loading={false} />
       </EuiPanel>
     </EuiComment>
   );
