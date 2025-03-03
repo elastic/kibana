@@ -52,8 +52,7 @@ export const scheduleRequestSchema = schema.object(
           schema.string({
             validate: validateIntervalAndFrequencyV1,
             meta: {
-              description:
-                'Recurrence interval and frequency of the schedule. It allows values like <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: 5d, 2w, 3m, 1y.',
+              description: `Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: '15d', '2w', '3m', '1y'.`,
             },
           })
         ),
