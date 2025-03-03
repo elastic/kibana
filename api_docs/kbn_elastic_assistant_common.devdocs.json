@@ -3468,7 +3468,7 @@
         "label": "ExecuteConnectorRequestBody",
         "description": [],
         "signature": [
-          "{ actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }"
+          "{ actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
@@ -3483,7 +3483,7 @@
         "label": "ExecuteConnectorRequestBodyInput",
         "description": [],
         "signature": [
-          "{ actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }"
+          "{ actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
@@ -4480,7 +4480,7 @@
         "label": "PostEvaluateBody",
         "description": [],
         "signature": [
-          "{ size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }"
+          "{ size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -4495,7 +4495,7 @@
         "label": "PostEvaluateRequestBody",
         "description": [],
         "signature": [
-          "{ size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }"
+          "{ size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -4510,7 +4510,7 @@
         "label": "PostEvaluateRequestBodyInput",
         "description": [],
         "signature": [
-          "{ graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }"
+          "{ graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -4819,6 +4819,23 @@
           "\"security\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ScreenContext",
+        "type": "Type",
+        "tags": [],
+        "label": "ScreenContext",
+        "description": [
+          "\nUser screen context"
+        ],
+        "signature": [
+          "{ timeZone?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6484,7 +6501,7 @@
         "label": "ExecuteConnectorRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodString, string, string>>; message: Zod.ZodOptional<Zod.ZodString>; model: Zod.ZodOptional<Zod.ZodString>; subAction: Zod.ZodEnum<[\"invokeAI\", \"invokeStream\"]>; actionTypeId: Zod.ZodString; alertsIndexPattern: Zod.ZodOptional<Zod.ZodString>; allow: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; allowReplacement: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; replacements: Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>; size: Zod.ZodOptional<Zod.ZodNumber>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }>"
+          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodString, string, string>>; message: Zod.ZodOptional<Zod.ZodString>; model: Zod.ZodOptional<Zod.ZodString>; subAction: Zod.ZodEnum<[\"invokeAI\", \"invokeStream\"]>; actionTypeId: Zod.ZodString; alertsIndexPattern: Zod.ZodOptional<Zod.ZodString>; allow: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; allowReplacement: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; replacements: Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>; size: Zod.ZodOptional<Zod.ZodNumber>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; screenContext: Zod.ZodOptional<Zod.ZodObject<{ timeZone: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { timeZone?: string | undefined; }, { timeZone?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; }, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
@@ -7339,7 +7356,7 @@
         "label": "PostEvaluateBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ graphs: Zod.ZodArray<Zod.ZodString, \"many\">; datasetName: Zod.ZodString; evaluatorConnectorId: Zod.ZodOptional<Zod.ZodString>; connectorIds: Zod.ZodArray<Zod.ZodString, \"many\">; runName: Zod.ZodOptional<Zod.ZodString>; alertsIndexPattern: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>>; size: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }, { graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }>"
+          "Zod.ZodObject<{ graphs: Zod.ZodArray<Zod.ZodString, \"many\">; datasetName: Zod.ZodString; evaluatorConnectorId: Zod.ZodOptional<Zod.ZodString>; connectorIds: Zod.ZodArray<Zod.ZodString, \"many\">; runName: Zod.ZodOptional<Zod.ZodString>; alertsIndexPattern: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>>; screenContext: Zod.ZodOptional<Zod.ZodObject<{ timeZone: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { timeZone?: string | undefined; }, { timeZone?: string | undefined; }>>; size: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }, { graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -7354,7 +7371,7 @@
         "label": "PostEvaluateRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ graphs: Zod.ZodArray<Zod.ZodString, \"many\">; datasetName: Zod.ZodString; evaluatorConnectorId: Zod.ZodOptional<Zod.ZodString>; connectorIds: Zod.ZodArray<Zod.ZodString, \"many\">; runName: Zod.ZodOptional<Zod.ZodString>; alertsIndexPattern: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>>; size: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }, { graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }>"
+          "Zod.ZodObject<{ graphs: Zod.ZodArray<Zod.ZodString, \"many\">; datasetName: Zod.ZodString; evaluatorConnectorId: Zod.ZodOptional<Zod.ZodString>; connectorIds: Zod.ZodArray<Zod.ZodString, \"many\">; runName: Zod.ZodOptional<Zod.ZodString>; alertsIndexPattern: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>>; screenContext: Zod.ZodOptional<Zod.ZodObject<{ timeZone: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { timeZone?: string | undefined; }, { timeZone?: string | undefined; }>>; size: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { size: number; alertsIndexPattern: string; replacements: {} & { [k: string]: string; }; graphs: string[]; datasetName: string; connectorIds: string[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }, { graphs: string[]; datasetName: string; connectorIds: string[]; size?: number | undefined; alertsIndexPattern?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; evaluatorConnectorId?: string | undefined; runName?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
@@ -7597,6 +7614,21 @@
           "Zod.ZodLiteral<\"security\">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ScreenContext",
+        "type": "Object",
+        "tags": [],
+        "label": "ScreenContext",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ timeZone: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { timeZone?: string | undefined; }, { timeZone?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
