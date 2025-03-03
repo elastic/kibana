@@ -7,7 +7,7 @@
 
 import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, useEuiBackgroundColorCSS } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
