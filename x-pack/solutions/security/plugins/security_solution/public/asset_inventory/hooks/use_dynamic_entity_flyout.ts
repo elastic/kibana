@@ -26,7 +26,7 @@ import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_exp
 
 interface InventoryFlyoutProps {
   entity: EntityEcs;
-  source: EsHitRecord['_source'];
+  source?: EsHitRecord['_source'];
   scopeId?: string;
   contextId?: string;
 }

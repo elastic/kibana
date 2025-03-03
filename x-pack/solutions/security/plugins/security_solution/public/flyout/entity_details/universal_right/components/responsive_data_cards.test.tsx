@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { EuiCardProps } from '@elastic/eui';
 import { ResponsiveDataCards } from './responsive_data_cards';
 
-const cards: Array<Pick<EuiCardProps, 'title' | 'description'>> = [
+const cards = [
   { title: 'Card 1', description: 'Description 1' },
   { title: 'Card 2', description: 'Description 2' },
   { title: 'Card 3', description: 'Description 3' },

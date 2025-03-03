@@ -11,7 +11,7 @@ import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 
 interface ExpandableBadgeGroupProps {
   /** Array of EuiBadges to display */
-  badges: EuiBadge[];
+  badges: Array<typeof EuiBadge>;
   /** The initial number of badges to show before expanding. Defaults to 'all' if not set */
   initialBadgeLimit?: number;
   /** The maximum height of the badge group in pixels. If not set the expandable container will not have inner scrolling */

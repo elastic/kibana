@@ -30,6 +30,8 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
   params: UniversalEntityPanelProps;
 }
 
+const isDate = (value: unknown): value is Date => value instanceof Date;
+
 export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelProps) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
@@ -38,7 +40,10 @@ export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelPro
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <UniversalEntityFlyoutHeader entity={entity} timestamp={source?.['@timestamp']} />
+      <UniversalEntityFlyoutHeader
+        entity={entity}
+        timestamp={isDate(source?.['@timestamp']) ? source['@timestamp'] : undefined}
+      />
       <UniversalEntityFlyoutContent source={source} />
     </>
   );
