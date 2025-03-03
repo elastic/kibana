@@ -22,6 +22,5 @@
     "@kbn/core-user-profile-browser",
     "@kbn/react-kibana-context-common",
     "@kbn/react-kibana-context-render",
-    "@kbn/i18n-react",
   ]
 }
