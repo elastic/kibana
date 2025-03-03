@@ -73,7 +73,7 @@ export const useMissingRiskEnginePrivileges = (
       hasAllRequiredPrivileges: false,
       missingPrivileges: {
         indexPrivileges,
-        clusterPrivileges,
+        clusterPrivileges: readonly ? [] : clusterPrivileges, // cluster privileges are not required for readonly
       },
     };
   }, [isLoading, privilegesResponse, readonly]);
