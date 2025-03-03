@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, pairwise, skip } from 'rxjs';
+import { combineLatest, pairwise } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -51,7 +51,7 @@ export const GridLayout = ({
     accessMode,
   });
 
-  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(() => getRowKeysInOrder(layout));
+  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
@@ -75,28 +75,18 @@ export const GridLayout = ({
    */
   useEffect(() => {
     /**
-     * The only thing that should cause the entire layout to re-render is adding a new row;
-     * this subscription ensures this by updating the `rowCount` state when it changes.
-     */
-    const rowCountSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(
-        skip(1),
-        distinctUntilChanged((prevLayout, newLayout) => {
-          return deepEqual(Object.keys(prevLayout), Object.keys(newLayout));
-        })
-      )
-      .subscribe((newLayout) => {
-        setRowIdsInOrder(getRowKeysInOrder(newLayout));
-      });
-
-    /**
-     * This subscription calls the passed `onLayoutChange` callback when the layout changes
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
+     * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
      */
     const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
       .pipe(pairwise())
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
+
+          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
+            setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+          }
         }
       });
 
@@ -124,7 +114,6 @@ export const GridLayout = ({
     });
 
     return () => {
-      rowCountSubscription.unsubscribe();
       onLayoutChangeSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
