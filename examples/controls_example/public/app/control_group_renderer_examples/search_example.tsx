@@ -39,7 +39,7 @@ interface Props {
 }
 
 type ControlGroupAPI = DefaultControlApi & {
-  clearSelections: () => void;
+  clearSelections?: () => void;
 };
 
 const DEST_COUNTRY_CONTROL_ID = 'DEST_COUNTRY_CONTROL_ID';
@@ -184,7 +184,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           onClick={() => {
             if (controlGroupAPI) {
               Object.values(controlGroupAPI.children$.getValue()).forEach((controlApi) => {
-                (controlApi as ControlGroupAPI)?.clearSelections();
+                (controlApi as ControlGroupAPI)?.clearSelections?.();
               });
             }
           }}
