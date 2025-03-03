@@ -7,24 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  WebpackConcatenatedModule,
-  WebpackDelegatedModule,
-  WebpackExternalModule,
-  WebpackIgnoredModule,
-  WebpackNormalModule,
-  WebpackResolveData,
-} from './src/webpack_helpers';
+import webpack from 'webpack';
 
-export {
-  STATS_WARNINGS_FILTER,
-  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
-  isFailureStats,
-  failedStatsToErrorMessage,
-  getModulePath,
-  isConcatenatedModule,
-  isDelegatedModule,
-  isExternalModule,
-  isIgnoredModule,
-  isNormalModule,
-} from './src/webpack_helpers';
+export function isRuntimeModule(module: any): boolean {
+  return module instanceof webpack.RuntimeModule;
+}
