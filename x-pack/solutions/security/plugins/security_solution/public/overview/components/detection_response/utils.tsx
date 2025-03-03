@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @deprecated
+/**
+ * @deprecated, use getRiskSeverityColors or useRiskSeverityColors from /common/utils/risk_color_palette.tsx instead
+ */
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
   high: '#DA8B45',

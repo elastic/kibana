@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+import { useEuiTheme } from '@elastic/eui';
 import {
   INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
   INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
@@ -87,7 +87,7 @@ describe('AlertCountInsight', () => {
   beforeEach(() => {
     (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: '' });
     (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   it('renders', () => {
@@ -107,8 +107,8 @@ describe('AlertCountInsight', () => {
     expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('open entity details panel when clicking on the count if new navigation is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('open entity details panel when clicking on the count if newExpandableFlyoutNavigationDisabled is false', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useAlertsByStatus as jest.Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
@@ -167,26 +167,32 @@ describe('AlertCountInsight', () => {
 });
 
 describe('getFormattedAlertStats', () => {
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+
   it('should return alert stats', () => {
-    const alertStats = getFormattedAlertStats(mockAlertData);
+    const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: SEVERITY_COLOR.high },
-      { key: 'Low', count: 2, color: SEVERITY_COLOR.low },
-      { key: 'Medium', count: 2, color: SEVERITY_COLOR.medium },
-      { key: 'Critical', count: 2, color: SEVERITY_COLOR.critical },
+      { key: 'High', count: 2, color: '#ff7e62' },
+      { key: 'Low', count: 2, color: '#54b399' },
+      { key: 'Medium', count: 2, color: '#f1d86f' },
+      { key: 'Critical', count: 2, color: '#bd271e' },
     ]);
   });
 
   it('should return empty array if no active alerts are available', () => {
-    const alertStats = getFormattedAlertStats({
-      closed: {
-        total: 2,
-        severities: [
-          { key: 'high', value: 1, label: 'High' },
-          { key: 'low', value: 1, label: 'Low' },
-        ],
+    const alertStats = getFormattedAlertStats(
+      {
+        closed: {
+          total: 2,
+          severities: [
+            { key: 'high', value: 1, label: 'High' },
+            { key: 'low', value: 1, label: 'Low' },
+          ],
+        },
       },
-    });
+      euiTheme
+    );
     expect(alertStats).toEqual([]);
   });
 });

@@ -15,19 +15,15 @@ jest.mock('@kbn/search-connectors', () => {
     fetchConnectors: () => mockedFetchConnectors(),
   };
 });
-import { DeprecationDetailsMessage, DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 
 import { Connector } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
 
-import indexDeprecatorFxns = require('./pre_eight_index_deprecator');
-
 import {
   getCrawlerDeprecations,
   getEnterpriseSearchNodeDeprecation,
-  getEnterpriseSearchPre8IndexDeprecations,
   getNativeConnectorDeprecations,
 } from '.';
 
@@ -39,11 +35,6 @@ const ctx = {
 const cloud = { baseUrl: 'cloud.elastic.co', deploymentId: '123', cloudId: 'abc' } as CloudSetup;
 const notCloud = {} as CloudSetup;
 const docsUrl = 'example.com';
-
-function getMessageFromDeprecation(details: DeprecationsDetails): string {
-  const message = details.message as DeprecationDetailsMessage;
-  return message.content;
-}
 
 describe('Enterprise Search node deprecation', () => {
   it('Tells you to remove capacity if running on cloud', () => {
@@ -62,9 +53,22 @@ describe('Enterprise Search node deprecation', () => {
     const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     const steps = deprecations[0].correctiveActions.manualSteps;
-    expect(steps).toHaveLength(4);
+    expect(steps).toHaveLength(5);
     const stepsStr = steps.join(', ');
     expect(stepsStr).toMatch("remove 'enterpriseSearch.host'");
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.customHeaders'");
+    expect(stepsStr).toMatch('Stop all your Enterprise Search nodes');
+  });
+
+  it('Tells you to remove the custom headers config if running self-managed without host', () => {
+    const config = { customHeaders: {} } as ConfigType;
+    const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
+    expect(deprecations).toHaveLength(1);
+    const steps = deprecations[0].correctiveActions.manualSteps;
+    expect(steps).toHaveLength(5);
+    const stepsStr = steps.join(', ');
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.host'");
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.customHeaders'");
     expect(stepsStr).toMatch('Stop all your Enterprise Search nodes');
   });
 
@@ -103,203 +107,23 @@ describe('Native connector deprecations', () => {
       is_native: false,
     } as Connector;
     mockedFetchConnectors = jest.fn().mockResolvedValue([connectorClient]);
-    const deprecations = await getNativeConnectorDeprecations(ctx, true, true, cloud, docsUrl);
+    const deprecations = await getNativeConnectorDeprecations(ctx, docsUrl);
     expect(deprecations).toHaveLength(0);
   });
 
-  it('Has a deprecation if there are native connectors with illegal service types', async () => {
+  it('Has a deprecation if there are native connectors present', async () => {
     const nativeConnector = {
       id: 'foo',
       is_native: true,
       service_type: 'fake',
     } as Connector;
     mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(ctx, true, true, cloud, docsUrl);
+    const deprecations = await getNativeConnectorDeprecations(ctx, docsUrl);
     expect(deprecations).toHaveLength(1);
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
       '/internal/enterprise_search/deprecations/convert_connectors_to_client'
     );
     expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo'] });
-    expect(deprecations[0].title).toMatch('must be of supported service types');
-  });
-
-  it('Does not allow "native" connectors in non-agentless environments', async () => {
-    const nativeConnector = {
-      id: 'foo',
-      is_native: true,
-      service_type: 'github',
-    } as Connector;
-    const hasAgentless = false;
-    mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(
-      ctx,
-      hasAgentless,
-      true,
-      notCloud,
-      docsUrl
-    );
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/convert_connectors_to_client'
-    );
-    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo'] });
-    expect(deprecations[0].title).toMatch('not supported in self-managed environments');
-  });
-
-  it('Does not allow native connector upgrades without fleet server', async () => {
-    const nativeConnector = {
-      id: 'foo',
-      is_native: true,
-      service_type: 'github',
-    } as Connector;
-    const hasFleetServer = false;
-    mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(
-      ctx,
-      true,
-      hasFleetServer,
-      cloud,
-      docsUrl
-    );
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].title).toMatch('Integration Server must be provisioned');
-  });
-
-  it('Gives precedence to your env being ineligible for agentless', async () => {
-    const connectors = [
-      {
-        id: 'foo',
-        is_native: true,
-        service_type: 'github',
-      },
-      {
-        id: 'bar',
-        is_native: true,
-        service_type: 'fake',
-      },
-    ] as Connector[];
-    const hasAgentless = false;
-    const hasFleetServer = false;
-    mockedFetchConnectors = jest.fn().mockResolvedValue(connectors);
-    const deprecations = await getNativeConnectorDeprecations(
-      ctx,
-      hasAgentless,
-      hasFleetServer,
-      notCloud,
-      docsUrl
-    );
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/convert_connectors_to_client'
-    );
-    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo', 'bar'] });
-    expect(deprecations[0].title).toMatch('not supported in self-managed environments');
-  });
-
-  it('can register both fleet server missing and bad service types together', async () => {
-    const connectors = [
-      {
-        id: 'foo',
-        is_native: true,
-        service_type: 'github',
-      },
-      {
-        id: 'bar',
-        is_native: true,
-        service_type: 'fake',
-      },
-    ] as Connector[];
-    const hasAgentless = true;
-    const hasFleetServer = false;
-    mockedFetchConnectors = jest.fn().mockResolvedValue(connectors);
-    const deprecations = await getNativeConnectorDeprecations(
-      ctx,
-      hasAgentless,
-      hasFleetServer,
-      cloud,
-      docsUrl
-    );
-    expect(deprecations).toHaveLength(2);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/convert_connectors_to_client'
-    );
-    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['bar'] });
-    expect(deprecations[0].title).toMatch('must be of supported service types');
-    expect(deprecations[1].title).toMatch('Integration Server must be provisioned');
-  });
-});
-
-describe('getEnterpriseSearchPre8IndexDeprecations', () => {
-  it('can register index and data stream deprecations that need to be set to read only', async () => {
-    const getIndicesMock = jest.fn(() =>
-      Promise.resolve([
-        {
-          name: '.ent-search-index_without_datastream',
-          isDatastream: false,
-          datastreamName: '',
-        },
-        {
-          name: '.ent-search-with_data_stream',
-          isDatastream: true,
-          datastreamName: 'datastream-testing',
-        },
-      ])
-    );
-
-    jest
-      .spyOn(indexDeprecatorFxns, 'getPreEightEnterpriseSearchIndices')
-      .mockImplementation(getIndicesMock);
-
-    const deprecations = await getEnterpriseSearchPre8IndexDeprecations(ctx, 'docsurl', 'mockhost');
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
-    );
-    expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      'The following indices are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      '.ent-search-index_without_datastream'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      'The following data streams are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain('.ent-search-with_data_stream');
-  });
-
-  it('can register an index without data stream deprecations that need to be set to read only', async () => {
-    const getIndicesMock = jest.fn(() =>
-      Promise.resolve([
-        {
-          name: '.ent-search-index_without_datastream',
-          isDatastream: false,
-          datastreamName: '',
-        },
-      ])
-    );
-
-    jest
-      .spyOn(indexDeprecatorFxns, 'getPreEightEnterpriseSearchIndices')
-      .mockImplementation(getIndicesMock);
-
-    const deprecations = await getEnterpriseSearchPre8IndexDeprecations(ctx, 'docsurl', 'mockhost');
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
-    );
-    expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      'The following indices are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      '.ent-search-index_without_datastream'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).not.toContain(
-      'The following data streams are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).not.toContain(
-      '.ent-search-with_data_stream'
-    );
+    expect(deprecations[0].title).toMatch('Elastic-managed connectors are no longer supported');
   });
 });

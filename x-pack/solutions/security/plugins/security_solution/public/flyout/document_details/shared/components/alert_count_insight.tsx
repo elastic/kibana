@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiFlexItem,
@@ -14,6 +15,7 @@ import {
   type EuiFlexGroupProps,
   EuiLink,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
@@ -72,7 +74,10 @@ interface AlertCountInsightProps {
 /**
  * Filters closed alerts and format the alert stats for the distribution bar
  */
-export const getFormattedAlertStats = (alertsData: ParsedAlertsData) => {
+export const getFormattedAlertStats = (
+  alertsData: ParsedAlertsData,
+  euiTheme: EuiThemeComputed
+) => {
   const severityMap = new Map<string, number>();
 
   const filteredAlertsData: ParsedAlertsData = alertsData
@@ -91,7 +96,7 @@ export const getFormattedAlertStats = (alertsData: ParsedAlertsData) => {
   const alertStats = Array.from(severityMap, ([key, count]) => ({
     key: capitalize(key),
     count,
-    color: getSeverityColor(key),
+    color: getSeverityColor(key, euiTheme),
   }));
   return alertStats;
 };
@@ -106,12 +111,13 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   openDetailsPanel,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
@@ -125,7 +131,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     from,
   });
 
-  const alertStats = useMemo(() => getFormattedAlertStats(items), [items]);
+  const alertStats = useMemo(() => getFormattedAlertStats(items, euiTheme), [items, euiTheme]);
 
   const totalAlertCount = useMemo(
     () => alertStats.reduce((acc, item) => acc + item.count, 0),

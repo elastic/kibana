@@ -12,10 +12,10 @@ actions:
   # Add some connector API examples
   - target: "$.paths['/api/actions/connector/{id}']['post']"
     description: "Add examples to create connector API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               createEmailConnectorRequest:
                 $ref: "../examples/create_email_connector_request.yaml"
@@ -28,7 +28,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 createEmailConnectorResponse:
                   $ref: "../examples/create_email_connector_response.yaml"
@@ -40,10 +40,10 @@ actions:
                   $ref: "../examples/get_connector_response.yaml"
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
     description: "Add examples to run connector API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               runIndexConnectorRequest:
                 $ref: "../examples/run_index_connector_request.yaml"
@@ -58,7 +58,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 runIndexConnectorResponse:
                   $ref: "../examples/run_index_connector_response.yaml"
@@ -78,7 +78,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getConnectorResponse:
                   $ref: '../examples/get_connector_response.yaml'
@@ -89,7 +89,7 @@ actions:
         200:
           description: Indicates a successful call.
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getConnectorTypesServerlessResponse:
                   $ref: '../examples/get_connector_types_generativeai_response.yaml'
@@ -100,16 +100,16 @@ actions:
         200:
           description: Indicates a successful call.
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getConnectorsResponse:
                   $ref: '../examples/get_connectors_response.yaml'
   - target: "$.paths['/api/actions/connector/{id}']['put']"
     description: "Add examples to update connector API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31:
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               updateIndexConnectorRequest:
                 $ref: '../examples/update_index_connector_request.yaml'
@@ -129,10 +129,10 @@ actions:
   # Add some connector configuration schemas
   - target: "$.paths['/api/actions/connector/{id}']['post']"
     description: "Add config and secrets to create connector API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31:
+    update:
+      requestBody:
+        content:
+          application/json:
             schema:
               properties:
                 config:
@@ -246,10 +246,10 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/xmatters_secrets.yaml'
   - target: "$.paths['/api/actions/connector/{id}']['put']"
     description: "Add config and secrets to update connector API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31:
+    update:
+      requestBody:
+        content:
+          application/json:
             schema:
               properties:
                 config:
@@ -365,13 +365,13 @@ actions:
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post'].requestBody.content.*.schema.properties.params"
     description: "Remove params in run connector API"
     remove: true
-  # Add some run connector params  
+  # Add some run connector params
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
     description: "Add examples to run connector API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             schema:
               properties:
                 params:

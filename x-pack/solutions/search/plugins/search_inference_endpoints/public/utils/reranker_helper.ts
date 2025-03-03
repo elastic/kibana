@@ -7,15 +7,21 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const isProviderTechPreview = (provider: InferenceAPIConfigResponse) => {
-  if (hasModelId(provider)) {
-    return provider.task_type === 'rerank' && provider.service_settings?.model_id?.startsWith('.');
+  const { service_settings: serviceSettings, task_type: taskType } = provider;
+  const modelId = serviceSettings?.model_id;
+
+  // If there's no model ID in service settings, it's not a tech preview
+  if (!modelId) {
+    return false;
+  }
+
+  /*
+    For rerank task type, model ID starting with '.' indicates tech preview
+    Special case for 'rainbow-sprinkles' model
+  */
+  if ((taskType === 'rerank' && modelId.startsWith('.')) || modelId === 'rainbow-sprinkles') {
+    return true;
   }
 
   return false;
 };
-
-function hasModelId(
-  service: InferenceAPIConfigResponse
-): service is Extract<InferenceAPIConfigResponse, { service_settings: { model_id: string } }> {
-  return 'model_id' in service.service_settings;
-}

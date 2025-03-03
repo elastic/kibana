@@ -17,6 +17,8 @@ export type {
 } from './src/webpack_helpers';
 
 export {
+  STATS_WARNINGS_FILTER,
+  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
   isFailureStats,
   failedStatsToErrorMessage,
   getModulePath,
@@ -25,4 +27,5 @@ export {
   isExternalModule,
   isIgnoredModule,
   isNormalModule,
+  isRuntimeModule,
 } from './src/webpack_helpers';

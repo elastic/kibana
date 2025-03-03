@@ -324,7 +324,9 @@ export interface DocLinks {
   readonly upgradeAssistant: {
     readonly overview: string;
     readonly batchReindex: string;
+    readonly indexBlocks: string;
     readonly remoteReindex: string;
+    readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
   };
   readonly rollupJobs: string;
@@ -371,6 +373,7 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
+    readonly updatePrebuiltDetectionRules: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -382,7 +385,7 @@ export interface DocLinks {
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyBulkApiDeprecations: string;
+    readonly legacyRuleManagementBulkApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;

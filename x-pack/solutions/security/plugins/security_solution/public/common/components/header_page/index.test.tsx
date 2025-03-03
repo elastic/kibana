@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -121,21 +120,6 @@ describe('HeaderPage', () => {
     );
 
     expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
-  });
-
-  test('it DOES NOT apply border styles when border is false', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
-    const securitySolutionHeaderPage = wrapper.find('.securitySolutionHeaderPage').first();
-
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
-      'border-bottom',
-      euiDarkVars.euiBorderThin
-    );
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it renders the right side items', () => {

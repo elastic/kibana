@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactWrapper, ShallowWrapper, ComponentType } from 'enzyme';
+import { ReactWrapper, ShallowWrapper, ComponentType, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
 import { screen, act, render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,6 +17,7 @@ import {
   EuiRange,
   EuiSelect,
   EuiComboBoxProps,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -26,7 +27,6 @@ import {
   FormBasedDimensionEditorComponent,
   FormBasedDimensionEditorProps,
 } from './dimension_panel';
-import { mount } from 'enzyme';
 import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
@@ -166,15 +166,22 @@ const bytesColumn: GenericIndexPatternColumn = {
   params: { format: { id: 'bytes' } },
 };
 
-const services = coreMock.createStart() as unknown as LensAppServices;
+const wrappingComponent: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  return (
+    <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
+      <EuiThemeProvider>{children}</EuiThemeProvider>
+    </KibanaContextProvider>
+  );
+};
 
 function mountWithServices(component: React.ReactElement): ReactWrapper {
   return mount(component, {
     // This is an elegant way to wrap a component in Enzyme
     // preserving the root at the component level rather than
     // at the wrapper one
-    wrappingComponent: KibanaContextProvider as ComponentType<{}>,
-    wrappingComponentProps: { services },
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
   });
 }
 
@@ -287,7 +294,11 @@ describe('FormBasedDimensionEditor', () => {
     const Wrapper: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {
-      return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+      return (
+        <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
+          {children}
+        </KibanaContextProvider>
+      );
     };
 
     const rtlRender = render(
