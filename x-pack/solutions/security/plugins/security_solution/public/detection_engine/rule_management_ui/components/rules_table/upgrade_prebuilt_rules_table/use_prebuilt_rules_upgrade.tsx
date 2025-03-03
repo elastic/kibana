@@ -19,7 +19,7 @@ import { usePerformUpgradeRules } from '../../../../rule_management/logic/prebui
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type {
   FindRulesSortField,
-  PrebuiltRuleFilter,
+  PrebuiltRulesFilter,
   RuleFieldsToUpgrade,
   RuleResponse,
   RuleSignatureId,
@@ -49,7 +49,7 @@ export interface UsePrebuiltRulesUpgradeParams {
     perPage: number;
   };
   sort?: { order: UpgradePrebuiltRulesSortingOptions['order']; field: FindRulesSortField };
-  filter: PrebuiltRuleFilter;
+  filter: PrebuiltRulesFilter;
   onUpgrade?: () => void;
 }
 
