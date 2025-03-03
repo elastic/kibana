@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
@@ -41,28 +41,26 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       params as KnowledgeBaseRetrievalToolParams;
     if (kbDataClient == null) return null;
 
-    return new DynamicStructuredTool({
+    return tool(async (input) => {
+      logger.debug(
+        () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
+      );
+
+      const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+        query: input.query,
+        kbResource: 'user',
+        required: false,
+      });
+
+      return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
+    }, {
       name: toolDetails.name,
       description: params.description || toolDetails.description,
       schema: z.object({
         query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
       }),
-      func: async (input) => {
-        logger.debug(
-          () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
-        );
-
-        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-          query: input.query,
-          kbResource: 'user',
-          required: false,
-        });
-
-        return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
-      },
       tags: ['knowledge-base'],
-      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
-    }) as unknown as DynamicStructuredTool;
+    });
   },
 };
 

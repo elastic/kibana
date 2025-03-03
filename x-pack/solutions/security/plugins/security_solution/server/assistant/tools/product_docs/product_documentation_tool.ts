@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
@@ -41,7 +41,24 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
     // This check is here in order to satisfy TypeScript
     if (llmTasks == null || connectorId == null) return null;
 
-    return new DynamicStructuredTool({
+    return tool(async ({ query, product }) => {
+      const response = await llmTasks.retrieveDocumentation({
+        searchTerm: query,
+        products: product ? [product] : undefined,
+        max: 3,
+        connectorId,
+        request,
+        functionCalling: 'auto',
+      });
+
+      const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
+
+      return {
+        content: {
+          documents: enrichedDocuments,
+        },
+      };
+    }, {
       name: toolDetails.name,
       description: params.description || toolDetails.description,
       schema: z.object({
@@ -65,27 +82,8 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           )
           .optional(),
       }),
-      func: async ({ query, product }) => {
-        const response = await llmTasks.retrieveDocumentation({
-          searchTerm: query,
-          products: product ? [product] : undefined,
-          max: 3,
-          connectorId,
-          request,
-          functionCalling: 'auto',
-        });
-
-        const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
-
-        return {
-          content: {
-            documents: enrichedDocuments,
-          },
-        };
-      },
       tags: ['product-documentation'],
-      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
-    }) as unknown as DynamicStructuredTool;
+    });
   },
 };
 
