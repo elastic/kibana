@@ -13,7 +13,6 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
 import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
@@ -34,12 +33,10 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
-  useInitSourcerer(getScopeFromPath(pathname));
+  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
-
-  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
