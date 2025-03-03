@@ -37,7 +37,8 @@ export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelPro
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
   }, [entity]);
 
-  const timestamp = isDate(source['@timestamp']) ? source['@timestamp'] : undefined;
+  const docTimestamp = source?.['@timestamp'];
+  const timestamp = isDate(docTimestamp) ? docTimestamp : undefined;
 
   return (
     <>
