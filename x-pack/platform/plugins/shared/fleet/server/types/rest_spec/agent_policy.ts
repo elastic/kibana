@@ -120,9 +120,8 @@ export const CreateAgentPolicyRequestSchema = {
 };
 
 export const CreateAgentAndPackagePolicyRequestSchema = {
-  body: schema.object({
-    agentPolicy: CreateAgentPolicyRequestSchema.body,
-    packagePolicy: CreatePackagePolicyRequestSchema.body,
+  body: CreateAgentPolicyRequestSchema.body.extends({
+    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body),
   }),
   query: schema.intersection([
     CreateAgentPolicyRequestSchema.query,

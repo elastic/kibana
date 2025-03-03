@@ -59,7 +59,7 @@ import {
   GetAgentPolicyOutputsHandler,
   GetListAgentPolicyOutputsHandler,
   getAutoUpgradeAgentsStatusHandler,
-  createAgentAndPackagePolicyHandler,
+  createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -251,17 +251,17 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       createAgentPolicyHandler
     );
 
-  // Create agent + integration policies in a single request
+  // Create agent + package policies in a single request
   // Used for agentless integrations
   router.versioned
     .post({
-      path: AGENT_POLICY_API_ROUTES.CREATE_WITH_PACKAGE_POLICY,
+      path: AGENT_POLICY_API_ROUTES.CREATE_WITH_PACKAGE_POLICIES,
       security: {
         authz: {
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
         },
       },
-      summary: `Create an agent policy and integration policy in one request`,
+      summary: `Create an agent policy and its package policies in one request`,
       options: {
         tags: ['oas-tag:Elastic Agent policies'],
       },
@@ -281,7 +281,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
       },
-      createAgentAndPackagePolicyHandler
+      createAgentAndPackagePoliciesHandler
     );
 
   // Update

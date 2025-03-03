@@ -41,7 +41,7 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
-  createAgentAndPackagePolicyHandler,
+  createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
 jest.mock('./handlers', () => ({
@@ -55,7 +55,7 @@ jest.mock('./handlers', () => ({
   getFullAgentPolicy: jest.fn(),
   getK8sManifest: jest.fn(),
   bulkGetAgentPoliciesHandler: jest.fn(),
-  createAgentAndPackagePolicyHandler: jest.fn(),
+  createAgentAndPackagePoliciesHandler: jest.fn(),
 }));
 
 jest.mock('../../services', () => ({
@@ -415,30 +415,32 @@ describe('schema validation', () => {
     expect(validationResp).toEqual(expectedResponse);
   });
 
-  describe('create agent policy with package policy', () => {
+  describe('create agent policy with package policies', () => {
     const validRequestBody = {
-      agentPolicy: {
-        name: 'Test Agent Policy',
-        namespace: 'default',
-        description: 'Test description',
-      },
-      packagePolicy: {
-        name: 'Test Package Policy',
-        namespace: 'default',
-        policy_ids: [],
-        enabled: true,
-        inputs: [],
-      },
+      name: 'Test Agent Policy',
+      namespace: 'default',
+      description: 'Test description',
+      package_policies: [
+        {
+          name: 'Test Package Policy',
+          namespace: 'default',
+          policy_ids: [],
+          enabled: true,
+          inputs: [],
+        },
+      ],
     };
 
     it('should return valid response', async () => {
       const expectedResponse = {
         item: agentPolicy,
       };
-      (createAgentAndPackagePolicyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
-        return res.ok({ body: expectedResponse });
-      });
-      await createAgentAndPackagePolicyHandler(context, {} as any, response);
+      (createAgentAndPackagePoliciesHandler as jest.Mock).mockImplementation(
+        (ctx, request, res) => {
+          return res.ok({ body: expectedResponse });
+        }
+      );
+      await createAgentAndPackagePoliciesHandler(context, {} as any, response);
 
       expect(response.ok).toHaveBeenCalledWith({
         body: expectedResponse,
@@ -453,17 +455,17 @@ describe('schema validation', () => {
       ).not.toThrow();
 
       const invalidRequest = {
-        agentPolicy: {
-          id: 'policy-missing-name',
-          namespace: 'default',
-        },
-        packagePolicy: {
-          name: 'Test Package Policy',
-          namespace: 'default',
-          policy_ids: [],
-          enabled: true,
-          inputs: [],
-        },
+        id: 'policy-missing-name',
+        namespace: 'default',
+        package_policies: [
+          {
+            name: 'Test Package Policy',
+            namespace: 'default',
+            policy_ids: [],
+            enabled: true,
+            inputs: [],
+          },
+        ],
       };
 
       expect(() =>
