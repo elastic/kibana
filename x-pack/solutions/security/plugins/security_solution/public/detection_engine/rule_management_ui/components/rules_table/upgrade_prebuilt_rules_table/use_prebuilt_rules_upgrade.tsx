@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import {
   FieldUpgradeStateEnum,
   type RuleUpgradeState,
@@ -19,7 +20,6 @@ import { usePerformUpgradeRules } from '../../../../rule_management/logic/prebui
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type {
   FindRulesSortField,
-  PrebuiltRulesFilter,
   RuleFieldsToUpgrade,
   RuleResponse,
   RuleSignatureId,
@@ -49,7 +49,7 @@ export interface UsePrebuiltRulesUpgradeParams {
     perPage: number;
   };
   sort?: { order: UpgradePrebuiltRulesSortingOptions['order']; field: FindRulesSortField };
-  filter: PrebuiltRulesFilter;
+  filter: ReviewPrebuiltRuleUpgradeFilter;
   onUpgrade?: () => void;
 }
 
@@ -112,6 +112,7 @@ export function usePrebuiltRulesUpgrade({
             rulesUpgradeState[ruleId].hasUnresolvedConflicts
         )
       );
+
       const upgradingRuleIds = ruleIds.filter((ruleId) => !conflictRuleIdsSet.has(ruleId));
       const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = upgradingRuleIds.map((ruleId) => ({
         rule_id: ruleId,

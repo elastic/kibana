@@ -33,7 +33,6 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   const numOfSolvableConflicts = calcNumOfSolvableConflicts(ruleUpgradeState);
   const numOfNonSolvableConflicts = calcNumOfNonSolvableConflicts(ruleUpgradeState);
   const fieldNames = extractSortedFieldNames(ruleUpgradeState.fieldsUpgradeState);
-  const hasBaseVersion = calcHasBaseVersion(ruleUpgradeState);
 
   return (
     <>
@@ -49,7 +48,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
       <RuleUpgradeCallout
         numOfSolvableConflicts={numOfSolvableConflicts}
         numOfNonSolvableConflicts={numOfNonSolvableConflicts}
-        hasBaseVersion={hasBaseVersion}
+        hasBaseVersion={ruleUpgradeState.hasBaseVersion}
       />
       <EuiSpacer size="s" />
       {fieldNames.map((fieldName) => (
@@ -86,12 +85,6 @@ function calcNumOfNonSolvableConflicts(ruleUpgradeState: RuleUpgradeState): numb
   return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
     ({ state }) => state === FieldUpgradeStateEnum.NonSolvableConflict
   ).length;
-}
-
-function calcHasBaseVersion(ruleUpgradeState: RuleUpgradeState): boolean {
-  return Object.values(ruleUpgradeState.diff.fields).some(
-    (field) => field.has_base_version === true
-  );
 }
 
 /**
