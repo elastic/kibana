@@ -24,7 +24,7 @@ import {
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
+import { StructuredToolInterface } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -224,7 +224,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
+  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
 }
 
 export type AssistantToolLlm =
