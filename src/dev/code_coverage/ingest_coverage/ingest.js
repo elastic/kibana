@@ -28,11 +28,11 @@ export const ingestList = (log) => async (xs) => {
   async function bulkIngest() {
     log.verbose(`\n${ccMark} Ingesting ${xs.length} docs at a time`);
 
-    const body = parseIndexes(xs);
+    const operations = parseIndexes(xs);
 
-    const bulkResponse = await client.bulk({ refresh: true, body });
+    const bulkResponse = await client.bulk({ refresh: true, operations });
 
-    handleErrors(body, bulkResponse)(log);
+    handleErrors(operations, bulkResponse)(log);
   }
 };
 

@@ -12,8 +12,8 @@ import type {
   EntityWithSource,
   EntitySource,
 } from '@kbn/investigation-shared';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { EntitiesESClient } from '../clients/create_entities_es_client';
 import {
   SERVICE_ENTITIES_LATEST_ALIAS,
@@ -156,12 +156,10 @@ const getFetchEntityPromise = ({
   return shouldFetch
     ? entitiesEsClient
         .search<{ source_index: string[]; entity: EntitiesLatest['entity'] }>(index, {
-          body: {
-            query: {
-              bool: {
-                should: shouldMatch,
-                minimum_should_match: 1,
-              },
+          query: {
+            bool: {
+              should: shouldMatch,
+              minimum_should_match: 1,
             },
           },
         })
