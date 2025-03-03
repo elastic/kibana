@@ -98,16 +98,7 @@ export function mapVerticalToHorizontalPlacement(placement: Position) {
   }
 }
 
-export function MarkerBody({
-  label,
-  isHorizontal,
-}: {
-  label: string | undefined;
-  isHorizontal: boolean;
-}) {
-  if (!label) {
-    return null;
-  }
+export function MarkerBody({ label, isHorizontal }: { label: string; isHorizontal: boolean }) {
   if (isHorizontal) {
     return (
       <div
@@ -214,7 +205,7 @@ export function Marker({
 
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
   if (config.textVisibility) {
-    if (hasReducedPadding) {
+    if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
     return <EuiIcon type="empty" />;
