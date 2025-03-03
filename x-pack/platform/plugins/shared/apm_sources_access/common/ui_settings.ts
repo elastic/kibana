@@ -11,7 +11,7 @@ import { OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID } from '@kbn/management
 import { indicesSchema } from './config_schema';
 
 /**
- * uiSettings definitions for the logs_data_access plugin.
+ * uiSettings definitions for the apm_sources_access plugin.
  */
 export const uiSettings: Record<string, UiSettingsParams> = {
   [OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID]: {
