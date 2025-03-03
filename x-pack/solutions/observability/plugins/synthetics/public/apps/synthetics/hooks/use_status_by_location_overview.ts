@@ -36,6 +36,5 @@ export const getConfigStatusByLocation = (
     configIdByLocation,
     status: config?.status || 'unknown',
     timestamp: config?.timestamp,
-    ping: config?.ping,
   };
 };

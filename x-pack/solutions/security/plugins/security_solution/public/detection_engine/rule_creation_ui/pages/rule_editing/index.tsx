@@ -22,6 +22,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
@@ -95,7 +96,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     usePrebuiltRulesCustomizationStatus();
   const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
 
-  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
+  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization_description'
+  );
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
@@ -336,6 +339,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
               {actionsStepData != null && (
                 <StepRuleActions
                   ruleId={rule?.id}
+                  ruleTypeId={ruleTypeMappings[rule?.type]}
                   isLoading={isLoading}
                   isUpdateView
                   actionMessageParams={actionMessageParams}
@@ -370,6 +374,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       esqlQueryForAboutStep,
       rule.rule_source,
       rule?.id,
+      rule?.type,
       scheduleStepData,
       scheduleStepForm,
       actionsStepData,
