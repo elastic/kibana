@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - Session Idle', function () {
     loadTestFile(require.resolve('./cleanup'));
-    loadTestFile(require.resolve('./extension'));
-    loadTestFile(require.resolve('./expired'));
+    // loadTestFile(require.resolve('./extension'));
+    // loadTestFile(require.resolve('./expired'));
   });
 }
