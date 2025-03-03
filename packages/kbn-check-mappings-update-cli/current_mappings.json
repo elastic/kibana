@@ -1713,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
