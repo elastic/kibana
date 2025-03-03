@@ -122,18 +122,16 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
     index: indexPattern,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      _source: ['index_recovery.shards'],
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type: dataset,
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric,
-      }),
-    },
+    _source: ['index_recovery.shards'],
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric,
+    }),
   };
 
   const indexPatternEcs = getIndexPatterns({
@@ -147,23 +145,21 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
     index: indexPatternEcs,
     size,
     ignore_unavailable: true,
-    body: {
-      _source: ['elasticsearch.index.recovery', '@timestamp'],
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric,
-      }),
-      aggs: {
-        max_timestamp: {
-          max: {
-            field: '@timestamp',
-          },
+    _source: ['elasticsearch.index.recovery', '@timestamp'],
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric,
+    }),
+    aggs: {
+      max_timestamp: {
+        max: {
+          field: '@timestamp',
         },
       },
     },

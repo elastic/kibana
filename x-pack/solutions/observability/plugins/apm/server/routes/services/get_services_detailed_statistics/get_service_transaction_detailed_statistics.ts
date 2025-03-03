@@ -82,47 +82,45 @@ export async function getServiceTransactionDetailedStats({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { [SERVICE_NAME]: serviceNames } },
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { terms: { [SERVICE_NAME]: serviceNames } },
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: serviceNames.length,
-              },
-              aggs: {
-                transactionType: {
-                  terms: {
-                    field: TRANSACTION_TYPE,
-                  },
-                  aggs: {
-                    ...metrics,
-                    timeseries: {
-                      date_histogram: {
-                        field: '@timestamp',
-                        fixed_interval: `${bucketSizeInSeconds}s`,
-                        min_doc_count: 0,
-                        extended_bounds: {
-                          min: startWithOffset,
-                          max: endWithOffset,
-                        },
+    },
+    aggs: {
+      sample: {
+        random_sampler: randomSampler,
+        aggs: {
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: serviceNames.length,
+            },
+            aggs: {
+              transactionType: {
+                terms: {
+                  field: TRANSACTION_TYPE,
+                },
+                aggs: {
+                  ...metrics,
+                  timeseries: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: `${bucketSizeInSeconds}s`,
+                      min_doc_count: 0,
+                      extended_bounds: {
+                        min: startWithOffset,
+                        max: endWithOffset,
                       },
-                      aggs: metrics,
                     },
+                    aggs: metrics,
                   },
                 },
               },
