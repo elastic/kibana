@@ -244,9 +244,7 @@ export class QuickJobCreatorBase {
       ),
     };
 
-    const location = await this.share.url.locators
-      .get(DASHBOARD_APP_LOCATOR)
-      ?.getLocation(params);
+    const location = await this.share.url.locators.get(DASHBOARD_APP_LOCATOR)?.getLocation(params);
     if (location === undefined) {
       return null;
     }

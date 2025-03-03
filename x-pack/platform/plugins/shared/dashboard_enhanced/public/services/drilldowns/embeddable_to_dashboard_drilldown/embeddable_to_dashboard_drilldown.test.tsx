@@ -99,9 +99,9 @@ describe('.execute() & getHref', () => {
                   getLocation: async (params: DashboardLocatorParams) => {
                     return await definition.getLocation(params);
                   },
-                })
-              }
-            }
+                }),
+              },
+            },
           },
         },
         self: {},
