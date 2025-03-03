@@ -14,7 +14,6 @@ import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
-import type { ExperimentalFeatures } from '../../../../../../common';
 
 jest.mock('../../../../machine_learning/authz');
 
@@ -34,7 +33,6 @@ describe('DetectionRulesClient.deleteRule', () => {
       mlAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
-      experimentalFeatures: {} as ExperimentalFeatures,
       productFeaturesService: createProductFeaturesServiceMock(),
     });
   });

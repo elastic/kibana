@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { applyRuleDefaults } from '../apply_rule_defaults';
 import { calculateRuleSource } from './calculate_rule_source';
@@ -37,10 +35,6 @@ const getSampleRule = () => {
   };
 };
 
-const ruleCustomizationStatus: PrebuiltRulesCustomizationStatus = {
-  isRulesCustomizationEnabled: true,
-};
-
 describe('calculateRuleSource', () => {
   it('returns an internal rule source when the rule is not prebuilt', async () => {
     const rule = getSampleRule();
@@ -50,7 +44,6 @@ describe('calculateRuleSource', () => {
       prebuiltRuleAssetClient,
       nextRule: rule,
       currentRule: undefined,
-      ruleCustomizationStatus,
     });
     expect(result).toEqual({
       type: 'internal',
@@ -68,7 +61,6 @@ describe('calculateRuleSource', () => {
       prebuiltRuleAssetClient,
       nextRule: rule,
       currentRule: rule,
-      ruleCustomizationStatus,
     });
     expect(result).toEqual(
       expect.objectContaining({
@@ -90,7 +82,6 @@ describe('calculateRuleSource', () => {
       prebuiltRuleAssetClient,
       nextRule: rule,
       currentRule: rule,
-      ruleCustomizationStatus,
     });
     expect(result).toEqual(
       expect.objectContaining({
@@ -114,62 +105,11 @@ describe('calculateRuleSource', () => {
       prebuiltRuleAssetClient,
       nextRule: rule,
       currentRule: rule,
-      ruleCustomizationStatus,
     });
     expect(result).toEqual(
       expect.objectContaining({
         type: 'external',
         is_customized: false,
-      })
-    );
-  });
-
-  it('returns is_customized false when the rule is customized but customization feature flag is disabled', async () => {
-    const rule = getSampleRule();
-    rule.immutable = true;
-    rule.name = 'Updated name';
-
-    const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
-
-    const result = await calculateRuleSource({
-      prebuiltRuleAssetClient,
-      nextRule: rule,
-      currentRule: rule,
-      ruleCustomizationStatus: {
-        isRulesCustomizationEnabled: false,
-        customizationDisabledReason: PrebuiltRulesCustomizationDisabledReason.FeatureFlag,
-      },
-    });
-    expect(result).toEqual(
-      expect.objectContaining({
-        type: 'external',
-        is_customized: false,
-      })
-    );
-  });
-
-  it('returns is_customized true when the rule is customized and customization is disabled because of license', async () => {
-    const rule = getSampleRule();
-    rule.immutable = true;
-    rule.name = 'Updated name';
-
-    const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
-
-    const result = await calculateRuleSource({
-      prebuiltRuleAssetClient,
-      nextRule: rule,
-      currentRule: rule,
-      ruleCustomizationStatus: {
-        isRulesCustomizationEnabled: false,
-        customizationDisabledReason: PrebuiltRulesCustomizationDisabledReason.License,
-      },
-    });
-    expect(result).toEqual(
-      expect.objectContaining({
-        type: 'external',
-        is_customized: true,
       })
     );
   });
@@ -186,7 +126,6 @@ describe('calculateRuleSource', () => {
         prebuiltRuleAssetClient,
         nextRule: rule,
         currentRule: undefined,
-        ruleCustomizationStatus,
       });
       expect(result).toEqual(
         expect.objectContaining({
@@ -211,7 +150,6 @@ describe('calculateRuleSource', () => {
         prebuiltRuleAssetClient,
         nextRule: rule,
         currentRule: rule,
-        ruleCustomizationStatus,
       });
       expect(result).toEqual(
         expect.objectContaining({
@@ -236,7 +174,6 @@ describe('calculateRuleSource', () => {
         prebuiltRuleAssetClient,
         nextRule: rule,
         currentRule: rule,
-        ruleCustomizationStatus,
       });
       expect(result).toEqual(
         expect.objectContaining({
@@ -266,7 +203,6 @@ describe('calculateRuleSource', () => {
         prebuiltRuleAssetClient,
         nextRule,
         currentRule: rule,
-        ruleCustomizationStatus,
       });
       expect(result).toEqual(
         expect.objectContaining({

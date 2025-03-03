@@ -36,15 +36,6 @@ describe(
   'Detection rules, Prebuilt Rules Export workflow - With Rule Customization',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'prebuiltRulesCustomizationEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('Rule export workflow with single rules', () => {

@@ -26,7 +26,6 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
@@ -47,9 +46,6 @@ export const useRulesTableActions = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const isPrebuiltRulesCustomizationFeatureFlagEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
 
   return [
     {
@@ -120,7 +116,6 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => isPrebuiltRulesCustomizationFeatureFlagEnabled || !rule.immutable,
     },
     {
       type: 'icon',
