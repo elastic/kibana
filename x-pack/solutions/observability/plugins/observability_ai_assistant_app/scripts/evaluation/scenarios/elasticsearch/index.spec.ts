@@ -144,6 +144,12 @@ describe('Elasticsearch functions', () => {
 
         expect(result.passed).to.be(true);
       });
+
+      after(async () => {
+        await esClient.indices.delete({
+          index: 'testing_ai_assistant',
+        });
+      });
     });
   });
 
