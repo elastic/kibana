@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CodeEditor, GrokLang } from '@kbn/code-editor';
+import { CodeEditor, GROK_LANG_ID } from '@kbn/code-editor';
 
 export function PatternInput({ value, onChange }) {
   return (
@@ -22,7 +22,7 @@ export function PatternInput({ value, onChange }) {
       data-test-subj="patternInput"
     >
       <CodeEditor
-        languageId={GrokLang}
+        languageId={GROK_LANG_ID}
         value={value}
         height={200}
         options={{

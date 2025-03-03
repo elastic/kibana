@@ -222,13 +222,11 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent1',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date().toISOString(),
-            status: 'online',
-            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date().toISOString(),
+          status: 'online',
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
         },
       });
       // 1 agent inactive
@@ -236,14 +234,12 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_id: 'policy-inactivity-timeout',
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
-            status: 'online',
-            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-          },
+        doc: {
+          policy_id: 'policy-inactivity-timeout',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+          status: 'online',
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
         },
       });
 

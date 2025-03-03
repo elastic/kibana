@@ -35,7 +35,6 @@ export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: HostPanelKey,
   [EntityType.user]: UserPanelKey,
   [EntityType.service]: ServicePanelKey,
-  [EntityType.universal]: undefined, // TODO create universal flyout?
   [EntityType.generic]: undefined, // TODO create generic flyout?
 };
 
@@ -44,6 +43,5 @@ export const EntityPanelParamByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: 'hostName',
   [EntityType.user]: 'userName',
   [EntityType.service]: 'serviceName',
-  [EntityType.universal]: undefined, // TODO create universal flyout?
   [EntityType.generic]: undefined, // TODO create generic flyout?
 };

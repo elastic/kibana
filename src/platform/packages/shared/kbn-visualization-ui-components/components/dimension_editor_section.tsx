@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, UseEuiTheme } from '@elastic/eui';
 import React from 'react';
-import './dimension_editor_section.scss';
 
 export const DimensionEditorSection = ({
   children,
@@ -19,14 +18,42 @@ export const DimensionEditorSection = ({
   children?: React.ReactNode | React.ReactNode[];
 }) => {
   return (
-    <div className="lnsDimensionEditorSection">
-      <div className="lnsDimensionEditorSection__border" />
+    <div css={DimensionEditorSectionStyles.self}>
+      <div css={DimensionEditorSectionStyles.divider} />
       {title && (
-        <EuiTitle size="xxs" className="lnsDimensionEditorSection__heading">
+        <EuiTitle
+          size="xxs"
+          data-test-subj="lnsDimensionEditorSectionHeading"
+          css={DimensionEditorSectionStyles.heading}
+        >
           <h3>{title}</h3>
         </EuiTitle>
       )}
       {children}
     </div>
   );
+};
+
+const DimensionEditorSectionStyles = {
+  self: ({ euiTheme }: UseEuiTheme) => `
+    padding-bottom: ${euiTheme.size.base};
+    padding-top: ${euiTheme.size.base};
+    &:first-child {
+      padding-top: 0;
+    }
+  `,
+  divider: ({ euiTheme }: UseEuiTheme) => `
+    position: relative;
+    &:before {
+      content: '';
+      position: absolute;
+      top: -${euiTheme.size.base};
+      right: -${euiTheme.size.base};
+      left: -${euiTheme.size.base};
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    }
+  `,
+  heading: ({ euiTheme }: UseEuiTheme) => `
+    padding-bottom: ${euiTheme.size.base};
+  `,
 };

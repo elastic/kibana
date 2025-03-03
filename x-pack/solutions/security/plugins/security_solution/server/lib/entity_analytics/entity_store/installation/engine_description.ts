@@ -14,7 +14,6 @@ import { generateIndexMappings } from '../elasticsearch_assets';
 import {
   hostEntityEngineDescription,
   userEntityEngineDescription,
-  universalEntityEngineDescription,
   serviceEntityEngineDescription,
   genericEntityEngineDescription
 } from '../entity_definitions/entity_descriptions';
@@ -28,7 +27,6 @@ import { defaultOptions } from '../constants';
 const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
-  universal: universalEntityEngineDescription,
   service: serviceEntityEngineDescription,
   generic: genericEntityEngineDescription
 };
