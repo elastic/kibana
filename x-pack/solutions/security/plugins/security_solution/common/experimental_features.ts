@@ -115,16 +115,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables filtering of Attack Discovery alerts in a flyout
-   */
-  attackDiscoveryAlertFiltering: false,
-
-  /**
-   * Enables content references (citations) in the AI Assistant
-   */
-  contentReferencesEnabled: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -261,11 +251,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
 
   /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.

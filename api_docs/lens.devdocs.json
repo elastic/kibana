@@ -1889,7 +1889,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"line\" | \"area\" | \"bar\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -13910,7 +13910,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -14237,7 +14237,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -16498,7 +16498,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -22682,7 +22682,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -23591,7 +23591,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"bottom\" | \"auto\" | \"left\""
+          "\"right\" | \"bottom\" | \"left\" | \"auto\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -23606,7 +23606,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"sqrt\" | \"time\" | \"linear\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

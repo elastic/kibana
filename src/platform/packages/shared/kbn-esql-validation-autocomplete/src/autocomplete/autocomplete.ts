@@ -16,6 +16,7 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -84,12 +85,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import type {
-  ESQLCallbacks,
-  ESQLSourceResult,
-  ESQLControlVariable,
-  ESQLVariableType,
-} from '../shared/types';
+import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
@@ -103,7 +99,7 @@ import {
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
 } from './helper';
-import { FunctionParameter, isParameterType } from '../definitions/types';
+import { FunctionParameter, isParameterType, FunctionDefinitionTypes } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
@@ -992,11 +988,13 @@ async function getFunctionArgsSuggestions(
 
   const shouldAddComma =
     hasMoreMandatoryArgs &&
-    fnDefinition.type !== 'operator' &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
     !isCursorFollowedByComma &&
     !canBeBooleanCondition;
   const shouldAdvanceCursor =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'operator' && !isCursorFollowedByComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
+    !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
@@ -1048,9 +1046,9 @@ async function getFunctionArgsSuggestions(
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
         // ignore grouping functions, they are only used for grouping
-        ...getAllFunctions({ type: 'grouping' }).map(({ name }) => name),
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
-          ? getAllFunctions({ type: 'agg' }).map(({ name }) => name)
+          ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : [])
       );
     }

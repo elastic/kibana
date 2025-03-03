@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import type {
   ESQLAstItem,
   ESQLCommand,
@@ -16,12 +16,7 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type {
-  ESQLCallbacks,
-  ESQLControlVariable,
-  ESQLVariableType,
-  ESQLSourceResult,
-} from '../shared/types';
+import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -174,8 +169,15 @@ export interface Signature {
   returnType: FunctionReturnType;
 }
 
+export enum FunctionDefinitionTypes {
+  AGG = 'agg',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  GROUPING = 'grouping',
+}
+
 export interface FunctionDefinition {
-  type: 'agg' | 'scalar' | 'operator' | 'grouping';
+  type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -187,6 +189,7 @@ export interface FunctionDefinition {
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
+  customParametersSnippet?: string;
 }
 
 export interface CommandSuggestParams<CommandName extends string> {
