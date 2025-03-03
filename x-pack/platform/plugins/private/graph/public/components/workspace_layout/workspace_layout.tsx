@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { UseEuiTheme } from '@elastic/eui';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -201,7 +202,7 @@ export const WorkspaceLayoutComponent = ({
       />
 
       {isInitialized && <GraphTitle />}
-      <div className="gphGraph__bar">
+      <div css={styles}>
         <SearchBar
           isLoading={loading}
           urlQuery={urlQuery}
@@ -246,6 +247,10 @@ export const WorkspaceLayoutComponent = ({
     </Fragment>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) => `
+  margin: ${euiTheme.size.s};
+`;
 
 export const WorkspaceLayout = connect<WorkspaceLayoutStateProps, {}, {}, GraphState>(
   (state: GraphState) => ({
