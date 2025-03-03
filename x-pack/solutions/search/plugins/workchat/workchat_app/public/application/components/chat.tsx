@@ -6,12 +6,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiCommentList, EuiPanel } from '@elastic/eui';
 import { useChat } from '../hooks/use_chat';
 import { ChatInputForm } from './chat_input_form';
+import { ChatMessage } from './chat_message';
 
 export const Chat: React.FC<{}> = () => {
-  const { send, events } = useChat();
+  const { send, messages } = useChat();
 
   const onSubmit = useCallback(
     (message: string) => {
@@ -23,11 +24,13 @@ export const Chat: React.FC<{}> = () => {
   return (
     <>
       <EuiFlexItem grow css={{ overflow: 'auto' }}>
-        <div>
-          {events.map((event) => {
-            return <div>{JSON.stringify(event)}</div>;
-          })}
-        </div>
+        <EuiPanel hasBorder={false} hasShadow={false}>
+          <EuiCommentList>
+            {messages.map((message) => {
+              return <ChatMessage message={message} />;
+            })}
+          </EuiCommentList>
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ChatInputForm disabled={false} loading={false} onSubmit={onSubmit} />

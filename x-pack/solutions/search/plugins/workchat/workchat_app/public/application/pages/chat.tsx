@@ -10,6 +10,7 @@ import React, { FC } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Chat } from '../components/chat';
+import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 
 const pageSectionContentClassName = css`
   width: 100%;
@@ -21,6 +22,8 @@ const pageSectionContentClassName = css`
 `;
 
 export const WorkchatChatPage: FC<{}> = () => {
+  useBreadcrumb([{ text: 'Kibana' }, { text: 'WorkChat' }]);
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -37,7 +40,7 @@ export const WorkchatChatPage: FC<{}> = () => {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={false} hasShadow={false}>
+          <EuiPanel hasBorder={true} hasShadow={false}>
             <EuiFlexGroup>
               <EuiFlexItem grow>
                 <EuiTitle>
