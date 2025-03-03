@@ -34,8 +34,8 @@ filters
 [/source]
 ```
 
-:::{image} https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-11ea-9e68-86f66862a183.png
-:alt: 74162514 3250a880 4c21 11ea 9e68 86f66862a183
+:::{image} ../images/expressions_plugin.png
+:alt: Rendered metric
 :class: screenshot
 :::
 
