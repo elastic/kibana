@@ -7,26 +7,32 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EuiBadge } from '@elastic/eui';
 import { ExpandableBadgeGroup } from './expandable_badge_group';
 
-const badges: Array<typeof EuiBadge> = [
-  <EuiBadge key="1">{'Badge 1'}</EuiBadge>,
-  <EuiBadge key="2">{'Badge 2'}</EuiBadge>,
-  <EuiBadge key="3">{'Badge 3'}</EuiBadge>,
-  <EuiBadge key="4">{'Badge 4'}</EuiBadge>,
+const badgeProps = [
+  { color: 'hollow', children: 'Badge 1' },
+  { color: 'hollow', children: 'Badge 2' },
+  { color: 'hollow', children: 'Badge 3' },
+  { color: 'hollow', children: 'Badge 4' },
+];
+
+const badgePropsWithElement = [
+  { color: 'hollow', children: <span>{'Badge 1 with element'}</span> },
+  { color: 'hollow', children: <span>{'Badge 2 with element'}</span> },
+  { color: 'hollow', children: <span>{'Badge 3 with element'}</span> },
+  { color: 'hollow', children: <span>{'Badge 4 with element'}</span> },
 ];
 
 describe('ExpandableBadgeGroup', () => {
   it('renders all badges when initialBadgeLimit is not set', () => {
-    render(<ExpandableBadgeGroup badges={badges} />);
-    badges.forEach((badge) => {
-      expect(screen.getByText(badge.props.children)).toBeInTheDocument();
+    render(<ExpandableBadgeGroup badges={badgeProps} />);
+    badgeProps.forEach((badge) => {
+      expect(screen.getByText(badge.children)).toBeInTheDocument();
     });
   });
 
   it('renders limited badges and expand button when initialBadgeLimit is set', () => {
-    render(<ExpandableBadgeGroup badges={badges} initialBadgeLimit={2} />);
+    render(<ExpandableBadgeGroup badges={badgeProps} initialBadgeLimit={2} />);
     expect(screen.getByText('Badge 1')).toBeInTheDocument();
     expect(screen.getByText('Badge 2')).toBeInTheDocument();
     expect(screen.queryByText('Badge 3')).not.toBeInTheDocument();
@@ -35,15 +41,22 @@ describe('ExpandableBadgeGroup', () => {
   });
 
   it('expands to show all badges when expand button is clicked', () => {
-    render(<ExpandableBadgeGroup badges={badges} initialBadgeLimit={2} />);
+    render(<ExpandableBadgeGroup badges={badgeProps} initialBadgeLimit={2} />);
     fireEvent.click(screen.getByText('+2'));
-    badges.forEach((badge) => {
-      expect(screen.getByText(badge.props.children)).toBeInTheDocument();
+    badgeProps.forEach((badge) => {
+      expect(screen.getByText(badge.children)).toBeInTheDocument();
     });
   });
 
   it('applies maxHeight style when maxHeight is set', () => {
-    const { container } = render(<ExpandableBadgeGroup badges={badges} maxHeight={100} />);
+    const { container } = render(<ExpandableBadgeGroup badges={badgeProps} maxHeight={100} />);
     expect(container.firstChild).toHaveStyle('max-height: 100px');
+  });
+
+  it('renders badges with children as React elements', () => {
+    render(<ExpandableBadgeGroup badges={badgePropsWithElement} />);
+    badgePropsWithElement.forEach((badge) => {
+      expect(screen.getByText(badge.children.props.children)).toBeInTheDocument();
+    });
   });
 });

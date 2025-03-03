@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
-import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup, EuiBadge, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { ExpandableBadgeGroup } from './components/expandable_badge_group';
@@ -22,33 +22,40 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
   const { euiTheme } = useEuiTheme();
 
   const tagBadges = useMemo(
-    () => tags?.map<Array<typeof EuiBadge>>((tag) => <EuiBadge color="hollow">{tag}</EuiBadge>),
+    () =>
+      tags?.map((tag) => ({
+        color: 'hollow',
+        children: tag,
+      })),
     [tags]
   );
 
   const labelBadges = useMemo(
     () =>
       labels &&
-      Object.entries(labels)?.map<Array<typeof EuiBadge>>(([key, value]) => (
-        <EuiBadge color="hollow">
-          <span
-            css={css`
-              color: ${euiTheme.colors.disabledText};
-              border-right: ${euiTheme.border.thick};
-              padding-right: ${euiTheme.size.xs};
-            `}
-          >
-            {key}
-          </span>
-          <span
-            css={css`
-              padding-left: ${euiTheme.size.xs};
-            `}
-          >
-            {value}
-          </span>
-        </EuiBadge>
-      )),
+      Object.entries(labels)?.map(([key, value]) => ({
+        color: 'hollow',
+        children: (
+          <>
+            <span
+              css={css`
+                color: ${euiTheme.colors.disabledText};
+                border-right: ${euiTheme.border.thick};
+                padding-right: ${euiTheme.size.xs};
+              `}
+            >
+              {key}
+            </span>
+            <span
+              css={css`
+                padding-left: ${euiTheme.size.xs};
+              `}
+            >
+              {value}
+            </span>
+          </>
+        ),
+      })),
     [labels, euiTheme.colors.disabledText, euiTheme.border.thick, euiTheme.size.xs]
   );
 

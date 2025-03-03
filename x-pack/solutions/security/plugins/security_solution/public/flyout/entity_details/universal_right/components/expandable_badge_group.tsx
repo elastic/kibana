@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 
 interface ExpandableBadgeGroupProps {
   /** Array of EuiBadges to display */
-  badges: Array<typeof EuiBadge>;
+  badges: EuiBadgeProps[];
   /** The initial number of badges to show before expanding. Defaults to 'all' if not set */
   initialBadgeLimit?: number;
   /** The maximum height of the badge group in pixels. If not set the expandable container will not have inner scrolling */
@@ -35,6 +36,11 @@ export const ExpandableBadgeGroup = ({
   const remainingCount = badgesToShow === 'all' ? 0 : badges.length - badgesToShow;
   const maxScrollHeight = maxHeight ? `${maxHeight}px` : 'initial';
 
+  const badgeElements = useMemo(
+    () => badges.map((badge, index) => <EuiBadge key={index} {...badge} />),
+    [badges]
+  );
+
   return (
     <EuiBadgeGroup
       gutterSize="s"
@@ -45,7 +51,7 @@ export const ExpandableBadgeGroup = ({
     >
       {
         // Show all badges if 'all' is set, otherwise show the first `badgesToShow` badges
-        badgesToShow === 'all' ? badges : badges.slice(0, badgesToShow)
+        badgesToShow === 'all' ? badgeElements : badgeElements.slice(0, badgesToShow)
       }
       {
         // Show the expand badge if there are remaining badges to show
