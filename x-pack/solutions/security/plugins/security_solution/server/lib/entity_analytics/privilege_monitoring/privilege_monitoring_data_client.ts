@@ -20,6 +20,7 @@ import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task'
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indicies';
 import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
+import { PRIVILEGE_MONITORING_ENGINE_STATUS } from './constants';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -58,16 +59,7 @@ export class PrivilegeMonitoringDataClient {
      * TODO: fill this in
      */
   }
-  /**
-   *
-   * init the engine,
-   * kibana task created,
-   * create save object with engine status and api key of user who enabled engine --
-   * ticket does not say enable, but is this implied? Or just ability of saved object when we want to enable engine?
-   * indices created
-   *
-   * definition and descriptor -- different things. **
-   */
+
   async init(): Promise<InitPrivilegedMonitoringEntityEngineResponse> {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
@@ -86,14 +78,26 @@ export class PrivilegeMonitoringDataClient {
       await this.apiKeyGenerator.generate(); // TODO: need this in a saved object?
     }
 
-    await startPrivilegeMonitoringTask({
-      logger: this.opts.logger,
-      namespace: this.opts.namespace,
-      taskManager: this.opts.taskManager,
-    });
+    try {
+      await startPrivilegeMonitoringTask({
+        logger: this.opts.logger,
+        namespace: this.opts.namespace,
+        taskManager: this.opts.taskManager,
+      });
+    } catch (e) {
+      this.log('error', `Error starting privilege monitoring task: ${e}`);
+      // TODO: audit failed initialization here
+      // TODO: telemetry, report event. Reference entity_store_data_client.ts line 476
+      await this.engineClient.update({
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
+        error: {// TODO: double check this, taken from entity_store_data_client.ts line 480 example.
+          message: e.message,
+          stack: e.stack,
+          action: 'init',
+        },
+      });
+    }
 
-    await this.engineClient.update({ status: 'installing' });
-    this.log('debug', `Updated privileged monitoring engine saved object status to installing`);
     return descriptor;
   }
 
