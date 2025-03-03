@@ -9,6 +9,7 @@ import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface ExpandableBadgeGroupProps {
   /** Array of EuiBadges to display */
@@ -59,7 +60,10 @@ export const ExpandableBadgeGroup = ({
           <EuiBadge
             color="hollow"
             onClick={() => setBadgesToShow('all')}
-            onClickAriaLabel="Expand Remaining Badges"
+            onClickAriaLabel={i18n.translate(
+              'xpack.securitySolution.expandableBadgeGroup.expandBadgeAriaLabel',
+              { defaultMessage: 'Expand Remaining Badges' }
+            )}
           >{`+${remainingCount}`}</EuiBadge>
         )
       }
