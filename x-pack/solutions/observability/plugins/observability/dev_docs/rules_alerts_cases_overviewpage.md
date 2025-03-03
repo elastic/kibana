@@ -119,7 +119,7 @@ Visit the Cases page under Observability, then check and test:
     - Edit it
     - Delete it
 From the Alerts table, go to the Alerts page
-  - On an alert click the more `...` in the alert table, then click `Add to existing case`
-  - On an alert click the more `...` in the alert table, then click `Add to new case`
+  - On an alert click the more button `...` in the alert table, then click `Add to existing case`
+  - On an alert click the more button `...` in the alert table, then click `Add to new case`
   - Click on the toast that appears after each action and verify that the alert was added correctly
   - Open the `Alerts` tab and check all the added alerts to that case
