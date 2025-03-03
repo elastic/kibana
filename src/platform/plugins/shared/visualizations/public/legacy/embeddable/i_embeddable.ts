@@ -16,7 +16,7 @@ import { ViewMode } from '@kbn/presentation-publishing';
 
 export type EmbeddableError = ErrorLike;
 
-export type EmbeddableInput = {
+export interface EmbeddableInput {
   version?: string;
   viewMode?: ViewMode;
   title?: string;
@@ -66,7 +66,7 @@ export type EmbeddableInput = {
   syncTooltips?: boolean;
 
   executionContext?: KibanaExecutionContext;
-};
+}
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
