@@ -9,7 +9,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import { ShareRegistry /* , ShareMenuRegistrySetup */ } from './services';
+import { ShareRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
@@ -25,7 +25,7 @@ import { registrations } from './lib/registrations';
 import type { BrowserUrlService } from './types';
 
 /** @public */
-export interface SharePublicSetup {
+export interface SharePublicSetup extends ShareMenuRegistrySetup {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -41,13 +41,6 @@ export interface SharePublicSetup {
    * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
-
-  registerShareIntegration: ShareRegistry['registerShareIntegration'];
-
-  /**
-   * @deprecated Use {@link registerShareIntegration} instead.
-   */
-  register: ShareRegistry['register'];
 }
 
 /** @public */
@@ -129,10 +122,7 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      registerShareIntegration: this.shareRegistry.registerShareIntegration.bind(
-        this.shareRegistry
-      ),
-      register: this.shareRegistry.register.bind(this.shareRegistry),
+      ...this.shareRegistry.setup(),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -147,13 +137,15 @@ export class SharePlugin
   public start(core: CoreStart): SharePublicStart {
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
+    const { resolveShareItemsForShareContext } = this.shareRegistry.start({
+      urlService: this.url!,
+      anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+    });
+
     const sharingContextMenuStart = this.shareContextMenu.start({
       core,
       isServerless,
-      resolveShareItemsForShareContext: this.shareRegistry.start({
-        urlService: this.url!,
-        anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
-      }),
+      resolveShareItemsForShareContext,
     });
 
     return {

@@ -13,6 +13,6 @@ import { shareMenuManagerMock } from './services/share_menu_manager.mock';
 export const registryMock = shareMenuRegistryMock.create();
 export const managerMock = shareMenuManagerMock.create();
 jest.doMock('./services', () => ({
-  ShareMenuRegistry: jest.fn(() => registryMock),
+  ShareRegistry: jest.fn(() => registryMock),
   ShareMenuManager: jest.fn(() => managerMock),
 }));

@@ -13,18 +13,21 @@ import {
   ShareMenuRegistrySetup,
   ShareMenuRegistryStart,
 } from './share_menu_registry';
-import { ShareContext } from '../types';
+import { ShareContext, ShareConfigs } from '../types';
 
 const createSetupMock = (): jest.Mocked<ShareMenuRegistrySetup> => {
   const setup = {
     register: jest.fn(),
+    registerShareIntegration: jest.fn(),
   };
   return setup;
 };
 
 const createStartMock = (): jest.Mocked<ShareMenuRegistryStart> => {
   const start = {
-    getShareMenuItems: jest.fn((_props: ShareContext) => [] as ShareMenuItemV2[]),
+    resolveShareItemsForShareContext: jest.fn(
+      (_props: ShareContext & { isServerless: boolean }) => [] as ShareConfigs[]
+    ),
   };
   return start;
 };

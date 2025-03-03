@@ -22,7 +22,7 @@ describe('ShareActionsRegistry', () => {
 
   describe('registerShareIntegration', () => {
     test('throws when registering duplicate id', () => {
-      const shareRegistry = new ShareRegistry();
+      const shareRegistry = new ShareRegistry().setup();
 
       shareRegistry.registerShareIntegration({
         id: 'csvReports',
@@ -43,7 +43,7 @@ describe('ShareActionsRegistry', () => {
   describe('start', () => {
     describe('resolveShareItemsForShareContext', () => {
       test('it returns the default share actions for any requested app scope without performing any prior registrations', () => {
-        const resolveShareItemsForShareContext = new ShareRegistry().start(startDeps);
+        const { resolveShareItemsForShareContext } = new ShareRegistry().start(startDeps);
 
         const context = {
           objectType: 'someRandomObjectType',
@@ -60,7 +60,7 @@ describe('ShareActionsRegistry', () => {
       });
 
       test('it excludes the default embed share actions for any requested app scope in serverless', () => {
-        const resolveShareItemsForShareContext = new ShareRegistry().start(startDeps);
+        const { resolveShareItemsForShareContext } = new ShareRegistry().start(startDeps);
 
         const context = {
           objectType: 'someRandomObjectType',
@@ -77,7 +77,7 @@ describe('ShareActionsRegistry', () => {
 
       test('returns a flat list of actions returned by all providers', () => {
         const service = new ShareRegistry();
-        const registerFunction = service.registerShareIntegration.bind(service);
+        const { registerShareIntegration: registerFunction } = service.setup();
 
         const shareAction1ConfigFactory = jest.fn(() => ({}));
         const shareAction1: ShareIntegration = {
@@ -107,13 +107,9 @@ describe('ShareActionsRegistry', () => {
         const context = { objectType: 'anotherRandomShareObjectType' } as ShareContext;
         const isServerless = false;
 
-        expect(() =>
-          service.resolveShareItemsForShareContext({ ...context, isServerless })
-        ).toThrow();
+        const { resolveShareItemsForShareContext } = service.start(startDeps);
 
-        service.start(startDeps);
-
-        expect(service.resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
+        expect(resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
           expect.objectContaining({
             shareType: 'link',
             config: expect.any(Object),
@@ -155,7 +151,7 @@ describe('ShareActionsRegistry', () => {
 
       test('it returns a flat list of actions registered to the requested scope', () => {
         const service = new ShareRegistry();
-        const registerFunction = service.registerShareIntegration.bind(service);
+        const { registerShareIntegration: registerFunction } = service.setup();
         const context = { objectType: 'randomObjectType' } as ShareContext;
 
         const isServerless = false;
@@ -185,13 +181,9 @@ describe('ShareActionsRegistry', () => {
         registerFunction('someOtherRandomObjectType', shareAction2);
         registerFunction(context.objectType, shareAction3);
 
-        expect(() =>
-          service.resolveShareItemsForShareContext({ ...context, isServerless })
-        ).toThrow();
+        const { resolveShareItemsForShareContext } = service.start(startDeps);
 
-        service.start(startDeps);
-
-        expect(service.resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
+        expect(resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
           expect.objectContaining({
             shareType: 'link',
             config: expect.any(Object),
