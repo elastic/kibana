@@ -8,14 +8,24 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
+import type {
+  TaskManagerSetupContract as TaskManagerPluginSetup,
+  TaskManagerStartContract as TaskManagerPluginStart,
+} from '@kbn/task-manager-plugin/server';
+
 import type { MetricsDataClient } from './client';
 
 export interface MetricsDataPluginSetup {
   client: MetricsDataClient;
 }
 
+export interface MetricsDataPluginSetupDeps {
+  taskManager?: TaskManagerPluginSetup;
+}
+
 export interface MetricsDataPluginStartDeps {
   data: DataPluginStart;
+  taskManager?: TaskManagerPluginStart;
 }
 
 export interface GetMetricIndicesOptions {
