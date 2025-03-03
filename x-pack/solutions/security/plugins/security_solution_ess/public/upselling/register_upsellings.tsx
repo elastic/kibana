@@ -31,6 +31,7 @@ import {
   AttackDiscoveryUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
 } from './lazy_upselling';
 
 interface UpsellingsConfig {
@@ -110,6 +111,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
     component: EntityAnalyticsUpsellingSectionLazy,
+  },
+  {
+    id: 'siem_migrations_start',
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsStartUpsellSectionLazy,
   },
 ];
 
