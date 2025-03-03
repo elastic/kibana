@@ -34,7 +34,6 @@ export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
-  TextBasedLanguages,
   sanitazeESQLInput,
   queryCannotBeSampled,
   mapVariableToColumn,

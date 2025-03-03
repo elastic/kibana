@@ -32,7 +32,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
+import type { SecurityService } from '@kbn/ftr-common-functional-services';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
 import type { FtrProviderContext } from '../../ftr_provider_context';

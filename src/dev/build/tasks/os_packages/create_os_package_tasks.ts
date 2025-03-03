@@ -64,26 +64,6 @@ export const CreateRpmPackage: Task = {
 };
 
 const dockerBuildDate = new Date().toISOString();
-export const CreateDockerUbuntu: Task = {
-  description: 'Creating Docker Ubuntu image',
-
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'ubuntu',
-      context: false,
-      image: true,
-      dockerBuildDate,
-    });
-    await runDockerGenerator(config, log, build, {
-      architecture: 'aarch64',
-      baseImage: 'ubuntu',
-      context: false,
-      image: true,
-      dockerBuildDate,
-    });
-  },
-};
 
 export const CreateDockerWolfi: Task = {
   description: 'Creating Docker Wolfi image',
@@ -139,6 +119,12 @@ export const CreateDockerUBI: Task = {
       context: false,
       image: true,
     });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'ubi',
+      context: false,
+      image: true,
+    });
   },
 };
 
@@ -181,12 +167,6 @@ export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 
   async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
-      context: true,
-      image: false,
-      dockerBuildDate,
-    });
     await runDockerGenerator(config, log, build, {
       baseImage: 'wolfi',
       context: true,

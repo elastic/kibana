@@ -6,7 +6,7 @@
  */
 import fetch from 'node-fetch';
 
-import * as fleetServerService from '../../services/fleet_server_host';
+import { fleetServerHostService } from '../../services/fleet_server_host';
 
 import { PostHealthCheckResponseSchema } from '../../types';
 
@@ -42,7 +42,7 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return a bad request error if the requested fleet server host has no host_urls', async () => {
-    jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
+    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
@@ -70,7 +70,7 @@ describe('Fleet server health_check handler', () => {
       name: 'Default',
     };
 
-    jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
+    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
@@ -105,7 +105,7 @@ describe('Fleet server health_check handler', () => {
 
   it('should return an error when host id is not found', async () => {
     jest
-      .spyOn(fleetServerService, 'getFleetServerHost')
+      .spyOn(fleetServerHostService, 'get')
       .mockRejectedValue({ output: { statusCode: 404 }, isBoom: true });
 
     const res = await postHealthCheckHandler(
@@ -123,7 +123,7 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return status `offline` when fetch request gets aborted', async () => {
-    jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
+    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
