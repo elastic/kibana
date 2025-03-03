@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { OnlyEsQueryRuleParams } from './types';
 
