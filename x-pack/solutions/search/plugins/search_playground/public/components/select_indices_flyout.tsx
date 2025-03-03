@@ -64,6 +64,9 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <EuiSelectable
             searchable
             height="full"
+            css={css`
+              height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+            `}
             searchProps={{
               onChange: handleSearchChange,
             }}
@@ -93,9 +96,6 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
             }}
             isLoading={isIndicesLoading}
             renderOption={undefined}
-            css={css`
-              height: calc(100vh - var(--euiFixedHeadersOffset, 0));
-            `}
           >
             {(list, search) => (
               <>
