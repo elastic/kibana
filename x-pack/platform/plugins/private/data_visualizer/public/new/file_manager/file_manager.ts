@@ -32,7 +32,12 @@ import {
 } from '../../application/file_data_visualizer/components/import_view/import';
 import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
 import type { FileClash } from './merge_tools';
-import { createMergedMappings, getFormatClashes, getMappingClashInfo } from './merge_tools';
+import {
+  CLASH_ERROR_TYPE,
+  createMergedMappings,
+  getFormatClashes,
+  getMappingClashInfo,
+} from './merge_tools';
 
 export enum STATUS {
   NA,
@@ -206,7 +211,7 @@ export class FileUploadManager {
     const filesToDestroy: FileWrapper[] = [];
     const files = this.getFiles();
     const newFiles = files.filter((file, i) => {
-      if (fileClashes[i].clash) {
+      if (fileClashes[i].clash === CLASH_ERROR_TYPE.ERROR) {
         filesToDestroy.push(files[i]);
         return false;
       }
@@ -238,7 +243,7 @@ export class FileUploadManager {
   } {
     const files = this.getFiles();
     const fileClashes = getFormatClashes(files);
-    const formatsOk = fileClashes.every((file) => file.clash === false);
+    const formatsOk = fileClashes.every((file) => file.clash === CLASH_ERROR_TYPE.NONE);
 
     if (formatsOk) {
       this.commonFileFormat = formatsOk ? files[0].getStatus().results!.format : null;

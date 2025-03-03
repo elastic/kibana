@@ -18,8 +18,14 @@ export enum CLASH_TYPE {
   MANY_UNUSED_FIELDS,
 }
 
-export const NEW_FIELD_THRESHOLD = 10;
-export const UNUSED_FIELD_THRESHOLD = 10;
+export enum CLASH_ERROR_TYPE {
+  NONE,
+  ERROR,
+  WARNING,
+}
+
+// export const NEW_FIELD_THRESHOLD = 10;
+// export const UNUSED_FIELD_THRESHOLD = 10;
 
 export interface MappingClash {
   fieldName: string;
@@ -29,7 +35,7 @@ export interface MappingClash {
 
 export interface FileClash {
   fileName: string;
-  clash: boolean;
+  clash: CLASH_ERROR_TYPE;
   clashType?: CLASH_TYPE;
   newFields?: string[];
   missingFields?: string[];
@@ -230,7 +236,7 @@ export function getMappingClashInfo(
     if (existingIndexClashes.has(c.index)) {
       fileClash = {
         fileName,
-        clash: true,
+        clash: CLASH_ERROR_TYPE.ERROR,
         clashType: CLASH_TYPE.EXISTING_INDEX_MAPPING,
       };
     } else {
@@ -239,7 +245,9 @@ export function getMappingClashInfo(
         clash:
           allClash ||
           (medianAboveZero === false && c.count > 0) ||
-          (medianAboveZero && c.count === 0),
+          (medianAboveZero && c.count === 0)
+            ? CLASH_ERROR_TYPE.ERROR
+            : CLASH_ERROR_TYPE.NONE,
         clashType: CLASH_TYPE.MAPPING,
       };
     }
@@ -257,6 +265,18 @@ export function getMappingClashInfo(
       const commonFields = existingIndexChecks.commonFieldsPerFile[i];
       if (commonFields) {
         fileClash.commonFields = commonFields.fields;
+      }
+    }
+    if (fileClash.clash !== CLASH_ERROR_TYPE.ERROR) {
+      // if the file contains many new fields but none of them are in the existing index
+      // set the clash to warning
+      if (
+        fileClash.missingFields &&
+        existingIndexChecks?.existingFields &&
+        existingIndexChecks?.existingFields.length > 0 &&
+        fileClash.missingFields.length > (existingIndexChecks.existingFields.length - 1) / 2
+      ) {
+        fileClash.clash = CLASH_ERROR_TYPE.WARNING;
       }
     }
     return fileClash;
@@ -279,7 +299,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
   if (formatMap.size === 1 && formatMap.has('unknown') === false) {
     return files.map((f) => ({
       fileName: f.getFileName(),
-      clash: false,
+      clash: CLASH_ERROR_TYPE.NONE,
     }));
   }
 
@@ -288,7 +308,8 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
   const fileClashes = files.map((f) => {
     return {
       fileName: f.getFileName(),
-      clash: f.getStatus().supportedFormat === false,
+      clash:
+        f.getStatus().supportedFormat === false ? CLASH_ERROR_TYPE.ERROR : CLASH_ERROR_TYPE.NONE,
       clashType: CLASH_TYPE.UNSUPPORTED,
     };
   });
@@ -309,7 +330,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
     return files.map((f) => {
       return {
         fileName: f.getFileName(),
-        clash: true,
+        clash: CLASH_ERROR_TYPE.ERROR,
         clashType: f.getStatus().supportedFormat ? CLASH_TYPE.FORMAT : CLASH_TYPE.UNSUPPORTED,
       };
     });
@@ -325,7 +346,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
 
     return {
       fileName: f.getFileName(),
-      clash: clashType !== undefined,
+      clash: clashType !== undefined ? CLASH_ERROR_TYPE.ERROR : CLASH_ERROR_TYPE.NONE,
       clashType,
     };
   });

@@ -28,6 +28,7 @@ import { AnalysisSummary } from '../../application/file_data_visualizer/componen
 import { FileContents } from '../../application/file_data_visualizer/components/file_contents';
 import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
 import { Mappings } from './mappings';
+import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
 
 interface Props {
   uploadStatus: UploadStatus;
@@ -54,14 +55,17 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
     uploadStatus.overallImportStatus === STATUS.COMPLETED;
+
+  const panelColor =
+    fileClash.clash === CLASH_ERROR_TYPE.ERROR
+      ? 'danger'
+      : fileClash.clash === CLASH_ERROR_TYPE.WARNING
+      ? 'warning'
+      : 'transparent';
+
   return (
     <>
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        color={fileClash.clash ? 'danger' : 'transparent'}
-      >
+      <EuiPanel hasShadow={false} hasBorder paddingSize="s" color={panelColor}>
         {importStarted ? (
           <UploadProgress fileStatus={fileStatus} />
         ) : (

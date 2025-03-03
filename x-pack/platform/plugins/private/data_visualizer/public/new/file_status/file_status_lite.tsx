@@ -20,6 +20,7 @@ import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from '../file_manager/file_manager';
 import { FileClashResult } from './file_clash';
 import { UploadProgress } from './progress';
+import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
 
 interface Props {
   uploadStatus: UploadStatus;
@@ -36,14 +37,17 @@ export const FileStatusLite: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
     uploadStatus.overallImportStatus === STATUS.COMPLETED;
+
+  const panelColor =
+    fileClash.clash === CLASH_ERROR_TYPE.ERROR
+      ? 'danger'
+      : fileClash.clash === CLASH_ERROR_TYPE.WARNING
+      ? 'warning'
+      : 'transparent';
+
   return (
     <>
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        color={fileClash.clash ? 'danger' : 'transparent'}
-      >
+      <EuiPanel hasShadow={false} hasBorder paddingSize="s" color={panelColor}>
         {importStarted ? (
           <UploadProgress fileStatus={fileStatus} />
         ) : (

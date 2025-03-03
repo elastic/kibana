@@ -36,6 +36,7 @@ import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { DataViewIllustration } from './data_view_illustration';
 import { useDataVisualizerKibana } from '../application/kibana_context';
+import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -70,7 +71,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
     fileUploadManager.uploadStatus$.getValue()
   );
   const fileClashes = useMemo(
-    () => uploadStatus.fileClashes.some((f) => f.clash),
+    () => uploadStatus.fileClashes.some((f) => f.clash === CLASH_ERROR_TYPE.ERROR),
     [uploadStatus.fileClashes]
   );
 

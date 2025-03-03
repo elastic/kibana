@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FileClash } from '../file_manager/merge_tools';
-import { CLASH_TYPE } from '../file_manager/merge_tools';
+import { CLASH_ERROR_TYPE, CLASH_TYPE } from '../file_manager/merge_tools';
 
 interface Props {
   fileClash: FileClash;
@@ -20,7 +20,7 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
   // eslint-disable-next-line no-console
   console.log(fileClash);
 
-  return fileClash.clash ? (
+  return fileClash.clash === CLASH_ERROR_TYPE.ERROR ? (
     <>
       {fileClash.clashType === CLASH_TYPE.FORMAT ? (
         <>
@@ -72,6 +72,18 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
     </>
   ) : (
     <>
+      {fileClash.clash === CLASH_ERROR_TYPE.WARNING ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="warning">
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.fileStatus.fileClashWarning"
+              defaultMessage="Mappings may be incompatible with the existing index"
+            />
+          </EuiText>
+        </>
+      ) : null}
+
       {fileClash.newFields?.length || fileClash.missingFields?.length ? (
         <EuiSpacer size="s" />
       ) : null}
