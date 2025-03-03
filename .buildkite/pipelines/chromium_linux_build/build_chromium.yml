@@ -31,6 +31,8 @@ steps:
     label: "Build {{matrix}} linux headless chromium"
     # timeout_in_minutes: 10
     depends_on: "infer_chromium_version"
+    env:
+      DEBIAN_FRONTEND: noninteractive
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod

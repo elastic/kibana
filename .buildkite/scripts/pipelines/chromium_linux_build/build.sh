@@ -7,8 +7,8 @@ CHROMIUM_COMMIT_HASH=$(buildkite-agent meta-data get "chromium_commit_hash")
 echo "---Preparing to build Chromium of commit hash: $CHROMIUM_COMMIT_HASH"
 
 sudo apt-get update && \
-    apt-get install -y curl git-all build-essential pkg-config gcc gperf python3 && \
-    rm -rf /var/lib/apt/lists/*
+sudo apt-get install -y curl git build-essential pkg-config gcc gperf python3 && \
+sudo rm -rf /var/lib/apt/lists/*
 
 BUILD_ROOT_DIR="$HOME/chromium"
 
