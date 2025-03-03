@@ -13,6 +13,7 @@ import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
+import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ApmAlertFields } from '../../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
@@ -150,6 +151,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('LLM requests', () => {
+      let firstRequestBody: ChatCompletionStreamParams;
+      let secondRequestBody: ChatCompletionStreamParams;
+      let thirdRequestBody: ChatCompletionStreamParams;
+      let fourthRequestBody: ChatCompletionStreamParams;
+
+      before(async () => {
+        firstRequestBody = llmProxy.interceptedRequests[0].requestBody;
+        secondRequestBody = llmProxy.interceptedRequests[1].requestBody;
+        thirdRequestBody = llmProxy.interceptedRequests[2].requestBody;
+        fourthRequestBody = llmProxy.interceptedRequests[3].requestBody;
+      });
+
       it('makes 4 requests to the LLM', () => {
         expect(llmProxy.interceptedRequests.length).to.be(4);
       });
@@ -203,11 +216,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The first request', () => {
         it('contains the correct number of messages', () => {
-          expect(llmProxy.interceptedRequests[0].requestBody.messages.length).to.be(4);
+          expect(firstRequestBody.messages.length).to.be(4);
         });
 
         it('contains the `get_alerts_dataset_info` tool', () => {
-          const hasTool = llmProxy.interceptedRequests[0].requestBody.tools?.some(
+          const hasTool = firstRequestBody.tools?.some(
             (tool) => tool.function.name === 'get_alerts_dataset_info'
           );
 
@@ -215,43 +228,37 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('leaves the function calling decision to the LLM via tool_choice=auto', () => {
-          expect(llmProxy.interceptedRequests[0].requestBody.tool_choice).to.be('auto');
+          expect(firstRequestBody.tool_choice).to.be('auto');
         });
 
         describe('The system message', () => {
           it('has the primary system message', () => {
-            expect(llmProxy.interceptedRequests[0].requestBody.messages[0].content).to.be(
-              primarySystemMessage
+            expect(systemMessageAsArray(firstRequestBody.messages[0].content as string)).to.eql(
+              systemMessageAsArray(primarySystemMessage)
             );
           });
 
           it('has a different system message from request 2', () => {
-            expect(llmProxy.interceptedRequests[0].requestBody.messages[0]).not.to.eql(
-              llmProxy.interceptedRequests[1].requestBody.messages[0]
-            );
+            expect(firstRequestBody.messages[0]).not.to.eql(secondRequestBody.messages[0]);
           });
 
           it('has the same system message as request 3', () => {
-            expect(llmProxy.interceptedRequests[0].requestBody.messages[0]).to.eql(
-              llmProxy.interceptedRequests[2].requestBody.messages[0]
-            );
+            expect(firstRequestBody.messages[0]).to.eql(thirdRequestBody.messages[0]);
           });
 
           it('has the same system message as request 4', () => {
-            expect(llmProxy.interceptedRequests[0].requestBody.messages[0]).to.eql(
-              llmProxy.interceptedRequests[3].requestBody.messages[0]
-            );
+            expect(firstRequestBody.messages[0]).to.eql(fourthRequestBody.messages[0]);
           });
         });
       });
 
       describe('The second request', () => {
         it('contains the correct number of messages', () => {
-          expect(llmProxy.interceptedRequests[1].requestBody.messages.length).to.be(5);
+          expect(secondRequestBody.messages.length).to.be(5);
         });
 
         it('contains a system generated user message with a list of field candidates', () => {
-          const hasList = llmProxy.interceptedRequests[1].requestBody.messages.some(
+          const hasList = secondRequestBody.messages.some(
             (message) =>
               message.role === 'user' &&
               (message.content as string).includes('Below is a list of fields.') &&
@@ -264,14 +271,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('instructs the LLM to call the `select_relevant_fields` tool via `tool_choice`', () => {
           const hasToolChoice =
             // @ts-expect-error
-            llmProxy.interceptedRequests[1].requestBody.tool_choice?.function?.name ===
-            'select_relevant_fields';
+            secondRequestBody.tool_choice?.function?.name === 'select_relevant_fields';
 
           expect(hasToolChoice).to.be(true);
         });
 
         it('has a custom, function-specific system message', () => {
-          expect(llmProxy.interceptedRequests[1].requestBody.messages[0].content).to.be(
+          expect(secondRequestBody.messages[0].content).to.be(
             GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE
           );
         });
@@ -279,11 +285,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The third request', () => {
         it('contains the correct number of messages', () => {
-          expect(llmProxy.interceptedRequests[2].requestBody.messages.length).to.be(6);
+          expect(thirdRequestBody.messages.length).to.be(6);
         });
 
         it('contains the `get_alerts_dataset_info` request', () => {
-          const hasFunctionRequest = llmProxy.interceptedRequests[2].requestBody.messages.some(
+          const hasFunctionRequest = thirdRequestBody.messages.some(
             (message) =>
               message.role === 'assistant' &&
               message.tool_calls?.[0]?.function?.name === 'get_alerts_dataset_info'
@@ -293,7 +299,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains the `get_alerts_dataset_info` response', () => {
-          const functionResponse = last(llmProxy.interceptedRequests[2].requestBody.messages);
+          const functionResponse = last(thirdRequestBody.messages);
           const parsedContent = JSON.parse(functionResponse?.content as string) as {
             fields: string[];
           };
@@ -332,9 +338,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains the `alerts` tool', () => {
-          const hasTool = llmProxy.interceptedRequests[2].requestBody.tools?.some(
-            (tool) => tool.function.name === 'alerts'
-          );
+          const hasTool = thirdRequestBody.tools?.some((tool) => tool.function.name === 'alerts');
 
           expect(hasTool).to.be(true);
         });
@@ -342,11 +346,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The fourth request', () => {
         it('contains the correct number of messages', () => {
-          expect(llmProxy.interceptedRequests[3].requestBody.messages.length).to.be(8);
+          expect(fourthRequestBody.messages.length).to.be(8);
         });
 
         it('contains the `alerts` request', () => {
-          const hasFunctionRequest = llmProxy.interceptedRequests[3].requestBody.messages.some(
+          const hasFunctionRequest = fourthRequestBody.messages.some(
             (message) =>
               message.role === 'assistant' && message.tool_calls?.[0]?.function?.name === 'alerts'
           );
@@ -355,9 +359,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains the `alerts` response', () => {
-          const functionResponseMessage = last(
-            llmProxy.interceptedRequests[3].requestBody.messages
-          );
+          const functionResponseMessage = last(fourthRequestBody.messages);
           const parsedContent = JSON.parse(functionResponseMessage?.content as string);
           expect(Object.keys(parsedContent)).to.eql(['total', 'alerts']);
         });
@@ -491,4 +493,8 @@ async function createSyntheticApmData(
   await apmSynthtraceEsClient.index(events);
 
   return { apmSynthtraceEsClient };
+}
+
+function systemMessageAsArray(message: string) {
+  return message.split('\n\n').map((line) => line.trim());
 }
