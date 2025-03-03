@@ -35,7 +35,7 @@ export function convertMessagesForInference(
           // if the LLM returns invalid JSON, it is likley because it is hallucinating
           // the function. We don't want to propogate the error about invalid JSON here.
           // Any errors related to the function call will be caught when the function and
-          // it's arguments are is validated
+          // it's arguments are validated
           return {};
         }
       }
