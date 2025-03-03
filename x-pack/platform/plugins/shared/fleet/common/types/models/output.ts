@@ -13,6 +13,7 @@ import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
 import type { kafkaVerificationModes } from '../../constants';
 import type { kafkaConnectionType } from '../../constants';
+import type { SOSecret } from '..';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;
@@ -23,12 +24,6 @@ export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 export type KafkaVerificationMode = typeof kafkaVerificationModes;
-export type OutputSecret =
-  | string
-  | {
-      id: string;
-      hash?: string;
-    };
 
 export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'latency';
 
@@ -54,7 +49,7 @@ interface NewBaseOutput {
   allow_edit?: string[];
   secrets?: {
     ssl?: {
-      key?: OutputSecret;
+      key?: SOSecret;
     };
   };
   preset?: OutputPreset;
@@ -68,10 +63,10 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: {
-    service_token?: OutputSecret;
-    kibana_api_key?: OutputSecret;
+    service_token?: SOSecret;
+    kibana_api_key?: SOSecret;
     ssl?: {
-      key?: OutputSecret;
+      key?: SOSecret;
     };
   };
   sync_integrations?: boolean;
@@ -81,6 +76,11 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
 
 export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: SOSecret;
+    };
+  };
 }
 
 export type NewOutput =
@@ -141,9 +141,9 @@ export interface KafkaOutput extends NewBaseOutput {
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
   secrets?: {
-    password?: OutputSecret;
+    password?: SOSecret;
     ssl?: {
-      key?: OutputSecret;
+      key?: SOSecret;
     };
   };
 }
