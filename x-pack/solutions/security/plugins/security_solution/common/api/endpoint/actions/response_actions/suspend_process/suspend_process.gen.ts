@@ -16,14 +16,30 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse, BaseActionSchema, Pid, EntityId } from '../../../model/schema/common.gen';
+import { BaseActionSchema } from '../../../model/schema/common.gen';
 
 export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
 export const SuspendProcessRouteRequestBody = BaseActionSchema.merge(
   z.object({
-    parameters: z.union([Pid, EntityId]),
+    parameters: z.union([
+      z.object({
+        /**
+         * The process ID (PID) of the process to suspend.
+         */
+        pid: z.number().int().min(1).optional(),
+      }),
+      z.object({
+        /**
+         * The entity ID of the process to suspend.
+         */
+        entity_id: z.string().min(1).optional(),
+      }),
+    ]),
   })
 );
+
+export type SuspendProcessRouteResponse = z.infer<typeof SuspendProcessRouteResponse>;
+export const SuspendProcessRouteResponse = z.object({});
 
 export type EndpointSuspendProcessActionRequestBody = z.infer<
   typeof EndpointSuspendProcessActionRequestBody
@@ -36,4 +52,4 @@ export type EndpointSuspendProcessActionRequestBodyInput = z.input<
 export type EndpointSuspendProcessActionResponse = z.infer<
   typeof EndpointSuspendProcessActionResponse
 >;
-export const EndpointSuspendProcessActionResponse = SuccessResponse;
+export const EndpointSuspendProcessActionResponse = SuspendProcessRouteResponse;

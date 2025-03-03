@@ -50,7 +50,7 @@ export const getServiceNameCell =
       props.fieldFormats,
       props.dataView,
       field,
-      'html'
+      'text'
     );
 
     return (
@@ -58,9 +58,7 @@ export const getServiceNameCell =
         onFilter={actions.addFilter}
         icon={getIcon}
         rawValue={serviceNameValue}
-        // TODO: formatFieldValue doesn't actually return a string in certain circumstances, change
-        // this line below once it does.
-        value={typeof value === 'string' ? value : `${value}`}
+        value={value}
         property={serviceNameField}
         core={core}
         share={share}

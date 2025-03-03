@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   DocumentEntry,
   DocumentEntryType,
   IndexEntry,
   IndexEntryType,
   KnowledgeBaseEntryResponse,
+  KnowledgeBaseResource,
 } from '@kbn/elastic-assistant-common';
 import { EsKnowledgeBaseEntrySchema, LegacyEsKnowledgeBaseEntrySchema } from './types';
 
@@ -49,6 +50,7 @@ const transformEsSchemaToEntry = (
       createdBy: esKbEntry.created_by,
       updatedAt: esKbEntry.updated_at,
       updatedBy: esKbEntry.updated_by,
+      global: !esKbEntry.users?.length,
       users:
         esKbEntry.users?.map((user) => ({
           id: user.id,
@@ -79,6 +81,7 @@ const transformEsSchemaToEntry = (
       createdBy: esKbEntry.created_by,
       updatedAt: esKbEntry.updated_at,
       updatedBy: esKbEntry.updated_by,
+      global: !esKbEntry.users?.length,
       users:
         esKbEntry.users?.map((user) => ({
           id: user.id,
@@ -116,6 +119,7 @@ const getDocumentEntryFromLegacyKbEntry = (
     createdBy: legacyEsKbDoc.created_by,
     updatedAt: legacyEsKbDoc.updated_at,
     updatedBy: legacyEsKbDoc.updated_by,
+    global: !legacyEsKbDoc.users?.length,
     users:
       legacyEsKbDoc.users?.map((user) => ({
         id: user.id,
@@ -125,7 +129,7 @@ const getDocumentEntryFromLegacyKbEntry = (
     name: legacyEsKbDoc.text,
     namespace: legacyEsKbDoc.namespace,
     type: DocumentEntryType.value,
-    kbResource: legacyEsKbDoc.metadata?.kbResource ?? 'unknown',
+    kbResource: (legacyEsKbDoc.metadata?.kbResource as KnowledgeBaseResource) ?? 'user',
     source: legacyEsKbDoc.metadata?.source ?? 'unknown',
     required: legacyEsKbDoc.metadata?.required ?? false,
     text: legacyEsKbDoc.text,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../../common/runtime_types/ping';
 
@@ -19,7 +19,7 @@ export const getLastSuccessfulStepParams = ({
   monitorId,
   timestamp,
   location,
-}: GetStepScreenshotParams): estypes.SearchRequest['body'] => {
+}: GetStepScreenshotParams): estypes.SearchRequest => {
   return {
     size: 1,
     sort: [
@@ -90,7 +90,7 @@ export const getLastSuccessfulCheck: UMElasticsearchQueryFn<
     location,
   });
 
-  const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
+  const { body: result } = await uptimeEsClient.search(lastSuccessCheckParams);
 
   if (result.hits.total.value < 1) {
     return null;
