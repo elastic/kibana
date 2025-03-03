@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP, getLogsContextService } from '../data_types';
-
-export const createLogsContextServiceMock = () => {
-  return getLogsContextService({
-    allLogsIndexPattern: 'logs-*',
-    allowedDataSources: [DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP],
-  });
-};
+export const combineUnique = <T>(...items: T[][]): T[] => [...new Set(items.flat())];

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP, getLogsContextService } from '../data_types';
+import { combineUnique } from './combine_unique';
 
-export const createLogsContextServiceMock = () => {
-  return getLogsContextService({
-    allLogsIndexPattern: 'logs-*',
-    allowedDataSources: [DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP],
+describe('combineUnique', () => {
+  it('should combine many arrays into one containing only unique values', () => {
+    expect(combineUnique(['a', 'b'], ['b', 'c'])).toStrictEqual(['a', 'b', 'c']);
   });
-};
+});

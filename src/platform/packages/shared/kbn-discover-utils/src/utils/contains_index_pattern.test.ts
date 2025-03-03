@@ -7,22 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP } from './traces_context_service';
-import { combineUnique, containsIndexPattern } from './utils';
-
-describe('combineUnique', () => {
-  it('should combine many arrays into one containing only unique values', () => {
-    expect(combineUnique(['a', 'b'], ['b', 'c'])).toStrictEqual(['a', 'b', 'c']);
-  });
-});
+import { DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP } from '../data_types/traces/traces_context_service';
+import { containsIndexPattern } from './contains_index_pattern';
 
 describe('containsIndexPattern', () => {
-  const allowed = [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+  const allowed = [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP, 'custom-*'];
   const isTraceIndex = containsIndexPattern(allowed);
 
   const testCases: Array<[string, boolean]> = [
     ['traces-*', true],
     ['logs-*', false],
+    ['custom-*', true],
     ['otel-*,apm-*,traces-apm*,traces-*.otel-*', true],
     [
       'remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*',

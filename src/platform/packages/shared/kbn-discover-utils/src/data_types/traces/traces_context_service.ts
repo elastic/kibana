@@ -9,7 +9,7 @@
 
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { containsIndexPattern, combineUnique } from './utils';
+import { containsIndexPattern, combineUnique } from '../../utils';
 
 export interface TracesContextService {
   getAllTracesIndexPattern(): string | undefined;
