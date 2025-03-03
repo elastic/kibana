@@ -116,7 +116,7 @@ describe('UnifiedDataTableFooter', function () {
         onFetchMoreRecords={mockLoadMore}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
-        paginationMode={'loadMore'}
+        paginationMode={'singlePage'}
         hasScrolledToBottom={true}
       />
     );
@@ -138,7 +138,7 @@ describe('UnifiedDataTableFooter', function () {
         onFetchMoreRecords={mockLoadMore}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
-        paginationMode={'loadMore'}
+        paginationMode={'singlePage'}
         hasScrolledToBottom={false}
       />
     );
