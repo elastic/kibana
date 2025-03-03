@@ -10,10 +10,10 @@
 
 Review important information about the {kib} 8.x releases.
 
-* <<release-notes-8.16.5>>
 * <<release-notes-8.17.2>>
 * <<release-notes-8.17.1>>
 * <<release-notes-8.17.0>>
+* <<release-notes-8.16.5>>
 * <<release-notes-8.16.4>>
 * <<release-notes-8.16.3>>
 * <<release-notes-8.16.2>>
