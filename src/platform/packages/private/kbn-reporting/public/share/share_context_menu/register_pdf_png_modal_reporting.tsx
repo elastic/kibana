@@ -14,7 +14,6 @@ import { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import { ExportGenerationOpts, ExportShare } from '@kbn/share-plugin/public/types';
-import { ApplicationStart } from '@kbn/core/public';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
 
@@ -40,14 +39,6 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
   return { ...baseParams, locatorParams };
 };
 
-const hasDashboardScreenshotReportingcapability = (
-  capabilities: ApplicationStart['capabilities']
-) => capabilities.dashboard_v2?.generateScreenshot === true;
-
-const hasVisualizeScreenshotReportingcapability = (
-  capabilities: ApplicationStart['capabilities']
-) => capabilities.visualize_v2?.generateScreenshot === true;
-
 export const reportingPDFExportProvider = ({
   apiClient,
   license,
@@ -63,7 +54,7 @@ export const reportingPDFExportProvider = ({
     shareableUrlForSavedObject,
     toasts,
     ...shareOpts
-  }: ShareContext): ReturnType<ExportShare['config']> | null => {
+  }: ShareContext): ReturnType<ExportShare['config']> => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
     const licenseToolTipContent = message;
     const licenseHasScreenshotReporting = showLinks;
@@ -77,6 +68,7 @@ export const reportingPDFExportProvider = ({
     if (!licenseHasScreenshotReporting) {
       return null;
     }
+
     // for lens png pdf and csv are combined into one modal
     const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
 
@@ -106,7 +98,7 @@ export const reportingPDFExportProvider = ({
 
     const requiresSavedState = sharingData.locatorParams === null;
 
-    const generateReportPDF = ({ intl, optimizedForPrinting = false }: ScreenshotExportOpts) => {
+    const generateReportPDF = ({ intl, optimizedForPrinting = false }: ExportGenerationOpts) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')(),
       });
@@ -169,15 +161,13 @@ export const reportingPDFExportProvider = ({
       }),
       toolTipContent: licenseToolTipContent,
       disabled: licenseDisabled || sharingData.reportingDisabled,
-      ['data-test-subj']: 'imageExports',
       label: 'PDF' as const,
       generateAssetExport: generateReportPDF,
-      generateValueExport: generateExportUrlPDF,
+      generateAssetURIValue: generateExportUrlPDF,
       exportType: 'printablePdfV2',
       requiresSavedState,
-      layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderLayoutOptionSwitch: objectType === 'dashboard',
-      renderCopyURLButton: true,
+      renderCopyURIButton: true,
     };
   };
 
@@ -309,14 +299,12 @@ export const reportingPNGExportProvider = ({
       }),
       toolTipContent: licenseToolTipContent,
       disabled: licenseDisabled || sharingData.reportingDisabled,
-      ['data-test-subj']: 'imageExports',
       label: 'PNG' as const,
       generateAssetExport: generateReportPNG,
-      generateValueExport: generateExportUrlPNG,
+      generateAssetURIValue: generateExportUrlPNG,
       exportType: 'pngV2',
       requiresSavedState,
-      layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
-      renderCopyURLButton: true,
+      renderCopyURIButton: true,
     };
   };
 
