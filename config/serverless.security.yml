@@ -182,5 +182,5 @@ xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
   - siemMigrationsDisabled
 
-# Double task manager capacity (default 10 -> 20) because we have twice as many resources by default (2GB mem)
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
 xpack.task_manager.capacity: 20
