@@ -3781,24 +3781,24 @@ paths:
                       type: object
                       properties:
                         duration:
-                          description: Duration of the snooze schedule.
+                          description: 'Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: ''5h'', ''30m'', ''5000s''.'
                           type: string
                         recurring:
                           additionalProperties: false
                           type: object
                           properties:
                             end:
-                              description: End date of recurrence of the snooze schedule in ISO 8601 format.
+                              description: End date of recurrence of the schedule in ISO 8601 format.
                               type: string
                             every:
-                              description: Recurrence interval and frequency of the snooze schedule.
+                              description: 'Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: ''15d'', ''2w'', ''3m'', ''1y''.'
                               type: string
                             occurrences:
-                              description: Total number of recurrences of the snooze schedule.
+                              description: Total number of recurrences of the schedule.
                               minimum: 1
                               type: number
                             onMonth:
-                              description: Specific months for recurrence of the snooze schedule.
+                              description: Specific months for recurrence of the schedule. Valid values are 1-12.
                               items:
                                 maximum: 12
                                 minimum: 1
@@ -3806,7 +3806,7 @@ paths:
                               minItems: 1
                               type: array
                             onMonthDay:
-                              description: Specific days of the month for recurrence of the snooze schedule.
+                              description: Specific days of the month for recurrence of the schedule. Valid values are 1-31.
                               items:
                                 maximum: 31
                                 minimum: 1
@@ -3814,16 +3814,16 @@ paths:
                               minItems: 1
                               type: array
                             onWeekDay:
-                              description: Specific days of the week or nth day of month for recurrence of the snooze schedule.
+                              description: Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.
                               items:
                                 type: string
                               minItems: 1
                               type: array
                         start:
-                          description: Start date and time of the snooze schedule in ISO 8601 format.
+                          description: Start date and time of the schedule in ISO 8601 format.
                           type: string
                         timezone:
-                          description: Timezone of the snooze schedule.
+                          description: Timezone of the schedule. The default timezone is UTC.
                           type: string
                       required:
                         - start
@@ -3851,24 +3851,24 @@ paths:
                             type: object
                             properties:
                               duration:
-                                description: Duration of the snooze schedule.
+                                description: 'Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: ''5h'', ''30m'', ''5000s''.'
                                 type: string
                               recurring:
                                 additionalProperties: false
                                 type: object
                                 properties:
                                   end:
-                                    description: End date of recurrence of the snooze schedule in ISO 8601 format.
+                                    description: End date of recurrence of the schedule in ISO 8601 format.
                                     type: string
                                   every:
-                                    description: Recurrence interval and frequency of the snooze schedule.
+                                    description: 'Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: ''15d'', ''2w'', ''3m'', ''1y''.'
                                     type: string
                                   occurrences:
-                                    description: Total number of recurrences of the snooze schedule.
+                                    description: Total number of recurrences of the schedule.
                                     minimum: 1
                                     type: number
                                   onMonth:
-                                    description: Specific months for recurrence of the snooze schedule.
+                                    description: Specific months for recurrence of the schedule. Valid values are 1-12.
                                     items:
                                       maximum: 12
                                       minimum: 1
@@ -3876,7 +3876,7 @@ paths:
                                     minItems: 1
                                     type: array
                                   onMonthDay:
-                                    description: Specific days of the month for recurrence of the snooze schedule.
+                                    description: Specific days of the month for recurrence of the schedule. Valid values are 1-31.
                                     items:
                                       maximum: 31
                                       minimum: 1
@@ -3884,16 +3884,16 @@ paths:
                                     minItems: 1
                                     type: array
                                   onWeekDay:
-                                    description: Specific days of the week or nth day of month for recurrence of the snooze schedule.
+                                    description: Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.
                                     items:
                                       type: string
                                     minItems: 1
                                     type: array
                               start:
-                                description: Start date and time of the snooze schedule in ISO 8601 format.
+                                description: Start date and time of the schedule in ISO 8601 format.
                                 type: string
                               timezone:
-                                description: Timezone of the snooze schedule.
+                                description: Timezone of the schedule. The default timezone is UTC.
                                 type: string
                             required:
                               - start
