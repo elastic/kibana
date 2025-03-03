@@ -524,10 +524,8 @@ export class PreviewController {
       .search({
         params: {
           index: this.dataView.getIndexPattern(),
-          body: {
-            fields: ['*'],
-            size: limit,
-          },
+          fields: ['*'],
+          size: limit,
         },
       })
       .toPromise()
@@ -571,13 +569,11 @@ export class PreviewController {
       .search({
         params: {
           index: this.dataView.getIndexPattern(),
-          body: {
-            size: 1,
-            fields: ['*'],
-            query: {
-              ids: {
-                values: [id],
-              },
+          size: 1,
+          fields: ['*'],
+          query: {
+            ids: {
+              values: [id],
             },
           },
         },

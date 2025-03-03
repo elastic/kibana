@@ -21,7 +21,7 @@ import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
 import { of, Subject } from 'rxjs';
 import { sleep } from '../test_utils';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
 type ResponseWithAggs = Omit<estypes.SearchResponse<ConcreteTaskInstance>, 'aggregations'> & {

@@ -165,7 +165,7 @@ export const bulkActionAnonymizationFieldsRoute = (
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
