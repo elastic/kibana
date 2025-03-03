@@ -69,15 +69,14 @@ export const SearchIndexPipelines: React.FC = () => {
   const pipelinesButton = Array.from(document.querySelectorAll('button')).find(
     (btn) => btn.textContent?.trim() === 'Pipelines'
   );
-
-  const onCloseDeleteModal = useCallback(() => {
-    closeDeleteModal();
-    setTimeout(() => {
+  
+  useEffect(() => {
+    if (!isDeleteModalOpen) {
       if (buttonRef.current) {
         buttonRef.current.focus();
       }
-    }, 0);
-  }, [closeDeleteModal, buttonRef]);
+    }
+  }, [isDeleteModalOpen]);
 
   const onDeletePipeline = useCallback(() => {
     revertPipeline({ indexName });
@@ -301,7 +300,7 @@ export const SearchIndexPipelines: React.FC = () => {
             }
           )}
           isLoading={revertStatus === Status.LOADING}
-          onCancel={onCloseDeleteModal}
+          onCancel={closeDeleteModal}
           onConfirm={onDeletePipeline}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
