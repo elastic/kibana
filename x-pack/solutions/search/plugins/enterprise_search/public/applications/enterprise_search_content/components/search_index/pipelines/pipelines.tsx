@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -33,7 +33,7 @@ import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_c
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
-
+import { SearchIndexTabId } from '../search_index';
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipeline_item';
@@ -65,27 +65,27 @@ export const SearchIndexPipelines: React.FC = () => {
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
+  const [isRevertPipeline, setRevertPipeline] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const pipelinesButton = Array.from(document.querySelectorAll('button')).find(
-    (btn) => btn.textContent?.trim() === 'Pipelines'
-  );
-
+  
   useEffect(() => {
     if (!isDeleteModalOpen) {
       if (buttonRef.current) {
         buttonRef.current.focus();
+      }
+      if (isRevertPipeline) {
+        const pipelinesButton = document.querySelector<HTMLDivElement>(`[id="${SearchIndexTabId.PIPELINES}"]`);
+        if (pipelinesButton) {
+          pipelinesButton.focus(); 
+        }
       }
     }
   }, [isDeleteModalOpen]);
 
   const onDeletePipeline = useCallback(() => {
     revertPipeline({ indexName });
-    setTimeout(() => {
-      if (pipelinesButton) {
-        pipelinesButton.focus();
-      }
-    }, 200);
-  }, [revertPipeline, pipelinesButton]);
+    setRevertPipeline(true);
+  }, [indexName, revertPipeline]);
 
   useEffect(() => {
     if (index) {
