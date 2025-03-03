@@ -29,11 +29,10 @@ export class CollapsibleNav {
     }
   }
 
-  async clickItem(itemName: string) {
+  async clickItem(itemName: 'Discover' | 'Dashboards' | 'Maps' | 'Machine Learning') {
     await this.expandNav();
-    const itemLocator = this.config.serverless
-      ? `a#${itemName.toLowerCase()}`
-      : `[title="${itemName}"]`;
-    return this.page.click(itemLocator);
+    return this.config.serverless
+      ? this.page.testSubj.click(`*nav-item-id-${itemName.toLocaleLowerCase()}`)
+      : this.page.click(`[title="${itemName}"]`);
   }
 }

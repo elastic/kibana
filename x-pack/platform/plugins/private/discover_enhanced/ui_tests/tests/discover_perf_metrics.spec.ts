@@ -21,7 +21,7 @@ test.describe('Discover app performance', { tag: [...tags.DEPLOYMENT_AGNOSTIC, '
   });
 
   test.beforeEach(async ({ browserAuth, page, context, perfTracker }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
     cdp = await context.newCDPSession(page);
     await cdp.send('Network.enable');
     await page.gotoApp('home');

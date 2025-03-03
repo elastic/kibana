@@ -23,7 +23,7 @@ lighthouseTest.describe(
     lighthouseTest(
       `audit '/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d'`,
       async ({ browserAuth, lighthouse, page, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
+        await browserAuth.loginAsAdmin();
         await pageObjects.dashboard.goto();
         await pageObjects.dashboard.waitForListingTableToLoad();
         await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');

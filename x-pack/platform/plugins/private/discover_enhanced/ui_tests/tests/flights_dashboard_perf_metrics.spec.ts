@@ -37,13 +37,14 @@ test.describe(
       await kbnClient.importExport.load('x-pack/performance/kbn_archives/flights_no_map_dashboard');
     });
 
-    test.beforeEach(async ({ browserAuth, page, context, perfTracker }) => {
-      await browserAuth.loginAsPrivilegedUser();
+    test.beforeEach(async ({ browserAuth, page, pageObjects, context, perfTracker }) => {
+      await browserAuth.loginAsAdmin();
       cdp = await context.newCDPSession(page);
       await cdp.send('Network.enable');
-      await page.gotoApp('home');
+      await pageObjects.dashboard.goto();
       await page.waitForLoadingIndicatorHidden();
-      // wait for all the js bundles to load on Home page
+      await pageObjects.dashboard.waitForListingTableToLoad();
+      // wait for all the js bundles to load on Dashboard Listing page
       await perfTracker.waitForJsLoad(cdp);
     });
 
@@ -52,11 +53,6 @@ test.describe(
     });
 
     test('collect all the JS bundles on page', async ({ page, pageObjects, perfTracker }) => {
-      await pageObjects.collapsibleNav.clickItem('Dashboards');
-      await pageObjects.dashboard.waitForListingTableToLoad();
-      // wait for all the js bundles to load on Dashboard Listing page
-      await perfTracker.waitForJsLoad(cdp);
-
       // start tracking bundle responses
       perfTracker.captureBundleResponses(cdp);
       await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
@@ -102,13 +98,7 @@ test.describe(
       ); // 1.6 MB
     });
 
-    test('collect metrics after dashboard is loaded', async ({
-      page,
-      pageObjects,
-      perfTracker,
-    }) => {
-      await pageObjects.dashboard.goto();
-      await pageObjects.dashboard.waitForListingTableToLoad();
+    test('collect metrics after dashboard is loaded', async ({ page, perfTracker }) => {
       await page.testSubj.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
       const before = await perfTracker.capturePagePerformanceMetrics(cdp);
       await page.waitForLoadingIndicatorHidden();

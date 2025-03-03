@@ -29,7 +29,7 @@ lighthouseTest.describe(
     lighthouseTest(
       `audit '/app/discover'`,
       async ({ browserAuth, lighthouse, page, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
+        await browserAuth.loginAsAdmin();
         await pageObjects.discover.goto();
         await pageObjects.discover.waitForHistogramRendered();
         const currentUrl = page.url();
