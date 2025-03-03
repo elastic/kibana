@@ -11,6 +11,7 @@ import {
   UnwiredStreamDefinition,
   WiredStreamDefinition,
   conditionToQueryDsl,
+  getParentId,
   isRoot,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
@@ -49,29 +50,41 @@ export async function syncWiredStreamDefinitionObjects({
   logger,
   isServerless,
   directChildren,
-  parent,
+  ancestors,
 }: SyncStreamParamsBase & {
   definition: WiredStreamDefinition;
   isServerless: boolean;
   directChildren: WiredStreamDefinition[];
-  parent?: WiredStreamDefinition;
+  ancestors: WiredStreamDefinition[];
 }) {
   if (definition.ingest.wired.virtual) {
     if (isRoot(definition.name)) {
       throw new Error('Root streams cannot be virtual');
     }
-    const ownRoutingCondition = parent?.ingest.routing.find(
-      (r) => r.destination === definition.name
-    )?.if;
+    const virtualParentsAndSelf = [
+      ...ancestors.filter((ancestor) => ancestor.ingest.wired.virtual),
+      definition,
+    ];
+    console.log('virtualParentsAndSelf', JSON.stringify(virtualParentsAndSelf, null, 2));
+    const parentConditions = virtualParentsAndSelf.map((parent) => {
+      const parentOfParent = getParentId(parent.name);
+      return (
+        ancestors
+          .find((ancestor) => ancestor.name === parentOfParent)
+          ?.ingest.routing.find((r) => r.destination === parent.name)?.if || { never: {} }
+      );
+    });
+    console.log('parentConditions', JSON.stringify(parentConditions, null, 2));
+    const lastNonVirtualParent = ancestors.findLast(
+      (ancestor) => !ancestor.ingest.wired.virtual
+    ) as WiredStreamDefinition;
     const aliasRequest = {
       name: definition.name,
-      index: parent!.name,
+      index: lastNonVirtualParent!.name,
       body: {
-        filter: conditionToQueryDsl(
-          ownRoutingCondition || {
-            never: {},
-          }
-        ),
+        filter: conditionToQueryDsl({
+          and: parentConditions,
+        }),
       },
     };
     console.log('aliasRequest', JSON.stringify(aliasRequest, null, 2));

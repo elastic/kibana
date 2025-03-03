@@ -199,10 +199,8 @@ export class StreamsClient {
 
     if (isWiredStreamDefinition(definition)) {
       const directChildren = await this.getDescendants(definition.name);
-      const parentId = getParentId(definition.name);
-      const parent = parentId
-        ? ((await this.getStream(parentId)) as WiredStreamDefinition)
-        : undefined;
+      const ancestors = await this.getAncestors(definition.name);
+      console.log('synStreamObjects ', JSON.stringify(ancestors));
 
       console.log('syncWiredStreamDefinitionObjects', definition.name);
       await syncWiredStreamDefinitionObjects({
@@ -211,7 +209,7 @@ export class StreamsClient {
         scopedClusterClient,
         isServerless: this.dependencies.isServerless,
         directChildren,
-        parent,
+        ancestors,
       });
 
       console.log(
@@ -562,16 +560,23 @@ export class StreamsClient {
     parent,
     name,
     if: condition,
+    virtual,
   }: {
     parent: string;
     name: string;
     if: Condition;
+    virtual?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
 
     const childDefinition: WiredStreamDefinition = {
       name,
-      ingest: { lifecycle: { inherit: {} }, processing: [], routing: [], wired: { fields: {} } },
+      ingest: {
+        lifecycle: { inherit: {} },
+        processing: [],
+        routing: [],
+        wired: { fields: {}, virtual },
+      },
     };
 
     // check whether root stream has a child of the given name already
