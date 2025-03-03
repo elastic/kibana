@@ -18,13 +18,13 @@ spaceTest.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
     });
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
-
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.discover.goto();
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest('should render invalid scripted field error', async ({ page }) => {

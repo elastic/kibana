@@ -232,7 +232,7 @@ Object {
           "xAccessor": "49a42fe6-ebe8-4adb-8eed-1966a5297b7e",
           "yConfig": Array [
             Object {
-              "color": "#54B399",
+              "color": "#16C5C0",
               "forAccessor": "0eb97c09-a351-4280-97da-944e4bd30dd7",
             },
           ],
@@ -247,7 +247,7 @@ Object {
           "xAccessor": "33a6163d-0c0a-451d-aa38-8ca6010dd5bf",
           "yConfig": Array [
             Object {
-              "color": "#CA8EAE",
+              "color": "#EE72A6",
               "forAccessor": "2b27c80e-a20d-46f1-8fb2-79626ef4563c",
             },
           ],

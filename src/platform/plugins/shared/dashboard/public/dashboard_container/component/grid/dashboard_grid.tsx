@@ -97,7 +97,7 @@ export const DashboardGrid = ({
   );
 
   const renderPanelContents = useCallback(
-    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
+    (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const currentPanels = dashboardApi.panels$.getValue();
       if (!currentPanels[id]) return;
 
@@ -132,6 +132,7 @@ export const DashboardGrid = ({
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
         }}
+        useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}

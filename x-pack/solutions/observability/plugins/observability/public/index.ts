@@ -129,3 +129,11 @@ export { RuleConditionChart } from './components/rule_condition_chart';
 export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
 export { Threshold } from './components/custom_threshold/components/threshold';
+
+export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { AlertActions } from './components/alert_actions/alert_actions_lazy';
+export type {
+  GetObservabilityAlertsTableProp,
+  ObservabilityAlertsTableContext,
+  ObservabilityAlertsTableProps,
+} from './components/alerts_table/types';

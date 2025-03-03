@@ -9,23 +9,22 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
-import { TaskTypes } from '../../common/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-  InferenceEndpointUI,
   QueryParams,
   SortOrder,
-  ServiceProviderKeys,
 } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
-  tableData: InferenceEndpointUI[];
-  sortedTableData: InferenceEndpointUI[];
-  paginatedSortedTableData: InferenceEndpointUI[];
+  tableData: InferenceInferenceEndpointInfo[];
+  sortedTableData: InferenceInferenceEndpointInfo[];
+  paginatedSortedTableData: InferenceInferenceEndpointInfo[];
   pagination: Pagination;
-  sorting: EuiTableSortingType<InferenceEndpointUI>;
+  sorting: EuiTableSortingType<InferenceInferenceEndpointInfo>;
 }
 
 export const useTableData = (
@@ -34,7 +33,7 @@ export const useTableData = (
   filterOptions: FilterOptions,
   searchKey: string
 ): UseTableDataReturn => {
-  const tableData: InferenceEndpointUI[] = useMemo(() => {
+  const tableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
 
     if (filterOptions.provider.length > 0) {
@@ -45,20 +44,14 @@ export const useTableData = (
 
     if (filterOptions.type.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
-        filterOptions.type.includes(TaskTypes[endpoint.task_type])
+        filterOptions.type.includes(endpoint.task_type)
       );
     }
 
-    return filteredEndpoints
-      .filter((endpoint) => endpoint.inference_id.includes(searchKey))
-      .map((endpoint) => ({
-        endpoint: endpoint.inference_id,
-        provider: endpoint,
-        type: endpoint.task_type,
-      }));
+    return filteredEndpoints.filter((endpoint) => endpoint.inference_id.includes(searchKey));
   }, [inferenceEndpoints, searchKey, filterOptions]);
 
-  const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
+  const sortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
       const aValue = a[queryParams.sortField];
       const bValue = b[queryParams.sortField];
@@ -81,7 +74,7 @@ export const useTableData = (
     [inferenceEndpoints, queryParams]
   );
 
-  const paginatedSortedTableData: InferenceEndpointUI[] = useMemo(() => {
+  const paginatedSortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
     const pageSize = pagination.pageSize || DEFAULT_TABLE_LIMIT;
     const startIndex = pagination.pageIndex * pageSize;
     const endIndex = startIndex + pageSize;

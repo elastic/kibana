@@ -242,5 +242,8 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     async getAlertsPageAppliedFilters() {
       return await find.allByCssSelector('[data-test-subj="filter-items-group"] > *');
     },
+    async getFilterGroupWrapper() {
+      return await find.byCssSelector('.filter-group__wrapper');
+    },
   };
 }

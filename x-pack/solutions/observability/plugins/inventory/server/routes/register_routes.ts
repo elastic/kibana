@@ -14,15 +14,18 @@ export function registerServerRoutes({
   core,
   logger,
   dependencies,
+  isDev,
 }: {
   core: CoreSetup;
   logger: Logger;
   dependencies: Omit<InventoryRouteHandlerResources, 'request' | 'context' | 'logger' | 'params'>;
+  isDev: boolean;
 }) {
   registerRoutes({
     core,
     logger,
     repository: getGlobalInventoryServerRouteRepository(),
     dependencies,
+    runDevModeChecks: isDev,
   });
 }
