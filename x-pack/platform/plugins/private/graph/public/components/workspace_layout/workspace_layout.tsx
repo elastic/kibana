@@ -7,7 +7,7 @@
 
 import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, useEuiBackgroundColorCSS } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -202,7 +202,7 @@ export const WorkspaceLayoutComponent = ({
       />
 
       {isInitialized && <GraphTitle />}
-      <div css={styles}>
+      <div css={styles.bar}>
         <SearchBar
           isLoading={loading}
           urlQuery={urlQuery}
@@ -222,7 +222,7 @@ export const WorkspaceLayoutComponent = ({
       )}
 
       {isInitialized && workspace && (
-        <div className="gphGraph__container" id="GraphSvgContainer">
+        <div id="GraphSvgContainer" css={styles.container}>
           <div className="gphVisualization">
             <GraphVisualization
               workspace={workspace}
@@ -248,9 +248,18 @@ export const WorkspaceLayoutComponent = ({
   );
 };
 
-const styles = ({ euiTheme }: UseEuiTheme) => `
-  margin: ${euiTheme.size.s};
-`;
+const styles = {
+  bar: ({ euiTheme }: UseEuiTheme) => `
+    margin: ${euiTheme.size.s};
+  `,
+  container: ({ euiTheme }: UseEuiTheme) => `
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    background: ${euiTheme.colors.emptyShade};
+  `,
+};
 
 export const WorkspaceLayout = connect<WorkspaceLayoutStateProps, {}, {}, GraphState>(
   (state: GraphState) => ({
