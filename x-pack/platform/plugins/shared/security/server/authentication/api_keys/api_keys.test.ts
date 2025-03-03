@@ -134,9 +134,7 @@ describe('API Keys', () => {
       const result = await apiKeys.areAPIKeysEnabled();
       expect(result).toEqual(true);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
-        body: {
-          ids: ['kibana-api-key-service-test'],
-        },
+        ids: ['kibana-api-key-service-test'],
       });
     });
   });
@@ -253,11 +251,9 @@ describe('API Keys', () => {
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockScopedClusterClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
-        body: {
-          name: 'key-name',
-          role_descriptors: roleDescriptors,
-          expiration: '1d',
-        },
+        name: 'key-name',
+        role_descriptors: roleDescriptors,
+        expiration: '1d',
       });
     });
 
@@ -636,9 +632,7 @@ describe('API Keys', () => {
         error_details: [],
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
-        body: {
-          ids: ['123'],
-        },
+        ids: ['123'],
       });
     });
 
@@ -661,9 +655,7 @@ describe('API Keys', () => {
         error_details: [],
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
-        body: {
-          ids: ['123'],
-        },
+        ids: ['123'],
       });
     });
   });
@@ -736,9 +728,7 @@ describe('API Keys', () => {
         error_details: [],
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
-        body: {
-          ids: ['123'],
-        },
+        ids: ['123'],
       });
     });
 
@@ -761,9 +751,7 @@ describe('API Keys', () => {
         error_details: [],
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
-        body: {
-          ids: ['123'],
-        },
+        ids: ['123'],
       });
     });
   });
@@ -804,24 +792,22 @@ describe('API Keys', () => {
         name: 'key-name',
       });
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
-        body: {
-          name: 'key-name',
-          role_descriptors: {
-            synthetics_writer: {
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['feature_uptime.all'],
-                  resources: ['*'],
-                },
-              ],
-              cluster: ['manage'],
-              indices: [],
-              run_as: [],
-            },
+        name: 'key-name',
+        role_descriptors: {
+          synthetics_writer: {
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_uptime.all'],
+                resources: ['*'],
+              },
+            ],
+            cluster: ['manage'],
+            indices: [],
+            run_as: [],
           },
-          expiration: '1d',
         },
+        expiration: '1d',
       });
     });
 

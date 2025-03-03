@@ -4,27 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  PromptResponse,
-  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { AIConnector } from '../../../../connectorland/connector_selector';
 import { Conversation } from '../../../../..';
-import { ConversationsBulkActions } from '../../../api';
+import { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
 
 export interface SystemPromptSettingsProps {
-  connectors: AIConnector[] | undefined;
-  conversationSettings: Record<string, Conversation>;
-  conversationsSettingsBulkActions: ConversationsBulkActions;
-  onSelectedSystemPromptChange: (systemPrompt?: PromptResponse) => void;
-  selectedSystemPrompt: PromptResponse | undefined;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
-  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  systemPromptSettings: PromptResponse[];
-  setConversationsSettingsBulkActions: React.Dispatch<
-    React.SetStateAction<ConversationsBulkActions>
-  >;
-  defaultConnector?: AIConnector;
-  promptsBulkActions: PromptsPerformBulkActionRequestBody;
-  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
+  conversations: Record<string, Conversation>;
+  onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
+  onNewConversationDefaultChange: (isChecked: boolean) => void;
+  onPromptContentChange: (newValue: string) => void;
+  onSystemPromptDelete: (id: string) => void;
+  onSystemPromptSelect: (systemPrompt?: SystemPromptSettings | string) => void;
+  resetSettings?: () => void;
+  selectedSystemPrompt: SystemPromptSettings | undefined;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
+  systemPromptSettings: SystemPromptSettings[];
 }

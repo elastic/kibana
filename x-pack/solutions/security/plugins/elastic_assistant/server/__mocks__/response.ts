@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getConversationSearchEsMock } from './conversations_schema.mock';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
@@ -87,7 +87,6 @@ export const getConversationResponseMock = (
   replacements: {},
   createdAt: timestamp,
   namespace: 'default',
-  isDefault: false,
   updatedAt: timestamp,
   timestamp,
   category: 'assistant',

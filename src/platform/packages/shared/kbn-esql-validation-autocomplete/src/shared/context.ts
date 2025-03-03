@@ -18,13 +18,12 @@ import {
   Walker,
   isIdentifier,
 } from '@kbn/esql-ast';
-import { ENRICH_MODES } from '../definitions/settings';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
   isColumnItem,
   isSourceItem,
-  isSettingItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
 } from './helpers';
@@ -63,10 +62,6 @@ function findCommand(ast: ESQLAst, offset: number) {
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
   return findCommandSubType(nodes, offset, isOptionItem);
-}
-
-function findSetting(nodes: ESQLAstItem[], offset: number): ESQLCommandMode | undefined {
-  return findCommandSubType(nodes, offset, isSettingItem);
 }
 
 function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
@@ -130,7 +125,6 @@ function findAstPosition(ast: ESQLAst, offset: number) {
     command: removeMarkerArgFromArgsList(command)!,
     option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
     node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))),
-    setting: removeMarkerArgFromArgsList(findSetting(command.args, offset)),
   };
 }
 
@@ -139,7 +133,7 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
 }
 
 function isOperator(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === 'operator';
+  return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
 }
 
 /**
@@ -170,16 +164,16 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
-  const { command, option, setting, node } = findAstPosition(ast, offset);
+  const { command, option, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'literal' && node.literalType === 'keyword') {
       // command ... "<here>"
-      return { type: 'value' as const, command, node, option, setting };
+      return { type: 'value' as const, command, node, option };
     }
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
-        return { type: 'list' as const, command, node, option, setting };
+        return { type: 'list' as const, command, node, option };
       }
       if (
         isNotEnrichClauseAssigment(node, command) &&
@@ -190,24 +184,19 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         !(isOperator(node) && command.name !== 'stats')
       ) {
         // command ... fn( <here> )
-        return { type: 'function' as const, command, node, option, setting };
+        return { type: 'function' as const, command, node, option };
       }
-    }
-    // for now it's only an enrich thing
-    if (node.type === 'source' && node.text === ENRICH_MODES.prefix) {
-      // command _<here>
-      return { type: 'setting' as const, command, node, option, setting };
     }
   }
   if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option, setting };
+    return { type: 'newCommand' as const, command: undefined, node, option };
   }
 
   // TODO — remove this option branch once https://github.com/elastic/kibana/issues/195418 is complete
   if (command && isOptionItem(command.args[command.args.length - 1]) && command.name !== 'stats') {
     if (option) {
-      return { type: 'option' as const, command, node, option, setting };
+      return { type: 'option' as const, command, node, option };
     }
   }
 
@@ -217,6 +206,5 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     command,
     option,
     node,
-    setting,
   };
 }
