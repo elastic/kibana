@@ -34,6 +34,7 @@ import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../.
 
 import { IndexNameLogic } from '../index_name_logic';
 import { SearchIndexTabId } from '../search_index';
+
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipeline_item';
@@ -67,16 +68,18 @@ export const SearchIndexPipelines: React.FC = () => {
   const extractionDisabled = getContentExtractionDisabled(index);
   const [isRevertPipeline, setRevertPipeline] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  
+
   useEffect(() => {
     if (!isDeleteModalOpen) {
       if (buttonRef.current) {
         buttonRef.current.focus();
       }
       if (isRevertPipeline) {
-        const pipelinesButton = document.querySelector<HTMLDivElement>(`[id="${SearchIndexTabId.PIPELINES}"]`);
+        const pipelinesButton = document.querySelector<HTMLDivElement>(
+          `[id="${SearchIndexTabId.PIPELINES}"]`
+        );
         if (pipelinesButton) {
-          pipelinesButton.focus(); 
+          pipelinesButton.focus();
         }
       }
     }
