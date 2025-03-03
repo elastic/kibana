@@ -53,6 +53,7 @@ const BULK_ERROR = {
 const SHAREABLE_OBJ_TYPE = 'type-a';
 const NON_SHAREABLE_OBJ_TYPE = 'type-b';
 const SHAREABLE_HIDDEN_OBJ_TYPE = 'type-c';
+const MULTI_ISOLATED_OBJ_TYPE = 'type-d';
 
 const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
 
@@ -85,12 +86,16 @@ describe('#updateObjectsSpaces', () => {
     registry.isShareable.mockImplementation(
       (type) => [SHAREABLE_OBJ_TYPE, SHAREABLE_HIDDEN_OBJ_TYPE].includes(type) // NON_SHAREABLE_OBJ_TYPE is excluded
     );
+    registry.isMultiNamespace.mockImplementation(
+      (type) =>
+        [SHAREABLE_OBJ_TYPE, SHAREABLE_HIDDEN_OBJ_TYPE, MULTI_ISOLATED_OBJ_TYPE].includes(type) // NON_SHAREABLE_OBJ_TYPE is excluded
+    );
     client = elasticsearchClientMock.createElasticsearchClient();
     const serializer = new SavedObjectsSerializer(registry);
     return {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to deleteLegacyUrlAliases which is mocked
       registry,
-      allowedTypes: [SHAREABLE_OBJ_TYPE, NON_SHAREABLE_OBJ_TYPE], // SHAREABLE_HIDDEN_OBJ_TYPE is excluded
+      allowedTypes: [SHAREABLE_OBJ_TYPE, NON_SHAREABLE_OBJ_TYPE, MULTI_ISOLATED_OBJ_TYPE], // SHAREABLE_HIDDEN_OBJ_TYPE is excluded
       client,
       serializer,
       logger: loggerMock.create(),
@@ -232,15 +237,17 @@ describe('#updateObjectsSpaces', () => {
       const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // mget error (Not Found)
       const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // bulk error (mocked as BULK_ERROR)
       const obj6 = { type: SHAREABLE_OBJ_TYPE, id: 'id-6' }; // success
+      const obj7 = { type: MULTI_ISOLATED_OBJ_TYPE, id: 'id-7' }; // incorrect space count for type (Bad Request)
 
-      const objects = [obj1, obj2, obj3, obj4, obj5, obj6];
-      const spacesToAdd = ['foo-space'];
+      const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7];
+      const spacesToAdd = ['foo-space', 'foo-2'];
       const params = setup({ objects, spacesToAdd });
       mockMgetResults(
         { found: true, namespaces: ['another-space'] }, // result for obj3
         { found: false }, // result for obj4
         { found: true, namespaces: [EXISTING_SPACE] }, // result for obj5
-        { found: true, namespaces: [EXISTING_SPACE] } // result for obj6
+        { found: true, namespaces: [EXISTING_SPACE] }, // result for obj6
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj7
       );
       mockRawDocExistsInNamespace.mockReturnValueOnce(false); // for obj3
       mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj5
@@ -259,7 +266,16 @@ describe('#updateObjectsSpaces', () => {
         { ...obj3, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj4, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj5, spaces: [], error: BULK_ERROR },
-        { ...obj6, spaces: [EXISTING_SPACE, 'foo-space'] },
+        { ...obj6, spaces: [EXISTING_SPACE, 'foo-space', 'foo-2'] },
+        {
+          ...obj7,
+          spaces: [],
+          error: expect.objectContaining({
+            error: 'Bad Request',
+            message:
+              "Cannot update type-d. To update objects with 'multiple-isolated' namespace type number of spaces to add must be 1: Bad Request",
+          }),
+        },
       ]);
     });
 
@@ -364,6 +380,52 @@ describe('#updateObjectsSpaces', () => {
           { action: 'update', object: { ...obj3, namespaces: [EXISTING_SPACE, space1] } },
           { action: 'update', object: { ...obj4, namespaces: [EXISTING_SPACE, space1] } }
         );
+      });
+
+      it('when adding and removing spaces for multiple-isolated', async () => {
+        const space1 = 'space-to-add';
+        const space2 = 'space-to-remove';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+        const obj4 = { type: MULTI_ISOLATED_OBJ_TYPE, id: 'id-4' };
+        const obj5 = { type: MULTI_ISOLATED_OBJ_TYPE, id: 'id-5' };
+
+        const objects = [obj1, obj2, obj3, obj4, obj5];
+        const spacesToAdd = [space1];
+        const spacesToRemove = [space2];
+        const params = setup({ objects, spacesToAdd, spacesToRemove });
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, space1] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [EXISTING_SPACE] }, // result for obj2 -- will be updated to add space1
+          { found: true, namespaces: [EXISTING_SPACE, space1, space2] }, // result for obj3 -- will be updated to remove space2
+          { found: true, namespaces: [space2] }, // result for obj4 -- multiple isolated, will be updated to space1
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj5 -- multiple isolated, current space is not space to remove
+        );
+        mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+
+        const result = await updateObjectsSpaces(params);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expectBulkArgs(
+          { action: 'update', object: { ...obj2, namespaces: [EXISTING_SPACE, space1] } },
+          { action: 'update', object: { ...obj3, namespaces: [EXISTING_SPACE, space1] } },
+          { action: 'update', object: { ...obj4, namespaces: [space1] } }
+        );
+        expect(result.objects).toEqual([
+          { ...obj1, spaces: [EXISTING_SPACE, space1] },
+          { ...obj2, spaces: [EXISTING_SPACE, space1] },
+          { ...obj3, spaces: [EXISTING_SPACE, space1] },
+          { ...obj4, spaces: [space1] },
+          {
+            ...obj5,
+            spaces: [],
+            error: expect.objectContaining({
+              error: 'Bad Request',
+              message:
+                "Cannot update type-d:id-5. Spaces to remove must include the current space of 'multiple-isolated' objects.: Bad Request",
+            }),
+          },
+        ]);
       });
     });
 
@@ -576,13 +638,15 @@ describe('#updateObjectsSpaces', () => {
       const otherSpace = 'space-to-add';
       const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
       const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: MULTI_ISOLATED_OBJ_TYPE, id: 'id-3' };
 
-      const objects = [obj1, obj2];
+      const objects = [obj1, obj2, obj3];
       const spacesToAdd = [otherSpace];
       const params = setup({ objects, spacesToAdd });
       mockMgetResults(
         { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj1 -- will not be changed
-        { found: true, namespaces: [EXISTING_SPACE] } // result for obj2 -- will be updated to add otherSpace
+        { found: true, namespaces: [EXISTING_SPACE] }, // result for obj2 -- will be updated to add otherSpace
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj3 -- will not be updated as no spaces are being removed
       );
       mockBulkResults({ error: false }); // result for obj2
 
@@ -590,6 +654,16 @@ describe('#updateObjectsSpaces', () => {
       expect(result.objects).toEqual([
         { ...obj1, spaces: [EXISTING_SPACE, otherSpace] },
         { ...obj2, spaces: [EXISTING_SPACE, otherSpace] },
+        {
+          ...obj3,
+          spaces: [],
+          error: {
+            error: 'Bad Request',
+            message:
+              "Cannot update type-d:id-3. Spaces to remove must include the current space of 'multiple-isolated' objects.: Bad Request",
+            statusCode: 400,
+          },
+        },
       ]);
     });
 
@@ -598,14 +672,16 @@ describe('#updateObjectsSpaces', () => {
       const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
       const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
       const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+      const obj4 = { type: MULTI_ISOLATED_OBJ_TYPE, id: 'id-4' };
 
-      const objects = [obj1, obj2, obj3];
+      const objects = [obj1, obj2, obj3, obj4];
       const spacesToRemove = [EXISTING_SPACE];
       const params = setup({ objects, spacesToRemove });
       mockMgetResults(
         { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj1 -- will not be changed
         { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj2 -- will be updated to remove EXISTING_SPACE
-        { found: true, namespaces: [EXISTING_SPACE] } // result for obj3 -- will be deleted (since it would have no spaces left)
+        { found: true, namespaces: [EXISTING_SPACE] }, // result for obj3 -- will be deleted (since it would have no spaces left)
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will not be updated as no spaces are being added
       );
       mockBulkResults({ error: false }, { error: false }); // results for obj2 and obj3
 
@@ -614,6 +690,16 @@ describe('#updateObjectsSpaces', () => {
         { ...obj1, spaces: [ALL_NAMESPACES_STRING] },
         { ...obj2, spaces: [otherSpace] },
         { ...obj3, spaces: [] },
+        {
+          ...obj4,
+          spaces: [],
+          error: {
+            error: 'Bad Request',
+            message:
+              "Cannot update type-d. To update objects with 'multiple-isolated' namespace type number of spaces to add must be 1: Bad Request",
+            statusCode: 400,
+          },
+        },
       ]);
     });
 
@@ -623,8 +709,9 @@ describe('#updateObjectsSpaces', () => {
       const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
       const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
       const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
+      const obj5 = { type: MULTI_ISOLATED_OBJ_TYPE, id: 'id-5' };
 
-      const objects = [obj1, obj2, obj3, obj4];
+      const objects = [obj1, obj2, obj3, obj4, obj5];
       const spacesToAdd = [otherSpace];
       const spacesToRemove = [EXISTING_SPACE];
       const params = setup({ objects, spacesToAdd, spacesToRemove });
@@ -632,9 +719,10 @@ describe('#updateObjectsSpaces', () => {
         { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
         { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj2 -- will be updated to add otherSpace
         { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj3 -- will be updated to remove EXISTING_SPACE
-        { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+        { found: true, namespaces: [EXISTING_SPACE] }, // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj5 -- will be updated to remove EXISTING_SPACE and add otherSpace
       );
-      mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+      mockBulkResults({ error: false }, { error: false }, { error: false }, { error: false }); // results for obj2, obj3, obj4, obj5
 
       const result = await updateObjectsSpaces(params);
       expect(result.objects).toEqual([
@@ -642,6 +730,7 @@ describe('#updateObjectsSpaces', () => {
         { ...obj2, spaces: [ALL_NAMESPACES_STRING, otherSpace] },
         { ...obj3, spaces: [otherSpace] },
         { ...obj4, spaces: [otherSpace] },
+        { ...obj5, spaces: [otherSpace] },
       ]);
     });
   });
