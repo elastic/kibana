@@ -6,15 +6,17 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { DeploymentParamsUI } from '../../model_management/deployment_setup';
 
-export type TrainedModelsDeploymentEbtProps = {
+export interface TrainedModelsDeploymentEbtProps {
   model_id: string;
   max_number_of_allocations?: number;
   min_number_of_allocations?: number;
   threads_per_allocation: number;
   number_of_allocations?: number;
-} & Omit<DeploymentParamsUI, 'deploymentId'>;
+  optimized: 'optimizedForIngest' | 'optimizedForSearch';
+  adaptive_resources: boolean;
+  vcpu_usage: 'low' | 'medium' | 'high';
+}
 
 export enum TrainedModelsTelemetryEventTypes {
   DEPLOYMENT_CREATED = 'Trained Models Deployment Created',

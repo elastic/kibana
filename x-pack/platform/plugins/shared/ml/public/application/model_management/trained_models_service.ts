@@ -490,8 +490,8 @@ export class TrainedModelsService {
                 this.telemetryService.trackTrainedModelsDeploymentCreated({
                   model_id: apiParams.modelId,
                   optimized: deployment.optimized,
-                  adaptiveResources: deployment.adaptiveResources,
-                  vCPUUsage: deployment.vCPUUsage,
+                  adaptive_resources: deployment.adaptiveResources,
+                  vcpu_usage: deployment.vCPUUsage,
                   number_of_allocations: apiParams.deploymentParams.number_of_allocations,
                   threads_per_allocation: assignment.task_parameters.threads_per_allocation,
                   min_number_of_allocations:

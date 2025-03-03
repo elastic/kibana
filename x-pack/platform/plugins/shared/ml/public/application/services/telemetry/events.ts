@@ -25,13 +25,13 @@ const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProp
       description: 'The optimized setting of the deployment',
     },
   },
-  adaptiveResources: {
+  adaptive_resources: {
     type: 'boolean',
     _meta: {
       description: 'Whether adaptive resources are enabled',
     },
   },
-  vCPUUsage: {
+  vcpu_usage: {
     type: 'keyword',
     _meta: {
       description: 'The vCPU/VCU usage level',
