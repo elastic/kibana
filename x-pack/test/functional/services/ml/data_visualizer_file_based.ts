@@ -192,11 +192,9 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     async getDocCountFromIndex(index: string) {
       const resp = await es.search({
         index,
-        body: {
-          size: 0,
-          query: {
-            match_all: {},
-          },
+        size: 0,
+        query: {
+          match_all: {},
         },
       });
       // @ts-expect-error incorrect type definition

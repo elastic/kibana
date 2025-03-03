@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     modes.forEach((mode: string) => {
       describe(`Edit remote cluster (${mode} mode)`, () => {
         const clusterName = mode === 'sniff' ? 'clusterSniffMode' : 'clusterProxyMode';
-        const body =
+        const settings =
           mode === 'sniff'
             ? getPayloadClusterSniffMode(clusterName)
             : getPayloadClusterProxyMode(clusterName);
@@ -162,11 +162,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         before(async () => {
-          await esClient.cluster.putSettings({ body });
+          await esClient.cluster.putSettings(settings);
         });
 
         after(async () => {
-          await esClient.cluster.putSettings({ body: getDeleteClusterPayload(clusterName) });
+          await esClient.cluster.putSettings(getDeleteClusterPayload(clusterName));
         });
 
         it('renders the list view with remote clusters', async () => {

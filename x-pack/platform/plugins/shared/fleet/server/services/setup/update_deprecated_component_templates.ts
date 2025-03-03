@@ -34,30 +34,28 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
     async (componentTemplate) => {
       const source = componentTemplate.component_template.template.mappings!._source;
       const { mode, ...restOfSource } = source!;
+      // export type IndicesSourceMode = 'disabled' | 'stored' | 'synthetic';
+      // export type MappingSourceFieldMode = 'disabled' | 'stored' | 'synthetic';
       const settings = componentTemplate.component_template.template.settings;
       await esClient.cluster.putComponentTemplate({
         name: componentTemplate.name,
-        body: {
-          template: {
-            settings: {
-              ...settings,
-              index: {
-                ...settings?.index,
-                mapping: {
-                  ...settings?.index?.mapping,
-                  // @ts-expect-error Property 'source' does not exist on type 'IndicesMappingLimitSettings'
-                  source: {
-                    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
-                    ...settings?.index?.mapping?.source,
-                    mode,
-                  },
+        template: {
+          settings: {
+            ...settings,
+            index: {
+              ...settings?.index,
+              mapping: {
+                ...settings?.index?.mapping,
+                source: {
+                  ...settings?.index?.mapping?.source,
+                  mode: mode!,
                 },
               },
             },
-            mappings: {
-              ...componentTemplate.component_template.template.mappings,
-              _source: restOfSource,
-            },
+          },
+          mappings: {
+            ...componentTemplate.component_template.template.mappings,
+            _source: restOfSource,
           },
         },
       });
