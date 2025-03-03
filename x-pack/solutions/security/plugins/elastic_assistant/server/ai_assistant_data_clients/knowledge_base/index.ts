@@ -89,7 +89,6 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
-  assistantDefaultInferenceEndpoint: boolean;
   trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
@@ -158,7 +157,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
   public getInferenceEndpointId = async () => {
     const elserId = await this.options.getElserId();
-    if (!this.options.assistantDefaultInferenceEndpoint || !ELSER_MODEL_2.includes(elserId)) {
+    // Don't use default enpdpoint for pt_tiny_elser
+    if (!ELSER_MODEL_2.includes(elserId)) {
       return ASSISTANT_ELSER_INFERENCE_ID;
     }
     const esClient = await this.options.elasticsearchClientPromise;

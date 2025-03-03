@@ -105,8 +105,6 @@ export class AIAssistantService {
   private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
-  // Temporary 'feature flag' to determine if we should initialize the new knowledge base mappings
-  private assistantDefaultInferenceEndpoint: boolean = true;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -229,119 +227,113 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      if (this.assistantDefaultInferenceEndpoint) {
-        const knowledgeBaseDataStreamExists = (
-          await esClient.indices.getDataStream({
-            name: this.knowledgeBaseDataStream.name,
-          })
-        )?.data_streams?.length;
+      const knowledgeBaseDataStreamExists = (
+        await esClient.indices.getDataStream({
+          name: this.knowledgeBaseDataStream.name,
+        })
+      )?.data_streams?.length;
 
-        // update component template for semantic_text field
-        // rollover
-        let mappings: IndicesGetFieldMappingResponse = {};
+      this.options.logger.error(' this.knowledgeBaseDataStream.name');
+      this.options.logger.error(this.knowledgeBaseDataStream.name);
+
+      // update component template for semantic_text field
+      // rollover
+      let mappings: IndicesGetFieldMappingResponse = {};
+      try {
+        mappings = await esClient.indices.getFieldMapping({
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+          fields: ['semantic_text'],
+        });
+      } catch (error) {
+        /* empty */
+      }
+
+      const isUsingDedicatedInferenceEndpoint =
+        (
+          Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text as {
+            inference_id: string;
+          }
+        )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
+
+      if (knowledgeBaseDataStreamExists && isUsingDedicatedInferenceEndpoint) {
+        const currentDataStream = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: {
+            ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+            semantic_text: {
+              type: 'semantic_text',
+              array: false,
+              required: false,
+              inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+              search_inference_id: ELASTICSEARCH_ELSER_INFERENCE_ID,
+            },
+          },
+        });
+
+        // Add `search_inference_id` to the existing mappings
+        await currentDataStream.install({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
+
+        // Migrate data stream mapping to the default inference_id
+        const newDS = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: {
+            ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
+            semantic_text: {
+              type: 'semantic_text',
+              array: false,
+              required: false,
+            },
+          },
+          settings: {
+            // force new semantic_text field behavior
+            'index.mapping.semantic_text.use_legacy_format': false,
+          },
+          writeIndexOnly: true,
+        });
+
+        // We need to first install the templates and then rollover the indices
+        await newDS.installTemplates({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
+
+        const indexNames = (
+          await esClient.indices.getDataStream({ name: newDS.name })
+        ).data_streams.map((ds) => ds.name);
+
         try {
-          mappings = await esClient.indices.getFieldMapping({
-            index: '.kibana-elastic-ai-assistant-knowledge-base-default',
-            fields: ['semantic_text'],
-          });
-        } catch (error) {
+          await Promise.all(
+            indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
+          );
+        } catch (e) {
           /* empty */
         }
-
-        const isUsingDedicatedInferenceEndpoint =
-          (
-            Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text as {
-              inference_id: string;
-            }
-          )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
-
-        if (knowledgeBaseDataStreamExists && isUsingDedicatedInferenceEndpoint) {
-          const currentDataStream = this.createDataStream({
-            resource: 'knowledgeBase',
-            kibanaVersion: this.options.kibanaVersion,
-            fieldMap: {
-              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
-              semantic_text: {
-                type: 'semantic_text',
-                array: false,
-                required: false,
-                inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-                search_inference_id: ELASTICSEARCH_ELSER_INFERENCE_ID,
-              },
-            },
-          });
-
-          // Add `search_inference_id` to the existing mappings
-          await currentDataStream.install({
-            esClient,
-            logger: this.options.logger,
-            pluginStop$: this.options.pluginStop$,
-          });
-
-          // Migrate data stream mapping to the default inference_id
-          const newDS = this.createDataStream({
-            resource: 'knowledgeBase',
-            kibanaVersion: this.options.kibanaVersion,
-            fieldMap: {
-              ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
-              semantic_text: {
-                type: 'semantic_text',
-                array: false,
-                required: false,
-              },
-            },
-            settings: {
-              // force new semantic_text field behavior
-              'index.mapping.semantic_text.use_legacy_format': false,
-            },
-            writeIndexOnly: true,
-          });
-
-          // We need to first install the templates and then rollover the indices
-          await newDS.installTemplates({
-            esClient,
-            logger: this.options.logger,
-            pluginStop$: this.options.pluginStop$,
-          });
-
-          const indexNames = (
-            await esClient.indices.getDataStream({ name: newDS.name })
-          ).data_streams.map((ds) => ds.name);
-
-          try {
-            await Promise.all(
-              indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
-            );
-          } catch (e) {
-            /* empty */
-          }
-        } else {
-          // We need to make sure that the data stream is created with the correct mappings
-          this.knowledgeBaseDataStream = this.createDataStream({
-            resource: 'knowledgeBase',
-            kibanaVersion: this.options.kibanaVersion,
-            fieldMap: {
-              ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
-              semantic_text: {
-                type: 'semantic_text',
-                array: false,
-                required: false,
-              },
-            },
-            settings: {
-              // force new semantic_text field behavior
-              'index.mapping.semantic_text.use_legacy_format': false,
-            },
-            writeIndexOnly: true,
-          });
-          await this.knowledgeBaseDataStream.install({
-            esClient,
-            logger: this.options.logger,
-            pluginStop$: this.options.pluginStop$,
-          });
-        }
       } else {
-        // Legacy path
+        // We need to make sure that the data stream is created with the correct mappings
+        this.knowledgeBaseDataStream = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: {
+            ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
+            semantic_text: {
+              type: 'semantic_text',
+              array: false,
+              required: false,
+            },
+          },
+          settings: {
+            // force new semantic_text field behavior
+            'index.mapping.semantic_text.use_legacy_format': false,
+          },
+          writeIndexOnly: true,
+        });
         await this.knowledgeBaseDataStream.install({
           esClient,
           logger: this.options.logger,
@@ -528,7 +520,6 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
-      assistantDefaultInferenceEndpoint: this.assistantDefaultInferenceEndpoint,
       trainedModelsProvider: opts.trainedModelsProvider,
     });
   }

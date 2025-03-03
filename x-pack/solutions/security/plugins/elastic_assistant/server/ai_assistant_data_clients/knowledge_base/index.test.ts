@@ -67,7 +67,6 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
-      assistantDefaultInferenceEndpoint: false,
       trainedModelsProvider: trainedModelsProviderMock,
     };
     esClientMock.search.mockReturnValue(
