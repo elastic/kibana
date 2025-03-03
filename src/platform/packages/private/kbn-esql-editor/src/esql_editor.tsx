@@ -32,8 +32,8 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import type { ESQLRealField } from '@kbn/esql-validation-autocomplete/src/validation/types';
+import type { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {

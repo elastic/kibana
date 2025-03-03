@@ -24,7 +24,9 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, ESQLRealField, validateQuery } from '@kbn/esql-validation-autocomplete';
+import { ESQLCallbacks } from '@kbn/esql-validation-autocomplete/src/shared/types';
+import { ESQLRealField } from '@kbn/esql-validation-autocomplete/src/validation/types';
+import { validateQuery } from '@kbn/esql-validation-autocomplete/src/validation/validation';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';

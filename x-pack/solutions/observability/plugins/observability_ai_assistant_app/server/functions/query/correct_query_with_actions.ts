@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-validation-autocomplete/src/validation/validation';
+import { getActions } from '@kbn/esql-validation-autocomplete/src/code_actions/actions';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const fixedQueryByOneAction = async (queryString: string) => {

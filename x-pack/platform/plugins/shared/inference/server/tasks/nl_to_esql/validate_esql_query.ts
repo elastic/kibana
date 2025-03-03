@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-validation-autocomplete/src/validation/validation';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';

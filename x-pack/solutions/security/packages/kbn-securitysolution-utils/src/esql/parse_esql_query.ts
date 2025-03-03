@@ -6,7 +6,7 @@
  */
 
 import { type ESQLAstQueryExpression, parse, ESQLCommandOption, EditorError } from '@kbn/esql-ast';
-import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
+import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 export interface ParseEsqlQueryResult {

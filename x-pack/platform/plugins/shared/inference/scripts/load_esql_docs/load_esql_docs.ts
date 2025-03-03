@@ -7,7 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-validation-autocomplete/src/validation/validation';
 import Fs from 'fs/promises';
 import Path from 'path';
 import yargs, { Argv } from 'yargs';
