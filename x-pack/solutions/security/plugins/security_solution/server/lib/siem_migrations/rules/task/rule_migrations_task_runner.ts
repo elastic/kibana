@@ -27,9 +27,9 @@ import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
 const TASK_CONCURRENCY = 10 as const;
 /** Number of rules loaded in memory to be translated in the pool */
 const TASK_BATCH_SIZE = 100 as const;
-/** The maximum time the initialization can take */
+/** The initialization timeout in minutes */
 const INITIALIZATION_TIMEOUT_MIN = 20 as const;
-/** The timeout of each individual agent invocation */
+/** The timeout of each individual agent invocation in minutes */
 const AGENT_INVOKE_TIMEOUT_MIN = 3 as const;
 
 /** Exponential backoff configuration to handle rate limit errors */
