@@ -77,13 +77,6 @@ export const POSTURE_TYPE_ALL = 'all';
 
 export const CSPM_FINDINGS_STATS_INTERVAL = 5;
 
-// A mapping of in-development features to their status. These features should be hidden from users but can be easily
-// activated via a simple code change in a single location.
-export const INTERNAL_FEATURE_FLAGS = {
-  showManageRulesMock: false,
-  showFindingFlyoutEvidence: true,
-} as const;
-
 export const CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE = 'cloud-security-posture-settings';
 export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID = 'csp-internal-settings';
