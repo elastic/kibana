@@ -27,7 +27,7 @@ describe('Get Knowledge Base Status Route', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest.fn().mockResolvedValue({
       getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
       indexTemplateAndPattern: {
@@ -39,6 +39,7 @@ describe('Get Knowledge Base Status Route', () => {
       isSetupInProgress: false,
       isSecurityLabsDocsLoaded: jest.fn().mockResolvedValue(true),
       isUserDataExists: jest.fn().mockResolvedValue(true),
+      getLoadedSecurityLabsDocsCount: jest.fn().mockResolvedValue(0),
     });
 
     getKnowledgeBaseStatusRoute(server.router);

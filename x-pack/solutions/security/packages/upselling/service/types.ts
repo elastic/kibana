@@ -20,7 +20,8 @@ export type UpsellingSectionId =
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions'
-  | 'automatic_import';
+  | 'automatic_import'
+  | 'siem_migrations_start';
 
 export type UpsellingMessageId =
   | 'investigation_guide'

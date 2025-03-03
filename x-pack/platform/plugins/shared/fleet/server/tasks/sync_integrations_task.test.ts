@@ -14,7 +14,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
 
 import { appContextService, outputService } from '../services';
 
@@ -53,6 +53,8 @@ jest.mock('../services/epm/packages/get', () => ({
   }),
 }));
 
+jest.mock('./sync_integrations_on_remote');
+
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
   runAt: new Date(),
@@ -79,7 +81,11 @@ describe('SyncIntegrationsTask', () => {
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
-    mockCore = coreSetupMock();
+    mockCore = coreSetupMock({
+      pluginStartContract: {
+        packageService: createMockPackageService(),
+      },
+    });
     mockTaskManagerSetup = tmSetupMock();
     mockTask = new SyncIntegrationsTask({
       core: mockCore,
@@ -156,29 +162,27 @@ describe('SyncIntegrationsTask', () => {
 
       expect(esClient.update).toHaveBeenCalledWith(
         {
-          body: {
-            doc: {
-              integrations: [
-                {
-                  package_name: 'package-1',
-                  package_version: '0.1.0',
-                  updated_at: expect.any(String),
-                },
-                {
-                  package_name: 'package-2',
-                  package_version: '0.2.0',
-                  updated_at: expect.any(String),
-                },
-              ],
-              remote_es_hosts: [
-                { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
-                { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
-              ],
-            },
-            doc_as_upsert: true,
-          },
           id: 'fleet-synced-integrations',
           index: 'fleet-synced-integrations',
+          doc: {
+            integrations: [
+              {
+                package_name: 'package-1',
+                package_version: '0.1.0',
+                updated_at: expect.any(String),
+              },
+              {
+                package_name: 'package-2',
+                package_version: '0.2.0',
+                updated_at: expect.any(String),
+              },
+            ],
+            remote_es_hosts: [
+              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+              { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
+            ],
+          },
+          doc_as_upsert: true,
         },
         expect.anything()
       );
@@ -195,6 +199,69 @@ describe('SyncIntegrationsTask', () => {
           },
         ],
       } as any);
+      await runTask();
+
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('Should update fleet-synced-integrations doc if sync flag changed from true to false', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote2',
+            hosts: ['https://remote2:9200'],
+            sync_integrations: false,
+          },
+        ],
+      } as any);
+      esClient.get.mockResolvedValue({
+        _source: {
+          remote_es_hosts: [
+            { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+          ],
+        },
+      } as any);
+      await runTask();
+
+      expect(esClient.update).toHaveBeenCalled();
+    });
+
+    it('Should not update fleet-synced-integrations doc if sync flag already false', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote2',
+            hosts: ['https://remote2:9200'],
+            sync_integrations: false,
+          },
+        ],
+      } as any);
+      esClient.get.mockResolvedValue({
+        _source: {
+          remote_es_hosts: [
+            { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: false },
+          ],
+        },
+      } as any);
+      await runTask();
+
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('Should not update fleet-synced-integrations doc if sync doc does not exist', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote2',
+            hosts: ['https://remote2:9200'],
+            sync_integrations: false,
+          },
+        ],
+      } as any);
+      esClient.get.mockRejectedValue({ statusCode: 404 });
       await runTask();
 
       expect(esClient.update).not.toHaveBeenCalled();
