@@ -17,11 +17,13 @@ type PliProductFeatures = Readonly<
 export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   [ProductLine.aiSoc]: {
     search_ai_lake: [
+      ProductFeatureKey.externalDetections,
       ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.assistant,
       ProductFeatureKey.threatIntelligence,
     ],
     essentials: [
+      ProductFeatureKey.externalDetections,
       ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.assistant,
       ProductFeatureKey.threatIntelligence,
@@ -29,7 +31,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     complete: [],
   },
   [ProductLine.security]: {
-    search_ai_lake: [ProductFeatureKey.externalDetections],
+    search_ai_lake: [],
     essentials: [
       ProductFeatureKey.detections,
       ProductFeatureKey.endpointHostManagement,

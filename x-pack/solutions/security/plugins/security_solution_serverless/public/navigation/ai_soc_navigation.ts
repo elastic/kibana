@@ -23,10 +23,10 @@ const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
   return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
 };
 const isAIStandalone = (productTypes: SecurityProductTypes) => {
-  return productTypes.some(
-    (productType) =>
-      productType.product_line === ProductLine.security &&
-      productType.product_tier === ProductTier.searchAiLake
+  return (
+    productTypes.length === 1 &&
+    productTypes[0].product_line === ProductLine.aiSoc &&
+    productTypes[0].product_tier === ProductTier.searchAiLake
   );
 };
 
@@ -62,21 +62,22 @@ export const applyAiSocNavigation = (
     return;
   }
 
-  const [attachDiscovery] = securityGroup.children.reduce<Array<NodeDefinition<AppDeepLinkId>>>(
+  const pageIdsToAttach = [SecurityPageName.attackDiscovery]; // Add more IDs as needed
+
+  const attachedPages = securityGroup.children.reduce<Array<NodeDefinition<AppDeepLinkId>>>(
     (nodes, category) => {
-      const [attachDiscoveryNode] = remove(category.children ?? [], {
-        id: SecurityPageName.attackDiscovery,
-      });
-      if (attachDiscoveryNode) {
-        nodes.push(attachDiscoveryNode);
-      }
+      const removedNodes = remove(category.children ?? [], (child) =>
+        pageIdsToAttach.includes(child.id)
+      );
+
+      nodes.push(...removedNodes);
       return nodes;
     },
     []
   );
 
-  if (attachDiscovery) {
+  if (attachedPages.length) {
     securityGroup.appendHorizontalRule = true; // does not seem to work :( talk with sharedUx team
-    draft.body.push({ ...aiGroup, children: [attachDiscovery] });
+    draft.body.push({ ...aiGroup, children: attachedPages });
   }
 };

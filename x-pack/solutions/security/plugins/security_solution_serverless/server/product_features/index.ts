@@ -41,12 +41,14 @@ export const registerProductFeatures = (
   );
 
   const configurator: ProductFeaturesConfigurator = {};
+  // Cases are always enabled (both for security and AI-SOC)
+  configurator.cases = getCasesProductFeaturesConfigurator(enabledProductFeatureKeys);
+
   if (productLines[ProductLine.security]) {
     configurator.security = getSecurityProductFeaturesConfigurator(
       enabledProductFeatureKeys,
       config.experimentalFeatures
     );
-    configurator.cases = getCasesProductFeaturesConfigurator(enabledProductFeatureKeys);
     // TODO: don't register timeline and notes for security "minimal" tier
     configurator.timeline = getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys);
     configurator.notes = getNotesProductFeaturesConfigurator(enabledProductFeatureKeys);
