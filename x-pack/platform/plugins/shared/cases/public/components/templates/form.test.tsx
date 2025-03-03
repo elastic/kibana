@@ -437,9 +437,7 @@ describe('TemplateForm', () => {
       </>
     );
 
-    await waitFor(async () => {
-      expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
 
     expect(formState!).not.toBeUndefined();
 
