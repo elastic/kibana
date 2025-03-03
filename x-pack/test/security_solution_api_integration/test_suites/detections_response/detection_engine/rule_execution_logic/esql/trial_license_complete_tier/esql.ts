@@ -407,6 +407,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.arrayContaining(['part-0', 'part-1', 'test-1'])
           );
         });
+
         it('should generate alert per expanded row when expanded field renamed', async () => {
           const id = uuidv4();
           const interval: [string, string] = [
@@ -443,6 +444,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(previewAlerts.length).toBe(3);
         });
+
+        //  When expanded field dropped, ES|QL response rows will be identical.
+        //  In this case, identical duplicated alerts won't be created
         it('should NOT generate alert per expanded row when expanded field dropped', async () => {
           const id = uuidv4();
           const interval: [string, string] = [
@@ -479,7 +483,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(previewAlerts.length).toBe(2);
         });
-        it('should generate alert per expanded row when mv_expand multiple used', async () => {
+
+        it('should generate alert per expanded row when mv_expand used multiple times', async () => {
           const id = uuidv4();
           const interval: [string, string] = [
             '2020-10-28T06:00:00.000Z',
@@ -525,6 +530,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.arrayContaining([undefined, 'host-0', 'host-1', 'host-2', 'host-3'])
           );
         });
+
         it('should deduplicate alerts generated from expanded rows', async () => {
           const id = uuidv4();
           // document will fall into 2 rule execution windows
@@ -558,6 +564,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(previewAlerts.length).toBe(2);
         });
+
         it('should deduplicate alerts generated form expanded rows when expanded field renamed', async () => {
           const id = uuidv4();
           // document will fall into 2 rule execution windows
@@ -594,7 +601,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(previewAlerts.length).toBe(2);
         });
 
-        it('should deduplicate alerts from expanded rows when expanded field dropped', async () => {
+        it('should deduplicate alert when expanded field dropped', async () => {
           const id = uuidv4();
           // document will fall into 2 rule execution windows
           const doc1 = {

@@ -2142,6 +2142,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(1);
         expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 2);
       });
+
       it('should suppress alerts generated from expanded rows when expanded field renamed', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
@@ -2181,7 +2182,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 2);
       });
 
-      it('should NOT generate alert per expanded row when expanded field dropped', async () => {
+      it('should NOT generate alerts per expanded row when expanded field dropped', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const documents = [
@@ -2220,7 +2221,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 1);
       });
 
-      it('should suppress on interval alerts, created from expanded rows', async () => {
+      it('should suppress alerts from expanded rows on interval', async () => {
         const id = uuidv4();
         const doc1 = {
           id,
@@ -2268,7 +2269,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(1);
         expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 3);
       });
-      it('should suppress on interval alerts, created from expanded rows when expanded field renamed', async () => {
+
+      it('should suppress alerts on interval when expanded field renamed', async () => {
         const id = uuidv4();
         const doc1 = {
           id,
