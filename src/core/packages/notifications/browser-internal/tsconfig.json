@@ -32,7 +32,8 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-render-context-browser"
   ],
   "exclude": [
     "target/**/*",
