@@ -71,9 +71,6 @@ export const SearchIndexPipelines: React.FC = () => {
 
   useEffect(() => {
     if (!isDeleteModalOpen) {
-      if (buttonRef.current) {
-        buttonRef.current.focus();
-      }
       if (isRevertPipeline) {
         const pipelinesButton = document.querySelector<HTMLDivElement>(
           `[id="${SearchIndexTabId.PIPELINES}"]`
@@ -82,6 +79,8 @@ export const SearchIndexPipelines: React.FC = () => {
           pipelinesButton.focus();
         }
       }
+    } else if (buttonRef.current) {
+      buttonRef.current.focus();
     }
   }, [isDeleteModalOpen]);
 
