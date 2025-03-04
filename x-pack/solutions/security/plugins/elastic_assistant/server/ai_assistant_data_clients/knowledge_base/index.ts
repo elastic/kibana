@@ -33,6 +33,7 @@ import {
 } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -86,6 +87,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ml: MlPluginSetup;
   getElserId: GetElser;
   getIsKBSetupInProgress: (spaceId: string) => boolean;
+  getProductDocumentationStatus: () => Promise<InstallationStatus>;
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
@@ -100,6 +102,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public get isSetupInProgress() {
     return this.options.getIsKBSetupInProgress(this.spaceId);
   }
+
+  public getProductDocumentationStatus = async () => {
+    return (await this.options.getProductDocumentationStatus()) ?? 'uninstalled';
+  };
+
   /**
    * Returns whether setup of the Knowledge Base can be performed (essentially an ML features check)
    *
