@@ -23,9 +23,11 @@ import { useKnowledgeBase } from '../hooks';
 export function ChatActionsMenu({
   connectors,
   disabled,
+  onDuplicateConversationClick,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
+  onDuplicateConversationClick: () => void;
 }) {
   const { application, http } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
@@ -126,6 +128,15 @@ export function ChatActionsMenu({
                   </div>
                 ),
                 panel: 1,
+              },
+              {
+                name: i18n.translate('xpack.aiAssistant.chatHeader.actions.duplicateConversation', {
+                  defaultMessage: 'Duplicate',
+                }),
+                onClick: () => {
+                  toggleActionsMenu();
+                  onDuplicateConversationClick();
+                },
               },
             ],
           },

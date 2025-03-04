@@ -15,8 +15,8 @@ import type {
 import type { ObservabilityAIAssistantChatService } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AbortableAsyncState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseChatResult } from '@kbn/observability-ai-assistant-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 import { useKibana } from './use_kibana';
@@ -47,6 +47,7 @@ export interface UseConversationProps {
   chatService: ObservabilityAIAssistantChatService;
   connectorId: string | undefined;
   onConversationUpdate?: (conversation: { conversation: Conversation['conversation'] }) => void;
+  onConversationDuplicate: (conversation: Conversation) => void;
 }
 
 export type UseConversationResult = {
@@ -56,6 +57,7 @@ export type UseConversationResult = {
   isConversationOwnedByCurrentUser: boolean;
   saveTitle: (newTitle: string) => void;
   updateConversationAccess: (access: ConversationAccess) => Promise<Conversation>;
+  duplicateConversation: () => Promise<Conversation>;
 } & Omit<UseChatResult, 'setMessages'>;
 
 const DEFAULT_INITIAL_MESSAGES: Message[] = [];
@@ -68,6 +70,7 @@ export function useConversation({
   chatService,
   connectorId,
   onConversationUpdate,
+  onConversationDuplicate,
 }: UseConversationProps): UseConversationResult {
   const service = useAIAssistantAppService();
   const scopes = useScopes();
@@ -118,6 +121,34 @@ export function useConversation({
         });
         throw err;
       });
+  };
+
+  const duplicateConversation = async () => {
+    if (!displayedConversationId || !conversation.value) {
+      throw new Error('Cannot duplicate the conversation if conversation is not stored');
+    }
+    try {
+      const duplicatedConversation = await service.callApi(
+        `POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate`,
+        {
+          signal: null,
+          params: {
+            path: {
+              conversationId: displayedConversationId,
+            },
+          },
+        }
+      );
+      onConversationDuplicate(duplicatedConversation);
+      return duplicatedConversation;
+    } catch (err) {
+      notifications!.toasts.addError(err, {
+        title: i18n.translate('xpack.aiAssistant.errorDuplicatingConversation', {
+          defaultMessage: 'Could not duplicate conversation',
+        }),
+      });
+      throw err;
+    }
   };
 
   const updateConversationAccess = async (access: ConversationAccess) => {
@@ -235,7 +266,7 @@ export function useConversation({
           }
         : currentUser,
     state,
-    next,
+    next: (_messages: Message[]) => next(_messages, () => conversation.refresh()),
     stop,
     messages,
     saveTitle: (title: string) => {
@@ -254,5 +285,6 @@ export function useConversation({
         });
     },
     updateConversationAccess,
+    duplicateConversation,
   };
 }

@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
+import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -88,6 +89,11 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
 
   const updateDisplayedConversation = (id?: string) => {
     navigateToConversation(id || undefined);
+  };
+
+  const handleConversationDuplicate = (conversation: Conversation) => {
+    refreshConversations();
+    navigateToConversation?.(conversation.conversation.id);
   };
 
   useEffect(() => {
@@ -177,6 +183,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             setIsUpdatingConversationList={setIsUpdatingConversationList}
             refreshConversations={refreshConversations}
             updateDisplayedConversation={updateDisplayedConversation}
+            onConversationDuplicate={handleConversationDuplicate}
           />
 
           <div className={sidebarContainerClass}>

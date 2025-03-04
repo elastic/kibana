@@ -152,9 +152,7 @@ export function ConversationList({
                   <EuiFlexItem grow={false} key={category}>
                     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
                       <EuiText className={titleClassName} size="s">
-                        {i18n.translate('xpack.aiAssistant.conversationList.dateGroup', {
-                          defaultMessage: DATE_CATEGORY_LABELS[category],
-                        })}
+                        {DATE_CATEGORY_LABELS[category]}
                       </EuiText>
                     </EuiPanel>
                     <EuiListGroup flush={false} gutterSize="none">

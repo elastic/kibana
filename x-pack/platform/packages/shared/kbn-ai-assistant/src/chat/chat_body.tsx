@@ -127,9 +127,10 @@ export function ChatBody({
   setIsUpdatingConversationList,
   refreshConversations,
   updateDisplayedConversation,
+  onConversationDuplicate,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
-  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
   flyoutPositionMode?: FlyoutPositionMode;
   initialTitle?: string;
   initialMessages?: Message[];
@@ -137,6 +138,7 @@ export function ChatBody({
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
+  onConversationDuplicate: (conversation: Conversation) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (conversationId?: string) => void;
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
@@ -168,6 +170,7 @@ export function ChatBody({
     state,
     stop,
     saveTitle,
+    duplicateConversation,
     isConversationOwnedByCurrentUser,
     user: conversationUser,
     updateConversationAccess,
@@ -179,6 +182,7 @@ export function ChatBody({
     chatService,
     connectorId: connectors.selectedConnector,
     onConversationUpdate,
+    onConversationDuplicate,
   });
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -373,7 +377,7 @@ export function ChatBody({
           title="This conversation is shared with your team."
           description="You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged."
           button={
-            <EuiButton onClick={() => {}} iconType="copy" size="s">
+            <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
               {i18n.translate('xpack.aiAssistant.duplicateButton', {
                 defaultMessage: 'Duplicate',
               })}
@@ -390,7 +394,7 @@ export function ChatBody({
         title="This conversation is shared with your team."
         description="You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged."
         button={
-          <EuiButton onClick={() => {}} iconType="copy" size="s">
+          <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
             {i18n.translate('xpack.aiAssistant.duplicateButton', {
               defaultMessage: 'Duplicate',
             })}
@@ -460,10 +464,12 @@ export function ChatBody({
                 />
               ) : (
                 <ChatTimeline
+                  conversationId={conversationId}
                   messages={messages}
                   knowledgeBase={knowledgeBase}
                   chatService={chatService}
-                  currentUser={currentUser}
+                  currentUser={conversationUser}
+                  isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
                   chatState={state}
                   hasConnector={!!connectors.connectors?.length}
                   onEdit={(editedMessage, newMessage) => {
@@ -509,7 +515,11 @@ export function ChatBody({
                 className={promptEditorContainerClassName}
               >
                 <PromptEditor
-                  disabled={!connectors.selectedConnector || !hasCorrectLicense}
+                  disabled={
+                    !connectors.selectedConnector ||
+                    !hasCorrectLicense ||
+                    (!!conversationId && !isConversationOwnedByCurrentUser)
+                  }
                   hidden={connectors.loading || connectors.connectors?.length === 0}
                   loading={isLoading}
                   onChangeHeight={handleChangeHeight}
@@ -594,6 +604,7 @@ export function ChatBody({
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           title={title}
+          onDuplicateConversation={duplicateConversation}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}

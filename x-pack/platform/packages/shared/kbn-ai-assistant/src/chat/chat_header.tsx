@@ -57,6 +57,8 @@ export function ChatHeader({
   licenseInvalid,
   loading,
   title,
+  isConversationOwnedByCurrentUser,
+  onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
@@ -64,7 +66,6 @@ export function ChatHeader({
   refreshConversations,
   updateDisplayedConversation,
   handleConversationAccessUpdate,
-  isConversationOwnedByCurrentUser,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -73,6 +74,8 @@ export function ChatHeader({
   licenseInvalid: boolean;
   loading: boolean;
   title: string;
+  isConversationOwnedByCurrentUser: boolean;
+  onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
@@ -80,7 +83,6 @@ export function ChatHeader({
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
   handleConversationAccessUpdate: (access: ConversationAccess) => Promise<void>;
-  isConversationOwnedByCurrentUser: boolean;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -150,7 +152,8 @@ export function ChatHeader({
                   !conversationId ||
                   !connectors.selectedConnector ||
                   licenseInvalid ||
-                  !Boolean(onSaveTitle)
+                  !Boolean(onSaveTitle) ||
+                  !isConversationOwnedByCurrentUser
                 }
                 onChange={(e) => {
                   setNewTitle(e.currentTarget.nodeValue || '');
@@ -256,7 +259,11 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                <ChatActionsMenu
+                  connectors={connectors}
+                  disabled={licenseInvalid}
+                  onDuplicateConversationClick={onDuplicateConversation}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
