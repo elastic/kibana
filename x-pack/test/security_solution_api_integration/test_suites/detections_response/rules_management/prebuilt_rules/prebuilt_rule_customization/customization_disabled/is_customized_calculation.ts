@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
         errors: [
           {
             error: {
-              message: expect.stringContaining('Importing prebuilt rules is not supported'),
+              message: expect.stringContaining('Importing prebuilt rules is not supported.'),
             },
             rule_id: 'test-rule-id',
           },
