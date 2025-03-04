@@ -16,7 +16,7 @@ import {
   addTab,
   closeTab,
   selectTab,
-  insertTab,
+  insertTabAfter,
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
@@ -94,7 +94,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate: (item) => {
         const newItem = createItem();
         newItem.label = `${item.label} (copy)`;
-        changeState((prevState) => insertTab(prevState, newItem, item));
+        changeState((prevState) => insertTabAfter(prevState, newItem, item));
       },
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
       onCloseTabsToTheRight: (item) =>

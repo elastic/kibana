@@ -65,7 +65,7 @@ export const closeTab = ({ items, selectedItem }: TabsState, item: TabItem): Tab
   };
 };
 
-export const insertTab = (
+export const insertTabAfter = (
   { items, selectedItem }: TabsState,
   item: TabItem,
   insertAfterItem: TabItem
