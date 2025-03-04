@@ -87,7 +87,6 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<DataStreamReindexResolutionCell />}
             />

@@ -68,11 +68,7 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({
             truncateText={false}
             data-test-subj={`defaultTableCell-${field}`}
           >
-            <EsDeprecationsTableCells
-              fieldName={field}
-              deprecation={deprecation}
-              openFlyout={() => setShowFlyout(true)}
-            />
+            <EsDeprecationsTableCells fieldName={field} deprecation={deprecation} />
           </EuiTableRowCell>
         );
       })}

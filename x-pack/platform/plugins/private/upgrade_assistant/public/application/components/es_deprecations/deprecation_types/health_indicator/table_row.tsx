@@ -68,11 +68,7 @@ export const HealthIndicatorTableRow: React.FunctionComponent<Props> = ({
             truncateText={false}
             data-test-subj={`healthIndicatorTableCell-${field}`}
           >
-            <EsDeprecationsTableCells
-              fieldName={field}
-              deprecation={deprecation}
-              openFlyout={() => setShowFlyout(true)}
-            />
+            <EsDeprecationsTableCells fieldName={field} deprecation={deprecation} />
           </EuiTableRowCell>
         );
       })}

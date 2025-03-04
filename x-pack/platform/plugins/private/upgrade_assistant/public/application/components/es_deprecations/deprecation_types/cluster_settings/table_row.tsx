@@ -104,7 +104,6 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<ClusterSettingsResolutionCell status={status} />}
             />
