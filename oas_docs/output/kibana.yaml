@@ -31023,7 +31023,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
