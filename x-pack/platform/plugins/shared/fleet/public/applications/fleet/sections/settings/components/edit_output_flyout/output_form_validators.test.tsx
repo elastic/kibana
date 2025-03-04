@@ -352,7 +352,9 @@ describe('Output form validation', () => {
     });
     it("should return error with missing brackets in topic's name", () => {
       const res = validateDynamicKafkaTopics(invalidBracketTopic);
-      expect(res).toEqual(['Topic should have matching amounts of opening and closing brackets']);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
     });
     it("should return error with missing percent sign before opening brackets in topic's name", () => {
       const res = validateDynamicKafkaTopics(invalidPercentTopic);

@@ -383,7 +383,8 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
       if (openingBrackets.length !== closingBrackets.length) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
-            defaultMessage: 'Topic should have matching amounts of opening and closing brackets',
+            defaultMessage:
+              'The topic should have a matching number of opening and closing brackets',
           })
         );
       }
