@@ -27,8 +27,6 @@ import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
 const TASK_CONCURRENCY = 10 as const;
 /** Number of rules loaded in memory to be translated in the pool */
 const TASK_BATCH_SIZE = 100 as const;
-/** The initialization timeout in minutes */
-const INITIALIZATION_TIMEOUT_MIN = 20 as const;
 /** The timeout of each individual agent invocation in minutes */
 const AGENT_INVOKE_TIMEOUT_MIN = 3 as const;
 
@@ -121,15 +119,7 @@ export class RuleMigrationTaskRunner {
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
   private async initialize() {
     assert(this.retriever, 'setup() must be called before initialize()');
-    await Promise.race([
-      this.retriever.initialize(),
-      new Promise((_, reject) => {
-        setTimeout(
-          () => reject(new Error(`Timeout (${INITIALIZATION_TIMEOUT_MIN}m)`)),
-          INITIALIZATION_TIMEOUT_MIN * 60 * 1000
-        );
-      }),
-    ]);
+    this.retriever.initialize();
   }
 
   public async run(invocationConfig: RunnableConfig): Promise<void> {
@@ -148,9 +138,7 @@ export class RuleMigrationTaskRunner {
         this.logger.info('Abort signal received, stopping initialization');
         return;
       } else {
-        throw new Error(
-          `Migration initialization failed. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. ${error}`
-        );
+        throw new Error(`Migration initialization failed. ${error}`);
       }
     }
 
