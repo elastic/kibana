@@ -64,6 +64,7 @@ import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
+  config: APMConfig;
 }
 
 export interface APMPluginSetupDependencies {

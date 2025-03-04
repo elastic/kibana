@@ -33,6 +33,8 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
+import { useEncodedApiKey } from './use_encoded_api_key';
+import { useIngestEndpointUrl } from './use_ingest_endpoint_url';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -45,24 +47,18 @@ const HOST_COMMAND = i18n.translate(
 export const OtelLogsPanel: React.FC = () => {
   const { onPageReady } = usePerformanceContext();
   const {
-    data: apiKeyData,
-    error,
-    refetch,
-  } = useFetcher(
-    (callApi) => {
-      return callApi('POST /internal/observability_onboarding/otel/api_key', {});
+    services: {
+      share,
+      http,
+      context: { isServerless },
     },
-    [],
-    { showToastOnError: false }
-  );
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const { encodedApiKey, error } = useEncodedApiKey();
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi('GET /internal/observability_onboarding/logs/setup/environment');
   }, []);
-
-  const {
-    services: { share, http },
-  } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
     if (apiKeyData && setup) {
@@ -74,6 +70,10 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [apiKeyData, onPageReady, setup]);
 
+  const ingestEndpointUrl = useIngestEndpointUrl({
+    elasticsearchUrl: setup?.elasticsearchUrl[0],
+    managedServiceUrl: setup?.managedServiceUrl,
+  });
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
   const agentVersion = setup?.elasticAgentVersionInfo.agentVersion ?? '';
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
@@ -92,6 +92,11 @@ export const OtelLogsPanel: React.FC = () => {
     getDeeplinks();
   }, [getDeeplinks]);
 
+  const sampleConfigurationPath = isServerless
+    ? './otel_samples/managed_otlp/platformlogs_hostmetrics.yml'
+    : './otel_samples/platformlogs_hostmetrics.yml';
+  const elasticEndpointVarName = isServerless ? 'ELASTIC_OTLP_ENDPOINT' : 'ELASTIC_ENDPOINT';
+
   const installTabContents = [
     {
       id: 'linux',
@@ -101,7 +106,7 @@ export const OtelLogsPanel: React.FC = () => {
 
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${urlEncodedAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch
 
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:${elasticEndpointVarName}}#${ingestEndpointUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${encodedApiKey}/g' ./otel.yml`,
       start: 'sudo ./otelcol --config otel.yml',
       type: 'copy',
     },
@@ -113,7 +118,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
 
 curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${urlEncodedAgentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch
 
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:${elasticEndpointVarName}}#${ingestEndpointUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${encodedApiKey}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
       type: 'copy',
     },
@@ -124,7 +129,13 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
   const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
   if (error) {
-    return <EmptyPrompt onboardingFlowType="otel_logs" error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt
+        onboardingFlowType="otel_logs"
+        error={error}
+        onRetryClick={() => window.location.reload()}
+      />
+    );
   }
 
   return (
@@ -156,9 +167,9 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                     }}
                   />
 
-                  {(!setup || !apiKeyData) && <EuiSkeletonText lines={6} />}
+                  {(!setup || !encodedApiKey) && <EuiSkeletonText lines={6} />}
 
-                  {setup && apiKeyData && (
+                  {setup && encodedApiKey && (
                     <>
                       <EuiText>
                         <p>{selectedContent.firstStepTitle}</p>
