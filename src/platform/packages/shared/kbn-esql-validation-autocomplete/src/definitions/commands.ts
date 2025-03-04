@@ -50,6 +50,7 @@ import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForEval } from '../autocomplete/commands/eval';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -326,6 +327,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForEval,
   },
   {
     name: 'rename',
