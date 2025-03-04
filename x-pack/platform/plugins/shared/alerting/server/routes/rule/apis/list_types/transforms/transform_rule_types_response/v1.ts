@@ -35,6 +35,7 @@ export const transformRuleTypesResponse = (
       minimum_license_required: ruleType.minimumLicenseRequired,
       name: ruleType.name,
       producer: ruleType.producer,
+      solution: ruleType.solution,
       recovery_action_group: ruleType.recoveryActionGroup,
       ...(ruleType.ruleTaskTimeout ? { rule_task_timeout: ruleType.ruleTaskTimeout } : {}),
     };

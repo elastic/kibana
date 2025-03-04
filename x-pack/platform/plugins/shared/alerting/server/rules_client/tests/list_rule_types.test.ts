@@ -245,11 +245,11 @@ describe('listRuleTypes', () => {
           "minimumLicenseRequired": "basic",
           "name": "myAppAlertType",
           "producer": "myApp",
-          "solution": "stack",
           "recoveryActionGroup": Object {
             "id": "recovered",
             "name": "Recovered",
           },
+          "solution": "stack",
           "validLegacyConsumers": Array [],
         },
       ]

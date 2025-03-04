@@ -135,6 +135,7 @@ describe('ruleTypesRoute', () => {
               "name": "Recovered",
             },
             "rule_task_timeout": "10m",
+            "solution": "stack",
           },
         ],
       }
