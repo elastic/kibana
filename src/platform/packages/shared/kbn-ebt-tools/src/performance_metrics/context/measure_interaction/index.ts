@@ -12,14 +12,15 @@ import {
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
-import { Description, EventData } from '../performance_context';
+import { EventData } from '../performance_context';
 import { perfomanceMarkers } from '../../performance_markers';
+import { DescriptionWithPrefix } from '../types';
 
 interface PerformanceMeta {
   queryRangeSecs: number;
   queryOffsetSecs: number;
   isInitialLoad?: boolean;
-  description?: Description;
+  description?: DescriptionWithPrefix;
 }
 
 export function measureInteraction(pathname: string) {
