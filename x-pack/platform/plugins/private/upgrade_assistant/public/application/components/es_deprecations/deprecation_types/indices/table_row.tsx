@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
@@ -27,13 +27,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
-  mustOpenFlyout: boolean;
+  index: number;
 }
 
 const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
-  mustOpenFlyout,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const indexContext = useIndexContext();
@@ -72,14 +72,12 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
     }
   }, [showFlyout]);
 
-  useEffect(() => {
-    if (mustOpenFlyout) {
-      setShowFlyout(true);
-    }
-  }, [mustOpenFlyout]);
-
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
@@ -96,7 +94,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };
 

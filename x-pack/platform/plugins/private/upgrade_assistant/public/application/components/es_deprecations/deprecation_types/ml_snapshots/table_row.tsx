@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { EnrichedDeprecationInfo, MlAction } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
@@ -22,14 +22,13 @@ interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
   mlUpgradeModeEnabled: boolean;
-
-  mustOpenFlyout: boolean;
+  index: number;
 }
 
 export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
-  mustOpenFlyout,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
@@ -62,14 +61,12 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
     }
   }, [snapshotState, addContentToGlobalFlyout, showFlyout, deprecation, closeFlyout]);
 
-  useEffect(() => {
-    if (mustOpenFlyout) {
-      setShowFlyout(true);
-    }
-  }, [mustOpenFlyout]);
-
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell key={field} truncateText={false} data-test-subj={`mlTableCell-${field}`}>
@@ -82,7 +79,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };
 

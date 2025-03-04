@@ -105,10 +105,10 @@ const cellToLabelMap = {
 const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
 const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
-const renderTableRowCells = (
+const renderTableRow = (
   deprecation: EnrichedDeprecationInfo,
   mlUpgradeModeEnabled: boolean,
-  mustOpenFlyout: boolean
+  index: number
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -117,17 +117,13 @@ const renderTableRowCells = (
           deprecation={deprecation}
           rowFieldNames={cellTypes}
           mlUpgradeModeEnabled={mlUpgradeModeEnabled}
-          mustOpenFlyout={mustOpenFlyout}
+          index={index}
         />
       );
 
     case 'indexSetting':
       return (
-        <IndexSettingsTableRow
-          deprecation={deprecation}
-          rowFieldNames={cellTypes}
-          mustOpenFlyout={mustOpenFlyout}
-        />
+        <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />
       );
 
     case 'clusterSetting':
@@ -135,46 +131,30 @@ const renderTableRowCells = (
         <ClusterSettingsTableRow
           deprecation={deprecation}
           rowFieldNames={cellTypes}
-          mustOpenFlyout={mustOpenFlyout}
+          index={index}
         />
       );
 
     case 'reindex':
     case 'unfreeze':
-      return (
-        <IndexTableRow
-          deprecation={deprecation}
-          rowFieldNames={cellTypes}
-          mustOpenFlyout={mustOpenFlyout}
-        />
-      );
+      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />;
 
     case 'healthIndicator':
       return (
         <HealthIndicatorTableRow
           deprecation={deprecation}
           rowFieldNames={cellTypes}
-          mustOpenFlyout={mustOpenFlyout}
+          index={index}
         />
       );
 
     case 'dataStream':
       return (
-        <DataStreamTableRow
-          deprecation={deprecation}
-          rowFieldNames={cellTypes}
-          mustOpenFlyout={mustOpenFlyout}
-        />
+        <DataStreamTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />
       );
 
     default:
-      return (
-        <DefaultTableRow
-          deprecation={deprecation}
-          rowFieldNames={cellTypes}
-          mustOpenFlyout={mustOpenFlyout}
-        />
-      );
+      return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />;
   }
 };
 
@@ -377,26 +357,9 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           </EuiTableBody>
         ) : (
           <EuiTableBody>
-            {visibleDeprecations.map((deprecation, index) => {
-              return (
-                <EuiTableRow
-                  data-test-subj="deprecationTableRow"
-                  key={`deprecation-row-${index}`}
-                  onClick={() => setSelectedRowIndex(index)}
-                  onBlur={() => {
-                    if (selectedRowIndex !== null) {
-                      setSelectedRowIndex(null);
-                    }
-                  }}
-                >
-                  {renderTableRowCells(
-                    deprecation,
-                    mlUpgradeModeEnabled,
-                    index === selectedRowIndex
-                  )}
-                </EuiTableRow>
-              );
-            })}
+            {visibleDeprecations.map((deprecation, index) =>
+              renderTableRow(deprecation, mlUpgradeModeEnabled, index)
+            )}
           </EuiTableBody>
         )}
       </EuiTable>
