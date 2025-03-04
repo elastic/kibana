@@ -65,7 +65,7 @@ describe('useInstalledIntegrations', () => {
     } as any);
   });
 
-  it('should filter not installed packages and compute status in extra property', () => {
+  it('should filter not installed packages and compute status in ui property', () => {
     const { result } = renderHook(() =>
       useInstalledIntegrations({}, { currentPage: 1, pageSize: 10 })
     );
@@ -80,13 +80,13 @@ describe('useInstalledIntegrations', () => {
       },
       customIntegrationsCount: 0,
       installedPackages: [
-        expect.objectContaining({ id: 'aws', extra: { installation_status: 'installed' } }),
-        expect.objectContaining({ id: 'azure', extra: { installation_status: 'upgrade_failed' } }),
-        expect.objectContaining({ id: 'nginx', extra: { installation_status: 'install_failed' } }),
-        expect.objectContaining({ id: 'apache', extra: { installation_status: 'install_failed' } }),
+        expect.objectContaining({ id: 'aws', ui: { installation_status: 'installed' } }),
+        expect.objectContaining({ id: 'azure', ui: { installation_status: 'upgrade_failed' } }),
+        expect.objectContaining({ id: 'nginx', ui: { installation_status: 'install_failed' } }),
+        expect.objectContaining({ id: 'apache', ui: { installation_status: 'install_failed' } }),
         expect.objectContaining({
           id: 'mysql',
-          extra: { installation_status: 'upgrade_available' },
+          ui: { installation_status: 'upgrade_available' },
         }),
       ],
     });
@@ -109,8 +109,8 @@ describe('useInstalledIntegrations', () => {
       },
       customIntegrationsCount: 0,
       installedPackages: [
-        expect.objectContaining({ id: 'nginx', extra: { installation_status: 'install_failed' } }),
-        expect.objectContaining({ id: 'apache', extra: { installation_status: 'install_failed' } }),
+        expect.objectContaining({ id: 'nginx', ui: { installation_status: 'install_failed' } }),
+        expect.objectContaining({ id: 'apache', ui: { installation_status: 'install_failed' } }),
       ],
     });
   });

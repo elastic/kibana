@@ -7,7 +7,7 @@
 
 import type { PackageListItem } from '../../../../../../../common';
 
-export type PackageInstallationStatus =
+export type InstalledPackagesUIInstallationStatus =
   | 'not_installed'
   | 'installing'
   | 'installed'
@@ -15,14 +15,14 @@ export type PackageInstallationStatus =
   | 'upgrade_failed'
   | 'upgrade_available';
 
-export type PackageListItemWithExtra = PackageListItem & {
-  extra: {
-    installation_status: PackageInstallationStatus;
+export type InstalledPackageUIPackageListItem = PackageListItem & {
+  ui: {
+    installation_status: InstalledPackagesUIInstallationStatus;
   };
 };
 
 export interface InstalledIntegrationsFilter {
-  installationStatus?: PackageInstallationStatus[];
+  installationStatus?: InstalledPackagesUIInstallationStatus[];
   customIntegrations?: boolean;
   q?: string;
 }

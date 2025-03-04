@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import type { InstalledIntegrationsFilter, PackageInstallationStatus } from '../types';
+import type { InstalledIntegrationsFilter, InstalledPackagesUIInstallationStatus } from '../types';
 import { useAddUrlFilters } from '../hooks/use_url_filters';
 
 import { InstalledIntegrationsActionMenu } from './installed_integration_action_menu';
@@ -47,7 +47,7 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
   const statuses: Array<{
     iconType: string;
     iconColor: string;
-    status: PackageInstallationStatus;
+    status: InstalledPackagesUIInstallationStatus;
     label: React.ReactElement;
   }> = useMemo(
     () => [

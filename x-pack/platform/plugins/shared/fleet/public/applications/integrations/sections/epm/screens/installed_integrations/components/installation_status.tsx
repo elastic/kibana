@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { PackageInstallationStatus } from '../types';
+import type { InstalledPackagesUIInstallationStatus } from '../types';
 import { useAddUrlFilters } from '../hooks/use_url_filters';
 
-function getStatusText(status: PackageInstallationStatus) {
+function getStatusText(status: InstalledPackagesUIInstallationStatus) {
   switch (status) {
     case 'installed':
       return i18n.translate('xpack.fleet.epmInstalledIntegrations.statusIntalledLabel', {
@@ -37,7 +37,7 @@ function getStatusText(status: PackageInstallationStatus) {
   }
 }
 
-function getIconForStatus(status: PackageInstallationStatus) {
+function getIconForStatus(status: InstalledPackagesUIInstallationStatus) {
   switch (status) {
     case 'installed':
       return <EuiIcon size="m" type="checkInCircleFilled" color="success" />;
@@ -50,24 +50,25 @@ function getIconForStatus(status: PackageInstallationStatus) {
   }
 }
 
-export const InstallationStatus: React.FunctionComponent<{ status: PackageInstallationStatus }> =
-  React.memo(({ status }) => {
-    const addUrlFilter = useAddUrlFilters();
+export const InstallationStatus: React.FunctionComponent<{
+  status: InstalledPackagesUIInstallationStatus;
+}> = React.memo(({ status }) => {
+  const addUrlFilter = useAddUrlFilters();
 
-    return (
-      <EuiButtonEmpty
-        size="s"
-        onClick={(e: React.MouseEvent) => {
-          e.preventDefault();
-          addUrlFilter({
-            installationStatus: [status],
-          });
-        }}
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{getIconForStatus(status)}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{getStatusText(status)}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiButtonEmpty>
-    );
-  });
+  return (
+    <EuiButtonEmpty
+      size="s"
+      onClick={(e: React.MouseEvent) => {
+        e.preventDefault();
+        addUrlFilter({
+          installationStatus: [status],
+        });
+      }}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>{getIconForStatus(status)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{getStatusText(status)}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiButtonEmpty>
+  );
+});

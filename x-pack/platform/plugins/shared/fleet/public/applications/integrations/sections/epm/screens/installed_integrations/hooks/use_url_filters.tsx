@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 
 import { useUrlParams } from '../../../../../../../hooks';
 
-import type { InstalledIntegrationsFilter, PackageInstallationStatus } from '../types';
+import type { InstalledIntegrationsFilter, InstalledPackagesUIInstallationStatus } from '../types';
 
 export function useAddUrlFilters() {
   const urlFilters = useUrlFilters();
@@ -53,9 +53,12 @@ export function useUrlFilters(): InstalledIntegrationsFilter {
     let installationStatus: InstalledIntegrationsFilter['installationStatus'];
     if (urlParams.installationStatus) {
       if (typeof urlParams.installationStatus === 'string') {
-        installationStatus = [urlParams.installationStatus as PackageInstallationStatus];
+        installationStatus = [
+          urlParams.installationStatus as InstalledPackagesUIInstallationStatus,
+        ];
       } else {
-        installationStatus = urlParams.installationStatus as PackageInstallationStatus[];
+        installationStatus =
+          urlParams.installationStatus as InstalledPackagesUIInstallationStatus[];
       }
     }
 

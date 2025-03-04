@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz } from '../../../../../../../hooks';
-import type { PackageListItemWithExtra } from '../types';
+import type { InstalledPackageUIPackageListItem } from '../types';
 
 import { InstallationStatus } from './installation_status';
 
@@ -42,7 +42,7 @@ const DisabledWrapperTooltip: React.FunctionComponent<{
 };
 
 export const InstalledIntegrationsTable: React.FunctionComponent<{
-  installedPackages: PackageListItemWithExtra[];
+  installedPackages: InstalledPackageUIPackageListItem[];
   total: number;
   isLoading: boolean;
   pagination: UrlPagination;
@@ -50,11 +50,11 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const authz = useAuthz();
   const { getHref } = useLink();
 
-  const [selectedItems, setSelectedItems] = useState<PackageListItemWithExtra[]>([]);
+  const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
 
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
-    ({ page }: CriteriaWithPagination<PackageListItemWithExtra>) => {
+    ({ page }: CriteriaWithPagination<InstalledPackageUIPackageListItem>) => {
       setPagination({
         currentPage: page.index + 1,
         pageSize: page.size,
@@ -128,8 +128,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.statusColumnTitle', {
               defaultMessage: 'Status',
             }),
-            render: (item: PackageListItemWithExtra) => (
-              <InstallationStatus status={item.extra.installation_status} />
+            render: (item: InstalledPackageUIPackageListItem) => (
+              <InstallationStatus status={item.ui.installation_status} />
             ),
           },
           {
@@ -147,7 +147,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               }
             ),
             width: '206px',
-            render: (item: PackageListItemWithExtra) => {
+            render: (item: InstalledPackageUIPackageListItem) => {
               const policyCount = item.packagePoliciesInfo?.count ?? 0;
               if (!policyCount) {
                 return null;

@@ -7,17 +7,17 @@
 
 import { useMemo } from 'react';
 import semverLt from 'semver/functions/lt';
-import { Search as LocalSearch, PrefixIndexStrategy } from 'js-search';
 
+import { useLocalSearch } from '../../../../../hooks';
 import type { PackageListItem } from '../../../../../../../../common';
 import { useGetPackagesQuery, type Pagination } from '../../../../../../../hooks';
 import type {
   InstalledIntegrationsFilter,
-  PackageInstallationStatus,
-  PackageListItemWithExtra,
+  InstalledPackagesUIInstallationStatus,
+  InstalledPackageUIPackageListItem,
 } from '../types';
 
-function getIntegrationStatus(item: PackageListItem): PackageInstallationStatus {
+function getIntegrationStatus(item: PackageListItem): InstalledPackagesUIInstallationStatus {
   if (item.status === 'install_failed') {
     return 'install_failed';
   } else if (item.status === 'installed') {
@@ -39,21 +39,6 @@ function getIntegrationStatus(item: PackageListItem): PackageInstallationStatus 
   return item.status ?? 'not_installed';
 }
 
-const fieldsToSearch = ['name', 'title', 'description'];
-function useLocalSearch(packageList: PackageListItemWithExtra[], isInitialLoading: boolean) {
-  return useMemo(() => {
-    if (isInitialLoading) {
-      return null;
-    }
-    const localSearch = new LocalSearch('id');
-    localSearch.indexStrategy = new PrefixIndexStrategy();
-    fieldsToSearch.forEach((field) => localSearch.addIndex(field));
-    localSearch.addDocuments(packageList);
-
-    return localSearch;
-  }, [isInitialLoading, packageList]);
-}
-
 export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
   pagination: Pagination
@@ -62,14 +47,14 @@ export function useInstalledIntegrations(
     withPackagePoliciesCount: true,
   });
 
-  const internalInstalledPackages: PackageListItemWithExtra[] = useMemo(
+  const internalInstalledPackages: InstalledPackageUIPackageListItem[] = useMemo(
     () =>
       // Filter not installed packages
       (data?.items.filter((item) => item.status !== 'not_installed') ?? [])
         // Add extra properties
         .map((item) => ({
           ...item,
-          extra: {
+          ui: {
             installation_status: getIntegrationStatus(item),
           },
         })),
@@ -78,16 +63,18 @@ export function useInstalledIntegrations(
 
   const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);
 
-  const internalInstalledPackagesFiltered: PackageListItemWithExtra[] = useMemo(() => {
-    const searchResults: PackageListItemWithExtra[] =
-      filters.q && localSearch ? (localSearch.search(filters.q) as PackageListItemWithExtra[]) : [];
+  const internalInstalledPackagesFiltered: InstalledPackageUIPackageListItem[] = useMemo(() => {
+    const searchResults: InstalledPackageUIPackageListItem[] =
+      filters.q && localSearch
+        ? (localSearch.search(filters.q) as InstalledPackageUIPackageListItem[])
+        : [];
 
     return (
       internalInstalledPackages
         // Filter according to filters
         .filter((item) => {
           const validInstalationStatus = filters.installationStatus
-            ? filters.installationStatus.includes(item.extra.installation_status)
+            ? filters.installationStatus.includes(item.ui.installation_status)
             : true;
 
           const validSearchTerms = filters.q ? searchResults.find((s) => s.id === item.id) : true;
@@ -103,10 +90,10 @@ export function useInstalledIntegrations(
 
   const countPerStatus = useMemo(() => {
     return internalInstalledPackagesFiltered.reduce((acc, item) => {
-      if (!acc[item.extra.installation_status]) {
-        acc[item.extra.installation_status] = 0;
+      if (!acc[item.ui.installation_status]) {
+        acc[item.ui.installation_status] = 0;
       }
-      (acc[item.extra.installation_status] as number)++;
+      (acc[item.ui.installation_status] as number)++;
 
       return acc;
     }, {} as { [k: string]: number | undefined });
@@ -118,7 +105,7 @@ export function useInstalledIntegrations(
     }, 0);
   }, [internalInstalledPackagesFiltered]);
 
-  const installedPackages: PackageListItemWithExtra[] = useMemo(() => {
+  const installedPackages: InstalledPackageUIPackageListItem[] = useMemo(() => {
     // Pagination
     const startAt = (pagination.currentPage - 1) * pagination.pageSize;
     return internalInstalledPackagesFiltered.slice(startAt, startAt + pagination.pageSize);
