@@ -63,12 +63,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // @ts-expect-error
         when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
         arguments: (requestBody) => {
-          const messageWithFieldIds = requestBody.messages.find((message) => {
-            const content = message?.content as string;
-            return content.includes('Below is a list of fields.') && content.includes('@timestamp');
-          });
-
-          const topFields = (messageWithFieldIds?.content as string)
+          const userMessage = last(requestBody.messages);
+          const topFields = (userMessage?.content as string)
             .slice(204) // remove the prefix message and only get the JSON
             .trim()
             .split('\n')
