@@ -1,5 +1,3 @@
-# Because of where this file is linked to the code you are in
-# $.['paths']['/api/alerting/rule/{id}']['post']
 requestBody:
   content:
     application/json:
