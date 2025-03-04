@@ -29,7 +29,7 @@ import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
-import { useStreamDetailSelector } from '../../../../../state_management/stream_detail_state_machine';
+import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
@@ -332,7 +332,7 @@ export function GrokAiSuggestions() {
     core: { http },
   } = useKibana();
   const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
-  const definition = useStreamDetailSelector((state) => state.context.definition!);
+  const { definition } = useStreamDetail();
   const previewDocuments = useSimulatorSelector((state) => state?.context.previewDocuments);
 
   if (!isAiEnabled && couldBeEnabled) {

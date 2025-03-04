@@ -12,11 +12,7 @@ import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_v
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../data_management/stream_detail_management';
 import { StreamDetailOverview } from '../stream_detail_overview';
-import {
-  StreamDetailContextProvider,
-  useStreamDetailEvents,
-  useStreamDetailSelector,
-} from '../../state_management/stream_detail_state_machine';
+import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
 
 export function StreamDetailView() {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
@@ -35,8 +31,7 @@ export function StreamDetailView() {
 }
 
 export function StreamDetailViewContent({ name, tab }: { name: string; tab: string }) {
-  const { reload } = useStreamDetailEvents();
-  const definition = useStreamDetailSelector((state) => state.context.definition);
+  const { definition, refresh } = useStreamDetail();
 
   const entity = {
     id: name,
@@ -60,7 +55,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
     },
     {
       name: 'management',
-      content: <StreamDetailManagement definition={definition} refreshDefinition={reload} />,
+      content: <StreamDetailManagement definition={definition} refreshDefinition={refresh} />,
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),
