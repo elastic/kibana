@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { WiredStreamDefinition } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
@@ -26,18 +26,20 @@ import { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
+  defaultColumns,
   fields,
   controls,
   stream,
   withTableActions,
 }: {
+  defaultColumns: TableColumnName[];
   fields: SchemaField[];
   controls: TControls;
   stream: WiredStreamDefinition;
   withTableActions: boolean;
 }) {
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(Object.keys(TABLE_COLUMNS));
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
   // Column sorting
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 

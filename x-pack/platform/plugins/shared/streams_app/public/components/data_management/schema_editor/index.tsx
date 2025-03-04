@@ -12,8 +12,10 @@ import { SchemaEditorProps } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
+import { SUPPORTED_TABLE_COLUMN_NAMES } from './constants';
 
 export function SchemaEditor({
+  defaultColumns = SUPPORTED_TABLE_COLUMN_NAMES,
   fields,
   isLoading,
   onFieldUnmap,
@@ -47,8 +49,9 @@ export function SchemaEditor({
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
         <FieldsTable
-          fields={fields}
+          defaultColumns={defaultColumns}
           controls={controls}
+          fields={fields}
           stream={stream}
           withTableActions={withTableActions}
         />
