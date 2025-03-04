@@ -117,7 +117,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           icon: 'iInCircle',
         },
         {
-          id: 'section1',
+          id: 'root-section1',
           path: '',
           title: 'Section one',
           children: [
@@ -151,7 +151,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                 //   icon: 'iInCircle',
                 // },
                 {
-                  id: 'section1',
+                  id: 'child-section1',
                   path: '',
                   title: 'Section one',
                   children: [
@@ -179,7 +179,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   ],
                 },
                 {
-                  id: 'section2',
+                  id: 'child-section2',
                   path: '',
                   title: 'Section two',
                   children: [
@@ -207,7 +207,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   ],
                 },
                 {
-                  id: 'section2',
+                  id: 'child-section3',
                   path: '',
                   title: 'Item 19',
                   icon: 'iInCircle',
@@ -228,7 +228,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   ],
                 },
                 {
-                  id: 'section3',
+                  id: 'child-section4',
                   title: 'Parent item, opened',
                   path: '',
                   icon: 'iInCircle',
@@ -282,7 +282,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           ],
         },
         {
-          id: 'section2',
+          id: 'root-section2',
           title: 'Section two',
           path: '',
           children: [
@@ -319,14 +319,14 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           ],
         },
         {
-          id: 'section3',
+          id: 'root-section3',
           title: 'Standalone item with long name',
           path: '',
           href: '/app/kibana',
           icon: 'iInCircle',
         },
         {
-          id: 'section3',
+          id: 'root-section4',
           title: 'Standalone group item with long name',
           path: '',
           icon: 'iInCircle',
@@ -398,7 +398,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
   ],
   footer: [
     {
-      id: 'section5',
+      id: 'footer-section5',
       title: 'Parent item, closed',
       path: '',
       renderAs: 'accordion',
@@ -445,7 +445,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
     },
     { id: 'item10', path: '', title: 'Item 10', icon: 'iInCircle', href: '/app/kibana' },
     {
-      id: 'section6',
+      id: 'footer-section6',
       title: 'Parent item, opened',
       path: '',
       renderAs: 'accordion',
