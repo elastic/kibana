@@ -140,6 +140,7 @@ export interface DocLinks {
     readonly engines: string;
     readonly indexApi: string;
     readonly inferenceApiCreate: string;
+    readonly inferenceApisConfigureChunking: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
@@ -254,11 +255,13 @@ export interface DocLinks {
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
     readonly dashboardImportExport: string;
+    readonly upgradeNotes: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;
     readonly batchReindex: string;
     readonly remoteReindex: string;
+    readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
   };
   readonly rollupJobs: string;
@@ -277,6 +280,9 @@ export interface DocLinks {
   };
   readonly server: {
     readonly protocol: string;
+  };
+  readonly logging: {
+    readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
     readonly aiAssistant: string;
@@ -305,6 +311,7 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
+    readonly updatePrebuiltDetectionRules: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -314,6 +321,8 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
+    readonly legacyEndpointManagementApiDeprecations: string;
+    readonly legacyRuleManagementBulkApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;
@@ -388,6 +397,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
   }>;
@@ -450,6 +460,7 @@ export interface DocLinks {
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
     deprecatedV1Endpoints: string;
+    enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;

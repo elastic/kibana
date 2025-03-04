@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 
+import { WorkflowId } from '@kbn/search-shared-ui';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -18,11 +19,10 @@ import { CreateIndexFormState } from '../../types';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-import { CreateIndexPanel } from '../shared/create_index_panel';
+import { CreateIndexPanel } from '../shared/create_index_panel/create_index_panel';
 
 import { CreateIndexCodeView } from './create_index_code_view';
 import { CreateIndexUIView } from './create_index_ui_view';
-import { WorkflowId } from '../../code_examples/workflows';
 import { useWorkflow } from '../shared/hooks/use_workflow';
 
 function initCreateIndexState() {
@@ -52,7 +52,11 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
       ? CreateIndexViewMode.Code
       : CreateIndexViewMode.UI
   );
-  const { workflow, setSelectedWorkflowId } = useWorkflow();
+  const {
+    workflow,
+    setSelectedWorkflowId,
+    createIndexExamples: selectedCodeExamples,
+  } = useWorkflow();
   const usageTracker = useUsageTracker();
   const onChangeView = useCallback(
     (id: string) => {
@@ -108,11 +112,12 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
           changeWorkflowId={(workflowId: WorkflowId) => {
             setSelectedWorkflowId(workflowId);
             usageTracker.click([
-              AnalyticsEvents.startCreateIndexWorkflowSelect,
-              `${AnalyticsEvents.startCreateIndexWorkflowSelect}_${workflowId}`,
+              AnalyticsEvents.createIndexWorkflowSelect,
+              `${AnalyticsEvents.createIndexWorkflowSelect}_${workflowId}`,
             ]);
           }}
           selectedWorkflow={workflow}
+          selectedCodeExamples={selectedCodeExamples}
           canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
           analyticsEvents={{
             runInConsole: AnalyticsEvents.createIndexRunInConsole,

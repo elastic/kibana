@@ -176,7 +176,7 @@ export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
 export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
-    defaultMessage: 'Risk engine Saved Object configuration updated successfully',
+    defaultMessage: 'Your configuration was updated.',
   }
 );
 
@@ -201,6 +201,13 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     defaultMessage: `Next engine run in {timeInMinutes}`,
     values: { timeInMinutes },
   });
+
+export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.riskEngineStatus',
+  {
+    defaultMessage: 'Risk engine status',
+  }
+);
 
 export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
   defaultMessage: 'Run Engine',

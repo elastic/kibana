@@ -16,12 +16,14 @@ import {
   type ESQLSource,
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
   isParameterType,
   type FunctionDefinition,
   type FunctionReturnType,
   type SupportedDataType,
   isReturnType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import {
   findFinalWord,
@@ -55,7 +57,10 @@ function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
 
 function checkContent(fn: ESQLFunction): boolean {
   const fnDef = getFunctionDefinition(fn.name);
-  return (!!fnDef && fnDef.type === 'agg') || extractFunctionArgs(fn.args).some(checkContent);
+  return (
+    (!!fnDef && fnDef.type === FunctionDefinitionTypes.AGG) ||
+    extractFunctionArgs(fn.args).some(checkContent)
+  );
 }
 
 export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number) {
@@ -101,7 +106,10 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
-  return args.filter((arg) => arg.sourceType === sourceType);
+  // the marker gets added in queries like "FROM "
+  return args.filter(
+    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
+  );
 }
 
 export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
@@ -287,7 +295,9 @@ export function getValidSignaturesAndTypesToSuggestNext(
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
   const shouldAddComma =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
+    !alreadyHasComma;
   const currentArg = enrichedArgs[argIndex];
   return {
     shouldAddComma,
@@ -367,12 +377,14 @@ export async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
     literals?: boolean;
+    values?: boolean;
   },
   {
     ignoreFn = [],
@@ -387,6 +399,7 @@ export async function getFieldsOrFunctionsSuggestions(
       ? getFieldsByType(types, ignoreColumns, {
           advanceCursor: commandName === 'sort',
           openSuggestions: commandName === 'sort',
+          variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
         })
       : [])) as SuggestionRawDefinition[],
     functions
@@ -571,7 +584,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
           operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
             ? 'any'
             : operatorReturnType,
-        ignored: ['='],
+        ignored: ['=', ':'],
       })
     );
   } else {
@@ -603,7 +616,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
         // technically another boolean value should be suggested, but it is a better experience
         // to actually suggest a wider set of fields/functions
         const typeToUse =
-          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'builtin'
+          finalType === 'boolean' &&
+          getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
             ? ['any']
             : (supportedTypes as string[]);
 
@@ -617,6 +631,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
             {
               functions: true,
               fields: true,
+              values: Boolean(operator.subtype === 'binary-expression'),
             }
           ))
         );

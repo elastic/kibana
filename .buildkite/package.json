@@ -15,12 +15,14 @@
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
+    "minimist": "^1.2.8",
     "tslib": "*"
   },
   "devDependencies": {
     "@types/chai": "^4.3.3",
     "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^3.0.5",
+    "@types/minimist": "^1.2.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^15.12.2",
     "chai": "^4.3.10",

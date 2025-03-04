@@ -83,7 +83,7 @@ export const initializeSearchEmbeddableApi = async (
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
-  const dataViews = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
@@ -151,7 +151,7 @@ export const initializeSearchEmbeddableApi = async (
   /** APIs for updating search source properties */
   const setDataViews = (nextDataViews: DataView[]) => {
     searchSource.setField('index', nextDataViews[0]);
-    dataViews.next(nextDataViews);
+    dataViews$.next(nextDataViews);
     searchSource$.next(searchSource);
   };
 
@@ -187,7 +187,7 @@ export const initializeSearchEmbeddableApi = async (
     },
     api: {
       setDataViews,
-      dataViews,
+      dataViews$,
       savedSearch$,
       filters$,
       setFilters,

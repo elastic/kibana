@@ -148,7 +148,11 @@ describe('rule helpers', () => {
         references: ['www.test.co'],
         riskScore: { value: 21, mapping: [], isMappingChecked: false },
         ruleNameOverride: 'message',
-        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+        severity: {
+          value: 'low',
+          mapping: fillEmptySeverityMappings([]),
+          isMappingChecked: false,
+        },
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',

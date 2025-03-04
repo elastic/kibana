@@ -47,7 +47,7 @@ export const MISCONFIGURATIONS_GROUPS_UNIT = (
       });
     default:
       return i18n.translate('xpack.csp.findings.groupUnit', {
-        values: { groupCount: totalCount },
+        values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {group} other {groups}}`,
       });
   }

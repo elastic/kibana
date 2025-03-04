@@ -20,9 +20,9 @@ import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/ty
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLI_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
@@ -498,7 +498,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        index: SLO_DESTINATION_INDEX_PATTERN,
+        index: SLI_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [
@@ -512,7 +512,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [

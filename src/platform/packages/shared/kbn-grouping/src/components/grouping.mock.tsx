@@ -130,6 +130,9 @@ export const mockGroupingProps = {
     unitsCountWithoutNull: {
       value: 14,
     },
+    nullGroupItems: {
+      doc_count: 1,
+    },
   },
   groupingId: 'test-grouping-id',
   isLoading: false,

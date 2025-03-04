@@ -105,17 +105,19 @@
     "@kbn/event-annotation-common",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-analytics-browser",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/entityManager-plugin",
     "@kbn/zod",
-    "@kbn/observability-utils-server",
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/observability-utils-common",
     "@kbn/charts-theme",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/deeplinks-management",
+    "@kbn/traced-es-client"
   ],
   "exclude": ["target/**/*"]
 }

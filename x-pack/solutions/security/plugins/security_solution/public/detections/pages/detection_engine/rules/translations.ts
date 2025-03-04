@@ -831,7 +831,7 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
 export const RULE_SOURCE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleSourceLabel',
   {
-    defaultMessage: 'Modifications',
+    defaultMessage: 'Modified/Unmodified',
   }
 );
 
@@ -1436,7 +1436,7 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
 export const UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.button.conflicts',
   {
-    defaultMessage: 'Rule has conflicts. Resolve them manually.',
+    defaultMessage: 'This rule has conflicts that must be manually resolved.',
   }
 );
 
@@ -1451,5 +1451,12 @@ export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
   'xpack.securitySolution.ruleUpdates.documentationLink',
   {
     defaultMessage: "See what's new in Prebuilt Security Detection Rules",
+  }
+);
+
+export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDuration',
+  {
+    defaultMessage: 'Unfilled gaps duration',
   }
 );

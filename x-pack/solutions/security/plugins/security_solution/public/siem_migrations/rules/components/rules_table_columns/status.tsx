@@ -16,11 +16,14 @@ import { StatusBadge } from '../status_badge';
 import { TableHeader } from './header';
 import { convertTranslationResultIntoText } from '../../utils/translation_results';
 
+export const SIEM_MIGRATIONS_STATUS_HEADER_ID = 'siemMigrationsStatusHeader';
+
 export const createStatusColumn = (): TableColumn => {
   return {
     field: 'translation_result',
     name: (
       <TableHeader
+        id={SIEM_MIGRATIONS_STATUS_HEADER_ID}
         title={i18n.COLUMN_STATUS}
         tooltipContent={
           <FormattedMessage

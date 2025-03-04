@@ -8,7 +8,7 @@
 /**
  * Get all actions with in-memory connectors
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { AuditLogger } from '@kbn/security-plugin-types-server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -120,6 +120,7 @@ async function getAllHelper({
       isPreconfigured: inMemoryConnector.isPreconfigured,
       isDeprecated: isConnectorDeprecated(inMemoryConnector),
       isSystemAction: inMemoryConnector.isSystemAction,
+      ...(inMemoryConnector.exposeConfig ? { config: inMemoryConnector.config } : {}),
     })),
   ].sort((a, b) => a.name.localeCompare(b.name));
 

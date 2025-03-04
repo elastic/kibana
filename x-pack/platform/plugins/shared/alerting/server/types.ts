@@ -400,6 +400,7 @@ export interface PublicMetricsSetters {
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+  setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
 }
 
 export interface PublicLastRunSetters {

@@ -319,18 +319,6 @@
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
               },
               {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
               },
@@ -361,10 +349,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register_discover_histogram_actions.ts"
-              },
-              {
-                "plugin": "links",
-                "path": "src/platform/plugins/private/links/public/actions/create_links_panel_action.ts"
               }
             ],
             "children": [
@@ -651,18 +635,6 @@
                 "path": "src/platform/plugins/shared/data/public/plugin.ts"
               },
               {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/public/plugin.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
               },
@@ -685,22 +657,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/public/plugin.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/public/plugin.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/public/plugin.ts"
               },
               {
                 "plugin": "cases",
@@ -825,30 +781,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/solutions/observability/plugins/synthetics/public/apps/embeddables/ui_actions/register_ui_actions.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/solutions/observability/plugins/synthetics/public/apps/embeddables/ui_actions/register_ui_actions.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -1753,25 +1685,15 @@
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.Action.subscribeToCompatibilityChanges",
+            "id": "def-public.Action.getCompatibilityChangesSubject",
             "type": "Function",
             "tags": [],
-            "label": "subscribeToCompatibilityChanges",
-            "description": [
-              "\nAllows this action to call a method when its compatibility changes."
-            ],
+            "label": "getCompatibilityChangesSubject",
+            "description": [],
             "signature": [
-              "((context: Context, onChange: (isCompatible: boolean, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>) => void) => ",
-              "Subscription",
-              " | undefined) | undefined"
+              "((context: Context) => ",
+              "Observable",
+              "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
@@ -1779,7 +1701,7 @@
             "children": [
               {
                 "parentPluginId": "uiActions",
-                "id": "def-public.Action.subscribeToCompatibilityChanges.$1",
+                "id": "def-public.Action.getCompatibilityChangesSubject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -1791,33 +1713,10 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.Action.subscribeToCompatibilityChanges.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(isCompatible: boolean, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context>) => void"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": [
-              "a subscription that can be used to unsubscribe from the changes."
+              "an Observable that emits when this action's compatibility changes."
             ]
           },
           {
@@ -2133,25 +2032,15 @@
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges",
+            "id": "def-public.ActionDefinition.getCompatibilityChangesSubject",
             "type": "Function",
             "tags": [],
-            "label": "subscribeToCompatibilityChanges",
-            "description": [
-              "\nAllows this action to call a method when its compatibility changes."
-            ],
+            "label": "getCompatibilityChangesSubject",
+            "description": [],
             "signature": [
-              "((context: Context, onChange: (isCompatible: boolean, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>) => void) => ",
-              "Subscription",
-              " | undefined) | undefined"
+              "((context: Context) => ",
+              "Observable",
+              "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
@@ -2159,7 +2048,7 @@
             "children": [
               {
                 "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$1",
+                "id": "def-public.ActionDefinition.getCompatibilityChangesSubject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -2171,33 +2060,10 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(isCompatible: boolean, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context>) => void"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": [
-              "a subscription that can be used to unsubscribe from the changes."
+              "an Observable that emits when this action's compatibility should be recalculated."
             ]
           },
           {
@@ -3015,7 +2881,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>, \"subscribeToCompatibilityChanges\" | \"couldBecomeCompatible\">>"
+          "<Context>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
@@ -3343,7 +3209,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3351,7 +3217,23 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; }"
+        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>>) => void; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
       "deprecated": false,

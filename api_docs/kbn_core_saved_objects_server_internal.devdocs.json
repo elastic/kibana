@@ -865,7 +865,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
@@ -1000,7 +1000,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
@@ -1233,7 +1233,23 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.SAVED_OBJECT_TYPES_COUNT",
+        "type": "number",
+        "tags": [],
+        "label": "SAVED_OBJECT_TYPES_COUNT",
+        "description": [],
+        "signature": [
+          "128"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",

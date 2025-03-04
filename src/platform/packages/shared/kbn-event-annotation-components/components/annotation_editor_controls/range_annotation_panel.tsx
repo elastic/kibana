@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker, UseEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
@@ -31,7 +31,7 @@ export const ConfigPanelApplyAsRangeSwitch = ({
 }) => {
   const isRange = isRangeAnnotationConfig(annotation);
   return (
-    <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
+    <EuiFormRow display="columnCompressed">
       <EuiSwitch
         data-test-subj="lns-xyAnnotation-rangeSwitch"
         label={
@@ -84,6 +84,15 @@ export const ConfigPanelApplyAsRangeSwitch = ({
   );
 };
 
+const RowCompressedMarginStyle = ({ euiTheme }: UseEuiTheme) => `
+  & + .lnsRowCompressedMargin {
+    margin-top: ${euiTheme.size.s};
+  }
+  .euiFormControlLayout__prepend {
+    min-width: 50px; // makes both labels ("from" and "to") the same width
+  }
+`;
+
 export const ConfigPanelRangeDatePicker = ({
   value,
   label,
@@ -102,9 +111,10 @@ export const ConfigPanelRangeDatePicker = ({
   return (
     <EuiFormRow
       display="rowCompressed"
-      fullWidth
       label={label}
-      className="lnsConfigPanelAnnotations__date lnsRowCompressedMargin"
+      fullWidth
+      className="lnsRowCompressedMargin"
+      css={RowCompressedMarginStyle}
     >
       <EuiDatePicker
         compressed

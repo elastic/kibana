@@ -6,8 +6,8 @@
  */
 import {
   SerializedTitles,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
+  PublishesWritableTitle,
+  PublishesTitle,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
@@ -32,8 +32,8 @@ interface ErrorBudgetCustomInput {
 
 export type SloErrorBudgetEmbeddableState = SerializedTitles & ErrorBudgetCustomInput;
 export type ErrorBudgetApi = DefaultEmbeddableApi<SloErrorBudgetEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle;
+  PublishesWritableTitle &
+  PublishesTitle;
 
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;

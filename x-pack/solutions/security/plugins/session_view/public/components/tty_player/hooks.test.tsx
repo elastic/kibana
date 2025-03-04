@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import type { ProcessEventsPage } from '../../../common';
@@ -179,21 +179,25 @@ describe('TTYPlayer/hooks', () => {
 
       rerender({ ...initialProps, isPlaying: false });
 
-      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
-      expect(result.current.terminal.buffer.active.getLine(1)?.translateToString(true)).toBe(',');
-      expect(result.current.terminal.buffer.active.getLine(2)?.translateToString(true)).toBe(
-        '                             Some Companies Puppet instance'
-      );
-      expect(result.current.terminal.buffer.active.getLine(3)?.translateToString(true)).toBe(
-        '             |  |    |       CentOS Stream release 8 on x86_64'
-      );
-      expect(result.current.terminal.buffer.active.getLine(4)?.translateToString(true)).toBe(
-        '  ***********************    Load average: 1.23, 1.01, 0.63'
-      );
-      expect(result.current.terminal.buffer.active.getLine(5)?.translateToString(true)).toBe(
-        '  ************************   '
-      );
-      expect(result.current.currentLine).toBe(LOOPS);
+      await waitFor(() => {
+        expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe(
+          '256'
+        );
+        expect(result.current.terminal.buffer.active.getLine(1)?.translateToString(true)).toBe(',');
+        expect(result.current.terminal.buffer.active.getLine(2)?.translateToString(true)).toBe(
+          '                             Some Companies Puppet instance'
+        );
+        expect(result.current.terminal.buffer.active.getLine(3)?.translateToString(true)).toBe(
+          '             |  |    |       CentOS Stream release 8 on x86_64'
+        );
+        expect(result.current.terminal.buffer.active.getLine(4)?.translateToString(true)).toBe(
+          '  ***********************    Load average: 1.23, 1.01, 0.63'
+        );
+        expect(result.current.terminal.buffer.active.getLine(5)?.translateToString(true)).toBe(
+          '  ************************   '
+        );
+        expect(result.current.currentLine).toBe(LOOPS);
+      });
     });
 
     it('will allow a plain text search highlight on the last line printed', async () => {

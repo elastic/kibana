@@ -13,8 +13,11 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
+import isEmpty from 'lodash/isEmpty';
+
+import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
@@ -55,6 +58,8 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
+import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
+import { logShardFailures } from '../utils/log_shard_failure';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -120,6 +125,8 @@ export const eqlExecutor = async ({
       uiSettingsClient: services.uiSettingsClient,
     });
 
+    const isSequenceQuery = isEqlSequenceQuery(ruleParams.query);
+
     const request = buildEqlSearchRequest({
       query: ruleParams.query,
       index: inputIndex,
@@ -164,6 +171,16 @@ export const eqlExecutor = async ({
       }
 
       let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
+
+      const shardFailures = response.shard_failures;
+      if (!isEmpty(shardFailures)) {
+        logShardFailures(
+          isSequenceQuery,
+          shardFailures as ShardFailure[],
+          result,
+          ruleExecutionLogger
+        );
+      }
 
       const { events, sequences } = response.hits;
 

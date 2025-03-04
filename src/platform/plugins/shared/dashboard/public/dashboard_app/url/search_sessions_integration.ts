@@ -50,7 +50,7 @@ export function createSessionRestorationDataProvider(
 ): SearchSessionInfoProvider<DashboardLocatorParams> {
   return {
     getName: async () =>
-      dashboardApi.panelTitle.value ?? dashboardApi.savedObjectId.value ?? dashboardApi.uuid,
+      dashboardApi.title$.value ?? dashboardApi.savedObjectId$.value ?? dashboardApi.uuid,
     getLocatorData: async () => ({
       id: DASHBOARD_APP_LOCATOR,
       initialState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: false }),
@@ -70,9 +70,9 @@ function getLocatorParams({
   dashboardApi: DashboardApi;
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
-  const savedObjectId = dashboardApi.savedObjectId.value;
+  const savedObjectId = dashboardApi.savedObjectId$.value;
   return {
-    viewMode: dashboardApi.viewMode.value ?? 'view',
+    viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
     preserveSavedFilters: false,
     filters: dataService.query.filterManager.getFilters(),

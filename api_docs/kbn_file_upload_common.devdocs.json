@@ -1,0 +1,244 @@
+{
+  "id": "@kbn/file-upload-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FileUploadResults",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileUploadResults",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.pipelineId",
+            "type": "string",
+            "tags": [],
+            "label": "pipelineId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.files",
+            "type": "Array",
+            "tags": [],
+            "label": "files",
+            "description": [],
+            "signature": [
+              "{ fileName: string; docCount: number; fileFormat: string; documentType: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.OpenFileUploadLiteContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "OpenFileUploadLiteContext",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.onUploadComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadComplete",
+            "description": [],
+            "signature": [
+              "((results: ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.FileUploadResults",
+                "text": "FileUploadResults"
+              },
+              " | null) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.OpenFileUploadLiteContext.onUploadComplete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "results",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/file-upload-common",
+                    "scope": "common",
+                    "docId": "kibKbnFileUploadCommonPluginApi",
+                    "section": "def-common.FileUploadResults",
+                    "text": "FileUploadResults"
+                  },
+                  " | null"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.indexSettings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexSettings",
+            "description": [],
+            "signature": [
+              "IndicesIndexSettings",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.autoAddInference",
+            "type": "string",
+            "tags": [],
+            "label": "autoAddInference",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.autoCreateDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoCreateDataView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.OPEN_FILE_UPLOAD_LITE_ACTION",
+        "type": "string",
+        "tags": [],
+        "label": "OPEN_FILE_UPLOAD_LITE_ACTION",
+        "description": [],
+        "signature": [
+          "\"openFileUploadLiteTrigger\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.OPEN_FILE_UPLOAD_LITE_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "OPEN_FILE_UPLOAD_LITE_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"OPEN_FILE_UPLOAD_LITE_TRIGGER\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

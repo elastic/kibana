@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -271,28 +271,26 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
       index: this.indexPattern.stats,
       ignore_unavailable: true,
       filter_path: filterPath,
-      body: {
-        query: createQuery({
-          start,
-          end,
-          filters: [
-            {
-              bool: {
-                should: [
-                  { term: { 'metricset.name': 'node_stats' } },
-                  { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
-                ],
-              },
+      query: createQuery({
+        start,
+        end,
+        filters: [
+          {
+            bool: {
+              should: [
+                { term: { 'metricset.name': 'node_stats' } },
+                { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
+              ],
             },
-          ],
-        }) as estypes.QueryDslQueryContainer,
-        collapse: {
-          field: 'logstash.node.stats.logstash.uuid',
-        },
-        sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-        from: page * HITS_SIZE,
-        size: HITS_SIZE,
+          },
+        ],
+      }) as estypes.QueryDslQueryContainer,
+      collapse: {
+        field: 'logstash.node.stats.logstash.uuid',
       },
+      sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
+      from: page * HITS_SIZE,
+      size: HITS_SIZE,
     };
 
     const results = await callCluster.search<LogstashStats>(params, {
@@ -335,28 +333,26 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
       index: this.indexPattern.state,
       ignore_unavailable: true,
       filter_path: filterPath,
-      body: {
-        query: createQuery({
-          // metricbeat occasionally sends state metrics
-          // so, not using start and end periods as we need node state info to fill plugin usages
-          filters: [
-            { terms: { 'logstash.node.state.pipeline.ephemeral_id': ephemeralIds } },
-            {
-              bool: {
-                should: [
-                  { term: { 'metricset.name': 'node' } },
-                  { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node' } },
-                ],
-              },
+      query: createQuery({
+        // metricbeat occasionally sends state metrics
+        // so, not using start and end periods as we need node state info to fill plugin usages
+        filters: [
+          { terms: { 'logstash.node.state.pipeline.ephemeral_id': ephemeralIds } },
+          {
+            bool: {
+              should: [
+                { term: { 'metricset.name': 'node' } },
+                { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node' } },
+              ],
             },
-          ],
-        }) as estypes.QueryDslQueryContainer,
-        collapse: {
-          field: 'logstash.node.state.pipeline.ephemeral_id',
-        },
-        sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-        size: ephemeralIds.length,
+          },
+        ],
+      }) as estypes.QueryDslQueryContainer,
+      collapse: {
+        field: 'logstash.node.state.pipeline.ephemeral_id',
       },
+      sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
+      size: ephemeralIds.length,
     };
 
     const results = await callCluster.search<LogstashState>(params, {

@@ -194,6 +194,11 @@ export const getTableColumns = (
       name: i18n.translate('esqlEditor.query.recentQueriesColumnLabel', {
         defaultMessage: 'Query',
       }),
+      css: css`
+        .euiTableCellContent {
+          align-items: flex-start;
+        }
+      `,
       render: (queryString: QueryHistoryItem['queryString']) => (
         <QueryColumn
           queryString={queryString}
@@ -408,9 +413,9 @@ export function QueryColumn({
   useEffect(() => {
     if (containerRef.current) {
       const textIsOverlapping = containerRef.current.offsetWidth < containerRef.current.scrollWidth;
-      setIsExpandable(textIsOverlapping);
+      setIsExpandable(textIsOverlapping || isRowExpanded);
     }
-  }, [containerWidth]);
+  }, [containerWidth, isRowExpanded, queryString]);
 
   return (
     <>

@@ -105,6 +105,8 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
+import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -149,7 +151,10 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
-import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
+import {
+  validateAdditionalDatastreamsPermissionsForSpace,
+  validatePolicyNamespaceForSpace,
+} from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import { runWithCache } from './epm/packages/cache';
@@ -295,6 +300,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         await validateAgentPolicyOutputForIntegration(
           soClient,
           agentPolicy,
+          packagePolicy,
           enrichedPackagePolicy.package?.name
         );
       }
@@ -316,6 +322,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
+    await validateAdditionalDatastreamsPermissionsForSpace({
+      additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     let inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
@@ -939,6 +949,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = appContextService.getLogger();
 
     this.keepPolicyIdInSync(packagePolicyUpdate);
+    await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
@@ -946,7 +957,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
-      await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
         packagePolicyUpdate,
@@ -988,6 +998,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
+    await validateAdditionalDatastreamsPermissionsForSpace({
+      additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     // eslint-disable-next-line prefer-const
     let { version, ...restOfPackagePolicy } = packagePolicy;
@@ -1912,17 +1926,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
+          // disable some inputs in case of agentless integration
+          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
+            ? false
+            : input.enabled;
+
           return {
             ...defaultInput,
-            enabled: input.enabled,
+            enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled: input.enabled,
+              enabled,
             })),
           } as NewPackagePolicyInput;
         });
+
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
@@ -1939,6 +1959,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
+          additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
     }
@@ -2212,6 +2233,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 await validateAgentPolicyOutputForIntegration(
                   soClient,
                   agentPolicy,
+                  packagePolicy,
                   packagePolicy.package.name,
                   false
                 );
@@ -2431,10 +2453,17 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
   const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
-      .map(([key, value]) => ({
-        key,
-        message: value,
-      }))
+      .map(([key, value]) => {
+        try {
+          const message = !!value ? JSON.stringify(value) : value;
+          return { key, message };
+        } catch (e) {
+          return {
+            key,
+            message: value,
+          };
+        }
+      })
       .filter(({ message }) => !!message);
 
     if (responseFormattedValidationErrors.length) {
@@ -2929,10 +2958,17 @@ export function updatePackageInputs(
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
-      .map(([key, value]) => ({
-        key,
-        message: value,
-      }))
+      .map(([key, value]) => {
+        try {
+          const message = !!value ? JSON.stringify(value) : value;
+          return { key, message };
+        } catch (e) {
+          return {
+            key,
+            message: value,
+          };
+        }
+      })
       .filter(({ message }) => !!message);
 
     if (responseFormattedValidationErrors.length) {

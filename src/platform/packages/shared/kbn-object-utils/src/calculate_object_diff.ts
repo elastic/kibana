@@ -27,6 +27,10 @@ interface ObjectDiffResult<TBase, TCompare> {
   };
 }
 
+function isAllUndefined(obj: unknown): boolean {
+  return Array.isArray(obj) && obj.every((value) => value === undefined);
+}
+
 /**
  * Compares two JSON objects and calculates the added and removed properties, including nested properties.
  * @param oldObj - The base object.
@@ -66,6 +70,20 @@ export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
         );
         if (isEmpty(addedMap[key])) delete addedMap[key];
         if (isEmpty(removedMap[key])) delete removedMap[key];
+      } else if (Array.isArray(base[key]) && Array.isArray(compare[key])) {
+        addedMap[key] = [];
+        removedMap[key] = [];
+        updatedMap[key] = [];
+        diffRecursive(
+          base[key] as Obj,
+          compare[key] as Obj,
+          addedMap[key] as Obj,
+          removedMap[key] as Obj,
+          updatedMap[key] as Obj
+        );
+        if (isAllUndefined(addedMap[key])) delete addedMap[key];
+        if (isAllUndefined(removedMap[key])) delete removedMap[key];
+        if (isAllUndefined(updatedMap[key])) delete updatedMap[key];
       } else if (base[key] !== compare[key]) {
         updatedMap[key] = compare[key];
       }

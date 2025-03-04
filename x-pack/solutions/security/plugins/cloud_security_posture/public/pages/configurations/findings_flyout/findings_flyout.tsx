@@ -34,30 +34,27 @@ import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
-import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspEvaluationBadge, benchmarksNavigation } from '@kbn/cloud-security-posture';
+import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
+import { BenchmarkName, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
-import {
-  CSP_MISCONFIGURATIONS_DATASET,
-  getVendorName,
-} from '../../../common/utils/get_vendor_name';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
-import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { TakeAction } from '../../../components/take_action';
 import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
-import { BenchmarkName } from '../../../../common/types_old';
-import { FINDINGS_FLYOUT, FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST } from '../test_subjects';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { CspInlineDescriptionList } from '../../../components/csp_inline_description_list';
+
+const FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST = 'misconfigs-findings-flyout-description-list';
+
+const FINDINGS_FLYOUT = 'findings_flyout';
 
 const tabs = [
   {
@@ -240,6 +237,7 @@ export const FindingsRuleFlyout = ({
   findingsCount,
   onPaginate,
 }: FindingFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
@@ -263,7 +261,7 @@ export const FindingsRuleFlyout = ({
         <div
           css={css`
             line-height: 20px;
-            margin-top: ${euiThemeVars.euiSizeM};
+            margin-top: ${euiTheme.size.m};
           `}
         >
           <CspInlineDescriptionList
@@ -287,7 +285,7 @@ export const FindingsRuleFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
         {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: euiThemeVars.euiSize }}>
+          <div style={{ marginBottom: euiTheme.size.base }}>
             <MissingFieldsCallout finding={finding} />
           </div>
         )}

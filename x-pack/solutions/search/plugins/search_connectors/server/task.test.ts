@@ -54,18 +54,24 @@ describe('infraSyncTaskRunner', () => {
     package_policy_id: 'agent-001',
     agent_policy_ids: ['agent-package-001'],
     connector_settings: githubConnector,
+    package_policy_name: 'Agentless github_connector',
+    package_name: 'Elastic Connectors',
   };
 
   const sharepointPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-002',
     agent_policy_ids: ['agent-package-002'],
     connector_settings: sharepointConnector,
+    package_policy_name: 'Agentless spo_connector',
+    package_name: 'Elastic Connectors',
   };
 
   const mysqlPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-003',
     agent_policy_ids: ['agent-package-003'],
     connector_settings: mysqlConnector,
+    package_policy_name: 'Agentless mysql_connector',
+    package_name: 'Elastic Connectors',
   };
 
   let logger: MockedLogger;

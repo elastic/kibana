@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastIsEqual from 'fast-deep-equal';
-import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasSaveNotification,
@@ -24,7 +22,9 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-
+import fastIsEqual from 'fast-deep-equal';
+import React, { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type {
   ControlGroupChainingSystem,
   ControlGroupRuntimeState,
@@ -85,7 +85,8 @@ export const getControlGroupEmbeddableFactory = () => {
         ...controlsManager.api,
         autoApplySelections$,
       });
-      const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
+      const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
         chainingSystem ?? DEFAULT_CONTROL_CHAINING
       );
@@ -130,7 +131,8 @@ export const getControlGroupEmbeddableFactory = () => {
 
       const api = setApi({
         ...controlsManager.api,
-        disabledActionIds: disabledActionIds$,
+        esqlVariables$,
+        disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
@@ -166,7 +168,7 @@ export const getControlGroupEmbeddableFactory = () => {
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
-            ? parentApi.dataViews.value?.[0]?.id
+            ? parentApi.dataViews$.value?.[0]?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
 
@@ -201,7 +203,7 @@ export const getControlGroupEmbeddableFactory = () => {
             references,
           };
         },
-        dataViews,
+        dataViews$,
         labelPosition: labelPosition$,
         saveNotification$: apiHasSaveNotification(parentApi)
           ? parentApi.saveNotification$
@@ -227,9 +229,17 @@ export const getControlGroupEmbeddableFactory = () => {
       const childrenDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
         DataView[]
-      >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
-        dataViews.next(newDataViews)
+      >(api, 'dataViews$', apiPublishesDataViews, []).subscribe((newDataViews) =>
+        dataViews$.next(newDataViews)
       );
+
+      /** Combine ESQL variables from all children that publish them. */
+      const childrenESQLVariablesSubscription = combineCompatibleChildrenApis<
+        PublishesESQLVariable,
+        ESQLControlVariable[]
+      >(api, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
+        esqlVariables$.next(newESQLVariables);
+      });
 
       const saveNotificationSubscription = apiHasSaveNotification(parentApi)
         ? parentApi.saveNotification$.subscribe(() => {
@@ -275,6 +285,7 @@ export const getControlGroupEmbeddableFactory = () => {
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
+              childrenESQLVariablesSubscription.unsubscribe();
               saveNotificationSubscription?.unsubscribe();
             };
           }, []);

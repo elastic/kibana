@@ -15,7 +15,7 @@ import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 interface Props {
   onSave: () => Promise<void>;
   resetUnsavedChanges: () => void;
-  unsavedChanges$: PublishesUnsavedChanges['unsavedChanges'];
+  unsavedChanges$: PublishesUnsavedChanges['unsavedChanges$'];
 }
 
 export function TopNav(props: Props) {

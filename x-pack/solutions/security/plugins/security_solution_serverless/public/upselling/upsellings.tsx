@@ -10,6 +10,8 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
+  PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -31,10 +33,11 @@ import {
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
-import { IntegrationsAssistantLazy } from './sections/integration_assistant';
+import { AutomaticImportLazy } from './sections/automatic_import';
 
 interface UpsellingsConfig {
   pli: ProductFeatureKeyType;
@@ -140,11 +143,14 @@ export const upsellingSections: UpsellingSections = [
     ),
   },
   {
-    id: 'integration_assistant',
-    pli: ProductFeatureKey.integrationAssistant,
-    component: () => (
-      <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
-    ),
+    id: 'siem_migrations_start',
+    pli: ProductFeatureKey.siemMigrations,
+    component: SiemMigrationsStartUpsellSectionLazy,
+  },
+  {
+    id: 'automatic_import',
+    pli: ProductFeatureKey.automaticImport,
+    component: () => <AutomaticImportLazy requiredPLI={ProductFeatureKey.automaticImport} />,
   },
 ];
 
@@ -162,6 +168,22 @@ export const upsellingMessages: UpsellingMessages = [
     pli: ProductFeatureKey.investigationGuideInteractions,
     message: UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS(
       getProductTypeByPLI(ProductFeatureKey.investigationGuideInteractions) ?? ''
+    ),
+  },
+  {
+    id: 'prebuilt_rule_customization',
+    pli: ProductFeatureKey.prebuiltRuleCustomization,
+    message: PREBUILT_RULE_CUSTOMIZATION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
+      'feature tier'
+    ),
+  },
+  {
+    id: 'prebuilt_rule_customization_description',
+    pli: ProductFeatureKey.prebuiltRuleCustomization,
+    message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
+      'feature tier'
     ),
   },
 ];

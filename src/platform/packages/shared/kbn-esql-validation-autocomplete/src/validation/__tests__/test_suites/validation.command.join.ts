@@ -13,7 +13,7 @@ export const validationJoinCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
       describe('<LEFT | RIGHT | LOOKUP> JOIN <index> [ AS <alias> ] ON <condition> [, <condition> [, ...]]', () => {
-        describe('... <index> [ AS <alias> ]', () => {
+        describe('... <index> ...', () => {
           test('validates the most basic query', async () => {
             const { expectErrors } = await setup();
 
@@ -45,6 +45,8 @@ export const validationJoinCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('FROM index | LEFT JOIN join_index_alias_2 ON stringField', []);
           });
         });
+
+        test.todo('... AS <alias> ...');
       });
     });
   });

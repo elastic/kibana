@@ -1,5 +1,5 @@
 
-`xpack.infra.sources.default.fields.message`::
+deprecated:[8.18.0] `xpack.infra.sources.default.fields.message`::
 Fields used to display messages in the Logs app. Defaults to `['message', '@message']`.
 
 `xpack.infra.alerting.inventory_threshold.group_by_page_size`::

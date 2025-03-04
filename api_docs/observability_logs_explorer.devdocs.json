@@ -18,60 +18,24 @@
   },
   "common": {
     "classes": [],
-    "functions": [
+    "functions": [],
+    "interfaces": [
       {
         "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.deepCompactObject",
-        "type": "Function",
+        "id": "def-common.ObservabilityLogsExplorerConfig",
+        "type": "Interface",
         "tags": [],
-        "label": "deepCompactObject",
+        "label": "ObservabilityLogsExplorerConfig",
         "description": [],
-        "signature": [
-          "<Value extends Record<string, any>>(obj: Value) => Value"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/common/utils/deep_compact_object.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityLogsExplorer",
-            "id": "def-common.deepCompactObject.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "obj",
-            "description": [],
-            "signature": [
-              "Value"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/common/utils/deep_compact_object.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
-        "description": [],
-        "signature": [
-          "\"pageState\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/common/url_schema/common.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

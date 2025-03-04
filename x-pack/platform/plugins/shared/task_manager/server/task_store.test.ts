@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
@@ -65,6 +65,7 @@ beforeEach(() => {
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -320,10 +321,8 @@ describe('TaskStore', () => {
       const { args } = await testFetch();
       expect(args).toMatchObject({
         index: 'tasky',
-        body: {
-          sort: [{ 'task.runAt': 'asc' }],
-          query: { term: { type: 'task' } },
-        },
+        sort: [{ 'task.runAt': 'asc' }],
+        query: { term: { type: 'task' } },
       });
     });
 
@@ -335,11 +334,9 @@ describe('TaskStore', () => {
       });
 
       expect(args).toMatchObject({
-        body: {
-          query: {
-            bool: {
-              must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
-            },
+        query: {
+          bool: {
+            must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
           },
         },
       });
@@ -356,10 +353,8 @@ describe('TaskStore', () => {
       const { args } = await testFetch({}, [], true);
       expect(args).toMatchObject({
         index: 'tasky',
-        body: {
-          sort: [{ 'task.runAt': 'asc' }],
-          query: { term: { type: 'task' } },
-        },
+        sort: [{ 'task.runAt': 'asc' }],
+        query: { term: { type: 'task' } },
         _source_excludes: ['task.state', 'task.params'],
       });
     });
@@ -425,7 +420,7 @@ describe('TaskStore', () => {
       const { args } = await testMsearch([{}], []);
       expect(args).toMatchObject({
         index: 'tasky',
-        body: [
+        searches: [
           {},
           {
             sort: [{ 'task.runAt': 'asc' }],
@@ -453,7 +448,7 @@ describe('TaskStore', () => {
       );
 
       expect(args).toMatchObject({
-        body: [
+        searches: [
           {},
           {
             query: {
@@ -552,20 +547,18 @@ describe('TaskStore', () => {
       });
       expect(args).toMatchObject({
         index: 'tasky',
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: {
-                bool: {
-                  must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-                  must_not: [{ term: { 'task.status': 'unrecognized' } }],
-                },
+        size: 0,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                must_not: [{ term: { 'task.status': 'unrecognized' } }],
               },
             },
           },
-          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
       });
     });
 
@@ -578,27 +571,25 @@ describe('TaskStore', () => {
       });
 
       expect(args).toMatchObject({
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    filter: {
-                      bool: {
-                        must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-                        must_not: [{ term: { 'task.status': 'unrecognized' } }],
-                      },
+        size: 0,
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                      must_not: [{ term: { 'task.status': 'unrecognized' } }],
                     },
                   },
                 },
-                { term: { 'task.taskType': 'bar' } },
-              ],
-            },
+              },
+              { term: { 'task.taskType': 'bar' } },
+            ],
           },
-          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
       });
     });
 
@@ -609,21 +600,19 @@ describe('TaskStore', () => {
       });
 
       expect(args).toMatchObject({
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: {
-                bool: {
-                  must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-                  must_not: [{ term: { 'task.status': 'unrecognized' } }],
-                },
+        size: 0,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                must_not: [{ term: { 'task.status': 'unrecognized' } }],
               },
             },
           },
-          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
-          runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
         },
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+        runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
       });
     });
 

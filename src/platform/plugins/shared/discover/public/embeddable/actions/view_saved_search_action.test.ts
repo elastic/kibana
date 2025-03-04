@@ -27,7 +27,7 @@ const compatibleEmbeddableApi: SearchEmbeddableApi = {
     searchSource: { getField: jest.fn() },
   } as unknown as SavedSearch),
   parentApi: {
-    viewMode: new BehaviorSubject('view'),
+    viewMode$: new BehaviorSubject('view'),
   },
 } as unknown as SearchEmbeddableApi;
 
@@ -54,7 +54,7 @@ describe('view saved search action', () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     expect(
       await action.isCompatible({
-        embeddable: { ...compatibleEmbeddableApi, viewMode: new BehaviorSubject(ViewMode.EDIT) },
+        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject(ViewMode.EDIT) },
       })
     ).toBe(false);
   });

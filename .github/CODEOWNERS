@@ -39,93 +39,20 @@ examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
 examples/unified_doc_viewer @elastic/kibana-core
 examples/unified_field_list_examples @elastic/kibana-data-discovery
+examples/unified_tabs_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
-packages/core/analytics/core-analytics-server-mocks @elastic/kibana-core
-packages/core/application/core-application-browser-mocks @elastic/kibana-core
-packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
-packages/core/base/core-base-browser-mocks @elastic/kibana-core
-packages/core/base/core-base-server-mocks @elastic/kibana-core
-packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
-packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
-packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
-packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
-packages/core/deprecations/core-deprecations-server-mocks @elastic/kibana-core
-packages/core/doc-links/core-doc-links-browser-mocks @elastic/kibana-core
-packages/core/doc-links/core-doc-links-server-mocks @elastic/kibana-core
-packages/core/elasticsearch/core-elasticsearch-client-server-mocks @elastic/kibana-core
-packages/core/elasticsearch/core-elasticsearch-server-mocks @elastic/kibana-core
-packages/core/environment/core-environment-server-mocks @elastic/kibana-core
-packages/core/execution-context/core-execution-context-browser-mocks @elastic/kibana-core
-packages/core/execution-context/core-execution-context-server-mocks @elastic/kibana-core
-packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
-packages/core/http/core-http-browser-mocks @elastic/kibana-core
-packages/core/http/core-http-context-server-mocks @elastic/kibana-core
-packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
-packages/core/http/core-http-router-server-mocks @elastic/kibana-core
-packages/core/http/core-http-server-mocks @elastic/kibana-core
-packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
-packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
-packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
-packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
-packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
-packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
-packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
-packages/core/logging/core-logging-server-mocks @elastic/kibana-core
-packages/core/metrics/core-metrics-collectors-server-mocks @elastic/kibana-core
-packages/core/metrics/core-metrics-server-mocks @elastic/kibana-core
-packages/core/node/core-node-server-mocks @elastic/kibana-core
-packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-core
-packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
-packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
-packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
-packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
-packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
-packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-api-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-base-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-browser-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-import-export-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-migration-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
-packages/core/status/core-status-server-mocks @elastic/kibana-core
-packages/core/test-helpers/core-test-helpers-kbn-server @elastic/kibana-core
-packages/core/test-helpers/core-test-helpers-model-versions @elastic/kibana-core
-packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
-packages/core/ui-settings/core-ui-settings-browser-mocks @elastic/appex-sharedux
-packages/core/ui-settings/core-ui-settings-server-mocks @elastic/appex-sharedux
-packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
-packages/kbn-ambient-common-types @elastic/kibana-operations
-packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-ambient-storybook-types @elastic/kibana-operations
-packages/kbn-ambient-ui-types @elastic/kibana-operations
-packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
-packages/kbn-babel-register @elastic/kibana-operations
-packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
-packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
-packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
-packages/kbn-code-owners @elastic/appex-qa
-packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
-packages/kbn-dev-cli-errors @elastic/kibana-operations
-packages/kbn-dev-cli-runner @elastic/kibana-operations
-packages/kbn-dev-proc-runner @elastic/kibana-operations
-packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-docs-utils @elastic/kibana-operations
-packages/kbn-es @elastic/kibana-operations
-packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-css @elastic/appex-sharedux
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
@@ -133,35 +60,20 @@ packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
-packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
-packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-ftr-common-functional-ui-services @elastic/appex-qa
-packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
-packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-import-locator @elastic/kibana-operations
-packages/kbn-import-resolver @elastic/kibana-operations
-packages/kbn-jest-serializers @elastic/kibana-operations
-packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
-packages/kbn-management/storybook/config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
-packages/kbn-mock-idp-utils @elastic/kibana-security
-packages/kbn-openapi-bundler @elastic/security-detection-rule-management
-packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
-packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
-packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
@@ -171,51 +83,46 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-relocate @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
-packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-scout @elastic/appex-qa
-packages/kbn-scout-info @elastic/appex-qa
-packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-set-map @elastic/kibana-operations
-packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
-packages/kbn-stdio-dev-helpers @elastic/kibana-operations
-packages/kbn-storybook @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
-packages/kbn-telemetry-tools @elastic/kibana-core
-packages/kbn-test @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-test-eui-helpers @elastic/kibana-visualizations
-packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
-packages/serverless/storybook/config @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
+src/core/packages/analytics/browser-mocks @elastic/kibana-core
 src/core/packages/analytics/server @elastic/kibana-core
 src/core/packages/analytics/server-internal @elastic/kibana-core
+src/core/packages/analytics/server-mocks @elastic/kibana-core
 src/core/packages/application/browser @elastic/kibana-core
 src/core/packages/application/browser-internal @elastic/kibana-core
+src/core/packages/application/browser-mocks @elastic/kibana-core
 src/core/packages/application/common @elastic/kibana-core
 src/core/packages/apps/browser-internal @elastic/kibana-core
+src/core/packages/apps/browser-mocks @elastic/kibana-core
 src/core/packages/apps/server-internal @elastic/kibana-core
 src/core/packages/base/browser-internal @elastic/kibana-core
+src/core/packages/base/browser-mocks @elastic/kibana-core
 src/core/packages/base/common @elastic/kibana-core
 src/core/packages/base/common-internal @elastic/kibana-core
 src/core/packages/base/server-internal @elastic/kibana-core
+src/core/packages/base/server-mocks @elastic/kibana-core
 src/core/packages/capabilities/browser-internal @elastic/kibana-core
+src/core/packages/capabilities/browser-mocks @elastic/kibana-core
 src/core/packages/capabilities/common @elastic/kibana-core
 src/core/packages/capabilities/server @elastic/kibana-core
 src/core/packages/capabilities/server-internal @elastic/kibana-core
+src/core/packages/capabilities/server-mocks @elastic/kibana-core
 src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
+src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
@@ -226,24 +133,34 @@ src/core/packages/custom-branding/server-internal @elastic/appex-sharedux
 src/core/packages/custom-branding/server-mocks @elastic/appex-sharedux
 src/core/packages/deprecations/browser @elastic/kibana-core
 src/core/packages/deprecations/browser-internal @elastic/kibana-core
+src/core/packages/deprecations/browser-mocks @elastic/kibana-core
 src/core/packages/deprecations/common @elastic/kibana-core
 src/core/packages/deprecations/server @elastic/kibana-core
 src/core/packages/deprecations/server-internal @elastic/kibana-core
+src/core/packages/deprecations/server-mocks @elastic/kibana-core
 src/core/packages/doc-links/browser @elastic/kibana-core
 src/core/packages/doc-links/browser-internal @elastic/kibana-core
+src/core/packages/doc-links/browser-mocks @elastic/kibana-core
 src/core/packages/doc-links/server @elastic/kibana-core
 src/core/packages/doc-links/server-internal @elastic/kibana-core
+src/core/packages/doc-links/server-mocks @elastic/kibana-core
 src/core/packages/elasticsearch/client-server-internal @elastic/kibana-core
+src/core/packages/elasticsearch/client-server-mocks @elastic/kibana-core
 src/core/packages/elasticsearch/server @elastic/kibana-core
 src/core/packages/elasticsearch/server-internal @elastic/kibana-core
+src/core/packages/elasticsearch/server-mocks @elastic/kibana-core
 src/core/packages/environment/server-internal @elastic/kibana-core
+src/core/packages/environment/server-mocks @elastic/kibana-core
 src/core/packages/execution-context/browser @elastic/kibana-core
 src/core/packages/execution-context/browser-internal @elastic/kibana-core
+src/core/packages/execution-context/browser-mocks @elastic/kibana-core
 src/core/packages/execution-context/common @elastic/kibana-core
 src/core/packages/execution-context/server @elastic/kibana-core
 src/core/packages/execution-context/server-internal @elastic/kibana-core
+src/core/packages/execution-context/server-mocks @elastic/kibana-core
 src/core/packages/fatal-errors/browser @elastic/kibana-core
 src/core/packages/fatal-errors/browser-internal @elastic/kibana-core
+src/core/packages/fatal-errors/browser-mocks @elastic/kibana-core
 src/core/packages/feature-flags/browser @elastic/kibana-core
 src/core/packages/feature-flags/browser-internal @elastic/kibana-core
 src/core/packages/feature-flags/browser-mocks @elastic/kibana-core
@@ -252,67 +169,97 @@ src/core/packages/feature-flags/server-internal @elastic/kibana-core
 src/core/packages/feature-flags/server-mocks @elastic/kibana-core
 src/core/packages/http/browser @elastic/kibana-core
 src/core/packages/http/browser-internal @elastic/kibana-core
+src/core/packages/http/browser-mocks @elastic/kibana-core
 src/core/packages/http/common @elastic/kibana-core
 src/core/packages/http/context-server-internal @elastic/kibana-core
+src/core/packages/http/context-server-mocks @elastic/kibana-core
+src/core/packages/http/rate-limiter-internal @elastic/kibana-core
 src/core/packages/http/request-handler-context-server @elastic/kibana-core
 src/core/packages/http/request-handler-context-server-internal @elastic/kibana-core
 src/core/packages/http/resources-server @elastic/kibana-core
 src/core/packages/http/resources-server-internal @elastic/kibana-core
+src/core/packages/http/resources-server-mocks @elastic/kibana-core
 src/core/packages/http/router-server-internal @elastic/kibana-core
+src/core/packages/http/router-server-mocks @elastic/kibana-core
 src/core/packages/http/server @elastic/kibana-core
 src/core/packages/http/server-internal @elastic/kibana-core
+src/core/packages/http/server-mocks @elastic/kibana-core
 src/core/packages/http/server-utils @elastic/kibana-core
 src/core/packages/i18n/browser @elastic/kibana-core
 src/core/packages/i18n/browser-internal @elastic/kibana-core
+src/core/packages/i18n/browser-mocks @elastic/kibana-core
 src/core/packages/i18n/server @elastic/kibana-core
 src/core/packages/i18n/server-internal @elastic/kibana-core
+src/core/packages/i18n/server-mocks @elastic/kibana-core
 src/core/packages/injected-metadata/browser-internal @elastic/kibana-core
+src/core/packages/injected-metadata/browser-mocks @elastic/kibana-core
 src/core/packages/injected-metadata/common-internal @elastic/kibana-core
 src/core/packages/integrations/browser-internal @elastic/kibana-core
+src/core/packages/integrations/browser-mocks @elastic/kibana-core
 src/core/packages/lifecycle/browser @elastic/kibana-core
 src/core/packages/lifecycle/browser-internal @elastic/kibana-core
+src/core/packages/lifecycle/browser-mocks @elastic/kibana-core
 src/core/packages/lifecycle/server @elastic/kibana-core
 src/core/packages/lifecycle/server-internal @elastic/kibana-core
+src/core/packages/lifecycle/server-mocks @elastic/kibana-core
 src/core/packages/logging/browser-internal @elastic/kibana-core
+src/core/packages/logging/browser-mocks @elastic/kibana-core
 src/core/packages/logging/common-internal @elastic/kibana-core
 src/core/packages/logging/server @elastic/kibana-core
 src/core/packages/logging/server-internal @elastic/kibana-core
+src/core/packages/logging/server-mocks @elastic/kibana-core
 src/core/packages/metrics/collectors-server-internal @elastic/kibana-core
+src/core/packages/metrics/collectors-server-mocks @elastic/kibana-core
 src/core/packages/metrics/server @elastic/kibana-core
 src/core/packages/metrics/server-internal @elastic/kibana-core
+src/core/packages/metrics/server-mocks @elastic/kibana-core
 src/core/packages/mount-utils/browser @elastic/kibana-core
 src/core/packages/mount-utils/browser-internal @elastic/kibana-core
 src/core/packages/node/server @elastic/kibana-core
 src/core/packages/node/server-internal @elastic/kibana-core
+src/core/packages/node/server-mocks @elastic/kibana-core
 src/core/packages/notifications/browser @elastic/kibana-core
 src/core/packages/notifications/browser-internal @elastic/kibana-core
+src/core/packages/notifications/browser-mocks @elastic/kibana-core
 src/core/packages/overlays/browser @elastic/kibana-core
 src/core/packages/overlays/browser-internal @elastic/kibana-core
+src/core/packages/overlays/browser-mocks @elastic/kibana-core
 src/core/packages/plugins/base-server-internal @elastic/kibana-core
 src/core/packages/plugins/browser @elastic/kibana-core
 src/core/packages/plugins/browser-internal @elastic/kibana-core
+src/core/packages/plugins/browser-mocks @elastic/kibana-core
 src/core/packages/plugins/contracts-browser @elastic/kibana-core
 src/core/packages/plugins/contracts-server @elastic/kibana-core
 src/core/packages/plugins/server @elastic/kibana-core
 src/core/packages/plugins/server-internal @elastic/kibana-core
+src/core/packages/plugins/server-mocks @elastic/kibana-core
 src/core/packages/preboot/server @elastic/kibana-core
 src/core/packages/preboot/server-internal @elastic/kibana-core
+src/core/packages/preboot/server-mocks @elastic/kibana-core
 src/core/packages/rendering/browser @elastic/kibana-core
 src/core/packages/rendering/browser-internal @elastic/kibana-core
+src/core/packages/rendering/browser-mocks @elastic/kibana-core
 src/core/packages/rendering/server-internal @elastic/kibana-core
+src/core/packages/rendering/server-mocks @elastic/kibana-core
 src/core/packages/root/browser-internal @elastic/kibana-core
 src/core/packages/root/server-internal @elastic/kibana-core
 src/core/packages/saved-objects/api-browser @elastic/kibana-core
 src/core/packages/saved-objects/api-server @elastic/kibana-core
 src/core/packages/saved-objects/api-server-internal @elastic/kibana-core
+src/core/packages/saved-objects/api-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/base-server-internal @elastic/kibana-core
+src/core/packages/saved-objects/base-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/browser @elastic/kibana-core
 src/core/packages/saved-objects/browser-internal @elastic/kibana-core
+src/core/packages/saved-objects/browser-mocks @elastic/kibana-core
 src/core/packages/saved-objects/common @elastic/kibana-core
 src/core/packages/saved-objects/import-export-server-internal @elastic/kibana-core
+src/core/packages/saved-objects/import-export-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/migration-server-internal @elastic/kibana-core
+src/core/packages/saved-objects/migration-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/server @elastic/kibana-core
 src/core/packages/saved-objects/server-internal @elastic/kibana-core
+src/core/packages/saved-objects/server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/utils-server @elastic/kibana-core
 src/core/packages/security/browser @elastic/kibana-core
 src/core/packages/security/browser-internal @elastic/kibana-core
@@ -324,20 +271,25 @@ src/core/packages/security/server-mocks @elastic/kibana-core
 src/core/packages/status/common @elastic/kibana-core
 src/core/packages/status/server @elastic/kibana-core
 src/core/packages/status/server-internal @elastic/kibana-core
+src/core/packages/status/server-mocks @elastic/kibana-core
 src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
 src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/core/packages/test-helpers/test-utils @elastic/kibana-core
 src/core/packages/theme/browser @elastic/kibana-core
 src/core/packages/theme/browser-internal @elastic/kibana-core
+src/core/packages/theme/browser-mocks @elastic/kibana-core
 src/core/packages/ui-settings/browser @elastic/appex-sharedux
 src/core/packages/ui-settings/browser-internal @elastic/appex-sharedux
+src/core/packages/ui-settings/browser-mocks @elastic/appex-sharedux
 src/core/packages/ui-settings/common @elastic/appex-sharedux
 src/core/packages/ui-settings/server @elastic/appex-sharedux
 src/core/packages/ui-settings/server-internal @elastic/appex-sharedux
+src/core/packages/ui-settings/server-mocks @elastic/appex-sharedux
 src/core/packages/usage-data/base-server-internal @elastic/kibana-core
 src/core/packages/usage-data/server @elastic/kibana-core
 src/core/packages/usage-data/server-internal @elastic/kibana-core
+src/core/packages/usage-data/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
@@ -348,30 +300,46 @@ src/core/packages/user-profile/server-mocks @elastic/kibana-core
 src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
+src/core/test-helpers/kbn-server @elastic/kibana-core
+src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
+src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
+src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
+src/platform/packages/private/kbn-babel-transform @elastic/kibana-operations
+src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
+src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
+src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
+src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
+src/platform/packages/private/kbn-get-repo-files @elastic/kibana-operations
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
 src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/private/kbn-hapi-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-health-gateway-server @elastic/kibana-core
+src/platform/packages/private/kbn-import-resolver @elastic/kibana-operations
 src/platform/packages/private/kbn-item-buffer @elastic/appex-sharedux
+src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
+src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizations
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
-src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
-src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
-src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
+src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
+src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
+src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
+src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
+src/platform/packages/private/kbn-repo-path @elastic/kibana-operations
 src/platform/packages/private/kbn-reporting/common @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/export_types/csv @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/export_types/csv_common @elastic/appex-sharedux
@@ -384,16 +352,19 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
+src/platform/packages/private/kbn-scout-info @elastic/appex-qa
+src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
+src/platform/packages/private/kbn-some-dev-log @elastic/kibana-operations
+src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
+src/platform/packages/private/kbn-telemetry-tools @elastic/kibana-core
+src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualizations
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
-src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
-src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
-src/platform/packages/private/serverless/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
@@ -430,10 +401,16 @@ src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
+src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operations
+src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
+src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
@@ -448,26 +425,38 @@ src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-d
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
+src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
+src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
+src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
+src/platform/packages/shared/kbn-dev-utils @elastic/kibana-operations
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-es @elastic/kibana-operations
+src/platform/packages/shared/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
+src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
@@ -478,18 +467,25 @@ src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_ser
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
+src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/application @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/components/field_category @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_input @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
+src/platform/packages/shared/kbn-management/storybook/config @elastic/kibana-management
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
+src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
@@ -505,6 +501,7 @@ src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
 src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
 src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
@@ -527,7 +524,14 @@ src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
+src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
+src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
+src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
+src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
 src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
@@ -536,6 +540,7 @@ src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-security
@@ -555,11 +560,17 @@ src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
+src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
+src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
+src/platform/packages/shared/serverless/storybook/config @elastic/appex-sharedux
+src/platform/packages/shared/serverless/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/avatar/solution @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/button_toolbar @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/button/exit_full_screen @elastic/appex-sharedux
@@ -773,7 +784,6 @@ x-pack/platform/packages/private/ml/date_picker @elastic/ml-ui
 x-pack/platform/packages/private/ml/date_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/field_stats_flyout @elastic/ml-ui
 x-pack/platform/packages/private/ml/in_memory_table @elastic/ml-ui
-x-pack/platform/packages/private/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/platform/packages/private/ml/is_defined @elastic/ml-ui
 x-pack/platform/packages/private/ml/is_populated_object @elastic/ml-ui
 x-pack/platform/packages/private/ml/json_schemas @elastic/ml-ui
@@ -796,19 +806,27 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/alerting-rule-utils @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
-x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
+x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic/obs-ai-assistant
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
+x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/platform/packages/shared/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
+x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
+x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
@@ -819,8 +837,6 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
-x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -865,6 +881,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
@@ -880,8 +897,8 @@ x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
-x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/licensing @elastic/kibana-core
@@ -890,7 +907,7 @@ x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
-x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
+x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
@@ -901,22 +918,24 @@ x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
+x-pack/platform/plugins/shared/streams @elastic/streams-program-team
+x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
+x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
-x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
-x-pack/solutions/observability/packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
-x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/utils_browser @elastic/observability-ui
-x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
-x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
+x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
+x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
@@ -928,7 +947,6 @@ x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-
 x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
@@ -936,12 +954,11 @@ x-pack/solutions/observability/plugins/observability_ai_assistant_management @el
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
+x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
 x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/slo @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
-x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
@@ -950,7 +967,7 @@ x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
-x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
+x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
@@ -962,10 +979,11 @@ x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
-x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
-x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
@@ -986,21 +1004,20 @@ x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/se
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generative-ai
+x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
-x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
@@ -1164,7 +1181,6 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /test/functional/fixtures/kbn_archiver/visualize.json @elastic/kibana-visualizations
 /test/functional/fixtures/kbn_archiver/managed_content.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/managed_content/managed_content.ts#L38
 /test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-visualizations
-/test/functional/page_objects/unified_search_page.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/200132#discussion_r1847188168
 /test/functional/apps/getting_started/*.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840485031
 /x-pack/test/upgrade/apps/graph @elastic/kibana-visualizations
 /x-pack/test/functional/page_objects/log_wrapper.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/36437
@@ -1255,6 +1271,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Observability AI Assistant
 /x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
@@ -1303,6 +1320,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/data_quality/ @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/onboarding/ @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_page.ts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
@@ -1324,8 +1342,13 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/solutions/observability/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/kibana.jsonc#L5
+/x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/kibana.jsonc#L5
 /x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
+
+## Streams parts owned by Logs UX
+/x-pack/platform/plugins/shared/streams/server/routes/streams/processing @elastic/obs-ux-logs-team
+/x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-ux-logs-team
+/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-ux-logs-team
 
 # Infra Monitoring tests
 /x-pack/test/common/services/infra_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team
@@ -1451,10 +1474,12 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Streams
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+/x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 
 # Presentation
+/test/functional/page_objects/unified_search_page.ts @elastic/kibana-presentation
 /test/functional/fixtures/kbn_archiver/dashboard_error_cases.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859020986
 /x-pack/test/functional/es_archives/getting_started/shakespeare @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1860319853
 /x-pack/test/upgrade/screenshots @elastic/kibana-presentation
@@ -1579,6 +1604,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.eslintignore @elastic/kibana-operations
 
 # QA - Appex QA
+/x-pack/test/.gitignore @elastic/appex-qa
+/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
+/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
+/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
+/x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
@@ -1709,7 +1739,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/services/remote @elastic/appex-qa
 /test/visual_regression @elastic/appex-qa
 /x-pack/test/visual_regression @elastic/appex-qa
-/packages/kbn-test/src/functional_test_runner @elastic/appex-qa
+/src/platform/packages/shared/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
 /x-pack/test_serverless/**/deployment_agnostic_services.ts @elastic/appex-qa
@@ -1719,7 +1749,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
-/packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
+/src/platform/packages/shared/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/README.md @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/*configs/ @elastic/appex-qa
@@ -1816,7 +1846,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
-/packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
+/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
@@ -1861,7 +1891,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
 /x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
 /x-pack/test/api_integration/apis/cloud @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/198444
-/test/plugin_functional/snapshots/baseline/hardening/prototype.json @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
+/test/plugin_functional/snapshots/baseline/hardening @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
 /test/functional/page_objects/login_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
@@ -1915,9 +1945,18 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/common/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/search/platform_security/ @elastic/kibana-security
-/x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
 /src/core/packages/http/server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
+/x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/kibana-security @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/kibana-security @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/kibana-security @elastic/appex-qa @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/kibana-security @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
+
+/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/kibana-security
 #CC# /x-pack/platform/plugins/shared/security/ @elastic/kibana-security
 
 # Response Ops team
@@ -1991,7 +2030,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # search
 /x-pack/test/functional/es_archives/data/search_sessions @elastic/search-kibana
 /x-pack/test/common/services/search_secure.ts @elastic/search-kibana
-/test/functional/page_objects/unified_search_page.ts @elastic/search-kibana
 /test/functional/fixtures/kbn_archiver/ccs @elastic/search-kibana
 /test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
@@ -2118,25 +2156,16 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution @elastic/appex-qa
-x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
-x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/constants.ts @elastic/security-solution
-/x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/security-solution @elastic/obs-ai-assistant
+/x-pack/test_serverless/functional/test_suites/security/constants.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
+/x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
 
-/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/security-solution
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
 /x-pack/test/functional/es_archives/cases/signals/duplicate_ids @elastic/response-ops
 
@@ -2203,6 +2232,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
@@ -2323,6 +2353,11 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 /x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-explore
 
+## The Hive Connector
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
+
 ## Generative AI owner connectors
 # OpenAI
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
@@ -2366,6 +2401,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
@@ -2516,7 +2552,6 @@ x-pack/solutions/security/plugins/security_solution/public/common/components/ses
 x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_api_integration/test_suites/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
 
 ## Fleet plugin (co-owned with Fleet team)
@@ -2541,6 +2576,7 @@ x-pack/test_serverless/api_integration/test_suites/security/cloud_security_postu
 ## CSP e2e tests
 x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+x-pack/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
@@ -2585,6 +2621,9 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 
 # Changes to translation files should not ping code reviewers
 x-pack/platform/plugins/private/translations/translations
+
+# Profiling cypress tests
+x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team

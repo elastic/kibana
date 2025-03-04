@@ -31,7 +31,7 @@ import {
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-const CERT_DIR = '../../../../../../../../packages/kbn-dev-utils/certs';
+const CERT_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
 
 const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
 const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
@@ -49,6 +49,7 @@ const ServerResponse = 'A unique response returned by the server!';
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let savedAxiosDefaultsAdapter: any;
 
   beforeEach(() => {

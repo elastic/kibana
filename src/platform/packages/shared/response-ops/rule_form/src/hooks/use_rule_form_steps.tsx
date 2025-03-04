@@ -149,13 +149,7 @@ const useCommonRuleFormSteps = ({
         ? {
             title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
             status: actionsStatus,
-            children: (
-              <>
-                <RuleActions />
-                <EuiSpacer />
-                <EuiHorizontalRule margin="none" />
-              </>
-            ),
+            children: <RuleActions />,
           }
         : null,
       [RuleFormStepId.DETAILS]: {
@@ -163,13 +157,7 @@ const useCommonRuleFormSteps = ({
           ? RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT
           : RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         status: ruleDetailsStatus,
-        children: (
-          <>
-            <RuleDetails />
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ),
+        children: <RuleDetails />,
       },
     }),
     [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus, shortTitles]
@@ -210,7 +198,7 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
 
   const mappedSteps = useMemo(() => {
     return stepOrder
-      .map((stepId) => {
+      .map((stepId, index) => {
         const step = steps[stepId];
         return step
           ? {
@@ -227,6 +215,12 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
                   stepId={stepId}
                 >
                   {step.children}
+                  {index > 0 && (
+                    <>
+                      <EuiSpacer />
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
                 </ReportOnBlur>
               ),
             }
@@ -246,8 +240,10 @@ interface RuleFormHorizontalSteps {
   hasNextStep: boolean;
   hasPreviousStep: boolean;
 }
-export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
-  const [currentStep, setCurrentStep] = useState<RuleFormStepId>(STEP_ORDER[0]);
+export const useRuleFormHorizontalSteps: (
+  initialStep?: RuleFormStepId
+) => RuleFormHorizontalSteps = (initialStep = STEP_ORDER[0]) => {
+  const [currentStep, setCurrentStep] = useState<RuleFormStepId>(initialStep);
   const [touchedSteps, setTouchedSteps] = useState<Record<RuleFormStepId, boolean>>(
     STEP_ORDER.reduce(
       (result, stepId) => ({ ...result, [stepId]: false }),

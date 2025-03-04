@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
@@ -44,7 +44,7 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const [rulesResolvedValues, setRulesResolvedValues] = useState<RulesResolvedConflicts>({});
   const resetRuleResolvedValues = useCallback(
     (ruleId: RuleSignatureId) => {
@@ -138,14 +138,14 @@ export function usePrebuiltRulesUpgradeState(
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
         fieldsUpgradeState,
-        hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
+        hasUnresolvedConflicts: isRulesCustomizationEnabled
           ? hasRuleTypeChange || hasFieldConflicts
           : false,
       };
     }
 
     return state;
-  }, [ruleUpgradeInfos, rulesResolvedValues, isPrebuiltRulesCustomizationEnabled]);
+  }, [ruleUpgradeInfos, rulesResolvedValues, isRulesCustomizationEnabled]);
 
   return {
     rulesUpgradeState,

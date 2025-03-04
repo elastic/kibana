@@ -18,6 +18,7 @@ interface RegisterRoutes {
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
   dependencies: RegisterRoutesDependencies;
+  isDev: boolean;
 }
 
 export interface RegisterRoutesDependencies {
@@ -33,11 +34,12 @@ export interface RegisterRoutesDependencies {
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
 }
 
-export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
+export function registerRoutes({ repository, core, logger, dependencies, isDev }: RegisterRoutes) {
   registerServerRoutes({
     core,
     dependencies: { dependencies },
     logger,
     repository,
+    runDevModeChecks: isDev,
   });
 }

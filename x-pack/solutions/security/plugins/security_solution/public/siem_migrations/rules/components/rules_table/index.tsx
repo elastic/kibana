@@ -25,6 +25,7 @@ import type { RuleMigration } from '../../../../../common/siem_migrations/model/
 import { EmptyMigration } from './empty_migration';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
+import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
 import { useInstallMigrationRules } from '../../logic/use_install_migration_rules';
 import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
@@ -41,6 +42,7 @@ import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { FilterOptions } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
+import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -158,22 +160,26 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       setSearchTerm(value.trim());
     }, []);
 
-    const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
+    const { mutateAsync: installMigrationRule } = useInstallMigrationRule(migrationId);
+    const { mutateAsync: installMigrationRules } = useInstallMigrationRules(
+      migrationId,
+      translationStats
+    );
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
-      async (migrationRule: RuleMigration, enabled?: boolean) => {
+      async (ruleMigration: RuleMigration, enabled?: boolean) => {
         setTableLoading(true);
         try {
-          await installMigrationRules({ ids: [migrationRule.id], enabled });
+          await installMigrationRule({ ruleMigration, enabled });
         } catch (error) {
           addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
         } finally {
           setTableLoading(false);
         }
       },
-      [addError, installMigrationRules]
+      [addError, installMigrationRule]
     );
 
     const installSelectedRule = useCallback(
@@ -299,6 +305,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
+        {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
+
         <EuiSkeletonLoading
           isLoading={isStatsLoading}
           loadingContent={

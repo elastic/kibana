@@ -266,8 +266,7 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       defaultMessage: 'Run a script on the host',
     }),
     helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: `
-Command Examples for Running Scripts:
+      defaultMessage: `Command Examples for Running Scripts:
 
 1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
 

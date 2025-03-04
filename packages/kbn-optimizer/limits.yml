@@ -5,6 +5,7 @@ pageLoadAssetSize:
   aiops: 32733
   alerting: 106936
   apm: 64385
+  automaticImport: 25433
   banners: 17946
   canvas: 29355
   cases: 180037
@@ -18,7 +19,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 34398
   console: 61298
   contentManagement: 16254
-  controls: 60000
+  controls: 12000
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -30,14 +31,14 @@ pageLoadAssetSize:
   dataUsage: 30000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
-  dataViewManagement: 5370
+  dataViewManagement: 6250
   dataViews: 65000
   dataVisualizer: 30000
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
   discoverShared: 17111
-  embeddable: 87309
+  embeddable: 24000
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -84,7 +85,6 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  integrationAssistant: 19524
   interactiveSetup: 80000
   inventory: 27430
   investigate: 17970
@@ -93,18 +93,16 @@ pageLoadAssetSize:
   kibanaReact: 74422
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
-  kubernetesSecurity: 77234
-  lens: 57135
+  lens: 76079
   licenseManagement: 41817
   licensing: 29004
-  links: 44490
+  links: 8000
   lists: 22900
   logsDataAccess: 16759
-  logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
   management: 46112
-  maps: 90000
+  maps: 46000
   mapsEms: 26072
   metricsDataAccess: 73287
   ml: 85000
@@ -122,8 +120,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 11468
-  presentationUtil: 33186
+  presentationPanel: 11550
+  presentationUtil: 33905
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
@@ -157,13 +155,14 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 88160
-  slo: 37039
+  slo: 45000
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
   streams: 16742
   streamsApp: 20537
+  streamsAppWrapper: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
@@ -177,7 +176,7 @@ pageLoadAssetSize:
   unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
-  uptime: 37842
+  uptime: 60000
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762
@@ -195,5 +194,5 @@ pageLoadAssetSize:
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 46868
-  visualizations: 90000
+  visualizations: 41000
   watcher: 43598

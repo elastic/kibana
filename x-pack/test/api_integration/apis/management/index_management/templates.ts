@@ -15,6 +15,7 @@ import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const es = getService('es');
   const { catTemplate, getTemplatePayload, getSerializedTemplate } = templatesHelpers(getService);
   const {
     getAllTemplates,
@@ -232,6 +233,52 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.name).to.equal(templateName);
         expect(Object.keys(body).sort()).to.eql(expectedKeys);
         expect(Object.keys(body.template).sort()).to.eql(expectedTemplateKeys);
+      });
+
+      describe('with logs-*-* index pattern', () => {
+        const logsdbTemplateName = 'test-logsdb-template';
+        before(async () => {
+          const template = getTemplatePayload(logsdbTemplateName, ['logs-*-*']);
+          await createTemplate(template).expect(200);
+        });
+
+        after(async () => {
+          await deleteTemplates([{ name: logsdbTemplateName }]);
+        });
+
+        const logsdbSettings: Array<{
+          enabled: boolean | null;
+          prior_logs_usage: boolean;
+          indexMode: string;
+        }> = [
+          { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
+          { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
+          // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
+          { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+          // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+          { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
+        ];
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
+          it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+            await es.cluster.putSettings({
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled,
+                  },
+                },
+                logsdb: {
+                  prior_logs_usage,
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal(indexMode);
+          });
+        });
       });
     });
 

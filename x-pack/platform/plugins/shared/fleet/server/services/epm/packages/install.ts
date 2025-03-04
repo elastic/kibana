@@ -83,7 +83,6 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
-
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
@@ -262,6 +261,7 @@ export async function handleInstallPackageFailure({
   esClient,
   spaceId,
   authorizationHeader,
+  keepFailedInstallation,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -271,6 +271,7 @@ export async function handleInstallPackageFailure({
   esClient: ElasticsearchClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  keepFailedInstallation?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
     return;
@@ -306,6 +307,9 @@ export async function handleInstallPackageFailure({
       logger.error(
         `Uninstalling ${pkgkey} after error installing: [${error.toString()}] with install type: ${installType}`
       );
+      if (keepFailedInstallation) {
+        return;
+      }
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
       return;
     }
@@ -388,6 +392,7 @@ interface InstallRegistryPackageParams {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
+  keepFailedInstallation?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -451,6 +456,7 @@ async function installPackageFromRegistry({
   ignoreMappingUpdateErrors = false,
   skipDataStreamRollover = false,
   retryFromLastState = false,
+  keepFailedInstallation = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -494,7 +500,6 @@ async function installPackageFromRegistry({
           useStreaming,
         }),
       ]);
-
     const packageInstallContext: PackageInstallContext = {
       packageInfo,
       assetsMap,
@@ -553,6 +558,7 @@ async function installPackageFromRegistry({
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      keepFailedInstallation,
     });
   } catch (e) {
     sendEvent({
@@ -592,6 +598,7 @@ async function installPackageWithStateMachine(options: {
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   useStreaming?: boolean;
+  keepFailedInstallation?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -612,6 +619,7 @@ async function installPackageWithStateMachine(options: {
     packageInstallContext,
     retryFromLastState,
     useStreaming,
+    keepFailedInstallation,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -737,6 +745,7 @@ async function installPackageWithStateMachine(options: {
           spaceId,
           esClient,
           authorizationHeader,
+          keepFailedInstallation,
         });
         sendEvent({
           ...telemetryEvent!,
@@ -898,6 +907,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      keepFailedInstallation,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -940,7 +950,9 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      keepFailedInstallation,
     });
+
     return response;
   } else if (args.installSource === 'upload') {
     const {

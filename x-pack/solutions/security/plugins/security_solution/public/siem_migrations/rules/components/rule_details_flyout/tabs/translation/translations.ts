@@ -28,52 +28,10 @@ export const NAME_REQUIRED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const SPLUNK_QUERY_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.splunkQueryTitle',
-  {
-    defaultMessage: 'Splunk query',
-  }
-);
-
-export const ESQL_TRANSLATION_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.esqlTranslationTitle',
-  {
-    defaultMessage: 'ES|QL translation',
-  }
-);
-
-export const TRANSLATED_QUERY_AREAL_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.queryArealLabel',
-  {
-    defaultMessage: 'Translated query',
-  }
-);
-
 export const INSTALLED_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.installedLabel',
   {
     defaultMessage: 'Installed',
-  }
-);
-
-export const EDIT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.editButtonLabel',
-  {
-    defaultMessage: 'Edit',
-  }
-);
-
-export const SAVE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.saveButtonLabel',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
-export const CANCEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.cancelButtonLabel',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 
@@ -82,6 +40,14 @@ export const CALLOUT_TRANSLATED_RULE_TITLE = i18n.translate(
   {
     defaultMessage:
       'This rule has been fully translated. Install rule to finish migration. Once installed, you’ll be able to fine tune the rule.',
+  }
+);
+
+export const CALLOUT_MAPPED_TRANSLATED_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.mappedTranslatedRuleCalloutTitle',
+  {
+    defaultMessage:
+      'This rule was mapped to an Elastic authored rule. Click Install & enable rule to complete migration. You can fine-tune it later.',
   }
 );
 
@@ -112,5 +78,20 @@ export const CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'This might be caused by feature differences between SIEM products. If possible, update the rule manually.',
+  }
+);
+
+export const CALLOUT_TRANSLATED_RULE_INFO_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutTitle',
+  {
+    defaultMessage: 'Translation successful. Install the rule to customize it.',
+  }
+);
+
+export const CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutDescription',
+  {
+    defaultMessage:
+      'After you install the rule, you can modify or update it with full access to all features.',
   }
 );

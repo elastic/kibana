@@ -26,6 +26,7 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
+import { MountPointPortal } from '@kbn/react-kibana-mount';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -33,6 +34,7 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
+  topNavStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -53,6 +55,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
 import { getFullEditPath } from '../utils/urls';
+import { DashboardFavoriteButton } from './dashboard_favorite_button';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -94,14 +97,14 @@ export function InternalDashboardTopNav({
     title,
     viewMode,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.dataViews,
+    dashboardApi.dataViews$,
     dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId,
+    dashboardApi.savedObjectId$,
     dashboardApi.query$,
-    dashboardApi.panelTitle,
-    dashboardApi.viewMode
+    dashboardApi.title$,
+    dashboardApi.viewMode$
   );
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
@@ -117,6 +120,13 @@ export function InternalDashboardTopNav({
   useEffect(() => {
     dashboardTitleRef.current?.focus();
   }, [title, viewMode]);
+
+  /*
+   * Manage chrome visibility when dashboard is in print mode.
+   */
+  useEffect(() => {
+    if (!embedSettings && viewMode === 'print') coreServices.chrome.setIsVisible(false);
+  }, [embedSettings, viewMode]);
 
   /**
    * populate recently accessed, and set is chrome visible.
@@ -145,6 +155,9 @@ export function InternalDashboardTopNav({
             <>
               {dashboardTitle}
               <EuiIcon
+                tabIndex={0}
+                role="button"
+                aria-label={topNavStrings.settings.description}
                 size="s"
                 type="pencil"
                 className="dshTitleBreadcrumbs__updateIcon"
@@ -316,6 +329,18 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
+  const setFavoriteButtonMountPoint = useCallback(
+    (mountPoint: MountPoint<HTMLElement> | undefined) => {
+      if (mountPoint) {
+        return coreServices.chrome.setBreadcrumbsAppendExtension({
+          content: mountPoint,
+          order: 0,
+        });
+      }
+    },
+    []
+  );
+
   return (
     <div className="dashboardTopNav">
       <h1
@@ -332,9 +357,7 @@ export function InternalDashboardTopNav({
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
-        saveQueryMenuVisibility={
-          getDashboardCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}
         setMenuMountPoint={
@@ -342,7 +365,6 @@ export function InternalDashboardTopNav({
             ? setCustomHeaderActionMenu ?? undefined
             : setHeaderActionMenu
         }
-        className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}
         config={
           visibilityProps.showTopNavMenu
             ? viewMode === 'edit'
@@ -362,6 +384,9 @@ export function InternalDashboardTopNav({
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
+      <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
+        <DashboardFavoriteButton dashboardId={lastSavedId} />
+      </MountPointPortal>
     </div>
   );
 }

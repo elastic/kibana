@@ -13,7 +13,7 @@ import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-containers';
 import {
   DefaultEmbeddableApi,
   EmbeddablePackageState,
@@ -21,14 +21,12 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import {
   StateComparators,
-  apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   apiPublishesUnsavedChanges,
-  getPanelTitle,
-  stateHasTitles,
+  apiHasSerializableState,
+  getTitle,
 } from '@kbn/presentation-publishing';
-import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
@@ -70,33 +68,28 @@ export function initializePanelsManager(
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
   if (incomingEmbeddable) {
-    let incomingEmbeddablePanelState: DashboardPanelState;
-    if (
-      incomingEmbeddable.embeddableId &&
-      Boolean(panels$.value[incomingEmbeddable.embeddableId])
-    ) {
+    const incomingPanelId = incomingEmbeddable.embeddableId ?? v4();
+    let incomingPanelState: DashboardPanelState;
+    if (incomingEmbeddable.embeddableId && Boolean(panels$.value[incomingPanelId])) {
       // this embeddable already exists, just update the explicit input.
-      incomingEmbeddablePanelState = panels$.value[incomingEmbeddable.embeddableId];
-      const sameType = incomingEmbeddablePanelState.type === incomingEmbeddable.type;
+      incomingPanelState = panels$.value[incomingPanelId];
+      const sameType = incomingPanelState.type === incomingEmbeddable.type;
 
-      incomingEmbeddablePanelState.type = incomingEmbeddable.type;
-      setRuntimeStateForChild(incomingEmbeddable.embeddableId, {
+      incomingPanelState.type = incomingEmbeddable.type;
+      setRuntimeStateForChild(incomingPanelId, {
         // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
-        ...(sameType ? incomingEmbeddablePanelState.explicitInput : {}),
+        ...(sameType ? incomingPanelState.explicitInput : {}),
 
         ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId,
 
         // maintain hide panel titles setting.
-        hidePanelTitles: incomingEmbeddablePanelState.explicitInput.hidePanelTitles,
+        hidePanelTitles: (incomingPanelState.explicitInput as { hidePanelTitles?: boolean })
+          .hidePanelTitles,
       });
-      incomingEmbeddablePanelState.explicitInput = {
-        id: incomingEmbeddablePanelState.explicitInput.id,
-      };
+      incomingPanelState.explicitInput = {};
     } else {
       // otherwise this incoming embeddable is brand new.
-      const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-      setRuntimeStateForChild(embeddableId, incomingEmbeddable.input);
+      setRuntimeStateForChild(incomingPanelId, incomingEmbeddable.input);
       const { newPanelPlacement } = runPanelPlacementStrategy(
         PanelPlacementStrategy.findTopLeftMostOpenSpace,
         {
@@ -105,22 +98,22 @@ export function initializePanelsManager(
           currentPanels: panels$.value,
         }
       );
-      incomingEmbeddablePanelState = {
-        explicitInput: { id: embeddableId },
+      incomingPanelState = {
+        explicitInput: {},
         type: incomingEmbeddable.type,
         gridData: {
           ...newPanelPlacement,
-          i: embeddableId,
+          i: incomingPanelId,
         },
       };
     }
 
     setPanels({
       ...panels$.value,
-      [incomingEmbeddablePanelState.explicitInput.id]: incomingEmbeddablePanelState,
+      [incomingPanelId]: incomingPanelState,
     });
-    trackPanel.setScrollToPanelId(incomingEmbeddablePanelState.explicitInput.id);
-    trackPanel.setHighlightPanelId(incomingEmbeddablePanelState.explicitInput.id);
+    trackPanel.setScrollToPanelId(incomingPanelId);
+    trackPanel.setHighlightPanelId(incomingPanelId);
   }
 
   async function untilEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {
@@ -165,56 +158,10 @@ export function initializePanelsManager(
     const titles: string[] = [];
     await asyncForEach(Object.keys(panels$.value), async (id) => {
       const childApi = await untilEmbeddableLoaded(id);
-      const title = apiPublishesPanelTitle(childApi) ? getPanelTitle(childApi) : '';
+      const title = apiPublishesTitle(childApi) ? getTitle(childApi) : '';
       if (title) titles.push(title);
     });
     return titles;
-  }
-
-  function duplicateReactEmbeddableInput(
-    childApi: unknown,
-    panelToClone: DashboardPanelState,
-    panelTitles: string[]
-  ) {
-    const id = v4();
-    const lastTitle = apiPublishesPanelTitle(childApi) ? getPanelTitle(childApi) ?? '' : '';
-    const newTitle = getClonedPanelTitle(panelTitles, lastTitle);
-
-    /**
-     * For react embeddables that have library transforms, we need to ensure
-     * to clone them with serialized state and references.
-     *
-     * TODO: remove this section once all by reference capable react embeddables
-     * use in-place library transforms
-     */
-    if (apiHasLibraryTransforms(childApi)) {
-      const byValueSerializedState = childApi.getByValueState();
-      if (panelToClone.references) {
-        pushReferences(prefixReferencesFromPanel(id, panelToClone.references));
-      }
-      return {
-        type: panelToClone.type,
-        explicitInput: {
-          ...byValueSerializedState,
-          title: newTitle,
-          id,
-        },
-      };
-    }
-
-    const runtimeSnapshot = (() => {
-      if (apiHasInPlaceLibraryTransforms(childApi)) return childApi.getByValueRuntimeSnapshot();
-      return apiHasSnapshottableState(childApi) ? childApi.snapshotRuntimeState() : {};
-    })();
-    if (stateHasTitles(runtimeSnapshot)) runtimeSnapshot.title = newTitle;
-
-    setRuntimeStateForChild(id, runtimeSnapshot);
-    return {
-      type: panelToClone.type,
-      explicitInput: {
-        id,
-      },
-    };
   }
 
   return {
@@ -223,20 +170,16 @@ export function initializePanelsManager(
         panelPackage: PanelPackage,
         displaySuccessMessage?: boolean
       ) => {
-        usageCollectionService?.reportUiCounter(
-          DASHBOARD_UI_METRIC_ID,
-          METRIC_TYPE.CLICK,
-          panelPackage.panelType
-        );
+        const { panelType: type, serializedState, initialState } = panelPackage;
+
+        usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
 
         const newId = v4();
 
-        const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(
-          panelPackage.panelType
-        );
+        const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
 
         const customPlacementSettings = getCustomPlacementSettingFunc
-          ? await getCustomPlacementSettingFunc(panelPackage.initialState)
+          ? await getCustomPlacementSettingFunc(initialState)
           : undefined;
 
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
@@ -247,23 +190,26 @@ export function initializePanelsManager(
             width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
           }
         );
+
+        if (serializedState?.references && serializedState.references.length > 0) {
+          pushReferences(prefixReferencesFromPanel(newId, serializedState.references));
+        }
         const newPanel: DashboardPanelState = {
-          type: panelPackage.panelType,
+          type,
           gridData: {
             ...newPanelPlacement,
             i: newId,
           },
           explicitInput: {
-            id: newId,
+            ...serializedState?.rawState,
           },
         };
-        if (panelPackage.initialState) {
-          setRuntimeStateForChild(newId, panelPackage.initialState);
-        }
+        if (initialState) setRuntimeStateForChild(newId, initialState);
+
         setPanels({ ...otherPanels, [newId]: newPanel });
         if (displaySuccessMessage) {
           coreServices.notifications.toasts.addSuccess({
-            title: getPanelAddedSuccessString(newPanel.explicitInput.title),
+            title: getPanelAddedSuccessString((newPanel.explicitInput as { title?: string }).title),
             'data-test-subj': 'addEmbeddableToDashboardSuccess',
           });
           trackPanel.setScrollToPanelId(newId);
@@ -271,16 +217,31 @@ export function initializePanelsManager(
         }
         return await untilEmbeddableLoaded<ApiType>(newId);
       },
-      canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
+      canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
       children$,
       duplicatePanel: async (idToDuplicate: string) => {
         const panelToClone = getDashboardPanelFromId(idToDuplicate);
+        const childApi = children$.value[idToDuplicate];
+        if (!apiHasSerializableState(childApi)) {
+          throw new Error('cannot duplicate a non-serializable panel');
+        }
 
-        const duplicatedPanelState = duplicateReactEmbeddableInput(
-          children$.value[idToDuplicate],
-          panelToClone,
-          await getPanelTitles()
-        );
+        const id = v4();
+        const allPanelTitles = await getPanelTitles();
+        const lastTitle = apiPublishesTitle(childApi) ? getTitle(childApi) ?? '' : '';
+        const newTitle = getClonedPanelTitle(allPanelTitles, lastTitle);
+
+        /**
+         * For embeddables that have library transforms, we need to ensure
+         * to clone them with by value serialized state.
+         */
+        const serializedState = apiHasLibraryTransforms(childApi)
+          ? childApi.getSerializedStateByValue()
+          : childApi.serializeState();
+
+        if (serializedState.references) {
+          pushReferences(prefixReferencesFromPanel(id, serializedState.references));
+        }
 
         coreServices.notifications.toasts.addSuccess({
           title: dashboardClonePanelActionStrings.getSuccessMessage(),
@@ -291,20 +252,25 @@ export function initializePanelsManager(
           width: panelToClone.gridData.w,
           height: panelToClone.gridData.h,
           currentPanels: panels$.value,
-          placeBesideId: panelToClone.explicitInput.id,
+          placeBesideId: idToDuplicate,
         });
 
         const newPanel = {
-          ...duplicatedPanelState,
+          type: panelToClone.type,
+          explicitInput: {
+            ...serializedState.rawState,
+            title: newTitle,
+            id,
+          },
           gridData: {
             ...newPanelPlacement,
-            i: duplicatedPanelState.explicitInput.id,
+            i: id,
           },
         };
 
         setPanels({
           ...otherPanels,
-          [newPanel.explicitInput.id]: newPanel,
+          [id]: newPanel,
         });
       },
       getDashboardPanelFromId,
@@ -312,9 +278,8 @@ export function initializePanelsManager(
         return Object.keys(panels$.value).length;
       },
       getSerializedStateForChild: (childId: string) => {
-        const rawState = panels$.value[childId]?.explicitInput ?? { id: childId };
-        const { id, ...serializedState } = rawState;
-        return Object.keys(serializedState).length === 0
+        const rawState = panels$.value[childId]?.explicitInput ?? {};
+        return Object.keys(rawState).length === 0
           ? undefined
           : {
               rawState,
@@ -337,7 +302,7 @@ export function initializePanelsManager(
           children$.next(children);
         }
       },
-      replacePanel: async (idToRemove: string, { panelType, initialState }: PanelPackage) => {
+      replacePanel: async (idToRemove: string, panelPackage: PanelPackage) => {
         const panels = { ...panels$.value };
         if (!panels[idToRemove]) {
           throw new PanelNotFoundError();
@@ -346,12 +311,20 @@ export function initializePanelsManager(
         const id = v4();
         const oldPanel = panels[idToRemove];
         delete panels[idToRemove];
+
+        const { panelType: type, serializedState, initialState } = panelPackage;
+        if (serializedState?.references && serializedState.references.length > 0) {
+          pushReferences(prefixReferencesFromPanel(id, serializedState?.references));
+        }
+
+        if (initialState) setRuntimeStateForChild(id, initialState);
+
         setPanels({
           ...panels,
           [id]: {
             ...oldPanel,
-            explicitInput: { ...initialState, id },
-            type: panelType,
+            explicitInput: { ...serializedState?.rawState, id },
+            type,
           },
         });
 

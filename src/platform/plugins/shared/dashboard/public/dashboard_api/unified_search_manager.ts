@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import {
+  GlobalQueryStateFromUrl,
+  RefreshInterval,
+  connectToQueryState,
+  extractSearchSourceReferences,
+  syncGlobalQueryStateWithUrl,
+} from '@kbn/data-plugin/public';
 import {
   COMPARE_ALL_OPTIONS,
   Filter,
@@ -15,6 +24,11 @@ import {
   compareFilters,
   isFilterPinned,
 } from '@kbn/es-query';
+import { ESQLControlVariable } from '@kbn/esql-types';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import fastIsEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
+import moment, { Moment } from 'moment';
 import {
   BehaviorSubject,
   Observable,
@@ -29,24 +43,11 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { cloneDeep } from 'lodash';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import {
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
-  connectToQueryState,
-  extractSearchSourceReferences,
-  syncGlobalQueryStateWithUrl,
-} from '@kbn/data-plugin/public';
-import moment, { Moment } from 'moment';
-import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { dataService } from '../services/kibana_services';
-import { DashboardCreationOptions, DashboardState } from './types';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { DashboardCreationOptions, DashboardState } from './types';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -120,6 +121,19 @@ export function initializeUnifiedSearchManager(
   const controlGroupTimeslice$ = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
   );
+
+  // forward ESQL variables from the control group. TODO, this is overcomplicated by the fact that
+  // the control group API is a publishing subject. Instead, the control group API should be a constant
+  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  const controlGroupEsqlVariables$ = controlGroupApi$.pipe(
+    switchMap((controlGroupApi) =>
+      controlGroupApi ? controlGroupApi.esqlVariables$ : of([] as ESQLControlVariable[])
+    )
+  );
+  controlGroupSubscriptions.add(
+    controlGroupEsqlVariables$.subscribe((latestVariables) => esqlVariables$.next(latestVariables))
+  );
+
   controlGroupSubscriptions.add(
     combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
       ([unifiedSearchFilters, controlGroupFilters]) => {
@@ -263,6 +277,7 @@ export function initializeUnifiedSearchManager(
   return {
     api: {
       filters$,
+      esqlVariables$,
       forceRefresh: () => {
         controlGroupReload$.next();
         panelsReload$.next();
@@ -342,11 +357,11 @@ export function initializeUnifiedSearchManager(
         });
         return {
           state: {
-            filters: filter ?? DEFAULT_DASHBOARD_INPUT.filters,
-            query: (query as Query) ?? DEFAULT_DASHBOARD_INPUT.query,
+            filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
+            query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
             refreshInterval: refreshInterval$.value,
             timeRange: timeRange$.value,
-            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
+            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
           },
           references,
         };

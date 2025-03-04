@@ -14,8 +14,8 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiProgress,
-  useEuiBackgroundColor,
   EuiDelayRender,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -77,7 +77,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     ebtManager,
     fieldsMetadata,
   } = useDiscoverServices();
-  const pageBackgroundColor = useEuiBackgroundColor('plain');
+  const { euiTheme } = useEuiTheme();
+  const pageBackgroundColor = euiTheme.colors.backgroundBasePlain;
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -375,9 +376,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   return (
     <EuiPage
-      className={classNames('dscPage', {
-        'dscPage--topNavInline': stateContainer.customizationContext.inlineTopNav.enabled,
-      })}
+      className="dscPage"
       data-fetch-counter={fetchCounter.current}
       css={css`
         background-color: ${pageBackgroundColor};

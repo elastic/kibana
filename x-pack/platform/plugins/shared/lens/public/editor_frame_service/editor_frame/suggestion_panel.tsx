@@ -522,9 +522,8 @@ export function SuggestionPanel({
     <EuiTitle
       size="xxs"
       css={css`
-    padding: 2px;
-  }
-`}
+        padding: 2px;
+      `}
     >
       <h3>
         <FormattedMessage

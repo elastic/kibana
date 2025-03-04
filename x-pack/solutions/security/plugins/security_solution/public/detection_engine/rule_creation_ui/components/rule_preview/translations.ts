@@ -206,3 +206,10 @@ export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
       'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
   }
 );
+
+export const REQUESTS_SAMPLE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewRequestSampleWarningText',
+  {
+    defaultMessage: 'Sample search queries logged only for first 2 requests of each type.',
+  }
+);

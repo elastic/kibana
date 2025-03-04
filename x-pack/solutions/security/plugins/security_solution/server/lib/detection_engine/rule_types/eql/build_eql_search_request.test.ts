@@ -37,37 +37,36 @@ describe('buildEqlSearchRequest', () => {
     expect(request).toEqual({
       allow_no_indices: true,
       index: ['testindex1', 'testindex2'],
-      body: {
-        size: 100,
-        query: 'process where true',
-        runtime_mappings: undefined,
-        filter: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'now',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: 'process where true',
+      runtime_mappings: undefined,
+      filter: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'now',
+                  format: 'strict_date_optional_time',
                 },
               },
-              emptyFilter,
-            ],
-          },
+            },
+            emptyFilter,
+          ],
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
       },
+      allow_partial_search_results: true,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     });
   });
 
@@ -89,73 +88,72 @@ describe('buildEqlSearchRequest', () => {
     expect(request).toEqual({
       allow_no_indices: true,
       index: ['testindex1', 'testindex2'],
-      body: {
-        event_category_field: 'event.other_category',
-        size: 100,
-        query: 'process where true',
-        runtime_mappings: undefined,
-        filter: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      range: {
-                        'event.ingested': {
-                          lte: 'now',
-                          gte: 'now-5m',
-                          format: 'strict_date_optional_time',
+      event_category_field: 'event.other_category',
+      size: 100,
+      query: 'process where true',
+      runtime_mappings: undefined,
+      filter: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    range: {
+                      'event.ingested': {
+                        lte: 'now',
+                        gte: 'now-5m',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          range: {
+                            '@timestamp': {
+                              lte: 'now',
+                              gte: 'now-5m',
+                              format: 'strict_date_optional_time',
+                            },
+                          },
                         },
-                      },
-                    },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'now',
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'event.ingested',
                               },
                             },
                           },
-                          {
-                            bool: {
-                              must_not: {
-                                exists: {
-                                  field: 'event.ingested',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
+                        },
+                      ],
                     },
-                  ],
-                },
+                  },
+                ],
               },
-              emptyFilter,
-            ],
-          },
+            },
+            emptyFilter,
+          ],
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: 'event.ingested',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
       },
+      allow_partial_search_results: true,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: 'event.ingested',
+          format: 'strict_date_optional_time',
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     });
   });
 
@@ -177,38 +175,37 @@ describe('buildEqlSearchRequest', () => {
     expect(request).toEqual({
       allow_no_indices: true,
       index: ['testindex1', 'testindex2'],
-      body: {
-        event_category_field: 'event.other_category',
-        size: 100,
-        query: 'process where true',
-        runtime_mappings: undefined,
-        filter: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  'event.ingested': {
-                    lte: 'now',
-                    gte: 'now-5m',
-                    format: 'strict_date_optional_time',
-                  },
+      event_category_field: 'event.other_category',
+      size: 100,
+      query: 'process where true',
+      runtime_mappings: undefined,
+      filter: {
+        bool: {
+          filter: [
+            {
+              range: {
+                'event.ingested': {
+                  lte: 'now',
+                  gte: 'now-5m',
+                  format: 'strict_date_optional_time',
                 },
               },
-              emptyFilter,
-            ],
-          },
+            },
+            emptyFilter,
+          ],
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: 'event.ingested',
-            format: 'strict_date_optional_time',
-          },
-        ],
       },
+      allow_partial_search_results: true,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: 'event.ingested',
+          format: 'strict_date_optional_time',
+        },
+      ],
     });
   });
 
@@ -235,97 +232,96 @@ describe('buildEqlSearchRequest', () => {
       exceptionFilter: filter,
     });
     expect(request).toMatchInlineSnapshot(`
-        Object {
-          "allow_no_indices": true,
-          "body": Object {
-            "event_category_field": undefined,
-            "fields": Array [
+      Object {
+        "allow_no_indices": true,
+        "allow_partial_search_results": true,
+        "event_category_field": undefined,
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
+          },
+          Object {
+            "field": "@timestamp",
+            "format": "strict_date_optional_time",
+          },
+        ],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [
               Object {
-                "field": "*",
-                "include_unmapped": true,
-              },
-              Object {
-                "field": "@timestamp",
-                "format": "strict_date_optional_time",
-              },
-            ],
-            "filter": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "format": "strict_date_optional_time",
-                        "gte": "now-5m",
-                        "lte": "now",
-                      },
-                    },
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "now-5m",
+                    "lte": "now",
                   },
-                  Object {
-                    "bool": Object {
-                      "filter": Array [],
-                      "must": Array [],
-                      "must_not": Array [
-                        Object {
-                          "bool": Object {
-                            "should": Array [
-                              Object {
-                                "bool": Object {
-                                  "filter": Array [
-                                    Object {
-                                      "nested": Object {
-                                        "path": "some.parentField",
-                                        "query": Object {
-                                          "bool": Object {
-                                            "minimum_should_match": 1,
-                                            "should": Array [
-                                              Object {
-                                                "match_phrase": Object {
-                                                  "some.parentField.nested.field": "some value",
-                                                },
-                                              },
-                                            ],
-                                          },
-                                        },
-                                        "score_mode": "none",
-                                      },
-                                    },
-                                    Object {
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [],
+                  "must": Array [],
+                  "must_not": Array [
+                    Object {
+                      "bool": Object {
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "filter": Array [
+                                Object {
+                                  "nested": Object {
+                                    "path": "some.parentField",
+                                    "query": Object {
                                       "bool": Object {
                                         "minimum_should_match": 1,
                                         "should": Array [
                                           Object {
                                             "match_phrase": Object {
-                                              "some.not.nested.field": "some value",
+                                              "some.parentField.nested.field": "some value",
                                             },
                                           },
                                         ],
                                       },
                                     },
-                                  ],
+                                    "score_mode": "none",
+                                  },
                                 },
-                              },
-                            ],
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match_phrase": Object {
+                                          "some.not.nested.field": "some value",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
                           },
-                        },
-                      ],
-                      "should": Array [],
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                  "should": Array [],
+                },
               },
-            },
-            "query": "process where true",
-            "runtime_mappings": undefined,
-            "size": 100,
-            "timestamp_field": undefined,
+            ],
           },
-          "index": Array [
-            "testindex1",
-            "testindex2",
-          ],
-        }
-      `);
+        },
+        "index": Array [
+          "testindex1",
+          "testindex2",
+        ],
+        "query": "process where true",
+        "runtime_mappings": undefined,
+        "size": 100,
+        "timestamp_field": undefined,
+      }
+    `);
   });
 
   test('should build a request with filters', () => {
@@ -378,54 +374,53 @@ describe('buildEqlSearchRequest', () => {
     expect(request).toEqual({
       allow_no_indices: true,
       index: ['testindex1', 'testindex2'],
-      body: {
-        size: 100,
-        query: 'process where true',
-        filter: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'now',
-                    format: 'strict_date_optional_time',
+      size: 100,
+      query: 'process where true',
+      filter: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'now',
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              bool: {
+                must: [],
+                filter: [
+                  {
+                    exists: {
+                      field: 'process.name',
+                    },
                   },
-                },
-              },
-              {
-                bool: {
-                  must: [],
-                  filter: [
-                    {
-                      exists: {
-                        field: 'process.name',
-                      },
+                  {
+                    match_phrase: {
+                      'host.name': 'Host-b4d9hu1a56',
                     },
-                    {
-                      match_phrase: {
-                        'host.name': 'Host-b4d9hu1a56',
-                      },
-                    },
-                  ],
-                  should: [],
-                  must_not: [],
-                },
+                  },
+                ],
+                should: [],
+                must_not: [],
               },
-            ],
-          },
+            },
+          ],
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
       },
+      allow_partial_search_results: true,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     });
   });
 
@@ -445,7 +440,7 @@ describe('buildEqlSearchRequest', () => {
         eventCategoryOverride: undefined,
         exceptionFilter: undefined,
       });
-      expect(request?.body?.tiebreaker_field).toEqual(`host.name`);
+      expect(request?.tiebreaker_field).toEqual(`host.name`);
     });
 
     test('should not pass a tiebreaker field with a valid value', async () => {
@@ -463,7 +458,7 @@ describe('buildEqlSearchRequest', () => {
         eventCategoryOverride: undefined,
         exceptionFilter: undefined,
       });
-      expect(request?.body?.tiebreaker_field).toEqual(undefined);
+      expect(request?.tiebreaker_field).toEqual(undefined);
     });
   });
 });

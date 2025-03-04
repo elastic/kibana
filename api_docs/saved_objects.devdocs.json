@@ -60,11 +60,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
           },
           {
             "plugin": "dashboard",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 import {
   AreaSeries,
   Axis,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/charts';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -30,6 +31,7 @@ import { asDynamicBytes } from '../../../../common/utils/formatters';
 export function StorageChart() {
   const { core } = useApmPluginContext();
   const chartThemes = useChartThemes();
+  const { euiTheme } = useEuiTheme();
 
   const euiPaletteColorBlindRotations = 3;
   const groupedPalette = euiPaletteColorBlind({
@@ -116,7 +118,7 @@ export function StorageChart() {
           gridLine={{ visible: true }}
           tickFormat={asDynamicBytes}
         />
-        {storageTimeSeries.map((serie) => (
+        {storageTimeSeries.map((serie, index) => (
           <AreaSeries
             timeZone={timeZone}
             key={serie.title}
@@ -126,7 +128,7 @@ export function StorageChart() {
             xAccessor="x"
             yAccessors={['y']}
             data={isEmpty ? [] : serie.data}
-            color={serie.color}
+            color={getVizColorForIndex(index, euiTheme)}
             stackAccessors={['x']}
           />
         ))}

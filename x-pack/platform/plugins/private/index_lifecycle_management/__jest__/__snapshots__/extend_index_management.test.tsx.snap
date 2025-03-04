@@ -179,7 +179,7 @@ exports[`extend index management ilm summary extension should render a phase def
         >
           <span
             class="euiBadge emotion-euiBadge"
-            style="--euiBadgeBackgroundColor: #E7664C; --euiBadgeTextColor: #000000;"
+            style="--euiBadgeBackgroundColor: #F6726A; --euiBadgeTextColor: #07101F;"
             title="Hot"
           >
             <span
@@ -349,7 +349,7 @@ exports[`extend index management ilm summary extension should render a step info
         >
           <span
             class="euiBadge emotion-euiBadge"
-            style="--euiBadgeBackgroundColor: #E7664C; --euiBadgeTextColor: #000000;"
+            style="--euiBadgeBackgroundColor: #F6726A; --euiBadgeTextColor: #07101F;"
             title="Hot"
           >
             <span
@@ -515,7 +515,7 @@ exports[`extend index management ilm summary extension should render an error pa
         >
           <span
             class="euiBadge emotion-euiBadge"
-            style="--euiBadgeBackgroundColor: #E7664C; --euiBadgeTextColor: #000000;"
+            style="--euiBadgeBackgroundColor: #F6726A; --euiBadgeTextColor: #07101F;"
             title="Hot"
           >
             <span

@@ -11,7 +11,7 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -500,6 +500,30 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render the upgrade call to action', () => {
       expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('Alerts filtering feature', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('invokes fetchAttackDiscoveries with the end, filter, size, and start parameters when the generate button is clicked,', () => {
+      const generate = screen.getAllByTestId('generate');
+
+      fireEvent.click(generate[0]);
+
+      expect(
+        (useAttackDiscovery as jest.Mock)().fetchAttackDiscoveries as jest.Mock
+      ).toHaveBeenCalledWith({ end: 'test-id', filter: undefined, size: 20, start: 'test-id' });
     });
   });
 

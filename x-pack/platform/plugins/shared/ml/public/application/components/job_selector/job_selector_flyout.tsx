@@ -42,7 +42,7 @@ export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 export interface JobSelectionResult {
   newSelection: string[];
   jobIds: string[];
-  time: { from: string; to: string } | undefined;
+  time?: { from: string; to: string } | undefined;
 }
 
 export interface JobSelectorFlyoutProps {

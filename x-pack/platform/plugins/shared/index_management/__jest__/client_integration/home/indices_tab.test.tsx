@@ -492,11 +492,13 @@ describe('<IndexManagementHome />', () => {
       });
       component.update();
 
+      await actions.selectIndexMode('indexModeLookupOption');
+
       await actions.clickCreateIndexSaveButton();
 
       // Saves the index with expected name
       expect(httpSetup.put).toHaveBeenCalledWith(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-        body: '{"indexName":"test-index-b"}',
+        body: '{"indexName":"test-index-b","indexMode":"lookup"}',
       });
       // It refresh indices after saving
       expect(httpSetup.get).toHaveBeenCalledTimes(2);

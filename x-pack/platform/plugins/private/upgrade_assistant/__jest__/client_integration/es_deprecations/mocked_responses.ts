@@ -77,13 +77,15 @@ const MOCK_DEFAULT_DEPRECATION: EnrichedDeprecationInfo = {
 
 export const esDeprecationsMockResponse: ESUpgradeStatus = {
   totalCriticalDeprecations: 2,
-  deprecations: [
+  migrationsDeprecations: [
     MOCK_ML_DEPRECATION,
     MOCK_INDEX_SETTING_DEPRECATION,
     MOCK_DEFAULT_DEPRECATION,
     MOCK_REINDEX_DEPRECATION,
     MOCK_CLUSTER_SETTING_DEPRECATION,
   ],
+  totalCriticalHealthIssues: 0,
+  enrichedHealthIndicators: [],
 };
 
 // Useful for testing pagination where a large number of deprecations are needed
@@ -118,7 +120,7 @@ export const createEsDeprecationsMockResponse = (
     () => MOCK_DEFAULT_DEPRECATION
   );
 
-  const deprecations: EnrichedDeprecationInfo[] = [
+  const migrationsDeprecations: EnrichedDeprecationInfo[] = [
     ...defaultDeprecations,
     ...reindexDeprecations,
     ...indexSettingsDeprecations,
@@ -127,6 +129,8 @@ export const createEsDeprecationsMockResponse = (
 
   return {
     totalCriticalDeprecations: mlDeprecations.length + reindexDeprecations.length,
-    deprecations,
+    migrationsDeprecations,
+    totalCriticalHealthIssues: esDeprecationsMockResponse.totalCriticalHealthIssues,
+    enrichedHealthIndicators: esDeprecationsMockResponse.enrichedHealthIndicators,
   };
 };

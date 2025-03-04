@@ -29,6 +29,7 @@ export {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  ESQL_CONTROL,
 } from './constants';
 
 export { CONTROL_GROUP_TYPE } from './control_group';

@@ -19,7 +19,6 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
   SecuritySolutionAppWrapperFeature,
@@ -77,7 +76,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
   private _securityStoreForDiscover?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
-  private _alertsTableRegistered?: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -100,7 +98,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, triggersActionsUi, usageCollection, management, cases } = plugins;
+    const { home, usageCollection, management, cases } = plugins;
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
@@ -131,7 +129,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
         await this.registerActions(store, params.history, core, services);
-        await this.registerAlertsTableConfiguration(triggersActionsUi);
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
@@ -296,7 +293,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
-        kubernetes: new subPluginClasses.Kubernetes(),
         onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
@@ -331,7 +327,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
-      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
@@ -345,7 +340,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
-        this.experimentalFeatures.siemMigrationsEnabled
+        !this.experimentalFeatures.siemMigrationsDisabled
       ),
     };
   }
@@ -410,23 +405,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { registerActions } = await this.lazyActions();
       registerActions(store, history, coreSetup, services);
       this._actionsRegistered = true;
-    }
-  }
-
-  /**
-   * Registers the alerts tables configurations to the triggersActionsUi plugin.
-   */
-  private async registerAlertsTableConfiguration(
-    triggersActionsUi: TriggersAndActionsUIPublicPluginSetup
-  ) {
-    if (!this._alertsTableRegistered) {
-      const { registerAlertsTableConfiguration } =
-        await this.lazyRegisterAlertsTableConfiguration();
-      registerAlertsTableConfiguration(
-        triggersActionsUi.alertsTableConfigurationRegistry,
-        this.storage
-      );
-      this._alertsTableRegistered = true;
     }
   }
 
@@ -596,17 +574,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "lazy_sub_plugins" */
       './lazy_sub_plugins'
-    );
-  }
-
-  private lazyRegisterAlertsTableConfiguration() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
-      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
     );
   }
 

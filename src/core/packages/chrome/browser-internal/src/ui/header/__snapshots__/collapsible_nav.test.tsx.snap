@@ -155,7 +155,7 @@ Array [
       </div>
       <div
         aria-labelledby="generated-id"
-        class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+        class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
         id="generated-id"
         role="group"
         style="block-size: 0;"
@@ -278,7 +278,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -408,7 +408,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -521,7 +521,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -617,7 +617,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"

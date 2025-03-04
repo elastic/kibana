@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DEFAULT_THEME_NAME = 'amsterdam';
-export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'];
+export const DEFAULT_THEME_NAME = 'borealis';
+export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'] as const;
 
 export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
 
@@ -37,19 +37,13 @@ export type ThemeTags = readonly ThemeTag[];
  */
 export const DEFAULT_THEME_TAGS: ThemeTags = SUPPORTED_THEME_TAGS;
 
-export const FALLBACK_THEME_TAG: ThemeTag = 'v8light';
+export const FALLBACK_THEME_TAG: ThemeTag = 'borealislight';
 
 const isValidTag = (tag: unknown) =>
   SUPPORTED_THEME_TAGS.includes(tag as (typeof SUPPORTED_THEME_TAGS)[number]);
 
 export function parseThemeTags(input?: unknown): ThemeTags {
   if (!input || input === '*') {
-    return DEFAULT_THEME_TAGS;
-  }
-
-  // TODO: remove when Borealis is in public beta
-  // This is left here for backwards compatibility during Borealis testing.
-  if (input === 'experimental') {
     return DEFAULT_THEME_TAGS;
   }
 

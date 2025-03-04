@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { getTailSamplingSettings, isTailBasedSamplingValid } from './tail_sampling_settings';
 
-const DOCS_LINK =
-  'https://www.elastic.co/guide/en/apm/guide/master/configure-tail-based-sampling.html';
-
 describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
+  const docLinks = docLinksServiceMock.createStartContract();
+  const DOCS_LINK = docLinks.links.apm.tailSamplingPolicies;
+
   it('return true when tail_sampling_interval is greater than 1s', () => {
     const settings = getTailSamplingSettings(DOCS_LINK);
     const isValid = isTailBasedSamplingValid(

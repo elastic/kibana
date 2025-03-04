@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { WorkflowId } from '@kbn/search-shared-ui';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -20,10 +21,9 @@ import { CreateIndexUIView } from './create_index';
 import { CreateIndexCodeView } from '../shared/create_index_code_view';
 import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 
-import { CreateIndexPanel } from '../shared/create_index_panel';
+import { CreateIndexPanel } from '../shared/create_index_panel/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
-import { WorkflowId } from '../../code_examples/workflows';
 import { useWorkflow } from '../shared/hooks/use_workflow';
 
 function initCreateIndexState(): CreateIndexFormState {
@@ -50,7 +50,11 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
       : CreateIndexViewMode.UI
   );
   const usageTracker = useUsageTracker();
-  const { workflow, setSelectedWorkflowId } = useWorkflow();
+  const {
+    workflow,
+    setSelectedWorkflowId,
+    createIndexExamples: selectedCodeExamples,
+  } = useWorkflow();
 
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.startPageOpened);
@@ -103,7 +107,6 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
       onChangeView={onChangeView}
       onClose={onClose}
       showSkip
-      showCallouts
     >
       {createIndexView === CreateIndexViewMode.UI && (
         <CreateIndexUIView
@@ -131,6 +134,7 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
             installCommands: AnalyticsEvents.startCreateIndexCodeCopyInstall,
             createIndex: AnalyticsEvents.startCreateIndexCodeCopy,
           }}
+          selectedCodeExamples={selectedCodeExamples}
         />
       )}
     </CreateIndexPanel>

@@ -13,7 +13,7 @@ import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
-import { PackagePolicySchema } from './package_policy';
+import { PackagePolicySchema, PackagePolicyResponseSchema } from './package_policy';
 
 export const AgentPolicyNamespaceSchema = schema.string({
   minLength: 1,
@@ -281,7 +281,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string()),
-      schema.arrayOf(PackagePolicySchema, {
+      schema.arrayOf(PackagePolicyResponseSchema, {
         meta: {
           description:
             'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter',
@@ -293,6 +293,17 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
 
 export const GetAgentPolicyResponseSchema = schema.object({
   item: AgentPolicyResponseSchema,
+});
+
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string(),
+      agents: schema.number(),
+      failedUpgradeAgents: schema.number(),
+    })
+  ),
+  totalAgents: schema.number(),
 });
 
 export const FullAgentPolicyResponseSchema = schema.object({
@@ -328,6 +339,17 @@ export const FullAgentPolicyResponseSchema = schema.object({
             certificate: schema.maybe(schema.string()),
             key: schema.maybe(schema.string()),
             renegotiation: schema.maybe(schema.string()),
+          })
+        ),
+        secrets: schema.maybe(
+          schema.object({
+            ssl: schema.maybe(
+              schema.object({
+                key: schema.object({
+                  id: schema.maybe(schema.string()),
+                }),
+              })
+            ),
           })
         ),
       }),
@@ -409,6 +431,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
         metrics: schema.boolean(),
         logs: schema.boolean(),
         traces: schema.boolean(),
+        apm: schema.maybe(schema.any()),
       }),
       download: schema.object({
         sourceURI: schema.string(),

@@ -10,7 +10,7 @@
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -121,11 +121,11 @@ describe('Serialization utils', () => {
         savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
+        serializeDynamicActions: jest.fn(),
       });
 
       expect(serializedState).toEqual({
         rawState: {
-          id: uuid,
           type: 'search',
           attributes: {
             ...toSavedSearchAttributes(savedSearch, searchSource.serialize().searchSourceJSON),
@@ -156,6 +156,7 @@ describe('Serialization utils', () => {
           savedSearch,
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
         });
 
@@ -176,6 +177,7 @@ describe('Serialization utils', () => {
           savedSearch: { ...savedSearch, sampleSize: 500, sort: [['order_date', 'asc']] },
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
         });
 

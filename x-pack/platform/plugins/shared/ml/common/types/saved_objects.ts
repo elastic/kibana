@@ -7,8 +7,11 @@
 
 import type { ErrorType } from '@kbn/ml-error-utils';
 
-export type JobType = 'anomaly-detector' | 'data-frame-analytics';
-export type TrainedModelType = 'trained-model';
+export const ANOMALY_DETECTOR_SAVED_OBJECT_TYPE = 'anomaly-detector';
+export const DFA_SAVED_OBJECT_TYPE = 'data-frame-analytics';
+export const TRAINED_MODEL_SAVED_OBJECT_TYPE = 'trained-model';
+export type JobType = typeof ANOMALY_DETECTOR_SAVED_OBJECT_TYPE | typeof DFA_SAVED_OBJECT_TYPE;
+export type TrainedModelType = typeof TRAINED_MODEL_SAVED_OBJECT_TYPE;
 export type MlSavedObjectType = JobType | TrainedModelType;
 
 export const ML_JOB_SAVED_OBJECT_TYPE = 'ml-job';

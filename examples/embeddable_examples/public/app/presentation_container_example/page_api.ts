@@ -12,7 +12,6 @@ import { v4 as generateId } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import {
   PanelPackage,
-  apiHasSerializableState,
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
@@ -21,6 +20,7 @@ import {
   PublishesDataLoading,
   PublishingSubject,
   ViewMode,
+  apiHasSerializableState,
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
@@ -81,7 +81,7 @@ export function getPageApi() {
     boolean | undefined
   >(
     { children$ },
-    'dataLoading',
+    'dataLoading$',
     apiPublishesDataLoading,
     undefined,
     // flatten method
@@ -193,7 +193,7 @@ export function getPageApi() {
       },
       canRemovePanels: () => true,
       children$,
-      dataLoading: dataLoading$,
+      dataLoading$,
       executionContext: {
         type: 'presentationContainerEmbeddableExample',
       },
@@ -210,7 +210,7 @@ export function getPageApi() {
         children$.next(omit(children$.value, id));
       },
       saveNotification$,
-      viewMode: new BehaviorSubject<ViewMode>('edit'),
+      viewMode$: new BehaviorSubject<ViewMode>('edit'),
       /**
        * return last saved embeddable state
        */
@@ -252,7 +252,7 @@ export function getPageApi() {
         return true;
       },
       timeRange$,
-      unsavedChanges: unsavedChanges$ as PublishingSubject<object | undefined>,
+      unsavedChanges$: unsavedChanges$ as PublishingSubject<object | undefined>,
     } as PageApi,
   };
 }

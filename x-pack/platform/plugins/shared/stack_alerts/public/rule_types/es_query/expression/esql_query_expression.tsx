@@ -59,7 +59,7 @@ export const EsqlQueryExpression: React.FC<
     // The sourceFields param is ignored for the ES|QL type
     sourceFields: [],
   });
-  const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
+  const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -75,18 +75,13 @@ export const EsqlQueryExpression: React.FC<
     [setRuleParams]
   );
 
-  const setDefaultExpressionValues = async () => {
+  const setDefaultExpressionValues = () => {
     setRuleProperty('params', currentRuleParams);
-    setQuery(esqlQuery ?? { esql: '' });
-    if (esqlQuery) {
-      if (esqlQuery.esql) {
-        refreshTimeFields(esqlQuery);
-      }
-    }
-    if (timeField) {
-      setTimeFieldOptions([firstFieldOption, { text: timeField, value: timeField }]);
+    if (esqlQuery?.esql) {
+      refreshTimeFields(esqlQuery);
     }
   };
+
   useEffect(() => {
     setDefaultExpressionValues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,20 +149,30 @@ export const EsqlQueryExpression: React.FC<
     isServerless,
   ]);
 
-  const refreshTimeFields = async (q: AggregateQuery) => {
-    const esqlDataView = await getESQLAdHocDataview(q.esql, dataViews);
-    const indexPattern: string = esqlDataView.getIndexPattern();
-    const currentEsFields = await getFields(http, [indexPattern]);
+  const refreshTimeFields = useCallback(
+    async (q: AggregateQuery) => {
+      const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
+        try {
+          const esqlDataView = await getESQLAdHocDataview(queryObj.esql, dataViews);
+          const indexPattern: string = esqlDataView.getIndexPattern();
+          const currentEsFields = await getFields(http, [indexPattern]);
+          const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
+          const timestampField = esqlDataView.timeFieldName;
+          return { newTimeFieldOptions, timestampField };
+        } catch (e) {
+          return { newTimeFieldOptions: [], timestampField: undefined };
+        }
+      };
 
-    const timeFields = getTimeFieldOptions(currentEsFields);
-    setTimeFieldOptions([firstFieldOption, ...timeFields]);
-
-    const timestampField = esqlDataView.timeFieldName;
-    if (timestampField) {
-      setParam('timeField', timestampField);
-    }
-    setDetectedTimestamp(timestampField);
-  };
+      const { newTimeFieldOptions, timestampField } = await fetchTimeFieldsData(q);
+      setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
+      if (!timeField && timestampField) {
+        setParam('timeField', timestampField);
+      }
+      setDetectedTimestamp(timestampField);
+    },
+    [timeField, setParam, dataViews, http]
+  );
 
   return (
     <Fragment>

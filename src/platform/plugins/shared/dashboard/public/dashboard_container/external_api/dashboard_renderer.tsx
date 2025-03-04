@@ -46,7 +46,7 @@ export function DashboardRenderer({
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
-  const dashboardContainer = useRef(null);
+  const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
@@ -112,17 +112,13 @@ export function DashboardRenderer({
     }
 
     return dashboardApi && dashboardInternalApi ? (
-      <div className="dashboardContainer" ref={dashboardContainer}>
+      <div className="dashboardContainer" ref={(e) => (dashboardContainerRef.current = e)}>
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport
-                dashboardContainer={
-                  dashboardContainer.current ? dashboardContainer.current : undefined
-                }
-              />
+              <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
@@ -157,7 +153,7 @@ const ParentClassController = ({
   dashboardApi: DashboardApi;
   viewportRef: HTMLDivElement;
 }) => {
-  const maximizedPanelId = useStateFromPublishingSubject(dashboardApi.expandedPanelId);
+  const maximizedPanelId = useStateFromPublishingSubject(dashboardApi.expandedPanelId$);
 
   useLayoutEffect(() => {
     const parentDiv = viewportRef.parentElement;

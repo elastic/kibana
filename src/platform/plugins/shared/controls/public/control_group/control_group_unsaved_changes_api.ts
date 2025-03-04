@@ -55,8 +55,8 @@ export function initializeControlGroupUnsavedChanges(
 
   return {
     api: {
-      unsavedChanges: combineLatest([
-        controlGroupUnsavedChanges.api.unsavedChanges,
+      unsavedChanges$: combineLatest([
+        controlGroupUnsavedChanges.api.unsavedChanges$,
         childrenUnsavedChanges$(children$),
       ]).pipe(
         map(([unsavedControlGroupState, unsavedControlsState]) => {
@@ -87,7 +87,7 @@ export function initializeControlGroupUnsavedChanges(
           applySelections();
         }
       },
-    } as Pick<PublishesUnsavedChanges, 'unsavedChanges'> & {
+    } as Pick<PublishesUnsavedChanges, 'unsavedChanges$'> & {
       asyncResetUnsavedChanges: () => Promise<void>;
     },
   };

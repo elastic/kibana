@@ -33,9 +33,10 @@ import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { FleetError, KibanaSOReferenceError } from '../../../../errors';
 import { withPackageSpan } from '../../packages/utils';
 
+import { appContextService } from '../../..';
+
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
-import { appContextService } from '../../..';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 1000;
 
@@ -70,6 +71,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
+  [KibanaAssetType.securityAIPrompt]: KibanaSavedObjectType.securityAIPrompt,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,

@@ -50,7 +50,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_USAGE_API_URL } from '../config';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
@@ -2127,6 +2127,39 @@ describe('delete()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"System action system-connector-.cases is not allowed to delete."`
     );
+  });
+
+  test('deleting unregistered action types works as expected', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get = jest.fn().mockResolvedValueOnce({
+      id: '2',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'unregistered-action-type-id',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+
+    const result = await actionsClient.delete({ id: '2' });
+    expect(result).toEqual(expectedResult);
+
+    // the event is logged but no error is thrown as expected
+    expect(logger.error).toHaveBeenCalledWith(
+      `Failed fetching action type from registry: Action type \"unregistered-action-type-id\" is not registered. - deletion will proceed.`
+    );
+
+    // deletion is called with the right params
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "2",
+      ]
+    `);
   });
 });
 

@@ -8,6 +8,7 @@
 import {
   ChatConnection,
   GeminiContent,
+  GeminiRequest,
   GoogleAbstractedClient,
   GoogleAIBaseLLMInput,
   GoogleLLMResponse,
@@ -16,6 +17,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { EnhancedGenerateContentResponse } from '@google/generative-ai';
 import { AsyncCaller } from '@langchain/core/utils/async_caller';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { convertResponseBadFinishReasonToErrorMsg } from '../../utils/gemini';
 
 // only implements non-streaming requests
@@ -26,23 +28,26 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
   #model?: string;
   temperature: number;
   caller: AsyncCaller;
+  telemetryMetadata?: TelemetryMetadata;
   constructor(
     fields: GoogleAIBaseLLMInput<Auth>,
     caller: AsyncCaller,
     client: GoogleAbstractedClient,
     _streaming: boolean, // defaulting to false in the super
     actionsClient: PublicMethodsOf<ActionsClient>,
-    connectorId: string
+    connectorId: string,
+    telemetryMetadata?: TelemetryMetadata
   ) {
     super(fields, caller, client, false);
     this.actionsClient = actionsClient;
     this.connectorId = connectorId;
+    this.telemetryMetadata = telemetryMetadata;
     this.caller = caller;
     this.#model = fields.model;
     this.temperature = fields.temperature ?? 0;
     const nativeFormatData = this.formatData.bind(this);
     this.formatData = async (data, options) => {
-      const result = await nativeFormatData(data, options);
+      const result = (await nativeFormatData(data, options)) as GeminiRequest;
       if (result?.contents != null && result?.contents.length) {
         // ensure there are not 2 messages in a row from the same role,
         // if there are combine them
@@ -77,6 +82,7 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
+              telemetryMetadata: this.telemetryMetadata,
               model: this.#model,
               messages: data?.contents,
               tools: data?.tools,

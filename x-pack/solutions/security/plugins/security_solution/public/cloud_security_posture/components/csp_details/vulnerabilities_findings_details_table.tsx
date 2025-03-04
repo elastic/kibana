@@ -35,6 +35,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
+import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
@@ -49,6 +50,8 @@ type VulnerabilitySortFieldType =
   | VULNERABILITY.PACKAGE_NAME;
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
+  const { getSeverityStatusColor } = useGetSeverityStatusColor();
+
   useEffect(() => {
     uiMetricService.trackUiMetric(
       METRIC_TYPE.COUNT,
@@ -154,6 +157,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       low,
       none,
     },
+    getSeverityStatusColor,
     setCurrentFilter,
     currentFilter
   );

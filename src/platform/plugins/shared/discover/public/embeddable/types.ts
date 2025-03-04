@@ -7,31 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import {
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type {
   EmbeddableApiContext,
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
+  HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesSavedObjectId,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import {
+import type {
   SavedSearch,
   SavedSearchAttributes,
   SerializableSavedSearch,
 } from '@kbn/saved-search-plugin/common/types';
-import { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import { BehaviorSubject } from 'rxjs';
-import { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { BehaviorSubject } from 'rxjs';
+import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
   SerializableSavedSearch,
@@ -75,6 +78,7 @@ export type EditableSavedSearchAttributes = Partial<
 
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
+  Partial<DynamicActionsSerializedState> &
   EditableSavedSearchAttributes & {
     // by value
     attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
@@ -85,7 +89,8 @@ export type SearchEmbeddableSerializedState = SerializedTitles &
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
-  SerializedTimeRange & {
+  SerializedTimeRange &
+  Partial<DynamicActionsSerializedState> & {
     rawSavedObjectAttributes?: EditableSavedSearchAttributes;
     savedObjectTitle?: string;
     savedObjectId?: string;
@@ -100,14 +105,16 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   PublishesSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
-  HasInPlaceLibraryTransforms &
+  HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
-  Partial<HasEditCapabilities & PublishesSavedObjectId>;
+  Partial<HasEditCapabilities & PublishesSavedObjectId> &
+  HasDynamicActions &
+  HasSupportedTriggers;
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;

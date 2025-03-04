@@ -867,12 +867,12 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.capabilities",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "capabilities",
             "description": [],
             "signature": [
-              "Capabilities"
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1266,7 +1266,9 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              "TimefilterHook",
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -2127,6 +2129,27 @@
               "{ services: { logSourcesService: ",
               "LogSourcesService",
               "; }; } | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.embeddableEnhanced",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableEnhanced",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddableEnhanced",
+                "scope": "public",
+                "docId": "kibEmbeddableEnhancedPluginApi",
+                "section": "def-public.StartContract",
+                "text": "StartContract"
+              },
+              " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -3383,10 +3406,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; } & ",
+          " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3479,10 +3502,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasInPlaceLibraryTransforms",
-            "text": "HasInPlaceLibraryTransforms"
+            "section": "def-public.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
           },
-          "<object> & ",
+          "<object, object> & ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3514,7 +3537,46 @@
             "section": "def-public.PublishesSavedObjectId",
             "text": "PublishesSavedObjectId"
           },
-          ">"
+          "> & Partial<{ enhancements: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; }; setDynamicActions: (newState: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined) => void; dynamicActionsState$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined>; }> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSupportedTriggers",
+            "text": "HasSupportedTriggers"
+          }
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
@@ -3549,7 +3611,9 @@
             "section": "def-public.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
-          " & { rawSavedObjectAttributes?: Partial<Pick<",
+          " & Partial<",
+          "DynamicActionsSerializedState",
+          "> & { rawSavedObjectAttributes?: Partial<Pick<",
           "SavedSearchAttributes",
           ", keyof ",
           "SavedSearchAttributes",
@@ -3591,7 +3655,9 @@
             "section": "def-public.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
-          " & Partial<Pick<",
+          " & Partial<",
+          "DynamicActionsSerializedState",
+          "> & Partial<Pick<",
           "SavedSearchAttributes",
           ", keyof ",
           "SavedSearchAttributes",
@@ -3630,7 +3696,7 @@
             "section": "def-public.UnifiedHistogramContainerProps",
             "text": "UnifiedHistogramContainerProps"
           },
-          ", \"onBrushEnd\" | \"disabledActions\" | \"onFilter\" | \"withDefaultActions\">"
+          ", \"onBrushEnd\" | \"onFilter\" | \"withDefaultActions\" | \"disabledActions\">"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/histogram_customization.tsx",
         "deprecated": false,
@@ -3672,69 +3738,6 @@
           "path": "src/platform/plugins/shared/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.showInlineTopNav",
-          "type": "Function",
-          "tags": [],
-          "label": "showInlineTopNav",
-          "description": [],
-          "signature": [
-            "() => void"
-          ],
-          "path": "src/platform/plugins/shared/discover/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.configureInlineTopNav",
-          "type": "Function",
-          "tags": [],
-          "label": "configureInlineTopNav",
-          "description": [],
-          "signature": [
-            "(projectNavId: string, options: { enabled: boolean; showLogsExplorerTabs: boolean; }) => void"
-          ],
-          "path": "src/platform/plugins/shared/discover/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "discover",
-              "id": "def-public.DiscoverSetup.configureInlineTopNav.$1",
-              "type": "string",
-              "tags": [],
-              "label": "projectNavId",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/platform/plugins/shared/discover/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            },
-            {
-              "parentPluginId": "discover",
-              "id": "def-public.DiscoverSetup.configureInlineTopNav.$2",
-              "type": "Object",
-              "tags": [],
-              "label": "options",
-              "description": [],
-              "signature": [
-                "{ enabled: boolean; showLogsExplorerTabs: boolean; }"
-              ],
-              "path": "src/platform/plugins/shared/discover/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",

@@ -11,6 +11,7 @@ export {
   MIGRATION_CLIENT_OPTIONS,
   SavedObjectsService,
   CoreSavedObjectsRouteHandlerContext,
+  SAVED_OBJECT_TYPES_COUNT,
 } from './src';
 export type {
   InternalSavedObjectsServiceStart,

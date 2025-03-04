@@ -56,7 +56,8 @@
     "@kbn/rison",
     "@kbn/task-manager-plugin",
     "@kbn/field-utils",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*"

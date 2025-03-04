@@ -1414,6 +1414,21 @@ Object {
       "required": false,
       "type": "version",
     },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
+    },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
       "required": false,
@@ -2516,6 +2531,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -3620,6 +3650,21 @@ Object {
       "required": false,
       "type": "version",
     },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
+    },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
       "required": false,
@@ -4723,6 +4768,21 @@ Object {
       "required": false,
       "type": "version",
     },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
+    },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
       "required": false,
@@ -5825,6 +5885,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -6935,6 +7010,21 @@ Object {
       "required": false,
       "type": "version",
     },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
+    },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
       "required": false,
@@ -8038,6 +8128,21 @@ Object {
       "required": false,
       "type": "version",
     },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
+    },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
       "required": false,
@@ -9140,6 +9245,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",

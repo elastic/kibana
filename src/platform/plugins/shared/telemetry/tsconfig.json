@@ -34,12 +34,12 @@
     "@kbn/analytics-collection-utils",
     "@kbn/react-kibana-mount",
     "@kbn/core-node-server",
-    "@kbn/security-plugin-types-server",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
+    "@kbn/security-plugin-types-common",
   ],
   "exclude": [
     "target/**/*",

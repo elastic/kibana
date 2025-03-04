@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 export interface RuleMigrationSort {
   sortField?: string;
@@ -49,6 +49,9 @@ const sortingOptions = {
         },
       },
     ];
+  },
+  riskScore(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
+    return [{ 'elastic_rule.risk_score': direction }];
   },
   status(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
     const field = 'translation_result';
@@ -101,6 +104,7 @@ const DEFAULT_SORTING: estypes.Sort = [
   ...sortingOptions.status('desc'),
   ...sortingOptions.matchedPrebuiltRule('desc'),
   ...sortingOptions.severity(),
+  ...sortingOptions.riskScore('desc'),
   ...sortingOptions.updated(),
 ];
 
@@ -110,6 +114,13 @@ const sortingOptionsMap: {
   'elastic_rule.title': sortingOptions.name,
   'elastic_rule.severity': (direction?: estypes.SortOrder) => [
     ...sortingOptions.severity(direction),
+    ...sortingOptions.riskScore(direction),
+    ...sortingOptions.status('desc'),
+    ...sortingOptions.matchedPrebuiltRule('desc'),
+  ],
+  'elastic_rule.risk_score': (direction?: estypes.SortOrder) => [
+    ...sortingOptions.riskScore(direction),
+    ...sortingOptions.severity(direction),
     ...sortingOptions.status('desc'),
     ...sortingOptions.matchedPrebuiltRule('desc'),
   ],
@@ -117,11 +128,13 @@ const sortingOptionsMap: {
     ...sortingOptions.matchedPrebuiltRule(direction),
     ...sortingOptions.status('desc'),
     ...sortingOptions.severity('desc'),
+    ...sortingOptions.riskScore(direction),
   ],
   translation_result: (direction?: estypes.SortOrder) => [
     ...sortingOptions.status(direction),
     ...sortingOptions.matchedPrebuiltRule('desc'),
     ...sortingOptions.severity('desc'),
+    ...sortingOptions.riskScore(direction),
   ],
   updated_at: sortingOptions.updated,
 };

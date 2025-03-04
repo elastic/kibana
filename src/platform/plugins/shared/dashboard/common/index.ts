@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardCapabilities, SharedDashboardState } from './types';
+export type { DashboardCapabilities } from './types';
 
 export type {
   DashboardPanelMap,
   DashboardPanelState,
-  DashboardContainerInput,
   DashboardContainerByReferenceInput,
 } from './dashboard_container/types';
 

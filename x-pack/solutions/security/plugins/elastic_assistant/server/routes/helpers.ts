@@ -12,6 +12,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
@@ -21,6 +22,10 @@ import {
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
   DEFEND_INSIGHTS_TOOL_ID,
+  ContentReferencesStore,
+  ContentReferences,
+  MessageMetadata,
+  ScreenContext,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +35,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
@@ -98,10 +104,12 @@ export const getPluginNameFromRequest = ({
 
 export const getMessageFromRawResponse = ({
   rawContent,
+  metadata,
   isError,
   traceData,
 }: {
   rawContent?: string;
+  metadata?: MessageMetadata;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -111,6 +119,7 @@ export const getMessageFromRawResponse = ({
       role: 'assistant',
       content: rawContent,
       timestamp: dateTimeString,
+      metadata,
       isError,
       traceData,
     };
@@ -168,6 +177,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
+  contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -176,6 +186,7 @@ export const appendAssistantMessageToConversation = async ({
   messageContent,
   replacements,
   conversationId,
+  contentReferences,
   isError = false,
   traceData = {},
 }: AppendAssistantMessageToConversationParams) => {
@@ -183,6 +194,10 @@ export const appendAssistantMessageToConversation = async ({
   if (!conversation) {
     return;
   }
+
+  const metadata: MessageMetadata = {
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+  };
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -192,6 +207,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -216,6 +232,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
@@ -235,6 +252,8 @@ export interface LangChainExecuteParams {
   getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   systemPrompt?: string;
 }
 export const langChainExecute = async ({
@@ -245,6 +264,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  contentReferencesStore,
   isOssModel,
   context,
   actionsClient,
@@ -258,6 +278,8 @@ export const langChainExecute = async ({
   response,
   responseLanguage,
   isStream = true,
+  savedObjectsClient,
+  screenContext,
   systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
@@ -299,10 +321,12 @@ export const langChainExecute = async ({
     abortSignal,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
+    core: context.core,
     actionsClient,
     assistantTools,
     conversationId,
     connectorId,
+    contentReferencesStore,
     esClient,
     llmTasks,
     inference,
@@ -316,6 +340,8 @@ export const langChainExecute = async ({
     request,
     replacements,
     responseLanguage,
+    savedObjectsClient,
+    screenContext,
     size: request.body.size,
     systemPrompt,
     telemetry,
@@ -418,12 +444,12 @@ type PerformChecks =
       isSuccess: false;
       response: IKibanaResponse;
     };
-export const performChecks = ({
+export const performChecks = async ({
   capability,
   context,
   request,
   response,
-}: PerformChecksParams): PerformChecks => {
+}: PerformChecksParams): Promise<PerformChecks> => {
   const assistantResponse = buildResponse(response);
 
   if (!hasAIAssistantLicense(context.licensing.license)) {
@@ -437,7 +463,7 @@ export const performChecks = ({
     };
   }
 
-  const currentUser = context.elasticAssistant.getCurrentUser();
+  const currentUser = await context.elasticAssistant.getCurrentUser();
 
   if (currentUser == null) {
     return {

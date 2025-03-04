@@ -10,6 +10,7 @@
 import moment from 'moment';
 
 import {
+  ContentReferencesStore,
   DEFEND_INSIGHTS_TOOL_ID,
   DefendInsightStatus,
   DefendInsightType,
@@ -58,6 +59,7 @@ describe('defend insights route helpers', () => {
         latestReplacements: {},
         onNewReplacements: jest.fn(),
         request: {} as any,
+        contentReferencesStore: {} as ContentReferencesStore,
       };
       const result = getAssistantToolParams(params);
 

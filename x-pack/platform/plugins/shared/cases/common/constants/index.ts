@@ -54,7 +54,6 @@ export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_i
 export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
-export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
@@ -186,6 +185,7 @@ export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
+export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
 
 /**
  * Cases API Tags

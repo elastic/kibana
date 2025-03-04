@@ -20,9 +20,10 @@ jest.mock('../../../../sourcerer/containers');
 jest.mock('../../open_timeline/use_timeline_status');
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
+  const mockDispatch = jest.fn();
   return {
     ...origin,
-    useDispatch: jest.fn(),
+    useDispatch: jest.fn(() => mockDispatch),
   };
 });
 jest.mock('react-router-dom', () => {

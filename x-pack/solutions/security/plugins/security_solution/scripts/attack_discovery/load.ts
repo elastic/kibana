@@ -10,6 +10,11 @@ import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
+import { createGunzip } from 'zlib';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+
+const pipelineAsync = promisify(pipeline);
 
 const PIPELINE_NAME = 'insights_pipeline';
 const DIRECTORY_PATH = path.resolve(
@@ -62,6 +67,36 @@ const getRule = async ({ kbnClient, log }: { kbnClient: KbnClient; log: ToolingL
 
   return response.data.data?.[0];
 };
+
+async function readAndDecompress({ filePath, log }: { filePath: string; log: ToolingLog }) {
+  try {
+    const decompressedChunks: Uint8Array[] = [];
+
+    // Create a read stream for the gzipped file
+    const fileStream = fs.createReadStream(filePath);
+
+    // Decompress the file stream using zlib
+    await pipelineAsync(
+      fileStream, // Readable stream for the file
+      createGunzip(), // Decompression stream
+      async function* (source) {
+        // Collect decompressed chunks
+        for await (const chunk of source) {
+          decompressedChunks.push(chunk);
+        }
+      }
+    );
+
+    // Combine decompressed chunks into a single buffer and convert to string
+    const decompressedBuffer = Buffer.concat(decompressedChunks);
+    const decompressedText = decompressedBuffer.toString('utf-8');
+
+    return decompressedText;
+  } catch (error) {
+    log.error('Error during file reading or decompression:');
+    log.error(error);
+  }
+}
 
 const importRule = async ({ kbnClient, log }: { kbnClient: KbnClient; log: ToolingLog }) => {
   log.info('Importing rule from endpoint_alert.ndjson...');
@@ -123,7 +158,7 @@ const createPipeline = async ({ esClient, log }: { esClient: Client; log: Toolin
 
       await esClient.ingest.putPipeline({
         id: PIPELINE_NAME,
-        body: pipelineConfig,
+        ...pipelineConfig,
       });
     } else {
       log.error('Error checking or creating ingest pipeline:');
@@ -161,12 +196,10 @@ const createAndConfigureIndex = async ({
       log.info(`Creating and configuring Elasticsearch index: ${indexName}`);
       await esClient.indices.create({
         index: indexName,
-        body: {
-          settings: {
-            'index.mapping.total_fields.limit': '6000',
-          },
-          mappings: JSON.parse(mappingData),
+        settings: {
+          'index.mapping.total_fields.limit': '6000',
         },
+        mappings: JSON.parse(mappingData),
       });
     }
   } catch (error) {
@@ -201,7 +234,7 @@ const processFile = async ({
 
   log.info(`Processing and indexing file: ${file} ...`);
 
-  const fileData = await fs.readFileSync(file).toString().split('\n');
+  const fileData = (await readAndDecompress({ filePath: file, log }))?.split('\n') ?? [];
 
   try {
     const response = await esClient.bulk<string>({
@@ -237,10 +270,10 @@ const processFilesForEpisode = async ({
 }) => {
   const dataFiles = fs
     .readdirSync(DIRECTORY_PATH)
-    .filter((file) => file.includes(`ep${epNum}data.ndjson`));
+    .filter((file) => file.includes(`ep${epNum}data.ndjson.gz`));
   const alertFiles = fs
     .readdirSync(DIRECTORY_PATH)
-    .filter((file) => file.includes(`ep${epNum}alerts.ndjson`));
+    .filter((file) => file.includes(`ep${epNum}alerts.ndjson.gz`));
 
   for (const file of dataFiles) {
     await processFile({ esClient, file: path.join(DIRECTORY_PATH, file), indexType: 'data', log });

@@ -11,16 +11,20 @@ import { Replacements } from '@kbn/elastic-assistant-common';
 
 import { getRetrieveAnonymizedAlertsNode } from '.';
 import { mockAnonymizedAlerts } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
-import { getDefaultAttackDiscoveryPrompt } from '../helpers/get_default_attack_discovery_prompt';
-import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
 import type { GraphState } from '../../types';
+import {
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+} from '../../../../../prompt/prompts';
 
 const initialGraphState: GraphState = {
   attackDiscoveries: null,
-  attackDiscoveryPrompt: getDefaultAttackDiscoveryPrompt(),
+  attackDiscoveryPrompt: ATTACK_DISCOVERY_DEFAULT,
   anonymizedAlerts: [],
   combinedGenerations: '',
   combinedRefinements: '',
+  continuePrompt: ATTACK_DISCOVERY_CONTINUE,
   errors: [],
   generationAttempts: 0,
   generations: [],
@@ -29,7 +33,7 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt: getDefaultRefinePrompt(),
+  refinePrompt: ATTACK_DISCOVERY_REFINE,
   replacements: {},
   unrefinedResults: null,
 };

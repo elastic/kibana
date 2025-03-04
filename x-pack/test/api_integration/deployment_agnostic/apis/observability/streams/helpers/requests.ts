@@ -7,8 +7,8 @@
 import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StreamConfigDefinition } from '@kbn/streams-schema';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { StreamsSupertestRepositoryClient } from './repository_client';
@@ -40,14 +40,14 @@ export async function forkStream(
   root: string,
   body: ClientRequestParamsOf<
     StreamsRouteRepository,
-    'POST /api/streams/{id}/_fork'
+    'POST /api/streams/{name}/_fork'
   >['params']['body']
 ) {
   return client
-    .fetch(`POST /api/streams/{id}/_fork`, {
+    .fetch(`POST /api/streams/{name}/_fork`, {
       params: {
         path: {
-          id: root,
+          name: root,
         },
         body,
       },
@@ -59,16 +59,50 @@ export async function forkStream(
 export async function putStream(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
-  body: StreamConfigDefinition,
+  body: StreamUpsertRequest,
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('PUT /api/streams/{id}', {
+    .fetch('PUT /api/streams/{name}', {
       params: {
         path: {
-          id: name,
+          name,
         },
         body,
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function getStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function getIlmStats(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/lifecycle/_stats', {
+      params: {
+        path: {
+          name,
+        },
       },
     })
     .expect(expectStatusCode)

@@ -11,8 +11,11 @@ import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import {
+  SerializedTimeRange,
+  SerializedTitles,
+  SerializedPanelState,
+} from '@kbn/presentation-publishing';
 import {
   SavedSearch,
   SavedSearchAttributes,
@@ -20,6 +23,7 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { DiscoverServices } from '../../build_services';
 import {
@@ -82,6 +86,7 @@ export const serializeState = ({
   savedSearch,
   serializeTitles,
   serializeTimeRange,
+  serializeDynamicActions,
   savedObjectId,
 }: {
   uuid: string;
@@ -89,6 +94,7 @@ export const serializeState = ({
   savedSearch: SavedSearch;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
+  serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
 }): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
@@ -112,6 +118,7 @@ export const serializeState = ({
         // Serialize the current dashboard state into the panel state **without** updating the saved object
         ...serializeTitles(),
         ...serializeTimeRange(),
+        ...serializeDynamicActions?.(),
         ...overwriteState,
       },
       // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
@@ -120,7 +127,6 @@ export const serializeState = ({
   }
 
   const { state, references } = extract({
-    id: uuid,
     type: SEARCH_EMBEDDABLE_TYPE,
     attributes: {
       ...savedSearchAttributes,

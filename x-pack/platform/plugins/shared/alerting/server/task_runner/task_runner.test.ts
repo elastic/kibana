@@ -90,6 +90,7 @@ import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -98,6 +99,7 @@ import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_servi
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithType } from '../lib/error_with_type';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -195,6 +197,7 @@ describe('Task Runner', () => {
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
+    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
   };
 
   beforeEach(() => {
@@ -3220,6 +3223,43 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  test('when there is a gap, report it to alert event log', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    jest.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
+      return {
+        run: {
+          history: [],
+          calculated_metrics: {
+            success_ratio: 0,
+          },
+          last_run: {
+            timestamp: '2021-09-01T00:00:00.000Z',
+            metrics: {
+              gap_range: {
+                gte: '2021-09-01T00:00:00.000Z',
+                lte: '2021-09-01T00:00:00.001Z',
+              },
+            },
+          },
+        },
+      };
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    await taskRunner.run();
+
+    expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
+      gap: { gte: '2021-09-01T00:00:00.000Z', lte: '2021-09-01T00:00:00.001Z' },
+    });
   });
 
   test('reschedules when persistAlerts returns a cluster_block_exception', async () => {

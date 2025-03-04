@@ -19,6 +19,7 @@ const LocalStorageKey = {
   selectedIntegrationTabId: 'securitySolution.onboarding.selectedIntegrationTabId',
   selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
   integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
+  assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
 } as const;
 
 /**
@@ -45,7 +46,7 @@ export const useStoredCompletedCardIds = (spaceId: string) =>
  * Stores the selected topic ID per space
  */
 export const useStoredUrlDetails = (spaceId: string) =>
-  useDefinedLocalStorage<string | null>(`${LocalStorageKey.urlDetails}.${spaceId}`, null);
+  useLocalStorage<string | null | undefined>(`${LocalStorageKey.urlDetails}.${spaceId}`);
 
 /**
  * Stores the selected selectable card ID per space
@@ -79,4 +80,13 @@ export const useStoredIntegrationSearchTerm = (spaceId: string) =>
   useDefinedLocalStorage<string | null>(
     `${LocalStorageKey.integrationSearchTerm}.${spaceId}`,
     null
+  );
+
+/**
+ * Stores the integration search term per space
+ */
+export const useStoredAssistantConnectorId = (spaceId: string) =>
+  useDefinedLocalStorage<string | undefined>(
+    `${LocalStorageKey.assistantConnectorId}.${spaceId}`,
+    undefined
   );

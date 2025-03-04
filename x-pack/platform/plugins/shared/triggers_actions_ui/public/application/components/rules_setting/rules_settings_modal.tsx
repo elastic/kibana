@@ -33,6 +33,7 @@ import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_que
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
 import { useUpdateRuleSettings } from '../../hooks/use_update_rules_settings';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 
 export const RulesSettingsErrorPrompt = memo(() => {
   return (
@@ -219,6 +220,9 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     if (isFlappingLoading || isQueryDelayLoading) {
       return <CenterJustifiedSpinner />;
     }
+    const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
+      'alertDeletionSettingsEnabled'
+    );
     return (
       <>
         {flappingSettings && (
@@ -230,6 +234,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
             hasError={hasFlappingError}
           />
         )}
+        {isAlertDeletionSettingsEnabled && <div>Alert Deletion Settings Placeholder</div>}
         {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />

@@ -19,6 +19,7 @@ import {
   SLO_ERROR_BUDGET_ID,
 } from '../embeddable/slo/error_budget/constants';
 import { SLORepositoryClient } from '../types';
+import { openSloConfiguration } from '../embeddable/slo/error_budget/error_budget_open_configuration';
 
 export function createAddErrorBudgetPanelAction(
   coreStart: CoreStart,
@@ -36,9 +37,6 @@ export function createAddErrorBudgetPanelAction(
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
-        const { openSloConfiguration } = await import(
-          '../embeddable/slo/error_budget/error_budget_open_configuration'
-        );
         const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {

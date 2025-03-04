@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiBadgeGroup, EuiToolTip, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Fragment, ReactElement } from 'react';
+
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiToolTip,
+  EuiBadgeProps,
+  EuiToolTipProps,
+  useEuiTheme,
+} from '@elastic/eui';
 
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;
@@ -17,9 +26,17 @@ export type TopNavMenuBadgeProps = EuiBadgeProps & {
 };
 
 export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | undefined }) => {
+  const { euiTheme } = useEuiTheme();
   if (!badges || badges.length === 0) return null;
   return (
-    <EuiBadgeGroup className="kbnTopNavMenu__badgeGroup">{badges.map(createBadge)}</EuiBadgeGroup>
+    <EuiBadgeGroup
+      css={css`
+        margin-right: ${euiTheme.size.m};
+      `}
+      data-test-subj="kbn-top-nav-menu-badge-group"
+    >
+      {badges.map(createBadge)}
+    </EuiBadgeGroup>
   );
 };
 

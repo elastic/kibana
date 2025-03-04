@@ -62,11 +62,11 @@ import {
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
   RuleActionKey,
-  Flapping,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
+import type { Flapping } from '@kbn/alerting-types';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -671,23 +671,8 @@ export const RuleForm = ({
         selectedRuleType.hasAlertsMappings
       : false;
 
-    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
-      // Use selectedConsumer when creating a new rule, existing rule consumer when editing
-      const ruleConsumer = initialSelectedConsumer ? selectedConsumer : rule.consumer;
-      return (
-        (validConsumers || VALID_CONSUMERS).includes(ruleConsumer as RuleCreationValidConsumer) &&
-        hasAlertHasData
-      );
-    }
     return hasAlertHasData;
-  }, [
-    rule?.ruleTypeId,
-    initialSelectedConsumer,
-    rule.consumer,
-    selectedConsumer,
-    selectedRuleType,
-    validConsumers,
-  ]);
+  }, [selectedRuleType]);
 
   const ruleTypeDetails = (
     <>

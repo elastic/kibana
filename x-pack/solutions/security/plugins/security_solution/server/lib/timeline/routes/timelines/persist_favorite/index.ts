@@ -28,7 +28,7 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
       path: TIMELINE_FAVORITE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['timeline_read'],
+          requiredPrivileges: ['timeline_write'],
         },
       },
       access: 'public',

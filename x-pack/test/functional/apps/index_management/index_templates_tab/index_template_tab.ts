@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
+  const browser = getService('browser');
 
   const INDEX_TEMPLATE_NAME = 'index-template-test-name';
 
@@ -28,10 +29,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await es.indices.deleteIndexTemplate({
-        name: INDEX_TEMPLATE_NAME,
-      });
-      await testSubjects.click('reloadButton');
+      await es.indices.deleteIndexTemplate(
+        {
+          name: INDEX_TEMPLATE_NAME,
+        },
+        { ignore: [404] }
+      );
+
+      if (await testSubjects.exists('reloadButton')) {
+        await testSubjects.click('reloadButton');
+      }
     });
 
     describe('index template creation', () => {
@@ -219,6 +226,47 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '_source can not be disabled in index using [logsdb] index mode'
           );
         });
+      });
+    });
+
+    describe('Index template list', () => {
+      const TEST_TEMPLATE = 'a_test_template';
+      const INDEX_PATTERN = `index_pattern_${Math.random()}`;
+
+      before(async () => {
+        await es.indices.putIndexTemplate({
+          name: TEST_TEMPLATE,
+          index_patterns: [INDEX_PATTERN],
+          template: {
+            settings: {
+              default_pipeline: 'test_pipeline',
+            },
+          },
+        });
+
+        // Navigate to the index management
+        await pageObjects.common.navigateToApp('indexManagement');
+        // Navigate to the templates tab
+        await pageObjects.indexManagement.changeTabs('templatesTab');
+      });
+
+      after(async () => {
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
+      });
+
+      it('shows link to ingest pipeline when default pipeline is set', async () => {
+        // Open details flyout
+        await pageObjects.indexManagement.clickIndexTemplate(TEST_TEMPLATE);
+
+        // Click on the linked ingest pipeline button
+        const linkedPipelineButton = await testSubjects.find('linkedIngestPipeline');
+        await linkedPipelineButton.click();
+
+        // Expect to navigate to the ingest pipeline page
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        // We should've now navigated to the ingest pipelines app
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('/ingest/ingest_pipelines/edit/test_pipeline');
       });
     });
   });

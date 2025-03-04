@@ -17,7 +17,6 @@ import {
   EuiPopoverFooter,
   EuiText,
   EuiButtonIcon,
-  EuiTextTruncate,
   EuiButtonEmpty,
   EuiCopy,
   useEuiTheme,
@@ -40,13 +39,15 @@ import {
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
-  /* ECS mapping for the key */
+  /** ECS mapping for the key */
   property: string;
-  /* Value for the mapping, which will be displayed */
+  /** Formatted value from the mapping, which will be displayed */
   value: string;
-  /* Optional callback to render the value */
+  /** The raw value from the mapping, can be an object */
+  rawValue: unknown;
+  /** Optional callback to render the formatted value */
   renderValue?: (value: string) => React.ReactNode;
-  /* Props to forward to the trigger Badge */
+  /** Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
       onClick: () => void;
@@ -60,6 +61,7 @@ export function CellActionsPopover({
   onFilter,
   property,
   value,
+  rawValue,
   renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
@@ -68,7 +70,7 @@ export function CellActionsPopover({
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
-      onFilter(property, value, operator);
+      onFilter(property, rawValue, operator);
     }
   };
 
@@ -99,7 +101,11 @@ export function CellActionsPopover({
             `}
           >
             <strong>{property}</strong>{' '}
-            {typeof renderValue === 'function' ? renderValue(value) : value}
+            {typeof renderValue === 'function'
+              ? renderValue(value)
+              : rawValue != null && typeof rawValue !== 'object'
+              ? (rawValue as React.ReactNode)
+              : value}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -160,7 +166,10 @@ export function CellActionsPopover({
 }
 
 export interface FieldBadgeWithActionsProps
-  extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
+  extends Pick<
+    CellActionsPopoverProps,
+    'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
+  > {
   icon?: EuiBadgeProps['iconType'];
 }
 
@@ -178,18 +187,30 @@ export function FieldBadgeWithActions({
   property,
   renderValue,
   value,
+  rawValue,
 }: FieldBadgeWithActionsPropsAndDependencies) {
   return (
     <CellActionsPopover
       onFilter={onFilter}
       property={property}
       value={value}
+      rawValue={rawValue}
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          <EuiTextTruncate text={value} truncation="middle" width={120} />
+          {truncateMiddle(value)}
         </EuiBadge>
       )}
     />
   );
+}
+
+const MAX_LENGTH = 20;
+
+function truncateMiddle(value: string): string {
+  if (value.length < MAX_LENGTH) {
+    return value;
+  }
+  const halfLength = MAX_LENGTH / 2;
+  return `${value.slice(0, halfLength)}...${value.slice(-halfLength)}`;
 }

@@ -14,17 +14,19 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
-  TINY_ELSER,
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from '../../knowledge_base/helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const ml = getService('ml');
   const es = getService('es');
+  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('when calling summarize function', function () {
@@ -34,16 +36,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let connectorId: string;
 
     before(async () => {
-      await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-      expect(status).to.be(200);
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
@@ -51,9 +46,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy
-        .intercept('conversation', () => true, 'Hello from LLM Proxy')
-        .completeAfterIntercept();
+      void proxy.interceptConversation('Hello from LLM Proxy');
 
       await invokeChatCompleteWithFunctionRequest({
         connectorId,

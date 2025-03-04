@@ -23,24 +23,12 @@ export const combineRenderers = ({
 }): RowRenderer => ({
   id,
   isInstance: (data: Ecs) => a.isInstance(data) || b.isInstance(data),
-  renderRow: ({
-    contextId,
-    data,
-    isDraggable,
-    scopeId,
-  }: {
-    contextId?: string;
-    data: Ecs;
-    isDraggable: boolean;
-    scopeId: string;
-  }) => (
+  renderRow: ({ contextId, data, scopeId }: { contextId?: string; data: Ecs; scopeId: string }) => (
     <EuiFlexGroup direction="column" gutterSize="m">
       {a.isInstance(data) && (
-        <EuiFlexItem> {a.renderRow({ contextId, data, isDraggable, scopeId })}</EuiFlexItem>
+        <EuiFlexItem> {a.renderRow({ contextId, data, scopeId })}</EuiFlexItem>
       )}
-      {b.isInstance(data) && (
-        <EuiFlexItem>{b.renderRow({ contextId, data, isDraggable, scopeId })}</EuiFlexItem>
-      )}
+      {b.isInstance(data) && <EuiFlexItem>{b.renderRow({ contextId, data, scopeId })}</EuiFlexItem>}
     </EuiFlexGroup>
   ),
 });

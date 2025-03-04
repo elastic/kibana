@@ -117,7 +117,7 @@ describe('geminiAdapter', () => {
               name: 'myFunction',
               parameters: {
                 properties: {},
-                type: 'OBJECT',
+                type: 'object',
               },
             },
             {
@@ -128,11 +128,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     description: 'foo',
                     enum: undefined,
-                    type: 'STRING',
+                    type: 'string',
                   },
                 },
                 required: ['foo'],
-                type: 'OBJECT',
+                type: 'object',
               },
             },
           ],
@@ -238,6 +238,57 @@ describe('geminiAdapter', () => {
           role: 'user',
         },
       ]);
+    });
+
+    it('encapsulates string tool messages', () => {
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'question',
+          },
+          {
+            role: MessageRole.Assistant,
+            content: null,
+            toolCalls: [
+              {
+                function: {
+                  name: 'my_function',
+                  arguments: {
+                    foo: 'bar',
+                  },
+                },
+                toolCallId: '0',
+              },
+            ],
+          },
+          {
+            name: 'my_function',
+            role: MessageRole.Tool,
+            toolCallId: '0',
+            response: JSON.stringify({ bar: 'foo' }),
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages[messages.length - 1]).toEqual({
+        role: 'user',
+        parts: [
+          {
+            functionResponse: {
+              name: '0',
+              response: {
+                response: JSON.stringify({ bar: 'foo' }),
+              },
+            },
+          },
+        ],
+      });
     });
 
     it('correctly formats content parts', () => {
@@ -535,6 +586,31 @@ describe('geminiAdapter', () => {
           model: 'gemini-1.5',
         }),
       });
+    });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          geminiAdapter
+            .chatComplete({
+              logger,
+              executor: executorMock,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
     });
   });
 });

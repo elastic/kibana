@@ -94,10 +94,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           it('returns a 404 for logs', async () => {
             await apiClient
-              .fetch('GET /api/streams/{id}', {
+              .fetch('GET /api/streams/{name}', {
                 params: {
                   path: {
-                    id: 'logs',
+                    name: 'logs',
                   },
                 },
               })
@@ -139,6 +139,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs',
+        });
+      });
+
+      it('Index a doc with a stream field', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: JSON.stringify({
+            'log.level': 'info',
+            'log.logger': 'nginx',
+            message: 'test',
+            stream: 'somethingelse', // a field named stream should work as well
+          }),
+        };
+        const response = await indexDocument(esClient, 'logs', doc);
+        expect(response.result).to.eql('created');
+        const result = await fetchDocument(esClient, 'logs', response._id);
+        expect(result._index).to.match(/^\.ds\-logs-.*/);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: 'test',
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          'stream.name': 'logs',
+          stream: 'somethingelse',
         });
       });
 
@@ -147,7 +172,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          condition: {
+          if: {
             field: 'log.logger',
             operator: 'eq' as const,
             value: 'nginx',
@@ -176,6 +201,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 
@@ -184,7 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          condition: { field: 'log.level', operator: 'eq' as const, value: 'info' },
+          if: { field: 'log.level', operator: 'eq' as const, value: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -209,6 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx.access',
         });
       });
 
@@ -217,7 +244,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          condition: { field: 'log', operator: 'eq' as const, value: 'error' },
+          if: { field: 'log', operator: 'eq' as const, value: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -242,6 +269,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'error',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 
@@ -250,7 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          condition: { field: 'code', operator: 'gte' as const, value: '500' },
+          if: { field: 'code', operator: 'gte' as const, value: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -282,7 +310,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.string-test',
           },
-          condition: {
+          if: {
             or: [
               { field: 'message', operator: 'contains' as const, value: '500' },
               { field: 'message', operator: 'contains' as const, value: 400 },
@@ -311,6 +339,47 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response2 = await indexDocument(esClient, 'logs', doc2);
         expect(response2.result).to.eql('created');
+      });
+
+      it('Fork logs to logs.weird-characters', async () => {
+        const body = {
+          stream: {
+            name: 'logs.weird-characters',
+          },
+          if: {
+            or: [
+              { field: '@abc.weird fieldname', operator: 'contains' as const, value: 'route_it' },
+            ],
+          },
+        };
+        const response = await forkStream(apiClient, 'logs', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Index documents with weird characters in their field names correctly', async () => {
+        const doc1 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          '@abc': {
+            'weird fieldname': 'Please route_it',
+          },
+        };
+        const doc2 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          '@abc': {
+            'weird fieldname': 'Keep where it is',
+          },
+        };
+        const response1 = await indexDocument(esClient, 'logs', doc1);
+        expect(response1.result).to.eql('created');
+
+        const result1 = await fetchDocument(esClient, 'logs.weird-characters', response1._id);
+        expect(result1._index).to.match(/^\.ds\-logs.weird-characters-.*/);
+
+        const response2 = await indexDocument(esClient, 'logs', doc2);
+        expect(response2.result).to.eql('created');
+
+        const result2 = await fetchDocument(esClient, 'logs', response2._id);
+        expect(result2._index).to.match(/^\.ds\-logs-.*/);
       });
     });
   });

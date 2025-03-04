@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchHit } from '@kbn/es-types';
 
@@ -41,7 +41,7 @@ export function searchHitToAgent(
         return acc;
       }, {} as OutputMap)
     : undefined;
-  const components: FleetServerAgentComponent[] | undefined = hit._source?.components
+  const components: FleetServerAgentComponent[] | undefined = Array.isArray(hit._source?.components)
     ? hit._source?.components.map((component) => ({
         id: component.id,
         type: component.type,

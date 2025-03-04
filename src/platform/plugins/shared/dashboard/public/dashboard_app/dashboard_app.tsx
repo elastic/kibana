@@ -16,10 +16,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions } from '..';
-import { SharedDashboardState } from '../../common';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
@@ -46,7 +44,11 @@ import {
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
+import {
+  loadAndRemoveDashboardState,
+  startSyncingExpandedPanelState,
+  type SharedDashboardState,
+} from './url/url_utils';
 import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 

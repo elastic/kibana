@@ -77,13 +77,13 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { packageHasAtLeastOneSecret } from '../utils';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
+import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { useAgentless } from './hooks/setup_technology';
 import { SetupTechnologySelector } from './components/setup_technology_selector';
+import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -122,6 +122,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  /*
+   * if there is no extension - will remain undefined
+   * if there is an extension and it is loaded - will be set to true, otherwise false
+   */
+  const [isFleetExtensionLoaded, setIsFleetExtensionLoaded] = useState<boolean | undefined>(
+    undefined
+  );
+
   const validation = agentPolicyFormValidation(newAgentPolicy, {
     allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
   });
@@ -145,15 +153,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
-  const integrationInfo = useMemo(
-    () =>
-      (params as AddToPolicyParams).integration
-        ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-          )
-        : undefined,
-    [packageInfo?.policy_templates, params]
+  const [integrationToEnable, setIntegrationToEnable] = useState<string | undefined>(
+    params.integration
   );
+  const integrationInfo = useMemo(() => {
+    return integrationToEnable
+      ? packageInfo?.policy_templates?.find(
+          (policyTemplate) => policyTemplate.name === integrationToEnable
+        )
+      : undefined;
+  }, [integrationToEnable, packageInfo?.policy_templates]);
 
   const showSecretsDisabledCallout =
     !fleetStatus.isSecretsStorageEnabled &&
@@ -176,6 +185,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     validationResults,
     hasAgentPolicyError,
     isInitialized,
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+    isAgentlessSelected,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -183,8 +197,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
-    integrationToEnable: integrationInfo?.name,
+    integrationToEnable,
     hasFleetAddAgentsPrivileges,
+    setNewAgentPolicy,
+    setSelectedPolicyTab,
   });
 
   const setPolicyValidation = useCallback(
@@ -258,8 +274,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
-    ({ isValid, updatedPolicy }) => {
+    ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
+      setIsFleetExtensionLoaded(isExtensionLoaded);
       setFormState((prevState) => {
         if (prevState === 'VALID' && !isValid) {
           return 'INVALID';
@@ -341,7 +358,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     () =>
       pliAuthBlockView?.Component && !isPackageInfoLoading
         ? pliAuthBlockView.Component
-        : ({ children }) => <>{children}</>, // when no UI Extension is registered, render children
+        : ({ children }: { children?: React.ReactNode }) => <>{children}</>, // when no UI Extension is registered, render children
     [isPackageInfoLoading, pliAuthBlockView?.Component]
   );
 
@@ -351,16 +368,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
   const { isAgentlessIntegration } = useAgentless();
-  const { handleSetupTechnologyChange, selectedSetupTechnology, defaultSetupTechnology } =
-    useSetupTechnology({
-      newAgentPolicy,
-      setNewAgentPolicy,
-      updateAgentPolicies,
-      updatePackagePolicy,
-      setSelectedPolicyTab,
-      packageInfo,
-      packagePolicy,
-    });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -378,6 +385,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
             defaultSetupTechnology={defaultSetupTechnology}
+            integrationToEnable={integrationToEnable}
+            setIntegrationToEnable={setIntegrationToEnable}
           />
         </ExtensionWrapper>
       )
@@ -405,6 +414,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {!extensionView && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               disabled={false}
+              allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
               onSetupTechnologyChange={(value) => {
                 handleSetupTechnologyChange(value);
@@ -418,11 +428,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {!extensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
-              showOnlyIntegration={integrationInfo?.name}
+              showOnlyIntegration={integrationToEnable}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
+              isAgentlessSelected={isAgentlessSelected}
             />
           )}
 
@@ -440,21 +451,23 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
-      isInitialized,
       isPackageInfoLoading,
-      agentPolicies,
+      isInitialized,
       packageInfo,
+      agentPolicies,
+      spaceSettings?.allowedNamespacePrefixes,
       packagePolicy,
       updatePackagePolicy,
       validationResults,
       formState,
-      integrationInfo?.name,
       extensionView,
-      handleExtensionViewOnChange,
-      spaceSettings?.allowedNamespacePrefixes,
-      handleSetupTechnologyChange,
       isAgentlessIntegration,
       selectedSetupTechnology,
+      integrationToEnable,
+      isAgentlessSelected,
+      handleExtensionViewOnChange,
+      handleSetupTechnologyChange,
+      allowedSetupTechnologies,
     ]
   );
 
@@ -467,17 +480,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
       headingElement: 'h2',
     },
+    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS
+      ? [
+          {
+            title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
+              defaultMessage: 'Where to add this integration?',
+            }),
+            children: stepSelectAgentPolicy,
+            headingElement: 'h2',
+          },
+        ]
+      : []),
   ];
-
-  if (selectedSetupTechnology !== SetupTechnology.AGENTLESS) {
-    steps.push({
-      title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-        defaultMessage: 'Where to add this integration?',
-      }),
-      children: stepSelectAgentPolicy,
-      headingElement: 'h2',
-    });
-  }
 
   // Display package error if there is one
   if (packageInfoError) {
@@ -647,7 +661,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                         onClick={() => onSubmit()}
                         isLoading={formState === 'LOADING'}
                         disabled={
-                          formState !== 'VALID' || hasAgentPolicyError || !validationResults
+                          formState !== 'VALID' ||
+                          hasAgentPolicyError ||
+                          !validationResults ||
+                          isFleetExtensionLoaded === false
                         }
                         iconType="save"
                         color="primary"

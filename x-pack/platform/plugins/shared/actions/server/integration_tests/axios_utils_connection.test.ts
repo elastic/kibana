@@ -32,7 +32,7 @@ import { getFips } from 'crypto';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-const CERT_DIR = '../../../../../../../../packages/kbn-dev-utils/certs';
+const CERT_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
 const MOCK_CERT_DIR = '../mock_certs';
 
 const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
@@ -62,6 +62,7 @@ const AuthB64 = Buffer.from(Auth).toString('base64');
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let savedAxiosDefaultsAdapter: any;
 
   beforeEach(() => {

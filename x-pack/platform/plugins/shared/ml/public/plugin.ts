@@ -75,6 +75,8 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { TelemetryService } from './application/services/telemetry/telemetry_service';
+import type { ITelemetryClient } from './application/services/telemetry/types';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -99,6 +101,7 @@ export interface MlStartDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  telemetry: ITelemetryClient;
 }
 
 export interface MlSetupDependencies {
@@ -157,6 +160,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     },
   };
 
+  private telemetry = new TelemetryService();
+
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
@@ -169,6 +174,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     pluginsSetup: MlSetupDependencies
   ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
     this.sharedMlServices = getMlSharedServices(core.http);
+
+    this.telemetry.setup({ analytics: core.analytics });
+
+    const telemetryClient = this.telemetry.start();
 
     core.application.register({
       id: PLUGIN_ID,
@@ -212,6 +221,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
             usageCollection: pluginsSetup.usageCollection,
+            spaces: pluginsStart.spaces,
+            telemetry: telemetryClient,
           },
           params,
           this.isServerless,

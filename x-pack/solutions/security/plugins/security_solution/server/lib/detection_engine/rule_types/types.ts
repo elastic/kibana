@@ -9,7 +9,7 @@ import type { Moment } from 'moment';
 
 import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
@@ -390,6 +390,7 @@ export interface SearchAfterAndBulkCreateParams {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   additionalFilters?: estypes.QueryDslQueryContainer[];
+  isLoggedRequestsEnabled?: boolean;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -405,10 +406,17 @@ export interface SearchAfterAndBulkCreateReturnType {
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  loggedRequests?: RulePreviewLoggedRequest[];
+}
+
+export interface LoggedRequestsConfig {
+  type: string;
+  description: string;
+  skipRequestQuery?: boolean;
 }
 
 // the new fields can be added later if needed
 export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;
-  fields?: estypes.Fields;
+  fields?: Array<estypes.QueryDslFieldAndFormat | estypes.Field>;
 }

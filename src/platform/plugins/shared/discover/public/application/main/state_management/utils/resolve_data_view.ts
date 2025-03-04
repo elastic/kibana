@@ -13,79 +13,70 @@ import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverServices } from '../../../../build_services';
+
 interface DataViewData {
-  /**
-   * List of existing data views
-   */
-  list: DataViewListItem[];
   /**
    * Loaded data view (might be default data view if requested was not found)
    */
-  loaded: DataView;
+  loadedDataView: DataView;
   /**
    * Id of the requested data view
    */
-  stateVal?: string;
+  requestedDataViewId?: string;
   /**
    * Determines if requested data view was found
    */
-  stateValFound: boolean;
+  requestedDataViewFound: boolean;
 }
 
 /**
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView({
-  id,
+  dataViewId,
   dataViewSpec,
-  services,
-  dataViewList,
+  services: { dataViews },
+  savedDataViews,
+  adHocDataViews,
 }: {
-  id?: string;
+  dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
-  dataViewList: DataViewListItem[];
+  savedDataViews: DataViewListItem[];
+  adHocDataViews: DataView[];
 }): Promise<DataViewData> {
-  const { dataViews } = services;
+  let fetchId: string | undefined = dataViewId;
 
-  let fetchId: string | undefined = id;
-
-  /**
-   * Handle redirect with data view spec provided via history location state
-   */
+  // Handle redirect with data view spec provided via history location state
   if (dataViewSpec) {
-    const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
-    if (!isPersisted) {
+    const isPersisted = savedDataViews.find(({ id: currentId }) => currentId === dataViewSpec.id);
+    if (isPersisted) {
+      // If passed a spec for a persisted data view, reassign the fetchId
+      fetchId = dataViewSpec.id!;
+    } else {
+      // If passed an ad hoc data view spec, clear the instance cache
+      // to avoid conflicts, then create and return the data view
+      if (dataViewSpec.id) {
+        dataViews.clearInstanceCache(dataViewSpec.id);
+      }
       const createdAdHocDataView = await dataViews.create(dataViewSpec);
       return {
-        list: dataViewList || [],
-        loaded: createdAdHocDataView,
-        stateVal: createdAdHocDataView.id,
-        stateValFound: true,
+        loadedDataView: createdAdHocDataView,
+        requestedDataViewId: createdAdHocDataView.id,
+        requestedDataViewFound: true,
       };
     }
-    // reassign fetchId in case of persisted data view spec provided
-    fetchId = dataViewSpec.id!;
   }
 
+  // First try to fetch the data view by ID
   let fetchedDataView: DataView | null = null;
-  // try to fetch adhoc data view first
   try {
     fetchedDataView = fetchId ? await dataViews.get(fetchId) : null;
-    if (fetchedDataView && !fetchedDataView.isPersisted()) {
-      return {
-        list: dataViewList || [],
-        loaded: fetchedDataView,
-        stateVal: id,
-        stateValFound: true,
-      };
-    }
-    // Skipping error handling, since 'get' call trying to fetch
-    // adhoc data view which only created using Promise.resolve(dataView),
-    // Any other error will be handled by the next 'get' call below.
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
+  } catch (e) {
+    // Swallow the error and fall back to the default data view
+  }
 
+  // If there is no fetched data view, try to fetch the default data view
   let defaultDataView: DataView | null = null;
   if (!fetchedDataView) {
     try {
@@ -94,17 +85,21 @@ export async function loadDataView({
         refreshFields: true,
       });
     } catch (e) {
-      //
+      // Swallow the error and fall back to the first ad hoc data view
     }
   }
 
-  // fetch persisted data view
+  // If nothing else is available, use the first ad hoc data view as a fallback
+  let defaultAdHocDataView: DataView | null = null;
+  if (!fetchedDataView && !defaultDataView && adHocDataViews.length) {
+    defaultAdHocDataView = adHocDataViews[0];
+  }
+
   return {
-    list: dataViewList || [],
-    // we can be certain that the data view exists due to an earlier hasData check
-    loaded: fetchedDataView || defaultDataView!,
-    stateVal: fetchId,
-    stateValFound: Boolean(fetchId) && Boolean(fetchedDataView),
+    // We can be certain that a data view exists due to an earlier hasData check
+    loadedDataView: (fetchedDataView || defaultDataView || defaultAdHocDataView)!,
+    requestedDataViewId: fetchId,
+    requestedDataViewFound: Boolean(fetchId) && Boolean(fetchedDataView),
   };
 }
 
@@ -112,27 +107,31 @@ export async function loadDataView({
  * Check if the given data view is valid, provide a fallback if it doesn't exist
  * And message the user in this case with toast notifications
  */
-export function resolveDataView(
-  ip: DataViewData,
-  savedSearch: SavedSearch | undefined,
-  toastNotifications: ToastsStart,
-  isEsqlMode?: boolean
-) {
-  const { loaded: loadedDataView, stateVal, stateValFound } = ip;
-
+function resolveDataView({
+  dataViewData,
+  savedSearch,
+  toastNotifications,
+  isEsqlMode,
+}: {
+  dataViewData: DataViewData;
+  savedSearch: SavedSearch | undefined;
+  toastNotifications: ToastsStart;
+  isEsqlMode?: boolean;
+}) {
+  const { loadedDataView, requestedDataViewId, requestedDataViewFound } = dataViewData;
   const ownDataView = savedSearch?.searchSource.getField('index');
 
-  if (ownDataView && !stateVal) {
+  if (ownDataView && !requestedDataViewId) {
     // the given saved search has its own data view, and no data view was specified in the URL
     return ownDataView;
   }
 
   // no warnings for ES|QL mode
-  if (stateVal && !stateValFound && !Boolean(isEsqlMode)) {
+  if (requestedDataViewId && !requestedDataViewFound && !Boolean(isEsqlMode)) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
       defaultMessage: '{stateVal} is not a configured data view ID',
       values: {
-        stateVal: `"${stateVal}"`,
+        stateVal: `"${requestedDataViewId}"`,
       },
     });
 
@@ -149,8 +148,10 @@ export function resolveDataView(
         }),
         'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
+
       return ownDataView;
     }
+
     toastNotifications.addWarning({
       title: warningTitle,
       text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
@@ -168,38 +169,53 @@ export function resolveDataView(
   return loadedDataView;
 }
 
-export const loadAndResolveDataView = async (
-  {
-    id,
-    dataViewSpec,
-    savedSearch,
-    isEsqlMode,
-  }: {
-    id?: string;
-    dataViewSpec?: DataViewSpec;
-    savedSearch?: SavedSearch;
-    isEsqlMode?: boolean;
-  },
-  {
-    internalStateContainer,
-    services,
-  }: { internalStateContainer: DiscoverInternalStateContainer; services: DiscoverServices }
-) => {
+export const loadAndResolveDataView = async ({
+  dataViewId,
+  dataViewSpec,
+  savedSearch,
+  isEsqlMode,
+  internalStateContainer,
+  services,
+}: {
+  dataViewId?: string;
+  dataViewSpec?: DataViewSpec;
+  savedSearch?: SavedSearch;
+  isEsqlMode?: boolean;
+  internalStateContainer: DiscoverInternalStateContainer;
+  services: DiscoverServices;
+}) => {
+  const { dataViews, toastNotifications } = services;
   const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
-  const adHocDataView = adHocDataViews.find((dataView) => dataView.id === id);
-  if (adHocDataView) return { fallback: false, dataView: adHocDataView };
 
-  const nextDataViewData = await loadDataView({
-    services,
-    id,
-    dataViewSpec,
-    dataViewList: savedDataViews,
-  });
-  const nextDataView = resolveDataView(
-    nextDataViewData,
-    savedSearch,
-    services.toastNotifications,
-    isEsqlMode
-  );
-  return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
+  // Check ad hoc data views first, unless a data view spec is supplied,
+  // then attempt to load one if none is found
+  let fallback = false;
+  let dataView = dataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId);
+
+  if (!dataView) {
+    const dataViewData = await loadDataView({
+      dataViewId,
+      services,
+      dataViewSpec,
+      savedDataViews,
+      adHocDataViews,
+    });
+
+    fallback = !dataViewData.requestedDataViewFound;
+    dataView = resolveDataView({
+      dataViewData,
+      savedSearch,
+      toastNotifications,
+      isEsqlMode,
+    });
+  }
+
+  // If dataView is an ad hoc data view with no fields, refresh its field list.
+  // This can happen when default profile data views are created without fields
+  // to avoid unnecessary requests on startup.
+  if (!dataView.isPersisted() && !dataView.fields.length) {
+    await dataViews.refreshFields(dataView);
+  }
+
+  return { fallback, dataView };
 };

@@ -14,7 +14,7 @@
         "tags": [],
         "label": "notificationServiceMock",
         "description": [],
-        "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+        "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
               "NotificationsServiceContract",
               ">"
             ],
-            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+            "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -56,7 +56,7 @@
               "NotificationsSetup",
               ">"
             ],
-            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+            "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -82,7 +82,7 @@
               "NotificationsStart",
               ">"
             ],
-            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+            "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

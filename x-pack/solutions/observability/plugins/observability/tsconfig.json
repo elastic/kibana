@@ -49,7 +49,6 @@
     "@kbn/alerts-grouping",
     "@kbn/grouping",
     "@kbn/data-views-plugin",
-    "@kbn/core-http-browser",
     "@kbn/visualization-ui-components",
     "@kbn/event-annotation-components",
     "@kbn/slo-schema",
@@ -76,7 +75,7 @@
     "@kbn/navigation-plugin",
     "@kbn/observability-alert-details",
     "@kbn/investigation-shared",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",
     "@kbn/securitysolution-ecs",
@@ -111,9 +110,13 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/es-types",
     "@kbn/logging-mocks",
-    "@kbn/response-ops-rule-form",
+    "@kbn/alerting-types",
+    "@kbn/response-ops-alerts-table",
     "@kbn/streams-plugin",
-    "@kbn/data-service"
+    "@kbn/response-ops-rule-form",
+    "@kbn/data-service",
+    "@kbn/ebt-tools",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,6 +9,7 @@ import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
+import { UserProfile } from '@kbn/test/src/auth/types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
@@ -27,10 +28,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let adminRoleAuthc: RoleCredentials;
   let transformHelper: TransformHelper;
+  let userData: UserProfile;
 
   describe('Create SLOs', function () {
+    // see details: https://github.com/elastic/kibana/issues/207354
+    this.tags(['failsOnMKI']);
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      userData = await samlAuth.getUserData('admin');
       transformHelper = createTransformHelper(getService);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
@@ -62,9 +67,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(definitions.results[0]).eql({
         budgetingMethod: 'occurrences',
         updatedAt: definitions.results[0].updatedAt,
-        updatedBy: 'elastic_admin',
+        updatedBy: userData.username,
         createdAt: definitions.results[0].createdAt,
-        createdBy: 'elastic_admin',
+        createdBy: userData.username,
         description: 'Fixture for api integration tests',
         enabled: true,
         groupBy: 'tags',
@@ -230,7 +235,7 @@ const getRollupDataEsQuery = (id: string) => ({
         sort: [
           {
             '@timestamp': {
-              order: 'desc',
+              order: 'desc' as const,
             },
           },
         ],

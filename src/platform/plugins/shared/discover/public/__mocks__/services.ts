@@ -43,11 +43,11 @@ import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { urlTrackerMock } from './url_tracker.mock';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../services/discover_ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
+import { createUrlTrackerMock } from './url_tracker.mock';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -174,10 +174,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     docLinks: docLinksServiceMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     capabilities: {
-      visualize: {
+      visualize_v2: {
         show: true,
       },
-      discover: {
+      discover_v2: {
         save: false,
       },
       advancedSettings: {
@@ -247,7 +247,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
-    urlTracker: urlTrackerMock,
+    urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import type {
@@ -79,23 +79,25 @@ export const buildEqlSearchRequest = ({
   return {
     index,
     allow_no_indices: true,
-    body: {
-      size,
-      query,
-      filter: {
-        bool: {
-          filter: requestFilter,
-        },
+    size,
+    query,
+    filter: {
+      bool: {
+        filter: requestFilter,
       },
-      runtime_mappings: runtimeMappings,
-      timestamp_field: timestampField,
-      event_category_field: eventCategoryOverride,
-      ...(!isEmpty(tiebreakerField)
-        ? {
-            tiebreaker_field: tiebreakerField,
-          }
-        : {}),
-      fields,
     },
+    // the allow_partial_search_results query parameter will supersede
+    // the corresponding xpack settings on cluster
+    // issue: https://github.com/elastic/kibana/issues/208760
+    allow_partial_search_results: true,
+    runtime_mappings: runtimeMappings,
+    timestamp_field: timestampField,
+    event_category_field: eventCategoryOverride,
+    ...(!isEmpty(tiebreakerField)
+      ? {
+          tiebreaker_field: tiebreakerField,
+        }
+      : {}),
+    fields,
   };
 };

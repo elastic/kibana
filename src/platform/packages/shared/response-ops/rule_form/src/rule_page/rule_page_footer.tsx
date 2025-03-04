@@ -15,9 +15,8 @@ import {
   RULE_PAGE_FOOTER_CREATE_TEXT,
   RULE_PAGE_FOOTER_SAVE_TEXT,
 } from '../translations';
-import { useRuleFormState } from '../hooks';
+import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { hasRuleErrors } from '../validation';
-import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import { RulePageConfirmCreateRule } from './rule_page_confirm_create_rule';
 
 export interface RulePageFooterProps {
@@ -28,8 +27,9 @@ export interface RulePageFooterProps {
 }
 
 export const RulePageFooter = (props: RulePageFooterProps) => {
-  const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
   const [showCreateConfirmation, setShowCreateConfirmation] = useState<boolean>(false);
+
+  const { setIsShowRequestScreenVisible } = useRuleFormScreenContext();
 
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
@@ -68,12 +68,8 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   }, [isEdit]);
 
   const onOpenShowRequestModalClick = useCallback(() => {
-    setShowRequestModal(true);
-  }, []);
-
-  const onCloseShowRequestModalClick = useCallback(() => {
-    setShowRequestModal(false);
-  }, []);
+    setIsShowRequestScreenVisible(true);
+  }, [setIsShowRequestScreenVisible]);
 
   const onSaveClick = useCallback(() => {
     if (isEdit) {
@@ -134,9 +130,6 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showRequestModal && (
-        <RulePageShowRequestModal onClose={onCloseShowRequestModalClick} isEdit={isEdit} />
-      )}
       {showCreateConfirmation && (
         <RulePageConfirmCreateRule
           onConfirm={onCreateConfirmClick}
