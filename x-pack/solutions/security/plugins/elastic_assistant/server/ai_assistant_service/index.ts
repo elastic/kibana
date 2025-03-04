@@ -18,8 +18,10 @@ import {
   IndicesIndexSettings,
 } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
-import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
+import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import {
@@ -47,7 +49,7 @@ import {
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
+import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
 
@@ -101,9 +103,10 @@ export class AIAssistantService {
   private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
-  private isKBSetupInProgress: boolean = false;
+  private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
+  private isProductDocumentationInProgress: boolean = false;
   // Temporary 'feature flag' to determine if we should initialize the new knowledge base mappings
   private assistantDefaultInferenceEndpoint: boolean = false;
 
@@ -161,12 +164,20 @@ export class AIAssistantService {
     return this.initialized;
   }
 
-  public getIsKBSetupInProgress() {
-    return this.isKBSetupInProgress;
+  public getIsKBSetupInProgress(spaceId: string) {
+    return this.isKBSetupInProgress.get(spaceId) ?? false;
   }
 
-  public setIsKBSetupInProgress(isInProgress: boolean) {
-    this.isKBSetupInProgress = isInProgress;
+  public setIsKBSetupInProgress(spaceId: string, isInProgress: boolean) {
+    this.isKBSetupInProgress.set(spaceId, isInProgress);
+  }
+
+  public getIsProductDocumentationInProgress() {
+    return this.isProductDocumentationInProgress;
+  }
+
+  public setIsProductDocumentationInProgress(isInProgress: boolean) {
+    this.isProductDocumentationInProgress = isInProgress;
   }
 
   private createDataStream: CreateDataStream = ({
@@ -219,7 +230,11 @@ export class AIAssistantService {
 
       if (this.productDocManager) {
         // install product documentation without blocking other resources
-        void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
+        void ensureProductDocumentationInstalled({
+          productDocManager: this.productDocManager,
+          logger: this.options.logger,
+          setIsProductDocumentationInProgress: this.setIsProductDocumentationInProgress.bind(this),
+        });
       }
 
       await this.conversationsDataStream.install({
@@ -468,6 +483,16 @@ export class AIAssistantService {
     }
   }
 
+  public async getProductDocumentationStatus(): Promise<InstallationStatus> {
+    const status = await this.productDocManager?.getStatus();
+
+    if (!status) {
+      return 'uninstalled';
+    }
+
+    return this.isProductDocumentationInProgress ? 'installing' : status.status;
+  }
+
   public async createAIAssistantConversationsDataClient(
     opts: CreateAIAssistantClientParams & GetAIAssistantConversationsDataClientParams
   ): Promise<AIAssistantConversationsDataClient | null> {
@@ -488,7 +513,10 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
-    opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
+    opts: CreateAIAssistantClientParams &
+      GetAIAssistantKnowledgeBaseDataClientParams & {
+        trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+      }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
     if (opts?.modelIdOverride != null) {
@@ -519,12 +547,14 @@ export class AIAssistantService {
       ingestPipelineResourceName: this.resourceNames.pipelines.knowledgeBase,
       getElserId: this.getElserId,
       getIsKBSetupInProgress: this.getIsKBSetupInProgress.bind(this),
+      getProductDocumentationStatus: this.getProductDocumentationStatus.bind(this),
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
       assistantDefaultInferenceEndpoint: this.assistantDefaultInferenceEndpoint,
+      trainedModelsProvider: opts.trainedModelsProvider,
     });
   }
 

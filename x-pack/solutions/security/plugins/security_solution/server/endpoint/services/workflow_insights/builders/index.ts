@@ -6,14 +6,12 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { InvalidDefendInsightTypeError } from '@kbn/elastic-assistant-plugin/server/lib/defend_insights/errors';
 
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 
-import { InvalidDefendInsightTypeError } from '../../../../assistant/tools/defend_insights/errors';
 import type { EndpointMetadataService } from '../../metadata';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
