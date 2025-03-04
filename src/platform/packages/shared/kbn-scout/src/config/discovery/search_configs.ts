@@ -13,35 +13,69 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
+interface PluginScoutConfig {
+  group: string;
+  pluginPath: string;
+  configs: string[];
+}
+
 export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog) => {
   const patterns = searchPaths.map((basePath) =>
     path.join(basePath, '**/ui_tests/{playwright.config.ts,parallel.playwright.config.ts}')
   );
 
-  log.info('Searching for playwright config files in the following paths:');
+  log.info('Searching for Playwright config files in the following paths:');
   patterns.forEach((pattern) => log.info(`- ${pattern}`));
   log.info(''); // Add a newline for better readability
 
   const files = patterns.flatMap((pattern) => fastGlob.sync(pattern, { onlyFiles: true }));
 
-  // Group config files by plugin
-  const plugins = files.reduce((acc: Map<string, string[]>, filePath: string) => {
-    const match = filePath.match(
-      /(?:src\/platform\/plugins|x-pack\/.*?\/plugins)\/(?:.*?\/)?([^\/]+)\/ui_tests\//
-    );
-    const pluginName = match ? match[1] : null;
+  const typeMappings: Record<string, string> = {
+    'x-pack/solutions/security': 'security',
+    'x-pack/solutions/search': 'search',
+    'x-pack/solutions/observability': 'observability',
+    'x-pack/platform/plugins': 'platform',
+    'src/platform/plugins': 'platform',
+  };
 
-    if (pluginName) {
-      if (!acc.has(pluginName)) {
-        acc.set(pluginName, []);
+  const matchPluginPath = (filePath: string): { pluginPath: string; pluginName: string } | null => {
+    const regexes = [
+      /(x-pack\/platform\/plugins\/(?:private|shared|[^\/]+)\/([^\/]+))\/ui_tests\//,
+      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//,
+      /(src\/platform\/plugins\/(?:private|shared)?\/?([^\/]+))\/ui_tests\//,
+    ];
+
+    for (const regex of regexes) {
+      const match = filePath.match(regex);
+      if (match) {
+        return { pluginPath: match[1], pluginName: match[2] };
       }
-      acc.get(pluginName)!.push(filePath);
-    } else {
+    }
+    return null;
+  };
+
+  const plugins = new Map<string, PluginScoutConfig>();
+
+  files.forEach((filePath) => {
+    const matchResult = matchPluginPath(filePath);
+    if (!matchResult) {
       log.warning(`Unable to extract plugin name from path: ${filePath}`);
+      return;
     }
 
-    return acc;
-  }, new Map<string, string[]>());
+    const { pluginPath, pluginName } = matchResult;
+    const group =
+      Object.entries(typeMappings).find(([key]) => filePath.includes(key))?.[1] || 'unknown';
+
+    if (!plugins.has(pluginName)) {
+      plugins.set(pluginName, { group, pluginPath, configs: [] });
+    }
+
+    const pluginData = plugins.get(pluginName)!;
+    if (!pluginData.configs.includes(filePath)) {
+      pluginData.configs.push(filePath);
+    }
+  });
 
   return plugins;
 };

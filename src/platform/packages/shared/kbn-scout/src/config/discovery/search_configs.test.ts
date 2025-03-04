@@ -35,21 +35,33 @@ describe('getScoutPlaywrightConfigs', () => {
 
   it('should correctly extract plugin names and group config files', () => {
     (fastGlob.sync as jest.Mock).mockReturnValue([
-      'x-pack/platform/plugins/plugin_a/ui_tests/playwright.config.ts',
-      'x-pack/platform/plugins/plugin_a/ui_tests/parallel.playwright.config.ts',
+      'x-pack/platform/plugins/private/plugin_a/ui_tests/playwright.config.ts',
+      'x-pack/platform/plugins/private/plugin_a/ui_tests/parallel.playwright.config.ts',
       'x-pack/solutions/security/plugins/plugin_b/ui_tests/playwright.config.ts',
+      'src/platform/plugins/shared/plugin_c/ui_tests/playwright.config.ts',
     ]);
 
-    const plugins = getScoutPlaywrightConfigs(['x-pack/'], mockLog);
+    const plugins = getScoutPlaywrightConfigs(['x-pack/', 'src/'], mockLog);
 
-    expect(plugins.size).toBe(2);
-    expect(plugins.get('plugin_a')).toEqual([
-      'x-pack/platform/plugins/plugin_a/ui_tests/playwright.config.ts',
-      'x-pack/platform/plugins/plugin_a/ui_tests/parallel.playwright.config.ts',
-    ]);
-    expect(plugins.get('plugin_b')).toEqual([
-      'x-pack/solutions/security/plugins/plugin_b/ui_tests/playwright.config.ts',
-    ]);
+    expect(plugins.size).toBe(3);
+    expect(plugins.get('plugin_a')).toEqual({
+      configs: [
+        'x-pack/platform/plugins/private/plugin_a/ui_tests/playwright.config.ts',
+        'x-pack/platform/plugins/private/plugin_a/ui_tests/parallel.playwright.config.ts',
+      ],
+      group: 'platform',
+      pluginPath: 'x-pack/platform/plugins/private/plugin_a',
+    });
+    expect(plugins.get('plugin_b')).toEqual({
+      configs: ['x-pack/solutions/security/plugins/plugin_b/ui_tests/playwright.config.ts'],
+      group: 'security',
+      pluginPath: 'x-pack/solutions/security/plugins/plugin_b',
+    });
+    expect(plugins.get('plugin_c')).toEqual({
+      configs: ['src/platform/plugins/shared/plugin_c/ui_tests/playwright.config.ts'],
+      group: 'platform',
+      pluginPath: 'src/platform/plugins/shared/plugin_c',
+    });
   });
 
   it('should log a warning if a file path does not match the expected pattern', () => {
