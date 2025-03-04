@@ -17,6 +17,7 @@ import { TransactionProvider } from './hooks/use_transaction';
 import { TraceSummary } from '../components/trace_summary';
 import { getFieldConfiguration } from '../resources/get_field_configuration';
 import { spanFields } from './resources/fields';
+import { SpanSummary } from './sub_components/span_summary';
 export type SpanOverviewProps = DocViewRenderProps;
 
 export function SpanOverview({
@@ -54,7 +55,7 @@ export function SpanOverview({
             const fieldConfiguration = getFieldConfiguration(parsedDoc)[fieldId];
 
             return (
-              <TraceSummary
+              <SpanSummary
                 key={fieldId}
                 fieldId={fieldId}
                 fieldConfiguration={fieldConfiguration}
