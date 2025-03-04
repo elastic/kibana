@@ -1184,7 +1184,7 @@
     "lru-cache": "^4.1.5",
     "lz-string": "^1.4.4",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
-    "maplibre-gl": "3.1.0",
+    "maplibre-gl": "5.1.1",
     "markdown-it": "^14.1.0",
     "mdast-util-to-hast": "10.2.0",
     "memoize-one": "^6.0.0",
