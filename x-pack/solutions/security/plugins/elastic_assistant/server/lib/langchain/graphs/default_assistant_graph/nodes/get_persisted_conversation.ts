@@ -37,22 +37,22 @@ export async function getPersistedConversation({
 
   logger.debug(`conversationId: ${state.conversationId}`);
 
-  const chatHistory = getLangChainMessages(conversation.messages ?? []);
+  const langchainMessages = getLangChainMessages(conversation.messages ?? []);
 
   if (!state.input) {
-    const [lastHumanMessage, ...remainingMessages] = chatHistory.reverse();
+    const [lastMessage, ...chatHistory] = langchainMessages.reverse();
     return {
       conversation,
-      chatHistory: remainingMessages,
+      chatHistory,
       chatTitle: conversation.title,
-      input: lastHumanMessage?.content as string,
+      input: lastMessage?.content as string,
       lastNode: NodeType.GET_PERSISTED_CONVERSATION,
     };
   }
 
   return {
     conversation,
-    chatHistory,
+    chatHistory: langchainMessages,
     chatTitle: conversation.title,
     lastNode: NodeType.GET_PERSISTED_CONVERSATION,
   };
