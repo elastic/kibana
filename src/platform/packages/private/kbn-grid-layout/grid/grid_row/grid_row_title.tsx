@@ -26,6 +26,7 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 export const GridRowTitle = React.memo(
   ({
     readOnly,
+    isActive,
     rowId,
     editTitleOpen,
     setEditTitleOpen,
@@ -33,6 +34,7 @@ export const GridRowTitle = React.memo(
     collapseButtonRef,
   }: {
     readOnly: boolean;
+    isActive: boolean;
     rowId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
@@ -91,7 +93,7 @@ export const GridRowTitle = React.memo(
             aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
-            iconType={'arrowDown'}
+            iconType={isActive ? undefined : 'arrowDown'}
             onClick={toggleIsCollapsed}
             size="m"
             id={`kbnGridRowTitle-${rowId}`}
@@ -128,7 +130,7 @@ export const GridRowTitle = React.memo(
           </EuiFlexItem>
         ) : (
           <>
-            {!readOnly && (
+            {!readOnly && !isActive && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="pencil"

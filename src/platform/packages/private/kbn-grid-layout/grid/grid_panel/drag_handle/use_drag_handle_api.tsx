@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useGridLayoutEvents } from '../../use_grid_layout_events';
+import { useGridLayoutPanelEvents } from '../../use_grid_layout_events/panel_events';
 import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 
@@ -27,7 +27,7 @@ export const useDragHandleApi = ({
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const startInteraction = useGridLayoutEvents({
+  const startInteraction = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
     rowId,

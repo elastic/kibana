@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
-import { useGridLayoutContext } from './use_grid_layout_context';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -54,4 +54,4 @@ export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
 
 const styles = css({ display: 'none', pointerEvents: 'none' });
 
-DragPreview.displayName = 'KbnGridLayoutDragPreview';
+DragPreview.displayName = 'KbnGridLayoutDragPanelPreview';

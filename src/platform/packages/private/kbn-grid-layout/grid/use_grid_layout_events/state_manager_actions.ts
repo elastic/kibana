@@ -72,7 +72,7 @@ export const moveAction = (
     return;
   }
 
-  const currentLayout = proposedGridLayout$.value;
+  const currentLayout = cloneDeep(proposedGridLayout$.value);
 
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
 
@@ -164,7 +164,6 @@ export const moveAction = (
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-    // remove the panel from the row it's currently in.
     const nextLayout = cloneDeep(currentLayout);
     Object.entries(nextLayout).forEach(([rowId, row]) => {
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;

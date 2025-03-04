@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { distinctUntilChanged, map, skip } from 'rxjs';
 
 import {
   EuiButtonIcon,
@@ -21,8 +22,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useGridLayoutRowEvents } from '../use_grid_layout_events/row_events';
 import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
+import { DragPreview } from './drag_preview';
 import { GridRowTitle } from './grid_row_title';
 
 export interface GridRowHeaderProps {
@@ -34,7 +37,12 @@ export interface GridRowHeaderProps {
 export const GridRowHeader = React.memo(
   ({ rowId, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
+    const startInteraction = useGridLayoutRowEvents({
+      interactionType: 'drag',
+      rowId,
+    });
 
+    const [isActive, setIsActive] = useState<boolean>(false);
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
     const [readOnly, setReadOnly] = useState<boolean>(
@@ -43,6 +51,7 @@ export const GridRowHeader = React.memo(
     const [panelCount, setPanelCount] = useState<number>(
       Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels).length
     );
+    console.log('remnder', isActive);
 
     useEffect(() => {
       /**
@@ -67,9 +76,31 @@ export const GridRowHeader = React.memo(
           setPanelCount(count);
         });
 
+      const dragRowStyleSubscription = gridLayoutStateManager.activeRow$
+        .pipe(skip(1))
+        .subscribe((activeRow) => {
+          const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+          if (!headerRef) return;
+
+          if (activeRow?.id === rowId) {
+            setIsActive(true);
+            headerRef.style.position = 'fixed';
+            headerRef.style.top = `${activeRow.startingPosition.top}px`;
+            headerRef.style.right = `${activeRow.startingPosition.right}px`;
+            headerRef.style.transform = `translate(${activeRow.translate.left}px, ${activeRow.translate.top}px)`;
+          } else {
+            setIsActive(false);
+            headerRef.style.position = 'relative';
+            headerRef.style.top = ``;
+            headerRef.style.right = ``;
+            headerRef.style.transform = ``;
+          }
+        });
+
       return () => {
         accessModeSubscription.unsubscribe();
         panelCountSubscription.unsubscribe();
+        dragRowStyleSubscription.unsubscribe();
       };
     }, [gridLayoutStateManager, rowId]);
 
@@ -94,11 +125,15 @@ export const GridRowHeader = React.memo(
           responsive={false}
           alignItems="center"
           css={styles.headerStyles}
-          className="kbnGridRowHeader"
+          className={classNames('kbnGridRowHeader', { 'kbnGridRowHeader--active': isActive })}
           data-test-subj={`kbnGridRowHeader-${rowId}`}
+          ref={(element: HTMLDivElement | null) =>
+            (gridLayoutStateManager.headerRefs.current[rowId] = element)
+          }
         >
           <GridRowTitle
             rowId={rowId}
+            isActive={isActive}
             readOnly={readOnly}
             toggleIsCollapsed={toggleIsCollapsed}
             editTitleOpen={editTitleOpen}
@@ -112,50 +147,51 @@ export const GridRowHeader = React.memo(
              */
             !editTitleOpen && (
               <>
-                <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
-                  <EuiText
-                    color="subdued"
-                    size="s"
-                    data-test-subj={`kbnGridRowHeader-${rowId}--panelCount`}
-                    className={'kbnGridLayout--panelCount'}
-                  >
-                    {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
-                      defaultMessage:
-                        '({panelCount} {panelCount, plural, one {panel} other {panels}})',
-                      values: {
-                        panelCount,
-                      },
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
+                {!isActive && (
+                  <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
+                    <EuiText
+                      color="subdued"
+                      size="s"
+                      data-test-subj={`kbnGridRowHeader-${rowId}--panelCount`}
+                      className={'kbnGridLayout--panelCount'}
+                    >
+                      {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
+                        defaultMessage:
+                          '({panelCount} {panelCount, plural, one {panel} other {panels}})',
+                        values: {
+                          panelCount,
+                        },
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
                 {!readOnly && (
                   <>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="trash"
-                        color="danger"
-                        className="kbnGridLayout--deleteRowIcon"
-                        onClick={confirmDeleteRow}
-                        aria-label={i18n.translate('kbnGridLayout.row.deleteRow', {
-                          defaultMessage: 'Delete section',
-                        })}
-                      />
-                    </EuiFlexItem>
+                    {!isActive && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="trash"
+                          color="danger"
+                          className="kbnGridLayout--deleteRowIcon"
+                          onClick={confirmDeleteRow}
+                          aria-label={i18n.translate('kbnGridLayout.row.deleteRow', {
+                            defaultMessage: 'Delete section',
+                          })}
+                        />
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
-                      {/*
-                        This was added as a placeholder to get the desired UI here; however, since the
-                        functionality will be implemented in https://github.com/elastic/kibana/issues/190381
-                        and this button doesn't do anything yet, I'm choosing to hide it for now. I am keeping
-                        the `FlexItem` wrapper so that the UI still looks correct.
-                      */}
-                      {/* <EuiButtonIcon
+                      <EuiButtonIcon
                         iconType="move"
                         color="text"
                         className="kbnGridLayout--moveRowIcon"
                         aria-label={i18n.translate('kbnGridLayout.row.moveRow', {
                           defaultMessage: 'Move section',
                         })}
-                      /> */}
+                        onMouseDown={(e) => {
+                          startInteraction(e);
+                        }}
+                      />
                     </EuiFlexItem>
                   </>
                 )}
@@ -163,6 +199,8 @@ export const GridRowHeader = React.memo(
             )
           }
         </EuiFlexGroup>
+        {isActive && <DragPreview rowId={rowId} />}
+        {/* <DragPreview rowId={rowId} />{' '} */}
         {deleteModalVisible && (
           <DeleteGridRowModal rowId={rowId} setDeleteModalVisible={setDeleteModalVisible} />
         )}
@@ -183,9 +221,21 @@ const styles = {
   }),
   headerStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
+      '&.kbnGridRowHeader--active': {
+        width: 'fit-content',
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        border: `1px solid ${euiTheme.border.color}`,
+        borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+        paddingLeft: '8px',
+        minWidth: '300px',
+        zIndex: euiTheme.levels.modal,
+        '.kbnGridLayout--moveRowIcon': {
+          opacity: 1,
+        },
+      },
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
       padding: `${euiTheme.size.s} 0px`,
-      borderBottom: '1px solid transparent', // prevents layout shift
+      border: '1px solid transparent', // prevents layout shift
       '.kbnGridRowContainer--collapsed &': {
         borderBottom: euiTheme.border.thin,
       },
@@ -195,6 +245,15 @@ const styles = {
       '.kbnGridLayout--panelCount': {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
+
+      '.kbnGridLayout--moveRowIcon': {
+        '&:active, &:hover': {
+          cursor: 'move',
+          backgroundColor: 'transparent',
+          transform: 'none !important',
+        },
+      },
+
       // these styles hide the delete + move actions by default and only show them on hover
       [`.kbnGridLayout--deleteRowIcon,
         .kbnGridLayout--moveRowIcon`]: {
