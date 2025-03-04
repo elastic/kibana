@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import { dereference } from '@apidevtools/json-schema-ref-parser';
 import deepMerge from 'deepmerge';
 import type { CustomOperationObject } from './type';
 
 export async function mergeOperationWithSchemaFile(
-  pathToSpec: string,
+  pathToSpecOrSpec: string | DeepPartial<OpenAPIV3.OperationObject>,
   operation: CustomOperationObject
 ) {
-  Object.assign(operation, deepMerge(operation, await dereference(pathToSpec)));
+  if (typeof pathToSpecOrSpec === 'string') {
+    Object.assign(operation, deepMerge(operation, await dereference(pathToSpecOrSpec)));
+  } else {
+    Object.assign(operation, deepMerge(operation, pathToSpecOrSpec));
+  }
 }

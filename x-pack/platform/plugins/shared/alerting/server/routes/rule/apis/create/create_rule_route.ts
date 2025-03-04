@@ -39,7 +39,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         access: 'public',
         summary: `Create a rule`,
         tags: ['oas-tag:alerting'],
-        oasFilePath: () => path.join(__dirname, 'create_rule.examples.yaml'),
+        oasOperationObject: () => path.join(__dirname, 'create_rule.examples.yaml'),
       },
       validate: {
         request: {

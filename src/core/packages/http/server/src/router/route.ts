@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -388,10 +390,35 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   deprecated?: RouteDeprecationInfo;
 
   /**
-   * Filepath to a YAML file that should be merged with any OAS that is created
-   * for this route
+   * Filepath to a YAML file or a partial {@link OpenAPIV3.OperationObject} to
+   * be merged with the code generated for this endpoint.
+   *
+   * @note Always instantiate the objects lazily to avoid unnecessarily loading
+   *       objects into memory.
+   *
+   * @example
+   * As a path to a OAS file
+   * () => path.join(__dirname, 'my_examples.yaml')
+   *
+   * @example
+   * As an object
+   * () => ({
+   *      requestBody: {
+   *        content: {
+   *          200: {
+   *            examples: {
+   *              fooExample: {
+   *                value: { coolType: true } as { coolType: true },
+   *              },
+   *            },
+   *          },
+   *        },
+   *      },
+   *  })
    */
-  oasFilePath?: () => string;
+  oasOperationObject?: () =>
+    | string
+    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router

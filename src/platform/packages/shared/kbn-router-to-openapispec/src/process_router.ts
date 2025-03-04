@@ -100,8 +100,8 @@ export const processRouter = async (
 
       setXState(route.options.availability, operation);
 
-      if (route.options.oasFilePath) {
-        await mergeOperationWithSchemaFile(route.options.oasFilePath(), operation);
+      if (route.options.oasOperationObject) {
+        await mergeOperationWithSchemaFile(route.options.oasOperationObject(), operation);
       }
 
       const path: OpenAPIV3.PathItemObject = {
