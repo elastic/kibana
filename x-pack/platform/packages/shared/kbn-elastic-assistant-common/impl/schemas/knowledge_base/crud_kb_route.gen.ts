@@ -73,4 +73,5 @@ export const ReadKnowledgeBaseResponse = z.object({
   pipeline_exists: z.boolean().optional(),
   security_labs_exists: z.boolean().optional(),
   user_data_exists: z.boolean().optional(),
+  product_documentation_status: z.string().optional(),
 });
