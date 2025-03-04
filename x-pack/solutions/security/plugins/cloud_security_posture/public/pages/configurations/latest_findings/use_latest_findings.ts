@@ -8,7 +8,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';

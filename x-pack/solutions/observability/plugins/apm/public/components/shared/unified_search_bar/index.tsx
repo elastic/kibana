@@ -18,7 +18,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import qs from 'query-string';
 import type { DataView } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import type { UIProcessorEvent } from '../../../../common/processor_event';
 import type { TimePickerTimeDefaults } from '../date_picker/typings';

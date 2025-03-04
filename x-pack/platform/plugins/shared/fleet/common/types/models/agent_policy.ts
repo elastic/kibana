@@ -11,7 +11,7 @@ import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
-import type { Output } from './output';
+import type { Output, OutputSecret } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -230,7 +230,10 @@ export interface FullAgentPolicyFleetConfig {
     certificate_authorities?: string[];
     renegotiation?: string;
     certificate?: string;
-    key?: string;
+    key?: OutputSecret;
+  };
+  secrets?: {
+    ssl?: { key?: OutputSecret };
   };
 }
 

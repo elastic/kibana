@@ -43,6 +43,8 @@ describe('TrainedModelsService', () => {
         queue_capacity: 1024,
         deployment_id: 'my-deployment-id',
         cache_size: '1mb',
+        per_deployment_memory_bytes: '1mb',
+        per_allocation_memory_bytes: '1mb',
       },
       node_count: 1,
       routing_table: {

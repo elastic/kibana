@@ -16,8 +16,10 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +28,7 @@ import { FlattenRecord, IngestStreamGetResponse } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
@@ -109,14 +112,24 @@ const RefreshButton = ({
 };
 
 function useAiEnabled() {
-  const { dependencies } = useKibana();
-  const { observabilityAIAssistant } = dependencies.start;
+  const { dependencies, core } = useKibana();
+  const { observabilityAIAssistant, licensing } = dependencies.start;
 
   const aiAssistantEnabled = observabilityAIAssistant?.service.isEnabled();
 
   const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
 
-  return aiAssistantEnabled && (genAiConnectors?.connectors || []).length > 0;
+  const aiEnabled = aiAssistantEnabled && (genAiConnectors?.connectors || []).length > 0;
+
+  const currentLicense = useObservable(licensing.license$);
+
+  const couldBeEnabled =
+    currentLicense?.hasAtLeast('enterprise') && core.application.capabilities.actions?.save;
+
+  return {
+    enabled: aiEnabled,
+    couldBeEnabled,
+  };
 }
 
 function InnerGrokAiSuggestions({
@@ -318,12 +331,42 @@ function InnerGrokAiSuggestions({
 }
 
 export function GrokAiSuggestions() {
-  const isAiEnabled = useAiEnabled();
+  const {
+    core: { http },
+  } = useKibana();
+  const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
   const props = useSimulatorContext();
+
+  if (!isAiEnabled && couldBeEnabled) {
+    return (
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.aiAssistantNotEnabledTooltip',
+          {
+            defaultMessage:
+              'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
+          }
+        )}
+      >
+        <EuiLink
+          target="_blank"
+          href={http!.basePath.prepend(
+            `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
+          )}
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.aiAssistantNotEnabled',
+            {
+              defaultMessage: 'Enable AI Assistant features',
+            }
+          )}
+        </EuiLink>
+      </EuiToolTip>
+    );
+  }
 
   if (!isAiEnabled || !props.filteredSamples.length) {
     return null;
   }
-
   return <InnerGrokAiSuggestions {...props} />;
 }

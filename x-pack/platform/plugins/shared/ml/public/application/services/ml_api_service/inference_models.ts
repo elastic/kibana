@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';

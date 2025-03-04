@@ -844,7 +844,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
       elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
       policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
-      remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
+      remoteESOoutput: `${FLEET_DOCS}remote-elasticsearch-output.html`,
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,

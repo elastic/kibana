@@ -33,10 +33,8 @@ export async function getHasData({
         events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
       },
       terminate_after: 1,
-      body: {
-        track_total_hits: 1,
-        size: 0,
-      },
+      track_total_hits: 1,
+      size: 0,
     };
 
     const response = await apmEventClient.search('observability_overview_has_apm_data', params);

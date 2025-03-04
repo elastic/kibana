@@ -3018,7 +3018,7 @@
                 "section": "def-common.NewPackagePolicy",
                 "text": "NewPackagePolicy"
               },
-              ">; }) => void"
+              ">; isExtensionLoaded?: boolean | undefined; }) => void"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -3083,6 +3083,20 @@
                         "text": "PackagePolicyConfigRecord"
                       },
                       " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; supports_agentless?: boolean | null | undefined; additional_datastreams_permissions?: string[] | undefined; }"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.isExtensionLoaded",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "isExtensionLoaded",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -11865,7 +11879,7 @@
             "label": "getPackages",
             "description": [],
             "signature": [
-              "(params?: { excludeInstallStatus?: false | undefined; category?: string | undefined; prerelease?: false | undefined; } | undefined) => Promise<",
+              "(params?: { excludeInstallStatus?: boolean | undefined; category?: string | undefined; prerelease?: boolean | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -11893,12 +11907,12 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-server.PackageClient.getPackages.$1.excludeInstallStatus",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "excludeInstallStatus",
                     "description": [],
                     "signature": [
-                      "false | undefined"
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
                     "deprecated": false,
@@ -11921,12 +11935,12 @@
                   {
                     "parentPluginId": "fleet",
                     "id": "def-server.PackageClient.getPackages.$1.prerelease",
-                    "type": "boolean",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "prerelease",
                     "description": [],
                     "signature": [
-                      "false | undefined"
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
                     "deprecated": false,
@@ -11945,7 +11959,7 @@
             "label": "getAgentPolicyConfigYAML",
             "description": [],
             "signature": [
-              "(pkgName: string, pkgVersion?: string | undefined, prerelease?: false | undefined, ignoreUnverified?: boolean | undefined) => Promise<string>"
+              "(pkgName: string, pkgVersion?: string | undefined, prerelease?: boolean | undefined, ignoreUnverified?: boolean | undefined) => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
             "deprecated": false,
@@ -11984,12 +11998,12 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackageClient.getAgentPolicyConfigYAML.$3",
-                "type": "boolean",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "prerelease",
                 "description": [],
                 "signature": [
-                  "false | undefined"
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
                 "deprecated": false,

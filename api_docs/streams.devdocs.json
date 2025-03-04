@@ -14,7 +14,7 @@
       "tags": [],
       "label": "StreamsPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -29,7 +29,7 @@
             "Observable",
             "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
           ],
-          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -44,7 +44,7 @@
       "tags": [],
       "label": "StreamsPluginStart",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -715,7 +715,7 @@
             "StreamsRepositoryClientOptions",
             ">"
           ],
-          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -730,7 +730,7 @@
             "Observable",
             "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
           ],
-          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -755,7 +755,7 @@
         "signature": [
           "{}"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/common/config.ts",
+        "path": "x-pack/platform/plugins/shared/streams/common/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1418,7 +1418,7 @@
           },
           ", undefined>; }"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/server/routes/index.ts",
+        "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1432,7 +1432,7 @@
       "tags": [],
       "label": "StreamsPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1446,7 +1446,7 @@
       "tags": [],
       "label": "StreamsPluginStart",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1477,7 +1477,7 @@
           "AssetLink",
           "<TAssetType>"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+        "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1488,7 +1488,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+            "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1502,7 +1502,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+            "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1522,7 +1522,7 @@
         "signature": [
           "\"rule\" | \"slo\" | \"dashboard\""
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+        "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

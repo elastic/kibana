@@ -19,8 +19,7 @@ export default function searchSolutionNavigation({
   const spaces = getService('spaces');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/203607
-  describe.skip('Search Classic Navigation', () => {
+  describe('Search Classic Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
