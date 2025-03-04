@@ -300,39 +300,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-common.isRuntimeModule",
-        "type": "Function",
-        "tags": [],
-        "label": "isRuntimeModule",
-        "description": [],
-        "signature": [
-          "(module: any) => boolean"
-        ],
-        "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-common.isRuntimeModule.$1",
-            "type": "Any",
-            "tags": [],
-            "label": "module",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
