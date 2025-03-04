@@ -12,7 +12,6 @@ import { set } from '@kbn/safer-lodash-set';
 
 import type {
   KafkaOutput,
-  NewLogstashOutput,
   NewRemoteElasticsearchOutput,
   Output,
   OutputSecretPath,
@@ -299,28 +298,12 @@ function getOutputSecretPaths(
 ): OutputSecretPath[] {
   const outputSecretPaths: OutputSecretPath[] = [];
 
-  if (outputType === 'logstash') {
-    const logstashOutput = output as NewLogstashOutput;
-    if (logstashOutput?.secrets?.ssl?.key) {
-      outputSecretPaths.push({
-        path: 'secrets.ssl.key',
-        value: logstashOutput.secrets.ssl.key,
-      });
-    }
-  }
-
   if (outputType === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
     if (kafkaOutput?.secrets?.password) {
       outputSecretPaths.push({
         path: 'secrets.password',
         value: kafkaOutput.secrets.password,
-      });
-    }
-    if (kafkaOutput?.secrets?.ssl?.key) {
-      outputSecretPaths.push({
-        path: 'secrets.ssl.key',
-        value: kafkaOutput.secrets.ssl.key,
       });
     }
   }
@@ -339,6 +322,14 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.kibana_api_key,
       });
     }
+  }
+
+  // common to all outputs
+  if (output?.secrets?.ssl?.key) {
+    outputSecretPaths.push({
+      path: 'secrets.ssl.key',
+      value: output.secrets.ssl.key,
+    });
   }
 
   return outputSecretPaths;
@@ -369,10 +360,7 @@ export async function deleteOutputSecrets(opts: {
 export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
   const outputSecretPaths: PolicySecretReference[] = [];
 
-  if (
-    (output.type === 'kafka' || output.type === 'logstash') &&
-    typeof output.secrets?.ssl?.key === 'object'
-  ) {
+  if (typeof output.secrets?.ssl?.key === 'object') {
     outputSecretPaths.push({
       id: output.secrets.ssl.key.id,
     });

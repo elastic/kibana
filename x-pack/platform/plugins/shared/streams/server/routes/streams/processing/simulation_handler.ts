@@ -9,14 +9,14 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import {
-  IngestSimulateDocument,
+  IngestDocument,
   IngestProcessorContainer,
   IngestSimulateRequest,
   IngestPipelineConfig,
   ClusterComponentTemplateNode,
   ErrorCauseKeys,
-  IngestSimulatePipelineSimulation,
-  IngestSimulateSimulateDocumentResult,
+  IngestPipelineSimulation,
+  IngestSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -80,7 +80,7 @@ export interface ProcessorMetrics {
 
 // Narrow down the type to only successful processor results
 export type SuccessfulIngestSimulateDocumentResult = WithRequired<
-  IngestSimulateSimulateDocumentResult,
+  IngestSimulateDocumentResult,
   'processor_results'
 >;
 
@@ -146,7 +146,7 @@ export const simulateProcessing = async ({
 const prepareSimulationDocs = (
   documents: FlattenRecord[],
   streamName: string
-): IngestSimulateDocument[] => {
+): IngestDocument[] => {
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
@@ -224,7 +224,7 @@ const prepareIngestSimulationBody = (
 
   // TODO: update type once Kibana updates to elasticsearch-js 8.17
   const simulationBody: {
-    docs: IngestSimulateDocument[];
+    docs: IngestDocument[];
     pipeline_substitutions: Record<string, IngestPipelineConfig>;
     component_template_substitutions?: Record<string, ClusterComponentTemplateNode>;
   } = {
@@ -295,7 +295,7 @@ const executePipelineSimulation = async (
 
 // TODO: update type to built-in once Kibana updates to elasticsearch-js 8.17
 interface IngestSimulationResult {
-  docs: Array<{ doc: IngestSimulateDocument & { error?: ErrorCauseKeys } }>;
+  docs: Array<{ doc: IngestDocument & { error?: ErrorCauseKeys } }>;
 }
 
 const conditionallyExecuteIngestSimulation = async (
@@ -605,8 +605,8 @@ const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) 
  * Guard helpers
  */
 const isSuccessfulProcessor = (
-  processor: IngestSimulatePipelineSimulation
-): processor is WithRequired<IngestSimulatePipelineSimulation, 'doc' | 'tag'> =>
+  processor: IngestPipelineSimulation
+): processor is WithRequired<IngestPipelineSimulation, 'doc' | 'tag'> =>
   processor.status === 'success' && !!processor.tag;
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17

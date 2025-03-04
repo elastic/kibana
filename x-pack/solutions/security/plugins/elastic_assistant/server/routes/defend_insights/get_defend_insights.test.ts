@@ -63,7 +63,7 @@ describe('getDefendInsightsRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockCurrentInsights = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock());
 
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     getDefendInsightsRoute(server.router);
     (updateDefendInsightsLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentInsights);
@@ -109,7 +109,7 @@ describe('getDefendInsightsRoute', () => {
   });
 
   it('should handle missing authenticated user', async () => {
-    context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
     const response = await server.inject(
       getDefendInsightsRequest({ connector_id: 'connector-id1' }),
       requestContextMock.convertContext(context)

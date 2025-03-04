@@ -52,7 +52,11 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {};
+  secrets?: {
+    ssl?: {
+      key?: OutputSecret;
+    };
+  };
   preset?: OutputPreset;
 }
 
@@ -66,6 +70,9 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   secrets?: {
     service_token?: OutputSecret;
     kibana_api_key?: OutputSecret;
+    ssl?: {
+      key?: OutputSecret;
+    };
   };
   sync_integrations?: boolean;
   kibana_url?: string | null;
@@ -74,11 +81,6 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
 
 export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
-  secrets?: {
-    ssl?: {
-      key?: OutputSecret;
-    };
-  };
 }
 
 export type NewOutput =

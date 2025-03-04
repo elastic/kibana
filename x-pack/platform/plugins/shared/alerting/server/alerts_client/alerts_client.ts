@@ -15,7 +15,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
@@ -231,7 +231,7 @@ export class AlertsClient<
   }
 
   public async search<Aggregation = unknown>(
-    queryBody: SearchRequest['body']
+    queryBody: SearchRequest
   ): Promise<SearchResult<AlertData, Aggregation>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
@@ -242,7 +242,7 @@ export class AlertsClient<
       aggregations,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
-      body: queryBody,
+      ...queryBody,
       ignore_unavailable: true,
     });
 

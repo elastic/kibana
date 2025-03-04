@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { ConfigType } from '../../config';
+import type { StartPlugins } from '../../plugin';
 
 export interface AssetInventoryRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
   config: ConfigType;
+  getStartServices: StartServicesAccessor<StartPlugins>;
 }

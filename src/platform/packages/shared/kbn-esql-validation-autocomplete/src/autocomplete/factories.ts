@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
@@ -29,7 +30,6 @@ import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
-import { ESQLVariableType, ESQLControlVariable } from '../shared/types';
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',

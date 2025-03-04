@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
@@ -193,9 +193,7 @@ export class CreateSLO {
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }

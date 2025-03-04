@@ -40,11 +40,12 @@ const searchArgsToSOFindOptions = (
   return {
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: options?.fields ?? ['title', 'description', 'timeRestore'],
+    fields: options?.fields,
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
     defaultSearchOperator: 'AND',
+    namespaces: options?.spaces,
     ...tagsToFindOptions(query.tags),
   };
 };

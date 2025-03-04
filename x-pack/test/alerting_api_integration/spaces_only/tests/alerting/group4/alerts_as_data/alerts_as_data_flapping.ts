@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -823,18 +823,16 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
   async function queryForAlertDocs<T>(ruleId: string): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: {
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        query: {
-          bool: {
-            must: {
-              term: {
-                [ALERT_RULE_UUID]: { value: ruleId },
-              },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          must: {
+            term: {
+              [ALERT_RULE_UUID]: { value: ruleId },
             },
           },
         },

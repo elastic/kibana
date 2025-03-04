@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { sumBy } from 'lodash';
 import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
@@ -63,22 +63,20 @@ export const fetchDurationRanges = async ({
     apm: {
       events: [getEventType(chartType, searchMetrics)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query: filteredQuery,
-      }),
-      aggs: {
-        logspace_ranges: {
-          range: {
-            field: getDurationField(chartType, searchMetrics),
-            ranges,
-          },
+    track_total_hits: false,
+    size: 0,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query: filteredQuery,
+    }),
+    aggs: {
+      logspace_ranges: {
+        range: {
+          field: getDurationField(chartType, searchMetrics),
+          ranges,
         },
       },
     },
