@@ -6,6 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { IRouter, Logger } from '@kbn/core/server';
@@ -23,10 +24,16 @@ export const registerChatRoutes = ({
   router.post(
     {
       path: '/internal/workchat/chat',
-      validate: false,
+      validate: {
+        body: schema.object({
+          message: schema.string(),
+        }),
+      },
     },
     async (ctx, request, res) => {
       const { agentFactory } = getServices();
+
+      const { message } = request.body;
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
@@ -41,7 +48,7 @@ export const registerChatRoutes = ({
           connectorId: 'azure-gpt4',
         });
 
-        const { events$ } = await agent.run();
+        const { events$ } = await agent.run({ message });
 
         return res.ok({
           headers: {
@@ -58,9 +65,7 @@ export const registerChatRoutes = ({
         logger.error(error);
         return res.customError({
           statusCode: 500,
-          body: {
-            message: 'Internal server error',
-          },
+          body: { message: 'Internal server error' },
         });
       }
     }

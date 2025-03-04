@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { Observable, from, filter, map } from 'rxjs';
+import { Observable, from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ChatEvent } from '../../../common/chat_events';
 import { createAgentGraph } from './agent_graph';
 import { IntegrationsService } from '../integrations/integrations_service';
 import { getLCTools } from '../integrations/utils';
+import { langchainToChatEvents } from './utils';
+
+interface AgentRunOptions {
+  message: string;
+}
 
 interface AgentRunResult {
   events$: Observable<ChatEvent>;
 }
 
 export interface Agent {
-  run(): Promise<AgentRunResult>;
+  run(options: AgentRunOptions): Promise<AgentRunResult>;
 }
 
 export const createAgent = async ({
@@ -37,10 +42,9 @@ export const createAgent = async ({
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
-    run: async (): Promise<AgentRunResult> => {
-
+    run: async ({ message }): Promise<AgentRunResult> => {
       const eventStream = agentGraph.streamEvents(
-        { input: 'What is Kibana error 500?' },
+        { input: message },
         {
           version: 'v2',
           runName: 'defaultAgentGraph',
@@ -57,16 +61,12 @@ export const createAgent = async ({
 
       const events$ = from(eventStream).pipe(
         filter(isStreamEvent),
-        map((event) => {
-          return {
-            type: event.event,
-            ...event,
-          };
-        })
+        langchainToChatEvents(),
+        shareReplay()
       );
 
       return {
-        events$: events$ as any, // TODO: convert
+        events$,
       };
     },
   };
