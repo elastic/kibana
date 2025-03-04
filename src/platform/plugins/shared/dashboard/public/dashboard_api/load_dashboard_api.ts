@@ -104,7 +104,7 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // get dashboard Api
   // --------------------------------------------------------------------------------------
-  const { api, cleanup, internalApi } = getDashboardApi({
+  const { api, cleanup, internalApi, controlGroupApi$ } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
     initialState: {
@@ -140,5 +140,7 @@ export async function loadDashboardApi({
       performanceSubscription.unsubscribe();
     },
     internalApi,
+    creationStartTime,
+    controlGroupApi$,
   };
 }
