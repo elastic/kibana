@@ -165,12 +165,13 @@ export interface UnstructuredLogState {
   grokPatterns: string[];
   currentPattern: string;
   logSamples: string[];
-  erroredSamples: string[];
   jsonSamples: string[];
   finalized: boolean;
-  errorsAndSamples: object;
+  errors: object[];
+  unParsedSamples: string[];
   additionalProcessors: object[];
   ecsVersion: string;
+  isFirst: boolean;
 }
 
 export interface RelatedState {

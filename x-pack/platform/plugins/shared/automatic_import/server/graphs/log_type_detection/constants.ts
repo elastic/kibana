@@ -38,4 +38,9 @@ export const LOG_FORMAT_EXAMPLE_LOGS = [
       '2016/10/25 14:49:34 [error] 54053#0: *1 open() "/usr/local/Cellar/nginx/1.10.2_1/html/favicon.ico" failed (2: No such file or directory)',
     format: 'Unstructured',
   },
+  {
+    example:
+      '2025/02/12|14:42:42:871|FAKePolicyNumber-ws-sharedendorsement-autocore-54--fhfh-rghrg-0|INFO |http-nio-8080-exec-58 |RatingHelper.sendToPolicyPro:1521 |-call to  PolicyPro for /rest/v2/actions/ISSUEEXT successful',
+    format: 'Unstructured',
+  },
 ];

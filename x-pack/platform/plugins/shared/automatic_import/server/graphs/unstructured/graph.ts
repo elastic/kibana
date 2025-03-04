@@ -10,7 +10,6 @@ import { StateGraph, END, START } from '@langchain/langgraph';
 import type { UnstructuredLogState } from '../../types';
 import { handleUnstructured } from './unstructured';
 import type { UnstructuredGraphParams, UnstructuredBaseNodeParams } from './types';
-import { handleUnstructuredError } from './error';
 import { handleUnstructuredValidate } from './validate';
 
 const graphState: StateGraphArgs<UnstructuredLogState>['channels'] = {
@@ -30,10 +29,6 @@ const graphState: StateGraphArgs<UnstructuredLogState>['channels'] = {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
-  erroredSamples: {
-    value: (x: string[], y?: string[]) => y ?? x,
-    default: () => [],
-  },
   currentPattern: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
@@ -50,8 +45,12 @@ const graphState: StateGraphArgs<UnstructuredLogState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
-  errorsAndSamples: {
-    value: (x: object, y?: object) => y ?? x,
+  unParsedSamples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  errors: {
+    value: (x: object[], y?: object[]) => y ?? x,
     default: () => [],
   },
   additionalProcessors: {
@@ -62,11 +61,16 @@ const graphState: StateGraphArgs<UnstructuredLogState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
+  isFirst: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
 };
 
 function modelInput({ state }: UnstructuredBaseNodeParams): Partial<UnstructuredLogState> {
   return {
     finalized: false,
+    isFirst: true,
     lastExecutedChain: 'modelInput',
   };
 }
@@ -80,10 +84,10 @@ function modelOutput({ state }: UnstructuredBaseNodeParams): Partial<Unstructure
 }
 
 function validationRouter({ state }: UnstructuredBaseNodeParams): string {
-  if (Object.keys(state.errorsAndSamples).length === 0) {
+  if (Object.keys(state.unParsedSamples).length === 0) {
     return 'modelOutput';
   }
-  return 'handleUnstructuredError';
+  return 'handleUnparsed';
 }
 
 export async function getUnstructuredGraph({ model, client }: UnstructuredGraphParams) {
@@ -92,9 +96,6 @@ export async function getUnstructuredGraph({ model, client }: UnstructuredGraphP
   })
     .addNode('modelInput', (state: UnstructuredLogState) => modelInput({ state }))
     .addNode('modelOutput', (state: UnstructuredLogState) => modelOutput({ state }))
-    .addNode('handleUnstructuredError', (state: UnstructuredLogState) =>
-      handleUnstructuredError({ state, model, client })
-    )
     .addNode('handleUnstructured', (state: UnstructuredLogState) =>
       handleUnstructured({ state, model, client })
     )
@@ -108,11 +109,10 @@ export async function getUnstructuredGraph({ model, client }: UnstructuredGraphP
       'handleUnstructuredValidate',
       (state: UnstructuredLogState) => validationRouter({ state }),
       {
-        handleUnstructuredError: 'handleUnstructuredError',
+        handleUnparsed: 'handleUnstructured',
         modelOutput: 'modelOutput',
       }
     )
-    .addEdge('handleUnstructuredError', 'handleUnstructuredValidate')
     .addEdge('modelOutput', END);
 
   const compiledUnstructuredGraph = workflow.compile();

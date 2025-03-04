@@ -12,12 +12,7 @@ import { createGrokProcessor, createPassthroughFailureProcessor } from '../../ut
 
 export interface UnstructuredLogParse {
   grokPatterns: string[];
-  errorsAndSamples: ErrorAndSample[];
-}
-
-export interface ErrorAndSample {
-  sample: string;
-  error: object;
+  unParsedSamples: string[];
 }
 
 export async function handleUnstructuredValidate({
@@ -26,13 +21,14 @@ export async function handleUnstructuredValidate({
 }: HandleUnstructuredNodeParams): Promise<Partial<UnstructuredLogState>> {
   const currentPattern = state.currentPattern;
   const grokPatterns = state.grokPatterns;
-  const grokProcessor = createGrokProcessor([currentPattern]);
+  const grokProcessor = createGrokProcessor([...grokPatterns, currentPattern]);
   const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
 
   const packageName = state.packageName;
   const dataStreamName = state.dataStreamName;
   const validSamples: LogResult[] = [];
-  const errorsAndSamples: ErrorAndSample[] = [];
+  const unParsedSamples: string[] = [];
+  const errors: object[] = [];
 
   for (const sample of state.logSamples) {
     const result = (await testPipeline([sample], pipeline, client)) as {
@@ -41,21 +37,21 @@ export async function handleUnstructuredValidate({
     };
 
     if (result.errors.length > 0) {
-      errorsAndSamples.push({ sample, error: result.errors[0] });
+      unParsedSamples.push(sample);
+      errors.push(result.errors[0]);
     } else {
       validSamples.push(result.pipelineResults[0]);
     }
   }
 
-  const matchPercentage = validSamples.length / state.logSamples.length;
-
   if (validSamples.length > 0) {
     grokPatterns.push(currentPattern);
   }
 
-  if (errorsAndSamples.length > 0) {
+  if (unParsedSamples.length > 0) {
     return {
-      errorsAndSamples,
+      unParsedSamples,
+      errors,
       lastExecutedChain: 'unstructuredValidate',
     };
   }
@@ -70,7 +66,7 @@ export async function handleUnstructuredValidate({
   return {
     jsonSamples,
     additionalProcessors,
-    errorsAndSamples: [],
+    unParsedSamples: [],
     lastExecutedChain: 'unstructuredValidate',
   };
 }
