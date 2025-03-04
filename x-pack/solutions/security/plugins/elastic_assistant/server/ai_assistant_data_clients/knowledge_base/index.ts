@@ -53,6 +53,7 @@ import {
 } from './helpers';
 import {
   getKBUserFilter,
+  isGlobalEntry,
   validateDocumentsModification,
 } from '../../routes/knowledge_base/entries/utils';
 import {
@@ -434,8 +435,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
             source: doc.metadata.source ?? 'unknown',
+            global,
           },
-          global,
         });
       }),
       authenticatedUser,
@@ -658,11 +659,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     auditLogger,
     knowledgeBaseEntry,
     telemetry,
-    global = false,
   }: {
     auditLogger?: AuditLogger;
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
-    global?: boolean;
     telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
@@ -673,7 +672,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+    if (isGlobalEntry(knowledgeBaseEntry) && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
       throw new Error('User lacks privileges to create global knowledge base entries');
     }
 
@@ -690,7 +689,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       spaceId: this.spaceId,
       user: authenticatedUser,
       knowledgeBaseEntry,
-      global,
       telemetry,
     });
   };
@@ -704,12 +702,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public updateKnowledgeBaseEntry = async ({
     auditLogger,
     knowledgeBaseEntry,
+    telemetry,
   }: {
     auditLogger?: AuditLogger;
     knowledgeBaseEntry: KnowledgeBaseEntryUpdateProps;
+    telemetry: AnalyticsServiceSetup;
   }): Promise<{
     errors: BulkOperationError[];
-    updatedEntry: KnowledgeBaseEntryResponse;
+    updatedEntry: KnowledgeBaseEntryResponse | null | undefined;
   }> => {
     const authenticatedUser = this.options.currentUser;
 
@@ -734,7 +734,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           user: authenticatedUser,
           updatedAt: changedAt,
           entry: knowledgeBaseEntry,
-          global: knowledgeBaseEntry.users != null && knowledgeBaseEntry.users.length === 0,
         }),
       ],
       getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),

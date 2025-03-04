@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { END, START, StateGraph, StateGraphArgs } from '@langchain/langgraph';
+import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { StructuredTool } from '@langchain/core/tools';
@@ -60,72 +60,72 @@ export const getDefaultAssistantGraph = ({
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
-    const graphState: StateGraphArgs<AgentState>['channels'] = {
-      input: {
-        value: (x: string, y?: string) => y ?? x,
+    const graphAnnotation = Annotation.Root({
+      input: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
-      },
-      lastNode: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      lastNode: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => 'start',
-      },
-      steps: {
-        value: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
+      }),
+      steps: Annotation<AgentStep[]>({
+        reducer: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
         default: () => [],
-      },
-      hasRespondStep: {
-        value: (x: boolean, y?: boolean) => y ?? x,
+      }),
+      hasRespondStep: Annotation<boolean>({
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
-      },
-      agentOutcome: {
-        value: (
+      }),
+      agentOutcome: Annotation<AgentAction | AgentFinish | undefined>({
+        reducer: (
           x: AgentAction | AgentFinish | undefined,
           y?: AgentAction | AgentFinish | undefined
         ) => y ?? x,
         default: () => undefined,
-      },
-      messages: {
-        value: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
+      }),
+      messages: Annotation<BaseMessage[]>({
+        reducer: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
         default: () => [],
-      },
-      chatTitle: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      chatTitle: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
-      },
-      llmType: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      llmType: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => 'unknown',
-      },
-      isStream: {
-        value: (x: boolean, y?: boolean) => y ?? x,
+      }),
+      isStream: Annotation<boolean>({
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
-      },
-      isOssModel: {
-        value: (x: boolean, y?: boolean) => y ?? x,
+      }),
+      isOssModel: Annotation<boolean>({
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
-      },
-      connectorId: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      connectorId: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
-      },
-      conversation: {
-        value: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
+      }),
+      conversation: Annotation<ConversationResponse | undefined>({
+        reducer: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
           y ?? x,
         default: () => undefined,
-      },
-      conversationId: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      conversationId: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
-      },
-      responseLanguage: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      responseLanguage: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => 'English',
-      },
-      provider: {
-        value: (x: string, y?: string) => y ?? x,
+      }),
+      provider: Annotation<string>({
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
-      },
-    };
+      }),
+    });
 
     // Default node parameters
     const nodeParams: NodeParamsBase = {
@@ -135,9 +135,7 @@ export const getDefaultAssistantGraph = ({
     };
 
     // Put together a new graph using default state from above
-    const graph = new StateGraph({
-      channels: graphState,
-    })
+    const graph = new StateGraph(graphAnnotation)
       .addNode(NodeType.GET_PERSISTED_CONVERSATION, (state: AgentState) =>
         getPersistedConversation({
           ...nodeParams,

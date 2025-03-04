@@ -270,14 +270,12 @@ discover.enableUiSettingsValidations: true
 xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
-
 # This feature is disabled in Serverless until Inference Endpoint become enabled within a Serverless environment
 xpack.stack_connectors.enableExperimental: ['inferenceConnectorOff']
-
 # This is the definition introducing pre-configured Kibana Connector for Elastic default LLM
 xpack.actions.preconfigured:
-  Elastic-Inference-Rainbow-Sprinkles:
-    name: Elastic-Inference-Rainbow-Sprinkles
+  Elastic-LLM:
+    name: Elastic LLM
     actionTypeId: .inference
     exposeConfig: true
     config:

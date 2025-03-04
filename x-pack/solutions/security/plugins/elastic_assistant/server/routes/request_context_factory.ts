@@ -56,7 +56,26 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
-    const getCurrentUser = () => coreContext.security.authc.getCurrentUser();
+    const getCurrentUser = async () => {
+      let contextUser = coreContext.security.authc.getCurrentUser();
+
+      if (contextUser && !contextUser?.profile_uid) {
+        try {
+          const users = await coreContext.elasticsearch.client.asCurrentUser.security.getUser({
+            username: contextUser.username,
+            with_profile_uid: true,
+          });
+
+          if (users[contextUser.username].profile_uid) {
+            contextUser = { ...contextUser, profile_uid: users[contextUser.username].profile_uid };
+          }
+        } catch (e) {
+          this.logger.error(`Failed to get user profile_uid: ${e}`);
+        }
+      }
+
+      return contextUser;
+    };
 
     return {
       core: coreContext,
@@ -86,7 +105,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
       getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
-        const currentUser = getCurrentUser();
+        const currentUser = await getCurrentUser();
 
         const { securitySolutionAssistant } = await coreStart.capabilities.resolveCapabilities(
           request,
@@ -105,8 +124,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAttackDiscoveryDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getAttackDiscoveryDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAttackDiscoveryDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -115,8 +134,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getDefendInsightsDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getDefendInsightsDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createDefendInsightsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -125,8 +144,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantPromptsDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getAIAssistantPromptsDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -135,8 +154,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantAnonymizationFieldsDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getAIAssistantAnonymizationFieldsDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -146,7 +165,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       }),
 
       getAIAssistantConversationsDataClient: memoize(async (params) => {
-        const currentUser = getCurrentUser();
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
