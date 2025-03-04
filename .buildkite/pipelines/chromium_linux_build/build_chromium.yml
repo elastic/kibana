@@ -43,11 +43,11 @@ steps:
       - "arm64"
 
   - command: |
-      .buildkite/scripts/pipelines/chromium_linux_build/create_pr.sh
-    label: Create PR updating puppeteer and related config for chromium
+      node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.mjs
+    label: provided feedback to issue created to update puppeteer
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       machineType: n2-standard-2
-    timeout_in_minutes: 5
+    timeout_in_minutes: 30
