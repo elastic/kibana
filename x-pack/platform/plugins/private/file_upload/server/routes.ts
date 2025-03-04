@@ -24,7 +24,7 @@ import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
-import { IngestPipelineWrapper } from '../common/types';
+import type { IngestPipelineWrapper } from '../common/types';
 
 /**
  * Routes for the file upload.
