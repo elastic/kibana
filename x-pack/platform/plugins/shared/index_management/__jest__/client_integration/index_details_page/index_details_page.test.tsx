@@ -533,6 +533,67 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
+  describe('Semantic Text Banner', () => {
+    const mockIndexMappingResponseWithoutSemanticText: any = {
+      ...testIndexMappings.mappings,
+      properties: {
+        ...testIndexMappings.mappings.properties,
+        name: {
+          type: 'text',
+        },
+      },
+    };
+
+    const mockIndexMappingResponseWithSemanticText: any = {
+      ...testIndexMappings.mappings,
+      properties: {
+        ...testIndexMappings.mappings.properties,
+        name: {
+          type: 'text',
+        },
+        sem_text: {
+          type: 'semantic_text',
+          inference_id: '.elser-2-elasticsearch',
+        },
+        title: {
+          type: 'text',
+          copy_to: ['sem_text'],
+        },
+      },
+    };
+
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            core: {
+              application: { capabilities: { ml: { canGetTrainedModels: true } } },
+            },
+          },
+        });
+      });
+    });
+
+    it('semantic text banner is visible if there is no semantic_text field in the mapping', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithoutSemanticText,
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(true);
+    });
+
+    it('semantic text banner is not visible if there exists a semantic_text field in the mapping', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithSemanticText,
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
+    });
+  });
+
   describe('Mappings tab', () => {
     beforeEach(async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
