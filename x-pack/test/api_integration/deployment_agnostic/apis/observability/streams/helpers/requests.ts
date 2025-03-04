@@ -26,6 +26,17 @@ export async function indexDocument(esClient: Client, index: string, document: J
   return response;
 }
 
+export async function indexAndAssertTargetStream(
+  esClient: Client,
+  target: string,
+  document: JsonObject
+) {
+  const response = await esClient.index({ index: 'logs', document, refresh: 'wait_for' });
+  const result = await fetchDocument(esClient, target, response._id);
+  expect(result._index).to.match(new RegExp(`^\.ds\-${target}-.*`));
+  return result;
+}
+
 export async function fetchDocument(esClient: Client, index: string, id: string) {
   const query = {
     ids: { values: [id] },
