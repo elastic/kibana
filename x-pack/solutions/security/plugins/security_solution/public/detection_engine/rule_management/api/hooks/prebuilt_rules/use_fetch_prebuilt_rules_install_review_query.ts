@@ -12,6 +12,7 @@ import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detec
 import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
+import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
 export const REVIEW_RULE_INSTALLATION_QUERY_KEY = ['POST', REVIEW_RULE_INSTALLATION_URL];
 
@@ -28,6 +29,7 @@ export const useFetchPrebuiltRulesInstallReviewQuery = (
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
       retry: retryOnRateLimitedError,
+      retryDelay: cappedExponentialBackoff,
     }
   );
 };
