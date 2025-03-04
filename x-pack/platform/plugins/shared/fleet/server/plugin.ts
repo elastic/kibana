@@ -714,7 +714,7 @@ export class FleetPlugin
     this.updateAgentlessDeploymentsTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
-    
+
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
