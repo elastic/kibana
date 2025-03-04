@@ -58,7 +58,7 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
 }

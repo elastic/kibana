@@ -1351,7 +1351,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
-  getVariablesByType: [],
+  getVariables: [],
   canSuggestVariables: [],
   getJoinIndices: [],
 };
