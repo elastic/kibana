@@ -466,6 +466,7 @@
     "@kbn/discover-utils": "link:src/platform/packages/shared/kbn-discover-utils",
     "@kbn/doc-links": "link:src/platform/packages/shared/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:src/platform/packages/shared/kbn-dom-drag-drop",
+    "@kbn/durable-functions-plugin": "link:x-pack/platform/plugins/shared/durable_functions",
     "@kbn/ebt-tools": "link:src/platform/packages/shared/kbn-ebt-tools",
     "@kbn/ecs-data-quality-dashboard": "link:x-pack/solutions/security/packages/ecs-data-quality-dashboard",
     "@kbn/ecs-data-quality-dashboard-plugin": "link:x-pack/solutions/security/plugins/ecs_data_quality_dashboard",

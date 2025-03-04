@@ -91,6 +91,17 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
               },
             ],
           },
+          {
+            name: 'Durable Functions',
+            id: 'durable-functions',
+            items: [
+              {
+                id: 'durable-functions-demo',
+                name: 'Durable Functions Demo',
+                onClick: () => history.push('/durable_functions'),
+              }
+            ],
+          },
         ]}
       />
     </EuiPageSidebar>

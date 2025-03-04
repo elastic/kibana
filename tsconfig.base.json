@@ -798,6 +798,8 @@
       "@kbn/docs-utils/*": ["packages/kbn-docs-utils/*"],
       "@kbn/dom-drag-drop": ["src/platform/packages/shared/kbn-dom-drag-drop"],
       "@kbn/dom-drag-drop/*": ["src/platform/packages/shared/kbn-dom-drag-drop/*"],
+      "@kbn/durable-functions-plugin": ["x-pack/platform/plugins/shared/durable_functions"],
+      "@kbn/durable-functions-plugin/*": ["x-pack/platform/plugins/shared/durable_functions/*"],
       "@kbn/ebt-tools": ["src/platform/packages/shared/kbn-ebt-tools"],
       "@kbn/ebt-tools/*": ["src/platform/packages/shared/kbn-ebt-tools/*"],
       "@kbn/ecs-data-quality-dashboard": ["x-pack/solutions/security/packages/ecs-data-quality-dashboard"],
