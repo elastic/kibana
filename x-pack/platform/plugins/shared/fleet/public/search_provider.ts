@@ -164,11 +164,6 @@ const toCustomItegrationSearchResult = (customIntegration: CustomIntegration) =>
 export const createCustomIntegrationsSearchProvider = (
   customIntegrations: CustomIntegrationsSetup
 ): GlobalSearchResultProvider => {
-  const customIntegrations$ = from(customIntegrations.getReplacementCustomIntegrations()).pipe(
-    map((integrations) => integrations),
-    shareReplay(1)
-  );
-
   return {
     id: 'customIntegrations',
     getSearchableTypes: () => [packageType],
@@ -180,6 +175,11 @@ export const createCustomIntegrationsSearchProvider = (
       if (!term) {
         return of([]);
       }
+
+      const customIntegrations$ = from(customIntegrations.getReplacementCustomIntegrations()).pipe(
+        map((integrations) => integrations),
+        shareReplay(1)
+      );
 
       return customIntegrations$.pipe(
         takeUntil(aborted$),
