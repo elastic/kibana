@@ -14,6 +14,7 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { typedMemo } from '../utils/react';
+import { ALERTS_ACTIONS, useStartTransaction } from '../hooks/use_start_transaction';
 
 /**
  * Alerts table row action to open the selected alert detail page
@@ -37,6 +38,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
     const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;
+    const { startTransaction } = useStartTransaction();
 
     if (isAlertDetailsEnabled && linkToAlert) {
       return (
@@ -59,6 +61,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
         key="viewAlertDetailsFlyout"
         size="s"
         onClick={() => {
+          startTransaction({ name: ALERTS_ACTIONS.VIEW_ALERT_DETAILS });
           onActionExecuted?.();
           openAlertInFlyout(alert._id);
         }}

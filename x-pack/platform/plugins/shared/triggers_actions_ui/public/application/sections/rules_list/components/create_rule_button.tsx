@@ -8,6 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 export interface CreateRuleButtonProps {
   openFlyout: () => void;
@@ -15,6 +17,12 @@ export interface CreateRuleButtonProps {
 
 export const CreateRuleButton = (props: CreateRuleButtonProps) => {
   const { openFlyout } = props;
+  const { startTransaction } = useStartTransaction();
+
+  const handleClick = () => {
+    startTransaction({ name: RULES_LIST_ACTIONS.CREATE });
+    openFlyout();
+  };
 
   return (
     <EuiButton
@@ -22,7 +30,7 @@ export const CreateRuleButton = (props: CreateRuleButtonProps) => {
       key="create-rule"
       data-test-subj="createRuleButton"
       fill
-      onClick={openFlyout}
+      onClick={handleClick}
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel"

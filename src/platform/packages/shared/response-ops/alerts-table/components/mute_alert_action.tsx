@@ -18,6 +18,7 @@ import { MUTE, UNMUTE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { typedMemo } from '../utils/react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
+import { ALERTS_ACTIONS, useStartTransaction } from '../hooks/use_start_transaction';
 
 /**
  * Alerts table row action to mute/unmute the selected alert
@@ -31,6 +32,7 @@ export const MuteAlertAction = typedMemo(
     const {
       services: { http, notifications },
     } = useAlertsTableContext();
+    const { startTransaction } = useStartTransaction();
     const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
     const { mutateAsync: muteAlert } = useMuteAlertInstance({ http, notifications });
     const { mutateAsync: unmuteAlert } = useUnmuteAlertInstance({ http, notifications });
@@ -41,8 +43,10 @@ export const MuteAlertAction = typedMemo(
         return;
       }
       if (isMuted) {
+        startTransaction({ name: ALERTS_ACTIONS.UNMUTE });
         await unmuteAlert({ ruleId, alertInstanceId });
       } else {
+        startTransaction({ name: ALERTS_ACTIONS.MUTE });
         await muteAlert({ ruleId, alertInstanceId });
       }
       onActionExecuted?.();

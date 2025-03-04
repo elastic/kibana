@@ -29,6 +29,8 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { RecurrenceScheduler } from './recurrence_scheduler';
 
 import './scheduler.scss';
@@ -184,6 +186,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   );
 
   const [selectedTimezone, setSelectedTimezone] = useState(initialState.selectedTimezone);
+  const { startTransaction } = useStartTransaction();
 
   const onFocusStart = useCallback(() => {
     setSelectingEndDate(false);
@@ -257,6 +260,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         : {
             count: 1,
           };
+
+    startTransaction({ name: RULES_LIST_ACTIONS.SNOOZE });
     onSaveSchedule({
       id: initialSchedule?.id ?? uuidv4(),
       rRule: {

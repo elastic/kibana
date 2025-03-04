@@ -93,6 +93,7 @@ export const UrlSyncedAlertsSearchBar = ({
     notifications,
     dataViews,
     spaces,
+    apm,
   } = useKibana().services;
   const { toasts } = notifications;
   const {
@@ -216,6 +217,7 @@ export const UrlSyncedAlertsSearchBar = ({
               notifications,
               dataViews,
               storage: Storage,
+              apm,
             }}
           />
         </ErrorBoundary>

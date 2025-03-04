@@ -63,6 +63,8 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
@@ -218,6 +220,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
+  const { startTransaction } = useStartTransaction();
 
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
@@ -562,7 +565,10 @@ export const RulesListTable = (props: RulesListTableProps) => {
                       <EuiButtonIcon
                         color="text"
                         data-test-subj={`ruleInterval-config-icon-${rule.index}`}
-                        onClick={() => onRuleEditClick(rule)}
+                        onClick={() => {
+                          startTransaction({ name: RULES_LIST_ACTIONS.EDIT });
+                          onRuleEditClick(rule);
+                        }}
                         iconType="flag"
                         aria-label={i18n.translate(
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel',
@@ -744,7 +750,10 @@ export const RulesListTable = (props: RulesListTableProps) => {
                         )}
                         className="ruleSidebarItem__action"
                         data-test-subj="editActionHoverButton"
-                        onClick={() => onRuleEditClick(rule)}
+                        onClick={() => {
+                          startTransaction({ name: RULES_LIST_ACTIONS.EDIT });
+                          onRuleEditClick(rule);
+                        }}
                         iconType={'pencil'}
                         aria-label={i18n.translate(
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editAriaLabel',

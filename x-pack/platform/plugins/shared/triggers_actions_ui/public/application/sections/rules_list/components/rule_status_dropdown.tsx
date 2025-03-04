@@ -28,6 +28,11 @@ import { isRuleSnoozed } from '../../../lib';
 import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import {
+  RULES_LIST_ACTIONS,
+  RULES_LIST_BULK_ACTIONS,
+} from '../../../../common/lib/apm/user_actions';
 
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
@@ -286,7 +291,9 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   scheduledSnoozes = [],
   activeSnoozes = [],
 }) => {
+  const { startTransaction } = useStartTransaction();
   const enableRule = useCallback(() => {
+    startTransaction({ name: RULES_LIST_ACTIONS.ENABLE });
     if (isSnoozed) {
       // Unsnooze if the rule is snoozed and the user clicks Enabled
       unsnoozeRule();
@@ -297,6 +304,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   }, [onChangeEnabledStatus, onClosePopover, unsnoozeRule, isSnoozed]);
 
   const disableRule = useCallback(() => {
+    startTransaction({ name: RULES_LIST_ACTIONS.DISABLE });
     onChangeEnabledStatus(false);
     onClosePopover();
   }, [onChangeEnabledStatus, onClosePopover]);

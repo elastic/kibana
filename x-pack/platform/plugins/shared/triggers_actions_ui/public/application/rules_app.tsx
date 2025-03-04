@@ -51,6 +51,7 @@ import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
+import { ApmBase } from '@elastic/apm-rum';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -85,6 +86,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   isServerless: boolean;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
+  apm?: ApmBase;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

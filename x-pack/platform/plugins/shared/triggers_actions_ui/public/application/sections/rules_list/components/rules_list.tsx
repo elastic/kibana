@@ -84,6 +84,11 @@ import './rules_list.scss';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import {
+  RULES_LIST_ACTIONS,
+  RULES_LIST_BULK_ACTIONS,
+} from '../../../../common/lib/apm/user_actions';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListDocLink } from './rules_list_doc_link';
@@ -199,6 +204,7 @@ export const RulesList = ({
     ...startServices
   } = kibanaServices;
 
+  const { startTransaction } = useStartTransaction();
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
@@ -742,12 +748,21 @@ export const RulesList = ({
     setIsDeleteModalVisibility(false);
     clearRulesToBulkEdit();
   };
+
+  const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
+
   const onDeleteConfirm = async () => {
     if (bulkEditAction !== 'delete') {
       return;
     }
     setIsDeleteModalVisibility(false);
     setIsBulkEditing(true);
+
+    if (numberRulesToDelete === 1) {
+      startTransaction({ name: RULES_LIST_ACTIONS.DELETE });
+    } else {
+      startTransaction({ name: RULES_LIST_BULK_ACTIONS.DELETE });
+    }
 
     const bulkDeleteRulesArguments =
       isAllSelected && rulesToBulkEditFilter
@@ -767,8 +782,6 @@ export const RulesList = ({
     onClearSelection();
     refreshRules();
   };
-
-  const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
 
   const allRuleCategories = getAllUniqueRuleTypeCategories(
     Array.from(ruleTypesState.data.values())

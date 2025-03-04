@@ -32,6 +32,8 @@ import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import React, { useState, useCallback, useMemo } from 'react';
 import { parseInterval } from '../../../../../../../common';
+import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 
 import { SnoozeSchedule } from '../../../../../../types';
 import { COMMON_SNOOZE_TIMES, SnoozeUnit } from './constants';
@@ -76,6 +78,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval();
 
   const { euiTheme } = useEuiTheme();
+  const { startTransaction } = useStartTransaction();
 
   const onChangeValue: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     ({ target }) => {
@@ -104,6 +107,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
         duration: newSnoozeEndTime === -1 ? -1 : Date.parse(newSnoozeEndTime) - Date.now(),
         rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment.tz.guess() },
       };
+      startTransaction({ name: RULES_LIST_ACTIONS.SNOOZE });
       return snoozeRule(newSnoozeSchedule);
     },
     [setPreviousSnoozeInterval, snoozeRule]
@@ -116,7 +120,10 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       } else if (value !== 0) {
         const newSnoozeEndTime = moment().add(value, unit).toISOString();
         await snoozeRuleAndStoreInterval(newSnoozeEndTime, `${value}${unit}`);
-      } else await unsnoozeRule();
+      } else {
+        startTransaction({ name: RULES_LIST_ACTIONS.UNSNOOZE });
+        await unsnoozeRule();
+      }
     },
     [snoozeRuleAndStoreInterval, unsnoozeRule]
   );
@@ -143,6 +150,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
 
   const onClickRemoveAllSchedules = useCallback(() => {
     setIsRemoveAllModalVisible(false);
+    startTransaction({ name: RULES_LIST_ACTIONS.UNSNOOZE });
     onRemoveAllSchedules(scheduledSnoozes!.filter((s) => s.id).map((s) => s.id as string));
   }, [onRemoveAllSchedules, scheduledSnoozes]);
 

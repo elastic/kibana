@@ -27,6 +27,8 @@ import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
 import { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
 import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_LIST_BULK_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 const failureMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleFailMessage',
@@ -76,6 +78,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
   const {
     notifications: { toasts },
   } = useKibana().services;
+  const { startTransaction } = useStartTransaction();
 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
@@ -99,6 +102,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
   };
 
   const onRemoveSnoozeSchedule = async () => {
+    startTransaction({ name: RULES_LIST_BULK_ACTIONS.UNSNOOZE });
     onClose();
     setIsBulkEditing(true);
     try {
