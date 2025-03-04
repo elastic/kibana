@@ -35,10 +35,3 @@ export const timelineDefaultProductFeaturesConfig: Record<
     },
   },
 };
-
-export const nonTimelineDefaultProductFeaturesConfig: Record<
-  ProductFeatureTimelineFeatureKey,
-  ProductFeatureKibanaConfig
-> = {
-  [ProductFeatureTimelineFeatureKey.timeline]: {},
-};

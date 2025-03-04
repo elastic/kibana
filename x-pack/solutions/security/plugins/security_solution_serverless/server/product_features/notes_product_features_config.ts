@@ -11,10 +11,9 @@ import type {
 } from '@kbn/security-solution-features';
 import {
   notesDefaultProductFeaturesConfig,
-  nonNotesDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-import type { ProductFeatureNotesFeatureKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureNotesFeatureKey } from '@kbn/security-solution-features/keys';
 
 /**
  * Maps the ProductFeatures keys to Kibana privileges that will be merged
@@ -40,6 +39,6 @@ export const getNotesProductFeaturesConfigurator =
 export const getNonNotesProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesNotesConfig =>
     createEnabledProductFeaturesConfigMap(
-      nonNotesDefaultProductFeaturesConfig,
+      { [ProductFeatureNotesFeatureKey.notes]: {} },
       enabledProductFeatureKeys
     );
