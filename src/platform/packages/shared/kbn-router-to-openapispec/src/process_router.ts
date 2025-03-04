@@ -28,7 +28,7 @@ import {
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';
 import { extractAuthzDescription } from './extract_authz_description';
-import { mergeOperationWithSchemaFile } from './merge_operation_with_schema_file';
+import { mergeOperation } from './merge_operation';
 
 export const processRouter = async (
   appRouter: Router,
@@ -101,7 +101,7 @@ export const processRouter = async (
       setXState(route.options.availability, operation);
 
       if (route.options.oasOperationObject) {
-        await mergeOperationWithSchemaFile(route.options.oasOperationObject(), operation);
+        await mergeOperation(route.options.oasOperationObject(), operation);
       }
 
       const path: OpenAPIV3.PathItemObject = {

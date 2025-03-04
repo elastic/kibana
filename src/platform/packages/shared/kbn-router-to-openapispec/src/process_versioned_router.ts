@@ -31,7 +31,7 @@ import {
   GetOpId,
 } from './util';
 import { isReferenceObject } from './oas_converter/common';
-import { mergeOperationWithSchemaFile } from './merge_operation_with_schema_file';
+import { mergeOperation } from './merge_operation';
 
 export const processVersionedRouter = async (
   appRouter: CoreVersionedRouter,
@@ -132,7 +132,7 @@ export const processVersionedRouter = async (
       setXState(route.options.options?.availability, operation);
 
       if (route.options.options?.oasOperationObject) {
-        await mergeOperationWithSchemaFile(route.options.options.oasOperationObject(), operation);
+        await mergeOperation(route.options.options.oasOperationObject(), operation);
       }
 
       const path: OpenAPIV3.PathItemObject = {

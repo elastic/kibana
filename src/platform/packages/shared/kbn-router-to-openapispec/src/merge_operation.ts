@@ -13,7 +13,7 @@ import { dereference } from '@apidevtools/json-schema-ref-parser';
 import deepMerge from 'deepmerge';
 import type { CustomOperationObject } from './type';
 
-export async function mergeOperationWithSchemaFile(
+export async function mergeOperation(
   pathToSpecOrSpec: string | DeepPartial<OpenAPIV3.OperationObject>,
   operation: CustomOperationObject
 ) {
