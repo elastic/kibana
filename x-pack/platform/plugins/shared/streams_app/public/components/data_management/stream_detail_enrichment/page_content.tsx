@@ -196,7 +196,7 @@ const ProcessorsEditor = React.memo(() => {
                 idx={idx}
                 processorRef={processorRef}
                 processorMetrics={
-                  simulationSnapshot?.context.simulation?.processors_metrics[processorRef.id]
+                  simulationSnapshot.context.simulation?.processors_metrics[processorRef.id]
                 }
               />
             ))}

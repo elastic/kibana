@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, MachineImplementationsFrom, and, assign, sendTo, setup } from 'xstate5';
+import {
+  ActorRefFrom,
+  MachineImplementationsFrom,
+  SnapshotFrom,
+  and,
+  assign,
+  sendTo,
+  setup,
+} from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
@@ -30,9 +38,10 @@ import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import { derivePreviewColumns, filterSimulationDocuments, composeSamplingCondition } from './utils';
+import { filterSimulationDocuments, composeSamplingCondition } from './utils';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
+export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
 
 export const simulationMachine = setup({
   types: {
@@ -61,14 +70,8 @@ export const simulationMachine = setup({
     storeSimulation: assign((_, params: { simulation: Simulation }) => ({
       simulation: params.simulation,
     })),
-    derivePreviewColumns: assign(
-      ({ context }, params: { processors: ProcessorDefinitionWithUIAttributes[] }) => ({
-        previewColumns: derivePreviewColumns(context, params.processors),
-      })
-    ),
-    derivePreviewConfig: assign(({ context }) => {
+    derivePreviewDocuments: assign(({ context }) => {
       return {
-        previewColumns: derivePreviewColumns(context, context.processors),
         previewDocuments: context.simulation
           ? filterSimulationDocuments(context.simulation.documents, context.previewDocsFilter)
           : context.samples,
@@ -107,7 +110,6 @@ export const simulationMachine = setup({
         parentRef: self,
       },
     }),
-    previewColumns: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     processors: input.processors,
@@ -121,15 +123,12 @@ export const simulationMachine = setup({
     'simulation.changePreviewDocsFilter': {
       actions: [
         { type: 'storePreviewDocsFilter', params: ({ event }) => event },
-        { type: 'derivePreviewConfig' },
+        { type: 'derivePreviewDocuments' },
       ],
     },
     'processors.change': {
       target: '.debouncingChanges',
-      actions: [
-        { type: 'storeProcessors', params: ({ event }) => event },
-        { type: 'derivePreviewColumns', params: ({ event }) => event },
-      ],
+      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
   },
   states: {
@@ -149,10 +148,7 @@ export const simulationMachine = setup({
       on: {
         'processors.change': {
           target: 'debouncingChanges',
-          actions: [
-            { type: 'storeProcessors', params: ({ event }) => event },
-            { type: 'derivePreviewColumns', params: ({ event }) => event },
-          ],
+          actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
           description: 'Re-enter debouncing state and reinitialize the delayed processing.',
           reenter: true,
         },
@@ -182,7 +178,7 @@ export const simulationMachine = setup({
           target: 'assertingSimulationRequirements',
           actions: [
             { type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) },
-            { type: 'derivePreviewConfig' },
+            { type: 'derivePreviewDocuments' },
           ],
         },
         onError: {
@@ -218,7 +214,7 @@ export const simulationMachine = setup({
           target: 'idle',
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
-            { type: 'derivePreviewConfig' },
+            { type: 'derivePreviewDocuments' },
             { type: 'emitSimulationChange' },
           ],
         },

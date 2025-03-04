@@ -16,7 +16,11 @@ import {
 import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
-import { PreviewDocsFilterOption, simulationMachine } from '../simulation_state_machine';
+import {
+  PreviewDocsFilterOption,
+  SimulationActorSnapshot,
+  simulationMachine,
+} from '../simulation_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -95,9 +99,12 @@ export const useSimulatorRef = () => {
   return useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
 };
 
-export const useSimulatorSelector = <T,>(
-  selector: (snapshot: SnapshotFrom<typeof simulationMachine> | undefined) => T
-): T => {
+export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
   const simulationRef = useSimulatorRef();
+
+  if (!simulationRef) {
+    throw new Error('useSimulatorSelector must be used within a StreamEnrichmentContextProvider');
+  }
+
   return useSelector(simulationRef, selector);
 };

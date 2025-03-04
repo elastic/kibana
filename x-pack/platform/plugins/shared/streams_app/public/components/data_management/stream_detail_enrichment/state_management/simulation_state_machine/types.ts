@@ -48,7 +48,6 @@ export type SimulationEvent =
 export interface SimulationContext {
   dateRangeRef: DateRangeActorRef;
   parentRef: SimulationParentActor;
-  previewColumns: string[];
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];

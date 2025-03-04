@@ -56,7 +56,7 @@ export function AddProcessorPanel() {
     state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))
   );
   const processorMetrics = useSimulatorSelector(
-    (state) => processorRef && state?.context.simulation?.processors_metrics[processorRef.id]
+    (state) => processorRef && state.context.simulation?.processors_metrics[processorRef.id]
   );
 
   const isOpen = Boolean(processorRef);
