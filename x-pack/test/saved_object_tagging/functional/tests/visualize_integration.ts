@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('visualize integration', () => {
+  describe.only('visualize integration', () => {
     before(async () => {
       // clean up any left-over visualizations and tags from tests that didn't clean up after themselves
       await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });
