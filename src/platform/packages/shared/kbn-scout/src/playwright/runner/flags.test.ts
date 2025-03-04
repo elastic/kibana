@@ -72,6 +72,7 @@ describe('parseTestFlags', () => {
     expect(result).toEqual({
       mode: 'serverless=oblt',
       configPath: '/path/to/config',
+      env: 'local',
       headed: false,
       esFrom: undefined,
       installDir: undefined,
@@ -82,6 +83,7 @@ describe('parseTestFlags', () => {
   it(`should parse with correct config and stateful flags`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
+      env: 'local',
       stateful: true,
       logToFile: false,
       headed: true,
@@ -93,6 +95,7 @@ describe('parseTestFlags', () => {
     expect(result).toEqual({
       mode: 'stateful',
       configPath: '/path/to/config',
+      env: 'local',
       headed: true,
       esFrom: 'snapshot',
       installDir: undefined,
