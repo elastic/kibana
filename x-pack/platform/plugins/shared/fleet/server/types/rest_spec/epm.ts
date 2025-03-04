@@ -122,8 +122,8 @@ export const InstallationInfoSchema = schema.object({
   ),
   latest_executed_state: schema.maybe(
     schema.object({
-      name: schema.string(),
-      started_at: schema.string(),
+      name: schema.maybe(schema.string()),
+      started_at: schema.maybe(schema.string()),
       error: schema.maybe(schema.string()),
     })
   ),

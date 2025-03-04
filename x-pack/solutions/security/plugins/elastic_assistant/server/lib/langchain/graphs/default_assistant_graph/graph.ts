@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
-import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
+import { END, START, StateGraph } from '@langchain/langgraph';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
-import { BaseMessage } from '@langchain/core/messages';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { Replacements } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -29,6 +27,7 @@ import { getPersistedConversation } from './nodes/get_persisted_conversation';
 import { persistConversationChanges } from './nodes/persist_conversation_changes';
 import { respond } from './nodes/respond';
 import { NodeType } from './constants';
+import { getStateAnnotation } from './state';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -61,78 +60,6 @@ export const getDefaultAssistantGraph = ({
   getFormattedTime,
 }: GetDefaultAssistantGraphParams) => {
   try {
-    // Default graph state
-    const graphAnnotation = Annotation.Root({
-      input: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => '',
-      }),
-      lastNode: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => 'start',
-      }),
-      steps: Annotation<AgentStep[]>({
-        reducer: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
-        default: () => [],
-      }),
-      hasRespondStep: Annotation<boolean>({
-        reducer: (x: boolean, y?: boolean) => y ?? x,
-        default: () => false,
-      }),
-      agentOutcome: Annotation<AgentAction | AgentFinish | undefined>({
-        reducer: (
-          x: AgentAction | AgentFinish | undefined,
-          y?: AgentAction | AgentFinish | undefined
-        ) => y ?? x,
-        default: () => undefined,
-      }),
-      messages: Annotation<BaseMessage[]>({
-        reducer: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
-        default: () => [],
-      }),
-      chatTitle: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => '',
-      }),
-      llmType: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => 'unknown',
-      }),
-      isStream: Annotation<boolean>({
-        reducer: (x: boolean, y?: boolean) => y ?? x,
-        default: () => false,
-      }),
-      isOssModel: Annotation<boolean>({
-        reducer: (x: boolean, y?: boolean) => y ?? x,
-        default: () => false,
-      }),
-      connectorId: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => '',
-      }),
-      conversation: Annotation<ConversationResponse | undefined>({
-        reducer: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
-          y ?? x,
-        default: () => undefined,
-      }),
-      conversationId: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => '',
-      }),
-      responseLanguage: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => 'English',
-      }),
-      provider: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: () => '',
-      }),
-      formattedTime: Annotation<string>({
-        reducer: (x: string, y?: string) => y ?? x,
-        default: getFormattedTime ?? (() => ''),
-      }),
-    });
-
     // Default node parameters
     const nodeParams: NodeParamsBase = {
       actionsClient,
@@ -140,8 +67,10 @@ export const getDefaultAssistantGraph = ({
       savedObjectsClient,
     };
 
+    const stateAnnotation = getStateAnnotation({ getFormattedTime });
+
     // Put together a new graph using default state from above
-    const graph = new StateGraph(graphAnnotation)
+    const graph = new StateGraph(stateAnnotation)
       .addNode(NodeType.GET_PERSISTED_CONVERSATION, (state: AgentState) =>
         getPersistedConversation({
           ...nodeParams,
