@@ -220,8 +220,7 @@ function InnerGrokAiSuggestions({
     content = <EuiCallOut color="danger">{suggestionsError.message}</EuiCallOut>;
   }
 
-  const currentPatterns = form.getValues().patterns;
-  const currentFieldName = form.getValues().field;
+  const { field: currentFieldName, patterns: currentPatterns } = form.getValues();
 
   const hasValidField = useMemo(() => {
     return Boolean(currentFieldName && filteredSamples.some((sample) => sample[currentFieldName]));
