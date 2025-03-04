@@ -655,9 +655,10 @@ const isSuccessfulProcessor = (
   processor.status === 'success' && !!processor.tag;
 
 const isSkippedProcessor = (
-  processor: IngestPipelineSimulation
-  // @ts-expect-error Looks like the IngestPipelineSimulation.status is not typed correctly and misses the 'skipped' status
-): processor is WithRequired<IngestPipelineSimulation, 'tag'> => processor.status === 'skipped';
+  processor: IngestSimulatePipelineSimulation
+): processor is WithRequired<IngestSimulatePipelineSimulation, 'tag'> =>
+  // @ts-expect-error Looks like the IngestSimulatePipelineSimulation.status is not typed correctly and misses the 'skipped' status
+  processor.status === 'skipped';
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const isMappingFailure = (entry: any) => entry.doc?.error?.type === 'document_parsing_exception';
