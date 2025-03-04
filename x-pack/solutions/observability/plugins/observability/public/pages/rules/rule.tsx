@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { RuleForm } from '@kbn/response-ops-rule-form';
+import { RuleForm } from '@kbn/response-ops-rule-form/src/rule_form';
 import { useLocation } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
