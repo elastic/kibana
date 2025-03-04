@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import { type AstProviderFn, type ESQLAstItem, parse, Walker } from '@kbn/esql-ast';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -40,6 +40,12 @@ import { monaco } from '../../../../monaco_imports';
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
 });
+
+const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const usedVariablesInQuery = Walker.params(root);
+  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+};
 
 async function getHoverItemForFunction(
   model: monaco.editor.ITextModel,
@@ -145,15 +151,34 @@ export async function getHoverItem(
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
+  const innerText = fullText.substring(0, offset);
 
   const { ast } = await astProvider(fullText);
   const astContext = getAstContext(fullText, ast, offset);
 
+  console.log(astContext);
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
-  let hoverContent: monaco.languages.Hover = {
+  const currentPipeIndex = innerText.split('|').length;
+  const validQueryOnCurrentPipe = fullText.split('|').slice(0, currentPipeIndex).join('|');
+  const variables = resourceRetriever?.getVariables?.();
+  const usedVariablesInQuery = getESQLQueryVariables(fullText);
+  const usedVariables = variables?.filter((v) => usedVariablesInQuery.includes(v.key));
+
+  const hoverContent: monaco.languages.Hover = {
     contents: [],
   };
+
+  if (usedVariables?.length) {
+    usedVariables.forEach((variable) => {
+      if (validQueryOnCurrentPipe.includes(`?${variable.key}`)) {
+        hoverContent.contents.push({
+          value: `**${variable.key}**: ${variable.value}`,
+        });
+      }
+    });
+  }
+
   const hoverItemsForFunction = await getHoverItemForFunction(
     model,
     position,
@@ -162,7 +187,8 @@ export async function getHoverItem(
     resourceRetriever
   );
   if (hoverItemsForFunction) {
-    hoverContent = hoverItemsForFunction;
+    hoverContent.contents.push(...hoverItemsForFunction.contents);
+    hoverContent.range = hoverItemsForFunction.range;
   }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
