@@ -120,6 +120,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     prefix: 'pendingFieldListId',
   });
 
+  const hasSemanticText = hasSemanticTextField(state.fields);
+
   const [isAddingFields, setAddingFields] = useState<boolean>(false);
 
   useUnsavedChangesPrompt({
@@ -222,7 +224,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const updateMappings = useCallback(
     async (forceSaveMappings?: boolean) => {
-      const hasSemanticText = hasSemanticTextField(state.fields);
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
@@ -555,7 +556,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {hasMLPermissions && (
+          {hasMLPermissions && !hasSemanticText && (
             <EuiFlexItem grow={true}>
               <SemanticTextBanner
                 isSemanticTextEnabled={isSemanticTextEnabled}

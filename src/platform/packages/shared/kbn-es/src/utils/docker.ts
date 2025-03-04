@@ -126,14 +126,21 @@ const DOCKER_BASE_CMD = [
 ];
 
 const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
-  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
-
   ['ES_LOG_STYLE', 'file'],
 
   ['discovery.type', 'single-node'],
 
   ['xpack.security.enabled', 'false'],
 ];
+// Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
+if (process.arch === 'arm64') {
+  DEFAULT_DOCKER_ESARGS.push(
+    ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m -XX:UseSVE=0'],
+    ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
+  );
+} else {
+  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m']);
+}
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
@@ -173,8 +180,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
 // only allow certain ES args to be overwrote by options
 const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
-  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
-
   ['ES_LOG_STYLE', 'file'],
 
   ['cluster.name', 'stateless'],
@@ -212,6 +217,15 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 ];
+// Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
+if (process.arch === 'arm64') {
+  DEFAULT_SERVERLESS_ESARGS.push(
+    ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
+    ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
+  );
+} else {
+  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1g -Xmx1g']);
+}
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.http.ssl.enabled', 'true'],
@@ -771,6 +785,7 @@ export async function runServerlessEsNode(
 function getESClient(clientOptions: ClientOptions): Client {
   return new Client({
     Connection: HttpConnection,
+    requestTimeout: 30_000,
     ...clientOptions,
   });
 }

@@ -7,7 +7,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
@@ -82,6 +82,23 @@ export async function getStream(
 ) {
   return await apiClient
     .fetch('GET /api/streams/{name}', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function getIlmStats(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/lifecycle/_stats', {
       params: {
         path: {
           name,

@@ -13,6 +13,7 @@ import {
   isWiredStreamDefinition,
   streamUpsertRequestSchema,
   isGroupStreamDefinitionBase,
+  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
@@ -87,18 +88,16 @@ export const streamDetailRoute = createServerRoute({
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
       index: indexPattern,
-      body: {
-        track_total_hits: true,
-        query: {
-          range: {
-            '@timestamp': {
-              gte: params.query.start,
-              lte: params.query.end,
-            },
+      track_total_hits: true,
+      query: {
+        range: {
+          '@timestamp': {
+            gte: params.query.start,
+            lte: params.query.end,
           },
         },
-        size: 0,
       },
+      size: 0,
     });
 
     const count = (docCountResponse.hits.total as SearchTotalHits).value;
@@ -152,22 +151,17 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
+    const streamDefinition = { ...params.body.stream, name: params.path.name };
 
-    if (!(await streamsClient.isStreamsEnabled())) {
-      throw badData('Streams are not enabled');
+    if (!isUnwiredStreamDefinition(streamDefinition) && !(await streamsClient.isStreamsEnabled())) {
+      throw badData('Streams are not enabled for Wired and Group streams.');
     }
 
-    if (
-      isWiredStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
-      !hasSupportedStreamsRoot(params.path.name)
-    ) {
+    if (isWiredStreamDefinition(streamDefinition) && !hasSupportedStreamsRoot(params.path.name)) {
       throw badRequest('Cannot create wired stream due to unsupported root stream');
     }
 
-    if (
-      isGroupStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
-      params.path.name.startsWith('logs.')
-    ) {
+    if (isGroupStreamDefinition(streamDefinition) && params.path.name.startsWith('logs.')) {
       throw badRequest('A group stream name can not start with [logs.]');
     }
 

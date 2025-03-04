@@ -1484,15 +1484,13 @@ class AgentPolicyService {
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
-      body: {
-        query: {
-          term: {
-            policy_id: agentPolicyId,
-          },
+      query: {
+        term: {
+          policy_id: agentPolicyId,
         },
-        size: 1,
-        sort: [{ revision_idx: { order: 'desc' } }],
       },
+      size: 1,
+      sort: [{ revision_idx: { order: 'desc' } }],
     });
 
     if ((res.hits.total as number) === 0) {
@@ -1810,6 +1808,7 @@ class AgentPolicyService {
       sortOrder = 'asc',
       sortField = 'created_at',
       fields = [],
+      spaceId = undefined,
     }: FetchAllAgentPoliciesOptions = {}
   ): Promise<AsyncIterable<AgentPolicy[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -1822,6 +1821,7 @@ class AgentPolicyService {
         perPage,
         fields,
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        namespaces: spaceId ? [spaceId] : undefined,
       },
       resultsMapper(data) {
         return data.saved_objects.map((agentPolicySO) => {

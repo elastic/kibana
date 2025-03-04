@@ -242,7 +242,8 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({
         index: name,
-        ...simulateIndexTemplateResponse.template.mappings,
+        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+        body: simulateIndexTemplateResponse.template.mappings,
       });
     }
   }

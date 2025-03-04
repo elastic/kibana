@@ -189,14 +189,12 @@ describe('write_list_items_to_stream', () => {
       options.searchAfter = ['string 1', 'string 2'];
       await getResponse(options);
       const expected = {
-        body: {
-          query: { term: { list_id: LIST_ID } },
-          search_after: ['string 1', 'string 2'],
-          sort: [{ tie_breaker_id: 'asc' }],
-        },
         ignore_unavailable: true,
         index: LIST_ITEM_INDEX,
+        query: { term: { list_id: LIST_ID } },
+        search_after: ['string 1', 'string 2'],
         size: 100,
+        sort: [{ tie_breaker_id: 'asc' }],
       };
       expect(options.esClient.search).toBeCalledWith(expected);
     });
@@ -207,14 +205,12 @@ describe('write_list_items_to_stream', () => {
       options.size = 33;
       await getResponse(options);
       const expected = {
-        body: {
-          query: { term: { list_id: LIST_ID } },
-          search_after: ['string 1', 'string 2'],
-          sort: [{ tie_breaker_id: 'asc' }],
-        },
         ignore_unavailable: true,
         index: LIST_ITEM_INDEX,
+        query: { term: { list_id: LIST_ID } },
+        search_after: ['string 1', 'string 2'],
         size: 33,
+        sort: [{ tie_breaker_id: 'asc' }],
       };
       expect(options.esClient.search).toBeCalledWith(expected);
     });
