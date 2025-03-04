@@ -22440,10 +22440,6 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": [
-                                  "name",
-                                  "started_at"
-                                ],
                                 "type": "object"
                               },
                               "latest_install_failed_attempts": {
@@ -24085,10 +24081,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "name",
-                                "started_at"
-                              ],
                               "type": "object"
                             },
                             "latest_install_failed_attempts": {
@@ -25008,10 +25000,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "name",
-                                "started_at"
-                              ],
                               "type": "object"
                             },
                             "latest_install_failed_attempts": {

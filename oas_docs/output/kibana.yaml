@@ -24289,9 +24289,6 @@ paths:
                                   type: string
                                 started_at:
                                   type: string
-                              required:
-                                - name
-                                - started_at
                             latest_install_failed_attempts:
                               items:
                                 additionalProperties: true
@@ -25145,9 +25142,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -25768,9 +25762,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
