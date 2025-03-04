@@ -12,8 +12,6 @@ export const ML_USAGE_EVENT = {
   IMPORT_FAILED_DATA_FRAME_ANALYTICS_JOBS: 'import_failed_data_frame_analytics_jobs',
   EXPORTED_ANOMALY_DETECTOR_JOBS: 'exported_anomaly_detector_jobs',
   EXPORTED_DATA_FRAME_ANALYTICS_JOBS: 'exported_data_frame_analytics_jobs',
-  TESTED_TRAINED_MODEL: 'tested_trained_model',
-  TEST_FAILED_TRAINED_MODEL: 'test_failed_trained_model',
 } as const;
 
 export type MlUsageEvent = (typeof ML_USAGE_EVENT)[keyof typeof ML_USAGE_EVENT];
