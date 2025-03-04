@@ -12,6 +12,7 @@ import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuActions } from '../../utils/get_tab_menu_actions';
+import { addTab, removeTab, selectTab } from '../../utils/manage_tabs';
 import { TabItem } from '../../types';
 
 export interface TabbedContentProps {
@@ -59,39 +60,21 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelect = useCallback(
     (item: TabItem) => {
-      changeState((prevState) => ({
-        ...prevState,
-        selectedItem: item,
-      }));
+      changeState((prevState) => selectTab(prevState, item));
     },
     [changeState]
   );
 
   const onClose = useCallback(
     (item: TabItem) => {
-      changeState((prevState) => {
-        const nextItems = prevState.items.filter((prevItem) => prevItem.id !== item.id);
-        // TODO: better selection logic
-        const nextSelectedItem = nextItems.length ? nextItems[nextItems.length - 1] : null;
-
-        return {
-          items: nextItems,
-          selectedItem:
-            prevState.selectedItem?.id !== item.id ? prevState.selectedItem : nextSelectedItem,
-        };
-      });
+      changeState((prevState) => removeTab(prevState, item));
     },
     [changeState]
   );
 
   const onAdd = useCallback(() => {
     const newItem = createItem();
-    changeState((prevState) => {
-      return {
-        items: [...prevState.items, newItem],
-        selectedItem: newItem,
-      };
-    });
+    changeState((prevState) => addTab(prevState, newItem));
   }, [changeState, createItem]);
 
   const getTabMenuItems = useMemo(() => {
