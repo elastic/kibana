@@ -27,6 +27,15 @@ import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  GenerativeAIForSecurityConnectorFeatureId,
+  GenerativeAIForObservabilityConnectorFeatureId,
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  EndpointSecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import {
   ActionConnector,
   ActionType,
   ActionTypeModel,
@@ -71,36 +80,70 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<[{ label: string; id: string }]>([]);
 
   const categoryOptions: EuiSelectableOption[] = [
-    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.alertingRules', {
-      defaultMessage: 'Alerting Rules',
-    }),
-    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cases', {
-      defaultMessage: 'Cases',
-    }),
-    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.endpointSecurity', {
-      defaultMessage: 'Endpoint Security',
-    }),
-    i18n.translate(
-      'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAIObservability',
-      {
-        defaultMessage: 'Generative AI for Observability',
-      }
-    ),
-    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAISearch', {
-      defaultMessage: 'Generative AI for Search',
-    }),
-    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.generativeSecurity', {
-      defaultMessage: 'Generative AI for Security',
-    }),
-    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.securitySolution', {
-      defaultMessage: 'Security Solution',
-    }),
-  ].map((label) => ({
+    {
+      label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.alertingRules', {
+        defaultMessage: 'Alerting Rules',
+      }),
+      id: AlertingConnectorFeatureId,
+    },
+    {
+      label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cases', {
+        defaultMessage: 'Cases',
+      }),
+      id: CasesConnectorFeatureId,
+    },
+    {
+      label: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionConnectorAdd.endpointSecurity',
+        {
+          defaultMessage: 'Endpoint Security',
+        }
+      ),
+      id: EndpointSecurityConnectorFeatureId,
+    },
+    {
+      label: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAIObservability',
+        {
+          defaultMessage: 'Generative AI for Observability',
+        }
+      ),
+      id: GenerativeAIForObservabilityConnectorFeatureId,
+    },
+    {
+      label: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAISearch',
+        {
+          defaultMessage: 'Generative AI for Search',
+        }
+      ),
+      id: GenerativeAIForSearchPlaygroundConnectorFeatureId,
+    },
+    {
+      label: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeSecurity',
+        {
+          defaultMessage: 'Generative AI for Security',
+        }
+      ),
+      id: GenerativeAIForSecurityConnectorFeatureId,
+    },
+    {
+      label: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionConnectorAdd.securitySolution',
+        {
+          defaultMessage: 'Security Solution',
+        }
+      ),
+      id: SecurityConnectorFeatureId,
+    },
+  ].map(({ label, id }) => ({
     label,
-    checked: selectedOptions.includes(label) ? 'on' : undefined,
+    id,
+    checked: selectedOptions.some((opt) => opt.label.includes(label)) ? 'on' : undefined,
   }));
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
@@ -251,7 +294,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   };
 
   const onSelectOptionChange = (newOptions: EuiSelectableOption[]) => {
-    const selected = newOptions.filter((opt) => opt.checked === 'on').map((opt) => opt.label);
+    const selected = newOptions.filter((opt) => opt.checked === 'on');
     setSelectedOptions(selected);
   };
 

@@ -282,7 +282,7 @@ describe('connector_add_flyout', () => {
         <ActionTypeMenu
           onActionTypeChange={onActionTypeChange}
           actionTypeRegistry={actionTypeRegistry}
-          selectedOptions={['cases']}
+          selectedOptions={[{ label: 'Cases', id: 'cases' }]}
         />
       );
       await act(async () => {
