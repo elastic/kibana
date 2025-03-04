@@ -35,7 +35,7 @@ export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.user]: 'user',
   [EntityType.host]: 'storage',
   [EntityType.service]: 'node',
-  [EntityType.generic]: 'globe'
+  [EntityType.generic]: 'globe',
 };
 
 export const sourceFieldToText = (source: string) => {
