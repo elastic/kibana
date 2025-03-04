@@ -164,7 +164,7 @@ export const CloudSecurityDataTable = ({
   }, [persistedSettings, columnHeaders]);
 
   // This is a mapper that adds vulnerability.id field as an empty string - needed for the flyout to open
-  const mappedRows = useMemo(
+  const rowsWithVulnerabilityId = useMemo(
     () =>
       rows.map((row: DataTableRecord) => ({
         ...row,
@@ -292,14 +292,14 @@ export const CloudSecurityDataTable = ({
     if (!customCellRenderer) {
       return undefined;
     }
-    return customCellRenderer(mappedRows);
-  }, [customCellRenderer, mappedRows]);
+    return customCellRenderer(rowsWithVulnerabilityId);
+  }, [customCellRenderer, rowsWithVulnerabilityId]);
 
   const onResetColumns = () => {
     setColumns(defaultColumns.map((c) => c.id));
   };
 
-  if (!isLoading && !mappedRows.length) {
+  if (!isLoading && !rowsWithVulnerabilityId.length) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 
@@ -361,7 +361,7 @@ export const CloudSecurityDataTable = ({
           onResize={onResize}
           onSetColumns={onSetColumns}
           onSort={onSort}
-          rows={mappedRows}
+          rows={rowsWithVulnerabilityId}
           sampleSizeState={MAX_FINDINGS_TO_LOAD}
           setExpandedDoc={setExpandedDoc}
           renderDocumentView={renderDocumentView}

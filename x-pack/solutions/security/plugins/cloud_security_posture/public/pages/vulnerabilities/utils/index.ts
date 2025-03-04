@@ -6,3 +6,4 @@
  */
 
 export * from './normalize-serveity.util';
+export * from './find_reference_link.util';
