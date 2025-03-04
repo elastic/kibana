@@ -15,7 +15,11 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
-import { MAX_ASSETS_TO_LOAD, ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
+import {
+  MAX_ASSETS_TO_LOAD,
+  ASSET_INVENTORY_INDEX_PATTERN,
+  QUERY_KEY_GRID_DATA,
+} from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 
 interface UseAssetsOptions extends BaseEsQuery {
@@ -59,13 +63,13 @@ interface Asset {
 type LatestAssetsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestAssetsResponse = IKibanaSearchResponse<estypes.SearchResponse<Asset, never>>;
 
-export function useFetchData(options: UseAssetsOptions) {
+export function useFetchGridData(options: UseAssetsOptions) {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
   return useInfiniteQuery(
-    ['asset_inventory', { params: options }],
+    [QUERY_KEY_GRID_DATA, { params: options }],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits },
