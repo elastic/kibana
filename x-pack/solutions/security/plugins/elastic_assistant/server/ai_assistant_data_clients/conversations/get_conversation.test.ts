@@ -21,7 +21,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   messages: [],
   id: '1',
   namespace: 'default',
-  isDefault: true,
   excludeFromLastConversationStorage: false,
   timestamp: '2020-04-20T15:25:31.830Z',
   apiConfig: {
@@ -68,7 +67,6 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
           messages: [],
           id: '1',
           namespace: 'default',
-          is_default: true,
           exclude_from_last_conversation_storage: false,
           api_config: {
             action_type_id: '.gen-ai',
