@@ -14,8 +14,8 @@ const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
     ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     ['human', '{input}'],
-    ['placeholder', '{messages}'],
     ['placeholder', '{agent_scratchpad}'],
+    ['placeholder', '{messages}'],
   ]);
 
 const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
