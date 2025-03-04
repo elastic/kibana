@@ -46,7 +46,7 @@ export const useSchemaFields = ({
     refresh: refreshUnmappedFields,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/schema/unmapped_fields', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
         signal,
         params: {
           path: {

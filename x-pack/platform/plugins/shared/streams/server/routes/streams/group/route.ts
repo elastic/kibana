@@ -16,9 +16,12 @@ import {
 import { createServerRoute } from '../../create_server_route';
 
 const readGroupRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/_group',
+  endpoint: 'GET /api/streams/{name}/_group 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -48,9 +51,12 @@ const readGroupRoute = createServerRoute({
 });
 
 const upsertGroupRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/_group',
+  endpoint: 'PUT /api/streams/{name}/_group 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {

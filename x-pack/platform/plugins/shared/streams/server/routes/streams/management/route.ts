@@ -18,9 +18,12 @@ import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 
 export const forkStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/_fork',
+  endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -49,9 +52,12 @@ export const forkStreamsRoute = createServerRoute({
 });
 
 export const resyncStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_resync',
+  endpoint: 'POST /api/streams/_resync 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -88,7 +94,7 @@ export const getStreamsStatusRoute = createServerRoute({
 });
 
 export const sampleStreamRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/_sample',
+  endpoint: 'POST /internal/streams/{name}/_sample',
   options: {
     access: 'internal',
   },

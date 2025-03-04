@@ -18,7 +18,7 @@ import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_
 const UNMAPPED_SAMPLE_SIZE = 500;
 
 export const unmappedFieldsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/schema/unmapped_fields',
+  endpoint: 'GET /internal/streams/{name}/schema/unmapped_fields',
   options: {
     access: 'internal',
   },
@@ -85,7 +85,7 @@ export const unmappedFieldsRoute = createServerRoute({
 const FIELD_SIMILATION_SAMPLE_SIZE = 200;
 
 export const schemaFieldsSimulationRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/schema/fields_simulation',
+  endpoint: 'POST /internal/streams/{name}/schema/fields_simulation',
   options: {
     access: 'internal',
   },

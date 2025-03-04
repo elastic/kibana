@@ -25,7 +25,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
-export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 export type ProcessorMetrics =
   Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
@@ -164,18 +164,21 @@ export const useProcessingSimulator = ({
         return [];
       }
 
-      const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
-        signal,
-        params: {
-          path: { name: definition.stream.name },
-          body: {
-            if: samplingCondition,
-            start: start?.valueOf(),
-            end: end?.valueOf(),
-            size: 100,
+      const samplesBody = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_sample',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              if: samplingCondition,
+              start: start?.valueOf(),
+              end: end?.valueOf(),
+              size: 100,
+            },
           },
-        },
-      });
+        }
+      );
 
       return samplesBody.documents.map((doc) => flattenObjectNestedLast(doc)) as FlattenRecord[];
     },
@@ -207,7 +210,7 @@ export const useProcessingSimulator = ({
         return Promise.resolve(simulation!);
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
+      return streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
         signal,
         params: {
           path: { name: definition.stream.name },

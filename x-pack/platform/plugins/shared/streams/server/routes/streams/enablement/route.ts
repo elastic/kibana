@@ -12,10 +12,13 @@ import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/stre
 import { createServerRoute } from '../../create_server_route';
 
 export const enableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_enable',
+  endpoint: 'POST /api/streams/_enable 2023-10-31',
   params: z.object({}),
   options: {
-    access: 'internal',
+    access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -42,10 +45,13 @@ export const enableStreamsRoute = createServerRoute({
 });
 
 export const disableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_disable',
+  endpoint: 'POST /api/streams/_disable 2023-10-31',
   params: z.object({}),
   options: {
-    access: 'internal',
+    access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
