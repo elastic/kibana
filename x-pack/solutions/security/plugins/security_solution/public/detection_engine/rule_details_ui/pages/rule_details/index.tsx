@@ -13,7 +13,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
@@ -149,8 +148,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { usePrebuiltRulesUpgrade } from '../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade';
-import { HasRuleUpdateCallout } from '../../../rule_management_ui/components/rule_update_callouts/has_rule_update_callout';
+import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -255,36 +253,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     isExistingRule,
   } = useRuleWithFallback(ruleId);
 
-  const onUpgrade = useCallback(() => {
-    refreshRule();
-  }, [refreshRule]);
-
-  const {
-    upgradeReviewResponse,
-    isLoading: isRuleUpgradeReviewLoading,
-    rulePreviewFlyout,
-    loadingRules,
-    openRulePreview,
-  } = usePrebuiltRulesUpgrade({
-    pagination: {
-      page: 1, // we only want to fetch one result
-      perPage: 1,
-    },
-    filter: { rule_ids: [ruleId] },
-    onUpgrade,
-  });
-
-  const isRuleUpgradeable = useMemo(
-    () => upgradeReviewResponse !== undefined && upgradeReviewResponse.total > 0,
-    [upgradeReviewResponse]
-  );
-
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<RuleResponse | null>(null);
-  const isLoading = useMemo(
-    () => (ruleLoading && rule == null) || isRuleUpgradeReviewLoading || loadingRules.length > 0,
-    [isRuleUpgradeReviewLoading, loadingRules.length, rule, ruleLoading]
-  );
+  const isLoading = useMemo(() => ruleLoading && rule == null, [rule, ruleLoading]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
@@ -346,8 +317,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   useLegacyUrlRedirect({ rule, spacesApi });
 
   const showUpdating = useMemo(
-    () => isLoadingIndexPattern || isAlertsLoading || loading || isRuleUpgradeReviewLoading,
-    [isLoadingIndexPattern, isAlertsLoading, loading, isRuleUpgradeReviewLoading]
+    () => isLoadingIndexPattern || isAlertsLoading || loading,
+    [isLoadingIndexPattern, isAlertsLoading, loading]
   );
 
   const title = useMemo(
@@ -424,19 +395,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
 
-  const updateCallToActionButton = useMemo(
-    () => (
-      <EuiLink
-        onClick={() => {
-          openRulePreview(ruleRuleId);
-        }}
-        data-test-subj="ruleDetailsUpdateRuleCalloutButton"
-      >
-        {ruleI18n.HAS_RULE_UPDATE_CALLOUT_BUTTON}
-      </EuiLink>
-    ),
-    [openRulePreview, ruleRuleId]
-  );
+  const upgradeCallout = useRuleUpdateCallout({
+    rule,
+    message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
+    onUpgrade: refreshRule,
+  });
 
   const ruleStatusInfo = useMemo(() => {
     return (
@@ -599,12 +562,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      <HasRuleUpdateCallout
-        rule={rule}
-        hasUpdate={isRuleUpgradeable}
-        actionButton={updateCallToActionButton}
-        message={ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE}
-      />
+      {upgradeCallout}
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
@@ -629,7 +587,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       {isManualRuleRunConfirmationVisible && (
         <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
       )}
-      {rulePreviewFlyout}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>

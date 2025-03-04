@@ -7,37 +7,34 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
-import {
-  FieldUpgradeStateEnum,
-  type RuleUpgradeState,
-} from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import { usePerformUpgradeRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
-import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
+import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
+import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
+import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_packages';
+import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
+import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type {
   FindRulesSortField,
   RuleFieldsToUpgrade,
   RuleResponse,
   RuleSignatureId,
   RuleUpgradeSpecifier,
-} from '../../../../../../common/api/detection_engine';
-import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
-import { useOutdatedMlJobsUpgradeModal } from './use_ml_jobs_upgrade_modal';
-import { useUpgradeWithConflictsModal } from './use_upgrade_with_conflicts_modal';
-import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
-import * as i18n from './translations';
-import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
-import { CustomizationDisabledCallout } from './customization_disabled_callout';
-import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff';
-import { TabContentPadding } from '../../../../../siem_migrations/rules/components/rule_details_flyout';
-import { RuleTypeChangeCallout } from './rule_type_change_callout';
-import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
-import type { UpgradePrebuiltRulesSortingOptions } from './upgrade_prebuilt_rules_table_context';
+} from '../../../../common/api/detection_engine';
+import { usePrebuiltRulesUpgradeState } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
+import { useUpgradeWithConflictsModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal';
+import * as ruleDetailsI18n from '../components/rule_details/translations';
+import * as i18n from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/translations';
+import { UpgradeFlyoutSubHeader } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_flyout_subheader';
+import { CustomizationDisabledCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/customization_disabled_callout';
+import { RuleUpgradeTab } from '../components/rule_details/three_way_diff';
+import { TabContentPadding } from '../../../siem_migrations/rules/components/rule_details_flyout';
+import { RuleTypeChangeCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_type_change_callout';
+import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
+import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
+import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
