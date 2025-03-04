@@ -132,9 +132,7 @@
                 "text": "AssistantToolParams"
               },
               ") => ",
-              "Tool",
-              " | ",
-              "DynamicStructuredTool",
+              "StructuredToolInterface",
               "<ZodObjectAny> | null"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
