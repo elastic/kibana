@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './normalize-serveity.util';
+export * from './normalize-severity.util';
 export * from './find_reference_link.util';
