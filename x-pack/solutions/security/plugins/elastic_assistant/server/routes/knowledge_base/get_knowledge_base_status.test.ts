@@ -10,6 +10,7 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getGetKnowledgeBaseStatusRequest } from '../../__mocks__/request';
 import { AuthenticatedUser } from '@kbn/core-security-common';
+import { knowledgeBaseDataClientMock } from '../../__mocks__/data_clients.mock';
 
 describe('Get Knowledge Base Status Route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -28,19 +29,18 @@ describe('Get Knowledge Base Status Route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
-    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest.fn().mockResolvedValue({
-      getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
-      indexTemplateAndPattern: {
-        alias: 'knowledge-base-alias',
-      },
-      isModelInstalled: jest.fn().mockResolvedValue(true),
-      isSetupAvailable: jest.fn().mockResolvedValue(true),
-      isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
-      isSetupInProgress: false,
-      isSecurityLabsDocsLoaded: jest.fn().mockResolvedValue(true),
-      isUserDataExists: jest.fn().mockResolvedValue(true),
-      getLoadedSecurityLabsDocsCount: jest.fn().mockResolvedValue(0),
-    });
+    const kbDataClient = knowledgeBaseDataClientMock.create();
+    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest
+      .fn()
+      .mockResolvedValue(kbDataClient);
+
+    kbDataClient.isInferenceEndpointExists.mockResolvedValue(true);
+    kbDataClient.isModelInstalled.mockResolvedValue(true);
+    kbDataClient.isSetupAvailable.mockResolvedValue(true);
+    kbDataClient.getProductDocumentationStatus.mockResolvedValue('installed');
+    kbDataClient.isSecurityLabsDocsLoaded.mockResolvedValue(true);
+    kbDataClient.isUserDataExists.mockResolvedValue(true);
+    kbDataClient.isSetupInProgress = false;
 
     getKnowledgeBaseStatusRoute(server.router);
   });
@@ -61,6 +61,7 @@ describe('Get Knowledge Base Status Route', () => {
         pipeline_exists: true,
         security_labs_exists: true,
         user_data_exists: true,
+        product_documentation_status: 'installed',
       });
     });
   });
