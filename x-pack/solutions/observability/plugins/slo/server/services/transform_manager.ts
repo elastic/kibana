@@ -34,7 +34,7 @@ export class DefaultTransformManager implements TransformManager {
   async install(slo: SLODefinition): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      this.logger.debug(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
@@ -63,7 +63,7 @@ export class DefaultTransformManager implements TransformManager {
   async inspect(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      this.logger.debug(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 

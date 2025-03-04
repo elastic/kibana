@@ -63,7 +63,7 @@ export class TempSummaryCleanupTask {
     }
 
     if (!plugins.taskManager) {
-      this.logger.error('Missing required service during start');
+      this.logger.debug('Missing required service during start');
       return;
     }
 
@@ -87,7 +87,7 @@ export class TempSummaryCleanupTask {
         params: {},
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, error: ${e}`);
+      this.logger.debug(`Error scheduling task, error: ${e}`);
     }
   }
 

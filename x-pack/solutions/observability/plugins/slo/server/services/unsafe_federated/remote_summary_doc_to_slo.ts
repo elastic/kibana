@@ -48,8 +48,8 @@ export function fromRemoteSummaryDocumentToSloDefinition(
 
   if (isLeft(res)) {
     const errors = formatErrors(res.left);
-    logger.error(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
-    logger.error(errors.join('|'));
+    logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
+    logger.debug(errors.join('|'));
 
     return undefined;
   }

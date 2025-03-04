@@ -166,7 +166,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     if (isLeft(result)) {
-      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
+      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
       return undefined;
     }
 
