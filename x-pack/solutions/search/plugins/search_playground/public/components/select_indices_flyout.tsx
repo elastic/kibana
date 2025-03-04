@@ -65,7 +65,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
             searchable
             height="full"
             css={css`
-              height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+              height: calc(70vh - var(--euiFixedHeadersOffset, 0));
             `}
             searchProps={{
               onChange: handleSearchChange,
