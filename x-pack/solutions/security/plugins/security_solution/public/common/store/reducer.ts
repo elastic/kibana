@@ -38,7 +38,7 @@ import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
 import { notesReducer } from '../../notes/store/notes.slice';
 import {
-  dataViewManagerReducer as dataViewManagerReducer,
+  dataViewManagerReducer,
   initialDataViewManagerState,
 } from '../../data_view_manager/redux/reducer';
 
