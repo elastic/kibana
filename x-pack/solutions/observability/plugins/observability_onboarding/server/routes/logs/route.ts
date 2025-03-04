@@ -51,6 +51,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     scriptDownloadUrl: string;
     elasticAgentVersionInfo: ElasticAgentVersionInfo;
     elasticsearchUrl: string[];
+    managedServiceUrl: string;
   }> {
     const {
       core,
@@ -78,6 +79,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       elasticsearchUrl,
       scriptDownloadUrl,
       elasticAgentVersionInfo,
+      managedServiceUrl: plugins.apm.setup.config.managedServiceUrl,
     };
   },
 });
