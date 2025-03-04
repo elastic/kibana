@@ -187,7 +187,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             transactionType: 'request',
             triggerValue: '50',
             grouping:
-              '{"service":{"name":"opbeans-php","environment":"production"},"transaction":{"type":"request"}}',
+              '{"service":{"name":"opbeans-java","environment":"production"},"transaction":{"type":"request","name":"tx-java"}}',
           });
 
           const url = new URL(results[0].viewInAppUrl);
