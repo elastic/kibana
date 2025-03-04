@@ -75,6 +75,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
     getFieldDefaultValue('config.verificationMode') === 'none';
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
+
   return (
     <>
       <EuiFlexGroup>
