@@ -239,16 +239,9 @@ export const getColor = (
     return defaultColor;
   }
 
-  // Needed for syncColor use case only
-  if (isTreemapOrMosaicChart(chartType)) {
-    // for treemap use the top layer for coloring, for mosaic use the second layer
-    if (seriesLayers.length > 1) {
-      if (chartType === ChartTypes.MOSAIC) {
-        seriesLayers.shift();
-      } else {
-        seriesLayers.pop();
-      }
-    }
+  //  Mosaic - use the second layer for color
+  if (chartType === ChartTypes.MOSAIC && seriesLayers.length > 1) {
+    seriesLayers.shift();
   }
 
   const outputColor = paletteService?.get(visParams.palette.name).getCategoricalColor(
