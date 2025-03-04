@@ -184,7 +184,7 @@ export async function fetchServicePathsFromTraceIds({
               if (event == null) {
                 return null;
               }
-              
+
               pathStack.push(eventId);
 
               // build a stack with the path from the current event to the root
@@ -194,7 +194,7 @@ export async function fetchServicePathsFromTraceIds({
                 if (parent == null || visited.contains(parentId)) {
                   break;
                 }
-                  
+
                 pathStack.push(parentId);
                 visited.add(parentId);
                 parentId = parent['parent.id'];
@@ -205,7 +205,7 @@ export async function fetchServicePathsFromTraceIds({
                 def currentEventId = pathStack.pop();
                 def currentEvent = context.eventsById.get(currentEventId);
 
-                 def basePath = new ArrayList();
+                def basePath = new ArrayList();
 
                 if (currentEvent == null || context.processedEvents.get(currentEventId) != null) {
                   continue;
@@ -215,8 +215,7 @@ export async function fetchServicePathsFromTraceIds({
                 service['service.name'] = currentEvent['service.name'];
                 service['service.environment'] = currentEvent['service.environment'];
                 service['agent.name'] = currentEvent['agent.name'];
-        
-              
+
                 def currentParentId = currentEvent['parent.id'];
                 def parent = currentParentId != null ? context.processedEvents.get(currentParentId) : null;
 
@@ -230,7 +229,8 @@ export async function fetchServicePathsFromTraceIds({
                   if (parent['span.destination.service.resource'] != null
                     && parent['span.destination.service.resource'] != ""
                     && (parent['service.name'] != currentEvent['service.name']
-                      || parent['service.environment'] != currentEvent['service.environment'])) {
+                      || parent['service.environment'] != currentEvent['service.environment'])
+                  ) {
                     def parentDestination = getDestination(parent);
                     context.externalToServiceMap.put(parentDestination, service);
                   }
@@ -238,12 +238,12 @@ export async function fetchServicePathsFromTraceIds({
 
                 def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
                 def currentLocation = service;
-        
+
                 // only add the current location to the path if it's different from the last one
                 if (lastLocation == null || !lastLocation.equals(currentLocation)) {
                   basePath.add(currentLocation);
                 }
-        
+
                 // if there is an outgoing span, create a new path
                 if (currentEvent['span.destination.service.resource'] != null
                   && !currentEvent['span.destination.service.resource'].equals("")) {
@@ -253,10 +253,9 @@ export async function fetchServicePathsFromTraceIds({
                   outgoingPath.add(outgoingLocation);
                   context.paths.add(outgoingPath);
                 }
-        
+
                 currentEvent.path = basePath;
                 context.processedEvents[currentEventId] = currentEvent;
-
               }
 
               return null;
