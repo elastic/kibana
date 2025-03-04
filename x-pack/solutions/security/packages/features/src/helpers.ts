@@ -20,7 +20,7 @@ export const createEnabledProductFeaturesConfigMap = <
 >(
   productFeatures: Record<K, ProductFeatureKibanaConfig<T>>,
   enabledProductFeaturesKeys: ProductFeatureKeys
-) =>
+): Map<K, ProductFeatureKibanaConfig<T>> =>
   new Map(
     Object.entries<ProductFeatureKibanaConfig<T>>(productFeatures).reduce<
       Array<[K, ProductFeatureKibanaConfig<T>]>

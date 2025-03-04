@@ -13,7 +13,7 @@ import {
   timelineDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-import type { ProductFeatureTimelineFeatureKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureTimelineFeatureKey } from '@kbn/security-solution-features/keys';
 
 /**
  * Maps the ProductFeatures keys to Kibana privileges that will be merged
@@ -35,3 +35,10 @@ const timelineProductFeaturesConfig: Record<
 export const getTimelineProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesTimelineConfig =>
     createEnabledProductFeaturesConfigMap(timelineProductFeaturesConfig, enabledProductFeatureKeys);
+
+export const getNonTimelineProductFeaturesConfigurator =
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesTimelineConfig =>
+    createEnabledProductFeaturesConfigMap(
+      { [ProductFeatureTimelineFeatureKey.timeline]: {} },
+      enabledProductFeatureKeys
+    );
