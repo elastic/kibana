@@ -575,6 +575,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     expect(mockCreateEntry).toHaveBeenCalledWith({
       ...mockData[3],
       global: false,
+      users: undefined,
     });
   });
 
