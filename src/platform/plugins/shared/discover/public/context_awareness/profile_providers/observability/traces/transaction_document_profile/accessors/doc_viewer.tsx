@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import { UnifiedDocViewerObservabilityTracesTransactionOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
@@ -31,7 +31,7 @@ export const getDocViewer =
           ),
           order: 0,
           component: (props) => {
-            return <UnifiedDocViewerTracesOverview {...props} />;
+            return <UnifiedDocViewerObservabilityTracesTransactionOverview {...props} />;
           },
         });
 
