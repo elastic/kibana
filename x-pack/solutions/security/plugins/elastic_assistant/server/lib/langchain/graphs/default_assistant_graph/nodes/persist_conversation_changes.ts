@@ -34,7 +34,6 @@ export async function persistConversationChanges({
     logger.debug('No need to generate chat title, conversationId is undefined');
     return {
       conversation: undefined,
-      messages: [],
       lastNode: NodeType.PERSIST_CONVERSATION_CHANGES,
     };
   }
@@ -54,11 +53,7 @@ export async function persistConversationChanges({
     : undefined;
   if (lastMessage && lastMessage.content === state.input && lastMessage.role === 'user') {
     // this is a regenerated message, do not update the conversation again
-    const langChainMessages = getLangChainMessages(state.conversation.messages ?? []);
-    const messages = langChainMessages.slice(0, -1); // all but the last message
     return {
-      conversation: state.conversation,
-      messages,
       lastNode: NodeType.PERSIST_CONVERSATION_CHANGES,
     };
   }
@@ -80,18 +75,18 @@ export async function persistConversationChanges({
     logger.debug('Not updated conversation');
     return {
       conversation: undefined,
-      messages: [],
+      chatHistory: [],
       lastNode: NodeType.PERSIST_CONVERSATION_CHANGES,
     };
   }
 
   logger.debug(`conversationId: ${state.conversationId}`);
   const langChainMessages = getLangChainMessages(updatedConversation.messages ?? []);
-  const messages = langChainMessages.slice(0, -1); // all but the last message
+  const chatHistory = langChainMessages.slice(0, -1); // all but the last message
 
   return {
     conversation: updatedConversation,
-    messages,
+    chatHistory,
     lastNode: NodeType.PERSIST_CONVERSATION_CHANGES,
   };
 }

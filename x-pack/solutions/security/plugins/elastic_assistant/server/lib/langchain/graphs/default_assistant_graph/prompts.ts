@@ -14,6 +14,7 @@ const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
     ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     ['human', '{input}'],
+    ['placeholder', '{messages}'],
     ['placeholder', '{agent_scratchpad}'],
   ]);
 
@@ -26,6 +27,7 @@ const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
       'human',
       '{input}\n\n{agent_scratchpad}\n\n(reminder to respond in a JSON blob no matter what)',
     ],
+    ['placeholder', '{messages}'],
   ]);
 
 export const formatPrompt = ({

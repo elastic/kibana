@@ -413,7 +413,8 @@ export const postEvaluateRoute = (
                   tags: ['evaluation'],
                 }
               );
-              const output = (result.agentOutcome as AgentFinish).returnValues.output;
+              const lastMessage = result.messages[result.messages.length - 1];
+              const output = lastMessage.content as string;
               return output;
             };
 

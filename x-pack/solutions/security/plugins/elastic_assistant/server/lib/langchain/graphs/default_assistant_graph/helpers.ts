@@ -244,8 +244,12 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
     });
-    const output = (result.agentOutcome as AgentFinish).returnValues.output;
+
+    const lastMessage = result.messages[result.messages.length - 1];
+
+    const output = lastMessage.content as string;
     const conversationId = result.conversation?.id;
+
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }

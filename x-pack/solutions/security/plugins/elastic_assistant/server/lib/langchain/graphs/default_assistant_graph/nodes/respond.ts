@@ -26,11 +26,14 @@ export async function respond({
 }: RespondParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.RESPOND}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  if (state?.agentOutcome && 'returnValues' in state.agentOutcome) {
+  const { messages } = state;
+  const lastMessage = messages[messages.length - 1];
+  
+  if (lastMessage && 'content' in lastMessage) {
     const userMessage = [
       'user',
       `Respond exactly with
-    ${state.agentOutcome?.returnValues?.output}
+    ${lastMessage.content}
 
     Do not verify, confirm or anything else. Just reply with the same content as provided above.`,
     ] as [StringWithAutocomplete<'user'>, string];
@@ -41,12 +44,7 @@ export async function respond({
       .invoke([userMessage]);
 
     return {
-      agentOutcome: {
-        ...state.agentOutcome,
-        returnValues: {
-          output: responseMessage.content,
-        },
-      },
+      messages: [responseMessage],
       lastNode: NodeType.RESPOND,
     };
   }

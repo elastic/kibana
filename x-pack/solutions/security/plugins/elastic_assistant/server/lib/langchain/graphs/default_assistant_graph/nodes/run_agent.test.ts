@@ -71,7 +71,7 @@ describe('runAgent', () => {
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        chat_history: expect.arrayContaining([
+        sanitized_messages: expect.arrayContaining([
           expect.objectContaining({
             content: 'This message contains a reference ',
           }),
