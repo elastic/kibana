@@ -2,9 +2,6 @@ name: Map issue labels to project fields
 on:
   schedule:
     - cron: '0 */1 * * *'
-  push:
-    branches:
-      - add-project-labelling-action
 
 jobs:
   map-labels-to-fields:
@@ -28,7 +25,6 @@ jobs:
           all: 'true'
           project-number: 1525
           owner: 'elastic'
-          dry-run: 'true'
 
       - name: Update every issue in project 1141 (https://github.com/elastic/projects/1141)
         uses: ./actions/github-projects/map-labels
@@ -37,4 +33,3 @@ jobs:
           all: 'true'
           project-number: 1141
           owner: 'elastic'
-          dry-run: 'true'
