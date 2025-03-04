@@ -49,7 +49,7 @@ export const EntityAnalyticsManagementPage = () => {
   const { addSuccess, addError } = useAppToasts();
   const userHasRequiredPrivileges =
     'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
-  const RunEngineBtnIsDisabled =
+  const runEngineBtnIsDisabled =
     !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
 
   const handleRunEngineClick = async () => {
@@ -118,7 +118,7 @@ export const EntityAnalyticsManagementPage = () => {
                     <EuiButton
                       size="s"
                       iconType="play"
-                      disabled={RunEngineBtnIsDisabled}
+                      disabled={runEngineBtnIsDisabled}
                       isLoading={isLoading}
                       onClick={handleRunEngineClick}
                     >
