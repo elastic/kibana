@@ -630,6 +630,7 @@
         "fp-ts",
         "getos",
         "joi-to-json",
+        "@apidevtools/json-schema-ref-parser",
         "json5",
         "load-json-file",
         "mock-fs",
