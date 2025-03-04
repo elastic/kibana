@@ -5,5 +5,5 @@
     "@elastic/kibana-core"
   ],
   "group": "platform",
-  "visibility": "shared",
+  "visibility": "shared"
 }
