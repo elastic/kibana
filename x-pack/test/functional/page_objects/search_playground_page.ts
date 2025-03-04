@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const comboBox = getService('comboBox');
   const selectIndex = async () => {
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
@@ -212,14 +213,21 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
       },
 
-      async expectEditContextOpens() {
+      async expectEditContextOpens(
+        indexName: string = 'basic_index',
+        expectedSelectedFields: string[] = ['baz']
+      ) {
         await testSubjects.click('chatMode');
-        await testSubjects.existOrFail('contextFieldsSelectable-0');
-        await testSubjects.click('contextFieldsSelectable-0');
-        await testSubjects.existOrFail('contextField');
-        const fields = await testSubjects.findAll('contextField');
-
-        expect(fields.length).to.be(1);
+        await testSubjects.existOrFail(`contextFieldsSelectable-${indexName}`);
+        for (const field of expectedSelectedFields) {
+          await testSubjects.existOrFail(`contextField-${field}`);
+        }
+        expect(
+          await comboBox.doesComboBoxHaveSelectedOptions(`contextFieldsSelectable-${indexName}`)
+        ).to.be(true);
+        expect(
+          await comboBox.getComboBoxSelectedOptions(`contextFieldsSelectable-${indexName}`)
+        ).to.eql(expectedSelectedFields);
       },
 
       async expectSaveFieldsBetweenModes() {
@@ -230,11 +238,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
+        await testSubjects.click('chatMode');
       },
 
       async clickManageButton() {
-        await testSubjects.click('manageConnectorsLink');
         await testSubjects.existOrFail('manageConnectorsLink');
+        await testSubjects.click('manageConnectorsLink');
         await browser.switchTab(1);
         await testSubjects.existOrFail('edit-connector-flyout');
         await browser.closeCurrentWindow();

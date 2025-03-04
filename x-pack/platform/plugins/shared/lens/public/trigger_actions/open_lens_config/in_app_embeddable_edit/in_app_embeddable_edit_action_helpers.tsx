@@ -11,12 +11,13 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import '../helpers.scss';
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { LensPluginStartDependencies } from '../../../plugin';
+import { DatasourceMap, VisualizationMap } from '../../../types';
 import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
 import { mountInlineEditPanel } from '../../../react_embeddable/inline_editing/mount';
 import type { TypedLensByValueInput, LensRuntimeState } from '../../../react_embeddable/types';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import type { LensChartLoadEvent } from './types';
 
 const asyncNoop = async () => {};
@@ -31,8 +32,8 @@ export function isEmbeddableEditActionCompatible(
 }
 
 export async function executeEditEmbeddableAction({
-  deps,
   core,
+  deps,
   attributes,
   lensEvent,
   container,
@@ -40,8 +41,11 @@ export async function executeEditEmbeddableAction({
   onApply,
   onCancel,
 }: {
-  deps: LensPluginStartDependencies;
   core: CoreStart;
+  deps: LensPluginStartDependencies & {
+    visualizationMap: VisualizationMap;
+    datasourceMap: DatasourceMap;
+  };
   attributes: TypedLensByValueInput['attributes'];
   lensEvent: LensChartLoadEvent;
   container?: HTMLElement | null;

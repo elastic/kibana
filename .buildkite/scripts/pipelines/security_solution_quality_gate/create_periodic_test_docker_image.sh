@@ -34,7 +34,6 @@ node scripts/build \
   --docker-images \
   --docker-namespace="kibana-ci" \
   --docker-tag="$KIBANA_IMAGE_TAG" \
-  --skip-docker-ubuntu \
   --skip-docker-wolfi \
   --skip-docker-ubi \
   --skip-docker-cloud \

@@ -54,6 +54,7 @@ import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
+import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -319,6 +320,12 @@ function InternalAlertsPage() {
                       initialPageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
+                      renderAdditionalToolbarControls={() => (
+                        <GroupingToolbarControls
+                          groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                        />
+                      )}
                       showInspectButton
                     />
                   );

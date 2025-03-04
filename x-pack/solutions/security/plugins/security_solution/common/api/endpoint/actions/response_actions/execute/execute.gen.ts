@@ -16,12 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import {
-  SuccessResponse,
-  BaseActionSchema,
-  Command,
-  Timeout,
-} from '../../../model/schema/common.gen';
+import { BaseActionSchema, Command, Timeout } from '../../../model/schema/common.gen';
 
 export type ExecuteRouteRequestBody = z.infer<typeof ExecuteRouteRequestBody>;
 export const ExecuteRouteRequestBody = BaseActionSchema.merge(
@@ -33,6 +28,9 @@ export const ExecuteRouteRequestBody = BaseActionSchema.merge(
   })
 );
 
+export type ExecuteRouteResponse = z.infer<typeof ExecuteRouteResponse>;
+export const ExecuteRouteResponse = z.object({});
+
 export type EndpointExecuteActionRequestBody = z.infer<typeof EndpointExecuteActionRequestBody>;
 export const EndpointExecuteActionRequestBody = ExecuteRouteRequestBody;
 export type EndpointExecuteActionRequestBodyInput = z.input<
@@ -40,4 +38,4 @@ export type EndpointExecuteActionRequestBodyInput = z.input<
 >;
 
 export type EndpointExecuteActionResponse = z.infer<typeof EndpointExecuteActionResponse>;
-export const EndpointExecuteActionResponse = SuccessResponse;
+export const EndpointExecuteActionResponse = ExecuteRouteResponse;

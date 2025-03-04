@@ -73,13 +73,13 @@ export function ConversationList({
 
   const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
-      defaultMessage: 'Delete this conversation?',
+      defaultMessage: 'Delete conversation',
     }),
     children: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationContent', {
-      defaultMessage: 'This action cannot be undone.',
+      defaultMessage: 'This action is permanent and cannot be undone.',
     }),
     confirmButtonText: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteButtonText', {
-      defaultMessage: 'Delete conversation',
+      defaultMessage: 'Delete',
     }),
   });
 
@@ -169,7 +169,15 @@ export function ConversationList({
                               }
                             ),
                             onClick: () => {
-                              confirmDeleteCallback().then((confirmed) => {
+                              confirmDeleteCallback(
+                                i18n.translate(
+                                  'xpack.aiAssistant.flyout.confirmDeleteCheckboxLabel',
+                                  {
+                                    defaultMessage: 'Delete "{title}"',
+                                    values: { title: conversation.label },
+                                  }
+                                )
+                              ).then((confirmed) => {
                                 if (!confirmed) {
                                   return;
                                 }

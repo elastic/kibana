@@ -101,20 +101,20 @@ export const getMigrationRuleDocuments = (
 
 export const statsOverrideCallbackFactory = ({
   migrationId,
-  failed,
-  pending,
-  processing,
-  completed,
-  fullyTranslated,
-  partiallyTranslated,
+  failed = 0,
+  pending = 0,
+  processing = 0,
+  completed = 0,
+  fullyTranslated = 0,
+  partiallyTranslated = 0,
 }: {
   migrationId: string;
-  failed: number;
-  pending: number;
-  processing: number;
-  completed: number;
-  fullyTranslated: number;
-  partiallyTranslated: number;
+  failed?: number;
+  pending?: number;
+  processing?: number;
+  completed?: number;
+  fullyTranslated?: number;
+  partiallyTranslated?: number;
 }) => {
   const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
     let translationResult;
@@ -179,10 +179,8 @@ export const createMigrationRules = async (
 export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [SIEM_MIGRATIONS_RULES_INDEX_PATTERN],
-    body: {
-      query: {
-        match_all: {},
-      },
+    query: {
+      match_all: {},
     },
     ignore_unavailable: true,
     refresh: true,

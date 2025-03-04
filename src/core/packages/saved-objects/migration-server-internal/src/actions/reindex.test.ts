@@ -73,22 +73,21 @@ describe('reindex', () => {
       /** ignore */
     }
     expect(client.reindex).toHaveBeenCalledTimes(1);
-    expect(client.reindex).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: {
-          conflicts: 'proceed',
-          source: {
-            index: 'my_source_index',
-            size: 99,
-            query: { match_all: {} },
-          },
-          dest: {
-            index: 'my_target_index',
-            op_type: 'create',
-          },
-          script: { lang: 'painless', source: 'my script' },
-        },
-      })
-    );
+    expect(client.reindex).toHaveBeenCalledWith({
+      conflicts: 'proceed',
+      source: {
+        index: 'my_source_index',
+        size: 99,
+        query: { match_all: {} },
+      },
+      dest: {
+        index: 'my_target_index',
+        op_type: 'create',
+      },
+      script: { lang: 'painless', source: 'my script' },
+      refresh: true,
+      require_alias: false,
+      wait_for_completion: false,
+    });
   });
 });
