@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { uniqBy } from 'lodash/fp';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { EcsFlat } from '@elastic/ecs';
 import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
@@ -67,29 +66,41 @@ export const getFieldItemsData = ({
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
   const selectedFieldIds = new Set(columnIds);
 
-  const fieldItems = uniqBy(
-    'name',
-    categoryIds.reduce<BrowserFieldItem[]>((fieldItemsAcc, categoryId) => {
+  const getFieldItems = () => {
+    const fieldItemsAcc: BrowserFieldItem[] = [];
+    const fieldsSeen: Set<string> = new Set();
+
+    /**
+     * Both categoryIds and the fields in browserFields can be significantly large. Technically speaking,
+     * there is no upper cap on how many fields a customer can have. We are using a for loop here to avoid
+     * the performance issues that can arise from using map/filter/reduce.
+     */
+    for (let i = 0; i < categoryIds.length; i += 1) {
+      const categoryId = categoryIds[i];
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
-        fieldItemsAcc.push(
-          ...categoryBrowserFields.map(({ name = '', ...field }) => {
-            return {
-              name,
-              type: field.type,
-              description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
-              example: field.example?.toString(),
-              category: getCategory(name),
-              selected: selectedFieldIds.has(name),
-              isRuntime: !!field.runtimeField,
-            };
-          })
-        );
+        for (let j = 0; j < categoryBrowserFields.length; j += 1) {
+          const field = categoryBrowserFields[j];
+          const name = field.name !== undefined ? field.name : '';
+          if (fieldsSeen.has(name)) continue;
+          fieldsSeen.add(name);
+          const categoryFieldItem = {
+            name,
+            type: field.type,
+            description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
+            example: field.example?.toString(),
+            category: getCategory(name),
+            selected: selectedFieldIds.has(name),
+            isRuntime: !!field.runtimeField,
+          };
+          fieldItemsAcc.push(categoryFieldItem);
+        }
       }
-      return fieldItemsAcc;
-    }, [])
-  );
-  return { fieldItems };
+    }
+    return fieldItemsAcc;
+  };
+
+  return { fieldItems: getFieldItems() };
 };
 
 const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): FieldTableColumns => {
