@@ -13,4 +13,3 @@ export type {
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
 } from './types';
-export { ViewMode } from './types';

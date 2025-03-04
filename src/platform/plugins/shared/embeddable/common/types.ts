@@ -14,13 +14,6 @@ import type {
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
 
-export enum ViewMode {
-  EDIT = 'edit',
-  PREVIEW = 'preview',
-  PRINT = 'print',
-  VIEW = 'view',
-}
-
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
   type: string;
