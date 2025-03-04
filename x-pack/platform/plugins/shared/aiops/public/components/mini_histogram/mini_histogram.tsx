@@ -17,8 +17,7 @@ import { useLogRateAnalysisBarColors } from '@kbn/aiops-log-rate-analysis';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItemHistogramItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
-
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 interface MiniHistogramProps {
   chartData?: SignificantItemHistogramItem[];

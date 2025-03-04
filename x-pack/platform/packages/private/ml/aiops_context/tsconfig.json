@@ -1,0 +1,34 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/data-plugin",
+    "@kbn/event-bus-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/share-plugin",
+    "@kbn/core",
+    "@kbn/lens-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ml-field-stats-flyout",
+  ]
+}

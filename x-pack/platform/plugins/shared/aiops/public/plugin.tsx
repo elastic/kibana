@@ -8,6 +8,7 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
+import { searchSlice } from '@kbn/event-bus-plugin/public';
 
 import { getChangePointDetectionComponent } from './shared_components';
 import { LogCategorizationForDiscover as PatternAnalysisComponent } from './shared_lazy_components';
@@ -45,6 +46,23 @@ export class AiopsPlugin
 
           if (cases) {
             registerCases(cases, coreStart, pluginStart);
+          }
+
+          if (pluginStart.eventBus) {
+            const search = pluginStart.eventBus.get(searchSlice);
+
+            search.subscribe((action) => {
+              // eslint-disable-next-line no-console
+              console.log('AIOps Received updated search query:', action);
+            });
+
+            // subscribers will only be notified if the search query changes
+            search.actions.setSearchQuery('test1');
+            search.actions.setSearchQuery('test1');
+            search.actions.setSearchQuery('test2');
+            search.actions.setSearchQuery('test2');
+            search.actions.setSearchQuery('test3');
+            search.actions.setSearchQuery('test3');
           }
         }
       }
