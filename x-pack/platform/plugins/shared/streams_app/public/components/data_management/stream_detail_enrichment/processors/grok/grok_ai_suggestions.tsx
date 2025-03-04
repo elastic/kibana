@@ -223,7 +223,7 @@ function InnerGrokAiSuggestions({
   const { field: currentFieldName, patterns: currentPatterns } = form.getValues();
 
   const hasValidField = useMemo(() => {
-    return Boolean(currentFieldName && filteredSamples.some((sample) => sample[currentFieldName]));
+    return Boolean(currentFieldName && filteredSamples.some((sample) => sample[currentFieldName] && typeof sample[currentFieldName] === 'string'));
   }, [filteredSamples, currentFieldName]);
 
   const filteredSuggestions = suggestions?.patterns
