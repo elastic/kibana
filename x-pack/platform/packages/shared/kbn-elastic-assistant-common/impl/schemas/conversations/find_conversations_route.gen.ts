@@ -21,12 +21,7 @@ import { SortOrder } from '../common_attributes.gen';
 import { ConversationResponse } from './common_attributes.gen';
 
 export type FindConversationsSortField = z.infer<typeof FindConversationsSortField>;
-export const FindConversationsSortField = z.enum([
-  'created_at',
-  'is_default',
-  'title',
-  'updated_at',
-]);
+export const FindConversationsSortField = z.enum(['created_at', 'title', 'updated_at']);
 export type FindConversationsSortFieldEnum = typeof FindConversationsSortField.enum;
 export const FindConversationsSortFieldEnum = FindConversationsSortField.enum;
 
