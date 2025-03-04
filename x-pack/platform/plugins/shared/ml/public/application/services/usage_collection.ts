@@ -10,8 +10,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import type { MlUsageEvent } from '../../../common/constants/usage_collection';
 
-export type MlUsageCollection = ReturnType<typeof mlUsageCollectionProvider>;
-
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {
     // if usageCollection is disabled, swallow the clicks and counts
