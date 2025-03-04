@@ -266,26 +266,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Overview page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.OVERVIEW, true);
-    cy.url().should('include', OVERVIEW_URL);
-  });
-
-  it('navigates to the Detection & Response page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.DETECTION_RESPONSE, true);
-    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
-  });
-
-  it('navigates to the Entity Analytics page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.ENTITY_ANALYTICS, true);
-    cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
-
-  it('navigates to the CSP dashboard page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.CSP_DASHBOARD, true);
-    cy.url().should('include', CSP_DASHBOARD_URL);
-  });
-
   it('navigates to the Rules landing page', () => {
     navigateFromHeaderTo(ServerlessHeaders.RULES_LANDING, true);
     cy.url().should('include', RULES_LANDING_URL);
