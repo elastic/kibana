@@ -831,7 +831,7 @@ export function FormulaEditor({
 
           <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem className="lnsFormula__editorFooterGroup">
+              <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
                 {isFullscreen ? (
                   <EuiToolTip
                     content={

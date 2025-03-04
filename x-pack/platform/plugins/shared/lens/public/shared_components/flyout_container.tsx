@@ -107,7 +107,7 @@ export function FlyoutContainer({
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
             css`
-              box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
+              box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
             `,
             flyoutContainerStyles(euiThemeContext),
             dimensionContainerStyles.self(euiThemeContext),
@@ -164,6 +164,7 @@ export function FlyoutContainer({
             className="eui-yScroll"
             css={css`
               flex: 1;
+              z-index: 1;
             `}
           >
             {children}
@@ -200,7 +201,6 @@ const dimensionContainerStyles = {
       // But with custom positioning to keep it within the sidebar contents
       max-width: none !important;
       left: 0;
-      z-index: ${euiThemeContext.euiTheme.levels.menu};
       ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
         height: 100% !important;
         position: absolute;
