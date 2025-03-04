@@ -1126,29 +1126,6 @@
           },
           {
             "parentPluginId": "unifiedSearch",
-            "id": "def-public.DataViewPickerProps.textBasedLanguages",
-            "type": "Array",
-            "tags": [],
-            "label": "textBasedLanguages",
-            "description": [
-              "\nList of the supported text based languages (SQL, ESQL) etc.\nDefined per application, if not provided, no text based languages\nwill be available."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-utils",
-                "scope": "common",
-                "docId": "kibKbnEsqlUtilsPluginApi",
-                "section": "def-common.TextBasedLanguages",
-                "text": "TextBasedLanguages"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPickerProps.isDisabled",
             "type": "CompoundType",
             "tags": [],

@@ -29,7 +29,6 @@ import {
   docsFilterOptions,
 } from './hooks/use_processing_simulator';
 import { AssetImage } from '../../asset_image';
-import { useDateRange } from '../../../hooks/use_date_range';
 
 interface ProcessorOutcomePreviewProps {
   columns: TableColumn[];
@@ -53,7 +52,7 @@ export const ProcessorOutcomePreview = ({
   const { dependencies } = useKibana();
   const { data } = dependencies.start;
 
-  const { timeRange, setTimeRange } = useDateRange({ data });
+  const { timeRange, setTimeRange } = data.query.timefilter.timefilter.useTimefilter();
 
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
@@ -68,6 +67,11 @@ export const ProcessorOutcomePreview = ({
     }
   }, [columns, selectedDocsFilter]);
 
+  const simulationFailureRate = simulation
+    ? simulation?.failure_rate + simulation?.skipped_rate
+    : undefined;
+  const simulationSuccessRate = simulation?.success_rate;
+
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -77,8 +81,8 @@ export const ProcessorOutcomePreview = ({
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
           onTimeRangeRefresh={onRefreshSamples}
-          simulationFailureRate={simulation?.failure_rate}
-          simulationSuccessRate={simulation?.success_rate}
+          simulationFailureRate={simulationFailureRate}
+          simulationSuccessRate={simulationSuccessRate}
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />

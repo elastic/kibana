@@ -22,6 +22,7 @@ import {
   GetFullAgentPolicyResponseSchema,
   DownloadFullAgentPolicyResponseSchema,
   GetK8sManifestResponseScheme,
+  CreateAgentAndPackagePolicyRequestSchema,
 } from '../../types';
 
 import { ListResponseSchema } from '../schema/utils';
@@ -40,6 +41,7 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
+  createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
 jest.mock('./handlers', () => ({
@@ -53,6 +55,7 @@ jest.mock('./handlers', () => ({
   getFullAgentPolicy: jest.fn(),
   getK8sManifest: jest.fn(),
   bulkGetAgentPoliciesHandler: jest.fn(),
+  createAgentAndPackagePoliciesHandler: jest.fn(),
 }));
 
 jest.mock('../../services', () => ({
@@ -410,6 +413,65 @@ describe('schema validation', () => {
     });
     const validationResp = GetAgentPolicyResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  describe('create agent policy with package policies', () => {
+    const validRequestBody = {
+      name: 'Test Agent Policy',
+      namespace: 'default',
+      description: 'Test description',
+      package_policies: [
+        {
+          name: 'Test Package Policy',
+          namespace: 'default',
+          policy_ids: [],
+          enabled: true,
+          inputs: [],
+        },
+      ],
+    };
+
+    it('should return valid response', async () => {
+      const expectedResponse = {
+        item: agentPolicy,
+      };
+      (createAgentAndPackagePoliciesHandler as jest.Mock).mockImplementation(
+        (ctx, request, res) => {
+          return res.ok({ body: expectedResponse });
+        }
+      );
+      await createAgentAndPackagePoliciesHandler(context, {} as any, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expectedResponse,
+      });
+      const validationResp = GetAgentPolicyResponseSchema.validate(expectedResponse);
+      expect(validationResp).toEqual(expectedResponse);
+    });
+
+    it('should validate request schema', async () => {
+      expect(() =>
+        CreateAgentAndPackagePolicyRequestSchema.body.validate(validRequestBody)
+      ).not.toThrow();
+
+      const invalidRequest = {
+        id: 'policy-missing-name',
+        namespace: 'default',
+        package_policies: [
+          {
+            name: 'Test Package Policy',
+            namespace: 'default',
+            policy_ids: [],
+            enabled: true,
+            inputs: [],
+          },
+        ],
+      };
+
+      expect(() =>
+        CreateAgentAndPackagePolicyRequestSchema.body.validate(invalidRequest)
+      ).toThrow();
+    });
   });
 
   it('update agent policy should return valid response', async () => {
