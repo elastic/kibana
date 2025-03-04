@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ConfigType } from '../../../../config';
 import type { SignalSource, SimpleHit } from '../types';
 import type { CompleteRule, RuleParams } from '../../rule_schema';

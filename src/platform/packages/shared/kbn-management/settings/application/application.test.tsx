@@ -81,6 +81,34 @@ describe('Settings application', () => {
     }
   });
 
+  it("doesn't render settings that are not applicable in the current solution", async () => {
+    const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
+      undefined,
+      'es',
+      'security'
+    );
+
+    const { findByTestId } = render(wrap(<SettingsApplication />, services));
+
+    // The empty state should be rendered since all settings are for es solution and current space solution is security
+    expect(findByTestId(DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE)).toBeTruthy();
+  });
+
+  it('renders settings that are applicable in the current solution', async () => {
+    const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
+      undefined,
+      'oblt',
+      'oblt'
+    );
+
+    const { getByTestId } = render(wrap(<SettingsApplication />, services));
+
+    // The form should be rendered
+    for (const category of spaceCategories) {
+      expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
+    }
+  });
+
   describe('Tabs', () => {
     const spaceSettingsTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${SPACE_SETTINGS_TAB_ID}`;
     const globalSettingsTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${GLOBAL_SETTINGS_TAB_ID}`;

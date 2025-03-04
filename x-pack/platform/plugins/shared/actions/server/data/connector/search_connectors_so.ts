@@ -15,12 +15,10 @@ export const searchConnectorsSo = async ({
   return esClient.search({
     index: kibanaIndices,
     ignore_unavailable: true,
-    body: {
-      aggs,
-      size: 0,
-      query: {
-        match_all: {},
-      },
+    aggs,
+    size: 0,
+    query: {
+      match_all: {},
     },
   });
 };

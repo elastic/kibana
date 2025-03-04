@@ -13,7 +13,7 @@ jest.mock('../../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

@@ -102,15 +102,13 @@ async function getRootTransaction(es: Client) {
   const params = {
     index: 'traces-apm*',
     _source: [TRACE_ID, TRANSACTION_ID],
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
-            { term: { [SERVICE_ENVIRONMENT]: environment } },
-          ],
-          must_not: [{ exists: { field: PARENT_ID } }],
-        },
+    query: {
+      bool: {
+        filter: [
+          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          { term: { [SERVICE_ENVIRONMENT]: environment } },
+        ],
+        must_not: [{ exists: { field: PARENT_ID } }],
       },
     },
   };
