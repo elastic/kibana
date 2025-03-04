@@ -29,6 +29,7 @@ import { FileContents } from '../../application/file_data_visualizer/components/
 import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
 import { Mappings } from './mappings';
 import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
+import { Pipeline } from './pipeline';
 
 interface Props {
   uploadStatus: UploadStatus;
@@ -42,6 +43,7 @@ enum TAB {
   STATS,
   CONTENT,
   MAPPINGS,
+  PIPELINE,
 }
 
 export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, index }) => {
@@ -122,7 +124,7 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                     data-test-subj="mlNodesOverviewPanelDetailsTab"
                   >
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.nodesList.expandedRow.detailsTabTitle"
+                      id="xpack.dataVisualizer.file.fileStatus.summaryTabTitle"
                       defaultMessage="Summary"
                     />
                   </EuiTab>
@@ -132,7 +134,7 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                     data-test-subj="mlNodesOverviewPanelMemoryTab"
                   >
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
+                      id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
                       defaultMessage="Stats"
                     />
                   </EuiTab>
@@ -142,7 +144,7 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                     data-test-subj="mlNodesOverviewPanelMemoryTab"
                   >
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
+                      id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
                       defaultMessage="Content"
                     />
                   </EuiTab>
@@ -152,8 +154,18 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                     data-test-subj="mlNodesOverviewPanelMemoryTab"
                   >
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
+                      id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
                       defaultMessage="Mappings"
+                    />
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={selectedTab === TAB.PIPELINE}
+                    onClick={() => setSelectedTab(TAB.PIPELINE)}
+                    data-test-subj="mlNodesOverviewPanelMemoryTab"
+                  >
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"
+                      defaultMessage="Pipeline"
                     />
                   </EuiTab>
                 </EuiTabs>
@@ -175,6 +187,8 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                 ) : null}
 
                 {selectedTab === TAB.MAPPINGS ? <Mappings fileStatus={fileStatus} /> : null}
+
+                {selectedTab === TAB.PIPELINE ? <Pipeline fileStatus={fileStatus} /> : null}
               </>
             ) : null}
           </>
