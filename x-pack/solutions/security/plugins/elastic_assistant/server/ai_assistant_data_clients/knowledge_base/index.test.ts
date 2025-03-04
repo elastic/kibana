@@ -63,6 +63,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       kibanaVersion: '8.8.0',
       ml,
       getElserId: getElserId.mockResolvedValue('elser-id'),
+      modelIdOverride: false,
       getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
       getProductDocumentationStatus: jest.fn().mockResolvedValue('installed'),
       ingestPipelineResourceName: 'something',

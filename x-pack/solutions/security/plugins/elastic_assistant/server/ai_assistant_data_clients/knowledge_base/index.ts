@@ -163,9 +163,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   public getInferenceEndpointId = async () => {
-    const elserId = await this.options.getElserId();
     // Don't use default enpdpoint for pt_tiny_elser
-    console.error('getInfEndpotni', this.options.modelIdOverride);
     if (this.options.modelIdOverride) {
       return ASSISTANT_ELSER_INFERENCE_ID;
     }
@@ -290,8 +288,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     const esClient = await this.options.elasticsearchClientPromise;
     const inferenceId = await this.getInferenceEndpointId();
-
-    console.error('createInferenceEndpoint', inferenceId, elserId);
 
     if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
       await this.deleteInferenceEndpoint();
@@ -464,8 +460,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       const inferenceId = await this.getInferenceEndpointId();
-
-      console.error('inferenceId', inferenceId);
 
       if (
         inferenceId !== ASSISTANT_ELSER_INFERENCE_ID &&
