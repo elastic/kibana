@@ -6,6 +6,11 @@ on:
     branches:
       - add-project-labelling-action
 
+permissions:
+  contents: read
+  repository-projects: read
+  issues: write
+
 jobs:
   map-labels-to-fields:
     name: 'Map issue labels to project fields'
