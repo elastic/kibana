@@ -216,6 +216,9 @@ export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
+export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -384,7 +387,7 @@ export const STARTED_TRANSFORM_STATES = new Set([
 ]);
 
 /**
- * How many rules to update at a time is set to 50 from errors coming from
+ * How many rules to update at a time is set to 20 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
  * seeing timeout issues.
  *
@@ -399,14 +402,14 @@ export const STARTED_TRANSFORM_STATES = new Set([
  * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
  * which in turn could create additional connections we want to avoid.
  *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
+ * See file import_rules_route.ts for another area where 20 was chosen, therefore I chose
+ * 20 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 20 above to a lower number.
  *
  * See the original ticket here:
  * https://github.com/elastic/kibana/issues/94418
  */
-export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 

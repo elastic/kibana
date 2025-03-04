@@ -121,7 +121,10 @@ export const openNavigationPanelFor = (pageName: string) => {
       break;
     }
     case FLEET:
-    case ENDPOINTS:
+    case ENDPOINTS: {
+      panel = ASSETS_PANEL_BTN;
+      break;
+    }
   }
   if (panel) {
     openNavigationPanel(panel);

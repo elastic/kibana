@@ -10,22 +10,23 @@ import {
   RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
 } from '@kbn/security-solution-plugin/public/detections/pages/detection_engine/rules/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
   assertConnectorSelected,
+  assertConversationTitleContains,
+  assertErrorResponse,
+  assertMessageSent,
   assertNewConversation,
   closeAssistant,
+  createAndTitleConversation,
   openAssistant,
   selectConnector,
-  createNewChat,
   selectConversation,
-  assertMessageSent,
-  assertConversationTitle,
-  typeAndSendMessage,
-  assertErrorResponse,
   selectRule,
-  updateConversationTitle,
+  submitMessage,
+  typeAndSendMessage,
 } from '../../tasks/assistant';
-import { deleteConversations } from '../../tasks/api_calls/assistant';
+import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import {
   azureConnectorAPIPayload,
   bedrockConnectorAPIPayload,
@@ -47,20 +48,30 @@ import {
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/204167
-// Failing: See https://github.com/elastic/kibana/issues/204167
-describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
+const mockConvo1 = {
+  id: 'spooky',
+  title: 'Spooky convo',
+  messages: [],
+};
+const mockConvo2 = {
+  id: 'silly',
+  title: 'Silly convo',
+  messages: [],
+};
+describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
     deleteAlertsAndRules();
-    login();
+    login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    waitForConversation(mockConvo1);
+    waitForConversation(mockConvo2);
   });
   describe('No connectors or conversations exist', () => {
     it('Shows welcome setup when no connectors or conversations exist', () => {
       visitGetStartedPage();
       openAssistant();
-      assertNewConversation(true, 'Welcome');
+      assertNewConversation(true, 'New chat');
     });
   });
   describe('When no conversations exist but connectors do exist, show empty convo', () => {
@@ -70,16 +81,17 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
     it('When invoked on AI Assistant click', () => {
       visitGetStartedPage();
       openAssistant();
-      assertNewConversation(false, 'Welcome');
+      assertNewConversation(false, 'New chat');
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(USER_PROMPT).should('not.have.text');
     });
     it('When invoked from rules page', () => {
       createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
         visitRulesManagementTable();
+        cy.log('NEW RULE', createdRule);
         selectRule(createdRule?.body?.id);
         openAssistant('rule');
-        assertNewConversation(false, 'Detection Rules');
+        assertNewConversation(false, `Detection Rules - Rule 1`);
         assertConnectorSelected(azureConnectorAPIPayload.name);
         cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
         cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
@@ -91,7 +103,7 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
       waitForAlertsToPopulate();
       expandFirstAlert();
       openAssistant('alert');
-      assertNewConversation(false, 'Alert summary');
+      assertConversationTitleContains('New Rule Test');
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(USER_PROMPT).should(
         'have.text',
@@ -102,7 +114,8 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
     it('Shows empty connector callout when a conversation that had a connector no longer does', () => {
       visitGetStartedPage();
       openAssistant();
-      assertConnectorSelected(azureConnectorAPIPayload.name);
+      selectConversation(mockConvo1.title);
+      selectConnector(azureConnectorAPIPayload.name);
       closeAssistant();
       deleteConnectors();
       openAssistant();
@@ -121,42 +134,39 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
       waitForAlertsToPopulate();
       expandFirstAlert();
       openAssistant('alert');
-      assertNewConversation(false, 'Alert summary');
+      assertConversationTitleContains('New Rule Test');
+      // send message to ensure conversation is created
+      submitMessage();
+      assertMessageSent(EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N);
       closeAssistant();
       visitGetStartedPage();
       openAssistant();
-      assertNewConversation(false, 'Alert summary');
+      assertConversationTitleContains('New Rule Test');
     });
     it('Properly switches back and forth between conversations', () => {
       visitGetStartedPage();
       openAssistant();
-      assertNewConversation(false, 'Welcome');
-      assertConnectorSelected(azureConnectorAPIPayload.name);
+      selectConversation(mockConvo1.title);
+      selectConnector(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertMessageSent('hello');
       assertErrorResponse();
-      selectConversation('Alert summary');
+      selectConversation(mockConvo2.title);
       selectConnector(bedrockConnectorAPIPayload.name);
       typeAndSendMessage('goodbye');
       assertMessageSent('goodbye');
       assertErrorResponse();
-      selectConversation('Welcome');
+      selectConversation(mockConvo1.title);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       assertMessageSent('hello');
-      selectConversation('Alert summary');
+      selectConversation(mockConvo2.title);
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
     it('Correctly creates and titles new conversations, and allows title updates', () => {
       visitGetStartedPage();
       openAssistant();
-      createNewChat();
-      assertNewConversation(false, 'New chat');
-      assertConnectorSelected(azureConnectorAPIPayload.name);
-      typeAndSendMessage('hello');
-      assertMessageSent('hello');
-      assertConversationTitle('Unexpected API Error:  - Connection error.');
-      updateConversationTitle('Something else');
+      createAndTitleConversation('Something else');
     });
   });
 });

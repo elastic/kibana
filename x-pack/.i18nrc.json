@@ -90,7 +90,6 @@
       "platform/packages/private/ml/data_view_utils",
       "platform/packages/private/ml/date_picker",
       "platform/packages/private/ml/field_stats_flyout",
-      "platform/packages/private/ml/inference_integration_flyout",
       "platform/packages/shared/ml/trained_models_utils",
       "platform/packages/private/ml/category_validator",
       "platform/packages/private/ml/ui_actions",
@@ -151,7 +150,8 @@
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
-      "solutions/observability/plugins/streams_app"
+      "solutions/observability/plugins/observability_streams_wrapper",
+      "platform/plugins/shared/streams_app"
     ],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
