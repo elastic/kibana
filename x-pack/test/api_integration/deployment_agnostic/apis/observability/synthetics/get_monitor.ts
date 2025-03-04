@@ -80,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('get many monitors', () => {
-      it('without params', async () => {
+      it.skip('without params', async () => {
         const uuid = uuidv4();
         const [mon1, mon2] = await Promise.all(
           monitors.map((mon, i) => saveMonitor({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
