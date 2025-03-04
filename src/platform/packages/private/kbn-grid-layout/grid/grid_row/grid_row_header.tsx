@@ -51,7 +51,6 @@ export const GridRowHeader = React.memo(
     const [panelCount, setPanelCount] = useState<number>(
       Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels).length
     );
-    console.log('remnder', isActive);
 
     useEffect(() => {
       /**

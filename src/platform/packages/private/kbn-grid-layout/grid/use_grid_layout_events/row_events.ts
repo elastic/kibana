@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
+import { cloneDeep, pick } from 'lodash';
 import { useCallback, useRef } from 'react';
-import { GridPanelData, GridLayoutStateManager, RowInteractionEvent } from '../types';
+import { GridLayoutStateManager, RowInteractionEvent } from '../types';
+import { useGridLayoutContext } from '../use_grid_layout_context';
+import { getRowKeysInOrder } from '../utils/resolve_grid_row';
 import {
   getPointerPosition,
   isMouseEvent,
@@ -16,11 +20,7 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { commitAction, moveAction, startAction } from './state_manager_actions';
 import { UserInteractionEvent } from './types';
-import { useGridLayoutContext } from '../use_grid_layout_context';
-import { pick } from 'lodash';
-import { getRowKeysInOrder } from '../utils/resolve_grid_row';
 
 export const useGridLayoutRowEvents = ({
   interactionType,
@@ -34,9 +34,6 @@ export const useGridLayoutRowEvents = ({
   const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
   const startingMouse = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
   const startingPosition = useRef<{ top: number; right: number }>({ top: 0, right: 0 });
-  const rowsInOrder = useRef<string[]>(
-    getRowKeysInOrder(gridLayoutStateManager.gridLayout$.getValue())
-  );
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
@@ -68,6 +65,32 @@ export const useGridLayoutRowEvents = ({
           pointerPixel.current = getPointerPosition(ev);
         }
 
+        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        if (!headerRef) return;
+
+        const currentLayout =
+          gridLayoutStateManager.proposedGridLayout$.getValue() ??
+          gridLayoutStateManager.gridLayout$.getValue();
+        const currentRowOrder = getRowKeysInOrder(currentLayout);
+        currentRowOrder.shift(); // drop first row since nothing can go above it
+        const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).sort(
+          (idA, idB) => {
+            const rowRefA = gridLayoutStateManager.headerRefs.current[idA];
+            const rowRefB = gridLayoutStateManager.headerRefs.current[idB];
+
+            const rectA = rowRefA?.getBoundingClientRect();
+            const rectB = rowRefB?.getBoundingClientRect();
+            return (rectA?.top ?? 0) - (rectB?.top ?? 0);
+          }
+        );
+        if (!deepEqual(currentRowOrder, updatedRowOrder)) {
+          const updatedLayout = cloneDeep(currentLayout);
+          updatedRowOrder.forEach((id, index) => {
+            updatedLayout[id].order = index + 1;
+          });
+          gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+        }
+
         gridLayoutStateManager.activeRow$.next({
           id: rowId,
           startingPosition: startingPosition.current,
@@ -80,7 +103,14 @@ export const useGridLayoutRowEvents = ({
 
       const onEnd = () => {
         gridLayoutStateManager.activeRow$.next(undefined);
-        rowsInOrder.current = getRowKeysInOrder(gridLayoutStateManager.gridLayout$.getValue());
+        const proposedGridLayoutValue = gridLayoutStateManager.proposedGridLayout$.getValue();
+        if (
+          proposedGridLayoutValue &&
+          !deepEqual(proposedGridLayoutValue, gridLayoutStateManager.gridLayout$.getValue())
+        ) {
+          gridLayoutStateManager.gridLayout$.next(cloneDeep(proposedGridLayoutValue));
+        }
+        gridLayoutStateManager.proposedGridLayout$.next(undefined);
       };
 
       if (isMouseEvent(e)) {
