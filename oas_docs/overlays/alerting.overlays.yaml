@@ -5,38 +5,6 @@ info:
   version: 0.0.1
 actions:
   # Add some alerting API examples
-  # - target: "$.paths['/api/alerting/rule/{id}']['post']"
-  #   description: "Add examples to create rule API"
-  #   update:
-  #     requestBody:
-  #       content:
-  #         application/json:
-  #           examples:
-  #             createEsQueryEsqlRuleRequest:
-  #               $ref: "../examples/create_es_query_esql_rule_request.yaml"
-  #             createEsQueryRuleRequest:
-  #               $ref: "../examples/create_es_query_rule_request.yaml"
-  #             createEsQueryKqlRuleRequest:
-  #               $ref: "../examples/create_es_query_kql_rule_request.yaml"
-  #             createIndexThresholdRuleRequest:
-  #               $ref: "../examples/create_index_threshold_rule_request.yaml"
-  #             createTrackingContainmentRuleRequest:
-  #               $ref: "../examples/create_tracking_containment_rule_request.yaml"
-  #     responses:
-  #       200:
-  #         content:
-  #           application/json:
-  #             examples:
-  #               createEsQueryEsqlRuleResponse:
-  #                 $ref: "../examples/create_es_query_esql_rule_response.yaml"
-  #               createEsQueryRuleResponse:
-  #                 $ref: "../examples/create_es_query_rule_response.yaml"
-  #               createEsQueryKqlRuleResponse:
-  #                 $ref: "../examples/create_es_query_kql_rule_response.yaml"
-  #               createIndexThresholdRuleResponse:
-  #                 $ref: "../examples/create_index_threshold_rule_response.yaml"
-  #               createTrackingContainmentRuleResponse:
-  #                 $ref: "../examples/create_tracking_containment_rule_response.yaml"
   - target: "$.paths['/api/alerting/rule/{id}']['put']"
     description: "Add examples to update rule API"
     update:
