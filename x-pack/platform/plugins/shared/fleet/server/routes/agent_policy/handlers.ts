@@ -415,7 +415,7 @@ export const createAgentAndPackagePoliciesHandler: FleetRequestHandler<
   const createdAgentPolicy: CreateAgentPolicyResponse['item'] = agentPolicyResult.options.body.item;
   const createdPackagePolicyIds = [];
 
-  if (agentPolicyRequest.body.id !== createdAgentPolicy.id) {
+  if (agentPolicyRequest.body.id && agentPolicyRequest.body.id !== createdAgentPolicy.id) {
     logger.warn(
       `Agent policy created with id ${createdAgentPolicy.id} instead of requested id ${agentPolicyRequest.body.id}`
     );
