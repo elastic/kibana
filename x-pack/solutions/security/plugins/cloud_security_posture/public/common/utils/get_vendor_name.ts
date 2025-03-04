@@ -12,6 +12,7 @@ export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
 export const WIZ_MISCONFIGURATIONS_DATASET = 'wiz.cloud_configuration_finding';
 export const WIZ_VULN_DATASET = 'wiz.vulnerability';
+export const QUALYS_VULN_DATASET = 'qualys_vmdr';
 
 export const getVendorName = (finding: CspFinding | CspVulnerabilityFinding) => {
   if (finding.observer?.vendor) return finding.observer.vendor;
@@ -19,5 +20,7 @@ export const getVendorName = (finding: CspFinding | CspVulnerabilityFinding) => 
   const dataset = finding.data_stream?.dataset;
 
   if (dataset === WIZ_MISCONFIGURATIONS_DATASET || dataset === WIZ_VULN_DATASET) return 'Wiz';
+  if (dataset === QUALYS_VULN_DATASET) return 'Qualys';
+
   if (isNativeCspFinding(finding)) return 'Elastic';
 };
