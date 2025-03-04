@@ -22,7 +22,6 @@ export const unstructuredLogState = {
 };
 
 export const unstructuredLogResponse = {
-  grok_pattern: [
+  grok_pattern:
     '####<%{MONTH} %{MONTHDAY}, %{YEAR} %{TIME} (?:AM|PM) %{WORD:timezone}> <%{WORD:log_level}> <%{WORD:component}> <%{DATA:hostname}> <%{DATA:server_name}> <%{DATA:thread_info}> <%{DATA:user}> <%{DATA:empty_field}> <%{DATA:empty_field2}> <%{NUMBER:timestamp}> <%{DATA:message_id}> <%{GREEDYDATA:message}>',
-  ],
 };
