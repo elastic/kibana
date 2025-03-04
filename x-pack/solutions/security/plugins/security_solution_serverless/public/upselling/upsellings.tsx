@@ -148,11 +148,12 @@ export const upsellingSections: UpsellingSections = [
     component: () => (
       <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
     ),
-  },{
+  },
+  {
     id: 'siem_migrations_start',
     pli: ProductFeatureKey.siemMigrations,
     component: SiemMigrationsStartUpsellSectionLazy,
-  }
+  },
 ];
 
 // Upselling for sections, linked by arbitrary ids
