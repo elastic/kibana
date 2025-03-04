@@ -15,16 +15,9 @@ import type {
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
 
-export enum ViewMode {
-  EDIT = 'edit',
-  PREVIEW = 'preview',
-  PRINT = 'print',
-  VIEW = 'view',
-}
-
 export type EmbeddableInput = {
   version?: string;
-  viewMode?: ViewMode;
+  viewMode?: 'view' | 'edit' | 'print' | 'preview';
   title?: string;
   description?: string;
   /**
