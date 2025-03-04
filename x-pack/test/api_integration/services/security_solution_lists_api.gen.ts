@@ -19,6 +19,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
+import { BulkDeleteListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item_bulk/bulk_delete_list_items.gen';
 import { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list/create_list.gen';
 import { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
 import { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
@@ -40,6 +41,17 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+     * Delete a value list item using its `id`, or its `list_id` and `value` fields.
+     */
+    bulkDeleteListItems(props: BulkDeleteListItemsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .delete(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     /**
      * Create a new value list.
      */
@@ -251,6 +263,9 @@ You can import items to a new or existing list.
   };
 }
 
+export interface BulkDeleteListItemsProps {
+  query: BulkDeleteListItemsRequestQueryInput;
+}
 export interface CreateListProps {
   body: CreateListRequestBodyInput;
 }

@@ -6,22 +6,23 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEM_URL_BULK } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { isEmpty } from 'lodash';
 import {
-  DeleteListItemRequestQuery,
-  DeleteListItemResponse,
+  BulkDeleteListItemsRequestQuery,
+  BulkDeleteListItemsResponse,
 } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
-export const deleteListItemRoute = (router: ListsPluginRouter): void => {
+export const deleteListItemsRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .delete({
       access: 'public',
-      path: LIST_ITEM_URL,
+      path: LIST_ITEM_URL_BULK,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
@@ -32,7 +33,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteListItemRequestQuery),
+            query: buildRouteValidationWithZod(BulkDeleteListItemsRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -40,19 +41,20 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, list_id: listId, value, refresh } = request.query;
+          const { ids, list_id: listId, value, refresh } = request.query;
           const shouldRefresh = refresh === 'true' ? true : false;
           const lists = await getListClient(context);
-          if (id != null) {
-            const deleted = await lists.deleteListItems({ ids: [id], refresh: shouldRefresh });
-            if (deleted == null || deleted?.length === 0) {
+          // null check required to satisfy type checker
+          if (!isEmpty(ids) && ids != null) {
+            const deleted = await lists.deleteListItems({ ids, refresh: shouldRefresh });
+            if (deleted == null) {
               return siemResponse.error({
-                body: `list item with id: "${id}" not found`,
+                body: `list item with id: "${ids}" not found`,
                 statusCode: 404,
               });
             }
 
-            return response.ok({ body: DeleteListItemResponse.parse(deleted[0]) });
+            return response.ok({ body: BulkDeleteListItemsResponse.parse(deleted) });
           } else if (listId != null && value != null) {
             const list = await lists.getList({ id: listId });
 
@@ -77,10 +79,10 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
               });
             }
 
-            return response.ok({ body: DeleteListItemResponse.parse(deleted) });
+            return response.ok({ body: BulkDeleteListItemsResponse.parse(deleted) });
           } else {
             return siemResponse.error({
-              body: 'Either "list_id" or "id" needs to be defined in the request',
+              body: 'Either "list_id" or "ids" needs to be defined in the request',
               statusCode: 400,
             });
           }

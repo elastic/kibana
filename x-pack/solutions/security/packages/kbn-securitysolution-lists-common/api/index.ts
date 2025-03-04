@@ -24,3 +24,4 @@ export * from './read_list_item/read_list_item.gen';
 export * from './read_list/read_list.gen';
 export * from './update_list_item/update_list_item.gen';
 export * from './update_list/update_list.gen';
+export * from './delete_list_item_bulk/bulk_delete_list_items.gen';

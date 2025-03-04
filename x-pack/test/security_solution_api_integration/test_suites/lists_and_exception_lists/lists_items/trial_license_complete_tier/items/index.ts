@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update_list_items'));
     loadTestFile(require.resolve('./update_list_items_migrations'));
     loadTestFile(require.resolve('./delete_list_items'));
+    loadTestFile(require.resolve('./bulk_delete_list_items'));
     loadTestFile(require.resolve('./find_list_items'));
     loadTestFile(require.resolve('./import_list_items'));
     loadTestFile(require.resolve('./import_list_items_migrations'));

@@ -6,31 +6,31 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Ids, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { transformElasticToListItem } from '../utils';
 import { findSourceType } from '../utils/find_source_type';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 interface GetListItemOptions {
-  id: Id;
+  ids: Ids;
   esClient: ElasticsearchClient;
   listItemIndex: string;
 }
 
-export const getListItem = async ({
-  id,
+export const getListItems = async ({
+  ids,
   esClient,
   listItemIndex,
-}: GetListItemOptions): Promise<ListItemSchema | null> => {
+}: GetListItemOptions): Promise<ListItemSchema[] | null> => {
   // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
-  const listItemES = await esClient.search<SearchEsListItemSchema>({
+  const listItemsES = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
-        term: {
-          _id: id,
+        ids: {
+          values: ids,
         },
       },
     },
@@ -39,12 +39,12 @@ export const getListItem = async ({
     seq_no_primary_term: true,
   });
 
-  if (listItemES.hits.hits.length) {
+  if (listItemsES.hits.hits.length) {
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    const type = findSourceType(listItemES.hits.hits[0]._source);
+    const type = findSourceType(listItemsES.hits.hits[0]._source);
     if (type != null) {
-      const listItems = transformElasticToListItem({ response: listItemES, type });
-      return listItems[0];
+      const listItems = transformElasticToListItem({ response: listItemsES, type });
+      return listItems;
     } else {
       return null;
     }

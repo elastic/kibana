@@ -13,6 +13,7 @@ import { deepFreeze } from '@kbn/std';
 export const LIST_URL = '/api/lists';
 export const LIST_INDEX = `${LIST_URL}/index`;
 export const LIST_ITEM_URL = `${LIST_URL}/items`;
+export const LIST_ITEM_URL_BULK = `${LIST_ITEM_URL}/_bulk`;
 export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
 
 /**

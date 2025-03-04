@@ -18,7 +18,7 @@ import {
 } from '../../../common/constants.mock';
 import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
-import { getListItem } from './get_list_item';
+import { getListItems } from './get_list_items';
 
 describe('get_list_item', () => {
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('get_list_item', () => {
     const data = getSearchListItemMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const list = await getListItems({ esClient, ids: [LIST_ID], listItemIndex: LIST_INDEX });
     const expected = getListItemResponseMock();
     expect(list).toEqual(expected);
   });
@@ -43,7 +43,7 @@ describe('get_list_item', () => {
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const list = await getListItems({ esClient, ids: [LIST_ID], listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 
@@ -86,7 +86,7 @@ describe('get_list_item', () => {
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const list = await getListItems({ esClient, ids: [LIST_ID], listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 });

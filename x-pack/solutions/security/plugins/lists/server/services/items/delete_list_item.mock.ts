@@ -13,6 +13,6 @@ import { DeleteListItemOptions } from '.';
 
 export const getDeleteListItemOptionsMock = (): DeleteListItemOptions => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
-  id: LIST_ITEM_ID,
+  ids: [LIST_ITEM_ID],
   listItemIndex: LIST_ITEM_INDEX,
 });

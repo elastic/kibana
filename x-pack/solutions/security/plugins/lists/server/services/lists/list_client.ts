@@ -40,16 +40,16 @@ import type { ConfigType } from '../../config';
 import {
   BufferLines,
   createListItem,
-  deleteListItem,
   deleteListItemByValue,
+  deleteListItems,
   exportListItemsToStream,
   findAllListItems,
   findListItem,
-  getListItem,
   getListItemByValue,
   getListItemByValues,
   getListItemIndex,
   getListItemTemplate,
+  getListItems,
   importListItemsToStream,
   searchListItemByValues,
   updateListItem,
@@ -649,13 +649,13 @@ export class ListClient {
    * Given a list item id, this will delete the single list item
    * @returns The list item if found, otherwise null
    */
-  public deleteListItem = async ({
-    id,
+  public deleteListItems = async ({
+    ids,
     refresh,
-  }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
+  }: DeleteListItemOptions): Promise<ListItemSchema[] | null> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
-    return deleteListItem({ esClient, id, listItemIndex: listItemName, refresh });
+    return deleteListItems({ esClient, ids, listItemIndex: listItemName, refresh });
   };
 
   /**
@@ -999,12 +999,12 @@ export class ListClient {
    * @param options.id The id of the list item to get.
    * @returns The list item found if it exists, otherwise "null".
    */
-  public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema | null> => {
+  public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema[] | null> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
-    return getListItem({
+    return getListItems({
       esClient,
-      id,
+      ids: [id],
       listItemIndex: listItemName,
     });
   };
