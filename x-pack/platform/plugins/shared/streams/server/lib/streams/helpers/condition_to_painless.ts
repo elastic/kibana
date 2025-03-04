@@ -18,14 +18,13 @@ import {
   isOrCondition,
   isUnaryFilterCondition,
 } from '@kbn/streams-schema';
-import { getRealFieldName } from '@kbn/streams-schema/src/helpers/namespaced_ecs';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (typeof conditionOrField === 'string') {
-    return `ctx.${getRealFieldName(conditionOrField).split('.').join('?.')}`;
+    return `relevant_fields['${conditionOrField}']`;
   }
 
-  return `ctx.${getRealFieldName(conditionOrField.field).split('.').join('?.')}`;
+  return `relevant_fields['${conditionOrField.field}']`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -107,7 +106,7 @@ function unaryToPainless(condition: UnaryFilterCondition) {
 }
 
 function extractAllFields(condition: Condition, fields: string[] = []): string[] {
-  if (isFilterCondition(condition) && !isUnaryFilterCondition(condition)) {
+  if (isFilterCondition(condition)) {
     return uniq([...fields, condition.field]);
   } else if (isAndCondition(condition)) {
     return uniq(condition.and.map((cond) => extractAllFields(cond, fields)).flat());
@@ -115,6 +114,28 @@ function extractAllFields(condition: Condition, fields: string[] = []): string[]
     return uniq(condition.or.map((cond) => extractAllFields(cond, fields)).flat());
   }
   return uniq(fields);
+}
+
+function generateFieldDefinition(field: string) {
+  const parts = field.split('.');
+  const firstPart = parts[0];
+  let code = `relevant_fields['${field}'] = ctx['${firstPart}'];\n`;
+  for (let i = 1; i < parts.length; i++) {
+    code += `if (relevant_fields['${field}'] != null) {
+  if (relevant_fields['${field}'] instanceof Map) {
+    relevant_fields['${field}'] = relevant_fields['${field}']['${parts[i]}'];
+  } else {
+    relevant_fields['${field}'] = null;
+  }
+}\n`;
+  }
+  return code;
+}
+
+function generateFieldDefinitions(fields: string[]) {
+  return `
+${fields.map(generateFieldDefinition).join('\n')}
+  `;
 }
 
 export function conditionToStatement(condition: Condition, nested = false): string {
@@ -153,16 +174,14 @@ export function conditionToPainless(condition: Condition): string {
   }
 
   const fields = extractAllFields(condition);
-  let fieldCheck = '';
+  let fieldDefinitions = '';
   if (fields.length !== 0) {
-    fieldCheck = `if (${fields
-      .map((field) => `${safePainlessField(field)} instanceof Map`)
-      .join(' || ')}) {
-  return false;
-}
-`;
+    fieldDefinitions = generateFieldDefinitions(fields);
   }
-  return `${fieldCheck}try {
+  return `
+  def relevant_fields = [:];
+  ${fieldDefinitions}
+  try {
   if (${conditionToStatement(condition)}) {
     return true;
   }

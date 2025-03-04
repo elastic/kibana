@@ -21,38 +21,3 @@ export const keepFields: string[] = [
   'resource.schema_url',
   'resource.dropped_attributes_count',
 ];
-
-const renameMap: Record<string, string> = {
-  'error.exception.type': 'attributes.error.exception.type',
-  'error.stack_trace': 'attributes.error.stack_trace',
-  'error.exception.message': 'attributes.error.exception.message',
-  'span.id': 'span_id',
-  message: 'body.text',
-  'log.level': 'severity_text',
-  'trace.id': 'trace_id',
-};
-
-export function getRealFieldName(fieldName: string) {
-  // Return unchanged if field is already namespaced or real
-  if (
-    keepFields.includes(fieldName) ||
-    fieldName.startsWith('body.structured.') ||
-    fieldName.startsWith('resource.attributes.') ||
-    fieldName.startsWith('attributes.')
-  ) {
-    return fieldName;
-  }
-  if (renameMap[fieldName]) {
-    return renameMap[fieldName];
-  }
-
-  if (
-    fieldName.startsWith('host.') ||
-    fieldName.startsWith('cloud.') ||
-    fieldName.startsWith('agent.')
-  ) {
-    return `resource.attributes.${fieldName}`;
-  }
-  // Default: prefix with "attributes."
-  return `attributes.${fieldName}`;
-}

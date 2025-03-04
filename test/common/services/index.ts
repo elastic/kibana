@@ -8,7 +8,6 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 
 // pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
 const {
@@ -26,10 +25,8 @@ const {
   supertest,
   esSupertest,
   supertestWithoutAuth,
+  security,
 } = commonFunctionalServices;
-
-// pick what was there previously
-const { security } = commonFunctionalUIServices;
 
 export const services = {
   es,

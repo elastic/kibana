@@ -17,7 +17,6 @@ export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMe
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
   icon: () => getCardIcon(OnboardingCardId.siemMigrationsStart),
-  licenseTypeRequired: 'enterprise',
   Component: React.lazy(
     () =>
       import(
