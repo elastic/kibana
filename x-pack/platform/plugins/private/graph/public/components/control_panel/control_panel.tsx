@@ -8,6 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
+import { UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   ControlType,
   TermIntersect,
@@ -78,7 +80,7 @@ const ControlPanelComponent = ({
   };
 
   return (
-    <div id="sidebar" className="gphSidebar">
+    <div id="sidebar" css={[useEuiShadow('m'), styles.gphSidebar]}>
       <ControlPanelToolBar
         workspace={workspace}
         liveResponseFields={liveResponseFields}
@@ -135,6 +137,29 @@ const ControlPanelComponent = ({
       )}
     </div>
   );
+};
+
+const styles = {
+  gphSidebar: (euiThemeContext: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      right: euiThemeContext.euiTheme.size.s,
+      top: euiThemeContext.euiTheme.size.s,
+      width: `calc(${euiThemeContext.euiTheme.size.xl} * 10)`,
+      zIndex: euiThemeContext.euiTheme.levels.flyout, // https://eui.elastic.co/#/theming/more-tokens#levels
+      backgroundColor: euiThemeContext.euiTheme.colors.emptyShade,
+      border: euiThemeContext.euiTheme.border.thin,
+      padding: euiThemeContext.euiTheme.size.xs,
+      borderRadius: euiThemeContext.euiTheme.border.radius.medium,
+      opacity: 0.9,
+
+      '.help-block': {
+        fontSize: euiFontSize(euiThemeContext, 'xs', { unit: 'px' }).fontSize,
+        color: euiThemeContext.euiTheme.colors.text,
+      },
+    }),
+  gphSidebarHeader: ({ euiTheme }: UseEuiTheme) => css({}),
+  gphSidebarPanel: ({ euiTheme }: UseEuiTheme) => css({}),
 };
 
 export const ControlPanel = connect((state: GraphState) => ({

@@ -1,22 +1,3 @@
-.gphSidebar {
-  position: absolute;
-  right: $euiSizeS;
-  top: $euiSizeS;
-  width: $euiSizeXL * 10;
-  z-index: $euiZLevel1;
-  background-color: $euiColorEmptyShade;
-  border: $euiBorderThin;
-  padding: $euiSizeXS;
-  border-radius: $euiBorderRadius;
-  opacity: .9;
-  @include euiBottomShadowMedium;
-
-  .help-block {
-    font-size: $euiFontSizeXS;
-    color: $euiTextColor;
-  }
-}
-
 .gphSidebar__header {
   margin-top: $euiSizeS;
   color: $euiColorEmptyShade;
