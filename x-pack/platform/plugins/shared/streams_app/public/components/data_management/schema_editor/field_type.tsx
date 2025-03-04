@@ -19,7 +19,7 @@ export const FieldType = ({
   aliasFor?: string;
 }) => {
   if (aliasFor) {
-    return i18n.translate('xpack.sharedStreams.fieldType.aliasFor', {
+    return i18n.translate('xpack.streams.fieldType.aliasFor', {
       defaultMessage: 'Alias for {aliasFor}',
       values: { aliasFor },
     });
