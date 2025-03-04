@@ -13,9 +13,12 @@ import {
 import { cloneDeep } from 'lodash';
 import { isResponseError } from '@kbn/es-errors';
 import { State, StreamChange } from './state';
-import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stream_active_record';
-import { syncWiredStreamDefinitionObjects } from '../helpers/sync';
-import { deleteStreamObjects } from '../stream_crud';
+import {
+  StreamActiveRecord,
+  ValidationResult,
+  StreamDependencies,
+  ElasticsearchAction,
+} from './stream_active_record';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   constructor(definition: WiredStreamDefinition, dependencies: StreamDependencies) {
@@ -23,7 +26,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     // What about the assets?
   }
 
-  public clone(): StreamActiveRecord<WiredStreamDefinition> {
+  clone(): StreamActiveRecord<WiredStreamDefinition> {
     return new WiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
@@ -87,32 +90,16 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return { isValid: true, errors: [] };
   }
 
-  protected async doCommitUpsert(): Promise<void> {
-    await this.dependencies.storageClient.index({
-      id: this.definition.name,
-      document: this.definition,
-    });
+  determineElasticsearchActions(startingStateStream?: WiredStream): ElasticsearchAction[] {
+    // Check the diff between this instance and the startingStateStream instance and create actions
+    // To go from the starting state to the desired state of this stream
+    // Expressed as some actions taken on the Elasticsearch resources backing this stream
 
-    await syncWiredStreamDefinitionObjects({
-      definition: this.definition,
-      logger: this.dependencies.logger,
-      scopedClusterClient: this.dependencies.scopedClusterClient,
-      isServerless: this.dependencies.isServerless,
-    });
-    // Also update lifecycle
-
-    // Update assets
-  }
-
-  protected async doCommitDelete(): Promise<void> {
-    await deleteStreamObjects({
-      name: this.definition.name,
-      scopedClusterClient: this.dependencies.scopedClusterClient,
-      logger: this.dependencies.logger,
-    });
-
-    // Update assets
-
-    await this.dependencies.storageClient.delete({ id: this.definition.name });
+    // If startingStateStream is undefined, but the changeStatus is upserted, that means we created the stream
+    return [
+      {
+        type: 'update_tracking_document',
+      },
+    ];
   }
 }

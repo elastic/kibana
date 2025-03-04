@@ -24,13 +24,15 @@ export interface ValidationResult {
   errors: string[]; // Or Errors?
 }
 
+export interface ElasticsearchAction {
+  type: string; // A bunch of types to model based on Joe's list
+}
+
 type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
-type StreamCommitStatus = 'uncommitted' | 'committing' | 'committed' | 'failed';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected _definition: TDefinition;
-  private changeStatus: StreamChangeStatus = 'unchanged';
-  private commitStatus: StreamCommitStatus = 'uncommitted';
+  protected changeStatus: StreamChangeStatus = 'unchanged';
   protected dependencies: StreamDependencies;
 
   constructor(definition: TDefinition, dependencies: StreamDependencies) {
@@ -87,6 +89,12 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
+  // Used only when we failed to create a new stream and need to flip the stream to create deletion actions
+  // from the same definition that we attempted to create
+  markAsDeleted(): void {
+    this.changeStatus = 'deleted';
+  }
+
   async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
     try {
       return this.doValidate(desiredState, startingState);
@@ -95,40 +103,8 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  async commit(): Promise<void> {
-    try {
-      this.commitStatus = 'committing';
-      if (this.changeStatus === 'upserted') {
-        await this.doCommitUpsert();
-      } else if (this.changeStatus === 'deleted') {
-        await this.doCommitDelete();
-      }
-      this.commitStatus = 'committed';
-    } catch (error) {
-      // We should probably grab some error here?
-      this.commitStatus = 'failed';
-    }
-  }
-
-  async revert(desiredState: State, startingState: State): Promise<void> {
-    if (startingState.has(this.definition.name)) {
-      // Stream was updated or deleted
-      const startingStateDefinition = startingState.get(this.definition.name)?.definition!;
-      await this.upsert(startingStateDefinition, startingState, desiredState);
-    } else {
-      // Stream was created
-      await this.delete(startingState, desiredState);
-    }
-
-    await this.commit();
-  }
-
   hasChanged(): boolean {
     return this.changeStatus !== 'unchanged';
-  }
-
-  hasCommitted(): boolean {
-    return this.commitStatus !== 'uncommitted';
   }
 
   abstract clone(): StreamActiveRecord;
@@ -146,7 +122,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<ValidationResult>;
 
-  protected abstract doCommitUpsert(): Promise<void>;
-
-  protected abstract doCommitDelete(): Promise<void>;
+  abstract determineElasticsearchActions(
+    startingStateStream?: StreamActiveRecord<TDefinition>
+  ): ElasticsearchAction[];
 }

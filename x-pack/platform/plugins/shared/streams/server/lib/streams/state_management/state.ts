@@ -11,6 +11,7 @@ import { StreamsStorageClient } from '../service';
 import { StreamActiveRecord, ValidationResult } from './stream_active_record';
 import { streamFromDefinition } from './stream_from_definition';
 import { AssetClient } from '../assets/asset_client';
+import { ExecutionPlan } from './execution_plan';
 
 interface StateDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -41,10 +42,71 @@ export class State {
   private streamsByName: Map<string, StreamActiveRecord>;
   private dependencies: StateDependencies;
 
-  constructor(streams: StreamActiveRecord[], dependencies: StateDependencies) {
+  // Usage of State should only happen via static State.attemptChanges
+  private constructor(streams: StreamActiveRecord[], dependencies: StateDependencies) {
     this.streamsByName = new Map();
     streams.forEach((stream) => this.streamsByName.set(stream.definition.name, stream));
     this.dependencies = dependencies;
+  }
+
+  clone(): State {
+    const newStreams = this.all().map((stream) => stream.clone());
+    return new State(newStreams, this.dependencies);
+  }
+
+  // What should this function return?
+  static async attemptChanges(
+    requestedChanges: StreamChange[],
+    dependencies: StateDependencies,
+    dryRun: boolean = false
+  ) {
+    const startingState = await State.currentState(dependencies);
+
+    const desiredState = await startingState.applyChanges(requestedChanges);
+
+    const validationResult = await desiredState.validate(startingState);
+
+    if (!validationResult.isValid) {
+      // How do these translate to HTTP errors?
+      throw new Error(validationResult.errors.join(', '));
+    }
+
+    if (dryRun) {
+      const changedStreams = desiredState.changedStreams();
+      const elasticsearchActions = desiredState.determineElasticsearchActions(
+        changedStreams,
+        startingState
+      );
+      return {
+        changedStreams,
+        elasticsearchActions,
+      };
+    } else {
+      try {
+        await desiredState.commitChanges(startingState);
+      } catch (error) {
+        await desiredState.attemptRollback(startingState);
+      }
+    }
+  }
+
+  static async currentState(dependencies: StateDependencies): Promise<State> {
+    try {
+      const streamsSearchResponse = await dependencies.storageClient.search({
+        size: 10000, // Paginate if there are more...
+        sort: [{ name: 'asc' }],
+        track_total_hits: false,
+      });
+
+      const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
+        streamFromDefinition(definition, dependencies)
+      );
+
+      // State might need to be enriched with more information about these stream instances, like their existing ES resources
+      return new State(streams, dependencies);
+    } catch (error) {
+      throw new Error(`Failed to load current Streams state due to: ${error.message}`);
+    }
   }
 
   async applyChanges(requestedChanges: StreamChange[]): Promise<State> {
@@ -60,7 +122,7 @@ export class State {
     return desiredState;
   }
 
-  private async applyRequestedChange(
+  async applyRequestedChange(
     requestedChange: StreamChange,
     desiredState: State,
     startingState: State
@@ -84,7 +146,7 @@ export class State {
     }
   }
 
-  private async applyCascadingChanges(
+  async applyCascadingChanges(
     cascadingChanges: StreamChange[],
     desiredState: State,
     startingState: State
@@ -99,7 +161,7 @@ export class State {
     return excessiveCascadingChanges.flat();
   }
 
-  private async applyChange(
+  async applyChange(
     change: StreamChange,
     desiredState: State,
     startingState: State
@@ -122,11 +184,6 @@ export class State {
     return cascadingChanges.flat();
   }
 
-  private clone(): State {
-    const newStreams = this.all().map((stream) => stream.clone());
-    return new State(newStreams, this.dependencies);
-  }
-
   async validate(startingState: State): Promise<ValidationResult> {
     const desiredState = this;
     const validationResults = await Promise.all(
@@ -142,21 +199,39 @@ export class State {
     };
   }
 
-  changes() {
+  changedStreams() {
     return this.all().filter((stream) => stream.hasChanged());
   }
 
-  async commitChanges() {
-    await Promise.all(this.changes().map((stream) => stream.commit()));
+  async commitChanges(startingState: State) {
+    const executionPlan = new ExecutionPlan(this.dependencies);
+    executionPlan.plan(this.determineElasticsearchActions(this.changedStreams(), startingState));
+    executionPlan.execute();
   }
 
   async attemptRollback(startingState: State) {
-    const desiredState = this;
-    await Promise.all(
-      this.changes()
-        .filter((stream) => stream.hasCommitted())
-        .map((stream) => stream.revert(desiredState, startingState))
-    );
+    const brokenState = this;
+    const rollbackTargets = brokenState.changedStreams().map((stream) => {
+      if (startingState.has(stream.definition.name)) {
+        return startingState.get(stream.definition.name)!;
+      } else {
+        const createdStreamToCleanUp = stream.clone();
+        createdStreamToCleanUp.markAsDeleted();
+        return createdStreamToCleanUp;
+      }
+    });
+
+    const executionPlan = new ExecutionPlan(this.dependencies);
+    executionPlan.plan(this.determineElasticsearchActions(rollbackTargets, brokenState));
+    executionPlan.execute();
+  }
+
+  determineElasticsearchActions(changedStreams: StreamActiveRecord[], startingState: State) {
+    return changedStreams
+      .map((stream) =>
+        stream.determineElasticsearchActions(startingState.get(stream.definition.name))
+      )
+      .flat();
   }
 
   get(name: string) {
@@ -173,53 +248,5 @@ export class State {
 
   has(name: string) {
     return this.streamsByName.has(name);
-  }
-
-  // What should this function return?
-  static async attemptChanges(
-    requestedChanges: StreamChange[],
-    dependencies: StateDependencies,
-    dryRun: boolean = false
-  ) {
-    const startingState = await State.currentState(dependencies);
-
-    const desiredState = await startingState.applyChanges(requestedChanges);
-
-    const validationResult = await desiredState.validate(startingState);
-
-    if (!validationResult.isValid) {
-      // How do these translate to HTTP errors?
-      throw new Error(validationResult.errors.join(', '));
-    }
-
-    if (dryRun) {
-      // Perhaps we can/should compute some kind of diff here instead to make it easier for the UI to present what (in more detail) has changed?
-      return desiredState.changes();
-    } else {
-      try {
-        await desiredState.commitChanges();
-      } catch (error) {
-        await desiredState.attemptRollback(startingState);
-      }
-    }
-  }
-
-  private static async currentState(dependencies: StateDependencies): Promise<State> {
-    try {
-      const streamsSearchResponse = await dependencies.storageClient.search({
-        size: 10000, // Paginate if there are more...
-        sort: [{ name: 'asc' }],
-        track_total_hits: false,
-      });
-
-      const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
-        streamFromDefinition(definition, dependencies)
-      );
-
-      // State might need to be enriched with more information about these stream instances, like their existing ES resources
-      return new State(streams, dependencies);
-    } catch (error) {
-      throw new Error(`Failed to load current Streams state due to: ${error.message}`);
-    }
   }
 }
