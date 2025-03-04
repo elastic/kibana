@@ -55,8 +55,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    console.log('serverless setup: setProductFeatureKeys====== ')
-    securitySolution.setProductFeatureKeys(getProductProductFeatures(productTypes));
+    securitySolution.setProductFeatureKeys(new Set(getProductProductFeatures(productTypes)));
     return {};
   }
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subject, combineLatestWith } from 'rxjs';
+import { Subject, withLatestFrom, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -185,14 +185,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: 'admin',
     });
 
-    productFeatureKeys$.subscribe((productFeatureKeys) => {
-      // initial value is null, then it is set as an array in serverless/ess plugin
-      console.log('productFeatureKeys---',productFeatureKeys);
-      // This seemed to work with serverless but not sure how to deal with ess productFeatureKeys
 
-      const isInProductFeatureKeys = productFeatureKeys && productFeatureKeys.length > 0 && productFeatureKeys.includes(ProductFeatureAssistantKey.assistant);
-      if (isInProductFeatureKeys) {
-        console.log('======registering assistant management======');
+    productFeatureKeys$.pipe(withLatestFrom(plugins.licensing.license$)).subscribe(([productFeatureKeys, license]) => {
+
+      const isInProductFeatureKeys = productFeatureKeys?.has(ProductFeatureAssistantKey.assistant);
+      const hasRegistered = management?.sections.section.kibana.getApp('securityAiAssistantManagement')
+
+      if (isInProductFeatureKeys && license?.hasAtLeast('enterprise') && !hasRegistered) {
         management?.sections.section.kibana.registerApp({
           id: 'securityAiAssistantManagement',
           title: ASSISTANT_MANAGEMENT_TITLE,

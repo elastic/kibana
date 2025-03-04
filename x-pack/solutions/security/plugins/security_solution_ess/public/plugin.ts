@@ -16,6 +16,7 @@ import type {
   SecuritySolutionEssPluginStartDeps,
 } from './types';
 import { setOnboardingSettings } from './onboarding';
+import { DEFAULT_PRODUCT_FEATURES } from '../server/constants';
 
 export class SecuritySolutionEssPlugin
   implements
@@ -32,7 +33,7 @@ export class SecuritySolutionEssPlugin
   ): SecuritySolutionEssPluginSetup {
     const { securitySolution } = _setupDeps;
 
-    securitySolution.setProductFeatureKeys([]);
+    securitySolution.setProductFeatureKeys(new Set(DEFAULT_PRODUCT_FEATURES));
 
     return {};
   }

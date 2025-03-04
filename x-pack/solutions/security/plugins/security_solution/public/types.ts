@@ -214,7 +214,7 @@ export type StartRenderServices = Pick<
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;
-  setProductFeatureKeys: (productFeatureKeys: ProductFeatureKeyType[]) => void;
+  setProductFeatureKeys: (productFeatureKeys: Set<ProductFeatureKeyType>) => void;
 }
 
 export interface PluginStart {

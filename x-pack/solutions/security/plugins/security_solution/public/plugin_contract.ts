@@ -13,21 +13,21 @@ import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import { OnboardingService } from './onboarding/service';
-import { ProductFeatureKeys } from '../../../packages/features/src/types';
+import { ProductFeatureKeyType } from '../../../packages/features/src/types';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public onboardingService: OnboardingService;
   public isSolutionNavigationEnabled$: BehaviorSubject<boolean>;
-  public productFeatureKeys$: BehaviorSubject<ProductFeatureKeys | null>;
+  public productFeatureKeys$: BehaviorSubject<Set<ProductFeatureKeyType> | null>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.onboardingService = new OnboardingService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false); // defaults to classic navigation
-    this.productFeatureKeys$ = new BehaviorSubject<ProductFeatureKeys | null>(null);
+    this.productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(null);
   }
 
   public getSetupContract(): PluginSetup {
@@ -35,7 +35,7 @@ export class PluginContract {
     return {
       resolver: lazyResolver,
       experimentalFeatures: { ...this.experimentalFeatures },
-      setProductFeatureKeys: (productFeatureKeys: ProductFeatureKeys) => {
+      setProductFeatureKeys: (productFeatureKeys: Set<ProductFeatureKeyType>) => {
         this.productFeatureKeys$.next(productFeatureKeys);
       },
     };
