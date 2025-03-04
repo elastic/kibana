@@ -36,7 +36,6 @@ export function useCustomCards(
     history,
     `/otel-kubernetes/${location.search}`
   );
-  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
