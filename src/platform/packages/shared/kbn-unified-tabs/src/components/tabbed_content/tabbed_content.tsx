@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import { getTabMenuActions } from '../../utils/get_tab_menu_actions';
+import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
 import {
   addTab,
   closeTab,
@@ -89,7 +89,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   }, [changeState, createItem]);
 
   const getTabMenuItems = useMemo(() => {
-    return getTabMenuActions({
+    return getTabMenuItemsFn({
+      tabsState: state,
       onDuplicate: (item) => {
         const newItem = createItem();
         newItem.label = `${item.label} (copy)`;
@@ -99,7 +100,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState, createItem]);
+  }, [changeState, createItem, state]);
 
   return (
     <EuiFlexGroup

@@ -9,10 +9,18 @@
 
 import type { TabItem } from '../types';
 
-interface TabsState {
+export interface TabsState {
   items: TabItem[];
   selectedItem: TabItem | null;
 }
+
+export const hasSingleTab = ({ items }: TabsState): boolean => {
+  return items.length === 1;
+};
+
+export const isLastTab = ({ items }: TabsState, item: TabItem): boolean => {
+  return items[items.length - 1].id === item.id;
+};
 
 export const addTab = ({ items }: TabsState, item: TabItem): TabsState => {
   return {
