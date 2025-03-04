@@ -579,7 +579,6 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
     } as SearchBarProps)
   )
@@ -595,7 +594,6 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>)
@@ -612,7 +610,6 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       query: {
         esql: 'from dataview | project field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)',
@@ -631,7 +628,6 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       textBasedLanguageModeErrors: [
         new Error(

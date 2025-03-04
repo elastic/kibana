@@ -115,8 +115,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
         await this.expectLinkExists(by);
         if ('deepLinkId' in by) {
+          await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
           await testSubjects.click(`~nav-item-deepLinkId-${by.deepLinkId}`);
         } else if ('navId' in by) {
+          await testSubjects.existOrFail(`~nav-item-id-${by.navId}`);
           await testSubjects.click(`~nav-item-id-${by.navId}`);
         } else {
           await retry.try(async () => {

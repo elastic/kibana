@@ -35,17 +35,20 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [`nav-item-isActive`]: isActive,
   });
 
-  const togglePanel = useCallback(() => {
-    if (selectedNode?.id === item.id) {
-      closePanel();
-    } else {
-      openPanel(item);
-    }
-  }, [selectedNode?.id, item, closePanel, openPanel]);
+  const togglePanel = useCallback(
+    (target: EventTarget) => {
+      if (selectedNode?.id === item.id) {
+        closePanel();
+      } else {
+        openPanel(item, target as Element);
+      }
+    },
+    [selectedNode?.id, item, closePanel, openPanel]
+  );
 
   const onLinkClick = useCallback(
-    (_e: React.MouseEvent) => {
-      togglePanel();
+    (e: React.MouseEvent) => {
+      togglePanel(e.target);
       return;
     },
     [togglePanel]

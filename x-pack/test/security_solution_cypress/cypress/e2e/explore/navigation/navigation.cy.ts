@@ -63,7 +63,6 @@ import {
   RULES_COVERAGE_URL,
   OSQUERY_URL,
   FLEET_URL,
-  CLOUD_DEFEND_URL,
   HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -349,9 +348,5 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Fleet page', () => {
     navigateFromHeaderTo(ServerlessHeaders.FLEET, true);
     cy.url().should('include', FLEET_URL);
-  });
-  it('navigates to the Cloud defend page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.CLOUD_DEFEND, true);
-    cy.url().should('include', CLOUD_DEFEND_URL);
   });
 });

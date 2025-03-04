@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -31,13 +30,12 @@ import {
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { EvaluationSettings } from '.';
-import { SettingsTabs } from './types';
+import { ManagementSettingsTabs } from './types';
 
 interface Props {
   dataViews: DataViewsContract;
-  selectedConversation: Conversation;
   onTabChange?: (tabId: string) => void;
-  currentTab: SettingsTabs;
+  currentTab: ManagementSettingsTabs;
 }
 
 /**
@@ -45,12 +43,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({
-    dataViews,
-    selectedConversation: defaultSelectedConversation,
-    onTabChange,
-    currentTab: selectedSettingsTab,
-  }) => {
+  ({ dataViews, onTabChange, currentTab: selectedSettingsTab }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -150,7 +143,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             <ConversationSettingsManagement
               connectors={connectors}
               defaultConnector={defaultConnector}
-              defaultSelectedConversation={defaultSelectedConversation}
             />
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (

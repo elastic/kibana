@@ -62,7 +62,6 @@ export const HOSTS = '[data-test-subj="solutionSideNavPanelLink-hosts"]';
 
 export const FLEET = '[data-test-subj="solutionSideNavPanelLink-fleet:"]';
 export const ENDPOINTS = '[data-test-subj="solutionSideNavPanelLink-endpoints"]';
-export const CLOUD_DEFEND = '[data-test-subj="solutionSideNavPanelLink-cloud_defend"]';
 
 export const POLICIES = '[data-test-subj="solutionSideNavPanelLink-policy"]';
 
@@ -119,8 +118,7 @@ export const openNavigationPanelFor = (pageName: string) => {
       break;
     }
     case FLEET:
-    case ENDPOINTS:
-    case CLOUD_DEFEND: {
+    case ENDPOINTS: {
       panel = ASSETS_PANEL_BTN;
       break;
     }

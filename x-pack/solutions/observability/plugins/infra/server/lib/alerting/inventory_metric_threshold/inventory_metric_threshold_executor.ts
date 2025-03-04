@@ -350,6 +350,7 @@ export const createInventoryMetricThresholdExecutor =
           assetDetailsLocator,
           inventoryLocator,
         }),
+        reason: alertHits?.[ALERT_REASON],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS_ID,
