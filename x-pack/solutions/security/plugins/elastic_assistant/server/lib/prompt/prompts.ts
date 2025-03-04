@@ -15,7 +15,7 @@ const BASE_GEMINI_PROMPT =
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
 export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} ${INCLUDE_CITATIONS} ${KB_CATCH} \n{formattedTime}`;
-export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT} Use tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.`;
+export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Only format the response for the final output.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
 export const STRUCTURED_SYSTEM_PROMPT = `Respond to the human as helpfully and accurately as possible. ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS} You have access to the following tools:
@@ -137,7 +137,7 @@ export const ATTACK_DISCOVERY_GENERATION_TITLE =
   'A short, no more than 7 words, title for the insight, NOT formatted with special syntax or markdown. This must be as brief as possible.';
 export const ATTACK_DISCOVERY_GENERATION_INSIGHTS = `Insights with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
 
-export const BEDROCK_CHAT_TITLE = `You are a helpful assistant for Elastic Security. Assume the following user message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Respond with the title only with no other text explaining your response. As an example, for the given MESSAGE, this is the TITLE:
+export const BEDROCK_CHAT_TITLE = `You are a helpful assistant for Elastic Security. Assume the following user message is the start of a conversation between you and a user; give this conversation a short title no longer than 100 characters based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Respond with the title only, rather than answering the user's question. As an example, for the given MESSAGE, this is the TITLE:
 
 MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
