@@ -29,6 +29,7 @@ import { LINE_LIMIT } from './grok_highlighter';
 interface Props {
   fileContents: string;
   results: FindFileStructureResponse;
+  showTitle?: boolean;
 }
 
 interface SemiStructureTextData {
@@ -49,7 +50,7 @@ function semiStructureTextDataGuard(
   );
 }
 
-export const FileContents: FC<Props> = ({ fileContents, results }) => {
+export const FileContents: FC<Props> = ({ fileContents, results, showTitle = true }) => {
   let mode = EDITOR_MODE.TEXT;
   const format = results.format;
   const numberOfLines = results.num_lines_analyzed;
@@ -118,14 +119,16 @@ export const FileContents: FC<Props> = ({ fileContents, results }) => {
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.fileContents.fileContentsTitle"
-                defaultMessage="File contents"
-              />
-            </h2>
-          </EuiTitle>
+          {showTitle ? (
+            <EuiTitle size="s">
+              <h2>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.fileContents.fileContentsTitle"
+                  defaultMessage="File contents"
+                />
+              </h2>
+            </EuiTitle>
+          ) : null}
         </EuiFlexItem>
         {isSemiStructureTextData ? (
           <EuiFlexItem grow={false} data-test-subj="dataVisualizerFileContentsHighlightingSwitch">

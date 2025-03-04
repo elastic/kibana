@@ -7,36 +7,28 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-// import { EuiTextArea } from '@elastic/eui';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
-import { IngestPipeline } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
+import { IngestPipeline as IngestPipelineEditor } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
 
 interface Props {
   fileStatus: FileAnalysis;
+  showTitle?: boolean;
 }
 
-export const Pipeline: FC<Props> = ({ fileStatus }) => {
+export const IngestPipeline: FC<Props> = ({ fileStatus, showTitle = true }) => {
   const [localPipeline, setLocalPipeline] = useState(
     JSON.stringify(fileStatus.results!.ingest_pipeline, null, 2)
   );
 
-  // return (
-  //   <EuiTextArea
-  //     value={localMappings}
-  //     onChange={(e) => {
-  //       const value = e.target.value;
-  //       setLocalMappings(value);
-  //     }}
-  //   />
-  // );
   return (
-    <IngestPipeline
+    <IngestPipelineEditor
       initialized={false}
       data={localPipeline}
       onChange={(value) => {
         setLocalPipeline(value);
       }}
       indexName={''}
+      showTitle={showTitle}
     />
   );
 };

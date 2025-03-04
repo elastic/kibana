@@ -7,36 +7,28 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-// import { EuiTextArea } from '@elastic/eui';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
-import { Mappings as Mappings2 } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
+import { Mappings as MappingsEditor } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
 
 interface Props {
   fileStatus: FileAnalysis;
+  showTitle?: boolean;
 }
 
-export const Mappings: FC<Props> = ({ fileStatus }) => {
+export const Mappings: FC<Props> = ({ fileStatus, showTitle }) => {
   const [localMappings, setLocalMappings] = useState(
     JSON.stringify(fileStatus.results!.mappings, null, 2)
   );
 
-  // return (
-  //   <EuiTextArea
-  //     value={localMappings}
-  //     onChange={(e) => {
-  //       const value = e.target.value;
-  //       setLocalMappings(value);
-  //     }}
-  //   />
-  // );
   return (
-    <Mappings2
+    <MappingsEditor
       initialized={false}
       data={localMappings}
       onChange={(value) => {
         setLocalMappings(value);
       }}
       indexName={''}
+      showTitle={showTitle}
     />
   );
 };

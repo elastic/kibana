@@ -14,19 +14,26 @@ import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { getTikaDisplayType } from '../../../../../common/utils/tika_utils';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
-export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
+interface Props {
+  results: FindFileStructureResponse;
+  showTitle?: boolean;
+}
+
+export const AnalysisSummary: FC<Props> = ({ results, showTitle = true }) => {
   const items = createDisplayItems(results);
 
   return (
-    <React.Fragment>
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.analysisSummary.summaryTitle"
-            defaultMessage="Summary"
-          />
-        </h2>
-      </EuiTitle>
+    <>
+      {showTitle ? (
+        <EuiTitle size="s">
+          <h2>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.analysisSummary.summaryTitle"
+              defaultMessage="Summary"
+            />
+          </h2>
+        </EuiTitle>
+      ) : null}
 
       <EuiSpacer size="m" />
 
@@ -36,7 +43,7 @@ export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ re
         listItems={items}
         className="analysis-summary-list"
       />
-    </React.Fragment>
+    </>
   );
 };
 

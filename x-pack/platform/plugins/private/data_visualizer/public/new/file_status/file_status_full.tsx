@@ -29,7 +29,7 @@ import { FileContents } from '../../application/file_data_visualizer/components/
 import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
 import { Mappings } from './mappings';
 import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
-import { Pipeline } from './pipeline';
+import { IngestPipeline } from './pipeline';
 
 interface Props {
   uploadStatus: UploadStatus;
@@ -172,7 +172,7 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                 <EuiSpacer size="s" />
 
                 {selectedTab === TAB.SUMMARY ? (
-                  <AnalysisSummary results={fileStatus.results!} />
+                  <AnalysisSummary results={fileStatus.results!} showTitle={false} />
                 ) : null}
 
                 {selectedTab === TAB.STATS ? (
@@ -183,12 +183,17 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                   <FileContents
                     fileContents={fileStatus.fileContents}
                     results={fileStatus.results!}
+                    showTitle={false}
                   />
                 ) : null}
 
-                {selectedTab === TAB.MAPPINGS ? <Mappings fileStatus={fileStatus} /> : null}
+                {selectedTab === TAB.MAPPINGS ? (
+                  <Mappings fileStatus={fileStatus} showTitle={false} />
+                ) : null}
 
-                {selectedTab === TAB.PIPELINE ? <Pipeline fileStatus={fileStatus} /> : null}
+                {selectedTab === TAB.PIPELINE ? (
+                  <IngestPipeline fileStatus={fileStatus} showTitle={false} />
+                ) : null}
               </>
             ) : null}
           </>
