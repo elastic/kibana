@@ -95,12 +95,15 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     numberFieldsWithNonSolvableConflicts,
   } = getNumberOfFieldsByChangeType(fieldsDiff);
 
+  const fieldConflictLevel = getFieldConflictLevel(fieldsDiff);
+
   return {
     ruleDiff: {
       fields: fieldsDiff,
       num_fields_with_updates: numberFieldsWithUpdates,
       num_fields_with_conflicts: numberFieldsWithConflicts,
       num_fields_with_non_solvable_conflicts: numberFieldsWithNonSolvableConflicts,
+      field_conflict_level: fieldConflictLevel,
     },
     ruleVersions: {
       input: {
@@ -144,3 +147,16 @@ const getNumberOfFieldsByChangeType = (fieldsDiff: RuleFieldsDiff) =>
       numberFieldsWithNonSolvableConflicts: 0,
     }
   );
+
+const getFieldConflictLevel = (fieldsDiff: RuleFieldsDiff): ThreeWayDiffConflict => {
+  let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
+  Object.values<ThreeWayDiff<unknown>>(fieldsDiff).forEach((fieldDiff) => {
+    if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+      // return early as there is no higher severity
+      return ThreeWayDiffConflict.NON_SOLVABLE;
+    } else if (fieldDiff.conflict === ThreeWayDiffConflict.SOLVABLE) {
+      mostSevereFieldConflict = ThreeWayDiffConflict.SOLVABLE;
+    }
+  });
+  return mostSevereFieldConflict;
+};

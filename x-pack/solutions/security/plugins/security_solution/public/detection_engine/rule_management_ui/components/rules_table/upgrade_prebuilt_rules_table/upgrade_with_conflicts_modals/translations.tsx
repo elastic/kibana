@@ -28,6 +28,20 @@ export const UPGRADE_CONFLICTS_MODAL_CONFIRM = i18n.translate(
   }
 );
 
+export const UPGRADE_CONFLICTS_MODAL_NO_CONFLICT_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeSolvableConflictsModal.confirmTitle',
+  {
+    defaultMessage: 'Only update rules without conflicts',
+  }
+);
+
+export const UPGRADE_CONFLICTS_MODAL_SOLVABLE_CONFLICT_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeSolvableConflictsModal.confirmTitle',
+  {
+    defaultMessage: 'Update rules with solvable conflicts and no conflicts',
+  }
+);
+
 export const UPGRADE_CONFLICTS_MODAL_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeConflictsModal.affectedJobsTitle',
   {

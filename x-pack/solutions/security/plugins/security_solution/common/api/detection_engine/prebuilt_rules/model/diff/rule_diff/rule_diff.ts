@@ -17,6 +17,7 @@ import type {
   DiffableThreatMatchFields,
   DiffableThresholdFields,
 } from '../diffable_rule/diffable_rule';
+import type { ThreeWayDiffConflict } from '../three_way_diff/three_way_diff_conflict';
 
 import type { FieldsDiff } from './fields_diff';
 
@@ -58,6 +59,7 @@ interface BaseRuleDiff {
   num_fields_with_updates: number;
   num_fields_with_conflicts: number;
   num_fields_with_non_solvable_conflicts: number;
+  field_conflict_level: ThreeWayDiffConflict;
 }
 /**
  * Full rule diff contains diffs for all the top-level rule fields.

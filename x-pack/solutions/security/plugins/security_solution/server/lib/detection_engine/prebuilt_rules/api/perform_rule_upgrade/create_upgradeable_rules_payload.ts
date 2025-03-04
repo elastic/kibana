@@ -39,7 +39,11 @@ export const createModifiedPrebuiltRuleAssets = ({
   defaultPickVersion,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
-    const { pick_version: globalPickVersion = defaultPickVersion, mode } = requestBody;
+    const {
+      pick_version: globalPickVersion = defaultPickVersion,
+      mode,
+      allow_solvable_conflicts: allowSolvableConflicts,
+    } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =
       upgradeableRules.reduce<ProcessedRules>(
@@ -77,7 +81,9 @@ export const createModifiedPrebuiltRuleAssets = ({
             ) as AllFieldsDiff;
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
-              const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
+              const fieldsWithConflicts = Object.keys(
+                getFieldsDiffConflicts(calculatedRuleDiff, allowSolvableConflicts)
+              );
               if (fieldsWithConflicts.length > 0) {
                 // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
                 // than "MERGED", so throw an error for the fields that have conflicts.
@@ -152,7 +158,12 @@ function createModifiedPrebuiltRuleAsset({
   return modifiedPrebuiltRuleAsset as PrebuiltRuleAsset;
 }
 
-const getFieldsDiffConflicts = (ruleFieldsDiff: Partial<AllFieldsDiff>) =>
+const getFieldsDiffConflicts = (
+  ruleFieldsDiff: Partial<AllFieldsDiff>,
+  allowSolvableConflicts: boolean = false
+) =>
   pickBy(ruleFieldsDiff, (diff) => {
-    return diff.conflict !== 'NONE';
+    return allowSolvableConflicts
+      ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
+      : diff.conflict !== 'NONE';
   });

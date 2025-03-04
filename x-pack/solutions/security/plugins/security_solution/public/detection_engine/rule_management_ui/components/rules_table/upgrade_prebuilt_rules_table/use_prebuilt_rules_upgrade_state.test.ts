@@ -65,6 +65,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
             num_fields_with_updates: 1,
             num_fields_with_conflicts: 0,
             num_fields_with_non_solvable_conflicts: 0,
+            field_conflict_level: ThreeWayDiffConflict.NONE,
             fields: {
               name: {
                 base_version: 'base',
@@ -103,6 +104,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
             num_fields_with_updates: 1,
             num_fields_with_conflicts: 1,
             num_fields_with_non_solvable_conflicts: 0,
+            field_conflict_level: ThreeWayDiffConflict.SOLVABLE,
             fields: {
               name: {
                 base_version: 'base',
@@ -141,6 +143,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
             num_fields_with_updates: 1,
             num_fields_with_conflicts: 1,
             num_fields_with_non_solvable_conflicts: 1,
+            field_conflict_level: ThreeWayDiffConflict.NON_SOLVABLE,
             fields: {
               name: {
                 base_version: 'base',
@@ -180,6 +183,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
             num_fields_with_updates: 1,
             num_fields_with_conflicts: 1,
             num_fields_with_non_solvable_conflicts: 1,
+            field_conflict_level: ThreeWayDiffConflict.NON_SOLVABLE,
             fields: {
               name: {
                 base_version: 'base',
@@ -237,6 +241,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
             num_fields_with_updates: 1,
             num_fields_with_conflicts: 1,
             num_fields_with_non_solvable_conflicts: 1,
+            field_conflict_level: ThreeWayDiffConflict.NON_SOLVABLE,
             fields: {
               name: {
                 base_version: 'base',
@@ -325,6 +330,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
             num_fields_with_updates: 1,
             num_fields_with_conflicts: 1,
             num_fields_with_non_solvable_conflicts: 1,
+            field_conflict_level: ThreeWayDiffConflict.NON_SOLVABLE,
             fields: {
               name: {
                 base_version: 'base',
@@ -427,8 +433,10 @@ function createRuleUpgradeInfoMock(
       num_fields_with_updates: 0,
       num_fields_with_conflicts: 0,
       num_fields_with_non_solvable_conflicts: 0,
+      field_conflict_level: ThreeWayDiffConflict.NONE,
       fields: {},
     },
+    hasBaseVersion: true,
     version: 1,
     revision: 1,
     ...rewrites,

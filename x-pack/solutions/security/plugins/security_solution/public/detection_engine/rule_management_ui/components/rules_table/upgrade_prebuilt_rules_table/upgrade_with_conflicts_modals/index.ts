@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './use_upgrade_modal';
+export * from './use_upgrade_with_solvable_conflicts_modal';
+export * from './use_upgrade_with_conflicts_modal';

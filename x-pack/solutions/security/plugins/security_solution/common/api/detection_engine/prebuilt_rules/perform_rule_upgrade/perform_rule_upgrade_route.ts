@@ -124,6 +124,7 @@ export const UpgradeSpecificRulesRequest = z.object({
   pick_version: PickVersionValues.optional(),
   on_conflict: UpgradeConflictResolution.optional(),
   dry_run: z.boolean().optional(),
+  allow_solvable_conflicts: z.boolean().optional(),
 });
 
 export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
@@ -133,6 +134,7 @@ export const UpgradeAllRulesRequest = z.object({
   filter: PrebuiltRulesFilter.optional(),
   on_conflict: UpgradeConflictResolution.optional(),
   dry_run: z.boolean().optional(),
+  allow_solvable_conflicts: z.boolean().optional(),
 });
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;

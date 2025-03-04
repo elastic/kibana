@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useAsyncConfirmation } from '../../rules_table/use_async_confirmation';
-import { UpgradeWithConflictsModal } from './upgrade_modal';
+import { UpgradeWithConflictsModal } from './upgrade_confirm_modal';
 
 interface UseUpgradeWithConflictsModalResult {
   modal: ReactNode;

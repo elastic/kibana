@@ -55,6 +55,7 @@ export const calculateRuleUpgradeInfo = (
         num_fields_with_updates: ruleDiff.num_fields_with_updates,
         num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
         num_fields_with_non_solvable_conflicts: ruleDiff.num_fields_with_non_solvable_conflicts,
+        field_conflict_level: ruleDiff.field_conflict_level,
       },
     };
   });

@@ -170,6 +170,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     rulePreviewFlyout,
     confirmLegacyMlJobsUpgradeModal,
     upgradeConflictsModal,
+    upgradeSolvableConflictsModal,
     openRulePreview,
     reFetchRules,
     upgradeRules,
@@ -242,6 +243,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       <>
         {confirmLegacyMlJobsUpgradeModal}
         {upgradeConflictsModal}
+        {upgradeSolvableConflictsModal}
         {children}
         {rulePreviewFlyout}
       </>

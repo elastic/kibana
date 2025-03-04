@@ -24,11 +24,13 @@ export const getValueFromMergedVersion = ({
   upgradeableRule,
   fieldUpgradeSpecifier,
   ruleFieldsDiff,
+  allowSolvableConflicts,
 }: {
   fieldName: keyof PrebuiltRuleAsset;
   upgradeableRule: RuleTriad;
   fieldUpgradeSpecifier: NonNullable<RuleFieldsToUpgrade[keyof RuleFieldsToUpgrade]>;
   ruleFieldsDiff: AllFieldsDiff;
+  allowSolvableConflicts?: boolean;
 }) => {
   const ruleId = upgradeableRule.target.rule_id;
   const diffableRuleFieldName = mapRuleFieldToDiffableRuleField({
@@ -39,7 +41,11 @@ export const getValueFromMergedVersion = ({
   if (fieldUpgradeSpecifier.pick_version === 'MERGED') {
     const ruleFieldDiff = ruleFieldsDiff[diffableRuleFieldName];
 
-    if (ruleFieldDiff && ruleFieldDiff.conflict !== 'NONE') {
+    if (
+      ruleFieldDiff && allowSolvableConflicts
+        ? ruleFieldDiff.conflict !== 'NONE' && ruleFieldDiff.conflict !== 'SOLVABLE'
+        : ruleFieldDiff.conflict !== 'NONE'
+    ) {
       throw new Error(
         `Automatic merge calculation for field '${diffableRuleFieldName}' in rule of rule_id ${ruleId} resulted in a conflict. Please resolve the conflict manually or choose another value for 'pick_version'.`
       );
