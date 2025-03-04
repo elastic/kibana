@@ -94,7 +94,7 @@ function getChildren(
   const childSpan = serviceInstance
     .span({
       spanName: getTransactionName(transactionName, serviceInstance, index),
-      spanType: 'http',
+      spanType: 'app',
     })
     .timestamp(timestamp)
     .duration(1000)
@@ -104,15 +104,18 @@ function getChildren(
     const next = getTraceItem(rest[0]);
     if (next.serviceInstance) {
       return [
-        childSpan.destination(next.serviceInstance.fields['service.name']!).children(
-          next.serviceInstance
-            .transaction({
-              transactionName: getTransactionName(transactionName, next.serviceInstance, index),
-              transactionType: 'request',
-            })
-            .timestamp(timestamp)
-            .duration(1000)
-        ),
+        childSpan
+          .overrides({ 'span.type': 'external' })
+          .destination(next.serviceInstance.fields['service.name']!)
+          .children(
+            next.serviceInstance
+              .transaction({
+                transactionName: getTransactionName(transactionName, next.serviceInstance, index),
+                transactionType: 'request',
+              })
+              .timestamp(timestamp)
+              .duration(1000)
+          ),
       ];
     }
   }

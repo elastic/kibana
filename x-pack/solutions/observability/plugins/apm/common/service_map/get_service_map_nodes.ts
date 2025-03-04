@@ -175,7 +175,7 @@ function mapNodes({
 
         map.set(node.id, {
           ...serviceNode,
-          ...(serviceAnomalyStats ? { serviceAnomalyStats } : {}),
+          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
         });
       }
     } else {
@@ -269,14 +269,16 @@ export function getServiceMapNodes({
   // Build connections with mapped nodes
   const mappedEdges = mapEdges({ allConnections, nodes });
 
-  const uniqueNodes = Array.from(
-    new Map(
-      mappedEdges
-        .flatMap((connection) => [connection.sourceData, connection.targetData])
-        .concat(Array.from(allServices.values()))
-        .map((node) => [node.id, node])
-    ).values()
-  );
+  const uniqueNodes = mappedEdges
+    .flatMap((connection) => [connection.sourceData, connection.targetData])
+    .concat(Array.from(allServices.values()))
+    .reduce((acc, node) => {
+      if (!acc.has(node.id)) {
+        acc.set(node.id, node);
+      }
+      return acc;
+    }, new Map<string, ConnectionNode>())
+    .values();
 
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling

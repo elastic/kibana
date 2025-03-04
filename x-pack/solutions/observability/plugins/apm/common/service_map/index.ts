@@ -25,17 +25,17 @@ import type {
 export * from './utils';
 export { getServiceMapNodes } from './get_service_map_nodes';
 
-export {
+export type {
   Connection,
   ConnectionEdge,
   ConnectionNode,
-  ExitSpanDestination as DestinationService,
+  ExitSpanDestination,
   ConnectionElement,
   GroupResourceNodesResponse,
   ExternalConnectionNode,
   ServiceConnectionNode,
   ServicesResponse,
-  ServiceMapConnections as ServiceMapWithConnections,
+  ServiceMapConnections,
   ServiceMapResponse,
   ServiceMapTelemetry,
   NodeStats,

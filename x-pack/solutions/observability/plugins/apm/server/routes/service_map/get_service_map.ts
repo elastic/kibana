@@ -71,6 +71,10 @@ async function getConnectionData({
     logger.debug(`Found ${traceIds.length} traces to inspect`);
 
     if (useV2) {
+      if (traceIds.length === 0) {
+        return { spans: [], tracesCount: 0 };
+      }
+
       const spans = await withApmSpan(
         'get_service_map_exit_spans_and_transactions_from_traces',
         () =>
