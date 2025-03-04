@@ -8,7 +8,6 @@
 import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import { isNativeCspFinding } from './is_native_csp_finding';
 
-export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
 export const WIZ_MISCONFIGURATIONS_DATASET = 'wiz.cloud_configuration_finding';
 export const WIZ_VULN_DATASET = 'wiz.vulnerability';

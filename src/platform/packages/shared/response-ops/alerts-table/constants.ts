@@ -137,3 +137,4 @@ export const CELL_ACTIONS_EXPAND_TEST_ID = 'euiDataGridCellExpandButton';
 export const FIELD_BROWSER_TEST_ID = 'fields-browser-container';
 export const FIELD_BROWSER_BTN_TEST_ID = 'show-field-browser';
 export const FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID = 'field-browser-custom-create-btn';
+export const ERROR_PROMPT_TEST_ID = 'alertsTableErrorPrompt';

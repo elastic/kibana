@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { TransportResult } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { sanitizeBulkErrorResponse } from './sanitize_bulk_response';
 
 // Using https://www.elastic.co/guide/en/elasticsearch/reference/8.11/docs-bulk.html

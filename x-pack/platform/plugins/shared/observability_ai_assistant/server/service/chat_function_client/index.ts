@@ -9,6 +9,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
+import { Logger } from '@kbn/logging';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type {
   AdHocInstruction,
@@ -166,6 +167,7 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
+    logger,
     connectorId,
     simulateFunctionCalling,
   }: {
@@ -174,6 +176,7 @@ export class ChatFunctionClient {
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    logger: Logger;
     connectorId: string;
     simulateFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
@@ -187,16 +190,26 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.handler.respond(
-      {
-        arguments: parsedArguments,
-        messages,
-        screenContexts: this.screenContexts,
-        chat,
-        connectorId,
-        simulateFunctionCalling,
-      },
-      signal
+    logger.debug(
+      () => `Executing function ${name} with arguments: ${JSON.stringify(parsedArguments)}`
     );
+
+    try {
+      return await fn.handler.respond(
+        {
+          arguments: parsedArguments,
+          messages,
+          screenContexts: this.screenContexts,
+          chat,
+          connectorId,
+          simulateFunctionCalling,
+        },
+        signal
+      );
+    } catch (e) {
+      logger.error(`Error executing function "${name}": ${e.message}`);
+      logger.error(e);
+      throw e;
+    }
   }
 }

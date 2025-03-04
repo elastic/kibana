@@ -18,11 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorIcon } from '@kbn/search-shared-ui';
-import {
-  SearchEmptyPrompt,
-  DecorativeHorizontalStepper,
-  EuiIconPlugs,
-} from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { docLinks } from '../../../../common/doc_links';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
@@ -38,7 +34,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
 
   return (
     <SearchEmptyPrompt
-      icon={EuiIconPlugs}
+      icon="plugs"
       title={i18n.translate('xpack.serverlessSearch.elasticManagedConnectorEmpty.title', {
         defaultMessage: 'Elastic managed connectors',
       })}
@@ -114,7 +110,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                       justifyContent="center"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type={EuiIconPlugs} />
+                        <EuiIcon color="primary" size="l" type="plugs" />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiIcon size="m" type="sortRight" />
@@ -177,7 +173,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                           <EuiIcon size="m" type="sortRight" />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type={EuiIconPlugs} />
+                          <EuiIcon color="primary" size="l" type="plugs" />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon size="m" type="sortRight" />

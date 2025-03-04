@@ -8,14 +8,12 @@
 import { randomBytes } from 'node:crypto';
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
+import { Client } from '@elastic/elasticsearch';
 import axios from 'axios';
-import {
-  API_VERSIONS,
-  ConversationCreateProps,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-} from '@kbn/elastic-assistant-common';
 import pLimit from 'p-limit';
-import { getCreateConversationSchemaMock } from '../server/__mocks__/conversations_schema.mock';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
+import { getEsCreateConversationSchemaMock } from '../server/__mocks__/conversations_schema.mock';
 
 /**
  * Developer script for creating conversations.
@@ -35,14 +33,22 @@ export const create = async () => {
     .option('kibana', {
       type: 'string',
       description: 'Kibana url including auth',
-      default: `http://elastic:changeme@localhost:5601`,
+      default: `http://elastic:changeme@localhost:5601/kbn`,
+    })
+    .option('esUrl', {
+      type: 'string',
+      description: 'Elasticsearch URL including auth',
+      default: `http://elastic:changeme@localhost:9200`,
     })
     .parse();
+
   const kibanaUrl = removeTrailingSlash(argv.kibana);
+  const esUrl = removeTrailingSlash(argv.esUrl);
+  const esClient = new Client({ node: esUrl });
   const count = Number(argv.count);
   logger.info(`Kibana URL: ${kibanaUrl}`);
+  logger.info(`Elasticsearch URL: ${esUrl}`);
   const connectorsApiUrl = `${kibanaUrl}/api/actions/connectors`;
-  const conversationsCreateUrl = `${kibanaUrl}${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}`;
 
   try {
     logger.info(`Fetching available connectors...`);
@@ -66,17 +72,16 @@ export const create = async () => {
       limit(() =>
         retryRequest(
           () =>
-            axios.post(
-              conversationsCreateUrl,
-              getCreateConversationSchemaMock({
+            esClient.index({
+              index: '.kibana-elastic-ai-assistant-conversations-default',
+              document: getEsCreateConversationSchemaMock({
                 ...getMockConversationContent(),
-                apiConfig: {
-                  actionTypeId: aiConnectors[0].connector_type_id,
-                  connectorId: aiConnectors[0].id,
+                api_config: {
+                  connector_id: aiConnectors[0].id,
+                  action_type_id: aiConnectors[0].connector_type_id,
                 },
               }),
-              { headers: requestHeaders }
-            ),
+            }),
           3, // Retry up to 3 times
           1000 // Delay of 1 second between retries
         )
@@ -122,31 +127,52 @@ const retryRequest = async (
     throw e; // If retries are exhausted, throw the error
   }
 };
+const getRandomISODate = () => {
+  const now = new Date();
+  const probabilities = [
+    { chance: 3 / 10, daysAgo: Math.floor(Math.random() * 335) + 31 }, // Over a month ago
+    { chance: 1 / 10, daysAgo: 4 }, // In the last week
+    { chance: 1 / 10, daysAgo: 1 }, // Yesterday
+    { chance: 1 / 10, daysAgo: 0 }, // Today
+    { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 7) + 7 }, // Two weeks ago
+    { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 14) + 14 }, // Over two weeks ago
+  ];
 
-const getMockConversationContent = (): Partial<ConversationCreateProps> => ({
-  title: `A ${randomBytes(4).toString('hex')} title`,
-  isDefault: false,
-  messages: [
-    {
-      content: 'Hello robot',
-      role: 'user',
-      timestamp: '2019-12-13T16:40:33.400Z',
-      traceData: {
-        traceId: '1',
-        transactionId: '2',
-      },
-    },
-    {
-      content: 'Hello human',
-      role: 'assistant',
-      timestamp: '2019-12-13T16:41:33.400Z',
-      traceData: {
-        traceId: '3',
-        transactionId: '4',
-      },
-    },
-  ],
-});
+  const rand = Math.random();
+  let cumulativeProbability = 0;
+
+  for (const { chance, daysAgo } of probabilities) {
+    cumulativeProbability += chance;
+    if (rand <= cumulativeProbability) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - daysAgo);
+      return targetDate.toISOString();
+    }
+  }
+
+  // Fallback (should never be reached)
+  return now.toISOString();
+};
+
+const getMockConversationContent = (): {
+  title: string;
+  '@timestamp': string;
+  created_at: string;
+  updated_at: string;
+  messages: CreateMessageSchema['messages'];
+} => {
+  const timestamp = getRandomISODate();
+  return {
+    title: `A ${randomBytes(4).toString('hex')} title`,
+    created_at: timestamp,
+    updated_at: timestamp,
+    '@timestamp': timestamp,
+    messages: [
+      { content: 'Hello robot', role: 'user', '@timestamp': timestamp },
+      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp },
+    ],
+  };
+};
 
 export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 

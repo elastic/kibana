@@ -13,7 +13,6 @@ import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
 import {
   createLlmProxy,
-  isFunctionTitleRequest,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { interceptRequest } from '../../common/intercept_request';
@@ -137,11 +136,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           ],
           conversation: {
             title: 'My old conversation',
-            token_count: {
-              completion: 1,
-              prompt: 1,
-              total: 2,
-            },
           },
           '@timestamp': '2024-04-18T14:29:22.948',
           public: false,
@@ -243,51 +237,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             });
 
             describe('and sending over some text', () => {
-              before(async () => {
-                const titleInterceptor = proxy.intercept('title', (body) =>
-                  isFunctionTitleRequest(body)
-                );
+              const expectedTitle = 'My title';
+              const expectedResponse = 'My response';
 
-                const conversationInterceptor = proxy.intercept(
-                  'conversation',
-                  (body) =>
-                    body.tools?.find((fn) => fn.function.name === 'title_conversation') ===
-                    undefined
-                );
+              before(async () => {
+                void proxy.interceptTitle(expectedTitle);
+                void proxy.interceptConversation(expectedResponse);
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
-
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                const [titleSimulator, conversationSimulator] = await Promise.all([
-                  titleInterceptor.waitForIntercept(),
-                  conversationInterceptor.waitForIntercept(),
-                ]);
-
-                await titleSimulator.next({
-                  content: '',
-                  tool_calls: [
-                    {
-                      id: 'id',
-                      index: 0,
-                      function: {
-                        name: 'title_conversation',
-                        arguments: JSON.stringify({ title: 'My title' }),
-                      },
-                    },
-                  ],
-                });
-
-                await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                await titleSimulator.complete();
-
-                await conversationSimulator.next('My response');
-
-                await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                await conversationSimulator.complete();
-
+                await proxy.waitForAllInterceptorsSettled();
                 await header.waitUntilLoadingHasFinished();
               });
 
@@ -298,7 +258,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(response.body.conversations.length).to.eql(2);
 
-                expect(response.body.conversations[0].conversation.title).to.be('My title');
+                expect(response.body.conversations[0].conversation.title).to.be(expectedTitle);
 
                 const { messages, systemMessage } = response.body.conversations[0];
 
@@ -326,7 +286,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(pick(assistantResponse, 'role', 'content')).to.eql({
                   role: 'assistant',
-                  content: 'My response',
+                  content: expectedResponse,
                 });
               });
 
@@ -335,25 +295,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 expect(links.length).to.eql(2);
 
                 const title = await links[0].getVisibleText();
-                expect(title).to.eql('My title');
+                expect(title).to.eql(expectedTitle);
               });
 
               describe('and adding another prompt', () => {
                 before(async () => {
-                  const conversationInterceptor = proxy.intercept('conversation', () => true);
+                  void proxy.interceptConversation('My second response');
 
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
-
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                  const conversationSimulator = await conversationInterceptor.waitForIntercept();
-
-                  await conversationSimulator.next('My second response');
-
-                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                  await conversationSimulator.complete();
-
+                  await proxy.waitForAllInterceptorsSettled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
@@ -423,41 +375,40 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
             describe('and opening an old conversation', () => {
               before(async () => {
+                log.info('SQREN: Opening the old conversation');
                 const conversations = await testSubjects.findAll(
                   ui.pages.conversations.conversationLink
                 );
-                await conversations[1].click();
+
+                await conversations[0].click();
               });
 
               describe('and sending another prompt', () => {
                 before(async () => {
-                  const conversationInterceptor = proxy.intercept('conversation', () => true);
+                  void proxy.interceptConversation(
+                    'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
+                  );
 
                   await testSubjects.setValue(
                     ui.pages.conversations.chatInput,
                     'And what are SLIs?'
                   );
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
+                  log.info('SQREN: Waiting for the message to be displayed');
 
-                  const conversationSimulator = await conversationInterceptor.waitForIntercept();
-
-                  await conversationSimulator.next(
-                    'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
-                  );
-
-                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                  await conversationSimulator.complete();
-
+                  await proxy.waitForAllInterceptorsSettled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
                 describe('and choosing to send feedback', () => {
                   before(async () => {
                     await telemetry.setOptIn(true);
+
+                    log.info('SQREN: Clicking on the positive feedback button');
                     const feedbackButtons = await testSubjects.findAll(
                       ui.pages.conversations.positiveFeedbackButton
                     );
+
                     await feedbackButtons[feedbackButtons.length - 1].click();
                   });
 
