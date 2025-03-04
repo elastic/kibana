@@ -21,6 +21,7 @@ import {
   EuiPageSidebar,
   EuiPageSidebarProps,
   useEuiTheme,
+  useEuiBreakpoint,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
@@ -310,16 +311,29 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   );
 
   const { euiTheme } = useEuiTheme();
+  const smallScreenBreakpoint = useEuiBreakpoint(['xs', 's']);
 
   if (!dataView) {
     return null;
   }
 
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
-    className: classnames('unifiedFieldListSidebar', {
-      'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
-      ['unifiedFieldListSidebar--fullWidth']: fullWidth,
-    }),
+    className: classnames('unifiedFieldListSidebar'), // TODO remove after migrating.unifiedFieldListSidebar .unifiedFieldListItemButton  &.kbnFieldButton {
+    css: css`
+      overflow: hidden;
+      margin: 0 !important;
+      flex-grow: 1;
+      padding: ${isSidebarCollapsed ? `${euiTheme.size.s} ${euiTheme.size.s} 0` : '0'};
+      height: 100%;
+      width: ${fullWidth ? '100%' : isSidebarCollapsed ? 'auto' : `${euiTheme.base * 19}px`};
+      min-width: ${fullWidth ? '0 !important' : 'initial'};
+
+      ${smallScreenBreakpoint} {
+        width: 100%;
+        padding: ${euiTheme.size.base};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+      }
+    `,
     'aria-label': i18n.translate('unifiedFieldList.fieldListSidebar.fieldsSidebarAriaLabel', {
       defaultMessage: 'Fields',
     }),
@@ -398,6 +412,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
               </EuiFlexGroup>
             }
             className="unifiedFieldListSidebar__list"
+            css={css`
+              padding: ${`${euiTheme.size.s} ${euiTheme.size.xs} 0 ${euiTheme.size.xs}`};
+            `}
           >
             {showFieldList ? (
               <FieldListGrouped
