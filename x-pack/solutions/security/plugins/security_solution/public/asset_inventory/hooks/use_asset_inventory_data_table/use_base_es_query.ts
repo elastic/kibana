@@ -9,8 +9,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildEsQuery, type EsQueryConfig } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo } from 'react';
-import { useDataViewContext } from '../data_view_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { useDataViewContext } from '../data_view_context';
 import type { AssetsBaseURLQuery } from './use_asset_inventory_data_table';
 
 interface AssetsBaseESQueryConfig {
@@ -38,11 +38,7 @@ const getBaseQuery = ({
   }
 };
 
-export const useBaseEsQuery = ({
-  filters = [],
-  query,
-  nonPersistedFilters,
-}: AssetsBaseURLQuery) => {
+export const useBaseEsQuery = ({ filters = [], query }: AssetsBaseURLQuery) => {
   const {
     notifications: { toasts },
     data: {
@@ -57,11 +53,11 @@ export const useBaseEsQuery = ({
     () =>
       getBaseQuery({
         dataView,
-        filters: filters.concat(nonPersistedFilters ?? []).flat(),
+        filters,
         query,
         config,
       }),
-    [dataView, filters, nonPersistedFilters, query, config]
+    [dataView, filters, query, config]
   );
 
   /**
