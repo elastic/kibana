@@ -160,7 +160,7 @@ const styles = {
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active)': {
+    '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',
