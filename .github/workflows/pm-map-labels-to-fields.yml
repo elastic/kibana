@@ -2,6 +2,9 @@ name: Map issue labels to project fields
 on:
   schedule:
     - cron: '0 */1 * * *'
+  push:
+    branches:
+      - add-project-labelling-action
 
 jobs:
   map-labels-to-fields:
