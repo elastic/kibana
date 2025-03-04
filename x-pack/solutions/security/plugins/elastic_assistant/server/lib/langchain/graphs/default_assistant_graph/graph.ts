@@ -15,6 +15,7 @@ import { Replacements } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
@@ -27,7 +28,6 @@ import { persistConversationChanges } from './nodes/persist_conversation_changes
 import { respond } from './nodes/respond';
 import { NodeType } from './constants';
 import { getStateAnnotation } from './state';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -69,7 +69,7 @@ export const getDefaultAssistantGraph = ({
 
     const stateAnnotation = getStateAnnotation({ getFormattedTime });
 
-    const toolNodeForGraph = new ToolNode(tools)
+    const toolNodeForGraph = new ToolNode(tools);
 
     // Put together a new graph using default state from above
     const graph = new StateGraph(stateAnnotation)
