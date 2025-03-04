@@ -18,7 +18,7 @@ export interface TransactionSummaryProps {
 }
 
 export function TransactionSummary({ fieldConfiguration, fieldId }: TransactionSummaryProps) {
-  if (fieldConfiguration.value) {
+  if (!fieldConfiguration.value) {
     return null;
   }
 
