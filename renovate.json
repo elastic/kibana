@@ -3671,25 +3671,6 @@
       "enabled": true
     },
     {
-      "groupName": "react-syntax-highlighter",
-      "matchDepNames": [
-        "react-syntax-highlighter",
-        "@types/react-syntax-highlighter"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "native-hdr-histogram",
       "matchDepNames": [
         "native-hdr-histogram"
