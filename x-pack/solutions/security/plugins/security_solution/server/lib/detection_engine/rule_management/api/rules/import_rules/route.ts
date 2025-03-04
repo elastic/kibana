@@ -168,24 +168,23 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           let importRuleResponse: ImportRuleResponse[] = [];
 
           if (
-            ruleCustomizationStatus.isRulesCustomizationEnabled ||
             ruleCustomizationStatus.customizationDisabledReason ===
-              PrebuiltRulesCustomizationDisabledReason.License
+            PrebuiltRulesCustomizationDisabledReason.FeatureFlag
           ) {
-            importRuleResponse = await importRules({
-              ruleChunks,
-              overwriteRules: request.query.overwrite,
-              allowMissingConnectorSecrets: !!actionConnectors.length,
-              ruleSourceImporter,
-              detectionRulesClient,
-            });
-          } else {
             importRuleResponse = await importRulesLegacy({
               ruleChunks,
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
               detectionRulesClient,
               savedObjectsClient,
+            });
+          } else {
+            importRuleResponse = await importRules({
+              ruleChunks,
+              overwriteRules: request.query.overwrite,
+              allowMissingConnectorSecrets: !!actionConnectors.length,
+              ruleSourceImporter,
+              detectionRulesClient,
             });
           }
 

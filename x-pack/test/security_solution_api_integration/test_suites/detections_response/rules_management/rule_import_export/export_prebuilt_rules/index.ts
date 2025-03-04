@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Rules Management - Rule Bulk Action API - Export - Customization Disabled', function () {
-    loadTestFile(require.resolve('./bulk_export'));
+  describe('Rules Management - Prebuilt rule export', function () {
+    loadTestFile(require.resolve('./export_prebuilt_rules'));
   });
 }

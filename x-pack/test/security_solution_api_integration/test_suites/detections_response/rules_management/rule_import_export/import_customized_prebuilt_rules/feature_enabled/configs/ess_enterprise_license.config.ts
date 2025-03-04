@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Rules Management - Rule Import Integration Tests - Importing customized prebuilt rules - ESS Env',
+        'Rules Management - Rule Import Integration Tests - Importing customized prebuilt rules - Customization enabled - ESS Env',
     },
   };
 

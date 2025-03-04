@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../../config/serverless/config.base.essentials';
+import { createTestConfig } from '../../../../../../config/serverless/config.base.essentials';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Export Integration Tests - Customization enabled - Serverless Env',
+      'Rules Management - Rule Bulk Actions Integration Tests - Bulk Export - Customization disabled - Serverless Env',
   },
-  kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-      'prebuiltRulesCustomizationEnabled',
-    ])}`,
-  ],
+  kbnTestServerArgs: [],
 });

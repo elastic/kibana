@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../../../config/ess/config.base.basic')
+    require.resolve('../../../../../../config/ess/config.base.trial')
   );
 
   const testConfig = {
@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Rules Management - Rule Bulk Actions Integration Tests - Bulk Export with feature flag enabled - ESS Env',
+        'Rules Management - Prebuilt Rule Export Integration Tests - Customization enabled - ESS Env',
     },
   };
 

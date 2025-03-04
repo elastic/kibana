@@ -74,7 +74,6 @@ export const importRules = async ({
         const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
         const isCustomized = (ruleSource.type === 'external' && ruleSource.is_customized) ?? false;
 
-        // If it's a customized rule and the license is not sufficient, we should not import it
         if (
           isCustomized &&
           ruleCustomizationStatus.customizationDisabledReason ===

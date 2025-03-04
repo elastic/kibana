@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Import - Customization Disabled', () => {
+  describe('@ess @serverless @skipInServerlessMKI Prebuilt rule import', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);

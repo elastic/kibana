@@ -7,15 +7,15 @@
 
 import expect from 'expect';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   binaryToString,
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
-} from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+} from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -23,13 +23,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Bulk action - Export - Customization Disabled', () => {
+  describe('@ess @serverless @skipInServerlessMKI Bulk action - Export', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    it(`doesn't export prebuilt rules if the feature flag is disabled`, async () => {
+    it(`exports prebuilt rules if the feature flag is enabled`, async () => {
       const ruleAsset = createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 });
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
       await installPrebuiltRules(es, supertest);
@@ -45,10 +45,18 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200)
         .parse(binaryToString);
 
-      const exportDetails = JSON.parse(body.toString());
+      const [ruleJson, exportDetailsJson] = body.toString().split(/\n/);
 
-      expect(exportDetails).toMatchObject({
-        missing_rules: [{ rule_id: 'rule-1' }],
+      expect(JSON.parse(ruleJson)).toMatchObject({
+        id: installedRule.id,
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+        },
+      });
+
+      expect(JSON.parse(exportDetailsJson)).toMatchObject({
+        missing_rules: [],
       });
     });
   });

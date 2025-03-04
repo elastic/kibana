@@ -11,7 +11,7 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Import Integration Tests - Importing customized prebuilt rules - Serverless Env',
+      'Rules Management - Rule Import Integration Tests - Importing customized prebuilt rules - Customization disabled - Serverless Env',
   },
   kbnTestServerArgs: [],
 });

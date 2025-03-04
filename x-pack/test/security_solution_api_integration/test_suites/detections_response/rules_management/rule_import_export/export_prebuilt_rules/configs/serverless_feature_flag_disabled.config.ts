@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Export Integration Tests - Customization disabled - Serverless Env',
+      'Rules Management - Prebuilt Rule Export Integration Tests - Customization disabled - Serverless Env',
   },
 });
