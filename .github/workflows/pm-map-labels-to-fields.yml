@@ -6,11 +6,6 @@ on:
     branches:
       - add-project-labelling-action
 
-permissions:
-  contents: read
-  repository-projects: read
-  issues: write
-
 jobs:
   map-labels-to-fields:
     name: 'Map issue labels to project fields'
@@ -29,7 +24,7 @@ jobs:
       - name: Update every issue in project 1525 (https://github.com/elastic/projects/1525)
         uses: ./actions/github-projects/map-labels
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.PM_GH_TOKEN}}
           all: 'true'
           project-number: 1525
           owner: 'elastic'
@@ -38,7 +33,7 @@ jobs:
       - name: Update every issue in project 1141 (https://github.com/elastic/projects/1141)
         uses: ./actions/github-projects/map-labels
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.PM_GH_TOKEN}}
           all: 'true'
           project-number: 1141
           owner: 'elastic'
