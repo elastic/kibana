@@ -102,7 +102,6 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
   getColumnsByType,
   definition,
   callbacks,
-  previousCommands,
 }: CommandSuggestParams<'join'>): Promise<SuggestionRawDefinition[]> => {
   let commandText: string = innerText;
 

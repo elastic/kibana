@@ -72,7 +72,11 @@ export const findDocuments = async <TSearchSchema>({
         query,
         track_total_hits: true,
         sort,
-        _source: true,
+        _source: fields?.length
+          ? {
+              includes: fields,
+            }
+          : true,
         from: (page - 1) * perPage,
         ignore_unavailable: true,
         index,
@@ -101,7 +105,11 @@ export const findDocuments = async <TSearchSchema>({
           seq_no_primary_term: true,
           from: (page - 1) * perPage,
           sort,
-          _source: true,
+          _source: fields?.length
+            ? {
+                includes: fields,
+              }
+            : true,
         },
         { index },
         {
@@ -111,7 +119,11 @@ export const findDocuments = async <TSearchSchema>({
           seq_no_primary_term: true,
           from: (page - 1) * mSearch.perPage,
           sort,
-          _source: true,
+          _source: fields?.length
+            ? {
+                includes: fields,
+              }
+            : true,
         },
       ],
       ignore_unavailable: true,
