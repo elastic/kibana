@@ -49,16 +49,19 @@ describe('getScoutPlaywrightConfigs', () => {
         'x-pack/platform/plugins/private/plugin_a/ui_tests/playwright.config.ts',
         'x-pack/platform/plugins/private/plugin_a/ui_tests/parallel.playwright.config.ts',
       ],
+      usesParallelWorkers: true,
       group: 'platform',
       pluginPath: 'x-pack/platform/plugins/private/plugin_a',
     });
     expect(plugins.get('plugin_b')).toEqual({
       configs: ['x-pack/solutions/security/plugins/plugin_b/ui_tests/playwright.config.ts'],
+      usesParallelWorkers: false,
       group: 'security',
       pluginPath: 'x-pack/solutions/security/plugins/plugin_b',
     });
     expect(plugins.get('plugin_c')).toEqual({
       configs: ['src/platform/plugins/shared/plugin_c/ui_tests/playwright.config.ts'],
+      usesParallelWorkers: false,
       group: 'platform',
       pluginPath: 'src/platform/plugins/shared/plugin_c',
     });

@@ -16,6 +16,7 @@ export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/pl
 interface PluginScoutConfig {
   group: string;
   pluginPath: string;
+  usesParallelWorkers: boolean;
   configs: string[];
 }
 
@@ -54,7 +55,7 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
     return null;
   };
 
-  const plugins = new Map<string, PluginScoutConfig>();
+  const pluginsWithConfigs = new Map<string, PluginScoutConfig>();
 
   files.forEach((filePath) => {
     const matchResult = matchPluginPath(filePath);
@@ -67,15 +68,23 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
     const group =
       Object.entries(typeMappings).find(([key]) => filePath.includes(key))?.[1] || 'unknown';
 
-    if (!plugins.has(pluginName)) {
-      plugins.set(pluginName, { group, pluginPath, configs: [] });
+    if (!pluginsWithConfigs.has(pluginName)) {
+      pluginsWithConfigs.set(pluginName, {
+        group,
+        pluginPath,
+        configs: [],
+        usesParallelWorkers: false,
+      });
     }
 
-    const pluginData = plugins.get(pluginName)!;
+    const pluginData = pluginsWithConfigs.get(pluginName)!;
     if (!pluginData.configs.includes(filePath)) {
       pluginData.configs.push(filePath);
+      if (filePath.endsWith('parallel.playwright.config.ts')) {
+        pluginData.usesParallelWorkers = true;
+      }
     }
   });
 
-  return plugins;
+  return pluginsWithConfigs;
 };
