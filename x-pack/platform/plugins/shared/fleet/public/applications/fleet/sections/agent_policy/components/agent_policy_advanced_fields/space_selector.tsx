@@ -84,7 +84,7 @@ export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
       res.data?.items.map((item: any) => ({
         label: item.name,
         key: item.id,
-        ...item,
+        color: item.color,
       })) ?? []
     );
   }, [res.data]);
