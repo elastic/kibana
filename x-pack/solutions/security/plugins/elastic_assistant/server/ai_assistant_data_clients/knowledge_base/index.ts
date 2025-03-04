@@ -92,6 +92,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+  modelIdOverride: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -165,7 +166,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public getInferenceEndpointId = async () => {
     const elserId = await this.options.getElserId();
     // Don't use default enpdpoint for pt_tiny_elser
-    if (!ELSER_MODEL_2.includes(elserId)) {
+    console.error('getInfEndpotni', this.options.modelIdOverride);
+    if (this.options.modelIdOverride) {
       return ASSISTANT_ELSER_INFERENCE_ID;
     }
     const esClient = await this.options.elasticsearchClientPromise;
@@ -289,6 +291,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     const esClient = await this.options.elasticsearchClientPromise;
     const inferenceId = await this.getInferenceEndpointId();
+
+    console.error('createInferenceEndpoint', inferenceId, elserId);
 
     if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
       await this.deleteInferenceEndpoint();
@@ -421,11 +425,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!inferenceExists) {
         await this.createInferenceEndpoint();
 
-        this.options.logger.debug(
+        this.options.logger.error(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
         );
       } else {
-        this.options.logger.debug(
+        this.options.logger.error(
           `Inference endpoint for ELSER model '${elserId}' is already deployed`
         );
       }
@@ -460,7 +464,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
       }
 
-      if (await this.isInferenceEndpointExists(ASSISTANT_ELSER_INFERENCE_ID)) {
+      const inferenceId = await this.getInferenceEndpointId();
+
+      console.error('inferenceId', inferenceId);
+
+      if (
+        inferenceId !== ASSISTANT_ELSER_INFERENCE_ID &&
+        (await this.isInferenceEndpointExists(ASSISTANT_ELSER_INFERENCE_ID))
+      ) {
         try {
           await this.deleteInferenceEndpoint();
         } catch (error) {

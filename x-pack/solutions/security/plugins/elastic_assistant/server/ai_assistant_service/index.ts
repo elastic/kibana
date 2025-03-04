@@ -95,6 +95,7 @@ export class AIAssistantService {
   private initialized: boolean;
   private isInitializing: boolean = false;
   private getElserId: GetElser;
+  private modelIdOverride: boolean = false;
   private conversationsDataStream: DataStreamSpacesAdapter;
   private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
@@ -220,6 +221,76 @@ export class AIAssistantService {
     return newDataStream;
   };
 
+  private async rolloverDataStream(
+    initialInferenceEndpointId: string,
+    targetInferenceEndpointId: string
+  ): Promise<void> {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const currentDataStream = this.createDataStream({
+      resource: 'knowledgeBase',
+      kibanaVersion: this.options.kibanaVersion,
+      fieldMap: {
+        ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+        semantic_text: {
+          type: 'semantic_text',
+          array: false,
+          required: false,
+          inference_id: initialInferenceEndpointId,
+          search_inference_id: targetInferenceEndpointId,
+        },
+      },
+    });
+
+    // Add `search_inference_id` to the existing mappings
+    await currentDataStream.install({
+      esClient,
+      logger: this.options.logger,
+      pluginStop$: this.options.pluginStop$,
+    });
+
+    // Migrate data stream mapping to the default inference_id
+    const newDS = this.createDataStream({
+      resource: 'knowledgeBase',
+      kibanaVersion: this.options.kibanaVersion,
+      fieldMap: {
+        ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
+        semantic_text: {
+          type: 'semantic_text',
+          array: false,
+          required: false,
+          ...(targetInferenceEndpointId !== ELASTICSEARCH_ELSER_INFERENCE_ID
+            ? { inference_id: targetInferenceEndpointId }
+            : {}),
+        },
+      },
+      settings: {
+        // force new semantic_text field behavior
+        'index.mapping.semantic_text.use_legacy_format': false,
+      },
+      writeIndexOnly: true,
+    });
+
+    // We need to first install the templates and then rollover the indices
+    await newDS.installTemplates({
+      esClient,
+      logger: this.options.logger,
+      pluginStop$: this.options.pluginStop$,
+    });
+
+    const indexNames = (
+      await esClient.indices.getDataStream({ name: newDS.name })
+    ).data_streams.map((ds) => ds.name);
+
+    try {
+      await Promise.all(
+        indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
+      );
+    } catch (e) {
+      /* empty */
+    }
+  }
+
   private async initializeResources(): Promise<InitializationPromise> {
     this.isInitializing = true;
     try {
@@ -267,66 +338,17 @@ export class AIAssistantService {
             ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID
       );
 
-      if (isUsingDedicatedInferenceEndpoint) {
-        const currentDataStream = this.createDataStream({
-          resource: 'knowledgeBase',
-          kibanaVersion: this.options.kibanaVersion,
-          fieldMap: {
-            ...omit(knowledgeBaseFieldMap, 'semantic_text'),
-            semantic_text: {
-              type: 'semantic_text',
-              array: false,
-              required: false,
-              inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-              search_inference_id: ELASTICSEARCH_ELSER_INFERENCE_ID,
-            },
-          },
-        });
-
-        // Add `search_inference_id` to the existing mappings
-        await currentDataStream.install({
-          esClient,
-          logger: this.options.logger,
-          pluginStop$: this.options.pluginStop$,
-        });
-
-        // Migrate data stream mapping to the default inference_id
-        const newDS = this.createDataStream({
-          resource: 'knowledgeBase',
-          kibanaVersion: this.options.kibanaVersion,
-          fieldMap: {
-            ...omit(knowledgeBaseFieldMap, ['semantic_text', 'vector', 'vector.tokens']),
-            semantic_text: {
-              type: 'semantic_text',
-              array: false,
-              required: false,
-            },
-          },
-          settings: {
-            // force new semantic_text field behavior
-            'index.mapping.semantic_text.use_legacy_format': false,
-          },
-          writeIndexOnly: true,
-        });
-
-        // We need to first install the templates and then rollover the indices
-        await newDS.installTemplates({
-          esClient,
-          logger: this.options.logger,
-          pluginStop$: this.options.pluginStop$,
-        });
-
-        const indexNames = (
-          await esClient.indices.getDataStream({ name: newDS.name })
-        ).data_streams.map((ds) => ds.name);
-
-        try {
-          await Promise.all(
-            indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
-          );
-        } catch (e) {
-          /* empty */
-        }
+      // Used only for testing purposes
+      if (this.modelIdOverride && !isUsingDedicatedInferenceEndpoint) {
+        await this.rolloverDataStream(
+          ELASTICSEARCH_ELSER_INFERENCE_ID,
+          ASSISTANT_ELSER_INFERENCE_ID
+        );
+      } else if (isUsingDedicatedInferenceEndpoint) {
+        await this.rolloverDataStream(
+          ASSISTANT_ELSER_INFERENCE_ID,
+          ELASTICSEARCH_ELSER_INFERENCE_ID
+        );
 
         // Delete the old inference endpoint
         const elserId = await this.getElserId();
@@ -529,6 +551,7 @@ export class AIAssistantService {
     if (opts?.modelIdOverride != null) {
       const modelIdOverride = opts.modelIdOverride;
       this.getElserId = async () => modelIdOverride;
+      this.modelIdOverride = true;
     }
 
     // If a V2 KnowledgeBase has never been initialized or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
@@ -557,6 +580,7 @@ export class AIAssistantService {
       getProductDocumentationStatus: this.getProductDocumentationStatus.bind(this),
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
+      modelIdOverride: !!opts.modelIdOverride,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
