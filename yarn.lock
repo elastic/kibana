@@ -10020,11 +10020,6 @@
   resolved "https://registry.yarnpkg.com/@storybook/components/-/components-8.6.3.tgz#155c33adfd908cd756c2a0d52a65fd7e0fee0a24"
   integrity sha512-q5DQkV+E/j0KfF818RywgqEHjaZTg71q5YY4z0UO8CRSzDQ/VYF6L76oc69corbkJtYAk/GqaYJllzrWykS4sg==
 
-"@storybook/core-common@^8.6.3":
-  version "8.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/core-common/-/core-common-8.6.3.tgz#cdb13e6cfd4eab146890af9e8fb300b396ac4b0a"
-  integrity sha512-7XXwU0V4M+GdthTfo/MN9Tqe1jkpMRnAtVnOQJyFwFDd5/jxu+YbbuPeb4AUxn8MgqCn0qNkZoeyX+RpyFTDMw==
-
 "@storybook/core-events@^8.6.3":
   version "8.6.3"
   resolved "https://registry.yarnpkg.com/@storybook/core-events/-/core-events-8.6.3.tgz#3eaf4e9b5fae8fe42c88880ebaa558b31356e67c"
@@ -10042,7 +10037,7 @@
   dependencies:
     ts-dedent "^2.0.0"
 
-"@storybook/core@8.6.3", "@storybook/core@^8.6.3":
+"@storybook/core@8.6.3":
   version "8.6.3"
   resolved "https://registry.yarnpkg.com/@storybook/core/-/core-8.6.3.tgz#a64aea869d3df0d4101ad14e000348b1cc19d849"
   integrity sha512-0iMTfmo3UFCa1hFJLtThnRIppkIpGPyTL3MElhORP1t5l9lCUq5am0ymbi/TeCbsJPjE86FjeO0NinokL9iQiw==
