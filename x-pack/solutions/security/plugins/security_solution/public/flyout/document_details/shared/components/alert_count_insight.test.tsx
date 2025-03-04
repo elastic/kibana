@@ -153,9 +153,9 @@ describe('AlertCountInsight', () => {
         closed: {
           total: 6,
           severities: [
-            { key: 'high', value: 1, label: 'High' },
             { key: 'low', value: 1, label: 'Low' },
             { key: 'medium', value: 2, label: 'Medium' },
+            { key: 'high', value: 1, label: 'High' },
             { key: 'critical', value: 2, label: 'Critical' },
           ],
         },
@@ -173,9 +173,9 @@ describe('getFormattedAlertStats', () => {
   it('should return alert stats', () => {
     const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: '#ff7e62' },
       { key: 'Low', count: 2, color: '#54b399' },
       { key: 'Medium', count: 2, color: '#f1d86f' },
+      { key: 'High', count: 2, color: '#ff7e62' },
       { key: 'Critical', count: 2, color: '#bd271e' },
     ]);
   });
@@ -186,8 +186,8 @@ describe('getFormattedAlertStats', () => {
         closed: {
           total: 2,
           severities: [
-            { key: 'high', value: 1, label: 'High' },
             { key: 'low', value: 1, label: 'Low' },
+            { key: 'high', value: 1, label: 'High' },
           ],
         },
       },
