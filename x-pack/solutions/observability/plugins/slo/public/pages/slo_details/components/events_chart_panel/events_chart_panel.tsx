@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -62,20 +63,18 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
   }
 
   function getChart() {
+    if (isLoading) {
+      return <EuiLoadingChart size="m" mono data-test-subj="eventsLoadingChart" />;
+    }
+
     switch (slo.indicator.type) {
       case 'sli.metric.timeslice':
         return (
-          <MetricTimesliceEventsChart
-            isLoading={isLoading}
-            slo={slo}
-            data={data}
-            onBrushed={onBrushed}
-          />
+          <MetricTimesliceEventsChart slo={slo} data={data?.results ?? []} onBrushed={onBrushed} />
         );
+
       default:
-        return (
-          <GoodBadEventsChart isLoading={isLoading} data={data} slo={slo} onBrushed={onBrushed} />
-        );
+        return <GoodBadEventsChart data={data?.results ?? []} slo={slo} onBrushed={onBrushed} />;
     }
   }
 

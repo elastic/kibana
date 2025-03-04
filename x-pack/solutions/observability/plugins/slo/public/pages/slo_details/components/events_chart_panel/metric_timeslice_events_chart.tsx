@@ -6,12 +6,12 @@
  */
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiIcon, EuiLoadingChart } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
@@ -19,15 +19,15 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
 import { MetricTimesliceAnnotation } from './metric_timeslice_annotation';
+import { GetPreviewDataResponseResults } from './types';
 
 interface Props {
-  data?: GetPreviewDataResponse;
-  isLoading: boolean;
+  data: GetPreviewDataResponseResults;
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: Props) {
+export function MetricTimesliceEventsChart({ slo, data, onBrushed }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const chartRef = useRef(null);
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -43,7 +43,7 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
     return null;
   }
 
-  const values = (data?.results ?? []).map((row) => row.sliValue);
+  const values = data.map((row) => row.sliValue);
   const maxValue = max(values);
   const minValue = min(values);
   const threshold = slo.indicator.params.metric.threshold;
@@ -53,10 +53,6 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
     min: min([threshold, minValue]) ?? NaN,
     max: max([threshold, maxValue]) ?? NaN,
   };
-
-  if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="metricTimesliceLoadingChart" />;
-  }
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
@@ -105,7 +101,7 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
         yScaleType={ScaleType.Linear}
         xAccessor="date"
         yAccessors={['value']}
-        data={(data?.results ?? []).map((datum) => ({
+        data={data.map((datum) => ({
           date: new Date(datum.date).getTime(),
           value: datum.sliValue,
         }))}

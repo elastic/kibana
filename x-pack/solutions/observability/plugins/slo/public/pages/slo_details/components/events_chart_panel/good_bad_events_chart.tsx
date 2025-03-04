@@ -14,27 +14,27 @@ import {
   Settings,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
 import { openInDiscover } from '../../utils/get_discover_link';
+import { GetPreviewDataResponseResults } from './types';
 
 export interface Props {
-  data?: GetPreviewDataResponse;
+  data: GetPreviewDataResponseResults;
   slo: SLOWithSummaryResponse;
-  isLoading: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
+export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -48,8 +48,8 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
   const dateFormat = uiSettings.get('dateFormat');
 
   const intervalInMilliseconds =
-    data && data.results.length > 2
-      ? moment(data.results[1].date).valueOf() - moment(data.results[0].date).valueOf()
+    data && data.length > 2
+      ? moment(data[1].date).valueOf() - moment(data[0].date).valueOf()
       : 10 * 60000;
 
   const goodEventId = i18n.translate('xpack.slo.sloDetails.eventsChartPanel.goodEventsLabel', {
@@ -70,10 +70,6 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
     };
     openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover, uiSettings });
   };
-
-  if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="goodBadEventsLoadingChart" />;
-  }
 
   return (
     <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
@@ -137,7 +133,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         xAccessor="key"
         yAccessors={['value']}
         stackAccessors={[0]}
-        data={(data?.results ?? []).map((datum) => ({
+        data={data.map((datum) => ({
           key: new Date(datum.date).getTime(),
           value: datum.events?.good,
         }))}
@@ -155,7 +151,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         xAccessor="key"
         yAccessors={['value']}
         stackAccessors={[0]}
-        data={(data?.results ?? []).map((datum) => ({
+        data={data.map((datum) => ({
           key: new Date(datum.date).getTime(),
           value: datum.events?.bad,
         }))}
