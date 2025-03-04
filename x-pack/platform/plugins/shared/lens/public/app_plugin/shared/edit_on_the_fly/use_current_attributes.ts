@@ -20,7 +20,7 @@ export const useCurrentAttributes = ({
   initialAttributes: TypedLensSerializedState['attributes'];
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  textBasedMode?: string;
+  textBasedMode?: boolean;
 }) => {
   const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
   // use the latest activeId, but fallback to attributes

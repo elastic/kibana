@@ -26,8 +26,9 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { isEqual } from 'lodash';
-import { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import ReactDOM from 'react-dom';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
@@ -430,23 +431,24 @@ export function LayerPanel(props: LayerPanelProps) {
       if (isDataLoading) {
         return;
       }
-      const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables;
-      const [table] = Object.values(adaptersTables || {});
-      if (table && layers) {
-        // there are cases where a query can return a big amount of columns
-        // at this case we don't suggest all columns in a table but the first
-        // MAX_NUM_OF_COLUMNS
-        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
-        layers.forEach((layer) => {
-          activeData[layer] = table;
-        });
+      const activeData = getActiveDataFromDatatable(
+        layerId,
+        previousAdapters.current?.tables?.tables
+      );
+      const table = activeData[layerId];
 
+      if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
+        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
+      }
+
+      if (Object.keys(activeData).length > 0) {
         dispatch(onActiveDataChange({ activeData }));
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, dataLoading$, layers]);
+  }, [dispatch, dataLoading$, layers, layerId]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
