@@ -20,13 +20,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { DependencyNameLink } from '../doc_viewer_span_overview/sub_components/dependency_name_link';
-import { FieldConfiguration } from './get_field_configuration';
+import { FieldConfiguration, getCommonFieldConfiguration } from './get_field_configuration';
 import { asDuration } from '../utils';
 
 export const getSpanFieldConfiguration = (
   attributes: TraceDocumentOverview
 ): Record<string, FieldConfiguration> => {
   return {
+    ...getCommonFieldConfiguration(attributes),
     [SPAN_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.spanName.title', {
         defaultMessage: 'Span name',
