@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import webpack from 'webpack';
+import type { Stats } from 'webpack';
 
-export function isFailureStats(stats: webpack.Stats) {
+export function isFailureStats(stats: Stats) {
   if (stats.hasErrors()) {
     return true;
   }
@@ -29,7 +29,7 @@ export const STATS_WARNINGS_FILTER = new RegExp(
   ].join('')
 );
 
-export function failedStatsToErrorMessage(stats: webpack.Stats) {
+export function failedStatsToErrorMessage(stats: Stats) {
   const details = stats.toString({
     ...stats.compilation.createStatsOptions('minimal'),
     colors: true,
@@ -168,8 +168,4 @@ export function isDelegatedModule(module: any): module is WebpackDelegatedModule
 export function getModulePath(module: WebpackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
-}
-
-export function isRuntimeModule(module: any): boolean {
-  return module instanceof webpack.RuntimeModule;
 }

@@ -48,7 +48,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<ElasticAssistantApiRequestHandlerContext> {
     const { options } = this;
-    const { core } = options;
+    const { core, plugins } = options;
 
     const [coreStart, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
@@ -77,6 +77,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       return contextUser;
     };
 
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
     return {
       core: coreContext,
 
@@ -99,7 +101,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
-      savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+      savedObjectsClient,
       telemetry: core.analytics,
 
       // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
@@ -121,6 +123,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           modelIdOverride: params?.modelIdOverride,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
+          // uses internal user to interact with ML API
+          trainedModelsProvider: plugins.ml.trainedModelsProvider(
+            {} as KibanaRequest,
+            coreStart.savedObjects.createInternalRepository()
+          ),
         });
       }),
 
