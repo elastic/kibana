@@ -9,6 +9,15 @@ import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { StreamDefinition } from '@kbn/streams-schema';
 import { State, StreamChange } from './state'; // Does this create a circular dependency?
 import { StreamsStorageClient } from '../service';
+import { AssetClient } from '../assets/asset_client';
+
+export interface StreamDependencies {
+  scopedClusterClient: IScopedClusterClient;
+  assetClient: AssetClient;
+  storageClient: StreamsStorageClient;
+  logger: Logger;
+  isServerless: boolean;
+}
 
 export interface ValidationResult {
   isValid: boolean;
@@ -22,9 +31,11 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
   protected _definition: TDefinition;
   private changeStatus: StreamChangeStatus = 'unchanged';
   private commitStatus: StreamCommitStatus = 'uncommitted';
+  protected dependencies: StreamDependencies;
 
-  constructor(definition: TDefinition) {
+  constructor(definition: TDefinition, dependencies: StreamDependencies) {
     this._definition = definition;
+    this.dependencies = dependencies;
   }
 
   public get definition(): TDefinition {
@@ -52,8 +63,9 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   async delete(desiredState: State, startingState: State): Promise<StreamChange[]> {
     try {
-      return this.doDelete(desiredState, startingState);
+      const cascadingChanges = await this.doDelete(desiredState, startingState);
       this.changeStatus = 'deleted';
+      return cascadingChanges;
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
       return [];
@@ -66,38 +78,30 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<StreamChange[]> {
     try {
-      return this.doUpsert(definition, desiredState, startingState);
+      const cascadingChanges = await this.doUpsert(definition, desiredState, startingState);
       this.changeStatus = 'upserted';
+      return cascadingChanges;
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
       return [];
     }
   }
 
-  async validate(
-    desiredState: State,
-    startingState: State,
-    scopedClusterClient: IScopedClusterClient
-  ): Promise<ValidationResult> {
+  async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
     try {
-      return this.doValidate(desiredState, startingState, scopedClusterClient);
+      return this.doValidate(desiredState, startingState);
     } catch (error) {
       return { isValid: false, errors: [error.message] };
     }
   }
 
-  async commit(
-    storageClient: StreamsStorageClient,
-    logger: Logger,
-    scopedClusterClient: IScopedClusterClient,
-    isServerless: boolean
-  ): Promise<void> {
+  async commit(): Promise<void> {
     try {
       this.commitStatus = 'committing';
       if (this.changeStatus === 'upserted') {
-        await this.doCommitUpsert(storageClient, logger, scopedClusterClient, isServerless);
+        await this.doCommitUpsert();
       } else if (this.changeStatus === 'deleted') {
-        await this.doCommitDelete(storageClient, logger, scopedClusterClient, isServerless);
+        await this.doCommitDelete();
       }
       this.commitStatus = 'committed';
     } catch (error) {
@@ -106,14 +110,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  async revert(
-    desiredState: State,
-    startingState: State,
-    storageClient: StreamsStorageClient,
-    logger: Logger,
-    scopedClusterClient: IScopedClusterClient,
-    isServerless: boolean
-  ): Promise<void> {
+  async revert(desiredState: State, startingState: State): Promise<void> {
     if (startingState.has(this.definition.name)) {
       // Stream was updated or deleted
       const startingStateDefinition = startingState.get(this.definition.name)?.definition!;
@@ -123,7 +120,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
       await this.delete(startingState, desiredState);
     }
 
-    await this.commit(storageClient, logger, scopedClusterClient, isServerless);
+    await this.commit();
   }
 
   hasChanged(): boolean {
@@ -146,21 +143,10 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   protected abstract doValidate(
     desiredState: State,
-    startingState: State,
-    scopedClusterClient: IScopedClusterClient
+    startingState: State
   ): Promise<ValidationResult>;
 
-  protected abstract doCommitUpsert(
-    storageClient: StreamsStorageClient,
-    logger: Logger,
-    scopedClusterClient: IScopedClusterClient,
-    isServerless: boolean
-  ): Promise<void>;
+  protected abstract doCommitUpsert(): Promise<void>;
 
-  protected abstract doCommitDelete(
-    storageClient: StreamsStorageClient,
-    logger: Logger,
-    scopedClusterClient: IScopedClusterClient,
-    isServerless: boolean
-  ): Promise<void>;
+  protected abstract doCommitDelete(): Promise<void>;
 }

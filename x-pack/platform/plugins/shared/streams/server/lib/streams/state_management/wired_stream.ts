@@ -10,24 +10,21 @@ import {
   WiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
-import { InternalIStorageClient, ApplicationDocument } from '@kbn/storage-adapter';
 import { cloneDeep } from 'lodash';
 import { isResponseError } from '@kbn/es-errors';
 import { State, StreamChange } from './state';
-import { StreamActiveRecord, ValidationResult } from './stream_active_record';
+import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stream_active_record';
 import { syncWiredStreamDefinitionObjects } from '../helpers/sync';
 import { deleteStreamObjects } from '../stream_crud';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
-  constructor(definition: WiredStreamDefinition) {
-    super(definition);
+  constructor(definition: WiredStreamDefinition, dependencies: StreamDependencies) {
+    super(definition, dependencies);
     // What about the assets?
   }
 
   public clone(): StreamActiveRecord<WiredStreamDefinition> {
-    return new WiredStream(cloneDeep(this._definition));
+    return new WiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
   protected async doUpsert(
@@ -49,18 +46,15 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return [];
   }
 
-  protected async doValidate(
-    desiredState: State,
-    startingState: State,
-    scopedClusterClient: IScopedClusterClient
-  ): Promise<ValidationResult> {
+  protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
     const existsInStartingState = startingState.has(this.definition.name);
 
     if (!existsInStartingState) {
       // Check for data stream conflict
-      const dataStreamResult = await scopedClusterClient.asCurrentUser.indices.getDataStream({
-        name: this.definition.name,
-      });
+      const dataStreamResult =
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+          name: this.definition.name,
+        });
 
       if (dataStreamResult.data_streams.length !== 0) {
         return {
@@ -72,7 +66,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       }
 
       // Check for index conflict
-      await scopedClusterClient.asCurrentUser.indices
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices
         .get({
           index: this.definition.name,
         })
@@ -93,38 +87,32 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return { isValid: true, errors: [] };
   }
 
-  protected async doCommitUpsert(
-    storageClient: InternalIStorageClient<ApplicationDocument<StreamDefinition>>,
-    logger: Logger,
-    scopedClusterClient: IScopedClusterClient,
-    isServerless: boolean
-  ): Promise<void> {
-    await storageClient.index({
+  protected async doCommitUpsert(): Promise<void> {
+    await this.dependencies.storageClient.index({
       id: this.definition.name,
       document: this.definition,
     });
 
     await syncWiredStreamDefinitionObjects({
       definition: this.definition,
-      logger,
-      scopedClusterClient,
-      isServerless,
+      logger: this.dependencies.logger,
+      scopedClusterClient: this.dependencies.scopedClusterClient,
+      isServerless: this.dependencies.isServerless,
     });
     // Also update lifecycle
 
     // Update assets
   }
 
-  protected async doCommitDelete(
-    storageClient: InternalIStorageClient<ApplicationDocument<StreamDefinition>>,
-    logger: Logger,
-    scopedClusterClient: IScopedClusterClient,
-    isServerless: boolean
-  ): Promise<void> {
-    await deleteStreamObjects({ scopedClusterClient, name: this.definition.name, logger });
+  protected async doCommitDelete(): Promise<void> {
+    await deleteStreamObjects({
+      name: this.definition.name,
+      scopedClusterClient: this.dependencies.scopedClusterClient,
+      logger: this.dependencies.logger,
+    });
 
     // Update assets
 
-    await storageClient.delete({ id: this.definition.name });
+    await this.dependencies.storageClient.delete({ id: this.definition.name });
   }
 }

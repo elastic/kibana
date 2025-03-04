@@ -6,13 +6,16 @@
  */
 
 import { StreamDefinition, isWiredStreamDefinition } from '@kbn/streams-schema';
-import { StreamActiveRecord } from './stream_active_record';
+import { StreamActiveRecord, StreamDependencies } from './stream_active_record';
 import { WiredStream } from './wired_stream';
 
 // This should be the only thing that knows about the various stream types
-export function streamFromDefinition(definition: StreamDefinition): StreamActiveRecord {
+export function streamFromDefinition(
+  definition: StreamDefinition,
+  dependencies: StreamDependencies
+): StreamActiveRecord {
   if (isWiredStreamDefinition(definition)) {
-    return new WiredStream(definition);
+    return new WiredStream(definition, dependencies);
   } else {
     throw new Error('Unsupported stream type');
   }
