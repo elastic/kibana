@@ -53,11 +53,15 @@ export async function runDockerGenerator(
       'docker.elastic.co/wolfi/chainguard-base:latest@sha256:6387bd4c462007eaecaf13a423aea99c8a8452da09244c129703324aa97769c6';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud && !flags.fips)
+    imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.fips) imageFlavor += '-fips';
+  if (flags.fips) {
+    imageFlavor += '-fips';
+    baseImageName = 'docker.elastic.co/wolfi/chainguard-base-fips:latest';
+  }
 
   // General docker var config
   const license = 'Elastic License';
