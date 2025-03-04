@@ -108,7 +108,6 @@ describe('useDynamicEntityFlyout', () => {
       right: {
         id: UserPanelKey,
         params: { userName: 'testUser', scopeId: 'scope1', contextId: 'context1' },
-        source,
       },
     });
   });
