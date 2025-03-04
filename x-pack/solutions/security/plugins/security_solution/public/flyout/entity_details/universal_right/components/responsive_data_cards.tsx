@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { EuiCardProps } from '@elastic/eui/src/components/card/card';
 
-interface HeaderDataCardsProps {
+interface ResponsiveDataCardsProps {
   /**
    * An array of EuiCardProps objects, defining the cards to be displayed.
    */
@@ -26,7 +26,7 @@ interface HeaderDataCardsProps {
  * A component that displays a group of data cards in a responsive layout.
  * Depending on the width of the container, the cards will be displayed in a row layout or a two columns layout.
  */
-export const ResponsiveDataCards = ({ cards, collapseWidth = 750 }: HeaderDataCardsProps) => {
+export const ResponsiveDataCards = ({ cards, collapseWidth = 750 }: ResponsiveDataCardsProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
