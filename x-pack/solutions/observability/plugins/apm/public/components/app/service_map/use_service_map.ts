@@ -70,6 +70,7 @@ export const useServiceMap = ({
             serviceName,
             serviceGroup: serviceGroupId,
             kuery,
+            useV2: config.ui.serviceMapApiV2Enabled,
           },
         },
       });
@@ -83,6 +84,7 @@ export const useServiceMap = ({
       serviceGroupId,
       kuery,
       config.serviceMapEnabled,
+      config.ui.serviceMapApiV2Enabled,
     ],
     { preservePreviousData: false }
   );

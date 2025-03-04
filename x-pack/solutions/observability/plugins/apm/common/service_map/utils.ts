@@ -92,7 +92,7 @@ export const isExitSpan = (
 // backward compatibility with scrited_metric versions
 export const getLegacyNodeId = (node: ConnectionNodeLegacy) => {
   if (isExitSpan(node)) {
-    return `>${node[SERVICE_NAME]}|${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
+    return `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
   }
   return `${node[SERVICE_NAME]}`;
 };

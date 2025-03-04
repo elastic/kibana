@@ -90,18 +90,30 @@ function getChildren(
         ];
     }
   }
+
   const childSpan = serviceInstance
     .span({
       spanName: getTransactionName(transactionName, serviceInstance, index),
-      spanType: 'app',
+      spanType: 'http',
     })
     .timestamp(timestamp)
     .duration(1000)
     .children(...getChildren(rest, serviceInstance, timestamp, index));
+
   if (rest[0]) {
     const next = getTraceItem(rest[0]);
     if (next.serviceInstance) {
-      return [childSpan.destination(next.serviceInstance.fields['service.name']!)];
+      return [
+        childSpan.destination(next.serviceInstance.fields['service.name']!).children(
+          next.serviceInstance
+            .transaction({
+              transactionName: getTransactionName(transactionName, next.serviceInstance, index),
+              transactionType: 'request',
+            })
+            .timestamp(timestamp)
+            .duration(1000)
+        ),
+      ];
     }
   }
   return [childSpan];

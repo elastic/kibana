@@ -6,8 +6,13 @@
  */
 
 import { ServiceHealthStatus } from '../service_health_status';
-import { SERVICE_NAME, SPAN_SUBTYPE, SPAN_TYPE } from '../es_fields/apm';
-import type { ServiceMapExitSpan, ServiceMapService, ServiceMapConnections } from './types';
+import { SPAN_SUBTYPE, SPAN_TYPE } from '../es_fields/apm';
+import type {
+  ServiceMapExitSpan,
+  ServiceMapService,
+  ServiceMapConnections,
+  GroupResourceNodesResponse,
+} from './types';
 import { getServiceMapNodes } from './get_service_map_nodes';
 import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
 
@@ -97,13 +102,10 @@ describe('getServiceMapNodes', () => {
 
     const { elements } = getServiceMapNodes(response);
 
-    const connection = elements.find((e) => 'source' in e.data && 'target' in e.data);
+    const { edges, nodes } = partitionElements(elements);
 
-    expect(connection).toMatchObject({
-      data: { target: 'opbeans-node' },
-    });
-
-    expect(elements.some((e) => e.data.id === '>opbeans-node')).toBe(false);
+    expect(getIds(nodes)).toEqual(['opbeans-java', 'opbeans-node']);
+    expect(getIds(edges)).toEqual(['opbeans-java~opbeans-node']);
   });
 
   it('adds connection for messaging-based external destinations', () => {
@@ -129,36 +131,17 @@ describe('getServiceMapNodes', () => {
 
     const { elements } = getServiceMapNodes(response);
 
-    expect(elements.length).toBe(5);
+    const { edges, nodes } = partitionElements(elements);
 
-    const connections = elements.filter(
-      (element) => 'source' in element.data && 'target' in element.data
-    );
-    expect(connections.length).toBe(2);
-
-    const sendMessageConnection = connections.find(
-      (element) => 'source' in element.data && element.data.source === 'opbeans-java'
-    );
-
-    expect(sendMessageConnection).toHaveProperty('data');
-    expect(sendMessageConnection?.data).toHaveProperty('target');
-
-    if (sendMessageConnection?.data && 'target' in sendMessageConnection.data) {
-      expect(sendMessageConnection.data.target).toBe('>opbeans-java|kafka/some-queue');
-      expect(sendMessageConnection.data.id).toBe('opbeans-java~>opbeans-java|kafka/some-queue');
-    }
-
-    const receiveMessageConnection = connections.find(
-      (element) => 'target' in element.data && element.data.target === 'opbeans-node'
-    );
-
-    expect(receiveMessageConnection).toHaveProperty('data');
-    expect(receiveMessageConnection?.data).toHaveProperty('target');
-
-    if (receiveMessageConnection?.data && 'source' in receiveMessageConnection.data) {
-      expect(receiveMessageConnection.data.source).toBe('>opbeans-java|kafka/some-queue');
-      expect(receiveMessageConnection.data.id).toBe('>opbeans-java|kafka/some-queue~opbeans-node');
-    }
+    expect(getIds(nodes)).toEqual([
+      '>opbeans-java|kafka/some-queue',
+      'opbeans-java',
+      'opbeans-node',
+    ]);
+    expect(getIds(edges)).toEqual([
+      '>opbeans-java|kafka/some-queue~opbeans-node',
+      'opbeans-java~>opbeans-java|kafka/some-queue',
+    ]);
   });
 
   it('collapses external destinations based on span.destination.resource.name', () => {
@@ -192,8 +175,10 @@ describe('getServiceMapNodes', () => {
 
     const { elements } = getServiceMapNodes(response);
 
-    expect(elements.filter((element) => 'source' in element.data).length).toBe(1);
-    expect(elements.filter((element) => !('source' in element.data)).length).toBe(2);
+    const { edges, nodes } = partitionElements(elements);
+
+    expect(getIds(nodes)).toEqual(['opbeans-java', 'opbeans-node']);
+    expect(getIds(edges)).toEqual(['opbeans-java~opbeans-node']);
   });
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
@@ -226,8 +211,12 @@ describe('getServiceMapNodes', () => {
 
     const { elements } = getServiceMapNodes(response);
 
-    const nodejsNode = elements.find((node) => node.data.id === '>opbeans-java|opbeans-node');
+    const { edges, nodes } = partitionElements(elements);
 
+    expect(getIds(nodes)).toEqual(['>opbeans-java|opbeans-node', 'opbeans-java']);
+    expect(getIds(edges)).toEqual(['opbeans-java~>opbeans-java|opbeans-node']);
+
+    const nodejsNode = elements.find((node) => node.data.id === '>opbeans-java|opbeans-node');
     // @ts-expect-error
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
     // @ts-expect-error
@@ -287,30 +276,25 @@ describe('getServiceMapNodes', () => {
 
     const { elements } = getServiceMapNodes(response);
 
-    expect(elements).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          data: expect.objectContaining({ [SERVICE_NAME]: 'opbeans-java' }),
-        }),
-        expect.objectContaining({
-          data: expect.objectContaining({ [SERVICE_NAME]: 'opbeans-node' }),
-        }),
-        expect.objectContaining({
-          data: expect.objectContaining({ [SERVICE_NAME]: 'opbeans-go' }),
-        }),
-        expect.objectContaining({
-          data: expect.objectContaining({ [SERVICE_NAME]: 'opbeans-python' }),
-        }),
-        expect.objectContaining({
-          data: expect.objectContaining({ source: 'opbeans-go', target: 'opbeans-java' }),
-        }),
-        expect.objectContaining({
-          data: expect.objectContaining({ source: 'opbeans-java', target: 'opbeans-node' }),
-        }),
-        expect.objectContaining({
-          data: expect.objectContaining({ source: 'opbeans-python', target: 'opbeans-java' }),
-        }),
-      ])
-    );
+    const { edges, nodes } = partitionElements(elements);
+
+    expect(getIds(nodes)).toEqual(['opbeans-go', 'opbeans-java', 'opbeans-node', 'opbeans-python']);
+    expect(getIds(edges)).toEqual([
+      'opbeans-go~opbeans-java',
+      'opbeans-java~opbeans-node',
+      'opbeans-python~opbeans-java',
+    ]);
   });
 });
+
+type ConnectionElements = GroupResourceNodesResponse['elements'];
+
+export function partitionElements(elements: ConnectionElements) {
+  const edges = elements.filter(({ data }) => 'source' in data && 'target' in data);
+  const nodes = elements.filter((element) => !edges.includes(element));
+  return { edges, nodes };
+}
+
+export function getIds(elements: ConnectionElements) {
+  return elements.map(({ data }) => data.id).sort();
+}

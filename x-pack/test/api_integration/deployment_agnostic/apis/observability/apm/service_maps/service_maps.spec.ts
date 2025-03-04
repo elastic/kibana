@@ -11,6 +11,7 @@ import { serviceMap, timerange } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'node:stream';
 import type { SupertestReturnType } from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { extractExitSpansConnections, getElements, getSpans } from './utils';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
@@ -38,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).toBe(200);
-        expect(response.body.elements.length).toBe(0);
+        expect(getElements(response).length).toBe(0);
       });
 
       describe('/internal/apm/service-map/service/{serviceName} without data', () => {
@@ -149,7 +150,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).toBe(200);
-        expect(response.body.elements.length).toBeGreaterThan(0);
+        expect(getElements(response).length).toBeGreaterThan(0);
+      });
+
+      it('returns service map spans (api v2)', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/service-map',
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              environment: 'ENVIRONMENT_ALL',
+              useV2: true,
+            },
+          },
+        });
+
+        const spans = getSpans(response);
+        const exitSpansConnections = extractExitSpansConnections(spans);
+
+        expect(response.status).toBe(200);
+        expect(exitSpansConnections).toEqual([
+          {
+            serviceName: 'advertService',
+            spanDestinationServiceResource: 'elasticsearch',
+          },
+          {
+            destinationService: {
+              serviceName: 'advertService',
+            },
+            serviceName: 'frontend-node',
+            spanDestinationServiceResource: 'advertService',
+          },
+          {
+            destinationService: {
+              serviceName: 'frontend-node',
+            },
+            serviceName: 'frontend-rum',
+            spanDestinationServiceResource: 'frontend-node',
+          },
+        ]);
       });
     });
   });

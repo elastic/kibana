@@ -32,11 +32,11 @@ const configSchema = schema.object({
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
   serviceMapTerminateAfter: schema.number({ defaultValue: 100_000 }),
-  serviceMapV2Enabled: schema.boolean({ defaultValue: false }),
   serviceMapMaxTraces: schema.number({ defaultValue: 1000 }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     maxTraceItems: schema.number({ defaultValue: 5000 }),
+    serviceMapApiV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [
