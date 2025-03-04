@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export interface WCIConfiguration {
-  configuration: {
-    internal: boolean;
-  }
-}
+export * from './src/types';
+export * from './src/constants'; 

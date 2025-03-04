@@ -6,13 +6,17 @@
  */
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { IntegrationPlugin, IntegrationTypes } from '@kbn/wci-common';
+
+export interface SalesforceIntegrationPlugin extends IntegrationPlugin {
+  name: IntegrationTypes.Salesforce;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginStart {
-  mcpServer: McpServer;
+  integration: SalesforceIntegrationPlugin;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

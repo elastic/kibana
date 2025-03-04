@@ -12,6 +12,6 @@
     "configPath": ["xpack", "wciSalesforce"],
     "requiredPlugins": ["inference"],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": []
   }
 }

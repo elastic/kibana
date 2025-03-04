@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/wci-gateway",
+  "name": "@kbn/wci-common",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"

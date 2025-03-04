@@ -14,6 +14,7 @@ import type {
   WCISalesforcePluginStartDependencies
 } from './types';
 import { getMcpServer } from './mcp_server';
+import { IntegrationTypes } from '@kbn/wci-common';
 
 export class WCISalesforcePlugin
   implements
@@ -31,9 +32,11 @@ export class WCISalesforcePlugin
   }
 
   public start(core: CoreStart, pluginsDependencies: WCISalesforcePluginStartDependencies) {
-    const mcpServer = getMcpServer();
     return {
-      mcpServer
+      integration: {
+        mcpServer: getMcpServer,
+        name: IntegrationTypes.Salesforce
+      }
     };
   }
 }

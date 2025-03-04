@@ -6,3 +6,4 @@
  */
 
 export type { InternalServices } from './types';
+export { IntegrationsService } from './integrations/integrations_service';

@@ -22,6 +22,7 @@ import type {
   WorkChatAppPluginSetupDependencies,
   WorkChatAppPluginStartDependencies,
 } from './types';
+import { IntegrationsService } from './services';
 
 export class WorkChatAppPlugin
   implements
@@ -56,13 +57,25 @@ export class WorkChatAppPlugin
   }
 
   public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
+
+    const { wciSalesforce } = pluginsDependencies;
+
+    const integrationsService = new IntegrationsService({
+      logger: this.logger.get('services.integrationsService'),
+      integrationPlugins: [
+        wciSalesforce.integration
+      ]
+    });
+
     const agentFactory = new AgentFactory({
       inference: pluginsDependencies.inference,
       logger: this.logger.get('services.agentFactory'),
+      integrationsService,
     });
 
     this.services = {
       agentFactory,
+      integrationsService,
     };
 
     return {};

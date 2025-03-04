@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-// Add your constants here 
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/workchat_app'],
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+}; 

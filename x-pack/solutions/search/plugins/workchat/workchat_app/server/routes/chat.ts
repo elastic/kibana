@@ -33,25 +33,36 @@ export const registerChatRoutes = ({
         abortController.abort();
       });
 
-      const agent = await agentFactory.getAgent({
-        request,
-        agentId: 'TODO',
-        connectorId: 'azure-gpt4',
-      });
+      try {
 
-      const { events$ } = await agent.run();
+        const agent = await agentFactory.getAgent({
+          request,
+          agentId: 'TODO',
+          connectorId: 'azure-gpt4',
+        });
 
-      return res.ok({
-        headers: {
-          // 'Content-Type': 'text/event-stream',
-          // 'Cache-Control': 'no-cache',
-          // Connection: 'keep-alive',
-        },
-        body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
-          signal: abortController.signal,
-          logger,
-        }),
-      });
+        const { events$ } = await agent.run();
+
+        return res.ok({
+          headers: {
+            // 'Content-Type': 'text/event-stream',
+            // 'Cache-Control': 'no-cache',
+            // Connection: 'keep-alive',
+          },
+          body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
+            signal: abortController.signal,
+            logger,
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: 'Internal server error',
+          },
+        });
+      }
     }
   );
 };

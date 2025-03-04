@@ -10,6 +10,8 @@ import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ChatEvent } from '../../../common/chat_events';
 import { createAgentGraph } from './agent_graph';
+import { IntegrationsService } from '../integrations/integrations_service';
+import { getLCTools } from '../integrations/utils';
 
 interface AgentRunResult {
   events$: Observable<ChatEvent>;
@@ -22,24 +24,30 @@ export interface Agent {
 export const createAgent = async ({
   agentId,
   chatModel,
+  integrationsService,
 }: {
   agentId: string;
   chatModel: InferenceChatModel;
+  integrationsService: IntegrationsService;
 }): Promise<Agent> => {
   // TODO: everything
 
-  const agentGraph = await createAgentGraph({ agentId, chatModel });
+  const integrationTools = await getLCTools(integrationsService);
+
+  const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
     run: async (): Promise<AgentRunResult> => {
+
       const eventStream = agentGraph.streamEvents(
-        { input: 'Write 5 paragraphs on the meaning of life' },
+        { input: 'What is Kibana error 500?' },
         {
           version: 'v2',
           runName: 'defaultAgentGraph',
           metadata: {
             agentId,
           },
+          recursionLimit: 5
         }
       );
 

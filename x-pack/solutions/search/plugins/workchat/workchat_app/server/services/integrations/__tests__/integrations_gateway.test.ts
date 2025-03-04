@@ -1,8 +1,8 @@
-import { WCIGateway } from '../wci_gateway';
+import { IntegrationsGateway } from '../integrations_gateway';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-describe('WCIGateway', () => {
+describe('IntegrationsGateway', () => {
     describe('MCP servers with tools', () => {
 
         const server = new McpServer({
@@ -27,23 +27,35 @@ describe('WCIGateway', () => {
 
         it('should register multiple MCP servers with tools and call all tools', async () => {
 
-            const wciGateway = new WCIGateway();
+            const gateway = new IntegrationsGateway([
+                {
+                    id: 'Test Server 1',
+                    mcpServer: server
+                },
+                {
+                    id: 'Test Server 2',
+                    mcpServer: server2
+                }
+            ]);
 
-            wciGateway.registerServer('Test Server 1', server);
-            wciGateway.registerServer('Test Server 2', server2);
-
-            const allTools = await wciGateway.getAllTools();
+            const allTools = await gateway.getAllTools();
             expect(allTools.length).toBe(2);
             expect(allTools.map(tool => tool.name)).toEqual(['Test Server 1:add', 'Test Server 2:tool3']);
         });
 
         it('should allow to call a tool', async () => {
-            const wciGateway = new WCIGateway();
+            const gateway = new IntegrationsGateway([
+                {
+                    id: 'Test Server 1',
+                    mcpServer: server
+                },
+                {
+                    id: 'Test Server 2',
+                    mcpServer: server2
+                }
+            ]);
 
-            wciGateway.registerServer('Test Server 1', server);
-            wciGateway.registerServer('Test Server 2', server2);
-
-            const result = await wciGateway.executeTool('Test Server 1:add', { a: 1, b: 2 });
+            const result = await gateway.executeTool('Test Server 1:add', { a: 1, b: 2 });
             expect(result).toEqual({ content: [{ type: 'text', text: '3' }] });
         });
     });

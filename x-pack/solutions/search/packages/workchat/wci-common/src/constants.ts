@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export * from './src/types';
-export * from './src/constants'; 
-export * from './src/wci_gateway';
+ 
+export enum IntegrationTypes {
+    Salesforce = 'salesforce',
+}

@@ -8,19 +8,23 @@
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createAgent, type Agent } from './agent';
+import { IntegrationsService } from '../integrations/integrations_service';
 
 interface OrchestrationServiceOptions {
   logger: Logger;
   inference: InferenceServerStart;
+  integrationsService: IntegrationsService;
 }
 
 export class AgentFactory {
   private readonly inference: InferenceServerStart;
   private readonly logger: Logger;
+  private readonly integrationsService: IntegrationsService;
 
-  constructor({ inference, logger }: OrchestrationServiceOptions) {
+  constructor({ inference, logger, integrationsService }: OrchestrationServiceOptions) {
     this.inference = inference;
     this.logger = logger;
+    this.integrationsService = integrationsService;
   }
 
   async getAgent({
@@ -39,6 +43,6 @@ export class AgentFactory {
       connectorId,
       chatModelOptions: {},
     });
-    return await createAgent({ agentId, chatModel });
+    return await createAgent({ agentId, chatModel, integrationsService: this.integrationsService });
   }
 }
