@@ -50,9 +50,8 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const { euiTheme } = useEuiTheme();
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__, id, name }] = useFormData({
-    watch: ['config.apiProvider', 'config.headers', '__internal__.hasHeaders'],
+    watch: ['config.apiProvider', '__internal__.hasHeaders'],
   });
-  console.log('config ==>', config);
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
@@ -130,7 +129,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
       {hasHeaders && (
         <UseArray path="config.headers" initialNumberOfItems={1}>
           {({ items, addItem, removeItem }) => {
-            console.log('items', items);
             return (
               <>
                 <EuiSpacer size="s" />

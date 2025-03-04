@@ -67,14 +67,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
-    console.log('config.headers ==>', this.config.headers);
-    console.log('all headers ==>', {
-      ...this.config.headers,
-      ...('organizationId' in this.config
-        ? { 'OpenAI-Organization': this.config.organizationId }
-        : {}),
-      ...('projectId' in this.config ? { 'OpenAI-Project': this.config.projectId } : {}),
-    });
     this.headers = {
       ...this.config.headers,
       ...('organizationId' in this.config

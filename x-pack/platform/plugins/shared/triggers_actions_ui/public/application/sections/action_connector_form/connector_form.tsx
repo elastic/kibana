@@ -61,7 +61,11 @@ interface Props {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
-  if (data.actionTypeId !== '.webhook' && data.actionTypeId !== '.cases-webhook') {
+  if (
+    data.actionTypeId !== '.webhook' &&
+    data.actionTypeId !== '.cases-webhook' &&
+    data.actionTypeId !== '.gen-ai'
+  ) {
     return data;
   }
 
@@ -82,7 +86,11 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
-  if (formData.actionTypeId !== '.webhook' && formData.actionTypeId !== '.cases-webhook') {
+  if (
+    formData.actionTypeId !== '.webhook' &&
+    formData.actionTypeId !== '.cases-webhook' &&
+    formData.actionTypeId !== '.gen-ai'
+  ) {
     return formData;
   }
 
