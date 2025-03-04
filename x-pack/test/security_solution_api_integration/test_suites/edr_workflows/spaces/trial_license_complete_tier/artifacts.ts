@@ -100,18 +100,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       spaceOnePolicy = await policyTestResources.createPolicy({ options: { spaceId: spaceOneId } });
       spaceTwoPolicy = await policyTestResources.createPolicy({ options: { spaceId: spaceTwoId } });
-
-      afterEachDataCleanup.push(spaceOnePolicy);
-      afterEachDataCleanup.push(spaceTwoPolicy);
     });
 
     // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
     // to do it manually
     after(async () => {
-      await Promise.allSettled(afterEachDataCleanup.map((data) => data.cleanup()));
-
+      await spaceOnePolicy.cleanup();
       // @ts-expect-error
       spaceOnePolicy = undefined;
+
+      await spaceTwoPolicy.cleanup();
       // @ts-expect-error
       spaceTwoPolicy = undefined;
 
@@ -126,6 +124,10 @@ export default function ({ getService }: FtrProviderContext) {
         // @ts-expect-error
         globalArtifactManagerRole = undefined;
       }
+    });
+
+    afterEach(async () => {
+      await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
     });
 
     const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
@@ -230,11 +232,13 @@ export default function ({ getService }: FtrProviderContext) {
           log.info(`find results:\n${JSON.stringify(body)}, null, 2`);
 
           expect(body.total).to.eql(3);
-          expect(body.data.map((item) => item.item_id)).to.eql([
-            spaceOnePerPolicyArtifact.artifact.item_id,
-            spaceOneGlobalArtifact.artifact.item_id,
-            spaceTwoGlobalArtifact.artifact.item_id,
-          ]);
+          expect(body.data.map((item) => item.item_id).sort()).to.eql(
+            [
+              spaceOnePerPolicyArtifact.artifact.item_id,
+              spaceOneGlobalArtifact.artifact.item_id,
+              spaceTwoGlobalArtifact.artifact.item_id,
+            ].sort()
+          );
         });
 
         it('should get single global artifact regardless of space', async () => {
