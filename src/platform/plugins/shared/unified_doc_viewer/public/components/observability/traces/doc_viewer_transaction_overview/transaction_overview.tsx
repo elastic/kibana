@@ -20,7 +20,6 @@ export type TransactionOverviewProps = DocViewRenderProps;
 
 export function TransactionOverview({
   columns,
-  dataView,
   hit,
   filter,
   onAddColumn,
