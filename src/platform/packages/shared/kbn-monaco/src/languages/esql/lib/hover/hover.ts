@@ -149,11 +149,10 @@ export async function getHoverItem(
 
   const { ast } = await astProvider(fullText);
   const astContext = getAstContext(fullText, ast, offset);
-
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
   const variables = resourceRetriever?.getVariables?.();
-  const variablesContent = getVariablesHoverContent(fullText, offset, variables);
+  const variablesContent = getVariablesHoverContent(astContext.node, variables);
 
   const hoverContent: monaco.languages.Hover = {
     contents: [],
