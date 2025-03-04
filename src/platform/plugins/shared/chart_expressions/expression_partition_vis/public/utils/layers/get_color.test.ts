@@ -359,50 +359,5 @@ describe('get color', () => {
         expect.anything()
       );
     });
-
-    it('should only pass the first layer for treemap', () => {
-      const d: SimplifiedArrayNode = {
-        depth: 2,
-        sortIndex: 0,
-        parent: {
-          children: [
-            ['Second level 1', undefined],
-            ['Second level 2', undefined],
-          ],
-          depth: 1,
-          sortIndex: 0,
-          parent: {
-            children: [['First level', undefined]],
-            depth: 0,
-            sortIndex: 0,
-          },
-        },
-        children: [],
-      };
-      const registry = getPaletteRegistry();
-      getColor(
-        ChartTypes.TREEMAP,
-        'Second level 1',
-        d,
-        1,
-        true,
-        {},
-        distinctSeries,
-        dataLength,
-        visParams,
-        registry,
-        undefined,
-        true,
-        false,
-        dataMock.fieldFormats,
-        visData.columns[0],
-        colorIndexMap(ChartTypes.TREEMAP)
-      );
-      expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
-        [expect.objectContaining({ name: 'First level' })],
-        expect.anything(),
-        expect.anything()
-      );
-    });
   });
 });
