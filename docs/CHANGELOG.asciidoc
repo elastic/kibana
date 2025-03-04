@@ -285,7 +285,7 @@ ES|QL editor::
 * Fixes several query history issues ({kibana-pull}206418[#206418]).
 * Allows the editor suggestions to be visible when the inline documentation flyout is open ({kibana-pull}206064[#206064]).
 * Fixes editor cursor jumpiness ({kibana-pull}202389[#202389]).
-Discover and ES|QL::
+Discover::
 * Keeps the histogram config on time change ({kibana-pull}208053[#208053]).
 * Fixes CSV export with named parameters ({kibana-pull}206914[#206914]).
 * Prevent redundant requests when loading Discover sessions and toggling chart visibility ({kibana-pull}206699[#206699]).
