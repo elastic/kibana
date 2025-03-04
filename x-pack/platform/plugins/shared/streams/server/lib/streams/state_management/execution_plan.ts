@@ -9,7 +9,13 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { Logger } from 'elastic-apm-node';
 import { AssetClient } from '../assets/asset_client';
 import { StreamsStorageClient } from '../service';
-import { ElasticsearchAction } from './stream_active_record';
+
+// A bunch of types to model based on Joe's list
+type ActionType = 'upsert_component_template';
+
+export interface ElasticsearchAction {
+  type: ActionType;
+}
 
 interface ExecutionPlanDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -21,45 +27,17 @@ interface ExecutionPlanDependencies {
 
 export class ExecutionPlan {
   private dependencies: ExecutionPlanDependencies;
+  private actions: ElasticsearchAction[] = [];
 
   constructor(dependencies: ExecutionPlanDependencies) {
     this.dependencies = dependencies;
   }
 
   plan(elasticsearchActions: ElasticsearchAction[]) {
-    throw new Error('Method not implemented.');
+    this.actions = elasticsearchActions;
   }
 
   execute() {
-    throw new Error('Method not implemented.');
-
-    // protected async doCommitUpsert(): Promise<void> {
-    //   await this.dependencies.storageClient.index({
-    //     id: this.definition.name,
-    //     document: this.definition,
-    //   });
-
-    //   await syncWiredStreamDefinitionObjects({
-    //     definition: this.definition,
-    //     logger: this.dependencies.logger,
-    //     scopedClusterClient: this.dependencies.scopedClusterClient,
-    //     isServerless: this.dependencies.isServerless,
-    //   });
-    //   // Also update lifecycle
-
-    //   // Update assets
-    // }
-
-    // protected async doCommitDelete(): Promise<void> {
-    //   await deleteStreamObjects({
-    //     name: this.definition.name,
-    //     scopedClusterClient: this.dependencies.scopedClusterClient,
-    //     logger: this.dependencies.logger,
-    //   });
-
-    //   // Update assets
-
-    //   await this.dependencies.storageClient.delete({ id: this.definition.name });
-    // }
+    // To do
   }
 }

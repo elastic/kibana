@@ -13,12 +13,8 @@ import {
 import { cloneDeep } from 'lodash';
 import { isResponseError } from '@kbn/es-errors';
 import { State, StreamChange } from './state';
-import {
-  StreamActiveRecord,
-  ValidationResult,
-  StreamDependencies,
-  ElasticsearchAction,
-} from './stream_active_record';
+import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stream_active_record';
+import { ElasticsearchAction } from './execution_plan';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   constructor(definition: WiredStreamDefinition, dependencies: StreamDependencies) {
@@ -90,16 +86,29 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return { isValid: true, errors: [] };
   }
 
-  determineElasticsearchActions(startingStateStream?: WiredStream): ElasticsearchAction[] {
-    // Check the diff between this instance and the startingStateStream instance and create actions
-    // To go from the starting state to the desired state of this stream
-    // Expressed as some actions taken on the Elasticsearch resources backing this stream
+  protected doDetermineCreateActions(): ElasticsearchAction[] {
+    // Upsert component template
+    // Upsert index template
+    // Upsert data stream
+    // Upsert ingest pipeline (processing and routing)
+    // Upsert mapping/setting on write index
+    // Upsert lifecycle on data stream
+    // Upsert internal tracking document in .kibana_streams
+    return [];
+  }
 
-    // If startingStateStream is undefined, but the changeStatus is upserted, that means we created the stream
-    return [
-      {
-        type: 'update_tracking_document',
-      },
-    ];
+  protected doDetermineUpdateActions(startingStateStream: WiredStream): ElasticsearchAction[] {
+    // Some mix of the actions returned in doDetermineCreateActions but based on the diff between this stream and startingStateStream
+    // Is there any case where some delete action would happen as part of an update?
+    return [];
+  }
+
+  protected doDetermineDeleteActions(): ElasticsearchAction[] {
+    // Delete component template
+    // Delete index template
+    // Delete data stream
+    // Delete ingest pipeline (processing and routing)
+    // Delete internal tracking document in .kibana_streams
+    return [];
   }
 }

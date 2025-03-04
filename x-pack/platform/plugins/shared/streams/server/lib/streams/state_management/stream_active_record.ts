@@ -10,6 +10,7 @@ import { StreamDefinition } from '@kbn/streams-schema';
 import { State, StreamChange } from './state'; // Does this create a circular dependency?
 import { StreamsStorageClient } from '../service';
 import { AssetClient } from '../assets/asset_client';
+import { ElasticsearchAction } from './execution_plan';
 
 export interface StreamDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -24,16 +25,12 @@ export interface ValidationResult {
   errors: string[]; // Or Errors?
 }
 
-export interface ElasticsearchAction {
-  type: string; // A bunch of types to model based on Joe's list
-}
-
 type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected _definition: TDefinition;
-  protected changeStatus: StreamChangeStatus = 'unchanged';
   protected dependencies: StreamDependencies;
+  private changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StreamDependencies) {
     this._definition = definition;
@@ -103,6 +100,22 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
+  determineElasticsearchActions(
+    startingStateStream?: StreamActiveRecord<TDefinition>
+  ): ElasticsearchAction[] {
+    if (this.changeStatus === 'upserted') {
+      if (startingStateStream) {
+        return this.doDetermineUpdateActions(startingStateStream);
+      } else {
+        return this.doDetermineCreateActions();
+      }
+    } else if (this.changeStatus === 'deleted') {
+      return this.doDetermineDeleteActions();
+    }
+
+    throw new Error('Cannot determine Elasticsearch actions for an unchanged stream');
+  }
+
   hasChanged(): boolean {
     return this.changeStatus !== 'unchanged';
   }
@@ -122,7 +135,9 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<ValidationResult>;
 
-  abstract determineElasticsearchActions(
-    startingStateStream?: StreamActiveRecord<TDefinition>
+  protected abstract doDetermineCreateActions(): ElasticsearchAction[];
+  protected abstract doDetermineUpdateActions(
+    startingStateStream: StreamActiveRecord<TDefinition>
   ): ElasticsearchAction[];
+  protected abstract doDetermineDeleteActions(): ElasticsearchAction[];
 }
