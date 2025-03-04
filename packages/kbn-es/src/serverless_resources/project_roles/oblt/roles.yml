@@ -41,6 +41,7 @@ viewer:
       resources:
         - '*'
   run_as: []
+
 editor:
   metadata:
     _public: true
@@ -114,7 +115,6 @@ admin:
 # temporarily added for testing purpose
 system_indices_superuser:
   metadata:
-    _public: true
     _reserved: true
   cluster: ['all']
   indices:
