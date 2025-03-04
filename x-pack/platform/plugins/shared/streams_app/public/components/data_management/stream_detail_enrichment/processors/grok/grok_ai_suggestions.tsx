@@ -363,8 +363,9 @@ export function GrokAiSuggestions() {
     );
   }
 
-  if (!isAiEnabled || !previewDocuments?.length) {
+  if (!isAiEnabled || !definition || !previewDocuments?.length) {
     return null;
   }
+
   return <InnerGrokAiSuggestions definition={definition} previewDocuments={previewDocuments} />;
 }

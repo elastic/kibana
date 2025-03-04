@@ -6,11 +6,11 @@
  */
 
 import { Condition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
-import { isEmpty, uniq, isEqual } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { ProcessorDefinitionWithUIAttributes, DetectedField } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
-import { Simulation, SimulationContext } from './types';
+import { Simulation } from './types';
 
 export function composeSamplingCondition(
   processors: ProcessorDefinitionWithUIAttributes[]
@@ -66,19 +66,4 @@ export function filterSimulationDocuments(
     default:
       return documents.map((doc) => doc.value);
   }
-}
-
-export function derivePreviewColumns(
-  context: SimulationContext,
-  processors: ProcessorDefinitionWithUIAttributes[]
-) {
-  const nextPreviewColumns = getTableColumns(
-    processors,
-    context.simulation?.detected_fields ?? [],
-    context.previewDocsFilter
-  );
-
-  return isEqual(context.previewColumns, nextPreviewColumns)
-    ? context.previewColumns
-    : nextPreviewColumns;
 }

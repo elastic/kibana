@@ -8,7 +8,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { SnapshotFrom } from 'xstate5';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
@@ -16,11 +15,7 @@ import {
 import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
-import {
-  PreviewDocsFilterOption,
-  SimulationActorSnapshot,
-  simulationMachine,
-} from '../simulation_state_machine';
+import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
