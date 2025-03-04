@@ -20,10 +20,14 @@ export function stepRouter(state: AgentState): string {
     case NodeType.AGENT:
       const { messages } = state;
       const lastMessage = messages[messages.length - 1];
-      if ("tool_calls" in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls?.length) {
+      if (
+        'tool_calls' in lastMessage &&
+        Array.isArray(lastMessage.tool_calls) &&
+        lastMessage.tool_calls?.length
+      ) {
         return NodeType.TOOLS;
       }
-        return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
+      return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
 
     case NodeType.GET_PERSISTED_CONVERSATION:
       if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {

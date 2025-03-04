@@ -28,7 +28,7 @@ export async function respond({
 
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];
-  
+
   if (lastMessage && 'content' in lastMessage) {
     const userMessage = [
       'user',

@@ -76,20 +76,20 @@ export async function runAgent({
       config
     );
 
-  let newMessages: BaseMessage[] = []
+  const newMessages: BaseMessage[] = [];
 
-  if(result?.[0]?.messageLog && Array.isArray(result[0].messageLog)) {
-    newMessages.push(...result[0].messageLog)
+  if (result?.[0]?.messageLog && Array.isArray(result[0].messageLog)) {
+    newMessages.push(...result[0].messageLog);
   }
 
-  if(result?.returnValues?.output){
+  if (result?.returnValues?.output) {
     const aiMessage = new AIMessage({
       content: result.returnValues.output,
-    })
+    });
 
-    newMessages.push(aiMessage)
+    newMessages.push(aiMessage);
   }
-  
+
   return {
     messages: newMessages,
     lastNode: NodeType.AGENT,
