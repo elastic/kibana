@@ -51,7 +51,7 @@ export function LogThresholdCountChart({
         style={{ height }}
         timeRange={timeRange}
         attributes={lensDef}
-        viewMode={'view'}
+        viewMode="view"
         noPadding
       />
     </div>
