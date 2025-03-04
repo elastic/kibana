@@ -277,19 +277,20 @@ Data ingestion and Fleet::
 * Fixes bulk actions timing out ({kibana-pull}205735[#205735]).
 * Fixes generation of dynamic mapping for objects with specific subfields ({kibana-pull}204104[#204104]).
 * Fixes logic to ensure that agents are only considered stuck in updating when an upgrade fails ({kibana-pull}202126[#202126]).
-Discover and ES|QL::
+ES|QL editor::
 * Fixes WHERE autocomplete with MATCH before LIMIT ({kibana-pull}210607[#210607]).
 * Makes WHERE replacement ranges correctly generated for every case ({kibana-pull}209684[#209684]).
 * Fixes formatting and sorting for custom ES|QL variables ({kibana-pull}209360[#209360]).
 * Apply the time range to the fields fetch in the editor ({kibana-pull}208490[#208490]).
+* Fixes several query history issues ({kibana-pull}206418[#206418]).
+* Allows the editor suggestions to be visible when the inline documentation flyout is open ({kibana-pull}206064[#206064]).
+* Fixes editor cursor jumpiness ({kibana-pull}202389[#202389]).
+Discover and ES|QL::
 * Keeps the histogram config on time change ({kibana-pull}208053[#208053]).
 * Fixes CSV export with named parameters ({kibana-pull}206914[#206914]).
 * Prevent redundant requests when loading Discover sessions and toggling chart visibility ({kibana-pull}206699[#206699]).
-* Fixes several query history issues ({kibana-pull}206418[#206418]).
-* Allows the editor suggestions to be visible when the inline documentation flyout is open ({kibana-pull}206064[#206064]).
 * Ensure the same time range is being used for documents and histogram in ES|QL mode ({kibana-pull}204694[#204694]).
 * Fixes persisting URL state in session storage when in ES|QL mode ({kibana-pull}203865[#203865]).
-* Fixes editor cursor jumpiness ({kibana-pull}202389[#202389]).
 Elastic Observability solution::
 * Pass system message to inferenceCliente.chatComplete ({kibana-pull}211263[#211263]).
 * Fixes connector test in MKI ({kibana-pull}211235[#211235]).
