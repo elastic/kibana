@@ -11,7 +11,12 @@ import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod';
 import { APP_UI_ID } from '../../../../common';
-import { getPromptSuffixForOssModel } from './common';
+import { getEsqlFromContent, getPromptSuffixForOssModel } from './common';
+import { NlToEsqlTaskEvent } from '@kbn/inference-plugin/server/tasks/nl_to_esql';
+import { ToolOptions } from '@kbn/inference-common';
+import { parseEsqlQuery } from '@kbn/securitysolution-utils';
+import { parse } from '@kbn/esql-ast';
+import isEmpty from 'lodash/isEmpty';
 
 // select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
@@ -59,8 +64,12 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
 
     return tool(
       async (input) => {
-        const generateEvent = await callNaturalLanguageToEsql(input.question);
-        const answer = generateEvent.content ?? 'An error occurred in the tool';
+        
+        const answer = esqlValidator(callNaturalLanguageToEsql)({question: input.question});
+
+        /* const generateEvent = await callNaturalLanguageToEsql(input.question);
+
+        const answer = generateEvent.content ?? 'An error occurred in the tool'; */
 
         logger.debug(`Received response from NL to ESQL tool: ${answer}`);
         return answer;
@@ -78,3 +87,44 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     );
   },
 };
+
+type NatualLanguageToEsqlFunction = (question: string) => Promise<NlToEsqlTaskEvent<ToolOptions<string>>>
+const maxDepth = 3;
+
+const esqlValidator = (func: NatualLanguageToEsqlFunction) => {
+  return async (input: { question: string }) => {
+
+    const helper = async (question: string, depth = 0): Promise<(string | undefined)[]> => {
+      console.log(question);
+      if (depth >= maxDepth) {
+        return [`Unable to generate a valid query for the given question: "${question}"`];
+      }
+      const generateEvent = await func(question);
+      const queries = getEsqlFromContent(generateEvent.content);
+
+      const results = await Promise.all(
+        queries.map(async (query) => {
+          query = query+"."
+          if (isEmpty(query)) return undefined;
+
+          const { errors } = parse(query);
+
+          if (!isEmpty(errors)) {
+            const errorString = errors.map((e) => e.message).join("\n");
+            const retryString = `The following query has some syntax errors\n\n"${query}"\n\n${errorString}\n\nPlease try again.`;
+            return helper(retryString, depth + 1);
+          }
+
+          return query;
+        })
+      );
+
+      return results.flat();
+    };
+
+    return helper(input.question);
+  };
+};
+
+
+
