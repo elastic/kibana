@@ -23,32 +23,48 @@ import { useConfirmModal } from '../hooks';
 export function ChatContextMenu({
   disabled = false,
   isConversationOwnedByCurrentUser,
+  conversationTitle,
   onCopyToClipboardClick,
   onCopyUrlClick,
   onDeleteClick,
+  onDuplicateConversationClick,
 }: {
   disabled?: boolean;
   isConversationOwnedByCurrentUser: boolean;
+  conversationTitle: string;
   onCopyToClipboardClick: () => void;
   onCopyUrlClick: () => void;
   onDeleteClick: () => void;
+  onDuplicateConversationClick: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
-      defaultMessage: 'Delete this conversation?',
+      defaultMessage: 'Delete conversation',
     }),
     children: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationContent', {
-      defaultMessage: 'This action cannot be undone.',
+      defaultMessage: 'This action is permanent and cannot be undone.',
     }),
     confirmButtonText: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteButtonText', {
-      defaultMessage: 'Delete conversation',
+      defaultMessage: 'Delete',
     }),
   });
 
   const menuItems = [
+    <EuiContextMenuItem
+      key="duplicate"
+      icon="copy"
+      onClick={() => {
+        onDuplicateConversationClick();
+        setIsPopoverOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.duplicateConversation', {
+        defaultMessage: 'Duplicate',
+      })}
+    </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="copyConversationToClipboard"
       icon="copyClipboard"
@@ -86,7 +102,12 @@ export function ChatContextMenu({
         `}
         icon={<EuiIcon type="trash" size="m" color="danger" />}
         onClick={() => {
-          confirmDeleteCallback().then((confirmed) => {
+          confirmDeleteCallback(
+            i18n.translate('xpack.aiAssistant.flyout.confirmDeleteCheckboxLabel', {
+              defaultMessage: 'Delete "{title}"',
+              values: { title: conversationTitle },
+            })
+          ).then((confirmed) => {
             if (!confirmed) {
               return;
             }

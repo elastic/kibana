@@ -188,6 +188,8 @@ export function ChatHeader({
                       deleteConversation(conversationId).then(() => updateDisplayedConversation());
                     }}
                     isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+                    onDuplicateConversationClick={onDuplicateConversation}
+                    conversationTitle={conversation.conversation.title}
                   />
                 </EuiFlexItem>
               </>
@@ -259,11 +261,7 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <ChatActionsMenu
-                  connectors={connectors}
-                  disabled={licenseInvalid}
-                  onDuplicateConversationClick={onDuplicateConversation}
-                />
+                <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
