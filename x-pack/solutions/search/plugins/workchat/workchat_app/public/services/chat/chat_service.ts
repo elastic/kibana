@@ -10,6 +10,10 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { HttpSetup } from '@kbn/core/public';
 import { ChatEvent } from '../../../common/chat_events';
 
+interface CallAgentParams {
+  message: string;
+}
+
 export class ChatService {
   private readonly http: HttpSetup;
 
@@ -17,13 +21,13 @@ export class ChatService {
     this.http = http;
   }
 
-  async callAgent() {
+  async callAgent({ message }: CallAgentParams) {
     return (
       defer(() => {
         return this.http.post('/internal/workchat/chat', {
           asResponse: true,
           rawResponse: true,
-          body: JSON.stringify({}),
+          body: JSON.stringify({ message }),
         });
       })
         // @ts-ignore SseEvent mixin issue
