@@ -256,7 +256,8 @@ export function WorkspacePanelWrapper({
             height: 100%;
             position: absolute;
           }
-          ${isFullscreen && `
+          ${isFullscreen &&
+          `
             margin-bottom: 0; 
             .lnsWorkspacePanelWrapper__content {
               padding: ${euiTheme.size.s}
