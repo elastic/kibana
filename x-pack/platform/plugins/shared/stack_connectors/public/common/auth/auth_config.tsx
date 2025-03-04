@@ -49,6 +49,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
+      'config.headers',
       'config.hasAuth',
       'config.authType',
       'config.certType',
@@ -75,7 +76,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
     getFieldDefaultValue('config.verificationMode') === 'none';
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
-
+  console.log('config ==>', config);
   return (
     <>
       <EuiFlexGroup>
@@ -137,12 +138,12 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
       {hasHeaders && (
         <UseArray path="config.headers" initialNumberOfItems={1}>
           {({ items, addItem, removeItem }) => {
+            console.log('items', items);
             return (
               <>
                 <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
                   <h5>{i18n.HEADERS_TITLE}</h5>
                 </EuiTitle>
-                <EuiSpacer size="s" />
                 {items.map((item) => (
                   <EuiFlexGroup key={item.id}>
                     <EuiFlexItem>
