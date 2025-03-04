@@ -55,9 +55,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
+import { rolloverCondition } from './helpers/rollover_condition';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useWiredStreams } from '../../../hooks/use_wired_streams';
 import { getFormattedError } from '../../../util/errors';
+import { parseDuration } from './helpers';
 
 export type LifecycleEditAction = 'none' | 'dsl' | 'ilm' | 'inherit';
 
@@ -94,11 +96,6 @@ const isInvalidRetention = (value: string) => {
   return isNaN(num) || num < 1 || num % 1 > 0;
 };
 
-const parseRetentionDuration = (value: string = '') => {
-  const result = /(\d+)([d|m|s|h])/.exec(value);
-  return { value: result?.[1], unit: result?.[2] };
-};
-
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
@@ -108,17 +105,17 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
   ];
 
   const existingRetention = isDslLifecycle(definition.stream.ingest.lifecycle)
-    ? parseRetentionDuration(definition.stream.ingest.lifecycle.dsl.data_retention)
+    ? parseDuration(definition.stream.ingest.lifecycle.dsl.data_retention)
     : undefined;
   const [selectedUnit, setSelectedUnit] = useState(
     (existingRetention && timeUnits.find((unit) => unit.value === existingRetention.unit)) ||
       timeUnits[0]
   );
   const [retentionValue, setRetentionValue] = useState(
-    (existingRetention && existingRetention.value) || '1'
+    (existingRetention && existingRetention.value?.toString()) || '1'
   );
   const [noRetention, toggleNoRetention] = useToggle(
-    Boolean(existingRetention && !existingRetention.value)
+    isDslLifecycle(definition.stream.ingest.lifecycle) && !existingRetention
   );
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
   const invalidRetention = useMemo(
@@ -249,19 +246,10 @@ function IlmModal({
     const phasesDescription = (phases: Phases) => {
       const desc: string[] = [];
       if (phases.hot) {
-        const rollover = phases.hot.actions.rollover;
-        const rolloverWhen = [
-          rollover?.max_age && 'max age ' + rollover.max_age,
-          rollover?.max_docs && 'max docs ' + rollover.max_docs,
-          rollover?.max_primary_shard_docs &&
-            'primary shard docs ' + rollover.max_primary_shard_docs,
-          rollover?.max_primary_shard_size &&
-            'primary shard size ' + rollover.max_primary_shard_size,
-          rollover?.max_size && 'index size ' + rollover.max_size,
-        ]
-          .filter(Boolean)
-          .join(' or ');
-        desc.push(`Hot (${rolloverWhen ? 'rollover when ' + rolloverWhen : 'no rollover'})`);
+        const rolloverConditions = rolloverCondition(phases.hot.actions.rollover);
+        desc.push(
+          `Hot (${rolloverConditions ? 'rollover when ' + rolloverConditions : 'no rollover'})`
+        );
       }
       if (phases.warm) {
         desc.push(`Warm after ${phases.warm.min_age}`);

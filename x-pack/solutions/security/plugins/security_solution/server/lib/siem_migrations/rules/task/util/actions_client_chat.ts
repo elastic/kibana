@@ -71,6 +71,7 @@ export class ActionsClientChat {
       llmType,
       model: connector.config?.defaultModel,
       streaming: false,
+      convertSystemMessageToHumanContent: false,
       temperature: 0.05,
       maxRetries: 1, // Only retry once inside the model, we will handle backoff retries in the task runner
       telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
