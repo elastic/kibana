@@ -33,7 +33,7 @@ const mockDefaultDataViewSpec: DataViewSpec = {
   ].join(),
 };
 
-export const mockDataViewPickerState: RootState = {
+export const mockDataViewManagerState: RootState = {
   dataViewManager: {
     ...dataViewManagerState,
     timeline: {

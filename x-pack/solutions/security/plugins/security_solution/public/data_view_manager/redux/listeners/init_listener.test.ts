@@ -6,7 +6,7 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import { mockDataViewPickerState } from '../mock';
+import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
@@ -25,7 +25,7 @@ const mockDataViewsService = {
 } as unknown as DataViewsServicePublic;
 
 const mockDispatch = jest.fn();
-const mockGetState = jest.fn(() => mockDataViewPickerState);
+const mockGetState = jest.fn(() => mockDataViewManagerState);
 
 const mockListenerApi = {
   dispatch: mockDispatch,
