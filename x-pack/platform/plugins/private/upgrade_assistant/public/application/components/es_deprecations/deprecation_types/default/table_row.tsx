@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { DeprecationTableColumns } from '../../../types';
@@ -18,9 +18,14 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   rowFieldNames: DeprecationTableColumns[];
   deprecation: EnrichedDeprecationInfo;
+  index: number;
 }
 
-export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames, deprecation }) => {
+export const DefaultTableRow: React.FunctionComponent<Props> = ({
+  rowFieldNames,
+  deprecation,
+  index,
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -51,7 +56,11 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
   }, [addContentToGlobalFlyout, closeFlyout, deprecation, showFlyout]);
 
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field) => {
         return (
           <EuiTableRowCell
@@ -67,6 +76,6 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };

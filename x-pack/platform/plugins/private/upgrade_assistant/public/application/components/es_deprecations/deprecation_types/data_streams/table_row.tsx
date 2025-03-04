@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
@@ -27,11 +27,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  index: number;
 }
 
 const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const dataStreamContext = useDataStreamMigrationContext();
@@ -71,7 +73,11 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   }, [showFlyout]);
 
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
@@ -88,7 +94,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };
 
