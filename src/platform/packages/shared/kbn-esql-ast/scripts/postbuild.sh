@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Print the current working directory
-echo "Current working directory: $(pwd)"
-
 # Function to add @ts-nocheck to a file
 add_ts_nocheck() {
   local file=$1
