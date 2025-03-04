@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
+import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
 
 interface DrillDownsProps {
   urlTemplates: UrlTemplate[];
@@ -19,14 +20,14 @@ interface DrillDownsProps {
 export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) => {
   return (
     <div>
-      <div className="gphSidebar__header">
+      <div css={gphSidebarHeaderStyles}>
         <EuiIcon type="iInCircle" />{' '}
         {i18n.translate('xpack.graph.sidebar.drillDownsTitle', {
           defaultMessage: 'Drill-downs',
         })}
       </div>
 
-      <div className="gphSidebar__panel">
+      <div css={gphSidebarPanel}>
         {urlTemplates.length === 0 && (
           <p className="help-block">
             {i18n.translate('xpack.graph.sidebar.drillDowns.noDrillDownsHelpText', {

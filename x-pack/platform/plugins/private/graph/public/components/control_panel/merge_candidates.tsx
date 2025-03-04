@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
+import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
 
 interface MergeCandidatesProps {
   workspace: Workspace;
@@ -42,8 +43,8 @@ export const MergeCandidates = ({
   };
 
   return (
-    <div className="gphSidebar__panel">
-      <div className="gphSidebar__header">
+    <div css={gphSidebarPanel}>
+      <div css={gphSidebarHeaderStyles}>
         <EuiIcon type="link" />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {
           defaultMessage: 'Link summary',

@@ -1,21 +1,3 @@
-.gphSidebar__header {
-  margin-top: $euiSizeS;
-  color: $euiColorEmptyShade;
-  background-color: $euiColorDarkestShade;
-  padding: $euiSizeXS;
-  border-radius: $euiBorderRadius;
-  margin-bottom: $euiSizeXS;
-
-  .kuiIcon {
-    padding-right: $euiSizeXS;
-  }
-}
-
-.gphSidebar__panel {
-  max-height: $euiSizeL * 10;
-  overflow-y: hidden auto;
-}
-
 /**
  * Vertex Select
  */

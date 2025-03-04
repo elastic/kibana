@@ -28,6 +28,7 @@ import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
 import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
+import { gphSidebarHeaderStyles } from '../../styles';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];
@@ -88,7 +89,7 @@ const ControlPanelComponent = ({
       />
 
       <div>
-        <div className="gphSidebar__header">
+        <div css={gphSidebarHeaderStyles}>
           {i18n.translate('xpack.graph.sidebar.selectionsTitle', {
             defaultMessage: 'Selections',
           })}
@@ -158,8 +159,6 @@ const styles = {
         color: euiThemeContext.euiTheme.colors.text,
       },
     }),
-  gphSidebarHeader: ({ euiTheme }: UseEuiTheme) => css({}),
-  gphSidebarPanel: ({ euiTheme }: UseEuiTheme) => css({}),
 };
 
 export const ControlPanel = connect((state: GraphState) => ({

@@ -13,3 +13,23 @@ export const gphFieldBadgeSize = ({ euiTheme }: UseEuiTheme) =>
     height: euiTheme.size.l,
     lineHeight: `calc(${euiTheme.size.l} - 2px)`, // Subtract 2 for the border
   });
+
+export const gphSidebarHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    marginTop: euiTheme.size.s,
+    color: euiTheme.colors.emptyShade,
+    backgroundColor: euiTheme.colors.darkestShade,
+    padding: euiTheme.size.xs,
+    borderRadius: euiTheme.border.radius.medium,
+    marginBottom: euiTheme.size.xs,
+
+    '.kuiIcon': {
+      paddingRight: euiTheme.size.xs,
+    },
+  });
+
+export const gphSidebarPanel = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    maxHeight: `calc(${euiTheme.size.l} * 10)`,
+    overflowY: 'hidden', // Invalid property hidden auto;
+  });
