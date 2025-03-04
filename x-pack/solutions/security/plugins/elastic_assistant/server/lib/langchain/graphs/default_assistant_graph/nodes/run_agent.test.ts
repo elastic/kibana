@@ -18,7 +18,7 @@ jest.mock('../../../../prompt', () => ({
 }));
 
 const agentState = {
-  messages: [new AIMessage({ content: 'This message contains a reference {reference(1234)}' })],
+  chatHistory: [new AIMessage({ content: 'This message contains a reference {reference(1234)}' })],
   formattedTime: 'mockFormattedTime',
 } as unknown as AgentState;
 
@@ -71,7 +71,7 @@ describe('runAgent', () => {
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        sanitized_messages: expect.arrayContaining([
+        chat_history: expect.arrayContaining([
           expect.objectContaining({
             content: 'This message contains a reference ',
           }),
