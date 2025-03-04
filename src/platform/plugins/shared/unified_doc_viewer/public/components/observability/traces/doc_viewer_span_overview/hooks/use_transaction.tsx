@@ -109,7 +109,6 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     fetchData();
 
     return function onUnmount() {
-      // isMounted = false;
       controller.abort();
     };
   }, [core.notifications.toasts, data, indexPattern, transactionId]);
