@@ -15,7 +15,7 @@ import {
 } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
-import { getDocViewer } from './accessors';
+import { createGetDocViewer } from './accessors';
 
 export const createObservabilityTracesSpanDocumentProfileProvider = (
   services: ProfileProviderServices
@@ -23,7 +23,8 @@ export const createObservabilityTracesSpanDocumentProfileProvider = (
   isExperimental: true,
   profileId: 'obs-traces-span-document-profile',
   profile: {
-    getDocViewer,
+    getDocViewer: createGetDocViewer('traces-*'),
+    // TODO add APM configured indexes instead of traces-*, currently blocked by https://github.com/elastic/kibana/issues/211414
   },
   resolve: ({ record }) => {
     const isApmEnabled = services.application.capabilities.apm?.show;

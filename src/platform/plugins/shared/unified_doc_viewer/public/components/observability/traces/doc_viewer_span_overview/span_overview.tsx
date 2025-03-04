@@ -17,15 +17,17 @@ import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from '../resources/get_span_field_configuration';
 import { SpanSummary } from './sub_components/span_summary';
-export type SpanOverviewProps = DocViewRenderProps;
+export type SpanOverviewProps = DocViewRenderProps & {
+  transactionIndexPattern: string;
+};
 
 export function SpanOverview({
   columns,
-  dataView,
   hit,
   filter,
   onAddColumn,
   onRemoveColumn,
+  transactionIndexPattern,
 }: SpanOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
 
@@ -36,7 +38,7 @@ export function SpanOverview({
   return (
     <TransactionProvider
       transactionId={parsedDoc['transaction.id']}
-      indexPattern={dataView.getIndexPattern()} // TODO not get from the dataview but from the document
+      indexPattern={transactionIndexPattern}
     >
       <FieldActionsProvider
         columns={columns}
