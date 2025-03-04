@@ -156,6 +156,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       name: `Endpoint exception (${this.randomString(5)})`,
       list_id: ENDPOINT_LIST_ID,
       entries: this.randomEndpointExceptionEntries(1),
+      tags: [],
       ...overrides,
     });
   }

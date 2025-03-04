@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type {
+import {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
+  ENDPOINT_LIST_NAME,
+  ENDPOINT_LIST_DESCRIPTION,
+  ENDPOINT_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
@@ -123,6 +127,26 @@ export class EndpointArtifactsTestResources extends FtrService {
     this.log.info(`Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`);
   }
 
+  async createEndpointException(
+    overrides: Partial<CreateExceptionListItemSchema> = {},
+    options?: ArtifactCreateOptions
+  ): Promise<ArtifactTestData> {
+    await this.ensureListExists(
+      {
+        name: ENDPOINT_LIST_NAME,
+        description: ENDPOINT_LIST_DESCRIPTION,
+        list_id: ENDPOINT_LIST_ID,
+        type: ExceptionListTypeEnum.ENDPOINT,
+        namespace_type: 'agnostic',
+      },
+      options
+    );
+    const endpointException =
+      this.exceptionsGenerator.generateEndpointExceptionForCreate(overrides);
+
+    return this.createExceptionItem(endpointException, options);
+  }
+
   async createTrustedApp(
     overrides: Partial<CreateExceptionListItemSchema> = {},
     options?: ArtifactCreateOptions
@@ -180,6 +204,9 @@ export class EndpointArtifactsTestResources extends FtrService {
       }
       case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
         return this.createHostIsolationException(overrides, options);
+      }
+      case ENDPOINT_LIST_ID: {
+        return this.createEndpointException(overrides, options);
       }
       default:
         throw new Error(`Unexpected list id ${listId}`);
