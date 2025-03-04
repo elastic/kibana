@@ -188,16 +188,33 @@ const prepareSimulationProcessors = (
     } as ProcessorDefinition;
   });
 
-  const dotExpanderProcessor: Pick<IngestProcessorContainer, 'dot_expander'> = {
-    dot_expander: {
-      field: '*',
-      override: true,
+  const dotExpanderProcessors: Array<Pick<IngestProcessorContainer, 'dot_expander'>> = [
+    {
+      dot_expander: {
+        field: '*',
+        ignore_failure: true,
+        override: true,
+      },
     },
-  };
+    {
+      dot_expander: {
+        path: 'resource.attributes',
+        field: '*',
+        ignore_failure: true,
+      },
+    },
+    {
+      dot_expander: {
+        path: 'attributes',
+        field: '*',
+        ignore_failure: true,
+      },
+    },
+  ];
 
   const formattedProcessors = formatToIngestProcessors(processors);
 
-  return [dotExpanderProcessor, ...formattedProcessors];
+  return [...dotExpanderProcessors, ...formattedProcessors];
 };
 
 const prepareSimulationData = (params: ProcessingSimulationParams) => {
@@ -442,8 +459,8 @@ const extractProcessorMetrics = ({
 };
 
 const getDocumentStatus = (doc: SuccessfulIngestSimulateDocumentResult): DocSimulationStatus => {
-  // Remove the always present base processor for dot expander
-  const processorResults = doc.processor_results.slice(1);
+  // Remove the always present base processors for dot expander
+  const processorResults = doc.processor_results.slice(3);
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -464,7 +481,7 @@ const getLastDoc = (docResult: SuccessfulIngestSimulateDocumentResult, sample: F
   const status = getDocumentStatus(docResult);
   const lastDocSource =
     docResult.processor_results
-      .slice(1) // Remove the always present base processor for dot expander
+      .slice(3) // Remove the always present base processors for dot expander
       .filter((proc) => !isSkippedProcessor(proc))
       .at(-1)?.doc?._source ?? sample;
 

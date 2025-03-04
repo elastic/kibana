@@ -51,7 +51,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           })
           .expect(200);
-        expect(response.body.unmappedFields).to.eql(['another.field', 'lastField', 'some.field']);
+        expect(response.body.unmappedFields).to.eql([
+          'attributes.another.field',
+          'attributes.lastField',
+          'attributes.some.field',
+        ]);
       });
     });
 
@@ -65,7 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: 'logs',
               },
               body: {
-                field_definitions: [{ name: 'message', type: 'boolean' }],
+                field_definitions: [{ name: 'body.text', type: 'boolean' }],
               },
             },
           }
@@ -84,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: 'logs',
               },
               body: {
-                field_definitions: [{ name: 'message', type: 'keyword' }],
+                field_definitions: [{ name: 'body.text', type: 'keyword' }],
               },
             },
           }
@@ -100,7 +104,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx',
           },
           if: {
-            field: 'log.logger',
+            field: 'attributes.log.logger',
             operator: 'eq' as const,
             value: 'nginx',
           },
@@ -115,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: 'logs.nginx',
               },
               body: {
-                field_definitions: [{ name: 'message', type: 'keyword' }],
+                field_definitions: [{ name: 'body.text', type: 'keyword' }],
               },
             },
           }

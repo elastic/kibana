@@ -73,7 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(
         (logsDeeplyNestedStreamname.body as WiredStreamGetResponse).stream.ingest.wired.fields
       ).to.eql({
-        field2: {
+        'attributes.field2': {
           type: 'keyword',
         },
       });
@@ -83,7 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const logsResponse = await esClient.search({
         index: 'logs',
         query: {
-          match: { 'log.level': 'info' },
+          match: { severity_text: 'info' },
         },
       });
 
@@ -92,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const logsTestResponse = await esClient.search({
         index: 'logs.test',
         query: {
-          match: { numberfield: 20 },
+          match: { 'attributes.numberfield': 20 },
         },
       });
 
@@ -101,7 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const logsTest2Response = await esClient.search({
         index: 'logs.test2',
         query: {
-          match: { field2: 'abc' },
+          match: { 'attributes.field2': 'abc' },
         },
       });
 

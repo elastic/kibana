@@ -25,16 +25,49 @@ const rootStreamDefinition: WiredStreamDefinition = {
         '@timestamp': {
           type: 'date',
         },
-        message: {
+        'stream.name': {
+          type: 'keyword',
+        },
+        'scope.dropped_attributes_count': {
+          type: 'long',
+        },
+        dropped_attributes_count: {
+          type: 'long',
+        },
+        'resource.dropped_attributes_count': {
+          type: 'long',
+        },
+        'resource.schema_url': {
+          type: 'keyword',
+        },
+        'scope.name': {
+          type: 'keyword',
+        },
+        'scope.schema_url': {
+          type: 'keyword',
+        },
+        'scope.version': {
+          type: 'keyword',
+        },
+        observed_timestamp: {
+          type: 'date',
+        },
+        trace_id: {
+          type: 'keyword',
+        },
+        span_id: {
+          type: 'keyword',
+        },
+        severity_text: {
+          type: 'keyword',
+        },
+        'body.text': {
           type: 'match_only_text',
         },
-        'host.name': {
-          type: 'keyword',
+        'severity.number': {
+          type: 'long',
         },
-        'log.level': {
-          type: 'keyword',
-        },
-        'stream.name': {
+        'resource.attributes.host.name': {
           type: 'keyword',
         },
       },
@@ -66,9 +99,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: [
               {
                 grok: {
-                  field: 'message',
+                  field: 'body.text',
                   patterns: [
-                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
                   if: { always: {} },
                 },

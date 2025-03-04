@@ -36,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'logs.nginx',
         },
         if: {
-          field: 'host.name',
+          field: 'resource.attributes.host.name',
           operator: 'eq' as const,
           value: 'routeme',
         },
@@ -58,19 +58,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: [
               {
                 grok: {
-                  field: 'message',
+                  field: 'body.text',
                   patterns: [
-                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
                   if: { always: {} },
                 },
               },
               {
                 dissect: {
-                  field: 'message2',
-                  pattern: '%{log.logger} %{message3}',
+                  field: 'attributes.message2',
+                  pattern: '%{attributes.log.logger} %{attributes.message3}',
                   if: {
-                    field: 'log.level',
+                    field: 'severity_text',
                     operator: 'eq',
                     value: 'info',
                   },
@@ -80,20 +80,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             routing: [],
             wired: {
               fields: {
-                '@timestamp': {
-                  type: 'date',
-                },
-                message: {
+                'attributes.message2': {
                   type: 'match_only_text',
-                },
-                message2: {
-                  type: 'match_only_text',
-                },
-                'host.name': {
-                  type: 'keyword',
-                },
-                'log.level': {
-                  type: 'keyword',
                 },
               },
             },
@@ -116,12 +104,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const result = await fetchDocument(esClient, 'logs.nginx', response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:10.000Z',
-        message: '2023-01-01T00:00:10.000Z error test',
-        'host.name': 'routeme',
-        inner_timestamp: '2023-01-01T00:00:10.000Z',
-        message2: 'test',
-        'log.level': 'error',
-        'stream.name': 'logs.nginx',
+        body: {
+          text: '2023-01-01T00:00:10.000Z error test',
+        },
+        resource: {
+          attributes: {
+            'host.name': 'routeme',
+          },
+        },
+        attributes: {
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+        },
+        severity_text: 'error',
+        stream: { name: 'logs.nginx' },
       });
     });
 
@@ -137,14 +133,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const result = await fetchDocument(esClient, 'logs.nginx', response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:11.000Z',
-        message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
-        inner_timestamp: '2023-01-01T00:00:10.000Z',
-        'host.name': 'routeme',
-        'log.level': 'info',
-        'log.logger': 'mylogger',
-        message2: 'mylogger this is the message',
-        message3: 'this is the message',
-        'stream.name': 'logs.nginx',
+        body: {
+          text: '2023-01-01T00:00:10.000Z info mylogger this is the message',
+        },
+        resource: {
+          attributes: {
+            'host.name': 'routeme',
+          },
+        },
+        attributes: {
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          'log.logger': 'mylogger',
+          message2: 'mylogger this is the message',
+          message3: 'this is the message',
+        },
+        severity_text: 'info',
+        stream: { name: 'logs.nginx' },
       });
     });
 
@@ -153,7 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: 'logs.nginx',
         query: {
           match: {
-            message2: 'mylogger',
+            'attributes.message2': 'mylogger',
           },
         },
       });
@@ -165,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: 'logs.nginx',
         query: {
           match: {
-            'log.logger': 'mylogger',
+            'attributes.log.logger': 'mylogger',
           },
         },
       });
