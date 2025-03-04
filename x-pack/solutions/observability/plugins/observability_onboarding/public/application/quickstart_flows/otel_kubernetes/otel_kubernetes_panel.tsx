@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiSkeletonText,
@@ -27,23 +27,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { APMApiKeyResponse } from '../../../../common/types';
+import { ObservabilityOnboardingAppServices } from '../../..';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
+import { useOtelIngestEndpointUrl } from '../shared/use_otel_ingest_endpoint_url';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
 const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
+  const { data, error: createFlowError, refetch } = useKubernetesFlow('kubernetes_otel');
+  const [error, setError] = useState<IHttpFetchError<ResponseErrorBody> | null>(null);
   const [idSelected, setIdSelected] = useState('nodejs');
+  const [encodedApiKey, setEncodedApiKey] = useState<string | null>(null);
   const {
-    services: { share },
-  } = useKibana<ObservabilityOnboardingContextValue>();
+    services: {
+      http,
+      share,
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const theme = useEuiTheme();
@@ -58,6 +67,39 @@ export const OtelKubernetesPanel: React.FC = () => {
       });
     }
   }, [data, onPageReady]);
+  const ingestEndpointUrl = useOtelIngestEndpointUrl({
+    elasticsearchUrl: data?.elasticsearchUrl,
+    managedServiceUrl: data?.managedServiceUrl,
+  });
+
+  useEffect(() => {
+    if (createFlowError) {
+      setError(createFlowError);
+    }
+  }, [createFlowError]);
+
+  useEffect(() => {
+    if (encodedApiKey !== null || !data) {
+      return;
+    }
+
+    if (!isServerless) {
+      setEncodedApiKey(data.apiKeyEncoded);
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+
+    http
+      .post<APMApiKeyResponse>('/api/apm/agent_keys', {
+        body: JSON.stringify({
+          name: `ingest-otel-k8s-${timestamp}`,
+          privileges: ['event:write'],
+        }),
+      })
+      .then((res) => setEncodedApiKey(res.agentKey.encoded))
+      .catch((err) => setError(err));
+  }, [data, encodedApiKey, http, isServerless]);
 
   if (error) {
     return (
@@ -65,22 +107,26 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
+  const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
+  const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
+
   const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`
+    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/values.yaml`
     : '';
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
-  const installStackCommand = data
-    ? `kubectl create namespace ${namespace}
+  const installStackCommand =
+    data && encodedApiKey
+      ? `kubectl create namespace ${namespace}
 kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
-  --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
-  --from-literal=elastic_api_key='${data.apiKeyEncoded}'
+  --from-literal=${elasticEndpointVarName}='${ingestEndpointUrl}' \\
+  --from-literal=elastic_api_key='${encodedApiKey}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
   --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
-    : undefined;
+      : undefined;
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
