@@ -15,6 +15,10 @@ export interface HasSerializedChildState<SerializedState extends object = object
   ) => SerializedPanelState<SerializedState> | undefined;
 }
 
+export interface HasLastSavedChildState<SerializedState extends object = object> {
+  getLastSavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
+}
+
 /**
  * @deprecated Use `HasSerializedChildState` instead. All interactions between the container and the child should use the serialized state.
  */
@@ -27,6 +31,13 @@ export const apiHasSerializedChildState = <SerializedState extends object = obje
 ): api is HasSerializedChildState<SerializedState> => {
   return Boolean(api && (api as HasSerializedChildState).getSerializedStateForChild);
 };
+
+export const apiHasLastSavedChildState = <SerializedState extends object = object>(
+  api: unknown
+): api is HasLastSavedChildState<SerializedState> => {
+  return Boolean(api && (api as HasLastSavedChildState).getLastSavedStateForChild);
+};
+
 /**
  * @deprecated Use `HasSerializedChildState` instead. All interactions between the container and the child should use the serialized state.
  */

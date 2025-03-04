@@ -14,6 +14,8 @@ import {
   debounceTime,
   map,
   Subscription,
+  switchMap,
+  tap,
 } from 'rxjs';
 import {
   getInitialValuesFromComparators,
@@ -30,10 +32,27 @@ export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   initialLastSavedState: RuntimeState,
   parentApi: unknown,
-  comparators: StateComparators<RuntimeState>
+  comparators: StateComparators<RuntimeState>,
+  fetchLastSavedState?: () => Promise<RuntimeState>
 ) => {
   const subscriptions: Subscription[] = [];
   const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialLastSavedState);
+  const isDeserializing$ = new BehaviorSubject<boolean>(false);
+
+  const untilLastSavedStateDeserialized = () => {
+    return new Promise<void>((resolve) => {
+      if (!isDeserializing$.value) {
+        resolve();
+      } else {
+        const subscription = isDeserializing$.subscribe((isDeserializing) => {
+          if (!isDeserializing) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      }
+    });
+  };
 
   const snapshotRuntimeState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
@@ -48,9 +67,17 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   if (apiHasSaveNotification(parentApi)) {
     subscriptions.push(
       // any time the parent saves, the current state becomes the last saved state...
-      parentApi.saveNotification$.subscribe(() => {
-        lastSavedState$.next(snapshotRuntimeState());
-      })
+      parentApi.saveNotification$
+        .pipe(
+          tap(() => isDeserializing$.next(true)),
+          switchMap(() =>
+            fetchLastSavedState ? fetchLastSavedState() : Promise.resolve(snapshotRuntimeState())
+          )
+        )
+        .subscribe((nextLastSavedState) => {
+          lastSavedState$.next(nextLastSavedState);
+          isDeserializing$.next(false);
+        })
     );
   }
 
@@ -94,19 +121,21 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     api: {
       unsavedChanges$,
       resetUnsavedChanges: () => {
-        const lastSaved = lastSavedState$.getValue();
+        (async () => {
+          await untilLastSavedStateDeserialized();
+          const lastSaved = lastSavedState$.getValue();
+          // Do not reset to undefined or empty last saved state
+          // Temporary fix for https://github.com/elastic/kibana/issues/201627
+          // TODO remove when architecture fix resolves issue.
+          if (comparatorKeys.length && (!lastSaved || Object.keys(lastSaved).length === 0)) {
+            return false;
+          }
 
-        // Do not reset to undefined or empty last saved state
-        // Temporary fix for https://github.com/elastic/kibana/issues/201627
-        // TODO remove when architecture fix resolves issue.
-        if (comparatorKeys.length && (!lastSaved || Object.keys(lastSaved).length === 0)) {
-          return false;
-        }
-
-        for (const key of comparatorKeys) {
-          const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-          setter(lastSaved?.[key] as RuntimeState[typeof key]);
-        }
+          for (const key of comparatorKeys) {
+            const setter = comparators[key][1]; // setter function is the 1st element of the tuple
+            setter(lastSaved?.[key] as RuntimeState[typeof key]);
+          }
+        })();
         return true;
       },
       snapshotRuntimeState,
