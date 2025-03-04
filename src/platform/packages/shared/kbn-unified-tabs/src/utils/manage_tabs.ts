@@ -21,7 +21,14 @@ export const addTab = ({ items }: TabsState, item: TabItem): TabsState => {
   };
 };
 
-export const removeTab = ({ items, selectedItem }: TabsState, item: TabItem): TabsState => {
+export const selectTab = ({ items, selectedItem }: TabsState, item: TabItem): TabsState => {
+  return {
+    items,
+    selectedItem: items.find((i) => i.id === item.id) || selectedItem,
+  };
+};
+
+export const closeTab = ({ items, selectedItem }: TabsState, item: TabItem): TabsState => {
   const itemIndex = items.findIndex((i) => i.id === item.id);
 
   if (itemIndex === -1) {
@@ -50,9 +57,30 @@ export const removeTab = ({ items, selectedItem }: TabsState, item: TabItem): Ta
   };
 };
 
-export const selectTab = ({ items, selectedItem }: TabsState, item: TabItem): TabsState => {
+export const closeOtherTabs = (_: TabsState, item: TabItem): TabsState => {
   return {
-    items,
-    selectedItem: items.find((i) => i.id === item.id) || selectedItem,
+    items: [item],
+    selectedItem: item,
+  };
+};
+
+export const closeTabsToTheRight = (
+  { items, selectedItem }: TabsState,
+  item: TabItem
+): TabsState => {
+  const itemIndex = items.findIndex((i) => i.id === item.id);
+
+  if (itemIndex === -1 || itemIndex === items.length - 1) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
+  const nextItems = items.slice(0, itemIndex + 1);
+
+  return {
+    items: nextItems,
+    selectedItem,
   };
 };

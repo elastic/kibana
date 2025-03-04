@@ -12,7 +12,13 @@ import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuActions } from '../../utils/get_tab_menu_actions';
-import { addTab, removeTab, selectTab } from '../../utils/manage_tabs';
+import {
+  addTab,
+  closeTab,
+  selectTab,
+  closeOtherTabs,
+  closeTabsToTheRight,
+} from '../../utils/manage_tabs';
 import { TabItem } from '../../types';
 
 export interface TabbedContentProps {
@@ -46,14 +52,18 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     };
   });
   const { items, selectedItem } = state;
+  const stateRef = React.useRef<TabbedContentState>();
+  stateRef.current = state;
 
   const changeState = useCallback(
     (getNextState: (prevState: TabbedContentState) => TabbedContentState) => {
-      _setState((prevState) => {
-        const nextState = getNextState(prevState);
-        setTimeout(() => onChanged(nextState), 0);
-        return nextState;
-      });
+      if (!stateRef.current) {
+        return;
+      }
+
+      const nextState = getNextState(stateRef.current);
+      _setState(nextState);
+      onChanged(nextState);
     },
     [_setState, onChanged]
   );
@@ -67,7 +77,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onClose = useCallback(
     (item: TabItem) => {
-      changeState((prevState) => removeTab(prevState, item));
+      changeState((prevState) => closeTab(prevState, item));
     },
     [changeState]
   );
@@ -80,10 +90,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const getTabMenuItems = useMemo(() => {
     return getTabMenuActions({
       onDuplicate: (item) => alert(`Duplicate ${item.id}`),
-      onCloseOtherTabs: (item) => alert(`Close other tabs ${item.id}`),
-      onCloseTabsToTheRight: (item) => alert(`Close tabs to the right ${item.id}`),
+      onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
+      onCloseTabsToTheRight: (item) =>
+        changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, []);
+  }, [changeState]);
 
   return (
     <EuiFlexGroup
