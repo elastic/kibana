@@ -2317,11 +2317,8 @@ paths:
 
             > info
 
-            > [dev] This functionality is in development and may be changed or
-            removed completely in a future release. These features are
-            unsupported and not subject to the support SLA of official GA
-            features.These fields are under development and their usage or
-            schema may change: execution_summary.
+            > These fields are under development and their usage or schema may
+            change: execution_summary.
       summary: List all detection rules
       tags:
         - Security Detections API
@@ -3445,6 +3442,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  value:
+                    - zeek
+                    - suricata
+                    - windows
+                    - linux
+                    - network
+                    - initial access
+                    - remote access
+                    - phishing
               schema:
                 $ref: '#/components/schemas/RuleTagArray'
           description: Indicates a successful call
