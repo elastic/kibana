@@ -61,6 +61,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
           const loadedSecurityLabsDocsCount = await kbDataClient.getLoadedSecurityLabsDocsCount();
           const userDataExists = await kbDataClient.isUserDataExists();
+          const productDocumentationStatus = await kbDataClient.getProductDocumentationStatus();
 
           return response.ok({
             body: {
@@ -72,6 +73,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
               // If user data exists, we should have at least one document in the Security Labs index
               user_data_exists: userDataExists || !!loadedSecurityLabsDocsCount,
               pipeline_exists: pipelineExists,
+              product_documentation_status: productDocumentationStatus,
             },
           });
         } catch (err) {
