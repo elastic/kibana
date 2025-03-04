@@ -6,8 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { fetchConnectors } from '@kbn/search-connectors';
+import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
+import { Crawler } from '../../../common/types/crawler';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 import { fetchCrawlers } from '../crawler/fetch_crawlers';
 
@@ -23,8 +24,15 @@ export const fetchUnattachedIndices = async (
   totalResults: number;
 }> => {
   const { indexNames } = await getUnattachedIndexData(client, searchQuery);
-  const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
-  const crawlers = await fetchCrawlers(client, indexNames);
+
+  let connectors: Connector[] = [];
+  let crawlers: Crawler[] = [];
+  try {
+    connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+    crawlers = await fetchCrawlers(client, indexNames);
+  } catch (error) {
+    connectors = [];
+  }
 
   const connectedIndexNames = [
     ...connectors.map((con) => con.index_name).filter(isNotNullish),

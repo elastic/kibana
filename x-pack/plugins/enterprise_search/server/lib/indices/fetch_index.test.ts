@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
@@ -54,6 +54,10 @@ describe('fetchIndex lib function', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const logger = {
+    error: jest.fn(),
+  } as any as Logger;
 
   const statsResponse = {
     indices: {
@@ -110,7 +114,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).resolves.toEqual(result);
   });
 
@@ -134,7 +138,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).resolves.toEqual({
       ...result,
       connector: { doc: 'doc', service_type: 'some-service-type' },
@@ -213,7 +217,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).rejects.toEqual(new Error('404'));
   });
   it('should throw a 404 error if the indexStats cannot be fonud', async () => {
@@ -230,7 +234,7 @@ describe('fetchIndex lib function', () => {
     );
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).rejects.toEqual(new Error('404'));
   });
   it('should throw a 404 error if the index stats indices cannot be fonud', async () => {
@@ -245,7 +249,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve({}));
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).rejects.toEqual(new Error('404'));
   });
 });
