@@ -10,6 +10,8 @@ import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ChatEvent } from '../../../common/chat_events';
 import { createAgentGraph } from './agent_graph';
+import { IntegrationsService } from '../integrations/integrations_service';
+import { getLCTools } from '../integrations/utils';
 import { langchainToChatEvents } from './utils';
 
 interface AgentRunOptions {
@@ -27,11 +29,17 @@ export interface Agent {
 export const createAgent = async ({
   agentId,
   chatModel,
+  integrationsService,
 }: {
   agentId: string;
   chatModel: InferenceChatModel;
+  integrationsService: IntegrationsService;
 }): Promise<Agent> => {
-  const agentGraph = await createAgentGraph({ agentId, chatModel });
+  // TODO: everything
+
+  const integrationTools = await getLCTools(integrationsService);
+
+  const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
     run: async ({ message }): Promise<AgentRunResult> => {
@@ -43,6 +51,7 @@ export const createAgent = async ({
           metadata: {
             agentId,
           },
+          recursionLimit: 5
         }
       );
 

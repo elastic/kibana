@@ -1,0 +1,11 @@
+{
+  "name": "@kbn/workchat-integration-salesforce",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --config ./jest.config.js",
+    "test:watch": "jest --config ./jest.config.js --watch"
+  },
+  "devDependencies": {
+    "@kbn/test": "1.0.0"
+  }
+} 
