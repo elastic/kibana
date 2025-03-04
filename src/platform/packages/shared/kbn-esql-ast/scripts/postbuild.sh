@@ -4,21 +4,22 @@ set -euo pipefail
 # Print the current working directory
 echo "Current working directory: $(pwd)"
 
-# Check if the parser file exists and add @ts-nocheck
-if [ -f src/antlr/esql_parser.ts ]; then
-  echo "Adding @ts-nocheck to src/antlr/esql_parser.ts"
-  sed -i '' -e '1s/^/\/\/ @ts-nocheck\n/' src/antlr/esql_parser.ts
-else
-  echo "src/antlr/esql_parser.ts not found!"
-fi
+# Function to add @ts-nocheck to a file
+add_ts_nocheck() {
+  local file=$1
+  if [ -f "$file" ]; then
+    echo "Adding @ts-nocheck to $file"
+    echo -e "// @ts-nocheck\n$(cat "$file")" > "$file"
+  else
+    echo "$file not found!"
+  fi
+}
 
-# Check if the lexer file exists and add @ts-nocheck
-if [ -f src/antlr/esql_lexer.ts ]; then
-  echo "Adding @ts-nocheck to src/antlr/esql_lexer.ts"
-  sed -i '' -e '1s/^/\/\/ @ts-nocheck\n/' src/antlr/esql_lexer.ts
-else
-  echo "src/antlr/esql_lexer.ts not found!"
-fi
+# Add @ts-nocheck to the parser file
+add_ts_nocheck src/antlr/esql_parser.ts
+
+# Add @ts-nocheck to the lexer file
+add_ts_nocheck src/antlr/esql_lexer.ts
 
 # Rename the parser listener file if it exists
 if [ -f src/antlr/esql_parserListener.ts ]; then
