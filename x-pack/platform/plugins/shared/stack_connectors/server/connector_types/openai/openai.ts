@@ -177,10 +177,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
-    console.log('requestHeaders', {
-      headers: this.headers,
-      axiosHeaders: axiosOptions.headers,
-    });
     const response = await this.request(
       {
         url: this.url,

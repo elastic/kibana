@@ -122,7 +122,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         componentProps={{
           euiFieldProps: {
             disabled: readOnly,
-            'data-test-subj': 'webhookViewHeadersSwitch',
+            'data-test-subj': 'openAIViewHeadersSwitch',
           },
         }}
       />
