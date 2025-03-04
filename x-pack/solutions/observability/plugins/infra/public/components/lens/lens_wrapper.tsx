@@ -114,7 +114,7 @@ export const LensWrapper = ({
               onLoad={handleOnLoad}
               query={state.query}
               timeRange={dateRange}
-              viewMode={'view'}
+              viewMode="view"
             />
           </>
         )}
