@@ -14,7 +14,7 @@
       "tags": [],
       "label": "StreamsPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -29,7 +29,7 @@
             "Observable",
             "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
           ],
-          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -44,7 +44,7 @@
       "tags": [],
       "label": "StreamsPluginStart",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -141,7 +141,37 @@
               "section": "def-common.GroupObjectGetResponse",
               "text": "GroupObjectGetResponse"
             },
-            ", undefined>; \"PUT /api/streams/{name}/_ingest\": ",
+            ", undefined>; \"GET /api/streams/{name}/lifecycle/_explain\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{name}/lifecycle/_explain\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "IlmExplainLifecycleResponse",
+            ", undefined>; \"GET /api/streams/{name}/lifecycle/_stats\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{name}/lifecycle/_stats\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { phases: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.IlmPolicyPhases",
+              "text": "IlmPolicyPhases"
+            },
+            "; }, undefined>; \"PUT /api/streams/{name}/_ingest\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -715,7 +745,7 @@
             "StreamsRepositoryClientOptions",
             ">"
           ],
-          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -730,7 +760,7 @@
             "Observable",
             "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
           ],
-          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -755,7 +785,7 @@
         "signature": [
           "{}"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/common/config.ts",
+        "path": "x-pack/platform/plugins/shared/streams/common/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -846,7 +876,37 @@
             "section": "def-common.GroupObjectGetResponse",
             "text": "GroupObjectGetResponse"
           },
-          ", undefined>; \"PUT /api/streams/{name}/_ingest\": ",
+          ", undefined>; \"GET /api/streams/{name}/lifecycle/_explain\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{name}/lifecycle/_explain\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "IlmExplainLifecycleResponse",
+          ", undefined>; \"GET /api/streams/{name}/lifecycle/_stats\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{name}/lifecycle/_stats\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { phases: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IlmPolicyPhases",
+            "text": "IlmPolicyPhases"
+          },
+          "; }, undefined>; \"PUT /api/streams/{name}/_ingest\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1418,7 +1478,7 @@
           },
           ", undefined>; }"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/server/routes/index.ts",
+        "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1432,7 +1492,7 @@
       "tags": [],
       "label": "StreamsPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1446,7 +1506,7 @@
       "tags": [],
       "label": "StreamsPluginStart",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1477,7 +1537,7 @@
           "AssetLink",
           "<TAssetType>"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+        "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1488,7 +1548,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+            "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1502,7 +1562,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+            "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1522,7 +1582,7 @@
         "signature": [
           "\"rule\" | \"slo\" | \"dashboard\""
         ],
-        "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+        "path": "x-pack/platform/plugins/shared/streams/common/assets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

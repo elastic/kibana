@@ -75,11 +75,9 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
       index: ['known-type-index_8.0.0'],
       wait_for_completion: false,
-      body: {
-        query: {
-          bool: {
-            must_not: expect.any(Array),
-          },
+      query: {
+        bool: {
+          must_not: expect.any(Array),
         },
       },
     });

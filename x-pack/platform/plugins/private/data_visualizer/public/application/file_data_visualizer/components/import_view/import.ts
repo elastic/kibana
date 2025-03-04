@@ -13,7 +13,7 @@ import type {
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { IMPORT_STATUS } from '../import_progress/import_progress';
 import { AutoDeploy } from './auto_deploy';
 
@@ -84,7 +84,7 @@ export async function importData(props: Props, config: Config, setState: (state:
 
   let settings = {};
   let mappings = {};
-  let pipeline;
+  const pipelines = [];
 
   try {
     settings = JSON.parse(indexSettingsString);
@@ -108,7 +108,7 @@ export async function importData(props: Props, config: Config, setState: (state:
 
   try {
     if (createPipeline) {
-      pipeline = JSON.parse(pipelineString) as IngestPipeline;
+      pipelines.push(JSON.parse(pipelineString) as IngestPipeline);
     }
   } catch (error) {
     success = false;
@@ -178,7 +178,12 @@ export async function importData(props: Props, config: Config, setState: (state:
     return;
   }
 
-  const initializeImportResp = await importer.initializeImport(index, settings, mappings, pipeline);
+  const initializeImportResp = await importer.initializeImport(
+    index,
+    settings,
+    mappings,
+    pipelines
+  );
 
   if (initializeImportResp.success === false) {
     errors.push(initializeImportResp.error);
@@ -198,16 +203,16 @@ export async function importData(props: Props, config: Config, setState: (state:
   });
 
   if (createPipeline) {
-    const pipelineCreated = initializeImportResp.pipelineId !== undefined;
+    const pipelinesCreated = initializeImportResp.pipelineIds.length > 0;
     if (indexCreated) {
       setState({
-        ingestPipelineCreatedStatus: pipelineCreated
+        ingestPipelineCreatedStatus: pipelinesCreated
           ? IMPORT_STATUS.COMPLETE
           : IMPORT_STATUS.FAILED,
-        pipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
+        pipelineId: pipelinesCreated ? initializeImportResp.pipelineIds[0] : '',
       });
     }
-    success = indexCreated && pipelineCreated;
+    success = indexCreated && pipelinesCreated;
   } else {
     success = indexCreated;
   }
@@ -218,9 +223,8 @@ export async function importData(props: Props, config: Config, setState: (state:
   }
 
   const importResp = await importer.import(
-    initializeImportResp.id,
     index,
-    pipelineId ?? initializeImportResp.pipelineId,
+    pipelineId ?? initializeImportResp.pipelineIds[0],
     (progress: number) => {
       setState({
         uploadProgress: progress,
