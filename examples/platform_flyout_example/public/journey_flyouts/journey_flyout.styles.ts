@@ -33,14 +33,15 @@ export const getZIndex = (isActive: boolean) =>
         z-index: 0;
       `;
 
-export const getJourneyFlyoutParentStyles = (euiTheme: EuiThemeComputed) => css`
+export const getJourneyFlyoutParentStyles = (euiTheme: EuiThemeComputed, width: number) => css`
   position: fixed;
   display: flex;
   flex-direction: column;
   top: ${fixedHeaderOffset};
   right: 0;
   height: calc(100vh - ${fixedHeaderOffset});
-  width: 800px;
+  width: ${width}px;
+  transition: width ${euiTheme.animation.fast} ease-out;
   z-index: ${euiTheme.levels.flyout};
   animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.fast} ease-out;
 
@@ -88,14 +89,18 @@ export const getJourneyFlyoutParentStyles = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const getJourneyFlyoutChildStyles = (euiTheme: EuiThemeComputed) => css`
+export const getJourneyFlyoutChildStyles = (
+  euiTheme: EuiThemeComputed,
+  width: number,
+  backgroundColor?: string
+) => css`
   position: fixed;
   display: flex;
   flex-direction: column;
   top: ${fixedHeaderOffset};
   transition: right ${euiTheme.animation.fast} ease-out;
-  width: 800px;
-  background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  width: ${width}px;
+  background-color: ${backgroundColor ? backgroundColor : euiTheme.colors.backgroundBaseSubdued};
   z-index: ${euiTheme.levels.flyout};
   height: calc(100vh - ${fixedHeaderOffset});
   border-left: ${euiTheme.border.thin};
@@ -104,6 +109,6 @@ export const getJourneyFlyoutChildStyles = (euiTheme: EuiThemeComputed) => css`
     padding: ${euiTheme.size.s};
     border-left: ${euiTheme.border.thin};
     border-bottom: ${euiTheme.border.thin};
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    background-color: ${backgroundColor ? backgroundColor : euiTheme.colors.backgroundBaseSubdued};
   }
 `;

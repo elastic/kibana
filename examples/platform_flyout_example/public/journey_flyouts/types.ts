@@ -9,6 +9,7 @@
 
 export interface JourneyFlyoutEntry {
   Component: React.FC<JourneyFlyoutProps>;
+  width: number;
 }
 
 export interface JourneyFlyoutProps {

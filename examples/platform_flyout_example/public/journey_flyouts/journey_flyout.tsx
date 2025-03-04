@@ -36,75 +36,128 @@ import {
 import { JourneyFlyoutApi, JourneyFlyoutEntry, JourneyFlyoutProps } from './types';
 
 interface JourneyFlyoutEntryState extends JourneyFlyoutEntry {
-  ActiveChild?: React.FC<JourneyFlyoutProps>;
+  ActiveChild?: JourneyFlyoutEntry;
 }
 
-export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
-  const { euiTheme } = useEuiTheme();
-  const { journeyFlyoutParentStyles, journeyFlyoutChildStyles } = useMemo(
-    () => ({
-      journeyFlyoutParentStyles: getJourneyFlyoutParentStyles(euiTheme),
-      journeyFlyoutChildStyles: getJourneyFlyoutChildStyles(euiTheme),
-    }),
-    [euiTheme]
-  );
+export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor?: string }>(
+  ({ childBackgroundColor }, ref) => {
+    const { euiTheme } = useEuiTheme();
+    const [width, setWidth] = useState(800);
+    const [childWidth, setChildWidth] = useState(800);
 
-  const flyoutsMap = useRef<{ [key: string]: JourneyFlyoutEntryState }>({});
-  const flyoutEntries = useRef<JourneyFlyoutEntryState[]>([]);
+    const componentsMap = useRef<{ [key: string]: JourneyFlyoutEntryState }>({});
+    const [historyEntries, setHistoryEntries] = useState<string[]>([]);
 
-  const [historyCount, setHistoryCount] = useState(0);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+    const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
 
-  const aRef = useRef<HTMLDivElement>(null);
-  const bRef = useRef<HTMLDivElement>(null);
+    const aRef = useRef<HTMLDivElement>(null);
+    const bRef = useRef<HTMLDivElement>(null);
 
-  const [aIndex, setAIndex] = useState<number | undefined>(undefined);
-  const [bIndex, setBIndex] = useState<number | undefined>(undefined);
+    const [aIndex, setAIndex] = useState<number | undefined>(undefined);
+    const componentAId = useMemo(() => historyEntries[aIndex ?? -1], [aIndex, historyEntries]);
+    const [bIndex, setBIndex] = useState<number | undefined>(undefined);
+    const componentBId = useMemo(() => historyEntries[bIndex ?? -1], [bIndex, historyEntries]);
 
-  const [isAActive, setIsAActive] = useState(true);
-  const activeIndex = useMemo(() => (isAActive ? aIndex : bIndex), [aIndex, bIndex, isAActive]);
+    const [isAActive, setIsAActive] = useState(true);
+    const activeIndex = useMemo(() => (isAActive ? aIndex : bIndex), [aIndex, bIndex, isAActive]);
 
-  const [hasChildFlyout, setHasChildFlyout] = useState(false);
-  const [childId, setChildId] = useState<string>();
+    const [hasChildFlyout, setHasChildFlyout] = useState(false);
+    const [childId, setChildId] = useState<string>();
 
-  useEffect(() => {
-    setHasChildFlyout(Boolean(flyoutEntries.current[activeIndex ?? -1]?.ActiveChild));
-  }, [activeIndex]);
+    const { journeyFlyoutParentStyles, journeyFlyoutChildStyles } = useMemo(
+      () => ({
+        journeyFlyoutParentStyles: getJourneyFlyoutParentStyles(euiTheme, width),
+        journeyFlyoutChildStyles: getJourneyFlyoutChildStyles(
+          euiTheme,
+          hasChildFlyout ? childWidth : Math.min(childWidth, width),
+          childBackgroundColor
+        ),
+      }),
+      [euiTheme, width, hasChildFlyout, childWidth, childBackgroundColor]
+    );
 
-  const resetFlyoutState = useCallback(() => {
-    setIsFlyoutOpen(false);
-    setAIndex(undefined);
-    setBIndex(undefined);
-    flyoutEntries.current = [];
-    flyoutsMap.current = {};
-    setIsAActive(true);
-    setHistoryCount(0);
-  }, []);
+    useEffect(() => {
+      setHasChildFlyout(
+        Boolean(componentsMap.current[isAActive ? componentAId : componentBId]?.ActiveChild)
+      );
+    }, [activeIndex, componentAId, componentBId, isAActive]);
 
-  useImperativeHandle(ref, () => ({
-    // send back an imperative method that opens the INITIAL flyout
-    openFlyout: (flyoutEntry) => {
-      flyoutEntries.current[0] = flyoutEntry;
-      setIsFlyoutOpen(true);
-      setAIndex(0);
-      setHistoryCount(1);
-    },
-  }));
+    const resetFlyoutState = useCallback(() => {
+      setIsFlyoutOpen(false);
+      setAIndex(undefined);
+      setBIndex(undefined);
+      componentsMap.current = {};
+      setHistoryEntries([]);
+      setIsAActive(true);
+    }, []);
 
-  const openNextFlyout: JourneyFlyoutProps['openNextFlyout'] = useCallback(
-    (flyoutEntry) => {
-      if (isAnimating) return;
-      flyoutEntries.current.push(flyoutEntry);
-      setHistoryCount((prev) => prev + 1);
+    useImperativeHandle(ref, () => ({
+      // send back an imperative method that opens the INITIAL flyout
+      openFlyout: (flyoutEntry) => {
+        const flyoutId = v4();
+        setHistoryEntries([flyoutId]);
+        setWidth(flyoutEntry.width);
+        componentsMap.current[flyoutId] = flyoutEntry;
+        setIsFlyoutOpen(true);
+        setAIndex(0);
+      },
+    }));
 
-      // close child flyout
-      const activeFlyout = flyoutEntries?.current[activeIndex ?? -1];
-      if (activeFlyout?.ActiveChild) activeFlyout.ActiveChild = undefined;
+    const openNextFlyout: JourneyFlyoutProps['openNextFlyout'] = useCallback(
+      (flyoutEntry) => {
+        if (isAnimating || activeIndex === undefined) return;
+        const flyoutId = v4();
+        componentsMap.current[flyoutId] = flyoutEntry;
+        const nextHistoryEntries = historyEntries.slice(0, activeIndex + 1);
+        nextHistoryEntries.push(flyoutId);
+        setHistoryEntries(nextHistoryEntries);
+
+        // use the currently inactive flyout as the next active flyout.
+        const setIndexForNextActiveFlyout = isAActive ? setBIndex : setAIndex;
+        setIndexForNextActiveFlyout(nextHistoryEntries.length - 1);
+        setIsAActive(!isAActive);
+        setIsAnimating(true);
+        setWidth(flyoutEntry.width);
+
+        // animate the next flyout in and set it active
+        const flyoutRef = isAActive ? bRef : aRef;
+        triggerAnimationOnRef(flyoutRef.current, 'slide-in').then(() => {
+          setIsAnimating(false);
+          // stop rendering the inactive flyout
+          // (isAActive ? setAIndex : setBIndex)(undefined);
+        });
+      },
+      [activeIndex, historyEntries, isAActive, isAnimating]
+    );
+
+    const goBack = useCallback(() => {
+      if (isAnimating || !activeIndex) return;
+      // set the index of the inactive flyout, but don't make it active yet.
+      const flyoutIndexSetter = isAActive ? setBIndex : setAIndex;
+      flyoutIndexSetter(activeIndex - 1);
+      // slide the currently active flyout out of frame. Then make the inactive flyout active.
+      const flyoutRef = isAActive ? aRef : bRef;
+      setIsAnimating(true);
+      const flyoutEntry = componentsMap.current[historyEntries[activeIndex - 1]];
+      setWidth(flyoutEntry.width);
+      setChildWidth(flyoutEntry.ActiveChild?.width ?? width);
+      triggerAnimationOnRef(flyoutRef.current, 'slide-out').then(() => {
+        setIsAActive(!isAActive);
+        // then delete the last flyout entry.
+        setIsAnimating(false);
+      });
+    }, [activeIndex, historyEntries, isAActive, isAnimating, width]);
+
+    const goForward = useCallback(() => {
+      if (isAnimating || activeIndex === undefined) return;
 
       // use the currently inactive flyout as the next active flyout.
       const setIndexForNextActiveFlyout = isAActive ? setBIndex : setAIndex;
-      setIndexForNextActiveFlyout(flyoutEntries.current.length - 1);
+      setIndexForNextActiveFlyout(activeIndex + 1);
+      const flyoutEntry = componentsMap.current[historyEntries[activeIndex + 1]];
+      setWidth(flyoutEntry.width);
+      setChildWidth(flyoutEntry.ActiveChild?.width ?? width);
       setIsAActive(!isAActive);
       setIsAnimating(true);
 
@@ -113,131 +166,135 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
       triggerAnimationOnRef(flyoutRef.current, 'slide-in').then(() => {
         setIsAnimating(false);
         // stop rendering the inactive flyout
-        (isAActive ? setAIndex : setBIndex)(undefined);
+        // (isAActive ? setAIndex : setBIndex)(undefined);
       });
-    },
-    [activeIndex, isAActive, isAnimating]
-  );
+    }, [activeIndex, historyEntries, isAActive, isAnimating, width]);
 
-  const openLastFlyout = useCallback(() => {
-    if (isAnimating) return;
-    // set the index of the inactive flyout, but don't make it active yet.
-    const flyoutIndexSetter = isAActive ? setBIndex : setAIndex;
-    flyoutIndexSetter(flyoutEntries.current.length - 2);
-    setHistoryCount((prev) => prev - 1);
+    const openChildFlyout: JourneyFlyoutProps['openChildFlyout'] = useCallback(
+      ({ Component, width: nextChildWidth }) => {
+        if (activeIndex === undefined) return;
+        const activeFlyout = componentsMap?.current[historyEntries[activeIndex]];
+        if (!activeFlyout) return;
+        activeFlyout.ActiveChild = { Component, width: nextChildWidth };
+        setHasChildFlyout(true);
+        setChildWidth(nextChildWidth);
+        setChildId(v4());
+      },
+      [activeIndex, historyEntries]
+    );
 
-    // slide the currently active flyout out of frame. Then make the inactive flyout active.
-    const flyoutRef = isAActive ? aRef : bRef;
-    setIsAnimating(true);
-    triggerAnimationOnRef(flyoutRef.current, 'slide-out').then(() => {
-      setIsAActive(!isAActive);
-      // then delete the last flyout entry.
-      flyoutEntries.current = flyoutEntries.current.slice(0, -1);
-      setIsAnimating(false);
-    });
-  }, [isAActive, isAnimating]);
+    const { ComponentA, ComponentB, CurrentChildComponent } = useMemo(() => {
+      return {
+        ComponentA: componentsMap?.current[componentAId]?.Component,
+        ComponentB: componentsMap?.current[componentBId]?.Component,
+        CurrentChildComponent:
+          hasChildFlyout && childId
+            ? componentsMap?.current[isAActive ? componentAId : componentBId]?.ActiveChild
+                ?.Component
+            : null,
+      };
+    }, [componentAId, componentBId, hasChildFlyout, childId, isAActive]);
 
-  const openChildFlyout: JourneyFlyoutProps['openChildFlyout'] = useCallback(
-    ({ Component }) => {
-      const activeFlyout = flyoutEntries?.current[activeIndex ?? -1];
-      if (!activeFlyout) return;
-      activeFlyout.ActiveChild = Component;
-      setHasChildFlyout(true);
-      setChildId(v4());
-    },
-    [activeIndex]
-  );
-
-  const { ComponentA, ComponentB, CurrentChildComponent } = useMemo(() => {
-    return {
-      ComponentA: flyoutEntries?.current[aIndex ?? -1]?.Component,
-      ComponentB: flyoutEntries?.current[bIndex ?? -1]?.Component,
-      CurrentChildComponent:
-        hasChildFlyout && childId ? flyoutEntries?.current[activeIndex ?? -1]?.ActiveChild : null,
-    };
-  }, [aIndex, bIndex, activeIndex, hasChildFlyout, childId]);
-
-  if (!isFlyoutOpen) return null;
-  console.log('rendering with child ID,', childId);
-  return (
-    <>
-      <JourneyFlyoutFade />
-      <div
-        key={childId}
-        css={css`
-          right: ${hasChildFlyout ? '800px' : '0'};
-          ${journeyFlyoutChildStyles}
-        `}
-      >
-        <div className="journey-flyout-toolbar">
-          <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                onClick={() => {
-                  setHasChildFlyout(false);
-                  flyoutEntries.current[activeIndex ?? -1].ActiveChild = undefined;
-                }}
-                aria-label="Close journey flyout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+    if (!isFlyoutOpen) return null;
+    return (
+      <>
+        <JourneyFlyoutFade />
         <div
           css={css`
-            padding: ${euiTheme.size.s};
+            right: ${hasChildFlyout ? `${width}px` : '0'};
+            ${journeyFlyoutChildStyles}
           `}
         >
-          {CurrentChildComponent && (
-            <CurrentChildComponent
-              openNextFlyout={openNextFlyout}
-              openChildFlyout={openChildFlyout}
-            />
-          )}
-        </div>
-      </div>
-      <div css={journeyFlyoutParentStyles}>
-        <div className="journey-flyout-toolbar">
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {historyCount > 1 && (
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="clockCounter"
-                  iconSide="left"
-                  onClick={openLastFlyout}
-                >
-                  Back
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                onClick={resetFlyoutState}
-                aria-label="Close journey flyout"
+          <div className="journey-flyout-toolbar">
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  onClick={() => {
+                    setHasChildFlyout(false);
+                    delete componentsMap?.current[isAActive ? componentAId : componentBId]
+                      .ActiveChild;
+                  }}
+                  aria-label="Close journey flyout"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          <div
+            key={childId}
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
+            {CurrentChildComponent && (
+              <CurrentChildComponent
+                openNextFlyout={openNextFlyout}
+                openChildFlyout={openChildFlyout}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        <div className="journey-flyout-content-container">
-          <div ref={aRef} className="journey-flyout-content" css={getZIndex(isAActive)}>
-            {ComponentA && (
-              <ComponentA openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
-            )}
-          </div>
-          <div className="journey-flyout-shadow" />
-          <div ref={bRef} className="journey-flyout-content" css={getZIndex(!isAActive)}>
-            {ComponentB && (
-              <ComponentB openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
             )}
           </div>
         </div>
-      </div>
-    </>
-  );
-});
+        <div css={journeyFlyoutParentStyles}>
+          <div className="journey-flyout-toolbar">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    {historyEntries.length > 1 && (
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="arrowLeft"
+                        iconSide="left"
+                        onClick={goBack}
+                        disabled={activeIndex === 0}
+                      >
+                        Back
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {historyEntries.length > 1 && (
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="arrowRight"
+                        iconSide="right"
+                        onClick={goForward}
+                        disabled={activeIndex === historyEntries.length - 1}
+                      >
+                        Forward
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  onClick={resetFlyoutState}
+                  aria-label="Close journey flyout"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          <div className="journey-flyout-content-container">
+            <div ref={aRef} className="journey-flyout-content" css={getZIndex(isAActive)}>
+              {ComponentA && (
+                <ComponentA openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
+              )}
+            </div>
+            <div className="journey-flyout-shadow" />
+            <div ref={bRef} className="journey-flyout-content" css={getZIndex(!isAActive)}>
+              {ComponentB && (
+                <ComponentB openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
+              )}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+);
 
 export const JourneyFlyoutFade = () => {
   const { euiTheme } = useEuiTheme();
