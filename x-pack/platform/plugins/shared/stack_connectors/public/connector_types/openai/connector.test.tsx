@@ -14,6 +14,8 @@ import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { experimentalFeaturesMock } from '../../mocks';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -68,6 +70,12 @@ const otherOpenAiConnector = {
 const navigateToUrl = jest.fn();
 
 describe('ConnectorFields renders', () => {
+  beforeAll(() => {
+    ExperimentalFeaturesService.init({
+      // @ts-ignore force enable for testing
+      experimentalFeatures: { ...experimentalFeaturesMock, openAIAdditionalHeadersOn: true },
+    });
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
