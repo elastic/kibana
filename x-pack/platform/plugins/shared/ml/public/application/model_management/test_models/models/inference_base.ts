@@ -319,22 +319,14 @@ export abstract class InferenceBase<TInferResponse> {
       this.inferenceResult$.next([processedResponse]);
       this.setFinished();
 
-      this.telemetryClient.trackTrainedModelsModelTested({
-        model_id: this.model.model_id,
-        model_type: this.model.model_type,
-        task_type: this.inferenceType,
-        result: 'success',
-      });
+      this.trackModelTested('success');
 
       return [processedResponse];
     } catch (error) {
       this.setFinishedWithErrors(error);
-      this.telemetryClient.trackTrainedModelsModelTested({
-        model_id: this.model.model_id,
-        model_type: this.model.model_type,
-        task_type: this.inferenceType,
-        result: 'failure',
-      });
+
+      this.trackModelTested('failure');
+
       throw error;
     }
   }
@@ -352,23 +344,13 @@ export abstract class InferenceBase<TInferResponse> {
       this.inferenceResult$.next(processedResponse);
       this.setFinished();
 
-      this.telemetryClient.trackTrainedModelsModelTested({
-        model_id: this.model.model_id,
-        model_type: this.model.model_type,
-        task_type: this.inferenceType,
-        result: 'success',
-      });
+      this.trackModelTested('success');
 
       return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
 
-      this.telemetryClient.trackTrainedModelsModelTested({
-        model_id: this.model.model_id,
-        model_type: this.model.model_type,
-        task_type: this.inferenceType,
-        result: 'failure',
-      });
+      this.trackModelTested('failure');
 
       throw error;
     }
@@ -421,5 +403,14 @@ export abstract class InferenceBase<TInferResponse> {
       );
     }
     return doc;
+  }
+
+  private trackModelTested(result: 'success' | 'failure') {
+    this.telemetryClient.trackTrainedModelsModelTested({
+      model_id: this.model.model_id,
+      model_type: this.model.model_type,
+      task_type: this.inferenceType,
+      result,
+    });
   }
 }
