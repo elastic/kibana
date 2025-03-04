@@ -50,15 +50,8 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
    * Date field used to narrow ES|QL requests by global time range
    */
   dateField?: string;
-  /*
-   * Geo field used to narrow ES|QL requests by
-   * 1. by visible map area
-   * 2. spatial filters drawn on map
-   */
-  geoField?: string;
   narrowByGlobalSearch: boolean;
   narrowByGlobalTime: boolean;
-  narrowByMapBounds: boolean;
   applyForceRefresh: boolean;
 };
 
@@ -155,10 +148,16 @@ export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
-export type ESESQLTermSourceDescriptor = ESQLSourceDescriptor & {
-  term: string; // term field name (this is the "right field" from the ES|QL-query that will be joined to the left field from another dataset
-
+export type ESQLTermSourceDescriptor = AbstractSourceDescriptor & {
   type: SOURCE_TYPES.ES_ESQL_TERM_SOURCE;
+  id: string;
+  esql: string;
+  columns?: ESQLColumn[];
+  dataViewId?: string;
+  narrowByGlobalSearch: boolean;
+  narrowByGlobalTime: boolean;
+  applyForceRefresh: boolean;
+  term: string; // term field name (this is the "right field" from the ES|QL-query that will be joined to the left field from another dataset
 };
 
 // This is for symmetry with other sources only.
@@ -229,5 +228,5 @@ export type TableSourceDescriptor = {
 export type JoinSourceDescriptor =
   | ESDistanceSourceDescriptor
   | ESTermSourceDescriptor
-  | ESESQLTermSourceDescriptor
+  | ESQLTermSourceDescriptor
   | TableSourceDescriptor;

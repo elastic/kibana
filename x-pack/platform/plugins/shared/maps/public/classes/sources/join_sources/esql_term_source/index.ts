@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ESESQLTermSource } from './es_esql_term_source';
+export { ESQLTermSource } from './esql_term_source';

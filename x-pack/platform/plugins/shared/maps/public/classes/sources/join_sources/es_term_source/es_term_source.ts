@@ -49,12 +49,14 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
   const buckets: any[] = rawEsData?.aggregations?.[TERMS_AGG_NAME]?.buckets ?? [];
   buckets.forEach((termBucket: any) => {
+    console.log('b', termBucket);
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
     }
     propertiesMap.set(termBucket.key.toString(), properties);
   });
+  console.log('rpop', propertiesMap);
   return propertiesMap;
 }
 
@@ -172,8 +174,10 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
+    const a = extractPropertiesMap(rawEsData, countPropertyName);
+    console.log('propmap', a);
     return {
-      joinMetrics: extractPropertiesMap(rawEsData, countPropertyName),
+      joinMetrics: a,
       warnings,
     };
   }

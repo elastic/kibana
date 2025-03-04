@@ -31,6 +31,7 @@ import {
   ESTermSource,
   isTermSourceComplete,
   TableSource,
+  ESQLTermSource,
 } from '../sources/join_sources';
 
 export function createJoinSource(
@@ -47,9 +48,7 @@ export function createJoinSource(
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
     return new TableSource(descriptor as TableSourceDescriptor);
   } else if (descriptor.type === SOURCE_TYPES.ES_ESQL_TERM_SOURCE) {
-    console.log('CREATE ESQL TERM SOURCE', descriptor);
-    const esq = new ESESQLTermSource(descriptor as ESESQLTermSourceDescriptor);
-    console.log(esq);
+    const esq = new ESQLTermSource(descriptor as ESESQLTermSourceDescriptor);
     return esq;
   }
 }
@@ -155,6 +154,7 @@ export class InnerJoin {
   }
 
   getWhereQuery(): Query | undefined {
+    console.log('inner join get where query');
     return this.getRightJoinSource().getWhereQuery();
   }
 }

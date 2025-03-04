@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormHelpText, EuiPopoverTitle } from '@elastic/eui';
+import { EuiFormHelpText, EuiPopoverTitle, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +15,7 @@ import { inputStrings } from '../../../../input_strings';
 import { LeftFieldSelector } from '../common/left_field_selector';
 import { JoinField } from '../..';
 import type {
-  ESESQLTermSourceDescriptor,
+  ESQLTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { ESQLEditor, IOnEsqlChangeParams } from '../../../../../components/esql_editor';
@@ -40,7 +40,7 @@ interface Props {
   onLeftFieldChange: (leftField: string) => void;
 
   // Right source props
-  sourceDescriptor: Partial<ESESQLTermSourceDescriptor>;
+  sourceDescriptor: Partial<ESQLTermSourceDescriptor>;
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
   rightFields: any[];
 }

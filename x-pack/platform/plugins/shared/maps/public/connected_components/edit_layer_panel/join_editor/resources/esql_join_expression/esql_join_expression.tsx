@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionPreview } from '../common/expression_preview';
 import { JoinField } from '../..';
 import {
-  ESESQLTermSourceDescriptor,
+  ESQLTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { ESQLJoinPopoverContent } from './esql_join_popover_content';
@@ -22,7 +22,7 @@ interface Props {
   onLeftFieldChange: (leftField: string) => void;
 
   // right field props
-  sourceDescriptor: Partial<ESESQLTermSourceDescriptor>;
+  sourceDescriptor: Partial<ESQLTermSourceDescriptor>;
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
   rightFields: any[];
 }

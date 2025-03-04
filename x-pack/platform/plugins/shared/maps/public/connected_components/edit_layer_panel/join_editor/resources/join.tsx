@@ -22,7 +22,7 @@ import {
   AbstractESJoinSourceDescriptor,
   AggDescriptor,
   ESDistanceSourceDescriptor,
-  ESESQLTermSourceDescriptor,
+  ESQLTermSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
   JoinSourceDescriptor,
@@ -229,7 +229,7 @@ export class Join extends Component<Props, State> {
           leftValue={join.leftField}
           leftFields={leftFields}
           onLeftFieldChange={this._onLeftFieldChange}
-          sourceDescriptor={right as Partial<ESESQLTermSourceDescriptor>}
+          sourceDescriptor={right as Partial<ESQLTermSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
           rightFields={this.state.rightESQLFields}
         />

@@ -28,6 +28,7 @@ import { DataRequest } from '../../../util/data_request';
 import { InlineField } from '../../../fields/inline_field';
 import { ITooltipProperty, TooltipProperty } from '../../../tooltips/tooltip_property';
 
+// todo - shouldnt' be using IVectorSource
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
 

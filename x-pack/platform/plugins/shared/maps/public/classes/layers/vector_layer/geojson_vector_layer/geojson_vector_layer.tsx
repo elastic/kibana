@@ -296,6 +296,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
           return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
         },
       });
+      console.log('DONE LOADING SOURCE DATA', sourceResult);
       await this._syncSupportsFeatureEditing({ syncContext, source });
       if (
         !sourceResult.featureCollection ||
@@ -305,15 +306,19 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         return;
       }
 
+      console.log('BEFORE JOOIN SYNC');
       const joinStates = await this._syncJoins(syncContext, style, sourceResult.featureCollection);
+      console.log('joinstates', joinStates);
       await performInnerJoins(
         sourceResult,
         joinStates,
         syncContext.updateSourceData,
         syncContext.setJoinError
       );
+      console.log('SOURCE RESULT DONE', sourceResult);
     } catch (error) {
       // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
+      console.error(error);
     }
   }
 
