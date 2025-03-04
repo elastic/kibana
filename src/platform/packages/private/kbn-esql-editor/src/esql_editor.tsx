@@ -34,6 +34,7 @@ import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -329,6 +330,19 @@ export const ESQLEditor = memo(function ESQLEditor({
       onSaveControl,
       onCancelControl
     );
+  });
+
+  const onUploadComplete = useCallback(() => {}, []);
+
+  monaco.editor.registerCommand('esql.control.lookup_index.create', async (...args) => {
+    await uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
+      onUploadComplete,
+      // autoAddInference,
+      autoCreateDataView: true,
+      indexSettings: {
+        'index.mode': 'lookup',
+      } as IndicesIndexSettings,
+    });
   });
 
   editor1.current?.addCommand(
