@@ -88,6 +88,7 @@ export const postActionsConnectorExecuteRoute = (
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
+          const screenContext = request.body.screenContext;
           const connectorId = decodeURIComponent(request.params.connectorId);
 
           // if message is undefined, it means the user is regenerating a message from the stored conversation
@@ -164,6 +165,7 @@ export const postActionsConnectorExecuteRoute = (
             response,
             telemetry,
             savedObjectsClient,
+            screenContext,
             systemPrompt,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });

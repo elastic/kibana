@@ -253,11 +253,6 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeRunScriptEnabled: true,
 
   /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
-
-  /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
    * Release: 8.18/9.0
    */
