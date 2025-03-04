@@ -11,6 +11,7 @@ import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { ProcessorDefinitionWithUIAttributes, DetectedField } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
 import { Simulation } from './types';
+import { SchemaField } from '../../../schema_editor/types';
 
 export function composeSamplingCondition(
   processors: ProcessorDefinitionWithUIAttributes[]
@@ -67,3 +68,57 @@ export function filterSimulationDocuments(
       return documents.map((doc) => doc.value);
   }
 }
+
+export function getSchemaFieldsFromSimulation(
+  detectedFields: DetectedField[],
+  previousDetectedFields: DetectedField[],
+  streamName: string
+) {
+  const previousDetectedFieldsMap = previousDetectedFields.reduce<Record<string, DetectedField>>(
+    (acc, field) => {
+      acc[field.name] = field;
+      return acc;
+    },
+    {}
+  );
+
+  return detectedFields
+    .map((field) => {
+      // Detected field already mapped by the user on previous simulation
+      if (previousDetectedFieldsMap[field.name]) {
+        return previousDetectedFieldsMap[field.name];
+      }
+      // Detected field already inherited
+      if ('from' in field) {
+        return {
+          status: 'inherited',
+          name: field.name,
+          type: field.type,
+          format: field.format,
+          parent: field.from,
+        };
+      }
+      // Detected field already mapped
+      if ('type' in field) {
+        return {
+          status: 'mapped',
+          name: field.name,
+          type: field.type,
+          format: field.format,
+          parent: streamName,
+        };
+      }
+      // Detected field still unmapped
+      return {
+        status: 'unmapped',
+        name: field.name,
+        parent: streamName,
+      };
+    })
+    .sort(compareFieldsByStatus);
+}
+
+const statusOrder = { inherited: 0, mapped: 1, unmapped: 2 };
+const compareFieldsByStatus = (curr: SchemaField, next: SchemaField) => {
+  return statusOrder[curr.status] - statusOrder[next.status];
+};

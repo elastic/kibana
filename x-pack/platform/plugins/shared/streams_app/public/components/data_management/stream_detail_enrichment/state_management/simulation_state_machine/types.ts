@@ -10,14 +10,16 @@ import { ActorRef, Snapshot } from 'xstate5';
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { PreviewDocsFilterOption } from './preview_docs_filter';
 import {
   DateRangeToParentEvent,
   DateRangeActorRef,
 } from '../../../../../state_management/date_range_state_machine';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type DetectedField = Simulation['detected_fields'][number];
 
 export interface SimulationMachineDeps {
   data: DataPublicPluginStart;
@@ -47,6 +49,7 @@ export type SimulationEvent =
 
 export interface SimulationContext {
   dateRangeRef: DateRangeActorRef;
+  detectedSchemaFields: SchemaField[];
   parentRef: SimulationParentActor;
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];

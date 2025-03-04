@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiEmptyPrompt,
   EuiFlexItem,
+  EuiNotificationBadge,
+  EuiProgress,
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import {
-  IngestStreamGetResponse,
-  WiredStreamGetResponse,
-  isWiredStreamGetResponse,
-} from '@kbn/streams-schema';
-import { css } from '@emotion/react';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
-import { TableColumn, UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
-import { SchemaEditor } from '../schema_editor';
-import { SchemaField } from '../schema_editor/types';
-import { AssetImage } from '../../asset_image';
+import {
+  useStreamsEnrichmentSelector,
+  useStreamEnrichmentEvents,
+  useSimulatorSelector,
+} from './state_management/stream_enrichment_state_machine';
+import { DetectedFieldsEditor } from './detected_fields_editor';
 
 export const SimulationPlayground = () => {
+  const { definition } = useStreamDetail();
+
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
@@ -39,11 +38,17 @@ export const SimulationPlayground = () => {
       ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
     })
   );
-  const canViewDetectedFields = useStreamsEnrichmentSelector((state) =>
-    isWiredStreamGetResponse(state.context.definition)
-  );
+  const canViewDetectedFields = isWiredStreamGetResponse(definition!);
 
   const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
+
+  const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const isLoading = useSimulatorSelector(
+    (state) =>
+      state.matches('debouncingChanges') ||
+      state.matches('loadingSamples') ||
+      state.matches('runningSimulation')
+  );
 
   return (
     <>
@@ -56,7 +61,15 @@ export const SimulationPlayground = () => {
             )}
           </EuiTab>
           {canViewDetectedFields && (
-            <EuiTab isSelected={isViewingDetectedFields} onClick={viewSimulationDetectedFields}>
+            <EuiTab
+              isSelected={isViewingDetectedFields}
+              onClick={viewSimulationDetectedFields}
+              append={
+                detectedFields.length > 0 ? (
+                  <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+                ) : undefined
+              }
+            >
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
                 { defaultMessage: 'Detected fields' }
@@ -64,122 +77,13 @@ export const SimulationPlayground = () => {
             </EuiTab>
           )}
         </EuiTabs>
+        {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && (
-        <DetectedFieldsEditor
-          definition={definition}
-          isLoading={isLoading}
-          simulation={simulation}
-        />
+      {isViewingDetectedFields && canViewDetectedFields && (
+        <DetectedFieldsEditor definition={definition} detectedFields={detectedFields} />
       )}
     </>
   );
-};
-
-interface DetectedFieldsEditorProps {
-  definition: WiredStreamGetResponse;
-  isLoading: boolean;
-  simulation: UseProcessingSimulatorReturn['simulation'];
-}
-
-const DetectedFieldsEditor = ({ definition, isLoading, simulation }: DetectedFieldsEditorProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const fields = useMemo(() => {
-    const simulationFields = simulation?.detected_fields ?? [];
-
-    const schemaFields: SchemaField[] = simulationFields.map((field) => {
-      // Detected fields already inherited
-      if ('from' in field) {
-        return {
-          name: field.name,
-          type: field.type,
-          format: field.format,
-          parent: field.from,
-          status: 'inherited',
-        };
-      }
-      // Detected fields already mapped
-      if ('type' in field) {
-        return {
-          name: field.name,
-          type: field.type,
-          format: field.format,
-          parent: definition.stream.name,
-          status: 'mapped',
-        };
-      }
-      // Detected fields still unmapped
-      return {
-        name: field.name,
-        parent: definition.stream.name,
-        status: 'unmapped',
-      };
-    });
-
-    return schemaFields.sort(compareFieldsByStatus);
-  }, [definition, simulation]);
-
-  const hasFields = fields.length > 0;
-
-  if (!hasFields) {
-    return (
-      <EuiEmptyPrompt
-        titleSize="xs"
-        icon={<AssetImage type="noResults" />}
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields.noResults.content',
-              {
-                defaultMessage:
-                  'No fields were detected during the simulation. You can add fields manually in the Schema Editor.',
-              }
-            )}
-          </p>
-        }
-      />
-    );
-  }
-
-  const unmapField = (fieldName: string) => {};
-
-  const updateField = (field: SchemaField) => {};
-
-  const refreshFields = () => {};
-
-  return (
-    <>
-      <EuiText
-        component="p"
-        color="subdued"
-        size="xs"
-        css={css`
-          margin-bottom: ${euiTheme.size.base};
-        `}
-      >
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
-          { defaultMessage: 'You can review and adjust saved fields further in the Schema Editor.' }
-        )}
-      </EuiText>
-      <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status']}
-        fields={fields}
-        isLoading={isLoading}
-        stream={definition.stream}
-        onFieldUnmap={unmapField}
-        onFieldUpdate={updateField}
-        onRefreshData={refreshFields}
-        withTableActions
-      />
-    </>
-  );
-};
-
-const statusOrder = { inherited: 0, mapped: 1, unmapped: 2 };
-const compareFieldsByStatus = (curr: SchemaField, next: SchemaField) => {
-  return statusOrder[curr.status] - statusOrder[next.status];
 };

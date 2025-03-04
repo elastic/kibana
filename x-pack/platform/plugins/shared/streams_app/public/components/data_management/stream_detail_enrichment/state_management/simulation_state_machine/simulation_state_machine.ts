@@ -38,7 +38,11 @@ import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import { filterSimulationDocuments, composeSamplingCondition } from './utils';
+import {
+  filterSimulationDocuments,
+  composeSamplingCondition,
+  getSchemaFieldsFromSimulation,
+} from './utils';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -77,6 +81,15 @@ export const simulationMachine = setup({
           : context.samples,
       };
     }),
+    deriveDetectedSchemaFields: assign(({ context }) => ({
+      detectedSchemaFields: context.simulation
+        ? getSchemaFieldsFromSimulation(
+            context.simulation.detected_fields,
+            context.detectedSchemaFields,
+            context.streamName
+          )
+        : context.detectedSchemaFields,
+    })),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
@@ -100,7 +113,7 @@ export const simulationMachine = setup({
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBGU5ej1HLWlOaXUveXVlUwsES0d5TnpHPV7DdVk3I07ff3Qw4NImJLy4WEIk2Gi4ug4eUWqUYLrETTtHR3V3fUlnWRl+q2VZenV5RoVpEcNO+TSBYgUJBCL0FDEU4oHBYFAAL0hUFI5WOgmhIkq9QeN3o8gmknk8kMhi0JNkLwQWnosl6sk4eimegUxL0wNB4RIEKhBFhCKRKMkFX46LOWKkjmUkg+7i8XhsjL08kpLiUCq8ei0LUkhnk7KWYK5EDAACNCBhiFEkQBhfYwWCrdZRTbbXaxeKHYVVUW1cUIemOehacZ6Nw6zjE5XmRAk6WSB662mSRmcWSOQz6wKcyLGs0Wq10W0eh1iWB4Sj0HAAM1KAApc+bLWAACroMAASlIHOC9Ab+ZtdrgqMqJzFoGxnHGYychm0yklKgZlK00payk+jncpJkQL8IIN2d7psbBagRYOJbLFerdb7TdbaA7XYPPbvp-P9vYQrRNUx46kHTvNoXxTJoUqyCY0YILO6j2No2iGGG6auLImbLOCWCEDgEBIgAyjgaBMFgcDkCQYDcqkhAANbkbABFEXABRgHgsRgEkACCUR4Nsw4ir+xDnFSi5wWmnA4i06aOMutj0Ko8jpl0bhrkqaGGpEmHYXh9HEQ6bHrEk9BEfgVbbGg9B0YROlMSxMRsZx3FlEcI4+n+4gxpOoy6pqzIuF0OjqNJdhyQpDKuJKKl7t24I4LAsBsQQdC4S+ERUGAACOGAoCkj7EHgDq8d6-GCYSrT0KSHTjDq0wkiqNgfH5DxKv80iSOoqmHjFcVJAlUBJVmwSpRlWVgDleWCl6o6+v+VLyaMtiSMo8j0qSi2tSqOhldMcjuD0qgPO1PZJBaUKJclJCkcQ5GQpRNHmWdxBUMddlcTxTl8RiAl+nI7yqKojgVXMbyUvJdidCo66SuMEZtZF930EdxAnb192kHp2yGUEJlJGZUUkI9iPPQ5BWTa59TbUGHhiUp2ghpS67SEGi0Rjo7jBr4e7EIQxrwJUuOfe9Y5uQ0uhBmmoZhoYEa6pS1jqHoslTJuDJfDY8gyAd4KQtCfKInQP4fcVkrvP964uItTw3FGAyWNMaohl8uitV0u6LP1msQMR+uC-ULjvJ8gI6l8oaGFKlK-IoGo7UqDuhhrRrHv2haDjzAtTULmiBnInxSmrtJSgFUHxsoeLgcGmoBoycfqVhOGJdpcBe2n2JJmVwzjAojTjEYMsjHBtj0i0MxTESeqw27XKdfFeH3YNmXZWAuUp4VBt+lq8vaOL0gkpLbzSJS-yBtum5dJuLULaPrvoVyCNI31V-88v3sAZLsnZ-oIdyy4VuIOuxcPKmFVJwtR6OzbwQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBGU5ej1HLWlOaXUveXVlUwsES0d5TnpHPV7DdVk3I07ff3Qw4NImJLy4WEIk2Gi4ug4eUWqUYLrETTtHR3V3fUlnWRl+q2VZenV5RoVpEcNO+TSBYgUJBCL0FDEU4oHBYFAAL0hUFI5WOgmhIkq9QeN3o8gmknk8kMhi0JNkLwQWnosl6sk4eimegUxL0wNB4RIEKhBFhCKRKMkFX46LOWKkjmUkg+7i8XhsjL08kpLiUCq8ei0LUkhnk7KWYK5EDAACNCBhiFEkQBhfYwWCrdZRTbbXaxeKHYVVUW1cUIemOehacZ6Nw6zjE5XmRAk6WSB662mSRmcWSOQz6wKcyLGs0Wq10W0eh1iWB4Sj0HAAM1KAApc+bLWAACroMAASlIHOC9Ab+ZtdrgqMqJzFoGxnHGYychm0yklKgZlK00payk+jncpJkQL8IIN2d7psbBagRYOJbLFerdb7TdbaA7XYPPbvp-P9vYQrRNUx46kHTvNoXxTJoUqyCY0YILO6j2No2iGGG6auLImbLOCWCEDgEBIgAyjgaBMFgcDkCQYDcqkhAANbkbABFEXABRgHgsRgEkACCUR4Nsw4ir+xDnFSi5wWmnA4i06aOMutj0Ko8jpl0bhrkqaGGpEmHYXh9HEQ6bHrEk9BEfgVbbGg9B0YROlMSxMRsZx3FlEcI4+n+4gxpOoy6pqzIuF0OjqNJdhyQpDKuJKKl7t24I4LAsBsQQdC4S+ERUGAACOGAoCkj7EHgDq8d6-GCYSrT0KSHTjDq0wkiqNgfH5DxKv80iSOoqmHjFcVJAlUBJVmwSpRlWVgDleWCl6o6+v+VLyaMtiSMo8j0qSi2tSqOhldMcjuD0qgPO1PZJBaUKJclJCkcQ5GQpRNHmWdxBUMddlcTxTl8RiAl+nIyg0l8tK3AyhjphSUEjIG+KqFu6jTD0kgHeCR3ECdvX3aQenbIZQQmUkZlRSQj1I89DkFZNrn1NtQYeGJSnaCGlLrtIQaLRGOjuMGvh7sQhDGvAlR45971jm5DS6EGaahmGhgRrqlLWOoeiyVMwy-C0k6aso8NcpC0J8oidA-h9xWSu8jheFti1PDcUYDJY0xqiGXy6K1XS7os-XgigEDEQbQv1C47yfICOpfKGhhSpSvyKBqO1Ko7oaazmx79oWg684LU3C5ogZyJ8UryFovRrVB8Y-V8K7i1oasZpF930BpOGJdpcA+xn2JJmVwzjAojTjEYssjHBtj0i0MxTESeo1+7XKdfFeH3YNmXZWAuVp4Vht+lqCvaBL0gklLbzSJS-yBtum5dJuLULRPbvoVyiPI31t8C2vvsAVLsm5-oYfyy41uIOuP0HipgqpOFqPQObeCAA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
     parentRef: input.parentRef,
@@ -110,6 +123,7 @@ export const simulationMachine = setup({
         parentRef: self,
       },
     }),
+    detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     processors: input.processors,
@@ -215,6 +229,7 @@ export const simulationMachine = setup({
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
             { type: 'derivePreviewDocuments' },
+            { type: 'deriveDetectedSchemaFields' },
             { type: 'emitSimulationChange' },
           ],
         },

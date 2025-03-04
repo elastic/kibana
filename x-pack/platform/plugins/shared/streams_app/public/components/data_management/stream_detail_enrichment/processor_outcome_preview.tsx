@@ -13,7 +13,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiSpacer,
-  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from '@xstate5/react';
@@ -32,13 +31,6 @@ import {
 } from './state_management/simulation_state_machine';
 
 export const ProcessorOutcomePreview = () => {
-  const isLoading = useSimulatorSelector(
-    (state) =>
-      state.matches('debouncingChanges') ||
-      state.matches('loadingSamples') ||
-      state.matches('runningSimulation')
-  );
-
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -46,7 +38,6 @@ export const ProcessorOutcomePreview = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );
 };

@@ -7,7 +7,6 @@
 
 import {
   DissectProcessorConfig,
-  FieldDefinitionType,
   GrokProcessorConfig,
   ProcessorDefinition,
   ProcessorTypeOf,
@@ -20,21 +19,11 @@ export type WithUIAttributes<T extends ProcessorDefinition> = T & {
 
 export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
 
-export interface DetectedField {
-  name: string;
-  type?: FieldDefinitionType;
-}
+export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
+  type: 'grok';
+  patterns: Array<{ value: string }>;
+};
 
-interface BaseFormState {
-  detected_fields?: DetectedField[];
-}
-
-export type GrokFormState = BaseFormState &
-  Omit<GrokProcessorConfig, 'patterns'> & {
-    type: 'grok';
-    patterns: Array<{ value: string }>;
-  };
-
-export type DissectFormState = BaseFormState & DissectProcessorConfig & { type: 'dissect' };
+export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
 export type ProcessorFormState = GrokFormState | DissectFormState;
