@@ -731,7 +731,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
