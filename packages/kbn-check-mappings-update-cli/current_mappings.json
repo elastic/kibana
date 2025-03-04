@@ -1685,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1709,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -1737,6 +1742,7 @@
     "properties": {}
   },
   "fleet-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
@@ -2071,6 +2077,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2334,6 +2344,7 @@
     }
   },
   "ingest-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"

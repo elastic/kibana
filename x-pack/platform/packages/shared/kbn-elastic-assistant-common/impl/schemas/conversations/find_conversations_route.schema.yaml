@@ -98,6 +98,5 @@ components:
       type: string
       enum:
         - 'created_at'
-        - 'is_default'
         - 'title'
         - 'updated_at'

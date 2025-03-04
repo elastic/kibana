@@ -6,16 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { lazy, Suspense, Fragment } from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { monaco } from '@kbn/monaco';
-import { ESQLControlsFlyout } from './control_flyout';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import type { ESQLControlState } from './types';
 
@@ -35,6 +34,8 @@ export async function isActionCompatible(queryString: string) {
   return Boolean(queryString && queryString.trim().length > 0);
 }
 
+const Fallback = () => <Fragment />;
+
 export async function executeAction({
   queryString,
   core,
@@ -50,6 +51,12 @@ export async function executeAction({
   if (!isCompatibleAction) {
     throw new IncompatibleActionError();
   }
+  const LazyControlFlyout = lazy(async () => {
+    const { ESQLControlsFlyout } = await import('./control_flyout');
+    return {
+      default: ESQLControlsFlyout,
+    };
+  });
 
   const deps = await untilPluginStartServicesReady();
   const handle = core.overlays.openFlyout(
@@ -61,19 +68,21 @@ export async function executeAction({
               ...deps,
             }}
           >
-            <ESQLControlsFlyout
-              queryString={queryString}
-              search={search}
-              variableType={variableType}
-              closeFlyout={() => {
-                handle.close();
-              }}
-              onSaveControl={onSaveControl}
-              onCancelControl={onCancelControl}
-              cursorPosition={cursorPosition}
-              initialState={initialState}
-              esqlVariables={esqlVariables}
-            />
+            <Suspense fallback={<Fallback />}>
+              <LazyControlFlyout
+                queryString={queryString}
+                search={search}
+                variableType={variableType}
+                closeFlyout={() => {
+                  handle.close();
+                }}
+                onSaveControl={onSaveControl}
+                onCancelControl={onCancelControl}
+                cursorPosition={cursorPosition}
+                initialState={initialState}
+                esqlVariables={esqlVariables}
+              />
+            </Suspense>
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,
         {

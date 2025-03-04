@@ -16,12 +16,20 @@ import { SecuritySolutionTemplateWrapper } from '../../../app/home/template_wrap
  *
  * The `template` prop can be used to alter the page layout for a given plugin route / all routes within a plugin - depending on the nesting.
  */
-export const PluginTemplateWrapper: FC<KibanaPageTemplateProps> = memo(({ children, ...rest }) => {
-  useEffect(() => {
-    return () => console.log('PluginTemplateWrapper unmounted');
-  }, []);
+export const PluginTemplateWrapper: FC<KibanaPageTemplateProps> = memo(
+  ({ children, ...rest }) => {
+    const {
+      services: {
+        securityLayout: { getPluginWrapper },
+      },
+    } = useKibana();
+    useEffect(() => {
+      return () => console.log('PluginTemplateWrapper unmounted');
+    }, []);
+    const Wrapper = useMemo(() => getPluginWrapper(), [getPluginWrapper]);
 
-  return <SecuritySolutionTemplateWrapper {...rest}>{children}</SecuritySolutionTemplateWrapper>;
-});
+    return <Wrapper {...rest}>{children}</Wrapper>;
+  }
+);
 
 PluginTemplateWrapper.displayName = 'PluginTemplateWrapper';

@@ -732,7 +732,7 @@ async function handleTransformInstall({
           {
             transform_id: transform.installationName,
             defer_validation: true,
-            body: transform.content,
+            ...transform.content,
           },
           // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
           { ignore: [409], ...(secondaryAuth ? { ...secondaryAuth } : {}) }

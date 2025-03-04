@@ -34,7 +34,7 @@
         "signature": [
           "\"Serverless Storybook\""
         ],
-        "path": "packages/serverless/storybook/config/constants.ts",
+        "path": "src/platform/packages/shared/serverless/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -49,9 +49,9 @@
           "The remote URL of the root from which Storybook loads stories for Serverless."
         ],
         "signature": [
-          "\"https://github.com/elastic/kibana/tree/main/packages/serverless\""
+          "\"https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/serverless\""
         ],
-        "path": "packages/serverless/storybook/config/constants.ts",
+        "path": "src/platform/packages/shared/serverless/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

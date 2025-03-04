@@ -7,7 +7,7 @@
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -31,17 +31,18 @@ import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext } from './helper';
+import { getRenderMode, getParentContext, buildObservableVariable } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
+import { getEmbeddableVariables } from './initializers/utils';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
   'visualizationOnEmbeddable',
 ];
 
-type ReloadReason =
+export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
   | 'savedObjectId'
@@ -118,6 +119,8 @@ export function loadEmbeddableData(
     }
   };
 
+  const [controlESQLVariables$] = buildObservableVariable<ESQLControlVariable[]>([]);
+
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason
@@ -189,11 +192,9 @@ export function loadEmbeddableData(
       callbacks
     );
 
-    const esqlVariables = internalApi?.esqlVariables$?.getValue();
-
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi, esqlVariables),
+      getSearchContext(parentApi, controlESQLVariables$?.getValue()),
       api.timeRange$,
       parentApi,
       services
@@ -260,7 +261,7 @@ export function loadEmbeddableData(
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
-    internalApi?.esqlVariables$.pipe(
+    controlESQLVariables$.pipe(
       waitUntilChanged(),
       map(() => 'ESQLvariables' as ReloadReason)
     ),
@@ -294,6 +295,12 @@ export function loadEmbeddableData(
 
   const subscriptions: Subscription[] = [
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // In case of changes to the dashboard ES|QL controls, re-map them
+    internalApi.esqlVariables$.subscribe((newVariables: ESQLControlVariable[]) => {
+      const query = internalApi.attributes$.getValue().state?.query;
+      const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
+      controlESQLVariables$.next(esqlVariables);
+    }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set

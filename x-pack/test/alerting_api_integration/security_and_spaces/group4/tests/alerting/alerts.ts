@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import { omit, padStart } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -537,34 +537,32 @@ instanceStateValue: true
                   TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
                 >({
                   index: '.kibana_task_manager',
-                  body: {
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'task.status': 'idle',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.status': 'idle',
+                          },
+                        },
+                        {
+                          term: {
+                            'task.attempts': 1,
+                          },
+                        },
+                        {
+                          term: {
+                            'task.taskType': 'actions:test.rate-limit',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.scheduledAt': {
+                              gte: testStart,
                             },
                           },
-                          {
-                            term: {
-                              'task.attempts': 1,
-                            },
-                          },
-                          {
-                            term: {
-                              'task.taskType': 'actions:test.rate-limit',
-                            },
-                          },
-                          {
-                            range: {
-                              'task.scheduledAt': {
-                                gte: testStart,
-                              },
-                            },
-                          },
-                        ],
-                      },
+                        },
+                      ],
                     },
                   },
                 });
