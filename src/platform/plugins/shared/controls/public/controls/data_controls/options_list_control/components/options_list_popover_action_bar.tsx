@@ -18,7 +18,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { useBatchedPublishingSubjects, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
