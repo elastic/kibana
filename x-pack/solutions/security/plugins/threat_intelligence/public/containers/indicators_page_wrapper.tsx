@@ -28,9 +28,7 @@ export const IndicatorsPageWrapper: VFC = () => {
     <CasesContext owner={casesContextOwner} permissions={permissions}>
       <QueryClientProvider client={queryClient}>
         <IntegrationsGuard>
-          <SecuritySolutionPluginTemplateWrapper>
-            <IndicatorsPage />
-          </SecuritySolutionPluginTemplateWrapper>
+          <IndicatorsPage />
         </IntegrationsGuard>
       </QueryClientProvider>
     </CasesContext>

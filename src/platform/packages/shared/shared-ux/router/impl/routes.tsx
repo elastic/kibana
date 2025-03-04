@@ -37,7 +37,8 @@ export const Routes = ({
   children: React.ReactNode;
 }) => {
   const match = useRouteMatch();
-
+  debugger;
+  console.log('legacySwitch', legacySwitch);
   return legacySwitch ? (
     <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
       <Switch>{children}</Switch>

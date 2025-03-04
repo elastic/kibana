@@ -27,32 +27,32 @@ export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPl
   }, []);
   const appRoutes = useMemo(() => {
     console.log('rerunnin');
-    return subPluginRoutes.map(({ component: Component, ...rest }, index) => {
-      console.log(rest);
-      if (!Component) {
-        console.log('no component');
-        return <Route {...rest} key={rest.path} />;
-      }
-      console.log('component, key: ', rest.path);
-      return (
-        <Route
-          {...rest}
-          key={rest.path}
-          render={(props) => {
-            return <Component {...props} services={services} />;
-          }}
-        />
-      );
-    });
+    return [
+      ...subPluginRoutes.map(({ component: Component, ...rest }, index) => {
+        console.log(rest);
+        if (!Component) {
+          console.log('no component', { rest });
+          return <Route {...rest} key={rest.path} />;
+        }
+        console.log('component, key: ', rest.path, { rest });
+        return (
+          <Route
+            {...rest}
+            key={rest.path}
+            render={(props) => {
+              return <Component {...props} services={services} />;
+            }}
+          />
+        );
+      }),
+      <Route>
+        <RedirectRoute capabilities={services.application.capabilities} />
+      </Route>,
+    ];
   }, [services, subPluginRoutes]);
   return (
     <Routes>
-      <PluginTemplateWrapper>
-        {appRoutes}
-        <Route>
-          <RedirectRoute capabilities={services.application.capabilities} />
-        </Route>
-      </PluginTemplateWrapper>
+      <PluginTemplateWrapper>{appRoutes}</PluginTemplateWrapper>
     </Routes>
   );
 });
@@ -60,11 +60,14 @@ AppRoutes.displayName = 'AppRoutes';
 
 export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {
   if (hasAccessToSecuritySolution(capabilities)) {
+    console.log('redirecting to onboarding');
     return <Redirect to={ONBOARDING_PATH} />;
   }
   if (capabilities[CASES_FEATURE_ID].read_cases === true) {
+    console.log('redirecting to cases');
     return <Redirect to={CASES_PATH} />;
   }
+  console.log('redirecting to not found');
   return <NotFoundPage />;
 });
 RedirectRoute.displayName = 'RedirectRoute';

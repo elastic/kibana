@@ -29,14 +29,9 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
 
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
-      <SecuritySolutionPluginTemplateWrapper
-        isEmptyState
-        emptyPageBody={
-          <EuiPageTemplate.EmptyPrompt color="transparent">
-            <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
-          </EuiPageTemplate.EmptyPrompt>
-        }
-      />
+      <EuiPageTemplate.EmptyPrompt color="transparent">
+        <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 

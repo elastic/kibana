@@ -48,7 +48,7 @@ const ThreatIntelligence = memo(() => {
 
   const sourcererDataView = useSourcererDataView();
 
-  const securitySolutionStore = getStore() as Store;
+  const securitySolutionStore = useMemo(() => getStore() as Store, []);
 
   const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
 
