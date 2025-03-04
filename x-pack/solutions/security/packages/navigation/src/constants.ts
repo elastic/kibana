@@ -95,6 +95,7 @@ export enum ExternalPageName {
   managementSpaces = 'management:spaces',
   managementSettings = 'management:settings',
   managementMonitoring = 'monitoring:',
+  managementKnowledgeSources = 'management:securityAiAssistantManagement',
   // Cloud UI
   // These are links to Cloud UI outside Kibana
   // Special Format: <cloud>:<cloudUrlKey>

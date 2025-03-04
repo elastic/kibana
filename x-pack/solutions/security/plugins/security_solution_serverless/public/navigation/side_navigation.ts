@@ -11,7 +11,7 @@ import produce from 'immer';
 import { map } from 'rxjs';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
-import { applyAiSocNavigation } from './ai_soc_navigation';
+import { applyAiSocNavigation } from './ai_soc/ai_soc_navigation';
 
 const PROJECT_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.title',

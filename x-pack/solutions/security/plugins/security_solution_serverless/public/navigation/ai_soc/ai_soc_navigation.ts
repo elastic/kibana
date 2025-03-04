@@ -9,15 +9,16 @@ import type {
   AppDeepLinkId,
   GroupDefinition,
   NavigationTreeDefinition,
-  NodeDefinition,
 } from '@kbn/core-chrome-browser';
 
 import type { WritableDraft } from 'immer/dist/internal';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { remove } from 'lodash';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { ProductLine, ProductTier } from '../../common/product';
-import { type SecurityProductTypes } from '../../common/config';
+import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
+// import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import { findAndRemoveNodes } from './utils';
+import { type SecurityProductTypes } from '../../../common/config';
+import { ProductLine, ProductTier } from '../../../common/product';
+import { knowledgeSourceLink } from './links';
 
 const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
   return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
@@ -57,24 +58,20 @@ export const applyAiSocNavigation = (
     GroupDefinition<AppDeepLinkId, string, string>
   >;
 
+  // hardcode Knowledge Sources to exists in AI for SOC group
+  securityGroup.children.push(knowledgeSourceLink);
+
   if (isAIStandalone(productTypes)) {
     draft.body = [{ ...aiGroup, children: securityGroup.children }];
     return;
   }
 
-  const pageIdsToAttach = [SecurityPageName.attackDiscovery]; // Add more IDs as needed
+  const pageIdsToAttach = [
+    SecurityPageName.attackDiscovery,
+    ExternalPageName.managementKnowledgeSources,
+  ]; // Add more IDs as needed
 
-  const attachedPages = securityGroup.children.reduce<Array<NodeDefinition<AppDeepLinkId>>>(
-    (nodes, category) => {
-      const removedNodes = remove(category.children ?? [], (child) =>
-        pageIdsToAttach.includes(child.id)
-      );
-
-      nodes.push(...removedNodes);
-      return nodes;
-    },
-    []
-  );
+  const attachedPages = findAndRemoveNodes(securityGroup.children, pageIdsToAttach);
 
   if (attachedPages.length) {
     securityGroup.appendHorizontalRule = true; // does not seem to work :( talk with sharedUx team
