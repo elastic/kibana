@@ -712,6 +712,7 @@
     "@kbn/observability-onboarding-plugin": "link:x-pack/solutions/observability/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/solutions/observability/plugins/observability_shared",
+    "@kbn/observability-ui-semantic-conventions": "link:x-pack/platform/packages/shared/kbn-observability-ui-semantic-conventions",
     "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils-browser",
     "@kbn/observability-utils-common": "link:x-pack/solutions/observability/packages/utils-common",
     "@kbn/observability-utils-server": "link:x-pack/solutions/observability/packages/utils-server",
