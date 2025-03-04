@@ -286,7 +286,7 @@ describe('MaintenanceWindowClient - create', () => {
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Error validating create maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
-      invalid:
+      invalid: 
       ---------^"
     `);
   });
