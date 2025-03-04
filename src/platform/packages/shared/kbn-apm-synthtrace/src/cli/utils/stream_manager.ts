@@ -8,11 +8,32 @@
  */
 
 import { once, pull } from 'lodash';
+import { ToolingLog } from '@kbn/tooling-log';
 import { PassThrough, finished } from 'stream';
+
+function attach(logger: ToolingLog, cb: () => Promise<void>) {
+  const wrapped = once(() => {
+    cb()
+      .then(() => {
+        process.exit(0);
+      })
+      .catch((err) => {
+        logger.error(err);
+        process.exit(1);
+      });
+  });
+
+  process.on('SIGINT', wrapped);
+  process.on('SIGTERM', wrapped);
+  process.on('SIGQUIT', wrapped);
+}
 
 export class StreamManager {
   private currentStreams: PassThrough[] = [];
-  constructor(private readonly teardownCallback: () => Promise<void>) {}
+  constructor(
+    private readonly logger: ToolingLog,
+    private readonly teardownCallback: () => Promise<void>
+  ) {}
 
   trackStream(stream: PassThrough) {
     this.currentStreams.push(stream);
@@ -22,11 +43,13 @@ export class StreamManager {
     pull(this.currentStreams, stream);
   }
 
-  private teardown() {
-    this.teardownCallback().then(() => {});
+  teardown = once(async () => {
+    attach(this.logger, async () => {
+      process.exit(1);
+    });
 
-    Promise.all(
-      this.currentStreams.map((stream) => {
+    await Promise.all([
+      ...this.currentStreams.map((stream) => {
         stream.end();
         return new Promise<void>((resolve, reject) => {
           finished(stream, (err) => {
@@ -36,19 +59,12 @@ export class StreamManager {
             resolve();
           });
         });
-      })
-    )
-      .then(() => {
-        process.exit(0);
-      })
-      .catch(() => {
-        process.exit(1);
-      });
-  }
+      }),
+      this.teardownCallback(),
+    ]);
+  });
 
   init = once(() => {
-    process.on('SIGINT', () => this.teardown());
-    process.on('SIGTERM', () => this.teardown());
-    process.on('SIGQUIT', () => this.teardown());
+    attach(this.logger, () => this.teardown());
   });
 }

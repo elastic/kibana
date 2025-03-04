@@ -8,7 +8,7 @@
  */
 
 import * as z from '@kbn/zod';
-import { BooleanFromString, isBooleanFromString } from './boolean_from_string';
+import { BooleanFromString } from './boolean_from_string';
 
 describe('BooleanFromString', () => {
   it.each([
@@ -29,7 +29,6 @@ describe('BooleanFromString', () => {
   it('has the correct zod and kbn type', () => {
     expect(BooleanFromString instanceof z.ZodUnion).toBe(true);
     expect(BooleanFromString._def.typeName).toBe(z.ZodFirstPartyTypeKind.ZodUnion);
-    expect(isBooleanFromString(BooleanFromString)).toBe(true);
   });
 
   it('zod chaining works as expected', () => {

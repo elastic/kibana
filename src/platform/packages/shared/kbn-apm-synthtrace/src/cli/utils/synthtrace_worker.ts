@@ -7,80 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
-import { memoryUsage } from 'process';
 import { parentPort, workerData } from 'worker_threads';
-import { getScenario } from './get_scenario';
+import { bootstrap } from './bootstrap';
+import { indexHistoricalData } from './index_historical_data';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
-import { bootstrap } from './bootstrap';
 
 export interface WorkerData {
+  from: Date;
+  to: Date;
   bucketFrom: Date;
   bucketTo: Date;
   runOptions: RunOptions;
   workerId: string;
 }
 
-const { bucketFrom, bucketTo, runOptions } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
 
-  const { clients } = await bootstrap(runOptions);
-
-  const file = runOptions.file;
-
-  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-
-  logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
-
-  const { generate, teardown } = await scenario({ ...runOptions, logger });
-
-  logger.debug('Generating scenario');
-
-  const generatorsAndClients = logger.perf('generate_scenario', () =>
-    generate({
-      range: timerange(bucketFrom, bucketTo),
-      clients,
-    })
-  );
-
-  const generatorsAndClientsArray = castArray(generatorsAndClients);
-
-  logger.debug('Indexing scenario');
-
-  function mb(value: number): string {
-    return Math.round(value / 1024 ** 2).toString() + 'mb';
-  }
-
-  let cpuUsage = process.cpuUsage();
-
-  setInterval(async () => {
-    cpuUsage = process.cpuUsage(cpuUsage);
-    const mem = memoryUsage();
-    logger.info(
-      `cpu time: (user: ${cpuUsage.user}µs, sys: ${cpuUsage.system}µs), memory: ${mb(
-        mem.heapUsed
-      )}/${mb(mem.heapTotal)}`
-    );
-  }, 5000);
-
-  await logger.perf('index_scenario', async () => {
-    const promises = generatorsAndClientsArray.map(async ({ client, generator }) => {
-      await client.index(generator);
-      await client.refresh();
-    });
-
-    await Promise.all(promises);
+  const { clients } = await bootstrap({
+    ...runOptions,
+    clean: false,
   });
 
-  if (teardown) {
-    await teardown({
-      ...clients,
-    });
-  }
+  await indexHistoricalData({
+    bucketFrom,
+    bucketTo,
+    clients,
+    logger,
+    runOptions,
+    workerId,
+    from,
+    to,
+  });
 }
 
 parentPort!.on('message', (message) => {

@@ -118,7 +118,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
   async index(
     streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>,
     pipelineCallback?: (base: Readable) => NodeJS.WritableStream
-  ) {
+  ): Promise<void> {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
     const previousPipelineCallback = this.pipelineCallback;

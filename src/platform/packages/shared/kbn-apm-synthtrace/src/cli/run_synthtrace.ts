@@ -69,7 +69,7 @@ function options(y: Argv) {
     })
     .option('logLevel', {
       describe: 'Log level',
-      choices: ['trace', 'debug', 'info', 'error'],
+      choices: ['verbose', 'debug', 'info', 'error'],
       default: 'info',
     })
     .option('scenarioOpts', {
@@ -91,11 +91,18 @@ function options(y: Argv) {
                 .trim()
                 .split('=')
                 .map((part) => part.trim());
-
-              if (isNaN(Number(value))) {
-                return [key, value];
+              if (value === 'true') {
+                return [key, true];
               }
-              return [key, Number(value)];
+              if (value === 'false') {
+                return [key, false];
+              }
+
+              if (!isNaN(Number(value))) {
+                return [key, Number(value)];
+              }
+
+              return [key, value];
             })
           );
         }
@@ -133,7 +140,7 @@ async function run(argv: RunCliFlags) {
   const live = argv.live;
 
   if (live) {
-    await startLiveDataUpload({ runOptions, start: from });
+    await startLiveDataUpload({ runOptions, from, to });
   } else {
     await startHistoricalDataUpload({ runOptions, from, to });
   }

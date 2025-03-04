@@ -10,6 +10,7 @@ import { LoghubQuery } from '../src/validate_queries';
 export interface StreamLogDocument {
   [x: string]: unknown;
   filepath: string;
+  message: string;
   '@timestamp': number;
 }
 

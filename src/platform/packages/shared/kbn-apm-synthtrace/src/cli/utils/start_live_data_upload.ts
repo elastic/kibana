@@ -8,7 +8,7 @@
  */
 
 import { timerange } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
+import { castArray, once } from 'lodash';
 import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { SynthtraceEsClient } from '../../lib/shared/base_client';
@@ -20,25 +20,14 @@ import { StreamManager } from './stream_manager';
 
 export async function startLiveDataUpload({
   runOptions,
-  start,
+  from,
+  to,
 }: {
   runOptions: RunOptions;
-  start: Date;
+  from: Date;
+  to: Date;
 }) {
   const file = runOptions.file;
-
-  const streamManager = new StreamManager(async () => {
-    if (scenarioTearDown) {
-      try {
-        await scenarioTearDown(clients);
-      } catch (error) {
-        logger.error('Error during scenario teardown');
-        logger.error(error);
-      }
-    }
-  });
-
-  streamManager.init();
 
   const { logger, clients } = await bootstrap(runOptions);
 
@@ -47,14 +36,24 @@ export async function startLiveDataUpload({
     generate,
     bootstrap: scenarioBootstrap,
     teardown: scenarioTearDown,
-  } = await scenario({ ...runOptions, logger });
+  } = await scenario({ ...runOptions, logger, from, to });
+
+  const teardown = once(async () => {
+    if (scenarioTearDown) {
+      await scenarioTearDown(clients);
+    }
+  });
+
+  const streamManager = new StreamManager(logger, teardown);
+
+  streamManager.init();
 
   if (scenarioBootstrap) {
     await scenarioBootstrap(clients);
   }
 
   const bucketSizeInMs = runOptions.liveBucketSize;
-  let requestedUntil = start;
+  let requestedUntil = from;
 
   // @ts-expect-error upgrade typescript v4.9.5
   const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
@@ -75,7 +74,7 @@ export async function startLiveDataUpload({
       );
 
       const generatorsAndClients = generate({
-        range: timerange(rangeStart, rangeEnd),
+        range: timerange(rangeStart, rangeEnd, logger),
         clients,
       });
 

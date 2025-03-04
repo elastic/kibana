@@ -28,11 +28,19 @@ export async function ensureLoghubRepo({ log }: { log: ToolingLog }) {
   const defaultBranch =
     (await repoGit.revparse(['--abbrev-ref', 'origin/HEAD'])).replace('origin/', '') || 'master';
 
-  log.debug(`Checking out ${defaultBranch}`);
+  const currentBranch = (await repoGit.revparse(['--abbrev-ref', 'HEAD'])) || defaultBranch;
 
-  await repoGit.checkout(defaultBranch);
+  if (currentBranch !== defaultBranch) {
+    log.info(`Checking out ${defaultBranch}`);
 
-  log.debug(`Pulling ${defaultBranch} from logai/loghub`);
+    await repoGit.checkout(defaultBranch);
+  }
 
-  await repoGit.pull('origin', defaultBranch);
+  const status = await repoGit.status();
+  if (status.behind && status.behind > 0) {
+    log.info(`Local branch is behind by ${status.behind} commit(s); pulling changes.`);
+    await repoGit.pull('origin', defaultBranch);
+  } else {
+    log.debug(`Local branch is up-to-date; no pull needed.`);
+  }
 }

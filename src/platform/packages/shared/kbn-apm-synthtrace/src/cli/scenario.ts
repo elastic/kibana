@@ -8,29 +8,11 @@
  */
 
 import { Timerange } from '@kbn/apm-synthtrace-client';
-import {
-  ApmSynthtraceEsClient,
-  InfraSynthtraceEsClient,
-  LogsSynthtraceEsClient,
-  SyntheticsSynthtraceEsClient,
-  OtelSynthtraceEsClient,
-  EntitiesSynthtraceEsClient,
-} from '../..';
+import { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
 import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
+import { SynthtraceClients } from './utils/get_clients';
 import { RunOptions } from './utils/parse_run_cli_flags';
-import { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
-import { StreamsSynthtraceClient } from '../lib/streams/streams_synthtrace_client';
-
-interface EsClients {
-  apmEsClient: ApmSynthtraceEsClient;
-  logsEsClient: LogsSynthtraceEsClient;
-  infraEsClient: InfraSynthtraceEsClient;
-  syntheticsEsClient: SyntheticsSynthtraceEsClient;
-  otelEsClient: OtelSynthtraceEsClient;
-  entitiesEsClient: EntitiesSynthtraceEsClient;
-  streamsClient: StreamsSynthtraceClient;
-}
 
 interface KibanaClients {
   entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
@@ -38,11 +20,13 @@ interface KibanaClients {
 
 type Generate<TFields> = (options: {
   range: Timerange;
-  clients: EsClients;
+  clients: SynthtraceClients;
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
-export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
-  bootstrap?: (options: EsClients & KibanaClients) => Promise<void>;
+export type Scenario<TFields> = (
+  options: RunOptions & { logger: Logger; from: Date; to: Date }
+) => Promise<{
+  bootstrap?: (options: SynthtraceClients & KibanaClients) => Promise<void>;
   generate: Generate<TFields>;
-  teardown?: (options: EsClients & KibanaClients) => Promise<void>;
+  teardown?: (options: SynthtraceClients & KibanaClients) => Promise<void>;
 }>;

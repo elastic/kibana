@@ -86,36 +86,43 @@ export const queryFileSchema = z.object({
   queries: z.array(querySchema),
 });
 
-function tokenize(text: string): string[] {
+export function tokenize(text: string): string[] {
   return text
     .toLowerCase()
     .split(/\W+/)
     .filter((token) => token.length > 0);
 }
 
-function executeQuery(query: DslQuery, system: LoghubSystem) {
-  const validators = query.bool.filter.map(
-    (queryContainer): ((input: { tokens: string[]; raw: string }) => boolean) => {
-      if ('match' in queryContainer) {
-        const { query: q, operator = 'OR' } =
-          typeof queryContainer.match.message === 'string'
-            ? { query: queryContainer.match.message, operator: 'OR' }
-            : queryContainer.match.message;
+type StructuredInputMatchFunction = (input: { tokens: string[]; raw: string }) => boolean;
 
-        const tokens = tokenize(q);
-        return (input) => {
-          return operator === 'AND'
-            ? tokens.every((token) => input.tokens.includes(token))
-            : tokens.some((token) => input.tokens.includes(token));
-        };
-      }
-      const regex = new RegExp(queryContainer.regexp.message);
-      return (input) => !!input.raw.match(regex);
+export function createQueryMatcher(query: DslQuery): StructuredInputMatchFunction {
+  const validators = query.bool.filter.map((queryContainer): StructuredInputMatchFunction => {
+    if ('match' in queryContainer) {
+      const { query: q, operator = 'OR' } =
+        typeof queryContainer.match.message === 'string'
+          ? { query: queryContainer.match.message, operator: 'OR' }
+          : queryContainer.match.message;
+
+      const tokens = tokenize(q);
+      return (input) => {
+        return operator === 'AND'
+          ? tokens.every((token) => input.tokens.includes(token))
+          : tokens.some((token) => input.tokens.includes(token));
+      };
     }
-  );
+    const regex = new RegExp(queryContainer.regexp.message);
+    return (input) => !!input.raw.match(regex);
+  });
+
+  return (line) => validators.every((validator) => validator(line));
+}
+
+function executeQuery(query: DslQuery, system: LoghubSystem) {
+  const matcher = createQueryMatcher(query);
 
   return system.logLines.filter((line) => {
-    return validators.every((validator) => validator({ raw: line, tokens: tokenize(line) }));
+    const input = { tokens: tokenize(line), raw: line };
+    return matcher(input);
   });
 }
 

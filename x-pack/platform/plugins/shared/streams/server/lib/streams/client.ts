@@ -182,20 +182,38 @@ export class StreamsClient {
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
    *
-   * It does NOT delete ingest streams.
+   * It does NOT delete unwired streams.
    */
-  async disableStreams(): Promise<DisableStreamsResponse> {
+  async disableStreams({
+    force = false,
+  }: { force?: boolean } = {}): Promise<DisableStreamsResponse> {
     const isEnabled = await this.isStreamsEnabled();
+
     if (!isEnabled) {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const definition = await this.getStream(LOGS_ROOT_STREAM_NAME);
-
-    await this.deleteStreamFromDefinition(definition);
+    await this.getStream(LOGS_ROOT_STREAM_NAME)
+      .then(async (definition) => {
+        await this.deleteStreamFromDefinition(definition);
+      })
+      .catch((error) => {
+        if (!force) {
+          throw error;
+        }
+      });
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([assetClient.clean(), storageClient.clean()]);
+
+    if (force) {
+      const unwiredStreams = await this.getUnmanagedDataStreams();
+      await Promise.all(
+        unwiredStreams.map(async (definition) => {
+          await this.deleteStreamFromDefinition(definition);
+        })
+      );
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -343,6 +361,7 @@ export class StreamsClient {
     ]);
 
     await this.uninstallQueries(
+      name,
       deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query')
     );
 
@@ -896,12 +915,12 @@ export class StreamsClient {
     });
 
     await Promise.all([
-      this.uninstallQueries(deletedQueries),
+      this.uninstallQueries(definition.name, deletedQueries),
       this.dependencies.storageClient.delete({ id: definition.name }),
     ]);
   }
 
-  private async uninstallQueries(queries: QueryLink[]) {
+  private async uninstallQueries(name: string, queries: QueryLink[]) {
     await Promise.all(
       queries.map(async (query) => {
         const taskId = `${REINDEX_QUERY_TASK_NAME}:${query['asset.uuid']}`;
@@ -912,6 +931,30 @@ export class StreamsClient {
             throw error;
           }
         });
+
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+          .deleteAlias({
+            name: `${name}.@critical_events_alerts.${query.query.id}`,
+            index: name,
+          })
+          .catch((err) => {
+            if (isElasticsearch404(err)) {
+              return;
+            }
+            throw err;
+          });
+
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+          .deleteAlias({
+            name: `${name}.@critical_events_query.${query.query.id}`,
+            index: name,
+          })
+          .catch((err) => {
+            if (isElasticsearch404(err)) {
+              return;
+            }
+            throw err;
+          });
       })
     );
   }
@@ -1009,7 +1052,7 @@ export class StreamsClient {
             },
             tags: ['streams'],
             schedule: {
-              interval: '5m',
+              interval: '3m',
             },
           },
           options: {
@@ -1020,8 +1063,34 @@ export class StreamsClient {
     );
   }
 
+  private async installQueriesAliases(name: string, queries: QueryLink[]) {
+    for (const { query } of queries) {
+      if ('esql' in query) {
+        return;
+      }
+      const dsl = query.dsl;
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.putAlias({
+        index: name,
+        name: `${name}.@critical_events_alerts.${query.id}`,
+        filter: {
+          term: {
+            ['critical_event.query_id']: query.id,
+          },
+        },
+      });
+
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.putAlias({
+        index: name,
+        name: `${name}.@critical_events_query.${query.id}`,
+        filter: dsl.query,
+      });
+    }
+  }
+
   private async installQueries(name: string, queries: QueryLink[]) {
-    const mode: 'reindex' | 'rule' | 'query' = 'rule';
+    const mode: 'reindex' | 'rule' | 'query' | 'noop' = 'noop';
+
+    await this.installQueriesAliases(name, queries);
 
     if (mode === 'reindex') {
       await this.installQueriesReindexTask(name, queries);

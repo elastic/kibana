@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { range } from 'lodash';
+import { once, range } from 'lodash';
 import moment from 'moment';
 import { cpus } from 'os';
 import Path from 'path';
@@ -18,6 +18,7 @@ import { RunOptions } from './parse_run_cli_flags';
 import { WorkerData } from './synthtrace_worker';
 import { getScenario } from './get_scenario';
 import { StreamManager } from './stream_manager';
+import { indexHistoricalData } from './index_historical_data';
 
 export async function startHistoricalDataUpload({
   runOptions,
@@ -37,14 +38,18 @@ export async function startHistoricalDataUpload({
     return fn({
       ...runOptions,
       logger,
+      from,
+      to,
     });
   });
 
-  const streamManager = new StreamManager(async () => {
+  const teardown = once(async () => {
     if (scenario.teardown) {
       await scenario.teardown(clients);
     }
   });
+
+  const streamManager = new StreamManager(logger, teardown);
 
   streamManager.init();
 
@@ -62,8 +67,8 @@ export async function startHistoricalDataUpload({
 
   const d = moment.duration(Math.abs(diff), 'ms');
 
-  // make sure ranges cover at least 100k documents
-  const minIntervalSpan = moment.duration(60, 'm');
+  // make sure ranges cover at least 1m
+  const minIntervalSpan = moment.duration(1, 'm');
 
   const minNumberOfRanges = d.asMilliseconds() / minIntervalSpan.asMilliseconds();
   if (minNumberOfRanges < workers) {
@@ -110,6 +115,8 @@ export async function startHistoricalDataUpload({
         bucketFrom,
         bucketTo,
         workerId: workerIndex.toString(),
+        from,
+        to,
       };
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData,
@@ -150,7 +157,26 @@ export async function startHistoricalDataUpload({
     });
   }
 
-  const workerServices = range(0, intervals.length).map((index) => runService(intervals[index]));
+  const workerServices =
+    intervals.length === 1
+      ? // just run in this process. it's hard to attach
+        // a debugger to a worker_thread, see:
+        // https://issues.chromium.org/issues/41461728
+        [
+          indexHistoricalData({
+            bucketFrom: intervals[0].bucketFrom,
+            bucketTo: intervals[0].bucketTo,
+            clients,
+            logger,
+            runOptions,
+            workerId: 'i',
+            from,
+            to,
+          }),
+        ]
+      : range(0, intervals.length).map((index) => runService(intervals[index]));
 
-  return Promise.all(workerServices);
+  await Promise.all(workerServices);
+
+  await teardown();
 }

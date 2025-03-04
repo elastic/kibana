@@ -63,7 +63,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
   }
 
   async disable() {
-    await this.kibana!.fetch('/api/streams/_disable', {
+    await this.kibana!.fetch('/api/streams/_disable?force=true', {
       method: 'POST',
       timeout: 5 * 60 * 1000,
       headers: {
@@ -73,8 +73,18 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
   }
 
   override async clean(): Promise<void> {
+    await this.client.deleteByQuery({
+      index: '.alerts*',
+      query: {
+        match_all: {},
+      },
+    });
     await this.disable();
     await super.clean();
+  }
+
+  async clearESCache(): Promise<void> {
+    await this.client.indices.clearCache();
   }
 }
 
