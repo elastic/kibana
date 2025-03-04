@@ -191,10 +191,10 @@ const euiTheme = {
       euiColorVis4: '#CA8EAE',
       euiColorVis5: '#D6BF57',
       euiColorVis6: '#B9A888',
-      euiColorVis9: '#E7664C'
-    }
-  }
-}
+      euiColorVis9: '#E7664C',
+    },
+  },
+};
 
 moment.tz.setDefault('utc');
 
@@ -202,7 +202,7 @@ const getUrlForApp = (appId: string, options: any) => {
   return appId + '/' + (options ? options.path : '');
 };
 
-const reloadIndices = () => { };
+const reloadIndices = () => {};
 
 describe('extend index management', () => {
   describe('retry lifecycle action extension', () => {
@@ -360,7 +360,11 @@ describe('extend index management', () => {
         });
       expect(shouldRenderTab).toBeTruthy();
       const ilmContent = (
-        <IlmComponent index={indexWithLifecyclePolicy} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />
+        <IlmComponent
+          index={indexWithLifecyclePolicy}
+          getUrlForApp={getUrlForApp}
+          euiTheme={euiTheme}
+        />
       );
       const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
@@ -372,7 +376,11 @@ describe('extend index management', () => {
 
     test('should render an error panel when index has lifecycle error', () => {
       const ilmContent = (
-        <IlmComponent index={indexWithLifecycleError} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />
+        <IlmComponent
+          index={indexWithLifecycleError}
+          getUrlForApp={getUrlForApp}
+          euiTheme={euiTheme}
+        />
       );
       const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
@@ -384,7 +392,11 @@ describe('extend index management', () => {
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
       const ilmContent = (
-        <IlmComponent index={indexWithLifecyclePhaseDefinition} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />
+        <IlmComponent
+          index={indexWithLifecyclePhaseDefinition}
+          getUrlForApp={getUrlForApp}
+          euiTheme={euiTheme}
+        />
       );
       const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
@@ -396,7 +408,11 @@ describe('extend index management', () => {
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
       const ilmContent = (
-        <IlmComponent index={indexWithLifecycleWaitingStep} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />
+        <IlmComponent
+          index={indexWithLifecycleWaitingStep}
+          getUrlForApp={getUrlForApp}
+          euiTheme={euiTheme}
+        />
       );
       const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();

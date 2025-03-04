@@ -21,7 +21,7 @@ import {
   EuiDescriptionList,
   EuiBadgeProps,
   EuiBadge,
-  EuiCode
+  EuiCode,
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core/public';
@@ -47,7 +47,11 @@ interface Props {
   };
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp, euiTheme }) => {
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({
+  index,
+  getUrlForApp,
+  euiTheme,
+}) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
