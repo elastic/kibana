@@ -51,8 +51,10 @@ const OutcomeControls = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state?.context.previewDocsFilter);
-  const simulationFailureRate = useSimulatorSelector(
-    (state) => state?.context.simulation?.failure_rate
+  const simulationFailureRate = useSimulatorSelector((state) =>
+    state?.context.simulation
+      ? state.context.simulation.failure_rate + state.context.simulation.skipped_rate
+      : undefined
   );
   const simulationSuccessRate = useSimulatorSelector(
     (state) => state?.context.simulation?.success_rate
