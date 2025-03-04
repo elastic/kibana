@@ -15,6 +15,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
@@ -242,12 +243,16 @@ export class BlocklistValidator extends BaseValidator {
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
+    await this.validateCreateOwnerSpaceIds(item);
+
+    await this.setOwnerSpaceId(item);
 
     return item;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreGetOneItem(): Promise<void> {
@@ -296,6 +301,12 @@ export class BlocklistValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
+
+    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
+      await this.setOwnerSpaceId(_updatedItem);
+    }
 
     return _updatedItem;
   }

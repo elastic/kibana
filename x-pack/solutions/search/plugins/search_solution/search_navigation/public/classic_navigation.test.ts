@@ -61,7 +61,7 @@ describe('classicNavigationFactory', function () {
       },
     ];
     expect(classicNavigationFactory(items, core, history)).toEqual({
-      icon: 'logoEnterpriseSearch',
+      icon: 'logoElasticsearch',
       items: [
         {
           href: '/app/elasticsearch/overview',

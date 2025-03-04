@@ -521,7 +521,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -529,7 +529,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1889,7 +1889,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"line\" | \"area\" | \"bar\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -6280,7 +6280,7 @@
                 "section": "def-common.DynamicActionsState",
                 "text": "DynamicActionsState"
               },
-              "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+              "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -6288,7 +6288,7 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+              " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
               "SavedObjectReference",
               "[]; visualizationType: \"lnsXY\"; state: { query: ",
               {
@@ -6971,7 +6971,7 @@
                     "section": "def-common.DynamicActionsState",
                     "text": "DynamicActionsState"
                   },
-                  "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+                  "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
@@ -6979,7 +6979,7 @@
                     "section": "def-public.ViewMode",
                     "text": "ViewMode"
                   },
-                  " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+                  " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
                   "SavedObjectReference",
                   "[]; visualizationType: \"lnsXY\"; state: { query: ",
                   {
@@ -13910,7 +13910,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -14237,7 +14237,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -15194,7 +15194,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -15202,7 +15202,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
           "SavedObjectReference",
           "[]; visualizationType: \"lnsXY\"; state: { query: ",
           {
@@ -15870,7 +15870,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -15878,7 +15878,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
           "SavedObjectReference",
           "[]; visualizationType: \"lnsXY\"; state: { query: ",
           {
@@ -16498,7 +16498,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -17075,7 +17075,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17083,7 +17083,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -18110,7 +18110,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -18134,7 +18134,7 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; abortController?: AbortController | undefined; renderMode?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; abortController?: AbortController | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18142,7 +18142,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
+          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -18803,7 +18803,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; lastReloadRequestTime?: number | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -18827,7 +18827,7 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; abortController?: AbortController | undefined; renderMode?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; abortController?: AbortController | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18835,7 +18835,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
+          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -19421,7 +19421,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19429,7 +19429,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -20432,7 +20432,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20440,7 +20440,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; references: ",
           "SavedObjectReference",
           "[]; visualizationType: \"lnsXY\"; state: { query: ",
           {
@@ -21123,7 +21123,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; lastReloadRequestTime?: number | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; renderMode?: ",
+          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -21131,7 +21131,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -22682,7 +22682,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -23375,7 +23375,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; lastReloadRequestTime?: number | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -23399,7 +23399,7 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; abortController?: AbortController | undefined; renderMode?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; abortController?: AbortController | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -23407,7 +23407,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
+          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -23591,7 +23591,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"bottom\" | \"auto\" | \"left\""
+          "\"right\" | \"bottom\" | \"left\" | \"auto\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -23606,7 +23606,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"sqrt\" | \"time\" | \"linear\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

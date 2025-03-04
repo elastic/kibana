@@ -35,6 +35,7 @@ import {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -215,7 +216,7 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if (fnDef.type === 'agg' && argFn.type === 'agg') {
+    if (fnDef.type === FunctionDefinitionTypes.AGG && argFn.type === FunctionDefinitionTypes.AGG) {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
@@ -709,6 +710,7 @@ function validateFunction({
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
 }
 
+/** @deprecated — "command settings" will be removed soon */
 function validateSetting(
   setting: ESQLCommandMode,
   settingDef: CommandModeDefinition | undefined,
@@ -838,7 +840,7 @@ const validateAggregates = (
         visitFunction: (fn) => {
           const definition = getFunctionDefinition(fn.name);
           if (!definition) return;
-          if (definition.type === 'agg') hasAggregationFunction = true;
+          if (definition.type === FunctionDefinitionTypes.AGG) hasAggregationFunction = true;
         },
       });
 

@@ -24,7 +24,7 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem } from '@kbn/ml-agg-utils';

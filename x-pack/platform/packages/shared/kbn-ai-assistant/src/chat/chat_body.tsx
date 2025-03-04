@@ -255,7 +255,8 @@ export function ChatBody({
     const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
 
     const content = JSON.stringify({
-      title: initialTitle,
+      title: conversation.value?.conversation.title || initialTitle,
+      systemMessage: conversation.value?.systemMessage,
       messages: deserializedMessages,
     });
 
@@ -374,7 +375,7 @@ export function ChatBody({
               paddingSize="m"
               className={animClassName(euiTheme)}
             >
-              {connectors.connectors?.length === 0 || messages.length === 1 ? (
+              {connectors.connectors?.length === 0 || messages.length === 0 ? (
                 <WelcomeMessage
                   connectors={connectors}
                   knowledgeBase={knowledgeBase}
