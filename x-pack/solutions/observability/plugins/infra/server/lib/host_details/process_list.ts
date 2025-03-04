@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import {
-  ATTR_EVENT_DATASET,
-  ATTR_PROCESS_COMMAND_LINE,
-  ATTR_PROCESS_PID,
-  ATTR_SYSTEM_PROCESS_STATE,
-  ATTR_TIMESTAMP,
-  ATTR_USER_NAME,
-  METRIC_SYSTEM_PROCESS_CPU_START_TIME,
-  METRIC_SYSTEM_PROCESS_CPU_TOTAL_PCT,
-  METRIC_SYSTEM_PROCESS_MEMORY_RSS_PCT,
-} from '@kbn/observability-ui-semantic-conventions';
-
+import { TIMESTAMP_FIELD, PROCESS_COMMANDLINE_FIELD } from '../../../common/constants';
 import type {
   ProcessListAPIRequest,
   ProcessListAPIQueryAggregation,
@@ -38,7 +27,7 @@ export const getProcessList = async (
         filter: [
           {
             range: {
-              [ATTR_TIMESTAMP]: {
+              [TIMESTAMP_FIELD]: {
                 gte: to - 60 * 1000, // 1 minute
                 lte: to,
                 format: 'epoch_millis',
@@ -55,7 +44,7 @@ export const getProcessList = async (
       summaryEvent: {
         filter: {
           term: {
-            [ATTR_EVENT_DATASET]: 'system.process.summary',
+            'event.dataset': 'system.process.summary',
           },
         },
         aggs: {
@@ -64,7 +53,7 @@ export const getProcessList = async (
               size: 1,
               sort: [
                 {
-                  [ATTR_TIMESTAMP]: {
+                  [TIMESTAMP_FIELD]: {
                     order: 'desc',
                   },
                 },
@@ -83,7 +72,7 @@ export const getProcessList = async (
         aggs: {
           filteredProcs: {
             terms: {
-              field: ATTR_PROCESS_COMMAND_LINE,
+              field: PROCESS_COMMANDLINE_FIELD,
               size: TOP_N,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
@@ -92,17 +81,17 @@ export const getProcessList = async (
             aggs: {
               cpu: {
                 avg: {
-                  field: METRIC_SYSTEM_PROCESS_CPU_TOTAL_PCT,
+                  field: 'system.process.cpu.total.pct',
                 },
               },
               memory: {
                 avg: {
-                  field: METRIC_SYSTEM_PROCESS_MEMORY_RSS_PCT,
+                  field: 'system.process.memory.rss.pct',
                 },
               },
               startTime: {
                 max: {
-                  field: METRIC_SYSTEM_PROCESS_CPU_START_TIME,
+                  field: 'system.process.cpu.start_time',
                 },
               },
               meta: {
@@ -110,16 +99,16 @@ export const getProcessList = async (
                   size: 1,
                   sort: [
                     {
-                      [ATTR_TIMESTAMP]: {
+                      [TIMESTAMP_FIELD]: {
                         order: 'desc',
                       },
                     },
                   ],
                   _source: [
-                    ATTR_SYSTEM_PROCESS_STATE,
-                    ATTR_USER_NAME,
-                    ATTR_PROCESS_PID,
-                    ATTR_PROCESS_COMMAND_LINE,
+                    'system.process.state',
+                    'user.name',
+                    'process.pid',
+                    'process.command_line',
                   ],
                 },
               },

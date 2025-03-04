@@ -5,26 +5,6 @@
  * 2.0.
  */
 
-import {
-  ATTR_CLIENT_GEO_COUNTRY_NAME,
-  ATTR_NUMERIC_LABELS_INP_VALUE,
-  ATTR_PROCESSOR_EVENT,
-  ATTR_SERVICE_ENVIRONMENT,
-  ATTR_SERVICE_NAME,
-  ATTR_TRANSACTION_DURATION_US,
-  ATTR_TRANSACTION_EXPERIENCE_CLS,
-  ATTR_TRANSACTION_EXPERIENCE_TBT,
-  ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
-  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
-  ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
-  ATTR_TRANSACTION_TYPE,
-  ATTR_TRANSACTION_URL,
-  ATTR_USER_AGENT_DEVICE_NAME,
-  ATTR_USER_AGENT_NAME,
-  ATTR_USER_AGENT_OS_NAME,
-  ATTR_USER_AGENT_VERSION,
-  PROCESSOR_EVENT_VALUE_TRANSACTION,
-} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -34,6 +14,25 @@ import {
   LABEL_FIELDS_FILTER,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
+import {
+  CLIENT_GEO_COUNTRY_NAME,
+  CLS_FIELD,
+  FCP_FIELD,
+  INP_FIELD,
+  LCP_FIELD,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TBT_FIELD,
+  TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_TYPE,
+  TRANSACTION_URL,
+  USER_AGENT_DEVICE,
+  USER_AGENT_NAME,
+  USER_AGENT_OS,
+  USER_AGENT_VERSION,
+} from '../constants/elasticsearch_fieldnames';
 import {
   BACKEND_TIME_LABEL,
   CLS_LABEL,
@@ -63,70 +62,54 @@ export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfi
     hasOperationType: false,
     filterFields: [
       {
-        field: ATTR_TRANSACTION_URL,
+        field: TRANSACTION_URL,
         isNegated: false,
       },
-      ATTR_USER_AGENT_OS_NAME,
-      ATTR_CLIENT_GEO_COUNTRY_NAME,
-      ATTR_USER_AGENT_DEVICE_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
       {
-        field: ATTR_USER_AGENT_NAME,
-        nested: ATTR_USER_AGENT_VERSION,
+        field: USER_AGENT_NAME,
+        nested: USER_AGENT_VERSION,
       },
       LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [
-      ATTR_USER_AGENT_NAME,
-      ATTR_USER_AGENT_OS_NAME,
-      ATTR_CLIENT_GEO_COUNTRY_NAME,
-      ATTR_USER_AGENT_DEVICE_NAME,
-      ATTR_SERVICE_NAME,
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      SERVICE_NAME,
     ],
-    definitionFields: [ATTR_SERVICE_NAME, ATTR_SERVICE_ENVIRONMENT],
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
       {
         label: PAGE_LOAD_TIME_LABEL,
-        id: ATTR_TRANSACTION_DURATION_US,
-        field: ATTR_TRANSACTION_DURATION_US,
+        id: TRANSACTION_DURATION,
+        field: TRANSACTION_DURATION,
         showPercentileAnnotations: true,
       },
       {
         label: BACKEND_TIME_LABEL,
-        id: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
-        field: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
+        id: TRANSACTION_TIME_TO_FIRST_BYTE,
+        field: TRANSACTION_TIME_TO_FIRST_BYTE,
       },
-      {
-        label: FCP_LABEL,
-        id: ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
-        field: ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
-      },
-      {
-        label: TBT_LABEL,
-        id: ATTR_TRANSACTION_EXPERIENCE_TBT,
-        field: ATTR_TRANSACTION_EXPERIENCE_TBT,
-      },
-      {
-        label: LCP_LABEL,
-        id: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
-        field: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
-      },
-      { label: INP_LABEL, id: ATTR_NUMERIC_LABELS_INP_VALUE, field: ATTR_NUMERIC_LABELS_INP_VALUE },
-      {
-        label: CLS_LABEL,
-        id: ATTR_TRANSACTION_EXPERIENCE_CLS,
-        field: ATTR_TRANSACTION_EXPERIENCE_CLS,
-      },
+      { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
+      { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
+      { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
+      { label: INP_LABEL, id: INP_FIELD, field: INP_FIELD },
+      { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
     baseFilters: [
-      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, PROCESSOR_EVENT_VALUE_TRANSACTION, dataView),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: {
       ...FieldLabels,
-      [ATTR_SERVICE_NAME]: WEB_APPLICATION_LABEL,
-      [ATTR_TRANSACTION_DURATION_US]: PAGE_LOAD_TIME_LABEL,
+      [SERVICE_NAME]: WEB_APPLICATION_LABEL,
+      [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
     },
     // rum page load transactions are always less then 60 seconds
-    query: { query: `${ATTR_TRANSACTION_DURATION_US} < 60000000`, language: 'kuery' },
+    query: { query: 'transaction.duration.us < 60000000', language: 'kuery' },
   };
 }

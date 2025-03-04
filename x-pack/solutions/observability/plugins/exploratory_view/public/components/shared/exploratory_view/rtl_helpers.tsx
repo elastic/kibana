@@ -31,12 +31,6 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import * as useValuesListHook from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
-import {
-  ATTR_SERVICE_NAME,
-  ATTR_TIMESTAMP,
-  ATTR_TRANSACTION_DURATION_US,
-  ATTR_USER_AGENT_NAME,
-} from '@kbn/observability-ui-semantic-conventions';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
@@ -53,6 +47,7 @@ import * as useSeriesFilterHook from './hooks/use_series_filters';
 import dataViewData from './configurations/test_data/test_data_view.json';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
+import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 
@@ -280,10 +275,10 @@ export const mockUseValuesList = (
 export const mockUxSeries = {
   name: 'performance-distribution',
   dataType: 'ux',
-  breakdown: ATTR_USER_AGENT_NAME,
+  breakdown: 'user_agent.name',
   time: { from: 'now-15m', to: 'now' },
-  reportDefinitions: { [ATTR_SERVICE_NAME]: ['elastic-co'] },
-  selectedMetricField: ATTR_TRANSACTION_DURATION_US,
+  reportDefinitions: { 'service.name': ['elastic-co'] },
+  selectedMetricField: TRANSACTION_DURATION,
 } as SeriesUrl;
 
 function mockSeriesStorageContext({
@@ -297,7 +292,7 @@ function mockSeriesStorageContext({
 }) {
   const testSeries = {
     ...mockUxSeries,
-    breakdown: breakdown || ATTR_USER_AGENT_NAME,
+    breakdown: breakdown || 'user_agent.name',
     ...(filters ? { filters } : {}),
   };
 
@@ -377,7 +372,7 @@ export const mockDataView = createStubDataView({
   spec: {
     id: 'apm-*',
     title: 'apm-*',
-    timeFieldName: ATTR_TIMESTAMP,
+    timeFieldName: '@timestamp',
     fields: JSON.parse(dataViewData.attributes.fields),
     fieldFormats: fieldFormatMap,
   },

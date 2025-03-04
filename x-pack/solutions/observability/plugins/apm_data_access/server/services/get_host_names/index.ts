@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ATTR_HOST_NAME } from '@kbn/observability-ui-semantic-conventions';
+import { HOST_NAME } from '@kbn/apm-types/es_fields';
 import { castArray } from 'lodash';
 import { getBucketSize, type TimeRangeMetadata } from '../../../common';
 import { getPreferredBucketSizeAndDataSource } from '../../../common/utils/get_preferred_bucket_size_and_data_source';
@@ -53,7 +53,7 @@ export function createGetHostNames({ apmEventClient }: ApmDataAccessServicesPara
       aggs: {
         hostNames: {
           terms: {
-            field: ATTR_HOST_NAME,
+            field: HOST_NAME,
             size: Math.min(size, MAX_SIZE),
             order: {
               _key: 'asc',

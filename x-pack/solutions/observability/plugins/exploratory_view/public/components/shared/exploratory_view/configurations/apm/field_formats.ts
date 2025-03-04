@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { FieldFormat } from '../../types';
 import {
-  ATTR_TRANSACTION_DURATION_US,
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
-} from '@kbn/observability-ui-semantic-conventions';
-import { FieldFormat } from '../../types';
+  TRANSACTION_DURATION,
+} from '../constants/elasticsearch_fieldnames';
 
 export const apmFieldFormats: FieldFormat[] = [
   {
-    field: ATTR_TRANSACTION_DURATION_US,
+    field: TRANSACTION_DURATION,
     format: {
       id: 'duration',
       params: {

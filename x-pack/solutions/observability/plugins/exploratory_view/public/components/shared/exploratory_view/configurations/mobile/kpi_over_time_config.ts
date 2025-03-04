@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-import {
-  ATTR_AGENT_NAME,
-  ATTR_PROCESSOR_EVENT,
-  ATTR_SERVICE_ENVIRONMENT,
-  ATTR_SERVICE_NAME,
-  ATTR_TIMESTAMP,
-  ATTR_TRANSACTION_DURATION_US,
-  METRIC_SYSTEM_CPU_USAGE,
-  METRIC_SYSTEM_MEMORY_USAGE,
-  PROCESSOR_EVENT_VALUE_METRIC,
-  PROCESSOR_EVENT_VALUE_TRANSACTION,
-} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -27,6 +15,14 @@ import {
   ReportTypes,
 } from '../constants';
 import { buildPhrasesFilter } from '../utils';
+import {
+  METRIC_SYSTEM_CPU_USAGE,
+  METRIC_SYSTEM_MEMORY_USAGE,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
+} from '../constants/elasticsearch_fieldnames';
 import {
   CPU_USAGE,
   SYSTEM_MEMORY_USAGE,
@@ -42,7 +38,7 @@ export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar', 'area'],
     xAxisColumn: {
-      sourceField: ATTR_TIMESTAMP,
+      sourceField: '@timestamp',
     },
     yAxisColumns: [
       {
@@ -54,22 +50,22 @@ export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {
     filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhrasesFilter(ATTR_AGENT_NAME, ['iOS/swift', 'open-telemetry/swift'], dataView),
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], dataView),
     ],
     labels: {
       ...FieldLabels,
       ...MobileFields,
-      [ATTR_TRANSACTION_DURATION_US]: RESPONSE_LATENCY,
-      [ATTR_SERVICE_NAME]: MOBILE_APP,
+      [TRANSACTION_DURATION]: RESPONSE_LATENCY,
+      [SERVICE_NAME]: MOBILE_APP,
       [METRIC_SYSTEM_MEMORY_USAGE]: SYSTEM_MEMORY_USAGE,
       [METRIC_SYSTEM_CPU_USAGE]: CPU_USAGE,
     },
-    definitionFields: [ATTR_SERVICE_NAME, ATTR_SERVICE_ENVIRONMENT],
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
       {
         label: RESPONSE_LATENCY,
-        field: ATTR_TRANSACTION_DURATION_US,
-        id: ATTR_TRANSACTION_DURATION_US,
+        field: TRANSACTION_DURATION,
+        id: TRANSACTION_DURATION,
         columnType: OPERATION_COLUMN,
       },
       {
@@ -79,7 +75,7 @@ export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION}`,
+            query: `${PROCESSOR_EVENT}: transaction`,
           },
         ],
         timeScale: 'm',
@@ -92,7 +88,7 @@ export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_METRIC}`,
+            query: `${PROCESSOR_EVENT}: metric`,
           },
         ],
       },
@@ -104,7 +100,7 @@ export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_METRIC}`,
+            query: `${PROCESSOR_EVENT}: metric`,
           },
         ],
       },

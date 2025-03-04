@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ATTR_SERVICE_NAME } from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -15,6 +14,7 @@ import {
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
+import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
@@ -42,9 +42,9 @@ export function getMobileDeviceDistributionConfig({ dataView }: ConfigProps): Se
     labels: {
       ...FieldLabels,
       ...MobileFields,
-      [ATTR_SERVICE_NAME]: MOBILE_APP,
+      [SERVICE_NAME]: MOBILE_APP,
     },
-    definitionFields: [ATTR_SERVICE_NAME],
+    definitionFields: [SERVICE_NAME],
     metricOptions: [
       {
         field: 'labels.device_id',

@@ -6,25 +6,6 @@
  */
 
 import { euiPaletteForStatus } from '@elastic/eui';
-import {
-  ATTR_CLIENT_GEO_COUNTRY_NAME,
-  ATTR_NUMERIC_LABELS_INP_VALUE,
-  ATTR_PROCESSOR_EVENT,
-  ATTR_SERVICE_ENVIRONMENT,
-  ATTR_SERVICE_NAME,
-  ATTR_TRANSACTION_EXPERIENCE_CLS,
-  ATTR_TRANSACTION_EXPERIENCE_FID,
-  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
-  ATTR_TRANSACTION_TYPE,
-  ATTR_TRANSACTION_URL,
-  ATTR_URL_FULL,
-  ATTR_USER_AGENT_DEVICE_NAME,
-  ATTR_USER_AGENT_NAME,
-  ATTR_USER_AGENT_OS_NAME,
-  ATTR_USER_AGENT_OS_VERSION,
-  ATTR_USER_AGENT_VERSION,
-  PROCESSOR_EVENT_VALUE_TRANSACTION,
-} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -35,6 +16,24 @@ import {
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
 import { buildPhraseFilter, buildPhrasesFilter } from '../utils';
+import {
+  CLIENT_GEO_COUNTRY_NAME,
+  CLS_FIELD,
+  INP_FIELD,
+  LCP_FIELD,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  USER_AGENT_DEVICE,
+  USER_AGENT_NAME,
+  USER_AGENT_OS,
+  USER_AGENT_VERSION,
+  TRANSACTION_URL,
+  USER_AGENT_OS_VERSION,
+  URL_FULL,
+  SERVICE_ENVIRONMENT,
+  FID_FIELD,
+} from '../constants/elasticsearch_fieldnames';
 import { CLS_LABEL, FID_LABEL, INP_LABEL, LCP_LABEL } from '../constants/labels';
 
 export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig {
@@ -64,110 +63,110 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
     hasOperationType: false,
     filterFields: [
       {
-        field: ATTR_TRANSACTION_URL,
+        field: TRANSACTION_URL,
         isNegated: false,
       },
-      ATTR_SERVICE_NAME,
+      SERVICE_NAME,
       {
-        field: ATTR_USER_AGENT_OS_NAME,
-        nested: ATTR_USER_AGENT_OS_VERSION,
+        field: USER_AGENT_OS,
+        nested: USER_AGENT_OS_VERSION,
       },
-      ATTR_CLIENT_GEO_COUNTRY_NAME,
-      ATTR_USER_AGENT_DEVICE_NAME,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
       {
-        field: ATTR_USER_AGENT_NAME,
-        nested: ATTR_USER_AGENT_VERSION,
+        field: USER_AGENT_NAME,
+        nested: USER_AGENT_VERSION,
       },
       LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [
-      ATTR_SERVICE_NAME,
-      ATTR_USER_AGENT_NAME,
-      ATTR_USER_AGENT_OS_NAME,
-      ATTR_CLIENT_GEO_COUNTRY_NAME,
-      ATTR_USER_AGENT_DEVICE_NAME,
-      ATTR_URL_FULL,
+      SERVICE_NAME,
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      URL_FULL,
     ],
     baseFilters: [
-      ...buildPhrasesFilter(ATTR_TRANSACTION_TYPE, ['page-load', 'page-exit'], dataView),
-      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, PROCESSOR_EVENT_VALUE_TRANSACTION, dataView),
+      ...buildPhrasesFilter(TRANSACTION_TYPE, ['page-load', 'page-exit'], dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
-    labels: { ...FieldLabels, [ATTR_SERVICE_NAME]: 'Web Application' },
-    definitionFields: [ATTR_SERVICE_NAME, ATTR_SERVICE_ENVIRONMENT],
+    labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
       {
-        id: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+        id: LCP_FIELD,
         label: LCP_LABEL,
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} < 2500`,
+            query: `${LCP_FIELD} < 2500`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} > 2500 and ${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} < 4000`,
+            query: `${LCP_FIELD} > 2500 and ${LCP_FIELD} < 4000`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} > 4000`,
+            query: `${LCP_FIELD} > 4000`,
           },
         ],
       },
       {
         label: INP_LABEL,
-        id: ATTR_NUMERIC_LABELS_INP_VALUE,
+        id: INP_FIELD,
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_NUMERIC_LABELS_INP_VALUE} < 200`,
+            query: `${INP_FIELD} < 200`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_NUMERIC_LABELS_INP_VALUE} > 200 and ${ATTR_NUMERIC_LABELS_INP_VALUE} < 500`,
+            query: `${INP_FIELD} > 200 and ${INP_FIELD} < 500`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_NUMERIC_LABELS_INP_VALUE} > 500`,
+            query: `${INP_FIELD} > 500`,
           },
         ],
       },
       {
         label: CLS_LABEL,
-        id: ATTR_TRANSACTION_EXPERIENCE_CLS,
+        id: CLS_FIELD,
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_EXPERIENCE_CLS} < 0.1`,
+            query: `${CLS_FIELD} < 0.1`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_EXPERIENCE_CLS} > 0.1 and ${ATTR_TRANSACTION_EXPERIENCE_CLS} < 0.25`,
+            query: `${CLS_FIELD} > 0.1 and ${CLS_FIELD} < 0.25`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_EXPERIENCE_CLS} > 0.25`,
+            query: `${CLS_FIELD} > 0.25`,
           },
         ],
       },
       {
         label: FID_LABEL,
-        id: ATTR_TRANSACTION_EXPERIENCE_FID,
+        id: FID_FIELD,
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_EXPERIENCE_FID} < 100`,
+            query: `${FID_FIELD} < 100`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_EXPERIENCE_FID} > 100 and ${ATTR_TRANSACTION_EXPERIENCE_FID} < 300`,
+            query: `${FID_FIELD} > 100 and ${FID_FIELD} < 300`,
           },
           {
             language: 'kuery',
-            query: `${ATTR_TRANSACTION_EXPERIENCE_FID} > 300`,
+            query: `${FID_FIELD} > 300`,
           },
         ],
       },
@@ -177,6 +176,6 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
-    query: { query: `${ATTR_TRANSACTION_TYPE}: ("page-load" or "page-exit")`, language: 'kuery' },
+    query: { query: 'transaction.type: ("page-load" or "page-exit")', language: 'kuery' },
   };
 }

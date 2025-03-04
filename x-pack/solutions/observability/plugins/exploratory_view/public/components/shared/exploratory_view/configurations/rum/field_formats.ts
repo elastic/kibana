@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  ATTR_TRANSACTION_DURATION_US,
-  ATTR_TRANSACTION_EXPERIENCE_FID,
-  ATTR_TRANSACTION_EXPERIENCE_TBT,
-  ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
-  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
-  ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
-} from '@kbn/observability-ui-semantic-conventions';
 import { FieldFormat } from '../../types';
+import {
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  TBT_FIELD,
+  TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+} from '../constants/elasticsearch_fieldnames';
 
 export const rumFieldFormats: FieldFormat[] = [
   {
-    field: ATTR_TRANSACTION_DURATION_US,
+    field: TRANSACTION_DURATION,
     format: {
       id: 'duration',
       params: {
@@ -30,7 +30,7 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
-    field: ATTR_TRANSACTION_MARKS_AGENT_FIRST_CONTENTFUL_PAINT,
+    field: FCP_FIELD,
     format: {
       id: 'duration',
       params: {
@@ -42,7 +42,7 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
-    field: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+    field: LCP_FIELD,
     format: {
       id: 'duration',
       params: {
@@ -54,7 +54,7 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
-    field: ATTR_TRANSACTION_EXPERIENCE_TBT,
+    field: TBT_FIELD,
     format: {
       id: 'duration',
       params: {
@@ -66,7 +66,7 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
-    field: ATTR_TRANSACTION_EXPERIENCE_FID,
+    field: FID_FIELD,
     format: {
       id: 'duration',
       params: {
@@ -78,7 +78,7 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
-    field: ATTR_TRANSACTION_EXPERIENCE_FID,
+    field: FID_FIELD,
     format: {
       id: 'duration',
       params: {
@@ -90,7 +90,7 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
-    field: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
+    field: TRANSACTION_TIME_TO_FIRST_BYTE,
     format: {
       id: 'duration',
       params: {
