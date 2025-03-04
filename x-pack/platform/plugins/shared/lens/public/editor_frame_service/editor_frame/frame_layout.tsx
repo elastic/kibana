@@ -188,8 +188,6 @@ const sidebarStyles = (euiThemeContext: UseEuiTheme) => css`
   flex-direction: column;
   position: relative;
   ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-    > .lnsFrameLayout__sidebar {
-      min-height: ${euiThemeContext.euiTheme.size.l} * 15;
-    }
+    min-height: 360px;
   }
 `;

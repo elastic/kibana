@@ -439,6 +439,7 @@ export function App({
     <>
       <div
         data-test-subj="lnsApp"
+        className='lnsApp'
         role="main"
         css={css`
           flex: 1 1 auto;

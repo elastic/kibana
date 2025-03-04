@@ -259,13 +259,14 @@ export function LayerPanels(
     <EuiForm
       className="eui-yScroll"
       css={css`
-        padding: $euiSize $euiSize $euiSizeXL ($euiFormMaxWidth + $euiSize);
-        padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
+        .lnsApp & {
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
           calc(400px + ${euiTheme.size.base});
-        margin-left: -400px;
-        ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-          padding-left: ${euiTheme.size.base};
-          margin-left: 0;
+          margin-left: -400px;
+          ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+            padding-left: ${euiTheme.size.base};
+            margin-left: 0;
+          }
         }
       `}
     >

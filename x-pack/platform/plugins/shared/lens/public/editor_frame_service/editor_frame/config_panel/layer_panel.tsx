@@ -776,7 +776,7 @@ export function LayerPanel(props: LayerPanelProps) {
         isInlineEditing={isInlineEditing}
         handleClose={closeDimensionEditor}
         panel={
-          <div css={dimensionContainerStyles}>
+          <div>
             {openColumnGroup &&
               openColumnId &&
               layerDatasource &&
@@ -863,15 +863,3 @@ export function LayerPanel(props: LayerPanelProps) {
     </>
   );
 }
-
-const dimensionContainerStyles = ({ euiTheme }: UseEuiTheme) => `
-    .lnsIndexPatternDimensionEditor--padded {
-      padding: ${euiTheme.size.base};
-    }
-
-    .lnsIndexPatternDimensionEditor--collapseNext {
-      margin-bottom: -${euiTheme.size.l};
-      border-top: ${euiTheme.border.thin};
-      margin-top: 0 !important;
-    }
-  `;

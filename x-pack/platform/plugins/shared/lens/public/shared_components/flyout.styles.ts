@@ -34,4 +34,12 @@ export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
   align-items: stretch;
   animation: ${flyoutOpenCloseAnimation} ${euiThemeContext.euiTheme.animation.normal}
     ${euiThemeContext.euiTheme.animation.resistance};
+  .lnsIndexPatternDimensionEditor--padded {
+    padding: ${euiThemeContext.euiTheme.size.base};
+  }
+  .lnsIndexPatternDimensionEditor--collapseNext {
+    margin-bottom: -${euiThemeContext.euiTheme.size.l};
+    border-top: ${euiThemeContext.euiTheme.border.thin};
+    margin-top: 0 !important;
+  }
 `;
