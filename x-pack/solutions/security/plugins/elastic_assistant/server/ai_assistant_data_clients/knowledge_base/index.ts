@@ -69,7 +69,6 @@ import {
 import {
   ASSISTANT_ELSER_INFERENCE_ID,
   ELASTICSEARCH_ELSER_INFERENCE_ID,
-  ELSER_MODEL_2,
 } from './field_maps_configuration';
 import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
