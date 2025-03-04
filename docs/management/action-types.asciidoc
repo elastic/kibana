@@ -32,6 +32,7 @@ Actions are instantiations of a connector that are linked to rules and run as ba
 * <<webhook-action-type, {webhook}>>: Send a request to a web service.
 * <<cases-webhook-action-type,{webhook-cm}>>: Send a request to a Case Management web service.
 * <<xmatters-action-type,xMatters>>: Send actionable alerts to on-call xMatters resources.
+* <<xsoar-action-type,XSOAR>>: Create an incident in XSOAR.
 
 [NOTE]
 ==============================================
