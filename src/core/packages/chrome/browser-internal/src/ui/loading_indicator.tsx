@@ -14,7 +14,6 @@ import React from 'react';
 import classNames from 'classnames';
 import type { Subscription } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
-import logoElastic from './logo_elastic.svg';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -87,7 +86,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       />
     ) : (
       <EuiIcon
-        type={logoElastic}
+        type={'logoElastic'}
         size="l"
         data-test-subj={testSubj}
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
