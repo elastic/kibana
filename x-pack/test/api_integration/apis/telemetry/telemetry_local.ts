@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
-      await es.cluster.putSettings({ body: disableCollection });
+      await es.cluster.putSettings(disableCollection);
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest

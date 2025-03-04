@@ -22,7 +22,7 @@ describe('Find user conversations route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindConversationsResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue({
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
       username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',
@@ -91,7 +91,7 @@ describe('Find user conversations route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `sort_field: Invalid enum value. Expected 'created_at' | 'is_default' | 'title' | 'updated_at', received 'name'`
+        `sort_field: Invalid enum value. Expected 'created_at' | 'title' | 'updated_at', received 'name'`
       );
     });
 

@@ -48,22 +48,18 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent1',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date().toISOString(),
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date().toISOString(),
         },
       });
       await es.update({
         id: 'agent2',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
         },
       });
       // 1 agents offline
@@ -71,11 +67,9 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent3',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
         },
       });
       // 1 agents inactive
@@ -83,12 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_id: 'policy-inactivity-timeout',
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
-          },
+        doc: {
+          policy_id: 'policy-inactivity-timeout',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
         },
       });
       // 1 agents inactive through enrolled_at as no last_checkin

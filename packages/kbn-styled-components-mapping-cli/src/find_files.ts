@@ -10,7 +10,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-const SOURCE_DIRS = ['x-pack', 'src', 'packages'];
+const SOURCE_DIRS = ['x-pack', 'src'];
 const SOURCE_FILE_REGEX = /(^.?|\.[^d]|[^.]d|[^.][^d])\.tsx?$/;
 const STYLED_COMPONENTS_IMPORT_REGEX =
   /import\s+(?:{[^{}]+}|.*?)\s*(?:from)?\s*['"](styled-components)['"]/;

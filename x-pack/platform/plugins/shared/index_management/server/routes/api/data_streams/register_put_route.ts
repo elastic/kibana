@@ -55,7 +55,9 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
           const { headers } = await client.asCurrentUser.indices.putDataLifecycle(
             {
               name: dataStreams,
-              data_retention: dataRetention,
+              lifecycle: {
+                data_retention: dataRetention,
+              },
             },
             { meta: true }
           );

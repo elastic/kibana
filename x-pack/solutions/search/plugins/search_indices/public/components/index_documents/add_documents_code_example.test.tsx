@@ -95,7 +95,12 @@ describe('AddDocumentsCodeExample', () => {
     it('pass examples when mapping is default with extra vector fields', () => {
       const indexName = 'test-index';
       const mappingProperties: Record<string, MappingProperty> = {
-        vector: { type: 'dense_vector', dims: 3, similarity: 'extra' },
+        vector: {
+          type: 'dense_vector',
+          dims: 3,
+          // @ts-expect-error `extra` is not a valid MappingDenseVectorSimilarity
+          similarity: 'extra',
+        },
         text: { type: 'text' },
       };
 
