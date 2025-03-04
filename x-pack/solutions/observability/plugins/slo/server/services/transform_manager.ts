@@ -47,7 +47,7 @@ export class DefaultTransformManager implements TransformManager {
         }
       );
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot create SLO transform for indicator type [${slo.indicator.type}]. ${err}`
       );
       if (err.meta?.body?.error?.type === 'security_exception') {
@@ -80,7 +80,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot preview SLO transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot preview SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -97,7 +97,7 @@ export class DefaultTransformManager implements TransformManager {
       );
       await this.scheduleNowTransform(transformId);
     } catch (err) {
-      this.logger.error(`Cannot start SLO transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot start SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -113,7 +113,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot stop SLO transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot stop SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -129,7 +129,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot delete SLO transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot delete SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -146,7 +146,7 @@ export class DefaultTransformManager implements TransformManager {
       );
       return response?.transforms[0]?._meta?.version;
     } catch (err) {
-      this.logger.error(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -158,7 +158,7 @@ export class DefaultTransformManager implements TransformManager {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
       })
       .catch((e) => {
-        this.logger.error(`Cannot schedule now SLO transform [${transformId}]. ${e}`);
+        this.logger.debug(`Cannot schedule now SLO transform [${transformId}]. ${e}`);
       });
   }
 }
