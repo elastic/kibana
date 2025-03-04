@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const TIMELINE_CONVERSATION_TITLE = i18n.translate(
-  'xpack.securitySolution.assistant.conversations.timelineConversationTitle',
-  {
-    defaultMessage: 'Timeline',
-  }
-);
+jest.mock('@kbn/mapbox-gl', () => ({}));

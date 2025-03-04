@@ -740,7 +740,25 @@
             "label": "mbFeature",
             "description": [],
             "signature": [
-              "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
+              "GeoJSONFeature & { layer: (Omit<",
+              "FillLayerSpecification",
+              ", \"source\"> | Omit<",
+              "LineLayerSpecification",
+              ", \"source\"> | Omit<",
+              "SymbolLayerSpecification",
+              ", \"source\"> | Omit<",
+              "CircleLayerSpecification",
+              ", \"source\"> | Omit<",
+              "HeatmapLayerSpecification",
+              ", \"source\"> | Omit<",
+              "FillExtrusionLayerSpecification",
+              ", \"source\"> | Omit<",
+              "RasterLayerSpecification",
+              ", \"source\"> | Omit<",
+              "HillshadeLayerSpecification",
+              ", \"source\"> | Omit<",
+              "BackgroundLayerSpecification",
+              ", \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -1290,7 +1308,9 @@
             "label": "isSourceStale",
             "description": [],
             "signature": [
-              "(mbSource: maplibregl.RasterTileSource, sourceData: ",
+              "(mbSource: ",
+              "RasterTileSource",
+              ", sourceData: ",
               "RasterTileSourceData",
               ") => boolean"
             ],
@@ -1306,7 +1326,7 @@
                 "label": "mbSource",
                 "description": [],
                 "signature": [
-                  "maplibregl.RasterTileSource"
+                  "RasterTileSource"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
