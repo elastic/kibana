@@ -20,7 +20,7 @@ export interface UseGetScopedSourcererDataViewArgs {
  * selected data view.
  */
 export const useFullDataView = ({
-  dataViewManagerScope: dataViewManagerScope,
+  dataViewManagerScope,
 }: UseGetScopedSourcererDataViewArgs): DataView | undefined => {
   const {
     services: { fieldFormats },
