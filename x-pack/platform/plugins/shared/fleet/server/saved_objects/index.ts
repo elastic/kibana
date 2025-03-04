@@ -1129,12 +1129,23 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           source_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
           host: { type: 'keyword' },
           proxy_id: { type: 'keyword' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
         },
       },
     },
@@ -1296,5 +1307,9 @@ export function registerEncryptedSavedObjects(
     attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
+  });
+  encryptedSavedObjects.registerType({
+    type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
   });
 }

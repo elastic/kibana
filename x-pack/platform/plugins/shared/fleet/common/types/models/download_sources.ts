@@ -5,11 +5,23 @@
  * 2.0.
  */
 
+import type { SOSecret } from './secret';
+
 export interface DownloadSourceBase {
   name: string;
   host: string;
   is_default: boolean;
   proxy_id?: string | null;
+  ssl?: {
+    certificate_authorities?: string[];
+    certificate?: string;
+    key?: string;
+  };
+  secrets?: {
+    ssl?: {
+      key?: SOSecret;
+    };
+  };
 }
 
 export type DownloadSource = DownloadSourceBase & {

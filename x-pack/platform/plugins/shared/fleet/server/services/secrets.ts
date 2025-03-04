@@ -17,6 +17,8 @@ import type {
   NewFleetServerHost,
   NewRemoteElasticsearchOutput,
   Output,
+  DownloadSource,
+  DownloadSourceBase,
 } from '../../common/types';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
@@ -1024,4 +1026,81 @@ export function getFleetServerHostsSecretReferences(
   }
 
   return secretPaths;
+}
+
+// Download sources functions
+function getDownloadSourcesSecretPaths(
+  downloadSource: DownloadSource | Partial<DownloadSource>
+): SOSecretPath[] {
+  const secretPaths: SOSecretPath[] = [];
+
+  if (downloadSource?.secrets?.ssl?.key) {
+    secretPaths.push({
+      path: 'secrets.ssl.key',
+      value: downloadSource.secrets.ssl.key,
+    });
+  }
+  return secretPaths;
+}
+
+export async function extractAndWriteDownloadSourcesSecrets(opts: {
+  downloadSource: DownloadSourceBase;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{ downloadSource: DownloadSourceBase; secretReferences: PolicySecretReference[] }> {
+  const { downloadSource, esClient, secretHashes = {} } = opts;
+
+  const secretPaths = getFleetServerHostsSecretPaths(downloadSource).filter(
+    (path) => typeof path.value === 'string'
+  );
+  const secretRes = await extractAndWriteSOSecrets<DownloadSourceBase>({
+    soObject: downloadSource,
+    secretPaths,
+    esClient,
+    secretHashes,
+  });
+  return {
+    downloadSource: secretRes.soObjectWithSecrets,
+    secretReferences: secretRes.secretReferences,
+  };
+}
+
+export async function extractAndUpdateDownloadSourceSecrets(opts: {
+  oldDownloadSource: DownloadSourceBase;
+  downloadSourceUpdate: Partial<DownloadSourceBase>;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{
+  downloadSourceUpdate: Partial<DownloadSourceBase>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldDownloadSource, downloadSourceUpdate, esClient, secretHashes } = opts;
+  const oldSecretPaths = getDownloadSourcesSecretPaths(oldDownloadSource);
+  const updatedSecretPaths = getDownloadSourcesSecretPaths(downloadSourceUpdate);
+  const secretsRes = await extractAndUpdateSOSecrets<DownloadSourceBase>({
+    updatedSoObject: downloadSourceUpdate,
+    oldSecretPaths,
+    updatedSecretPaths,
+    esClient,
+    secretHashes,
+  });
+  return {
+    downloadSourceUpdate: secretsRes.updatedSoObject,
+    secretReferences: secretsRes.secretReferences,
+    secretsToDelete: secretsRes.secretsToDelete,
+  };
+}
+
+export async function deleteDownloadSourceSecrets(opts: {
+  downloadSource: DownloadSourceBase;
+  esClient: ElasticsearchClient;
+}): Promise<void> {
+  const { downloadSource, esClient } = opts;
+
+  const secretPaths = getDownloadSourcesSecretPaths(downloadSource).filter(
+    (path) => typeof path.value === 'string'
+  );
+
+  await deleteSOSecrets(esClient, secretPaths);
 }

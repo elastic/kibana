@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -140,6 +140,9 @@ describe('Download Service', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest
+      .mocked(appContextService.getExperimentalFeatures)
+      .mockReturnValue({ useSpaceAwareness: true } as any);
   });
   afterEach(() => {
     mockedAgentPolicyService.list.mockClear();
@@ -147,12 +150,15 @@ describe('Download Service', () => {
     mockedAgentPolicyService.removeDefaultSourceFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
   });
+  const esClient = elasticsearchServiceMock.createInternalClient();
+
   describe('create', () => {
     it('work with a predefined id', async () => {
       const soClient = getMockedSoClient();
 
       await downloadSourceService.create(
         soClient,
+        esClient,
         {
           host: 'http://test.co',
           is_default: false,
@@ -175,6 +181,7 @@ describe('Download Service', () => {
 
       await downloadSourceService.create(
         soClient,
+        esClient,
         {
           is_default: true,
           name: 'Test',
@@ -191,7 +198,7 @@ describe('Download Service', () => {
         defaultDownloadSourceId: 'existing-default-download-source',
       });
 
-      await downloadSourceService.create(soClient, {
+      await downloadSourceService.create(soClient, esClient, {
         is_default: true,
         name: 'New default host',
         host: 'http://test.co',
@@ -212,7 +219,7 @@ describe('Download Service', () => {
         defaultDownloadSourceId: 'existing-default-download-source',
       });
 
-      await downloadSourceService.update(soClient, 'download-source-test', {
+      await downloadSourceService.update(soClient, esClient, 'download-source-test', {
         is_default: true,
         name: 'New default',
         host: 'http://test.co',
@@ -237,7 +244,7 @@ describe('Download Service', () => {
         defaultDownloadSourceId: 'existing-default-download-source',
       });
 
-      await downloadSourceService.update(soClient, 'existing-default-download-source', {
+      await downloadSourceService.update(soClient, esClient, 'existing-default-download-source', {
         is_default: true,
         name: 'Test',
         host: 'http://test.co',
