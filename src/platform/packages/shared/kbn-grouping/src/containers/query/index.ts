@@ -9,7 +9,7 @@
 
 import { getEmptyValue } from './helpers';
 import { GroupingAggregation, ParsedGroupingAggregation } from '../..';
-import type { GroupingQueryArgs, GroupingQuery } from './types';
+import type { GroupingQueryArgs, BoolAgg, RangeAgg, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 
@@ -36,9 +36,28 @@ export const MAX_QUERY_SIZE = 10000;
  * @returns query dsl {@link GroupingQuery}
  */
 
+const applyFilters = (
+  additionalFilters: GroupingQueryArgs['additionalFilters'],
+  timeRange: GroupingQueryArgs['timeRange']
+) => {
+  const filters: Array<BoolAgg | RangeAgg> = [...additionalFilters];
+
+  if (timeRange) {
+    filters.push({
+      range: {
+        '@timestamp': {
+          gte: timeRange.from,
+          lte: timeRange.to,
+        },
+      },
+    });
+  }
+
+  return filters;
+};
+
 export const getGroupingQuery = ({
   additionalFilters = [],
-  from,
   groupByField,
   pageNumber,
   rootAggregations,
@@ -46,8 +65,8 @@ export const getGroupingQuery = ({
   size = DEFAULT_GROUP_BY_FIELD_SIZE,
   sort,
   statsAggregations,
-  to,
   uniqueValue,
+  timeRange,
 }: GroupingQueryArgs): GroupingQuery => ({
   size: 0,
   runtime_mappings: {
@@ -102,17 +121,7 @@ export const getGroupingQuery = ({
   },
   query: {
     bool: {
-      filter: [
-        ...additionalFilters,
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
+      filter: applyFilters(additionalFilters, timeRange),
     },
   },
   _source: false,
