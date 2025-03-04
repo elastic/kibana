@@ -26,7 +26,7 @@ export const RuleGapsCallout = () => {
 
   return (
     <>
-      <EuiCallOut color="danger" title={i18n.RULE_GAPS_CALLOUT_TITLE} iconType="warning">
+      <EuiCallOut color="warning" title={i18n.RULE_GAPS_CALLOUT_TITLE} iconType="warning">
         <p>{i18n.RULE_GAPS_CALLOUT_MESSAGE}</p>
       </EuiCallOut>
       <EuiSpacer size="s" />
