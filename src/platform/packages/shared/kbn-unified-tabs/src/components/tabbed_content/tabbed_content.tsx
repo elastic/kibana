@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
+import { getTabMenuActions } from '../../utils/get_tab_menu_actions';
 import { TabItem } from '../../types';
 
 export interface TabbedContentProps {
@@ -93,6 +94,14 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     });
   }, [changeState, createItem]);
 
+  const getTabMenuItems = useMemo(() => {
+    return getTabMenuActions({
+      onDuplicate: (item) => alert(`Duplicate ${item.id}`),
+      onCloseOtherTabs: (item) => alert(`Close other tabs ${item.id}`),
+      onCloseTabsToTheRight: (item) => alert(`Close tabs to the right ${item.id}`),
+    });
+  }, []);
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -105,6 +114,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           items={items}
           selectedItem={selectedItem}
           tabContentId={tabContentId}
+          getTabMenuItems={getTabMenuItems}
           onAdd={onAdd}
           onSelect={onSelect}
           onClose={onClose}

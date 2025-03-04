@@ -11,22 +11,23 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { Tab } from '../tab';
+import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
 
-export interface TabsBarProps {
+export type TabsBarProps = Pick<
+  TabProps,
+  'getTabMenuItems' | 'onSelect' | 'onClose' | 'tabContentId'
+> & {
   items: TabItem[];
   selectedItem: TabItem | null;
-  tabContentId: string;
   onAdd: () => void;
-  onSelect: (item: TabItem) => void;
-  onClose: (item: TabItem) => void;
-}
+};
 
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
   tabContentId,
+  getTabMenuItems,
   onAdd,
   onSelect,
   onClose,
@@ -56,6 +57,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
             item={item}
             isSelected={selectedItem?.id === item.id}
             tabContentId={tabContentId}
+            getTabMenuItems={getTabMenuItems}
             onSelect={onSelect}
             onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
           />

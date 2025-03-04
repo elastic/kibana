@@ -18,18 +18,27 @@ import {
   EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
+import { TabMenu } from '../tab_menu';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type { TabItem } from '../../types';
+import type { TabItem, GetTabMenuItems } from '../../types';
 
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
   tabContentId: string;
+  getTabMenuItems?: GetTabMenuItems;
   onSelect: (item: TabItem) => void;
   onClose: ((item: TabItem) => void) | undefined;
 }
 
-export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSelect, onClose }) => {
+export const Tab: React.FC<TabProps> = ({
+  item,
+  isSelected,
+  tabContentId,
+  getTabMenuItems,
+  onSelect,
+  onClose,
+}) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>();
 
@@ -91,18 +100,27 @@ export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSele
           {item.label}
         </EuiText>
       </button>
-      {Boolean(onClose) && (
-        <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-          <EuiButtonIcon
-            aria-label={closeButtonLabel}
-            title={closeButtonLabel}
-            color="text"
-            data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
-            iconType="cross"
-            onClick={onCloseEvent}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false} className="unifiedTabs__tabActions">
+        <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
+          {!!getTabMenuItems && (
+            <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
+              <TabMenu item={item} getTabMenuItems={getTabMenuItems} />
+            </EuiFlexItem>
+          )}
+          {!!onClose && (
+            <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
+              <EuiButtonIcon
+                aria-label={closeButtonLabel}
+                title={closeButtonLabel}
+                color="text"
+                data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
+                iconType="cross"
+                onClick={onCloseEvent}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -115,8 +133,7 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
     border-right: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.lightShade};
     height: ${euiTheme.size.xl};
-    padding-left: ${euiTheme.size.m};
-    padding-right: ${euiTheme.size.xs};
+    padding-inline: ${euiTheme.size.xs};
     min-width: 96px;
     max-width: 280px;
 
@@ -124,13 +141,14 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
     color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
     transition: background-color ${euiTheme.animation.fast};
 
-    .unifiedTabs__closeTabBtn {
+    .unifiedTabs__tabActions {
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
     }
 
-    &:hover {
-      .unifiedTabs__closeTabBtn {
+    &:hover,
+    &:focus-within {
+      .unifiedTabs__tabActions {
         opacity: 1;
       }
     }
@@ -153,9 +171,10 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
 function getTabButtonCss(euiTheme: EuiThemeComputed) {
   return css`
     width: 100%;
+    min-height: 100%;
     min-width: 0;
     flex-grow: 1;
-    padding-right: ${euiTheme.size.xs};
+    padding-inline: ${euiTheme.size.xs};
     text-align: left;
     color: inherit;
     border: none;
