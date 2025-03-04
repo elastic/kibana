@@ -1573,6 +1573,11 @@ describe('The custom threshold alert type', () => {
                 value: 'a',
               },
             ],
+            grouping: {
+              host: {
+                name: 'a',
+              },
+            },
             host: {
               name: 'a',
             },

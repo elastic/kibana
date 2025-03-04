@@ -235,6 +235,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             errorGroupingName: 'a php error',
             threshold: '1',
             triggerValue: '30',
+            grouping: {
+              service: { name: 'opbeans-php', environment: 'production' },
+              transaction: { name: 'tx-php' },
+              error: {
+                grouping_key: '000000000000000000000a php error',
+                grouping_name: 'a php error',
+              },
+            },
           });
 
           const url = new URL(phpEntry.viewInAppUrl);
