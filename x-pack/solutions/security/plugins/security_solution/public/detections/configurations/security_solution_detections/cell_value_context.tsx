@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
@@ -49,14 +49,17 @@ export const AlertTableCellContextProvider = ({
     return viewMode === VIEW_SELECTION.gridView ? gridColumns : eventRenderedViewColumns;
   }, [gridColumns, viewMode]);
 
-  const [commonCellValueContext] = useState<AlertTableCellContextProps>({
-    browserFields,
-    browserFieldsByName,
-    columnHeaders,
-  });
+  const cellValueContext = useMemo<AlertTableCellContextProps>(
+    () => ({
+      browserFields,
+      browserFieldsByName,
+      columnHeaders,
+    }),
+    [browserFields, browserFieldsByName, columnHeaders]
+  );
 
   return (
-    <AlertTableCellContext.Provider value={commonCellValueContext}>
+    <AlertTableCellContext.Provider value={cellValueContext}>
       {children}
     </AlertTableCellContext.Provider>
   );

@@ -446,11 +446,6 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [count, isEventRenderedView]
   );
 
-  const alertTableId = useMemo(
-    () => id ?? `detection-engine-alert-table-${tableType}-${tableView}`,
-    [id, tableType, tableView]
-  );
-
   if (isLoading) {
     return null;
   }
@@ -462,13 +457,13 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           <EuiDataGridContainer hideLastPage={false}>
             <AlertTableCellContextProvider
-              tableId={alertTableId}
+              tableId={tableType}
               sourcererScope={SourcererScopeName.detections}
             >
               <AlertsTable<SecurityAlertsTableContext>
                 ref={alertsTableRef}
                 // Stores separate configuration based on the view of the table
-                id={alertTableId}
+                id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
                 ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
                 consumers={ALERT_TABLE_CONSUMERS}
                 query={finalBoolQuery}

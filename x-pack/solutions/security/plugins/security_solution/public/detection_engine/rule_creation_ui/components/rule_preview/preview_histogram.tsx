@@ -143,7 +143,10 @@ const PreviewHistogramComponent = ({
   }, [config, indexPattern, previewId]);
 
   return (
-    <AlertTableCellContextProvider sourcererScope={SourcererScopeName.detections}>
+    <AlertTableCellContextProvider
+      tableId={TableId.rulePreview}
+      sourcererScope={SourcererScopeName.detections}
+    >
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
