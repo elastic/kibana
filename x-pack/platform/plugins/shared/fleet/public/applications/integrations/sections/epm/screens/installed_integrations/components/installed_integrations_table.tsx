@@ -27,7 +27,7 @@ import type { PackageListItemWithExtra } from '../types';
 import { InstallationStatus } from './installation_status';
 
 /**
- * Wrapper to display a tooltip if
+ * Wrapper to display a tooltip if element is disabled (i.e. due to insufficient permissions)
  */
 const DisabledWrapperTooltip: React.FunctionComponent<{
   children: React.ReactElement;
