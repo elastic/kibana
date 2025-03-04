@@ -15,6 +15,8 @@ import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common/types';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -303,6 +305,11 @@ export const AwsCredentialsFormAgentless = ({
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
 
+  const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
+  // Todo: Remove feature flag cloudConnectorsEnabled  before release.
+  // Feature flag to detect if serverless project or deployment was created on AWS cluster
+  const showCloudConnectors = cloud?.csp === 'aws' && !!cloudConnectorRemoteRoleTemplate;
+
   return (
     <>
       <AWSSetupInfoContent
@@ -329,20 +336,24 @@ export const AwsCredentialsFormAgentless = ({
           defaultMessage: 'Preferred method',
         })}
         type={awsCredentialsType}
-        options={getAwsCredentialsFormAgentlessOptions(true)}
+        options={getAwsCredentialsFormAgentlessOptions(showCloudConnectors)}
         disabled={!!isEditPage && awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE}
         onChange={(optionId) => {
           const supportsCloudConnector =
             setupTechnology === SetupTechnology.AGENTLESS &&
-            optionId === AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
-              'aws.credentials.type': { value: optionId },
-              'aws.supports_cloud_connectors': {
-                value: supportsCloudConnector,
-              },
-            })
-          );
+            optionId === AWS_CREDENTIALS_TYPE.ASSUME_ROLE &&
+            showCloudConnectors;
+          const credentialType: Record<string, PackagePolicyConfigRecordEntry> = showCloudConnectors
+            ? {
+                'aws.credentials.type': { value: optionId },
+                'aws.supports_cloud_connectors': {
+                  value: supportsCloudConnector,
+                },
+              }
+            : {
+                'aws.credentials.type': { value: optionId },
+              };
+          updatePolicy(getPosturePolicy(newPolicy, input.type, credentialType));
         }}
       />
       <EuiSpacer size="m" />

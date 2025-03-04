@@ -121,14 +121,14 @@ export const getAwsCredentialsFormManualOptions = (): AwsCredentialsTypeOptions 
   );
 
 export const getAwsCredentialsFormAgentlessOptions = (
-  isAgentless: boolean
+  showCloudConnectors: boolean
 ): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(
     ({ value }) =>
       value === AWS_CREDENTIALS_TYPE.ASSUME_ROLE ||
       value === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
       value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS,
-    isAgentless
+    showCloudConnectors
   );
 
 export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
@@ -136,9 +136,9 @@ export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.AS
   AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
 export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
 
-export const getAwsCredentialsFormOptions = (isAgentless = false): AwsOptions => ({
+export const getAwsCredentialsFormOptions = (showCloudConnectors = false): AwsOptions => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
-    label: isAgentless
+    label: showCloudConnectors
       ? i18n.translate('xpack.csp.awsIntegration.cloudConnectorsRoleLabel', {
           defaultMessage: 'Cloud Connectors (recommended)',
         })
