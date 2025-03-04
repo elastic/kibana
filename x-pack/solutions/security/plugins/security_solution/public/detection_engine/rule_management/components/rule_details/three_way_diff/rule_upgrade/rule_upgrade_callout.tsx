@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { ActionRequiredBadge } from '../badges/action_required';
 import { ReviewRequiredBadge } from '../badges/review_required_badge';
 import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
@@ -15,30 +15,15 @@ import * as i18n from './translations';
 interface RuleUpgradeCalloutProps {
   numOfSolvableConflicts: number;
   numOfNonSolvableConflicts: number;
-  hasBaseVersion: boolean;
 }
 
 export function RuleUpgradeCallout({
   numOfSolvableConflicts,
   numOfNonSolvableConflicts,
-  hasBaseVersion,
 }: RuleUpgradeCalloutProps): JSX.Element {
-  let missingBaseVersionCallout: JSX.Element | null = null;
-  if (!hasBaseVersion) {
-    missingBaseVersionCallout = (
-      <>
-        <EuiCallOut color="warning" size="s">
-          <p>{i18n.RULE_BASE_VERSION_IS_MISSING_DESCRIPTION}</p>
-        </EuiCallOut>
-        <EuiSpacer size="s" />
-      </>
-    );
-  }
-
   if (numOfNonSolvableConflicts > 0) {
     return (
       <>
-        {missingBaseVersionCallout}
         <EuiCallOut
           title={
             <>
@@ -66,7 +51,6 @@ export function RuleUpgradeCallout({
   if (numOfSolvableConflicts > 0) {
     return (
       <>
-        {missingBaseVersionCallout}
         <EuiCallOut
           title={
             <>
@@ -92,7 +76,6 @@ export function RuleUpgradeCallout({
 
   return (
     <>
-      {missingBaseVersionCallout}
       <EuiCallOut
         title={
           <>

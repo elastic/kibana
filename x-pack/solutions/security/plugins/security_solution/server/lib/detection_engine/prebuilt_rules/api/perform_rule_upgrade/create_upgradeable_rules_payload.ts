@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
@@ -58,8 +59,7 @@ export const createModifiedPrebuiltRuleAssets = ({
               assertPickVersionIsTarget({ ruleId, requestBody });
             }
 
-            const isRuleCustomized =
-              current.rule_source.type === 'external' && current.rule_source.is_customized === true;
+            const isCustomized = isRuleCustomized(current);
 
             const calculatedRuleDiff = calculateRuleFieldsDiff(
               {
@@ -73,7 +73,7 @@ export const createModifiedPrebuiltRuleAssets = ({
                   convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
                 ),
               },
-              isRuleCustomized
+              isCustomized
             ) as AllFieldsDiff;
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {

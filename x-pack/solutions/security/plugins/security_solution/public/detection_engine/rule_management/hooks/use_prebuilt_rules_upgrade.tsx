@@ -35,13 +35,14 @@ import { RuleTypeChangeCallout } from '../../rule_management_ui/components/rules
 import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
 import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
+import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
 export interface UsePrebuiltRulesUpgradeParams {
-  pagination: {
+  pagination?: {
     page: number;
     perPage: number;
   };
@@ -51,7 +52,7 @@ export interface UsePrebuiltRulesUpgradeParams {
 }
 
 export function usePrebuiltRulesUpgrade({
-  pagination,
+  pagination = { page: 1, perPage: RULES_TABLE_INITIAL_PAGE_SIZE },
   sort,
   filter,
   onUpgrade,

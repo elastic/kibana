@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { SecurityPageName } from '../../../../app/types';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -50,25 +50,22 @@ export const RuleUpdateCallouts = ({
   }, [navigateToUrl, href]);
 
   return (
-    <>
-      <EuiFlexGroup direction="column">
-        {shouldDisplayUpdateRulesCallout && (
-          <MiniCallout
-            iconType={'iInCircle'}
-            data-test-subj="prebuilt-rules-update-callout"
-            title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
-          />
-        )}
-        {shouldDisplayNewRulesCallout && (
-          <MiniCallout
-            color="success"
-            data-test-subj="prebuilt-rules-new-callout"
-            iconType={'iInCircle'}
-            title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
-          />
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
+    <EuiFlexGroup direction="column">
+      {shouldDisplayUpdateRulesCallout && (
+        <MiniCallout
+          iconType={'iInCircle'}
+          data-test-subj="prebuilt-rules-update-callout"
+          title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
+        />
+      )}
+      {shouldDisplayNewRulesCallout && (
+        <MiniCallout
+          color="success"
+          data-test-subj="prebuilt-rules-new-callout"
+          iconType={'iInCircle'}
+          title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
+        />
+      )}
+    </EuiFlexGroup>
   );
 };
