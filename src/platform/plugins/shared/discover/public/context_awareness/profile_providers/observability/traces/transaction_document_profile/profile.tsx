@@ -55,6 +55,5 @@ const getIsTransactionRecord = (record: DataTableRecord) => {
 const isTransactionDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  // Can I expect other things than a plain string for these fields?
   return dataStreamType === 'traces' && processorEvent === 'transaction';
 };
