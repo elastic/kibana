@@ -7,6 +7,7 @@
 
 import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flatten } from 'lodash';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
 export const mocksSource = {
@@ -386,6 +387,13 @@ export const mockBrowserFields: BrowserFields = {
 export const mockIndexFields = flatten(
   Object.values(mockBrowserFields).map((fieldItem) => Object.values(fieldItem.fields ?? {}))
 );
+
+export const mockIndexFieldsByName = mockIndexFields.reduce((acc, indexFieldObj) => {
+  if (indexFieldObj.name) {
+    acc[indexFieldObj.name] = indexFieldObj;
+  }
+  return acc;
+}, {} as { [fieldName: string]: Partial<FieldSpec> });
 
 const runTimeType: MappingRuntimeFieldType = 'keyword' as const;
 
