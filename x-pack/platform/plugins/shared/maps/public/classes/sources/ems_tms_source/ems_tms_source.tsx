@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EmsSpriteSheet } from '@elastic/ems-client';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../util';
@@ -17,6 +18,11 @@ import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+
+export interface SpriteMeta {
+  png: string;
+  json: EmsSpriteSheet;
+}
 
 function getErrorInfo(emsTileLayerId: string) {
   return i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
@@ -145,7 +151,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     return 'ems/' + this.getTileLayerId();
   }
 
-  async getVectorStyleSheetAndSpriteMeta(isRetina: boolean) {
+  async getVectorStyleSheetAndSpriteMeta(
+    isRetina: boolean
+  ): Promise<{ vectorStyleSheet?: unknown; spriteMeta?: SpriteMeta }> {
     const emsTMSService = await this._getEMSTMSService();
     const styleSheet = await emsTMSService.getVectorStyleSheet();
     const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
