@@ -2680,9 +2680,9 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
 
     expect(clusterClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
+
           search_after: ['2021-01-01T00:00:00.000Z'],
-        }),
+
       })
     );
   });
