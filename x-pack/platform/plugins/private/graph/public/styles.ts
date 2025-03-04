@@ -11,5 +11,5 @@ import { css } from '@emotion/react';
 export const gphFieldBadgeSize = ({ euiTheme }: UseEuiTheme) =>
   css({
     height: euiTheme.size.l,
-    lineHeight: `calc(${euiTheme.size.l} - 2px)`,
+    lineHeight: `calc(${euiTheme.size.l} - 2px)`, // Subtract 2 for the border
   });

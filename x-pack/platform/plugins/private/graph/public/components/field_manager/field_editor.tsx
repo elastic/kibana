@@ -59,7 +59,7 @@ export function FieldEditor({
 
   const { color, hopSize, lastValidHopSize, icon, name: fieldName } = currentField;
 
-  const isDisabled = true; // initialField.hopSize === 0;
+  const isDisabled = initialField.hopSize === 0;
 
   // update local field copy if changed from the outside
   useEffect(() => {
