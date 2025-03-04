@@ -13,8 +13,6 @@ import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import {
   ActionTypeModel,
   RuleTypeModel,
@@ -72,22 +70,6 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       return getEditConnectorFlyoutLazy({
         ...props,
         actionTypeRegistry,
-        connectorServices,
-      });
-    },
-    getAddRuleFlyout: (props) => {
-      return getAddRuleFlyoutLazy({
-        ...props,
-        actionTypeRegistry,
-        ruleTypeRegistry,
-        connectorServices,
-      });
-    },
-    getEditRuleFlyout: (props) => {
-      return getEditRuleFlyoutLazy({
-        ...props,
-        actionTypeRegistry,
-        ruleTypeRegistry,
         connectorServices,
       });
     },

@@ -62,6 +62,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -122,6 +123,7 @@ export interface ClientPluginsStart {
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {

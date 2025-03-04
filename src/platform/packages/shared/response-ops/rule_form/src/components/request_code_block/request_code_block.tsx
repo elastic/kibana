@@ -16,11 +16,11 @@ import {
   UpdateRuleBody,
   transformCreateRuleBody,
   transformUpdateRuleBody,
-} from '../common/apis';
-import { BASE_ALERTING_API_PATH } from '../constants';
-import { useRuleFormState } from '../hooks';
-import { SHOW_REQUEST_MODAL_ERROR } from '../translations';
-import { RuleFormData } from '../types';
+} from '../../common/apis';
+import { BASE_ALERTING_API_PATH } from '../../constants';
+import { useRuleFormState } from '../../hooks';
+import { SHOW_REQUEST_MODAL_ERROR } from '../../translations';
+import { RuleFormData } from '../../types';
 
 const stringifyBodyRequest = ({
   formData,
