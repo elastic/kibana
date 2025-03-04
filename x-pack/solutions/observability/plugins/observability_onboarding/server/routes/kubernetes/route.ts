@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
+import { firstValueFrom } from 'rxjs';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -22,6 +23,7 @@ export interface CreateKubernetesOnboardingFlowRouteResponse {
   onboardingId: string;
   elasticsearchUrl: string;
   elasticAgentVersionInfo: ElasticAgentVersionInfo;
+  managedServiceUrl: string;
 }
 
 export interface HasKubernetesDataRouteResponse {
@@ -79,12 +81,16 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
+    const managedServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((config) => {
+      return config.managedServiceUrl;
+    });
 
     return {
       onboardingId: uuidv4(),
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
+      managedServiceUrl,
     };
   },
 });
