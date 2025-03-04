@@ -22,20 +22,21 @@ export interface EsqlTable {
 
 export const performEsqlRequest = async ({
   esClient,
-  requestParams,
+  requestBody,
+  requestQueryParams,
 }: {
   logger?: Logger;
   esClient: ElasticsearchClient;
-  requestParams: Record<string, unknown>;
+  requestBody: Record<string, unknown>;
+  requestQueryParams?: { drop_null_columns?: boolean };
 }): Promise<EsqlTable> => {
   const search = async () => {
     try {
       const rawResponse = await esClient.transport.request<EsqlTable>({
         method: 'POST',
         path: '/_query',
-        body: {
-          ...requestParams,
-        },
+        body: requestBody,
+        querystring: requestQueryParams,
       });
       return {
         rawResponse,

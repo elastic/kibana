@@ -30,13 +30,6 @@ export enum ChatState {
   Aborted = 'aborted',
 }
 
-function getWithSystemMessage(messages: Message[], systemMessage: Message) {
-  return [
-    systemMessage,
-    ...messages.filter((message) => message.message.role !== MessageRole.System),
-  ];
-}
-
 export interface UseChatResult {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
@@ -160,7 +153,8 @@ function useChatWithoutContext({
       const next$ = chatService.complete({
         getScreenContexts: () => service.getScreenContexts(),
         connectorId,
-        messages: getWithSystemMessage(nextMessages, systemMessage),
+        messages: nextMessages,
+        systemMessage,
         persist,
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
@@ -275,8 +269,8 @@ function useChatWithoutContext({
   }, []);
 
   const memoizedMessages = useMemo(() => {
-    return getWithSystemMessage(messages.concat(pendingMessages ?? []), systemMessage);
-  }, [systemMessage, messages, pendingMessages]);
+    return messages.concat(pendingMessages ?? []);
+  }, [messages, pendingMessages]);
 
   const setMessagesWithAbort = useCallback((nextMessages: Message[]) => {
     abortControllerRef.current.abort();

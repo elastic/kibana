@@ -101,6 +101,7 @@ export const DashboardViewport = ({
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
+        'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
       {viewMode !== 'print' ? (

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiSkeletonLoading,
@@ -14,8 +15,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { RulesChangelogLink } from '../rules_changelog_link';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
@@ -43,6 +45,14 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const handleTableChange = useCallback(
+    ({ page: { index } }: CriteriaWithPagination<RuleResponse>) => {
+      setPageIndex(index);
+    },
+    [setPageIndex]
+  );
 
   return (
     <>
@@ -82,6 +92,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 pagination={{
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                  pageIndex,
                 }}
                 selection={{
                   selectable: () => true,
@@ -91,6 +102,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 data-test-subj="add-prebuilt-rules-table"
                 columns={rulesColumns}
+                onTableChange={handleTableChange}
               />
             </>
           )

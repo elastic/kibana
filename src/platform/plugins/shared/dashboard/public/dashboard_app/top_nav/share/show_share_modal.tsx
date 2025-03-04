@@ -245,6 +245,7 @@ export function ShowShareModal({
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },
     },
@@ -266,7 +267,6 @@ export function ShowShareModal({
         component: EmbedUrlParamExtension,
       },
     ],
-    showPublicUrlSwitch,
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,

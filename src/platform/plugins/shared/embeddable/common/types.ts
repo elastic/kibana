@@ -74,19 +74,10 @@ export type EmbeddableInput = {
   executionContext?: KibanaExecutionContext;
 };
 
-export interface PanelState<
-  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
-> {
-  // The type of embeddable in this panel. Will be used to find the factory in which to
-  // load the embeddable.
+export type EmbeddableStateWithType = {
+  enhancements?: SerializableRecord;
   type: string;
-
-  // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
-  // will be derived from the container's input. **State in here will override state derived from the container.**
-  explicitInput: Partial<E> & { id: string };
-}
-
-export type EmbeddableStateWithType = EmbeddableInput & { type: string };
+};
 
 export interface EmbeddableRegistryDefinition<
   P extends EmbeddableStateWithType = EmbeddableStateWithType

@@ -68,3 +68,29 @@ export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat',
 export const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
 export const SERVICE_NAME_FIELDS = ['service.name', 'service_name'];
 export const AGENT_NAME_FIELD = 'agent.name';
+
+export const RESOURCE_FIELDS = [
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.CONTAINER_NAME_FIELD,
+  fieldConstants.HOST_NAME_FIELD,
+  fieldConstants.ORCHESTRATOR_NAMESPACE_FIELD,
+  fieldConstants.CLOUD_INSTANCE_ID_FIELD,
+  fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
+  fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
+  fieldConstants.ORCHESTRATOR_CLUSTER_ID_FIELD,
+  fieldConstants.CONTAINER_ID_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+] as const;
+export const TRACE_FIELDS = [
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.EVENT_OUTCOME_FIELD,
+  fieldConstants.TRANSACTION_NAME_FIELD,
+  fieldConstants.TRANSACTION_DURATION_FIELD,
+  fieldConstants.SPAN_NAME_FIELD,
+  fieldConstants.SPAN_DURATION_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+] as const;
+export const DURATION_FIELDS: readonly string[] = [
+  fieldConstants.SPAN_DURATION_FIELD,
+  fieldConstants.TRANSACTION_DURATION_FIELD,
+];

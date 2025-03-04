@@ -18,6 +18,7 @@ import {
 } from './sensors';
 import { commitAction, moveAction, startAction } from './state_manager_actions';
 import { UserInteractionEvent } from './types';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
@@ -28,15 +29,15 @@ import { UserInteractionEvent } from './types';
 
 export const useGridLayoutEvents = ({
   interactionType,
-  gridLayoutStateManager,
   rowIndex,
   panelId,
 }: {
   interactionType: PanelInteractionEvent['type'];
-  gridLayoutStateManager: GridLayoutStateManager;
   rowIndex: number;
   panelId: string;
 }) => {
+  const { gridLayoutStateManager } = useGridLayoutContext();
+
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
   const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
 

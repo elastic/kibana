@@ -71,7 +71,7 @@ describe('useUserProfileForm', () => {
         "avatarType": "initials",
         "data": Object {
           "avatar": Object {
-            "color": "#D36086",
+            "color": "#61A2FF",
             "imageUrl": "",
             "initials": "fn",
           },

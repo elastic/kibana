@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import type {
   DashboardApi,
   DashboardCreationOptions,
@@ -28,7 +27,9 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<Partial<DashboardContainerInput>>({});
+const initialInput = new BehaviorSubject<
+  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
+>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,

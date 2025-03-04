@@ -40,7 +40,7 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
-import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -87,7 +87,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 
@@ -433,6 +433,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       </EuiFlexItem>
     ) : (
       <RuleStatusFailedCallOut
+        ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
         ruleName={rule?.immutable ? rule?.name : undefined}
         dataSources={rule?.immutable ? ruleIndex : undefined}
         status={lastExecutionStatus}
@@ -503,10 +504,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
-          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
+        <DetectionEngineAlertsTable
+          tableType={TableId.alertsOnRuleDetailsPage}
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
-          tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
         />
       );

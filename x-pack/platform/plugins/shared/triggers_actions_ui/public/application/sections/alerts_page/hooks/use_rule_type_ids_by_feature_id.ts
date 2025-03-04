@@ -8,7 +8,7 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import { mapValues } from 'lodash';
-import { observabilityFeatureIds, stackFeatureIds } from '../../alerts_table/constants';
+import { observabilityFeatureIds, stackFeatureIds } from '@kbn/response-ops-alerts-table/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
 import { RuleTypeIndex } from '../../../../types';
 

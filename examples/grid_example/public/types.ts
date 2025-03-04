@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  CanAddNewPanel,
+  CanExpandPanels,
+  HasSerializedChildState,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
+import { PublishesWritableViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+
 export interface DashboardGridData {
   w: number;
   h: number;
@@ -32,3 +41,12 @@ export interface MockSerializedDashboardState {
   panels: MockedDashboardPanelMap;
   rows: MockedDashboardRowMap;
 }
+
+export type MockDashboardApi = PresentationContainer &
+  CanAddNewPanel &
+  HasSerializedChildState &
+  PublishesWritableViewMode &
+  CanExpandPanels & {
+    panels$: BehaviorSubject<MockedDashboardPanelMap>;
+    rows$: BehaviorSubject<MockedDashboardRowMap>;
+  };

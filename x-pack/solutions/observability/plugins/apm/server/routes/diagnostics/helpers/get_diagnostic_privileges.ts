@@ -25,15 +25,13 @@ export async function getDiagnosticsPrivileges({
 
   const clusterPrivileges = ['manage_index_templates', 'monitor', 'read_pipeline'];
   const { index, cluster } = await esClient.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names: indexPatterns,
-          privileges: ['read'],
-        },
-      ],
-      cluster: clusterPrivileges,
-    },
+    index: [
+      {
+        names: indexPatterns,
+        privileges: ['read'],
+      },
+    ],
+    cluster: clusterPrivileges,
   });
 
   const hasAllIndexPrivileges = Object.values(index).every((indexPrivs) =>

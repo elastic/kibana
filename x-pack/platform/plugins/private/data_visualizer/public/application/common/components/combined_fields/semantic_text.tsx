@@ -27,7 +27,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type {
   InferenceInferenceEndpointInfo,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { createSemanticTextCombinedField, getFieldNames, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';

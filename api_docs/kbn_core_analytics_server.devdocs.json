@@ -659,6 +659,10 @@
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
@@ -813,6 +817,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1021,10 +1029,6 @@
               {
                 "plugin": "securitySolutionServerless",
                 "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
-              },
-              {
-                "plugin": "observabilityLogsExplorer",
-                "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1471,12 +1475,64 @@
                 "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
               },
               {
                 "plugin": "@kbn/core",

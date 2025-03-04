@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -16,14 +16,12 @@ export interface HostPreviewPanelFooterProps {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isDraggable?: boolean;
 }
 
 export const HostPreviewPanelFooter = ({
   contextID,
   scopeId,
   hostName,
-  isDraggable,
 }: HostPreviewPanelFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -35,11 +33,10 @@ export const HostPreviewPanelFooter = ({
           contextID,
           hostName,
           scopeId,
-          isDraggable,
         },
       },
     });
-  }, [openFlyout, hostName, contextID, isDraggable, scopeId]);
+  }, [openFlyout, hostName, contextID, scopeId]);
 
   return (
     <FlyoutFooter data-test-subj={'host-preview-footer'}>

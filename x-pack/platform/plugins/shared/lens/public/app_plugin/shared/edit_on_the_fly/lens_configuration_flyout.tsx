@@ -25,17 +25,14 @@ import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
-import {
-  EXPRESSION_BUILD_ERROR_ID,
-  extractReferencesFromState,
-  getAbsoluteDateRange,
-} from '../../../utils';
+import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
+import { useCurrentAttributes } from './use_current_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -162,43 +159,19 @@ export function LensEditConfigurationFlyout({
 
   const textBasedMode = isOfAggregateQueryType(attributes.state.query);
 
+  const currentAttributes = useCurrentAttributes({
+    textBasedMode,
+    initialAttributes: attributes,
+    datasourceMap,
+    visualizationMap,
+  });
+
   const onApply = useCallback(() => {
     if (visualization.activeId == null) {
       return;
     }
-    const dsStates = Object.fromEntries(
-      Object.entries(datasourceStates).map(([id, ds]) => {
-        const dsState = ds.state;
-        return [id, dsState];
-      })
-    );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode
-      ? extractReferencesFromState({
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
-          ),
-          datasourceStates,
-          visualizationState: visualization.state,
-          activeVisualization,
-        })
-      : [];
-    const attrs: TypedLensSerializedState['attributes'] = {
-      ...attributes,
-      state: {
-        ...attributes.state,
-        visualization: visualization.state,
-        datasourceStates: dsStates,
-      },
-      references,
-      visualizationType: visualization.activeId,
-    };
     if (savedObjectId) {
-      saveByRef?.(attrs);
+      saveByRef?.(currentAttributes);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -215,19 +188,16 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(attrs);
+    onApplyCallback?.(currentAttributes);
     closeFlyout?.();
   }, [
-    textBasedMode,
     visualization.activeId,
     savedObjectId,
     closeFlyout,
     onApplyCallback,
-    datasourceStates,
     visualization.state,
     activeVisualization,
-    attributes,
-    datasourceMap,
+    currentAttributes,
     saveByRef,
     updateByRefInput,
   ]);

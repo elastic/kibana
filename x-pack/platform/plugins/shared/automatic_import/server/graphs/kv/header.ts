@@ -9,7 +9,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
 import { KV_HEADER_PROMPT } from './prompts';
-import { KV_HEADER_EXAMPLE_ANSWER } from './constants';
+import { KV_HEADER_EXAMPLE_ANSWER, KV_HEADER_EXAMPLE_LOGS } from './constants';
 
 export async function handleHeader({
   state,
@@ -23,6 +23,7 @@ export async function handleHeader({
     samples: state.logSamples,
     packageName: state.packageName,
     dataStreamName: state.dataStreamName,
+    example_logs: KV_HEADER_EXAMPLE_LOGS,
     ex_answer: JSON.stringify(KV_HEADER_EXAMPLE_ANSWER, null, 2),
   });
 
