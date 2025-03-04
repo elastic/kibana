@@ -84,6 +84,7 @@ export interface PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
+    keepFailedInstallation?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -120,15 +121,15 @@ export interface PackageClient {
   ): ReturnType<typeof getPackageInfo>;
 
   getPackages(params?: {
-    excludeInstallStatus?: false;
+    excludeInstallStatus?: boolean;
     category?: CategoryId;
-    prerelease?: false;
+    prerelease?: boolean;
   }): Promise<PackageList>;
 
   getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
-    prerelease?: false,
+    prerelease?: boolean,
     ignoreUnverified?: boolean
   ): Promise<string>;
 
@@ -225,10 +226,17 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
+    keepFailedInstallation?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
-    const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = false } = options;
+    const {
+      pkgName,
+      pkgVersion,
+      spaceId = DEFAULT_SPACE_ID,
+      force = false,
+      keepFailedInstallation,
+    } = options;
 
     // If pkgVersion isn't specified, find the latest package version
     const pkgKeyProps = pkgVersion
@@ -244,6 +252,7 @@ class PackageClientImpl implements PackageClient {
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
+      keepFailedInstallation,
     });
   }
 
@@ -296,7 +305,7 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
-    prerelease?: false,
+    prerelease?: boolean,
     ignoreUnverified?: boolean
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
@@ -345,9 +354,9 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async getPackages(params?: {
-    excludeInstallStatus?: false;
+    excludeInstallStatus?: boolean;
     category?: CategoryId;
-    prerelease?: false;
+    prerelease?: boolean;
   }) {
     const { excludeInstallStatus, category, prerelease } = params || {};
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);

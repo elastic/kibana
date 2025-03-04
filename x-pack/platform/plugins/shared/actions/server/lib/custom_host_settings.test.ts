@@ -21,7 +21,7 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
 } from '../../common';
 
-const CA_DIR = '../../../../../../../../packages/kbn-dev-utils/certs';
+const CA_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
 const CA_FILE1 = pathResolve(__filename, pathJoin(CA_DIR, 'ca.crt'));
 const CA_CONTENTS1 = fsReadFileSync(CA_FILE1, 'utf8');
 const CA_FILE2 = pathResolve(__filename, pathJoin(CA_DIR, 'kibana.crt'));

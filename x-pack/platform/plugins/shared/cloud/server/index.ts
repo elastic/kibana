@@ -13,3 +13,5 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { CloudPlugin } = await import('./plugin');
   return new CloudPlugin(initializerContext);
 };
+
+export { getOnboardingToken } from './saved_objects';

@@ -1685,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1709,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -2069,6 +2074,10 @@
         "type": "keyword"
       },
       "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "required_versions": {
         "index": false,
         "type": "flattened"
       },

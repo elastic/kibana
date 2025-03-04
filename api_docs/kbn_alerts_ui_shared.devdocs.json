@@ -4412,7 +4412,7 @@
                 "section": "def-common.DataViewLazy",
                 "text": "DataViewLazy"
               },
-              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
               "SavedObject",
               "<",
               {
@@ -5308,10 +5308,10 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/esql-variables-types",
-            "scope": "public",
-            "docId": "kibKbnEsqlVariablesTypesPluginApi",
-            "section": "def-public.PublishesESQLVariables",
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.PublishesESQLVariables",
             "text": "PublishesESQLVariables"
           },
           " & ",

@@ -36,7 +36,12 @@ export function RuleUpgradeCallout({
         color="danger"
         size="s"
       >
-        <p>{i18n.RULE_HAS_HARD_CONFLICTS_DESCRIPTION}</p>
+        <span>{i18n.RULE_HAS_HARD_CONFLICTS_DESCRIPTION}</span>
+        <ul>
+          <li>{i18n.RULE_HAS_HARD_CONFLICTS_KEEP_YOUR_CHANGES}</li>
+          <li>{i18n.RULE_HAS_HARD_CONFLICTS_ACCEPT_ELASTIC_UPDATE}</li>
+          <li>{i18n.RULE_HAS_HARD_CONFLICTS_EDIT_FINAL_VERSION}</li>
+        </ul>
       </EuiCallOut>
     );
   }
@@ -56,7 +61,11 @@ export function RuleUpgradeCallout({
         color="warning"
         size="s"
       >
-        <p>{i18n.RULE_HAS_SOFT_CONFLICTS_DESCRIPTION}</p>
+        <span>{i18n.RULE_HAS_SOFT_CONFLICTS_DESCRIPTION}</span>
+        <ul>
+          <li>{i18n.RULE_HAS_SOFT_CONFLICTS_ACCEPT_SUGGESTED_UPDATE}</li>
+          <li>{i18n.RULE_HAS_SOFT_CONFLICTS_EDIT_FINAL_VERSION}</li>
+        </ul>
       </EuiCallOut>
     );
   }
