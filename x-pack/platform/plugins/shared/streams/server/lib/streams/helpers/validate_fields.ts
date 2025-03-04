@@ -8,7 +8,7 @@
 import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { keepFields } from '@kbn/streams-schema/src/helpers/namespaced_ecs';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
-import { otelMappings, otelPrefixes } from '../component_templates/otel_layer';
+import { baseMappings, namespacePrefixes } from '../component_templates/logs_layer';
 
 export function validateAncestorFields({
   ancestors,
@@ -34,14 +34,14 @@ export function validateAncestorFields({
         );
       }
       if (
-        !otelPrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
+        !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
         !keepFields.includes(fieldName)
       ) {
         throw new MalformedFieldsError(
           `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
         );
       }
-      for (const prefix of otelPrefixes) {
+      for (const prefix of namespacePrefixes) {
         const prefixedName = `${prefix}${fieldName}`;
         if (
           Object.prototype.hasOwnProperty.call(fields, prefixedName) ||
@@ -53,7 +53,7 @@ export function validateAncestorFields({
         }
       }
       // check the otelMappings - they are aliases and are not allowed to have the same name as a field
-      if (Object.keys(otelMappings).some((otelFieldName) => otelFieldName === fieldName)) {
+      if (Object.keys(baseMappings).some((otelFieldName) => otelFieldName === fieldName)) {
         throw new MalformedFieldsError(
           `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
         );

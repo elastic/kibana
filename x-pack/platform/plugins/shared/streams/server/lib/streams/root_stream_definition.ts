@@ -6,7 +6,7 @@
  */
 
 import { WiredStreamDefinition, getSegments } from '@kbn/streams-schema';
-import { otelFields } from './component_templates/otel_layer';
+import { baseFields } from './component_templates/logs_layer';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 
@@ -24,7 +24,7 @@ export const rootStreamDefinition: WiredStreamDefinition = {
         'stream.name': {
           type: 'keyword',
         },
-        ...otelFields,
+        ...baseFields,
       },
     },
   },

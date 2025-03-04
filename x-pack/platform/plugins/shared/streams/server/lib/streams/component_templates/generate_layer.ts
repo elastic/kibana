@@ -20,7 +20,7 @@ import {
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
-import { moveFieldsToProperties, otelMappings, otelPrefixes } from './otel_layer';
+import { moveFieldsToNamespaces, baseMappings, namespacePrefixes } from './logs_layer';
 
 export function generateLayer(
   name: string,
@@ -48,8 +48,8 @@ export function generateLayer(
     }
 
     properties[field] = property;
-    if (otelPrefixes.some((prefix) => field.startsWith(prefix))) {
-      properties[field.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+    if (namespacePrefixes.some((prefix) => field.startsWith(prefix))) {
+      properties[field.replace(new RegExp(`^(${namespacePrefixes.join('|')})`), '')] = {
         type: 'alias',
         path: field,
       };
@@ -64,8 +64,8 @@ export function generateLayer(
       mappings: {
         dynamic: false,
         properties: isRoot(name)
-          ? moveFieldsToProperties({
-              ...otelMappings,
+          ? moveFieldsToNamespaces({
+              ...baseMappings,
               ...properties,
             })
           : properties,

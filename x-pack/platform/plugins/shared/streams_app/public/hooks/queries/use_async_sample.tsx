@@ -17,7 +17,6 @@ import useToggle from 'react-use/lib/useToggle';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { filter, switchMap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { getRealFieldName } from '@kbn/streams-schema/src/helpers/namespaced_ecs';
 import { useKibana } from '../use_kibana';
 import { emptyEqualsToAlways } from '../../util/condition';
 
@@ -200,10 +199,6 @@ const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?
       .flatMap((field) => [
         [
           field.name,
-          { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
-        ],
-        [
-          getRealFieldName(field.name),
           { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
         ],
       ])

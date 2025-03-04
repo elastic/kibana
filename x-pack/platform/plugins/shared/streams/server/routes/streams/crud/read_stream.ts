@@ -20,7 +20,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
-import { addAliasesForOtelFields } from '../../../lib/streams/component_templates/otel_layer';
+import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
 
 export async function readStream({
   name,
@@ -76,7 +76,7 @@ export async function readStream({
     };
   }
 
-  const inheritedFields = addAliasesForOtelFields(
+  const inheritedFields = addAliasesForNamespacedFields(
     streamDefinition,
     getInheritedFieldsFromAncestors(ancestors)
   );

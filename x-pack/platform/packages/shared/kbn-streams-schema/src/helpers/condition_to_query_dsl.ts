@@ -13,33 +13,31 @@ import {
   isAndCondition,
   isOrCondition,
 } from '../models';
-import { getRealFieldName } from './namespaced_ecs';
 
 function conditionToClause(condition: FilterCondition) {
-  const realFieldName = getRealFieldName(condition.field);
   switch (condition.operator) {
     case 'neq':
-      return { bool: { must_not: { match: { [realFieldName]: condition.value } } } };
+      return { bool: { must_not: { match: { [condition.field]: condition.value } } } };
     case 'eq':
-      return { match: { [realFieldName]: condition.value } };
+      return { match: { [condition.field]: condition.value } };
     case 'exists':
-      return { exists: { field: realFieldName } };
+      return { exists: { field: condition.field } };
     case 'gt':
-      return { range: { [realFieldName]: { gt: condition.value } } };
+      return { range: { [condition.field]: { gt: condition.value } } };
     case 'gte':
-      return { range: { [realFieldName]: { gte: condition.value } } };
+      return { range: { [condition.field]: { gte: condition.value } } };
     case 'lt':
-      return { range: { [realFieldName]: { lt: condition.value } } };
+      return { range: { [condition.field]: { lt: condition.value } } };
     case 'lte':
-      return { range: { [realFieldName]: { lte: condition.value } } };
+      return { range: { [condition.field]: { lte: condition.value } } };
     case 'contains':
-      return { wildcard: { [realFieldName]: `*${condition.value}*` } };
+      return { wildcard: { [condition.field]: `*${condition.value}*` } };
     case 'startsWith':
-      return { prefix: { [realFieldName]: condition.value } };
+      return { prefix: { [condition.field]: condition.value } };
     case 'endsWith':
-      return { wildcard: { [realFieldName]: `*${condition.value}` } };
+      return { wildcard: { [condition.field]: `*${condition.value}` } };
     case 'notExists':
-      return { bool: { must_not: { exists: { field: realFieldName } } } };
+      return { bool: { must_not: { exists: { field: condition.field } } } };
     default:
       return { match_none: {} };
   }
