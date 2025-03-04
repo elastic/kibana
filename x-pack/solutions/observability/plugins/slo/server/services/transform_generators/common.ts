@@ -16,7 +16,7 @@ import { InvalidTransformError } from '../../errors';
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?: DataView) {
   try {
     if (kqlQuerySchema.is(kuery)) {
-      return toElasticsearchQuery(fromKueryExpression(kuery));
+      return toElasticsearchQuery(fromKueryExpression(kuery), dataView);
     } else {
       return buildEsQuery(
         dataView,
@@ -24,11 +24,18 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?:
           query: kuery?.kqlQuery,
           language: 'kuery',
         },
-        kuery?.filters
+        kuery?.filters,
+        {
+          allowLeadingWildcards: true,
+        }
       );
     }
   } catch (err) {
-    throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
+    if (kqlQuerySchema.is(kuery)) {
+      throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
+    } else {
+      throw new InvalidTransformError(`Invalid KQL: ${kuery.kqlQuery}`);
+    }
   }
 }
 

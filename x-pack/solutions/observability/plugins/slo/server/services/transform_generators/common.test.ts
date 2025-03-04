@@ -8,7 +8,13 @@
 import { fiveMinute, twoMinute } from '../fixtures/duration';
 import { createSLO } from '../fixtures/slo';
 import { thirtyDaysRolling } from '../fixtures/time_window';
-import { getTimesliceTargetComparator, parseIndex, getFilterRange } from './common';
+import {
+  getTimesliceTargetComparator,
+  parseIndex,
+  getFilterRange,
+  getElasticsearchQueryOrThrow,
+} from './common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 describe('common', () => {
   describe('parseIndex', () => {
@@ -99,6 +105,111 @@ describe('common', () => {
           '@timestamp': {
             gte: 'now-7d',
           },
+        },
+      });
+    });
+  });
+
+  describe('getElasticsearchQueryOrThrow', () => {
+    it('throws an error if the query is not a valid Elasticsearch query', () => {
+      expect(() => {
+        getElasticsearchQueryOrThrow('data:');
+      }).toThrowErrorMatchingInlineSnapshot(`"Invalid KQL: data:"`);
+    });
+
+    it('returns the query if it is a valid Elasticsearch query', () => {
+      expect(getElasticsearchQueryOrThrow('monitor.status: down')).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              match: {
+                'monitor.status': 'down',
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('works with wildcard queries', () => {
+      const mockDataView = createStubDataView({
+        spec: {
+          id: 'apm-*',
+          title: 'apm-*',
+          timeFieldName: '@timestamp',
+          fields: {
+            'monitor.status': {
+              name: 'monitor.status',
+              type: 'string',
+              esTypes: ['keyword'],
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+            },
+          },
+        },
+      });
+      expect(getElasticsearchQueryOrThrow('monitor.status: *own', mockDataView)).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              wildcard: {
+                'monitor.status': {
+                  value: '*own',
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('works with wildcard queries and filters', () => {
+      const mockDataView = createStubDataView({
+        spec: {
+          id: 'apm-*',
+          title: 'apm-*',
+          timeFieldName: '@timestamp',
+          fields: {
+            'monitor.status': {
+              name: 'monitor.status',
+              type: 'string',
+              esTypes: ['keyword'],
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+            },
+          },
+        },
+      });
+      expect(
+        getElasticsearchQueryOrThrow(
+          { kqlQuery: 'monitor.status: *own', filters: [] },
+          mockDataView
+        )
+      ).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    wildcard: {
+                      'monitor.status': {
+                        value: '*own',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
         },
       });
     });
