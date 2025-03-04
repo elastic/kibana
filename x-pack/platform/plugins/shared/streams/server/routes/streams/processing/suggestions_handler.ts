@@ -66,14 +66,20 @@ export function extractAndGroupPatterns(samples: FlattenRecord[], field: string)
   const NUMBER_PATTERN_CATEGORIES = 5;
   const NUMBER_SAMPLES_PER_PATTERN = 8;
 
-  const samplesWithPatterns = samples.map((sample) => {
-    const pattern = evalPattern(get(sample, field) as string);
-    return {
-      document: sample,
-      fullPattern: pattern,
-      truncatedPattern: pattern.slice(0, 10),
-      fieldValue: get(sample, field) as string,
-    };
+  const samplesWithPatterns = samples.flatMap((sample) => {
+    const value = get(sample, field);
+    if (typeof value !== 'string') {
+      return [];
+    }
+    const pattern = evalPattern(value);
+    return [
+      {
+        document: sample,
+        fullPattern: pattern,
+        truncatedPattern: pattern.slice(0, 10),
+        fieldValue: get(sample, field) as string,
+      },
+    ];
   });
 
   // Group samples by their truncated patterns
