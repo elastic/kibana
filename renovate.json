@@ -972,6 +972,27 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/elasticsearch (CI clients)",
+      "matchDepNames": [
+        "elasticsearch-8.x"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:appex-qa"
+      ],
+      "allowedVersions": "<9.0.0",
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor",
+        "Team:Operations",
+        "Team:QA"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/elasticsearch",
       "matchDepNames": [
         "@elastic/elasticsearch"
@@ -980,6 +1001,28 @@
         "team:kibana-operations",
         "team:kibana-core"
       ],
+      "allowedVersions": "<9.0.0",
+      "matchBaseBranches": [
+        "8.x"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Operations",
+        "Team:Core"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/elasticsearch",
+      "matchDepNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "allowedVersions": "<8.0.0",
       "matchBaseBranches": [
         "7.17"
       ],
