@@ -58,55 +58,53 @@ export const buildActionResultsQuery = ({
     allow_no_indices: true,
     index,
     ignore_unavailable: true,
-    body: {
+    aggs: {
       aggs: {
+        global: {},
         aggs: {
-          global: {},
-          aggs: {
-            responses_by_action_id: {
-              filter: {
-                bool: {
-                  must: [
-                    {
-                      match: {
-                        action_id: actionId,
-                      },
+          responses_by_action_id: {
+            filter: {
+              bool: {
+                must: [
+                  {
+                    match: {
+                      action_id: actionId,
                     },
-                  ],
+                  },
+                ],
+              },
+            },
+            aggs: {
+              rows_count: {
+                sum: {
+                  field: 'action_response.osquery.count',
                 },
               },
-              aggs: {
-                rows_count: {
-                  sum: {
-                    field: 'action_response.osquery.count',
-                  },
-                },
-                responses: {
-                  terms: {
-                    script: {
-                      lang: 'painless',
-                      source:
-                        "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                    } as const,
-                  },
+              responses: {
+                terms: {
+                  script: {
+                    lang: 'painless',
+                    source:
+                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                  } as const,
                 },
               },
             },
           },
         },
       },
-      query: { bool: { filter: filterQuery } },
-      // from: activePage * querySize,
-      size: 10000, // querySize,
-      track_total_hits: true,
-      fields: ['*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.direction,
-          },
-        },
-      ],
     },
+    query: { bool: { filter: filterQuery } },
+    // from: activePage * querySize,
+    size: 10000, // querySize,
+    track_total_hits: true,
+    fields: ['*'],
+    sort: [
+      {
+        [sort.field]: {
+          order: sort.direction,
+        },
+      },
+    ],
   };
 };

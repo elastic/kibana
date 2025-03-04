@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { ESQLVariableType } from '../../shared/types';
 import { pipeCompleteItem } from '../complete_items';
 import { getDateLiterals } from '../factories';
 import { log10ParameterTypes, powParameterTypes } from './constants';
@@ -19,6 +18,7 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
 } from './helpers';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
 
 describe('WHERE <expression>', () => {
   const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
@@ -40,7 +40,7 @@ describe('WHERE <expression>', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand),
         attachTriggerCommand('var0 '),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR'),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL'),
       ],
       {
         callbacks: {
@@ -150,7 +150,7 @@ describe('WHERE <expression>', () => {
         ...getFieldNamesByType('any')
           .map((field) => `${field} `)
           .map(attachTriggerCommand),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'MATCH'),
+        ...allEvalFns.filter((fn) => !FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.label!.toLowerCase())),
       ]);
     });
 

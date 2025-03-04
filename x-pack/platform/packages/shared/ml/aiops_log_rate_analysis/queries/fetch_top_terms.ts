@@ -6,7 +6,7 @@
  */
 import { uniqBy } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import {
@@ -79,7 +79,7 @@ export const getTopTermRequest = (
 
   return {
     ...getRequestBase(params),
-    body,
+    ...body,
   };
 };
 

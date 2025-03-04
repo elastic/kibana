@@ -6,7 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -32,6 +32,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
@@ -228,16 +229,7 @@ export async function getAgentsByKuery(
     aggregations,
     spaceId,
   } = options;
-  const filters = [];
-
-  const useSpaceAwareness = await isSpaceAwarenessEnabled();
-  if (useSpaceAwareness && spaceId) {
-    if (spaceId === DEFAULT_SPACE_ID) {
-      filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
-    } else {
-      filters.push(`namespaces:"${spaceId}"`);
-    }
-  }
+  const filters = await _getSpaceAwarenessFilter(spaceId);
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -393,6 +385,59 @@ export async function getAllAgentsByKuery(
     agents: res.agents,
     total: res.total,
   };
+}
+
+/**
+ * Fetch all agents by kuery in batches.
+ * @param esClient
+ * @param soClient
+ * @param options
+ */
+export async function fetchAllAgentsByKuery(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  options: ListWithKuery & { spaceId?: string }
+): Promise<AsyncIterable<Agent[]>> {
+  const {
+    kuery = '',
+    perPage = SO_SEARCH_LIMIT,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    spaceId,
+  } = options;
+
+  const filters = await _getSpaceAwarenessFilter(spaceId);
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+  const kueryNode = _joinFilters(filters);
+  const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const sort = getSortConfig(sortField, sortOrder);
+
+  try {
+    return createEsSearchIterable<FleetServerAgent>({
+      esClient,
+      searchRequest: {
+        index: AGENTS_INDEX,
+        size: perPage,
+        rest_total_hits_as_int: true,
+        track_total_hits: true,
+        runtime_mappings: runtimeFields,
+        fields: Object.keys(runtimeFields),
+        sort,
+        ...query,
+      },
+      resultsMapper: (data): Agent[] => {
+        return data.hits.hits.map(searchHitToAgent);
+      },
+    });
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .error(`Error fetching all agents by kuery: ${JSON.stringify(err)}`);
+    throw err;
+  }
 }
 
 export async function getAgentById(
@@ -716,5 +761,17 @@ export async function getAgentPolicyForAgent(
   const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
   if (agentPolicy) {
     return agentPolicy;
+  }
+}
+
+async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  if (!useSpaceAwareness || !spaceId) {
+    return [];
+  }
+  if (spaceId === DEFAULT_SPACE_ID) {
+    return [`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`];
+  } else {
+    return [`namespaces:"${spaceId}"`];
   }
 }
