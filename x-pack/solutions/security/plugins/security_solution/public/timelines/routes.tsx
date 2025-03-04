@@ -8,7 +8,6 @@
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { TIMELINES_PATH } from '../../common/constants';

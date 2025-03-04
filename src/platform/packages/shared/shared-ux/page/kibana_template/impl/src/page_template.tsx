@@ -7,56 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, memo } from 'react';
+import React, { FC, memo, useMemo } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import {
   NoDataConfigPage,
+  NoDataConfigPageProps,
   NoDataConfigPageWithSolutionNavBar,
 } from '@kbn/shared-ux-page-no-data-config';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
+type ComponentType =
+  | typeof NoDataConfigPageWithSolutionNavBar
+  | typeof NoDataConfigPage
+  | typeof KibanaPageTemplateWithSolutionNav
+  | typeof KibanaPageTemplateInner;
+
+type TemplateComponentProps = KibanaPageTemplateProps | NoDataConfigPageProps;
+
+type ComponentProps = Omit<TemplateComponentProps, 'solutionNav' | 'ref'> & {
+  solutionNav: { name: string };
+};
+
 export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = memo(
   ({ className, children, solutionNav, noDataConfig, ...rest }) => {
-    // console.log({ noDataConfig, solutionNav, rest });
     /**
      * If passing the custom template of `noDataConfig`
      */
-    if (noDataConfig && solutionNav) {
-      return (
-        <NoDataConfigPageWithSolutionNavBar
-          data-test-subj={rest['data-test-subj']}
-          className={className}
-          noDataConfig={noDataConfig}
-          solutionNav={solutionNav}
-        />
-      );
-    }
+    const Component: ComponentType = useMemo(() => {
+      if (noDataConfig && solutionNav) {
+        return NoDataConfigPageWithSolutionNavBar;
+      }
 
-    if (noDataConfig) {
-      return (
-        <NoDataConfigPage
-          data-test-subj={rest['data-test-subj']}
-          className={className}
-          noDataConfig={noDataConfig}
-        />
-      );
-    }
+      if (noDataConfig) {
+        return NoDataConfigPage;
+      }
 
-    if (solutionNav) {
-      return (
-        <KibanaPageTemplateWithSolutionNav
-          className={className}
-          solutionNav={solutionNav}
-          children={children}
-          {...rest}
-        />
-      );
-    }
+      if (solutionNav) {
+        return KibanaPageTemplateWithSolutionNav;
+      }
 
-    return <KibanaPageTemplateInner className={className} children={children} {...rest} />;
+      return KibanaPageTemplateInner;
+    }, [noDataConfig, solutionNav]);
+
+    const componentProps: ComponentProps = useMemo(() => {
+      return {
+        'data-test-subj': rest['data-test-subj'],
+        className,
+        noDataConfig,
+        solutionNav: solutionNav ? solutionNav : { name: 'Observability' },
+        children,
+        ...rest,
+      };
+    }, [rest, className, noDataConfig, solutionNav, children]);
+    return <Component {...componentProps} />;
   }
 );
 

@@ -15,7 +15,6 @@ import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (

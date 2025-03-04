@@ -59,10 +59,7 @@ export class RenderingService {
         body.classList.remove(...previousClasses);
         body.classList.add(...newClasses);
       });
-    // const whyDidYouRender = require('@welldone-software/why-did-you-render');
-    // whyDidYouRender(React, {
-    //   trackAllPureComponents: true,
-    // });
+
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>

@@ -21,6 +21,7 @@ import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
+import type { AppContainerProps } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
 
 interface Props {
@@ -38,6 +39,51 @@ interface Props {
 interface Params {
   appId: string;
 }
+
+const MountedRoute: FunctionComponent<AppContainerProps> = React.memo(
+  ({
+    appPath,
+    appStatus,
+    createScopedHistory,
+    appId,
+    mounter,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    setIsMounting,
+    theme$,
+    showPlainSpinner,
+  }) => {
+    const appContainerProps = useMemo(() => {
+      return {
+        appId,
+        appPath,
+        appStatus,
+        createScopedHistory,
+        mounter,
+        setAppLeaveHandler,
+        setAppActionMenu,
+        setIsMounting,
+        theme$,
+        showPlainSpinner,
+      };
+    }, [
+      appPath,
+      appStatus,
+      createScopedHistory,
+      appId,
+      mounter,
+      setAppLeaveHandler,
+      setAppActionMenu,
+      setIsMounting,
+      theme$,
+      showPlainSpinner,
+    ]);
+
+    return <AppContainer {...appContainerProps} />;
+  }
+);
+
+MountedRoute.displayName = 'MountedRoute';
 
 export const AppRouter: FunctionComponent<Props> = ({
   history,
@@ -58,34 +104,44 @@ export const AppRouter: FunctionComponent<Props> = ({
 
   const showPlainSpinner = useObservable(hasCustomBranding$ ?? EMPTY, false);
 
+  const routes = useMemo(() => {
+    return [...mounters].map(([appId, mounter]) => (
+      <Route
+        key={mounter.appRoute}
+        path={mounter.appRoute}
+        exact={mounter.exactRoute}
+        render={({ match: { path } }) => (
+          <MountedRoute
+            appPath={path}
+            appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+            createScopedHistory={createScopedHistory}
+            appId={appId}
+            mounter={mounter}
+            setAppLeaveHandler={setAppLeaveHandler}
+            setAppActionMenu={setAppActionMenu}
+            setIsMounting={setIsMounting}
+            theme$={theme$}
+            showPlainSpinner={showPlainSpinner}
+          />
+        )}
+      />
+    ));
+  }, [
+    mounters,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    setIsMounting,
+    theme$,
+    showPlainSpinner,
+    appStatuses,
+    createScopedHistory,
+  ]);
   return (
     <KibanaErrorBoundaryProvider analytics={analytics}>
       <KibanaErrorBoundary>
         <Router history={history}>
           <Routes>
-            {[...mounters].map(([appId, mounter]) => (
-              <Route
-                key={mounter.appRoute}
-                path={mounter.appRoute}
-                exact={mounter.exactRoute}
-                render={({ match: { path } }) => (
-                  <AppContainer
-                    appPath={path}
-                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                    createScopedHistory={createScopedHistory}
-                    {...{
-                      appId,
-                      mounter,
-                      setAppLeaveHandler,
-                      setAppActionMenu,
-                      setIsMounting,
-                      theme$,
-                      showPlainSpinner,
-                    }}
-                  />
-                )}
-              />
-            ))}
+            {routes}
             {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
             <Route
               path="/app/:appId"
@@ -95,22 +151,19 @@ export const AppRouter: FunctionComponent<Props> = ({
                   url,
                 },
               }: RouteComponentProps<Params>) => {
-                // the id/mounter retrieval can be removed once #76348 is addressed
-                const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
                 return (
-                  <AppContainer
+                  <MountedRoute
                     appPath={url}
-                    appId={id ?? appId}
+                    // think this is a real type error hidden by the previous {..{...}} or w/e
+                    appId={mounters.has(appId) ? appId : undefined}
                     appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                     createScopedHistory={createScopedHistory}
-                    {...{
-                      mounter,
-                      setAppLeaveHandler,
-                      setAppActionMenu,
-                      setIsMounting,
-                      theme$,
-                      showPlainSpinner,
-                    }}
+                    mounter={mounters.has(appId) ? mounters.get(appId) : undefined}
+                    setAppLeaveHandler={setAppLeaveHandler}
+                    setAppActionMenu={setAppActionMenu}
+                    setIsMounting={setIsMounting}
+                    theme$={theme$}
+                    showPlainSpinner={showPlainSpinner}
                   />
                 );
               }}

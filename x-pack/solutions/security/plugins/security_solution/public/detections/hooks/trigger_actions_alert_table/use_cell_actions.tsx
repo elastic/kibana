@@ -110,13 +110,18 @@ export const useCellActionsOptions = (
     disabledActionTypes,
   });
 
+  const getCellActionsForColumn = useCallback(
+    (_columnId: string, columnIndex: number) => {
+      if (cellActions.length === 0) return [];
+      return cellActions[columnIndex];
+    },
+    [cellActions]
+  );
+
   return useMemo<GetSecurityAlertsTableProp<'cellActionsOptions'>>(() => {
     return {
-      getCellActionsForColumn: (_columnId: string, columnIndex: number) => {
-        if (cellActions.length === 0) return [];
-        return cellActions[columnIndex];
-      },
+      getCellActionsForColumn,
       visibleCellActions: 3,
     };
-  }, [cellActions]);
+  }, [getCellActionsForColumn]);
 };

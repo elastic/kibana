@@ -36,31 +36,29 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
     emptyPageBody,
     ...rest
   }) => {
-    console.log({ pageHeader, children, isEmptyState, pageSideBar, pageSideBarProps, emptyPageBody, rest });
+    const classes = useMemo(() => getClasses(undefined, className), [className]);
+
     const header = useMemo(() => {
       if (isEmptyState && pageHeader && !children) {
-        console.log('null header');
         return null;
       } else if (pageHeader) {
-        console.log('pageHeader');
         return <EuiPageTemplate.Header {...pageHeader} />;
       }
     }, [pageHeader, children, isEmptyState]);
 
+    const minHeight = header
+      ? 'calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)))'
+      : 0;
+    const grow = header ? false : undefined;
+
     const sideBar = useMemo(() => {
-      if (pageSideBar) {
-        console.log('have sidebar');
-        const sideBarProps = { ...pageSideBarProps };
-        sideBarProps.sticky = true;
-        return (
-          <EuiPageTemplate.Sidebar {...pageSideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>
-        );
-      }
+      if (!pageSideBar) return null;
+      const sideBarProps = { ...pageSideBarProps, sticky: true };
+      return <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
     }, [pageSideBar, pageSideBarProps]);
 
     const content = useMemo(() => {
       if (isEmptyState && pageHeader && !children) {
-        console.log('emptyPrompt');
         const { iconType, pageTitle, description, rightSideItems } = pageHeader;
         const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
         const body = description ? <p>{description}</p> : undefined;
@@ -74,15 +72,11 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
           />
         );
       } else if (isEmptyState && emptyPageBody) {
-        console.log('emptyPageBody');
         return emptyPageBody;
       } else {
-        console.log('naked children');
         return children;
       }
     }, [children, emptyPageBody, isEmptyState, pageHeader]);
-
-    const classes = getClasses(undefined, className);
 
     return (
       <EuiPageTemplate
@@ -91,10 +85,8 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
         // the following props can be removed to allow the template to auto-handle
         // the fixed header and banner heights.
         offset={0}
-        minHeight={
-          header ? 'calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)))' : 0
-        }
-        grow={header ? false : undefined}
+        minHeight={minHeight}
+        grow={grow}
         {...rest}
       >
         {sideBar}

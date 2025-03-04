@@ -8,7 +8,7 @@
  */
 
 import { replace } from 'lodash';
-import React, { Children } from 'react';
+import React, { Children, useMemo } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { Switch, useRouteMatch } from 'react-router-dom';
 import { Routes as ReactRouterRoutes, Route } from 'react-router-dom-v5-compat';
@@ -27,50 +27,56 @@ type RouterElementChildren = Array<
   >
 >;
 
-export const Routes = ({
-  legacySwitch = true,
-  enableExecutionContextTracking = false,
-  children,
-}: {
-  legacySwitch?: boolean;
-  enableExecutionContextTracking?: boolean;
-  children: React.ReactNode;
-}) => {
-  const match = useRouteMatch();
-  debugger;
-  console.log('legacySwitch', legacySwitch);
-  return legacySwitch ? (
-    <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
-      <Switch>{children}</Switch>
-    </SharedUXRoutesContext.Provider>
-  ) : (
-    <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
-      <ReactRouterRoutes>
-        {Children.map(children as RouterElementChildren, (child) => {
-          if (React.isValidElement(child) && child.type === LegacyRoute) {
-            const path = replace(child?.props.path, match.url + '/', '');
-            const renderFunction =
-              typeof child?.props.children === 'function'
-                ? child?.props.children
-                : child?.props.render;
-            return (
-              <Route
-                path={path}
-                element={
-                  <>
-                    {enableExecutionContextTracking && <MatchPropagator />}
-                    {(child?.props?.component && <child.props.component />) ||
-                      (renderFunction && renderFunction()) ||
-                      children}
-                  </>
-                }
-              />
-            );
-          } else {
-            return child;
-          }
-        })}
-      </ReactRouterRoutes>
-    </SharedUXRoutesContext.Provider>
-  );
-};
+export const Routes = React.memo(
+  ({
+    legacySwitch = true,
+    enableExecutionContextTracking = false,
+    children,
+  }: {
+    legacySwitch?: boolean;
+    enableExecutionContextTracking?: boolean;
+    children: React.ReactNode;
+  }) => {
+    const match = useRouteMatch();
+    const contextValue = useMemo(
+      () => ({ enableExecutionContextTracking }),
+      [enableExecutionContextTracking]
+    );
+    return legacySwitch ? (
+      <SharedUXRoutesContext.Provider value={contextValue}>
+        <Switch>{children}</Switch>
+      </SharedUXRoutesContext.Provider>
+    ) : (
+      <SharedUXRoutesContext.Provider value={contextValue}>
+        <ReactRouterRoutes>
+          {Children.map(children as RouterElementChildren, (child) => {
+            if (React.isValidElement(child) && child.type === LegacyRoute) {
+              const path = replace(child?.props.path, match.url + '/', '');
+              const renderFunction =
+                typeof child?.props.children === 'function'
+                  ? child?.props.children
+                  : child?.props.render;
+              return (
+                <Route
+                  path={path}
+                  element={
+                    <>
+                      {enableExecutionContextTracking && <MatchPropagator />}
+                      {(child?.props?.component && <child.props.component />) ||
+                        (renderFunction && renderFunction()) ||
+                        children}
+                    </>
+                  }
+                />
+              );
+            } else {
+              return child;
+            }
+          })}
+        </ReactRouterRoutes>
+      </SharedUXRoutesContext.Provider>
+    );
+  }
+);
+
+Routes.displayName = 'Routes';

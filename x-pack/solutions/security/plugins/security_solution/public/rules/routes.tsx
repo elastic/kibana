@@ -22,7 +22,6 @@ import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_
 import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
 import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
@@ -59,12 +58,13 @@ const RulesSubRoutes = [
   },
 ];
 
-const RulesContainerComponent: React.FC = () => {
+const RulesContainerComponent: React.FC = (props) => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
     <TrackApplicationView viewId={SecurityPageName.rules}>
       <Routes>
+        <Route path={RULES_LANDING_PATH} component={RulesLandingPage} />
         <Route // Redirect to first tab if none specified
           path="/rules/id/:detailName"
           exact
@@ -91,7 +91,7 @@ const RulesContainerComponent: React.FC = () => {
             <route.main />
           </Route>
         ))}
-        <Route component={NotFoundPage} />
+        <Route path="*" component={NotFoundPage} />
         <SpyRoute pageName={SecurityPageName.rules} />
       </Routes>
     </TrackApplicationView>
@@ -107,10 +107,10 @@ const CoverageOverviewRoutes = () => (
 );
 
 export const routes: SecuritySubPluginRoutes = [
-  {
-    path: RULES_LANDING_PATH,
-    component: RulesLandingPage,
-  },
+  // {
+  //   path: RULES_LANDING_PATH,
+  //   component: RulesLandingPage,
+  // },
   {
     path: RULES_PATH,
     component: Rules,

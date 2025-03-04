@@ -20,6 +20,8 @@ import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
 
+const onRowSelected = () => {};
+
 export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell'> = ({
   tableType = TableId.alertsOnAlertsPage,
   rowIndex,
@@ -80,7 +82,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       isEventViewer={false}
       isExpandable={isExpandable}
       loadingEventIds={loadingEventIds}
-      onRowSelected={() => {}}
+      onRowSelected={onRowSelected}
       rowIndex={rowIndex}
       colIndex={colIndex}
       pageRowIndex={rowIndex}

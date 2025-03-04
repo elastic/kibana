@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo, useEffect } from 'react';
+import React, { type ReactNode, useMemo, memo } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -54,8 +54,8 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
   emptyPageBody?: ReactNode;
 };
 
-export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
-  React.memo(({ children, ...rest }) => {
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> = memo(
+  ({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -64,64 +64,67 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
     );
     const [routeProps] = useRouteSpy();
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
-
-    // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
-    // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
 
-    // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
-    // solutionNavProps is momentarily initialized to undefined, this check prevents the children from being re-rendered in the initial load
     const renderChildren = !rest.isEmptyState;
-    useEffect(() => {
-      return () => console.log('unmount');
-    }, []);
-    /*
-     * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
-     * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
-     * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
-     * between EuiPageTemplate and the security solution pages.
-     */
+
+    const mainContent = useMemo(() => {
+      return (
+        <KibanaPageTemplate.Section
+          className="securityPageWrapper"
+          data-test-subj="pageContainer"
+          paddingSize={rest.paddingSize ?? 'l'}
+          alignment="top"
+          component="div"
+          grow={true}
+        >
+          <AlertsContextProvider>
+            <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
+              {children}
+              <SecuritySolutionFlyout />
+            </ExpandableFlyoutProvider>
+          </AlertsContextProvider>
+        </KibanaPageTemplate.Section>
+      );
+    }, [children, isPreview, rest.paddingSize]);
+
+    const bottomBar = useMemo(() => {
+      return isTimelineBottomBarVisible ? (
+        <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
+          <EuiThemeProvider colorMode={globalColorMode}>
+            <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
+              <Timeline />
+              <TimelineFlyout />
+            </ExpandableFlyoutProvider>
+          </EuiThemeProvider>
+        </KibanaPageTemplate.BottomBar>
+      ) : null;
+    }, [isTimelineBottomBarVisible, globalColorMode]);
+
+    const templateProps = useMemo(
+      () => ({
+        theme: euiTheme,
+        $isShowingTimelineOverlay: isShowingTimelineOverlay,
+        paddingSize: 'none' as const,
+        solutionNav: solutionNavProps ?? undefined,
+        restrictWidth: false,
+        ...rest,
+      }),
+      [euiTheme, isShowingTimelineOverlay, solutionNavProps, rest]
+    );
+
     return (
-      <StyledKibanaPageTemplate
-        theme={euiTheme}
-        $isShowingTimelineOverlay={isShowingTimelineOverlay}
-        paddingSize="none"
-        solutionNav={solutionNavProps}
-        restrictWidth={false}
-        {...rest}
-      >
+      <StyledKibanaPageTemplate {...templateProps}>
         {renderChildren && (
           <>
             <GlobalKQLHeader />
-            <KibanaPageTemplate.Section
-              className="securityPageWrapper"
-              data-test-subj="pageContainer"
-              paddingSize={rest.paddingSize ?? 'l'}
-              alignment="top"
-              component="div"
-              grow={true}
-            >
-              <AlertsContextProvider>
-                <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
-                  {children}
-                  <SecuritySolutionFlyout />
-                </ExpandableFlyoutProvider>
-              </AlertsContextProvider>
-            </KibanaPageTemplate.Section>
-            {isTimelineBottomBarVisible && (
-              <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
-                <EuiThemeProvider colorMode={globalColorMode}>
-                  <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
-                    <Timeline />
-                    <TimelineFlyout />
-                  </ExpandableFlyoutProvider>
-                </EuiThemeProvider>
-              </KibanaPageTemplate.BottomBar>
-            )}
+            {mainContent}
+            {bottomBar}
           </>
         )}
       </StyledKibanaPageTemplate>
     );
-  });
+  }
+);
 
 SecuritySolutionTemplateWrapper.displayName = 'SecuritySolutionTemplateWrapper';

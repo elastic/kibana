@@ -9,7 +9,6 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { DASHBOARDS_PATH, SecurityPageName } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { DashboardsContainer } from './pages';
 
 export const DashboardRoutes = () => (

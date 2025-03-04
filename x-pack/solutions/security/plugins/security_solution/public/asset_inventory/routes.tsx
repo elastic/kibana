@@ -11,7 +11,6 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { ASSET_INVENTORY_PATH } from '../../common/constants';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
 import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
@@ -43,15 +42,15 @@ export const AssetInventoryRoutes = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
-          <DataViewContext.Provider value={dataViewContextValue}>
-            <SecuritySolutionPageWrapper noPadding>
-              <Suspense fallback={<AssetInventoryLoading />}>
-                <AssetsPageLazy />
-              </Suspense>
-            </SecuritySolutionPageWrapper>
-          </DataViewContext.Provider>
-        </SecurityRoutePageWrapper>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
+        <DataViewContext.Provider value={dataViewContextValue}>
+          <SecuritySolutionPageWrapper noPadding>
+            <Suspense fallback={<AssetInventoryLoading />}>
+              <AssetsPageLazy />
+            </Suspense>
+          </SecuritySolutionPageWrapper>
+        </DataViewContext.Provider>
+      </SecurityRoutePageWrapper>
     </QueryClientProvider>
   );
 };

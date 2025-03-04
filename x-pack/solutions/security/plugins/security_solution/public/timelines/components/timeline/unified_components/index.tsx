@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlexGroup } from '@elastic/eui';
 import type { EuiDataGridProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -14,21 +14,17 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
-import type { DropType } from '@kbn/dom-drag-drop';
-import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
+import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import { useDragDropContext } from '@kbn/dom-drag-drop';
 import styled from 'styled-components';
-import { css } from '@emotion/react';
 import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
-import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { withDataView } from '../../../../common/components/with_data_view';
-import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
@@ -40,12 +36,8 @@ import type {
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
 import { getColumnHeader } from '../body/column_headers/helpers';
-import { StyledMainEuiPanel, StyledPageContentWrapper } from './styles';
-import { DRAG_DROP_FIELD } from './data_table/translations';
 import { TimelineResizableLayout } from './resizable_layout';
-import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
-import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
 import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
 
@@ -56,20 +48,7 @@ const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   height: 100%;
 `;
 
-const DataGridMemoized = React.memo(TimelineDataTable);
-
-const DROP_PROPS = {
-  value: {
-    id: 'dscDropZoneTable',
-    humanData: {
-      label: DRAG_DROP_FIELD,
-    },
-  },
-  order: [1, 0, 0, 0],
-  types: ['field_add'] as DropType[],
-};
-
-const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
+export const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 
   .unifiedFieldListSidebar {
@@ -139,7 +118,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   leadingControlColumns,
   onUpdatePageIndex,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 
@@ -189,7 +167,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 
   const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
-  const [, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const columnIds = useMemo(() => {
     return columns.map((c) => c.id);
@@ -371,93 +348,45 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [hasTimelineBeenOpenedOnce, show]);
 
   // END PERFORMANCE ONLY CODE BLOCK
-
+  // the onAddFilter function type error below is likely real, but was obscured.
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
         container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
-        sidebarPanel={
-          <SidebarPanelFlexGroup gutterSize="none">
-            <EuiFlexItem className="sidebarContainer">
-              {dataView && hasTimelineBeenOpenedOnce ? (
-                <UnifiedFieldListSidebarContainer
-                  ref={unifiedFieldListContainerRef}
-                  showFieldList
-                  variant="responsive"
-                  getCreationOptions={getFieldsListCreationOptions}
-                  services={fieldListSidebarServices}
-                  dataView={dataView}
-                  fullWidth
-                  allFields={dataView.fields}
-                  workspaceSelectedFieldNames={columnIds}
-                  onAddFieldToWorkspace={onAddFieldToWorkspace}
-                  onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                  onAddFilter={onAddFilter}
-                  onFieldEdited={wrappedOnFieldEdited}
-                />
-              ) : null}
-            </EuiFlexItem>
-            <EuiHideFor sizes={HIDE_FOR_SIZES}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  border-right: ${euiTheme.border.thin};
-                `}
-              />
-            </EuiHideFor>
-          </SidebarPanelFlexGroup>
-        }
-        mainPanel={
-          <StyledPageContentWrapper>
-            <StyledMainEuiPanel
-              role="main"
-              panelRef={setMainContainer}
-              paddingSize="none"
-              borderRadius="none"
-              hasShadow={false}
-              hasBorder={false}
-              color="transparent"
-            >
-              <Droppable
-                dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
-                value={DROP_PROPS.value}
-                order={DROP_PROPS.order}
-                onDrop={onDropFieldToTable}
-              >
-                <DropOverlayWrapper isVisible={isDropAllowed}>
-                  <EventDetailsWidthProvider>
-                    <DataGridMemoized
-                      columns={columns}
-                      columnIds={currentColumnIds}
-                      rowRenderers={rowRenderers}
-                      timelineId={timelineId}
-                      isSortEnabled={isSortEnabled}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      sort={sortingColumns}
-                      onSort={onSort}
-                      onSetColumns={onSetColumnsTimeline}
-                      events={events}
-                      refetch={refetch}
-                      onFieldEdited={onFieldEdited}
-                      dataLoadingState={dataLoadingState}
-                      totalCount={totalCount}
-                      onFetchMoreRecords={onFetchMoreRecords}
-                      activeTab={activeTab}
-                      updatedAt={updatedAt}
-                      isTextBasedQuery={isTextBasedQuery}
-                      onFilter={onAddFilter as DocViewFilterFn}
-                      trailingControlColumns={trailingControlColumns}
-                      leadingControlColumns={leadingControlColumns}
-                      onUpdatePageIndex={onUpdatePageIndex}
-                    />
-                  </EventDetailsWidthProvider>
-                </DropOverlayWrapper>
-              </Droppable>
-            </StyledMainEuiPanel>
-          </StyledPageContentWrapper>
-        }
+        dataView={dataView}
+        hasTimelineBeenOpenedOnce={hasTimelineBeenOpenedOnce}
+        unifiedFieldListContainerRef={unifiedFieldListContainerRef}
+        fieldListSidebarServices={fieldListSidebarServices}
+        columnIds={columnIds}
+        onAddFieldToWorkspace={onAddFieldToWorkspace}
+        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+        wrappedOnFieldEdited={wrappedOnFieldEdited}
+        columns={columns}
+        currentColumnIds={currentColumnIds}
+        rowRenderers={rowRenderers}
+        isDropAllowed={isDropAllowed}
+        onDropFieldToTable={onDropFieldToTable}
+        onSort={onSort}
+        onSetColumnsTimeline={onSetColumnsTimeline}
+        sortingColumns={sortingColumns}
+        events={events}
+        refetch={refetch}
+        onFieldEdited={onFieldEdited}
+        dataLoadingState={dataLoadingState}
+        totalCount={totalCount}
+        onFetchMoreRecords={onFetchMoreRecords}
+        activeTab={activeTab}
+        updatedAt={updatedAt}
+        isTextBasedQuery={isTextBasedQuery}
+        onAddFilter={onAddFilter as DocViewFilterFn}
+        trailingControlColumns={trailingControlColumns}
+        leadingControlColumns={leadingControlColumns}
+        onUpdatePageIndex={onUpdatePageIndex}
+        timelineId={timelineId}
+        isSortEnabled={isSortEnabled}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
       />
     </TimelineBodyContainer>
   );

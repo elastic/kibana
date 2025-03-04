@@ -12,7 +12,6 @@ import { SecurityPageName } from '../app/types';
 import { ManagementContainer } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { ManageLandingPage } from './pages/landing';
 
 const ManagementLanding = () => (

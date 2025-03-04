@@ -30,16 +30,17 @@ export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['soluti
 
   useBreadcrumbsNav();
 
-  if (chromeStyle === 'project') {
-    // new shared-ux 'project' navigation enabled, return null to disable the 'classic' navigation
-    return null;
-  }
-
-  return {
-    canBeCollapsed: true,
-    name: translatedNavTitle,
-    icon: 'logoSecurity',
-    children: <SecuritySideNav />,
-    closeFlyoutButtonPosition: 'inside',
-  };
+  return useMemo(() => {
+    if (chromeStyle === 'project') {
+      // new shared-ux 'project' navigation enabled, return null to disable the 'classic' navigation
+      return null;
+    }
+    return {
+      canBeCollapsed: true,
+      name: translatedNavTitle,
+      icon: 'logoSecurity',
+      children: <SecuritySideNav />,
+      closeFlyoutButtonPosition: 'inside',
+    };
+  }, [chromeStyle]);
 };

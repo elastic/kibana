@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
@@ -14,11 +13,8 @@ import {
   ALERT_DETAILS_REDIRECT_PATH,
   SecurityPageName,
 } from '../../../../common/constants';
-import { NotFoundPage } from '../../../app/404';
-import * as i18n from './translations';
 import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useReadonlyHeader } from '../../../use_readonly_header';
 import { AlertDetailsRedirect } from './alert_details_redirect';
 
 const AlertsRoute = () => (

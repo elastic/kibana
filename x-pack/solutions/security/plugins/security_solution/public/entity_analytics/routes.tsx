@@ -19,7 +19,6 @@ import {
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 
 const EntityAnalyticsManagementTelemetry = () => (

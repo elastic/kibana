@@ -10,9 +10,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
 import { SecurityPageName } from '../../common';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
-import { SpyRoute } from '../common/utils/route/spy_routes';
 import { Title } from '../common/components/header_page/title';
 import { useRootNavLink } from '../common/links/nav_links';
 import { useGlobalQueryString } from '../common/utils/global_query_string';
@@ -37,7 +35,6 @@ export const RulesLandingPage = () => {
           onLinkClick={trackLandingLinkClick}
           urlState={urlState}
         />
-        <SpyRoute pageName={SecurityPageName.rulesLanding} />
       </SecuritySolutionPageWrapper>
     </TrackApplicationView>
   );

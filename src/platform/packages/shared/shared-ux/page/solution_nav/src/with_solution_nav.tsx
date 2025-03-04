@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType, ReactNode, useState, useCallback, useMemo } from 'react';
+import React, { ComponentType, ReactNode, useState, useCallback, useMemo, memo } from 'react';
 import classNames from 'classnames';
 import {
   useIsWithinBreakpoints,
@@ -37,7 +37,7 @@ type Props<P> = P &
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
 export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
-  const WithSolutionNav = (props: Props<P>) => {
+  const WithSolutionNav = memo((props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
@@ -56,12 +56,16 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const { canBeCollapsed = true } = solutionNav;
     const isSidebarShrunk =
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
-    const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
-    const sideBarClasses = classNames(
-      'kbnSolutionNav__sidebar',
-      { 'kbnSolutionNav__sidebar--shrink': isSidebarShrunk },
-      props.pageSideBarProps?.className,
-      withSolutionNavStyles
+    const withSolutionNavStyles = useMemo(() => WithSolutionNavStyles(euiTheme), [euiTheme]);
+    const sideBarClasses = useMemo(
+      () =>
+        classNames(
+          'kbnSolutionNav__sidebar',
+          { 'kbnSolutionNav__sidebar--shrink': isSidebarShrunk },
+          props.pageSideBarProps?.className,
+          withSolutionNavStyles
+        ),
+      [isSidebarShrunk, props.pageSideBarProps?.className, withSolutionNavStyles]
     );
 
     const pageSideBar = useMemo(() => {
@@ -84,18 +88,17 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       };
     }, [euiTheme.size.xxl, isSidebarShrunk, props.pageSideBarProps, sideBarClasses]);
 
-    return (
-      <WrappedComponent
-        {...{
-          ...(propagatedProps as P),
-          pageSideBar,
-          pageSideBarProps,
-        }}
-      >
-        {children}
-      </WrappedComponent>
+    const wrappedProps = useMemo(
+      () => ({
+        ...(propagatedProps as P),
+        pageSideBar,
+        pageSideBarProps,
+      }),
+      [propagatedProps, pageSideBar, pageSideBarProps]
     );
-  };
+
+    return <WrappedComponent {...wrappedProps}>{children}</WrappedComponent>;
+  });
 
   WithSolutionNav.displayName = `WithSolutionNavBar(${getDisplayName(WrappedComponent)})`;
 
