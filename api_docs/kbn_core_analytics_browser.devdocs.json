@@ -651,6 +651,10 @@
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
