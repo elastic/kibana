@@ -14,10 +14,10 @@ import { Subject } from 'rxjs';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import {
-  IndicesGetFieldMappingResponse,
   IndicesIndexSettings,
+  IndicesSimulateTemplateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { last, omit } from 'lodash';
+import { omit, some } from 'lodash';
 import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
@@ -227,32 +227,33 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      const knowledgeBaseDataStreamExists = (
+      const knowledgeBaseDataSteams = (
         await esClient.indices.getDataStream({
           name: this.knowledgeBaseDataStream.name,
         })
-      )?.data_streams?.length;
+      )?.data_streams;
 
-      // update component template for semantic_text field
-      // rollover
-      let mappings: IndicesGetFieldMappingResponse = {};
+      let mappings: IndicesSimulateTemplateResponse[] = [];
       try {
-        mappings = await esClient.indices.getFieldMapping({
-          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
-          fields: ['semantic_text'],
-        });
+        mappings = await Promise.all(
+          knowledgeBaseDataSteams.map((ds) =>
+            esClient.indices.simulateTemplate({
+              name: ds.template,
+            })
+          )
+        );
       } catch (error) {
         /* empty */
       }
 
-      const isUsingDedicatedInferenceEndpoint =
-        (
-          last(Object.values(mappings))?.mappings?.semantic_text?.mapping?.semantic_text as {
-            inference_id: string;
-          }
-        )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
+      const isUsingDedicatedInferenceEndpoint = some(
+        mappings,
+        (value) =>
+          (value?.template?.mappings?.properties?.semantic_text as { inference_id: string })
+            ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID
+      );
 
-      if (knowledgeBaseDataStreamExists && isUsingDedicatedInferenceEndpoint) {
+      if (isUsingDedicatedInferenceEndpoint) {
         const currentDataStream = this.createDataStream({
           resource: 'knowledgeBase',
           kibanaVersion: this.options.kibanaVersion,
