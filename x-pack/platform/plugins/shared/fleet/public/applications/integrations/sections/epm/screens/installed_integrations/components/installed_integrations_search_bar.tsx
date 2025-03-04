@@ -33,16 +33,16 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
 }> = ({ filters, countPerStatus, customIntegrationsCount }) => {
   const addUrlFilter = useAddUrlFilters();
   const theme = useEuiTheme();
-  const [searchTermas, setSearchTerms] = useState(filters.q);
+  const [searchTerms, setSearchTerms] = useState(filters.q);
 
   useDebounce(
     () => {
       addUrlFilter({
-        q: searchTermas,
+        q: searchTerms,
       });
     },
     SEARCH_DEBOUNCE_MS,
-    [searchTermas]
+    [searchTerms]
   );
   const statuses: Array<{
     iconType: string;
