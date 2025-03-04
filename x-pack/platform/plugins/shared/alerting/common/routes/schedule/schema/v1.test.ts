@@ -13,7 +13,6 @@ const recurring = {
   onMonthDay: [1, 31],
   onMonth: [1, 3, 5, 12],
   end: '2021-05-20T00:00:00.000Z',
-  occurrences: 25,
 };
 
 const defaultSchedule = {
@@ -43,7 +42,6 @@ describe('scheduleRequestSchema', () => {
         "recurring": Object {
           "end": "2021-05-20T00:00:00.000Z",
           "every": "1d",
-          "occurrences": 25,
           "onMonth": Array [
             1,
             3,
@@ -144,6 +142,17 @@ describe('scheduleRequestSchema', () => {
     );
   });
 
+  it(`throws an error when onMonthDay is not an integer`, async () => {
+    expect(() =>
+      scheduleRequestSchema.validate({
+        ...defaultSchedule,
+        recurring: { ...recurring, onMonthDay: [25.5] },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[recurring.onMonthDay.0]: schedule onMonthDay must be a positive integer."`
+    );
+  });
+
   it(`throws an error when onMonth is empty`, async () => {
     expect(() =>
       scheduleRequestSchema.validate({
@@ -177,6 +186,17 @@ describe('scheduleRequestSchema', () => {
     );
   });
 
+  it(`throws an error when onMonth is not an integer`, async () => {
+    expect(() =>
+      scheduleRequestSchema.validate({
+        ...defaultSchedule,
+        recurring: { ...recurring, onMonth: [3.2] },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[recurring.onMonth.0]: schedule onMonth must be a positive integer."`
+    );
+  });
+
   it(`throws an error when occurrences is less than 0`, async () => {
     expect(() =>
       scheduleRequestSchema.validate({
@@ -185,6 +205,17 @@ describe('scheduleRequestSchema', () => {
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"[recurring.occurrences]: Value must be equal to or greater than [1]."`
+    );
+  });
+
+  it(`throws an error when occurrences is not an integer`, async () => {
+    expect(() =>
+      scheduleRequestSchema.validate({
+        ...defaultSchedule,
+        recurring: { ...recurring, occurrences: 1.5 },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[recurring.occurrences]: schedule occurrences must be a positive integer."`
     );
   });
 });

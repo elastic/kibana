@@ -24,7 +24,7 @@ describe('validateSchedule', () => {
         duration: '2000m',
         recurring: { every: '1d' },
       })
-    ).toEqual('Recurrence every 1d must be longer than the duration 2000m');
+    ).toEqual('Recurrence every 1d must be longer than the duration 2000m.');
   });
 
   it('throws error when duration in hours greater than interval', () => {
@@ -33,7 +33,7 @@ describe('validateSchedule', () => {
         duration: '169h',
         recurring: { every: '1w' },
       })
-    ).toEqual('Recurrence every 1w must be longer than the duration 169h');
+    ).toEqual('Recurrence every 1w must be longer than the duration 169h.');
   });
 
   it('throws error when duration in hours greater than interval in months', () => {
@@ -42,7 +42,7 @@ describe('validateSchedule', () => {
         duration: '740h',
         recurring: { every: '1M' },
       })
-    ).toEqual('Recurrence every 1M must be longer than the duration 740h');
+    ).toEqual('Recurrence every 1M must be longer than the duration 740h.');
   });
 
   it('throws error when duration in hours greater than interval in years', () => {
@@ -51,7 +51,7 @@ describe('validateSchedule', () => {
         duration: '8761h',
         recurring: { every: '1y' },
       })
-    ).toEqual('Recurrence every 1y must be longer than the duration 8761h');
+    ).toEqual('Recurrence every 1y must be longer than the duration 8761h.');
   });
 
   it('throws error when recurring schedule provided with indefinite duration', () => {
@@ -63,5 +63,14 @@ describe('validateSchedule', () => {
     ).toEqual(
       'The duration of -1 represents indefinite schedule. Recurring schedules cannot be set when the duration is -1.'
     );
+  });
+
+  it('throws error when recurring end and occurrences both are provided', () => {
+    expect(
+      validateSchedule({
+        duration: '5h',
+        recurring: { every: '1w', end: '2021-05-10T00:00:00.000Z', occurrences: 5 },
+      })
+    ).toEqual(`Only one of 'end' or 'occurrences' can be set for recurring schedules.`);
   });
 });

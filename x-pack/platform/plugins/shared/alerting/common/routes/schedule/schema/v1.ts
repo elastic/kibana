@@ -15,6 +15,7 @@ import {
   validateTimezoneV1,
   validateScheduleV1,
 } from '../validation';
+import { validateInteger } from '../validation/validate_integer/v1';
 
 export const scheduleRequestSchema = schema.object(
   {
@@ -66,29 +67,40 @@ export const scheduleRequestSchema = schema.object(
           })
         ),
         onMonthDay: schema.maybe(
-          schema.arrayOf(schema.number({ min: 1, max: 31 }), {
-            minSize: 1,
-            meta: {
-              description:
-                'Specific days of the month for recurrence of the schedule. Valid values are 1-31.',
-            },
-          })
+          schema.arrayOf(
+            schema.number({
+              min: 1,
+              max: 31,
+              validate: (value: number) => validateInteger(value, 'onMonthDay'),
+            }),
+            {
+              minSize: 1,
+              meta: {
+                description:
+                  'Specific days of the month for recurrence of the schedule. Valid values are 1-31.',
+              },
+            }
+          )
         ),
         onMonth: schema.maybe(
-          schema.arrayOf(schema.number({ min: 1, max: 12 }), {
-            minSize: 1,
-            meta: {
-              description: 'Specific months for recurrence of the schedule. Valid values are 1-12.',
-            },
-          })
+          schema.arrayOf(
+            schema.number({
+              min: 1,
+              max: 12,
+              validate: (value: number) => validateInteger(value, 'onMonth'),
+            }),
+            {
+              minSize: 1,
+              meta: {
+                description:
+                  'Specific months for recurrence of the schedule. Valid values are 1-12.',
+              },
+            }
+          )
         ),
         occurrences: schema.maybe(
           schema.number({
-            validate: (occurrences: number) => {
-              if (!Number.isInteger(occurrences)) {
-                return 'schedule occurrences must be a positive integer';
-              }
-            },
+            validate: (occurrences: number) => validateInteger(occurrences, 'occurrences'),
             min: 1,
             meta: {
               description: 'Total number of recurrences of the schedule.',

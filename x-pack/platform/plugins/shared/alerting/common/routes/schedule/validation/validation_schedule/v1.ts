@@ -10,11 +10,12 @@ import { DURATION_REGEX, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
 
 export const validateSchedule = (schedule: {
   duration: string;
-  recurring?: { every?: string };
+  recurring?: { every?: string; end?: string; occurrences?: number };
 }) => {
   const { duration, recurring } = schedule;
-  if (recurring?.every && duration !== '-1') {
-    const [, interval, frequency] = recurring?.every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
+  const { end, occurrences, every } = recurring ?? {};
+  if (every && duration !== '-1') {
+    const [, interval, frequency] = every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
     const [, durationNumber, durationUnit] = duration.match(DURATION_REGEX) ?? [];
 
     const intervalInDays = moment
@@ -26,12 +27,16 @@ export const validateSchedule = (schedule: {
       .asDays();
 
     if (intervalInDays && interval && durationInDays >= intervalInDays) {
-      return `Recurrence every ${recurring?.every} must be longer than the duration ${duration}`;
+      return `Recurrence every ${every} must be longer than the duration ${duration}.`;
     }
   }
 
   if (duration === '-1' && recurring) {
     return `The duration of -1 represents indefinite schedule. Recurring schedules cannot be set when the duration is -1.`;
+  }
+
+  if (end && occurrences) {
+    return `Only one of 'end' or 'occurrences' can be set for recurring schedules.`;
   }
 
   return;
