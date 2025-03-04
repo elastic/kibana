@@ -4,11 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AssetsBaseURLQuery } from './use_asset_inventory_data_table';
 
-export const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
-  query,
-  filters,
-  sort: { field: '@timestamp', direction: 'desc' },
-  pageIndex: 0,
-});
+jest.mock('@kbn/mapbox-gl', () => ({}));

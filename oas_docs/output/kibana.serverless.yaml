@@ -38862,6 +38862,8 @@ paths:
                     type: boolean
                   pipeline_exists:
                     type: boolean
+                  product_documentation_status:
+                    type: string
                   security_labs_exists:
                     type: boolean
                   user_data_exists:
@@ -45254,7 +45256,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
