@@ -261,7 +261,7 @@ export function LayerPanels(
       css={css`
         .lnsApp & {
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-          calc(400px + ${euiTheme.size.base});
+            calc(400px + ${euiTheme.size.base});
           margin-left: -400px;
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
