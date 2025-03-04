@@ -1,45 +1,4 @@
 /**
- * Vertex Select
- */
-
-.vertexSelectionTypesBar {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-/**
- * Selection List
- */
-
-.gphSelectionList {
-  height: $euiSizeL * 10;
-  background-color: $euiColorLightestShade;
-  overflow: auto;
-  margin-bottom: 0;
-}
-
-.gphSelectionList__icon {
-  font-size: $euiFontSizeXS;
-}
-
-.gphSelectionList__field {
-  line-height: $euiLineHeight;
-  margin: $euiSizeXS 0;
-  cursor: pointer;
-  width: 100%;
-  display: block;
-  text-align: left;
-
-  > * {
-    vertical-align: middle;
-  }
-}
-
-.gphSelectionList__field--selected {
-  background: $euiColorLightShade;
-}
-
-/**
  * Link summary
  */
 

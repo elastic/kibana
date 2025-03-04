@@ -95,7 +95,7 @@ const ControlPanelComponent = ({
           })}
         </div>
         <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
-        <div className="gphSelectionList">
+        <div css={styles.gphSelectionList}>
           {workspace.selectedNodes.length === 0 && (
             <p className="help-block">
               {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
@@ -158,6 +158,13 @@ const styles = {
         fontSize: euiFontSize(euiThemeContext, 'xs', { unit: 'px' }).fontSize,
         color: euiThemeContext.euiTheme.colors.text,
       },
+    }),
+  gphSelectionList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: `calc(${euiTheme.size.l}* 10)`,
+      backgroundColor: euiTheme.colors.lightestShade,
+      overflow: 'auto',
+      marginBottom: 0,
     }),
 };
 
