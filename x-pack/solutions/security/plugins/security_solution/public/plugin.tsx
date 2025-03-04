@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subject, combineLatestWith, take } from 'rxjs';
+import { Subject, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
