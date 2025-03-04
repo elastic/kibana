@@ -10,7 +10,6 @@ import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import type { MlUsageCollection } from '../../../../services/usage_collection';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import type { INPUT_TYPE } from '../inference_base';
 import { InferenceBase } from '../inference_base';
@@ -19,6 +18,7 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 
 import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
@@ -41,9 +41,9 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    mlUsageCollection: MlUsageCollection
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, mlUsageCollection);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize(
       [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],

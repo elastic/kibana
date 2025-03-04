@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import type { MlUsageCollection } from '../../../../services/usage_collection';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export interface RawTextEmbeddingResponse {
   inference_results: Array<{ predicted_value: number[] }>;
@@ -45,9 +45,9 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    mlUsageCollection: MlUsageCollection
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, mlUsageCollection);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize();
   }

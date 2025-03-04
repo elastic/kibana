@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
-import type { MlUsageCollection } from '../../../../services/usage_collection';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import type { INPUT_TYPE } from '../inference_base';
 import { InferenceBase, type InferResponse } from '../inference_base';
 import { getTextExpansionOutputComponent } from './text_expansion_output';
 import { getTextExpansionInput } from './text_expansion_input';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export interface TextExpansionPair {
   token: string;
@@ -55,9 +55,9 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    mlUsageCollection: MlUsageCollection
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, mlUsageCollection);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize(
       [this.queryText$.pipe(map((questionText) => questionText !== ''))],

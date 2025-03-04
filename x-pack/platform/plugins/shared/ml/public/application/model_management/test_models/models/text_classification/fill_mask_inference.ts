@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { map } from 'rxjs';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import type { MlUsageCollection } from '../../../../services/usage_collection';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 const DEFAULT_MASK_TOKEN = '[MASK]';
 
@@ -38,9 +38,9 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
     deploymentId: string,
-    mlUsageCollection: MlUsageCollection
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId, mlUsageCollection);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
     const maskToken = model.inference_config?.[this.inferenceType]?.mask_token;
     if (maskToken) {
       this.maskToken = maskToken;

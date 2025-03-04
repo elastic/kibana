@@ -23,7 +23,7 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import { useMlApi, useMlKibana } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import type { InferrerType } from './models';
@@ -35,6 +35,7 @@ import {
   isMlIngestInferenceProcessor,
   isMlInferencePipelineInferenceConfig,
 } from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
+import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
@@ -54,11 +55,7 @@ export const SelectedModel: FC<Props> = ({
   setCurrentContext,
 }) => {
   const { trainedModels } = useMlApi();
-  const {
-    services: {
-      mlServices: { mlUsageCollection },
-    },
-  } = useMlKibana();
+  const { telemetryClient } = useMlTelemetryClient();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     const taskType = Object.keys(model.inference_config ?? {})[0];
@@ -75,7 +72,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
@@ -84,7 +81,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
@@ -93,7 +90,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           if (pipelineConfigValues) {
             const { labels, multi_label: multiLabel } = pipelineConfigValues;
@@ -109,7 +106,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
@@ -118,7 +115,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
@@ -127,7 +124,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           if (pipelineConfigValues?.question) {
             tempInferrer.setQuestionText(pipelineConfigValues.question);
@@ -139,7 +136,7 @@ export const SelectedModel: FC<Props> = ({
             model,
             inputType,
             deploymentId,
-            mlUsageCollection
+            telemetryClient
           );
           break;
         default:
@@ -151,7 +148,7 @@ export const SelectedModel: FC<Props> = ({
         model,
         inputType,
         deploymentId,
-        mlUsageCollection
+        telemetryClient
       );
     }
     if (tempInferrer) {
