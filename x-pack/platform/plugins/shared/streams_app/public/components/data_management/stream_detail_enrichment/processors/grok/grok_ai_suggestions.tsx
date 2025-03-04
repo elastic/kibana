@@ -57,21 +57,34 @@ const RefreshButton = ({
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="sparkles"
-          data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
-          onClick={generatePatterns}
-          isLoading={isLoading}
-          disabled={currentConnector === undefined || !hasValidField}
+        <EuiToolTip
+          content={
+            !hasValidField &&
+            i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestionsTooltip',
+              {
+                defaultMessage:
+                  'Make sure the configured field is valid and has samples in existing documents',
+              }
+            )
+          }
         >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
-            {
-              defaultMessage: 'Generate patterns',
-            }
-          )}
-        </EuiButton>
+          <EuiButton
+            size="s"
+            iconType="sparkles"
+            data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
+            onClick={generatePatterns}
+            isLoading={isLoading}
+            disabled={currentConnector === undefined || !hasValidField}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+              {
+                defaultMessage: 'Generate patterns',
+              }
+            )}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexItem>
       {connectors && connectors.length > 1 && (
         <EuiFlexItem grow={false}>
