@@ -115,8 +115,6 @@ export async function installKibanaAssets(options: {
 }): Promise<SavedObjectsImportSuccess[]> {
   const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
 
-  // Todo check if we put this behind a condition
-
   let assetsToInstall: ArchiveAsset[] = [];
   let res: SavedObjectsImportSuccess[] = [];
 
