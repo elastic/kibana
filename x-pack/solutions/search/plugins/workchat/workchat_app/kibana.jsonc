@@ -12,6 +12,6 @@
     "configPath": ["xpack", "workchatApp"],
     "requiredPlugins": ["inference"],
     "optionalPlugins": ["wciSalesforce"],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }

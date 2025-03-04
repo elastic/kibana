@@ -13,6 +13,7 @@ import type {
   WorkChatAppPluginStartDependencies,
 } from './types';
 import { registerApp } from './application';
+import { ChatService, WorkChatServices } from './services';
 
 export class WorkChatAppPlugin
   implements
@@ -23,12 +24,22 @@ export class WorkChatAppPlugin
       WorkChatAppPluginStartDependencies
     >
 {
+  private services?: WorkChatServices;
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
   ): WorkChatAppPluginSetup {
-    registerApp({ core });
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.services) {
+          throw new Error('getServices called before plugin start');
+        }
+        return this.services;
+      },
+    });
 
     return {};
   }
@@ -37,6 +48,14 @@ export class WorkChatAppPlugin
     coreStart: CoreStart,
     pluginsStart: WorkChatAppPluginStartDependencies
   ): WorkChatAppPluginStart {
+    const chatService = new ChatService({
+      http: coreStart.http,
+    });
+
+    this.services = {
+      chatService,
+    };
+
     return {};
   }
 
