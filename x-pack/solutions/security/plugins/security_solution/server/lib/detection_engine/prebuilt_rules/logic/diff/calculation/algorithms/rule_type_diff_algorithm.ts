@@ -21,8 +21,7 @@ import {
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const ruleTypeDiffAlgorithm = <TValue extends DiffableRuleTypes>(
-  versions: ThreeVersionsOf<TValue>,
-  isRuleCustomized: boolean
+  versions: ThreeVersionsOf<TValue>
 ): ThreeWayDiff<TValue> => {
   const {
     base_version: baseVersion,
@@ -38,7 +37,6 @@ export const ruleTypeDiffAlgorithm = <TValue extends DiffableRuleTypes>(
   const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
     targetVersion,
     diffOutcome,
-    isRuleCustomized,
   });
 
   return {
@@ -64,15 +62,17 @@ interface MergeResult<TValue> {
 interface MergeArgs<TValue> {
   targetVersion: TValue;
   diffOutcome: ThreeWayDiffOutcome;
-  isRuleCustomized: boolean;
 }
 
 const mergeVersions = <TValue>({
   targetVersion,
   diffOutcome,
-  isRuleCustomized,
 }: MergeArgs<TValue>): MergeResult<TValue> => {
   switch (diffOutcome) {
+    // Missing base versions always return target version
+    // Scenario -AA is treated as AAA
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
     case ThreeWayDiffOutcome.StockValueNoUpdate:
       return {
         conflict: ThreeWayDiffConflict.NONE,
@@ -92,17 +92,6 @@ const mergeVersions = <TValue>({
         mergedVersion: targetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-      };
-    }
-
-    // Missing base versions always return target version
-    // Scenario -AA is treated as AAA
-    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
-    case ThreeWayDiffOutcome.MissingBaseNoUpdate: {
-      return {
-        mergedVersion: targetVersion,
-        mergeOutcome: ThreeWayMergeOutcome.Target,
-        conflict: ThreeWayDiffConflict.NONE,
       };
     }
     default:

@@ -132,8 +132,9 @@ const mergeVersions = ({
 
     // Missing base versions always return target version
     // If the rule is customized, we return a SOLVABLE conflict
-    // Otherwise we treat scenario -AB as AAB
-    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
+    // Since multi-line string fields are mergeable, we would typically return a merged value
+    // as per https://github.com/elastic/kibana/pull/211862, but with no base version we cannot
+    // complete a full diff merge and so just return the target version
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
       return {
         conflict: isRuleCustomized ? ThreeWayDiffConflict.SOLVABLE : ThreeWayDiffConflict.NONE,

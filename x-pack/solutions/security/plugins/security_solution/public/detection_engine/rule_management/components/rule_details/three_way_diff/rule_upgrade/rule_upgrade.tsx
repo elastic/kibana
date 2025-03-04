@@ -48,7 +48,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
       <RuleUpgradeCallout
         numOfSolvableConflicts={numOfSolvableConflicts}
         numOfNonSolvableConflicts={numOfNonSolvableConflicts}
-        hasBaseVersion={ruleUpgradeState.hasBaseVersion}
+        hasBaseVersion={ruleUpgradeState.has_base_version}
       />
       <EuiSpacer size="s" />
       {fieldNames.map((fieldName) => (
