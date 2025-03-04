@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent, useCallback } from 'react';
+import React, { MouseEvent, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -26,11 +26,12 @@ export interface TabProps {
   isSelected: boolean;
   tabContentId: string;
   onSelect: (item: TabItem) => void;
-  onClose: (item: TabItem) => void;
+  onClose: ((item: TabItem) => void) | undefined;
 }
 
 export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSelect, onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const containerRef = useRef<HTMLDivElement>();
 
   const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -51,23 +52,24 @@ export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSele
   const onCloseEvent = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
-      onClose(item);
+      onClose?.(item);
     },
     [onClose, item]
   );
 
   const onClickEvent = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
-      if (event.currentTarget.getAttribute('data-test-subj') === tabContainerDataTestSubj) {
+      if (event.currentTarget === containerRef.current) {
         // if user presses on the space around the buttons, we should still trigger the onSelectEvent
         onSelectEvent(event);
       }
     },
-    [onSelectEvent, tabContainerDataTestSubj]
+    [onSelectEvent]
   );
 
   return (
     <EuiFlexGroup
+      ref={containerRef}
       alignItems="center"
       css={getTabContainerCss(euiTheme, isSelected)}
       data-test-subj={tabContainerDataTestSubj}
@@ -89,16 +91,18 @@ export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSele
           {item.label}
         </EuiText>
       </button>
-      <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-        <EuiButtonIcon
-          aria-label={closeButtonLabel}
-          title={closeButtonLabel}
-          color="text"
-          data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
-          iconType="cross"
-          onClick={onCloseEvent}
-        />
-      </EuiFlexItem>
+      {Boolean(onClose) && (
+        <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
+          <EuiButtonIcon
+            aria-label={closeButtonLabel}
+            title={closeButtonLabel}
+            color="text"
+            data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
+            iconType="cross"
+            onClick={onCloseEvent}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

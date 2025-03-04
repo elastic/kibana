@@ -49,7 +49,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     (getNextState: (prevState: TabbedContentState) => TabbedContentState) => {
       _setState((prevState) => {
         const nextState = getNextState(prevState);
-        onChanged(nextState);
+        setTimeout(() => onChanged(nextState), 0);
         return nextState;
       });
     },

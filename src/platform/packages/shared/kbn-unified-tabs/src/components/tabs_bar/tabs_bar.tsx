@@ -57,7 +57,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
             isSelected={selectedItem?.id === item.id}
             tabContentId={tabContentId}
             onSelect={onSelect}
-            onClose={onClose}
+            onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
           />
         </EuiFlexItem>
       ))}
