@@ -1090,6 +1090,7 @@ module.exports = {
         'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
