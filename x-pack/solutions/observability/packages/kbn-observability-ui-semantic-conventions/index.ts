@@ -258,14 +258,6 @@ export const ATTR_TRANSACTION_URL = 'transaction.url' as const;
 export const ATTR_TRANSACTION_PROFILER_STACK_TRACE_IDS =
   'transaction.profiler_stack_trace_ids' as const;
 
-/**
- * Identifier for the destination service resource being operated on (e.g. http://elastic.co:80, elasticsearch, rabbitmq/queue_name)
- *
- * @see https://www.elastic.co/guide/en/integrations/current/apm.html#apm-traces
- * @see https://github.com/elastic/apm-data/blob/main/input/elasticapm/docs/spec/v2/span.json
- */
-export const ATTR_SPAN_DESTINATION_SERVICE_RESOURCE = 'span.destination.service.resource' as const;
-
 // These are used in the exploratory_view plugin but not documented elsewhere
 export const METRIC_SYSTEM_MEMORY_USAGE = 'system.memory.usage' as const;
 export const METRIC_SYSTEM_CPU_USAGE = 'system.cpu.usage' as const;

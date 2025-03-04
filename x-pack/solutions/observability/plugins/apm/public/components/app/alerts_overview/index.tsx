@@ -13,13 +13,13 @@ import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
-import { ATTR_SERVICE_NAME } from '@kbn/observability-ui-semantic-conventions';
 import {
   APM_ALERTING_CONSUMERS,
   APM_ALERTING_RULE_TYPE_IDS,
 } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getEnvironmentKuery } from '../../../../common/environment_filter_values';
 import { push } from '../../shared/links/url_helpers';
 
@@ -56,7 +56,7 @@ export function AlertsOverview() {
 
   const apmQueries = useMemo(() => {
     const environmentKuery = getEnvironmentKuery(environment);
-    let query = `${ATTR_SERVICE_NAME}:${serviceName}`;
+    let query = `${SERVICE_NAME}:${serviceName}`;
 
     if (environmentKuery) {
       query += ` AND ${environmentKuery}`;
