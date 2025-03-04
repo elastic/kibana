@@ -141,7 +141,7 @@ export const getIndexResultsRoute = (
               outcome,
             }),
           };
-          const { hits } = await client.asInternalUser.search<ResultDocument>(query);
+          const { hits } = await client.asCurrentUser.search<ResultDocument>(query);
 
           const resultsWithUndefined = hits.hits.map((doc) => doc._source) ?? [];
 

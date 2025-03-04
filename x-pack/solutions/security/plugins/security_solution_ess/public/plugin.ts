@@ -30,6 +30,10 @@ export class SecuritySolutionEssPlugin
     _core: CoreSetup,
     _setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
+    const { securitySolution } = _setupDeps;
+
+    securitySolution.setProductFeatureKeys([]);
+
     return {};
   }
 

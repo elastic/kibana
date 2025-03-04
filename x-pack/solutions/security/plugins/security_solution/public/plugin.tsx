@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subject, combineLatestWith } from 'rxjs';
+import { Subject, combineLatestWith, take } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -61,6 +61,7 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
+import { ProductFeatureAssistantKey } from '../../../packages/features/src/product_features_keys';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -99,6 +100,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.setup(core, plugins);
 
     const { home, usageCollection, management, cases } = plugins;
+    const { productFeatureKeys$ } = this.contract;
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
@@ -183,23 +185,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: 'admin',
     });
 
-    management?.sections.section.kibana.registerApp({
-      id: 'securityAiAssistantManagement',
-      title: ASSISTANT_MANAGEMENT_TITLE,
-      hideFromSidebar: true,
-      order: 1,
-      mount: async (params) => {
-        const { renderApp, services, store } = await mountDependencies();
-        const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+    productFeatureKeys$.subscribe((productFeatureKeys) => {
+      // initial value is null, then it is set as an array in serverless/ess plugin
+      console.log('productFeatureKeys---',productFeatureKeys);
+      // This seemed to work with serverless but not sure how to deal with ess productFeatureKeys
 
-        return renderApp({
-          ...params,
-          services,
-          store,
-          usageCollection,
-          children: <ManagementSettings />,
+      const isInProductFeatureKeys = productFeatureKeys && productFeatureKeys.length > 0 && productFeatureKeys.includes(ProductFeatureAssistantKey.assistant);
+      if (isInProductFeatureKeys) {
+        console.log('======registering assistant management======');
+        management?.sections.section.kibana.registerApp({
+          id: 'securityAiAssistantManagement',
+          title: ASSISTANT_MANAGEMENT_TITLE,
+          hideFromSidebar: true,
+          order: 1,
+          mount: async (params) => {
+            const { renderApp, services, store } = await mountDependencies();
+            const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+
+            return renderApp({
+              ...params,
+              services,
+              store,
+              usageCollection,
+              children: <ManagementSettings />,
+            });
+          },
         });
-      },
+      }
     });
 
     cases?.attachmentFramework.registerExternalReference(

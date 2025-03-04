@@ -49,6 +49,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features/keys';
 
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -213,6 +214,7 @@ export type StartRenderServices = Pick<
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;
+  setProductFeatureKeys: (productFeatureKeys: ProductFeatureKeyType[]) => void;
 }
 
 export interface PluginStart {
