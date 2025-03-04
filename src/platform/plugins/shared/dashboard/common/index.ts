@@ -12,7 +12,6 @@ export type { DashboardCapabilities } from './types';
 export type {
   DashboardPanelMap,
   DashboardPanelState,
-  DashboardContainerByReferenceInput,
 } from './dashboard_container/types';
 
 export {
