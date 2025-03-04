@@ -30,6 +30,7 @@ steps:
   - command: "PLATFORM_VARIANT={{matrix}} .buildkite/scripts/pipelines/chromium_linux_build/build.sh"
     label: "Build {{matrix}} linux headless chromium"
     depends_on: "infer_chromium_version"
+    key: build_chromium
     env:
       DEBIAN_FRONTEND: noninteractive
     agents:
@@ -42,9 +43,9 @@ steps:
       - "x64"
       - "arm64"
 
-  - command: |
-      node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.mjs
+  - command: .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.mjs
     label: provided feedback to issue created to update puppeteer
+    depends_on: "build_chromium"
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2004
