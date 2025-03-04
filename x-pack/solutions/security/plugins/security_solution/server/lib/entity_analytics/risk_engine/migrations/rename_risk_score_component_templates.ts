@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
@@ -46,38 +45,52 @@ export const renameRiskScoreComponentTemplate = async ({
     namespaces: ['*'],
   });
 
-  await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
-    const namespace = savedObject.namespaces?.[0]; // We need to create one component template per space
+  const settledPromises = await Promise.allSettled(
+    savedObjectsResponse.saved_objects.map(async (savedObject) => {
+      const namespace = savedObject.namespaces?.[0]; // We need to create one component template per space
 
-    if (!namespace) {
-      logger.error('Unexpected saved object. Risk Score saved objects must have a namespace');
-      return;
-    }
+      if (!namespace) {
+        logger.error('Unexpected saved object. Risk Score saved objects must have a namespace');
+        return;
+      }
 
-    logger.info(`Starting Risk Score component template migration on namespace ${namespace}`);
+      logger.info(`Starting Risk Score component template migration on namespace ${namespace}`);
 
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
-    const riskScoreDataClient = new RiskScoreDataClient({
-      logger,
-      kibanaVersion,
-      esClient,
-      namespace,
-      soClient,
-      auditLogger,
-    });
+      const riskScoreDataClient = new RiskScoreDataClient({
+        logger,
+        kibanaVersion,
+        esClient,
+        namespace,
+        soClient,
+        auditLogger,
+      });
 
-    await riskScoreDataClient.createOrUpdateRiskScoreComponentTemplate();
-    await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
+      await riskScoreDataClient.createOrUpdateRiskScoreComponentTemplate();
+      await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
 
-    logger.debug(`Risk score component template migration ran on namespace ${namespace}`);
-  });
-
-  // Delete the legacy component template without the namespace in the name
-  await esClient.cluster.deleteComponentTemplate(
-    {
-      name: mappingComponentName,
-    },
-    { ignore: [404] }
+      logger.debug(`Risk score component template migration ran on namespace ${namespace}`);
+    })
   );
+
+  const rejectedPromises = settledPromises.filter(
+    (promise) => promise.status === 'rejected'
+  ) as PromiseRejectedResult[];
+
+  // Migration successfully ran on all spaces
+  if (rejectedPromises.length === 0) {
+    // Delete the legacy component template without the namespace in the name
+    await esClient.cluster.deleteComponentTemplate(
+      {
+        name: mappingComponentName,
+      },
+      { ignore: [404] }
+    );
+  } else {
+    const errorMessages = rejectedPromises.map((promise) => promise.reason?.message).join('\n');
+    throw new Error(
+      `Risk Score component template migration failed with errors: \n${errorMessages}`
+    );
+  }
 };
