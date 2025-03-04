@@ -28,6 +28,7 @@ export const RuleFormRoute = () => {
     ruleTypeRegistry,
     actionTypeRegistry,
     chrome,
+    isServerless,
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
@@ -75,6 +76,9 @@ export const RuleFormRoute = () => {
           actionTypeRegistry,
           ...startServices,
         }}
+        isServerless={isServerless}
+        id={id}
+        ruleTypeId={ruleTypeId}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });
