@@ -57,6 +57,35 @@ export const closeTab = ({ items, selectedItem }: TabsState, item: TabItem): Tab
   };
 };
 
+export const insertTab = (
+  { items, selectedItem }: TabsState,
+  item: TabItem,
+  insertAfterItem: TabItem
+): TabsState => {
+  const insertAfterIndex = items.findIndex((i) => i.id === insertAfterItem.id);
+
+  if (insertAfterIndex === -1) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
+  const nextItems = [...items];
+  const insertIndex = insertAfterIndex + 1;
+
+  if (insertIndex === nextItems.length) {
+    nextItems.push(item);
+  } else {
+    nextItems.splice(insertIndex, 0, item);
+  }
+
+  return {
+    items: nextItems,
+    selectedItem: item,
+  };
+};
+
 export const closeOtherTabs = (_: TabsState, item: TabItem): TabsState => {
   return {
     items: [item],

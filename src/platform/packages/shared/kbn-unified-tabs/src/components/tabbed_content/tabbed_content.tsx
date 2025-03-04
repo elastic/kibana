@@ -16,6 +16,7 @@ import {
   addTab,
   closeTab,
   selectTab,
+  insertTab,
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
@@ -89,12 +90,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const getTabMenuItems = useMemo(() => {
     return getTabMenuActions({
-      onDuplicate: (item) => alert(`Duplicate ${item.id}`),
+      onDuplicate: (item) => {
+        const newItem = createItem();
+        newItem.label = `${item.label} (copy)`;
+        changeState((prevState) => insertTab(prevState, newItem, item));
+      },
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState]);
+  }, [changeState, createItem]);
 
   return (
     <EuiFlexGroup
