@@ -42,11 +42,7 @@ import {
   PreviewDocsFilterOption,
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
-import {
-  processorMachine,
-  ProcessorActorRef,
-  createProcessorMachineImplementations,
-} from '../processor_state_machine';
+import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
 
 const createId = htmlIdGenerator();
 
@@ -71,10 +67,7 @@ export const streamEnrichmentMachine = setup({
           id: 'simulator',
           input: {
             parentRef: self,
-            processors: context.processorsRefs
-              .map((proc) => proc.getSnapshot())
-              .filter((proc) => proc.context.isNew)
-              .map((proc) => proc.context.processor),
+            processors: getStagedProcessors(context),
             streamName: context.definition.stream.name,
           },
         }),
@@ -138,10 +131,7 @@ export const streamEnrichmentMachine = setup({
     })),
     sendProcessorChangeToSimulator: sendTo('simulator', ({ context }) => ({
       type: 'processors.change',
-      processors: context.processorsRefs
-        .map((proc) => proc.getSnapshot())
-        .filter((proc) => proc.context.isNew)
-        .map((proc) => proc.context.processor),
+      processors: getStagedProcessors(context),
     })),
     sendFilterChangeToSimulator: sendTo(
       'simulator',
@@ -337,9 +327,7 @@ export const createStreamEnrichmentMachineImplementations = ({
 > => ({
   actors: {
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
-    processorMachine: processorMachine.provide(
-      createProcessorMachineImplementations({ overlays: core.overlays })
-    ),
+    processorMachine,
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
         data,
@@ -358,3 +346,10 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
+
+function getStagedProcessors(context: StreamEnrichmentContext) {
+  return context.processorsRefs
+    .map((proc) => proc.getSnapshot())
+    .filter((proc) => proc.context.isNew)
+    .map((proc) => proc.context.processor);
+}

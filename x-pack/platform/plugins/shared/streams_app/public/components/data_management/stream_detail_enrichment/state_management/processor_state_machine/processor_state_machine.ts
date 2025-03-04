@@ -4,17 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, MachineImplementationsFrom, assign, emit, sendTo, setup } from 'xstate5';
+import { ActorRefFrom, assign, emit, sendTo, setup } from 'xstate5';
 import { isEqual } from 'lodash';
-import { OverlayStart } from '@kbn/core/public';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { ProcessorDefinition, getProcessorType } from '@kbn/streams-schema';
 import { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorEmittedEvent } from './types';
-import {
-  createConfirmPromptActor,
-  deleteProcessorPromptInput,
-  discardChangesPromptInput,
-} from './confirm_prompt_actor';
 
 export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
 
@@ -24,9 +17,6 @@ export const processorMachine = setup({
     context: {} as ProcessorContext,
     events: {} as ProcessorEvent,
     emitted: {} as ProcessorEmittedEvent,
-  },
-  actors: {
-    confirmPrompt: getPlaceholderFor(createConfirmPromptActor),
   },
   actions: {
     changeProcessor: assign(({ context }, params: { processor: ProcessorDefinition }) => ({
@@ -58,7 +48,7 @@ export const processorMachine = setup({
     hasEditingChanges: ({ context }) => !isEqual(context.initialProcessor, context.processor),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAIwBWRvgBsAZlHSALIwCcADllqA7I0WyANCACeYrbPyzlAJkbiJKxWpVWrAX1eG0WHHiKly1HT0oqxIIMgcPHwCYSIIALSiWlr4KuKysoyy4lbZKtmGJghWiimaZgpJGVpJ7p4Y2LC4BBCoAIYAZtz4kFHEULRejc34sNxtMEyh7Fy8-IJxSSmSuk5aiiqMZuLihYjiKqL4igfiZk4OerJ14Q0+Le1dPRB9A0P3+JhtxNgUU4IRWbRBaIWRyfBqaTiRTSBziNRWNaKPYIUpWVKiLa5MGyEpqNQ3d5NXytTrdXq8fqDO7EghfH5gP4hAGROYxUBxWSbGTwk6WaQ6LTaZHGRDSXT4LRnIUrRj4lyEmkjUlPCmcKlEkaYAAW30mLBZQPmsUQiIhWgFAvscmkogMooQ1VSVnOGksKjkWkV3lp+BV3Uw-A6nFQAFt1VAACKcWBfVAQADCuv6cFoEH4YHw6qo6AA1pnNSTHgGgyHw-1o7G2vGk3q4Ahs1g2mypv8woCosaOYh8Yp8IxcrDpAj5HatCiwX3RM4NooFFYHPlvcMi2TPqWwxHK3HE8mYLBaGBUBgCMgKM2OnhQ-hCw814HiMHNxWYzvaynYA3iDmvi2WG2Zk7dlhFBAcZCsTEtCsM4bCULYJwRSUDnWXFbFEE43A8W4fS1UsoEIMgICzCAKDAakcN8CkAPCVlgRNBBpzUY41FEF1RDUOcVHyFQUQ9I5pDkLY7AFFxpGXD4H2DfDCOeHhZMpN4lV8QhkAgZswGojs2RBBJWJSDilnYxRHF0dReMkfBEQHXQXS2LixKw2910fThpMgeT5IjciVzpb5fk02iuxA4otmOFQhSg6D1hcKwUVEadzHC5JbTkO0nHEcTfUk1yCPcilPI1JTfIZJlphoo1gM5aR0WyWx5AXEo9DkczpElRg5GqdLwoyxyiucqTcqI-K1UKiiWkZMBuA0g120CyrEEcJj2JyTRcXQw4kjijYVH7eKHCxG1REy3CXLcoaXnJC6vKcnU6wCiqdPiC1JVxSwbIcBRNDi3EmPFBwSnCva52O3xsrOjzsufKNX2rXc6wPdNiEzRt8xvPqwcGiGN3LaGqxrPd60bX9olbGbAO0+ioR2hdWLSSE1tyFEEVaz65y5BEIIgkG6TwzH8shnHt1h9990PY9fDPC8rzRsb+pymT+exrcYfx+Gvx-ZsSf-MnyqAnSdnESyzGq8Q5HSSxYodO1GCkHIbZKeLYQgxRubl8HFZcqHIwmqaAAUirTDMs2-PMC3R3mFYuuWvZ9sB-bG9Wmz-Zh7r1+j8SYtQdigtQtlHWRxwdLRDlSRQbHC5RKgkV2McjuSBa3WP458sWTxvc9uEvMMZZ8t2+ajhuKyborE+J-hSbKrS6O7BADaNsFoLNjIy++56sjsMFNhOeL3Cw4h0AgOAASKw005n+IXENtIMnX3IDgKB0uUlD1h3apJoIOBRXZIMhcECCBT4U3PhII419lB2CsAJdiug4ouksi-CueIziOFdv6QB09gqJB2qxV6iJlA4m0CiaCUgy7nHspAjYHFUHFgKlAdBQU4i5COIwKupQNh5x2CiNEGIsQZDkHiAkvVZb+mjoLFWcMPz0PmrPFhqQPoSEkNkGElsijZCOJAzYOhbS6GyKbGuEdIBSMekkQ2BlkhGRMpQlE5wZAdUBusbRPV6iy1ru5TgJEwBGPouhQ2A4diei2AORwhciiQlalCTEzh2o1A5vo06-ceBeOASUF6uRlBlw+nINQcVMStVKMkZIdh4o1GuEI3urjzpyRGnQ2aD107hPxIcJwHEtjJB4lbaCU4hwc1YlCXIcSBp1xLJ7MReMJH7iScFYuUgsjig-tkZe2SraoRkBoZRLoSgrQGfLPKA8lZD1In7E+tSz5TKcJKE2+J16LK2lCfAdgzCbwHOhVQqDY4AJOUA4K2hDaaFMs4SBkCsgomQRYH5aFpRGV3q4IAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAMz4AbACYJAFgDsATkWN5jCfNETRUgDQgAnogCM8gBz4ArMbOjjsxossalAX1f60WHHiKly1HT0xqxIIMgcPHwCYSIIUrKW+IxSlimpEtrOorL6RgimFta2jLLKMlJSivLunhjYsLgEEKgAhgBm3PiQUcRQtF4NTfiw3K0wTKHsXLz8gnGVsviilopmxpWMxnYSeYiJ4hLV8kpSovLGpme14fU+zW2d3RC9-YP3+JitxNgUk4IRGbReaIRT4RSVUTrMpmI7yByWPYICSlfC2RSiHSMSzyKo1Dy3byNXwtDpdHq8PoDO7EgiYAAW3wmLABkVmMVAcQAtNtGOC7NYqpYpIxHCckVolkdZMZnBoUvJLGZLDd3rTPvx2pwoIQyBB8JwIBQwNSicMKf8woConNYohpBJwZopOszGZZEdFMYJal8IqUplTMUpMZVTThphNdrdZBnjw45S3uHfIRkBBWtwwJbpjaOcJ7VDwcYvfI5KkVhIzEiDpJjqdzpdcWGzb5I8QtTq9QmE5wqWqI99ftnwmzgXaEG7HbI7FD7NKId7DIgqnydJZrKVKhJ7GZm0NW1HO7GKT2+8nmmBjZnh9b2SCEJjjH715iZVpMW6kfC+TJZZdjJWZSKHuHxth2Mb6ieFK9kmLZ0oyfRZiyVqjranKIGYLr4KkLpmBiphQkcSJmFsfpKE4UjmCKGLuASxDoBAcAAuerJAmh+YIFylQWIksJQgotjGIwUJfksEJbDkKzFriOQgeqJBkLggQQKxub3jyJH4Lx2juuYdjCVWS4FBcyQqCGIYnMoSoqgS-Yko83CqXe448uY-J-kKIpivISKUfI+DFjKsjTmUlarHJwykk80F9E5Y7ocifKyBUiruvpsi2NWKgBWkbprKIGLSFIEUHu20Z6nF7FxDiFjVDorrup6i75ABUhaSKc4aBklQ2XUcEamVR76oaxqVXmcQnEkthKMKUINuKRkJGC4n2KoZhqMlmIlXSh4QQmY33pkYJaC6Xp4phOhIhIwp+tulgrDIWyndtA3gV2UEvImB3jhc-knXhGzVBdehGd+2F3f+gHKC9jFXpA30JVyFi2GkKzVPd8JQiD+S4kkXp4dkQmlIktGuEAA */
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
@@ -80,32 +70,16 @@ export const processorMachine = setup({
               target: '#configured',
               actions: [{ type: 'updateProcessor' }, { type: 'notifyProcessorChange' }],
             },
-            'processor.cancel': [
-              {
-                guard: 'hasEditingChanges',
-                target: 'confirmingDiscardChanges',
-              },
-              {
-                target: '#deleted',
-              },
-            ],
+            'processor.cancel': {
+              target: '#deleted',
+              actions: [{ type: 'restoreInitialProcessor' }],
+            },
             'processor.change': {
               actions: [
                 { type: 'changeProcessor', params: ({ event }) => event },
                 { type: 'notifyProcessorChange' },
               ],
             },
-          },
-        },
-        confirmingDiscardChanges: {
-          invoke: {
-            src: 'confirmPrompt',
-            input: discardChangesPromptInput,
-            onDone: {
-              target: '#deleted',
-              actions: [{ type: 'restoreInitialProcessor' }],
-            },
-            onError: 'editing',
           },
         },
       },
@@ -127,30 +101,7 @@ export const processorMachine = setup({
                   target: '#configured.idle',
                   actions: [{ type: 'updateProcessor' }, { type: 'notifyProcessorChange' }],
                 },
-                'processor.cancel': [
-                  {
-                    guard: 'hasEditingChanges',
-                    target: 'confirmingDiscardChanges',
-                  },
-                  {
-                    target: '#configured.idle',
-                    actions: [{ type: 'notifyProcessorChange' }, { type: 'emitChangesDiscarded' }],
-                  },
-                ],
-                'processor.delete': 'confirmingDeleteProcessor',
-                'processor.change': {
-                  actions: [
-                    { type: 'changeProcessor', params: ({ event }) => event },
-                    { type: 'notifyProcessorChange' },
-                  ],
-                },
-              },
-            },
-            confirmingDiscardChanges: {
-              invoke: {
-                src: 'confirmPrompt',
-                input: discardChangesPromptInput,
-                onDone: {
+                'processor.cancel': {
                   target: '#configured.idle',
                   actions: [
                     { type: 'restoreInitialProcessor' },
@@ -158,15 +109,13 @@ export const processorMachine = setup({
                     { type: 'emitChangesDiscarded' },
                   ],
                 },
-                onError: 'editing',
-              },
-            },
-            confirmingDeleteProcessor: {
-              invoke: {
-                src: 'confirmPrompt',
-                input: deleteProcessorPromptInput,
-                onDone: '#deleted',
-                onError: 'editing',
+                'processor.delete': '#deleted',
+                'processor.change': {
+                  actions: [
+                    { type: 'changeProcessor', params: ({ event }) => event },
+                    { type: 'notifyProcessorChange' },
+                  ],
+                },
               },
             },
           },
@@ -178,15 +127,5 @@ export const processorMachine = setup({
       type: 'final',
       entry: [{ type: 'notifyProcessorDelete' }],
     },
-  },
-});
-
-export const createProcessorMachineImplementations = ({
-  overlays,
-}: {
-  overlays: OverlayStart;
-}): MachineImplementationsFrom<typeof processorMachine> => ({
-  actors: {
-    confirmPrompt: createConfirmPromptActor({ overlays }),
   },
 });

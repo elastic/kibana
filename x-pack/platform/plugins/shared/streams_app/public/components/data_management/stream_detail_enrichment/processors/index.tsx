@@ -26,6 +26,7 @@ import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
+import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
@@ -83,12 +84,13 @@ export function AddProcessorPanel() {
     }
   }, [methods, processorRef]);
 
+  const handleCancel = useDiscardConfirm(
+    () => processorRef?.send({ type: 'processor.cancel' }),
+    discardChangesPromptOptions
+  );
+
   const handleSubmit: SubmitHandler<ProcessorFormState> = async () => {
     processorRef?.send({ type: 'processor.stage' });
-  };
-
-  const handleCancel = () => {
-    processorRef?.send({ type: 'processor.cancel' });
   };
 
   const handleOpen = () => {
@@ -232,16 +234,18 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
     return () => subscription.unsubscribe();
   }, [methods, processorRef]);
 
+  const handleCancel = useDiscardConfirm(
+    () => processorRef?.send({ type: 'processor.cancel' }),
+    discardChangesPromptOptions
+  );
+
+  const handleProcessorDelete = useDiscardConfirm(
+    () => processorRef?.send({ type: 'processor.delete' }),
+    deleteProcessorPromptOptions
+  );
+
   const handleSubmit: SubmitHandler<ProcessorFormState> = () => {
     processorRef.send({ type: 'processor.update' });
-  };
-
-  const handleProcessorDelete = () => {
-    processorRef.send({ type: 'processor.delete' });
-  };
-
-  const handleCancel = () => {
-    processorRef.send({ type: 'processor.cancel' });
   };
 
   const handleOpen = () => {
@@ -390,4 +394,38 @@ const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes)
   }
 
   return '';
+};
+
+export const discardChangesPromptOptions: DiscardPromptOptions = {
+  message: i18n.translate('xpack.streams.enrichment.processor.discardChanges.message', {
+    defaultMessage: 'Are you sure you want to discard your changes?',
+  }),
+  title: i18n.translate('xpack.streams.enrichment.processor.discardChanges.title', {
+    defaultMessage: 'Discard changes?',
+  }),
+  confirmButtonText: i18n.translate(
+    'xpack.streams.enrichment.processor.discardChanges.confirmButtonText',
+    { defaultMessage: 'Discard' }
+  ),
+  cancelButtonText: i18n.translate(
+    'xpack.streams.enrichment.processor.discardChanges.cancelButtonText',
+    { defaultMessage: 'Keep editing' }
+  ),
+};
+
+export const deleteProcessorPromptOptions: DiscardPromptOptions = {
+  message: i18n.translate('xpack.streams.enrichment.processor.deleteProcessor.message', {
+    defaultMessage: 'Deleting this processor will permanently impact the field configuration.',
+  }),
+  title: i18n.translate('xpack.streams.enrichment.processor.deleteProcessor.title', {
+    defaultMessage: 'Are you sure you want to delete this processor?',
+  }),
+  confirmButtonText: i18n.translate(
+    'xpack.streams.enrichment.processor.deleteProcessor.confirmButtonText',
+    { defaultMessage: 'Delete processor' }
+  ),
+  cancelButtonText: i18n.translate(
+    'xpack.streams.enrichment.processor.deleteProcessor.cancelButtonText',
+    { defaultMessage: 'Cancel' }
+  ),
 };
