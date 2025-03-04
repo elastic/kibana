@@ -16,42 +16,40 @@ export const readPrivileges = async (
   return (
     await esClient.security.hasPrivileges(
       {
-        body: {
-          cluster: [
-            'all',
-            'manage',
-            'manage_api_key',
-            'manage_transform',
-            'manage_index_templates',
-            'manage_ml',
-            'manage_own_api_key',
-            'manage_pipeline',
-            'manage_security',
-            'monitor',
-            'monitor_transform',
-            'monitor_ml',
-          ],
-          index: [
-            {
-              names: [index],
-              privileges: [
-                'all',
-                'create',
-                'create_doc',
-                'create_index',
-                'delete',
-                'delete_index',
-                'index',
-                'manage',
-                'maintenance',
-                'monitor',
-                'read',
-                'view_index_metadata',
-                'write',
-              ],
-            },
-          ],
-        },
+        cluster: [
+          'all',
+          'manage',
+          'manage_api_key',
+          'manage_transform',
+          'manage_index_templates',
+          'manage_ml',
+          'manage_own_api_key',
+          'manage_pipeline',
+          'manage_security',
+          'monitor',
+          'monitor_transform',
+          'monitor_ml',
+        ],
+        index: [
+          {
+            names: [index],
+            privileges: [
+              'all',
+              'create',
+              'create_doc',
+              'create_index',
+              'delete',
+              'delete_index',
+              'index',
+              'manage',
+              'maintenance',
+              'monitor',
+              'read',
+              'view_index_metadata',
+              'write',
+            ],
+          },
+        ],
       },
       { meta: true }
     )

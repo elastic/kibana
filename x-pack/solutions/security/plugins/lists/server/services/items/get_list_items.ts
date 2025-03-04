@@ -27,15 +27,12 @@ export const getListItems = async ({
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
   const listItemsES = await esClient.search<SearchEsListItemSchema>({
-    body: {
-      query: {
-        ids: {
-          values: ids,
-        },
+    index: listItemIndex,
+    query: {
+      ids: {
+        values: ids,
       },
     },
-    ignore_unavailable: true,
-    index: listItemIndex,
     seq_no_primary_term: true,
   });
 

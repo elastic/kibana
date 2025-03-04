@@ -140,38 +140,5 @@ describe('ProductDocumentationTool', () => {
         },
       });
     });
-
-    it('does not include citations if contentReferencesStore is false', async () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: undefined,
-      }) as DynamicStructuredTool;
-
-      (retrieveDocumentation as jest.Mock).mockResolvedValue({
-        documents: [
-          {
-            title: 'exampleTitle',
-            url: 'exampleUrl',
-            content: 'exampleContent',
-            summarized: false,
-          },
-        ] as RetrieveDocumentationResultDoc[],
-      });
-
-      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
-
-      expect(result).toEqual({
-        content: {
-          documents: [
-            {
-              content: 'exampleContent',
-              title: 'exampleTitle',
-              url: 'exampleUrl',
-              summarized: false,
-            },
-          ],
-        },
-      });
-    });
   });
 });
