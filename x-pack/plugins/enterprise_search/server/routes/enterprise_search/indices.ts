@@ -19,6 +19,7 @@ import {
   deleteConnectorSecret,
   deleteConnectorById,
   updateConnectorIndexName,
+  Connector,
 } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
@@ -26,6 +27,7 @@ import {
 } from '@kbn/search-connectors/lib/fetch_connectors';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
+import { Crawler } from '../../../common/types/crawler';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
@@ -126,8 +128,17 @@ export function registerIndexRoutes({
         from,
         size
       );
-      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
-      const crawlers = await fetchCrawlers(client, indexNames);
+
+      let connectors: Connector[] = [];
+      let crawlers: Crawler[] = [];
+      // If the user doesn't have permissions, fetchConnectors will error out. We still want to return indices in that case.
+      try {
+        connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+        crawlers = await fetchCrawlers(client, indexNames);
+      } catch {
+        connectors = [];
+        crawlers = [];
+      }
       const enrichedIndices = indices.map((index) => ({
         ...index,
         connector: connectors.find((connector) => connector.index_name === index.name),
@@ -164,7 +175,7 @@ export function registerIndexRoutes({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const index = await fetchIndex(client, indexName);
+        const index = await fetchIndex(client, indexName, log);
         return response.ok({
           body: index,
           headers: { 'content-type': 'application/json' },
@@ -198,8 +209,15 @@ export function registerIndexRoutes({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const crawler = await fetchCrawlerByIndexName(client, indexName);
-        const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+        let connector: Connector | undefined;
+        let crawler: Crawler | undefined;
+        // users without permissions to fetch connectors should still see a result
+        try {
+          connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+          crawler = await fetchCrawlerByIndexName(client, indexName);
+        } catch (error) {
+          log.error(`Error fetching connector for index ${indexName}: ${error}`);
+        }
 
         if (crawler) {
           const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
@@ -588,7 +606,15 @@ export function registerIndexRoutes({
         });
       }
 
-      const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+      let connector: Connector | undefined;
+      let crawler: Crawler | undefined;
+      // users without permissions to fetch connectors should still be able to create an index
+      try {
+        connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+        crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+      } catch (error) {
+        log.error(`Error fetching connector for index ${indexName}: ${error}`);
+      }
 
       if (crawler) {
         return createError({
@@ -603,11 +629,6 @@ export function registerIndexRoutes({
           statusCode: 409,
         });
       }
-
-      const connector = await fetchConnectorByIndexName(
-        client.asCurrentUser,
-        request.body.index_name
-      );
 
       if (connector) {
         return createError({
