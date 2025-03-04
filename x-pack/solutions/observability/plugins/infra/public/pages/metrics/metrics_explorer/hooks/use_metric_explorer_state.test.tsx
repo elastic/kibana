@@ -88,7 +88,6 @@ describe('useMetricsExplorerState', () => {
       pathname,
     }));
     performance.mark = jest.fn();
-    performance.clearMeasures = jest.fn();
   });
 
   afterEach(() => {

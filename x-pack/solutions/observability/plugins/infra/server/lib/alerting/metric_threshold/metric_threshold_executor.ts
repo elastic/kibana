@@ -472,7 +472,7 @@ export const createMetricThresholdExecutor =
           metricsExplorerLocator,
           additionalContext,
         }),
-        reason: alertHits?.[ALERT_REASON],
+
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,

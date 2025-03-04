@@ -38,13 +38,13 @@
       "visTypeTimeseries",
       "apmDataAccess",
       "logsDataAccess",
-      "entityManager",
-      "fieldsMetadata"
+      "entityManager"
     ],
     "optionalPlugins": [
       "spaces",
       "ml",
       "home",
+      "embeddable",
       "osquery",
       "cloud",
       "profilingDataAccess",
@@ -59,6 +59,7 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
+      "embeddable",
       "controls"
     ]
   }

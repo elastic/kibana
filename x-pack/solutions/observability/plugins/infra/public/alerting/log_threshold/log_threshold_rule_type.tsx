@@ -35,9 +35,7 @@ const logThresholdDefaultActionMessage = i18n.translate(
 const logThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.logs.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `Recovered: '{{context.reason}}'
-    
-    '{{rule.name}}' has recovered.
+    defaultMessage: `'{{rule.name}}' has recovered.
 
 [View alert details]('{{context.alertDetailsUrl}}')
 `,

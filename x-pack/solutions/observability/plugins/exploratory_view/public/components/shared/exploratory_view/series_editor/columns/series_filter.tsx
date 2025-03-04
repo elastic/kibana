@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { ATTR_TRANSACTION_URL } from '@kbn/observability-ui-semantic-conventions';
 import { FilterExpanded } from './filter_expanded';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { FieldLabels, LABEL_FIELDS_FILTER } from '../../configurations/constants/constants';
 import { SelectedFilters } from './selected_filters';
 import { LabelsFieldFilter } from '../components/labels_filter';
 import { URLSearch } from '../../components/url_search/url_search';
-import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
 
 interface Props {
   seriesId: number;
@@ -30,7 +30,7 @@ export interface Field {
 
 export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
   const options: Field[] = seriesConfig.filterFields
-    .filter((field) => field !== TRANSACTION_URL)
+    .filter((field) => field !== ATTR_TRANSACTION_URL)
     .map((field) => {
       if (typeof field === 'string') {
         return { label: seriesConfig.labels?.[field] ?? FieldLabels[field] ?? field, field };
@@ -47,9 +47,9 @@ export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
   const hasUrlFilter = useMemo(() => {
     return seriesConfig.filterFields.some((field) => {
       if (typeof field === 'string') {
-        return field === TRANSACTION_URL;
+        return field === ATTR_TRANSACTION_URL;
       } else if (field.field !== undefined) {
-        return field.field === TRANSACTION_URL;
+        return field.field === ATTR_TRANSACTION_URL;
       } else {
         return false;
       }

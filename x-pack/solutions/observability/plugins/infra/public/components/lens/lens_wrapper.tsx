@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -114,7 +115,7 @@ export const LensWrapper = ({
               onLoad={handleOnLoad}
               query={state.query}
               timeRange={dateRange}
-              viewMode={'view'}
+              viewMode={ViewMode.VIEW}
             />
           </>
         )}

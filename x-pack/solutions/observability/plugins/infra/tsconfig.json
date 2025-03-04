@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -117,9 +117,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-management",
-    "@kbn/response-ops-rule-form",
-    "@kbn/traced-es-client",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/traced-es-client"
   ],
   "exclude": ["target/**/*"]
 }
