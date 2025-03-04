@@ -59,7 +59,7 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... <index> ...', () => {
-      test('can suggest lookup indices (and aliases)', async () => {
+      test('can suggest lookup indices (and aliases), and a create index command', async () => {
         const { suggest } = await setup();
 
         const suggestions = await suggest('FROM index | LEFT JOIN /');
@@ -70,6 +70,7 @@ describe('autocomplete.suggest', () => {
           'join_index_with_alias',
           'join_index_alias_1',
           'join_index_alias_2',
+          'Create lookup index',
         ]);
       });
 
