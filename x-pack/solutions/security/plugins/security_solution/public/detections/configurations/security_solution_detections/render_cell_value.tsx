@@ -106,24 +106,17 @@ export const CellValue = memo(function RenderCellValue({
    */
 
   const finalData = useMemo(() => {
-    const idPosition = legacyAlert.findIndex((field) => field.field === '_id');
-    const indexPosition = legacyAlert.findIndex((field) => field.field === '_index');
-
-    const clonedLegacyAlert = structuredClone(legacyAlert);
-
-    if (idPosition !== -1) {
-      const idValue = clonedLegacyAlert[idPosition].value;
-      clonedLegacyAlert[idPosition].value = Array.isArray(idValue) ? idValue : [idValue];
-    }
-
-    if (indexPosition !== -1) {
-      const indexValue = clonedLegacyAlert[indexPosition].value;
-      clonedLegacyAlert[indexPosition].value = Array.isArray(indexValue)
-        ? indexValue
-        : [indexValue];
-    }
-
-    return clonedLegacyAlert as TimelineNonEcsData[];
+    return (legacyAlert as TimelineNonEcsData[]).map((field) => {
+      if (['_id', '_index'].includes(field.field)) {
+        const newValue = field.value ?? '';
+        return {
+          field: field.field,
+          value: Array.isArray(newValue) ? newValue : [newValue],
+        };
+      } else {
+        return field;
+      }
+    });
   }, [legacyAlert]);
 
   const actualSuppressionCount = useMemo(() => {
