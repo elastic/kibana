@@ -10,7 +10,7 @@ import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerScopeName } from '../../constants';
+import type { DataViewManagerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { useDataView } from '../../hooks/use_data_view';
@@ -18,7 +18,7 @@ import { sharedStateSelector } from '../../redux/selectors';
 import { shared } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 
-export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) => {
+export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
 

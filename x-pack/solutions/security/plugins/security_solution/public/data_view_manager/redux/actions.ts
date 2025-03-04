@@ -7,7 +7,7 @@
 
 import { createAction } from '@reduxjs/toolkit';
 
-import type { DataViewPickerScopeName } from '../constants';
+import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 
 export const selectDataViewAsync = createAction<{
@@ -19,5 +19,5 @@ export const selectDataViewAsync = createAction<{
   /**
    * Specify one or more security solution scopes where the data view selection should be applied
    */
-  scope: DataViewPickerScopeName[];
+  scope: DataViewManagerScopeName[];
 }>(`${SLICE_PREFIX}/selectDataView`);

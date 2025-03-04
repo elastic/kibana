@@ -7,7 +7,7 @@
 
 import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
-import type { DataViewPickerScopeName } from '../constants';
+import type { DataViewManagerScopeName } from '../constants';
 import { selectDataViewAsync } from '../redux/actions';
 
 export const useSelectDataView = () => {
@@ -24,7 +24,7 @@ export const useSelectDataView = () => {
       /**
        * Data view selection will be applied to the scopes listed here
        */
-      scope: DataViewPickerScopeName[];
+      scope: DataViewManagerScopeName[];
     }) => {
       dispatch(selectDataViewAsync(params));
     },

@@ -8,7 +8,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewPickerScopeName } from '../constants';
+import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 import type { ScopedDataViewSelectionState, SharedDataViewSelectionState } from './types';
 import { selectDataViewAsync } from './actions';
@@ -24,7 +24,7 @@ export const initialSharedState: SharedDataViewSelectionState = {
   status: 'pristine',
 };
 
-export const createDataViewSelectionSlice = <T extends DataViewPickerScopeName>(scopeName: T) =>
+export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>(scopeName: T) =>
   createSlice({
     name: `${SLICE_PREFIX}/${scopeName}`,
     initialState: initialScopeState,

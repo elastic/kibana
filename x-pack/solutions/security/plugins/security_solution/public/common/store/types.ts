@@ -26,7 +26,7 @@ import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
-import type { RootState as DataViewPickerState } from '../../data_view_picker/redux/reducer';
+import type { RootState as DataViewPickerState } from '../../data_view_manager/redux/reducer';
 
 export type State = HostsPluginState &
   UsersPluginState &

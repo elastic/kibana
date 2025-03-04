@@ -6,12 +6,12 @@
  */
 
 import { useSelector } from 'react-redux';
-import type { DataViewPickerScopeName } from '../constants';
+import type { DataViewManagerScopeName } from '../constants';
 import { sourcererAdapterSelector } from '../redux/selectors';
 
 /**
  * Returns data view selection for given scopeName
  */
-export const useDataView = (scopeName: DataViewPickerScopeName) => {
+export const useDataView = (scopeName: DataViewManagerScopeName) => {
   return useSelector(sourcererAdapterSelector(scopeName));
 };

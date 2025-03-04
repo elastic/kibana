@@ -21,7 +21,7 @@ import type { KueryFilterQuery } from '../../../../../common/types/timeline';
 import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 import { Sourcerer } from '../../../../sourcerer/components';
-import { DataViewPicker } from '../../../../data_view_picker/components/data_view_picker';
+import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';

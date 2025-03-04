@@ -9,8 +9,8 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewPickerScopeName } from '../../../data_view_picker/constants';
-import { useFullDataView } from '../../../data_view_picker/hooks/use_full_data_view';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useFullDataView } from '../../../data_view_manager/hooks/use_full_data_view';
 import { DataViewErrorComponent } from './data_view_error';
 import { useEnableExperimental } from '../../hooks/use_experimental_features';
 
@@ -35,7 +35,7 @@ export const withDataView = <P extends WithDataViewArg>(
 ) => {
   const ComponentWithDataView = (props: OmitDataView<P>) => {
     const experimentalDataView = useFullDataView({
-      dataViewPickerScope: DataViewPickerScopeName.timeline,
+      dataViewManagerScope: DataViewManagerScopeName.timeline,
     });
 
     let dataView = useGetScopedSourcererDataView({

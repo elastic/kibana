@@ -7,21 +7,21 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 
-import type { DataViewPickerScopeName } from '../constants';
+import type { DataViewManagerScopeName } from '../constants';
 import type { RootState } from './reducer';
 
-export const sourcererAdapterSelector = (scope: DataViewPickerScopeName) =>
-  createSelector([(state: RootState) => state.dataViewPicker], (dataViewPicker) => {
-    const scopedState = dataViewPicker[scope];
+export const sourcererAdapterSelector = (scope: DataViewManagerScopeName) =>
+  createSelector([(state: RootState) => state.dataViewManager], (dataViewManager) => {
+    const scopedState = dataViewManager[scope];
 
     return {
       ...scopedState,
       dataView: scopedState.dataView ? scopedState.dataView : { title: '', id: '' },
-      indicesExist: !!dataViewPicker[scope]?.dataView?.title?.split(',')?.length,
+      indicesExist: !!dataViewManager[scope]?.dataView?.title?.split(',')?.length,
     };
   });
 
 export const sharedStateSelector = createSelector(
-  [(state: RootState) => state.dataViewPicker],
-  (dataViewPicker) => dataViewPicker.shared
+  [(state: RootState) => state.dataViewManager],
+  (dataViewManager) => dataViewManager.shared
 );

@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useBrowserFields } from '../../../../../data_view_picker/hooks/use_browser_fields';
+import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';

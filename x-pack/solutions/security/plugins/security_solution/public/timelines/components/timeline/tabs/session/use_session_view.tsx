@@ -19,7 +19,7 @@ import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../../../../data_view_picker/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import {
   getScopedActions,

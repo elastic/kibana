@@ -40,7 +40,7 @@ jest.mock('react-redux', () => {
             },
           },
         },
-        dataViewPicker: { timeline: {} },
+        dataViewManager: { timeline: {} },
       }),
   };
 });

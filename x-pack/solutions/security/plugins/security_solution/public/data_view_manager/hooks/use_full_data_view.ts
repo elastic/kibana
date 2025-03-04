@@ -8,11 +8,11 @@
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
-import { type DataViewPickerScopeName } from '../constants';
+import { type DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 
 export interface UseGetScopedSourcererDataViewArgs {
-  dataViewPickerScope: DataViewPickerScopeName;
+  dataViewManagerScope: DataViewManagerScopeName;
 }
 
 /*
@@ -20,12 +20,12 @@ export interface UseGetScopedSourcererDataViewArgs {
  * selected data view.
  */
 export const useFullDataView = ({
-  dataViewPickerScope,
+  dataViewManagerScope: dataViewManagerScope,
 }: UseGetScopedSourcererDataViewArgs): DataView | undefined => {
   const {
     services: { fieldFormats },
   } = useKibana();
-  const { dataView: dataViewSpec } = useDataView(dataViewPickerScope);
+  const { dataView: dataViewSpec } = useDataView(dataViewManagerScope);
 
   const dataView = useMemo(() => {
     if (Object.keys(dataViewSpec?.fields ?? {}).length) {

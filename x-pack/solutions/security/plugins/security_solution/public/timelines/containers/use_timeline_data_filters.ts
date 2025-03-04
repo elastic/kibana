@@ -13,7 +13,7 @@ import {
   endSelector,
 } from '../../common/components/super_date_picker/selectors';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useSelectedPatterns } from '../../data_view_picker/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 

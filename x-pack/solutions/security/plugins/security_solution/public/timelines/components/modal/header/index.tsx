@@ -22,7 +22,7 @@ import { useEnableExperimental } from '../../../../common/hooks/use_experimental
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-import { useDataView } from '../../../../data_view_picker/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -44,8 +44,8 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { AttachToCaseButton } from '../actions/attach_to_case_button';
 import { SaveTimelineButton } from '../actions/save_timeline_button';
-import { useBrowserFields } from '../../../../data_view_picker/hooks/use_browser_fields';
-import { DataViewPickerScopeName } from '../../../../data_view_picker/constants';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 
 const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
 const autoOverflowXCSS = { 'overflow-x': 'auto' };
@@ -79,8 +79,8 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
 
     let { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
 
-    const { dataView: experimentalDataView } = useDataView(DataViewPickerScopeName.timeline);
-    const experimentalBrowserFields = useBrowserFields(DataViewPickerScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
+    const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
 
     if (newDataViewPickerEnabled) {
       browserFields = experimentalBrowserFields;

@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import { useInitDataViewPicker } from './use_init_data_view_picker';
+import { useInitDataViewManager } from './use_init_data_view_manager';
 
 describe('useInitDataViewPicker', () => {
   it('should render', () => {
     renderHook(
       () => {
-        return useInitDataViewPicker();
+        return useInitDataViewManager();
       },
       { wrapper: TestProviders }
     );

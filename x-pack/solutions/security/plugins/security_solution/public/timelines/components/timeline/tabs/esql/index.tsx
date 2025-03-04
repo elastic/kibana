@@ -19,7 +19,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../../data_view_picker/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useKibana } from '../../../../../common/lib/kibana';

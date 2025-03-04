@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
 
 import { useFullDataView } from './use_full_data_view';
 import { useDataView } from './use_data_view';
@@ -37,7 +37,7 @@ describe('useFullDataView', () => {
 
     it('should return DataView instance', () => {
       const wrapper = renderHook(
-        () => useFullDataView({ dataViewPickerScope: DataViewPickerScopeName.default }),
+        () => useFullDataView({ dataViewManagerScope: DataViewManagerScopeName.default }),
         {
           wrapper: TestProviders,
         }
@@ -61,7 +61,7 @@ describe('useFullDataView', () => {
 
     it('should return undefined', () => {
       const wrapper = renderHook(
-        () => useFullDataView({ dataViewPickerScope: DataViewPickerScopeName.default }),
+        () => useFullDataView({ dataViewManagerScope: DataViewManagerScopeName.default }),
         {
           wrapper: TestProviders,
         }

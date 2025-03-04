@@ -10,7 +10,7 @@ import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
-import { DataViewPickerScopeName } from '../../constants';
+import { DataViewManagerScopeName } from '../../constants';
 
 const mockDataViewsService = {
   get: jest.fn(),
@@ -22,7 +22,7 @@ const mockDataViewsService = {
 } as unknown as DataViewsServicePublic;
 
 const mockedState: RootState = {
-  dataViewPicker: {
+  dataViewManager: {
     analyzer: {
       dataView: null,
       status: 'pristine',
@@ -87,7 +87,7 @@ describe('createDataViewSelectedListener', () => {
 
   it('should return cached adhoc data view first', async () => {
     await listener.effect(
-      selectDataViewAsync({ id: 'adhoc_test-*', scope: [DataViewPickerScopeName.default] }),
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: [DataViewManagerScopeName.default] }),
       mockListenerApi
     );
 
@@ -99,7 +99,7 @@ describe('createDataViewSelectedListener', () => {
       selectDataViewAsync({
         id: 'fetched-id',
         fallbackPatterns: ['test-*'],
-        scope: [DataViewPickerScopeName.default],
+        scope: [DataViewManagerScopeName.default],
       }),
       mockListenerApi
     );
@@ -117,7 +117,7 @@ describe('createDataViewSelectedListener', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({ id: 'adhoc_test-*' }),
-        type: 'x-pack/security_solution/dataViewPicker/default/setSelectedDataView',
+        type: 'x-pack/security_solution/dataViewManager/default/setSelectedDataView',
       })
     );
   });
@@ -126,7 +126,7 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: [DataViewPickerScopeName.default],
+        scope: [DataViewManagerScopeName.default],
       }),
       mockListenerApi
     );
@@ -156,14 +156,14 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: [DataViewPickerScopeName.default],
+        scope: [DataViewManagerScopeName.default],
       }),
       mockListenerApi
     );
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'x-pack/security_solution/dataViewPicker/default/dataViewSelectionError',
+        type: 'x-pack/security_solution/dataViewManager/default/dataViewSelectionError',
       })
     );
   });

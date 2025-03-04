@@ -18,8 +18,8 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
-import { useDataView } from '../../data_view_picker/hooks/use_data_view';
-import { DataViewPickerScopeName } from '../../data_view_picker/constants';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 
@@ -30,7 +30,7 @@ export const TimelinesPage = React.memo(() => {
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
   let { indicesExist } = useSourcererDataView();
-  const { indicesExist: experimentalIndicesExist } = useDataView(DataViewPickerScopeName.default);
+  const { indicesExist: experimentalIndicesExist } = useDataView(DataViewManagerScopeName.default);
 
   if (newDataViewPickerEnabled) {
     indicesExist = experimentalIndicesExist;

@@ -11,7 +11,7 @@ import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { shared } from '../slices';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 
 const mockDataViewsService = {
@@ -50,9 +50,9 @@ describe('createInitListener', () => {
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: [
-          DataViewPickerScopeName.default,
-          DataViewPickerScopeName.timeline,
-          DataViewPickerScopeName.analyzer,
+          DataViewManagerScopeName.default,
+          DataViewManagerScopeName.timeline,
+          DataViewManagerScopeName.analyzer,
         ],
       })
     );

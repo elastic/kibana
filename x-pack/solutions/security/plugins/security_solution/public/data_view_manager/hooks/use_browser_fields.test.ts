@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useBrowserFields } from './use_browser_fields';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 import { type FieldSpec } from '@kbn/data-views-plugin/common';
 
@@ -34,7 +34,7 @@ describe('useBrowserFields', () => {
   });
 
   it('should call the useDataView hook and return browser fields map', () => {
-    const wrapper = renderHook(() => useBrowserFields(DataViewPickerScopeName.default), {
+    const wrapper = renderHook(() => useBrowserFields(DataViewManagerScopeName.default), {
       wrapper: TestProviders,
     });
 

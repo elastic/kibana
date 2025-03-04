@@ -7,10 +7,10 @@
 
 import type { DataViewSpec } from './types';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
-import { initialDataViewPickerState, type RootState } from './reducer';
+import { initialDataViewManagerState, type RootState } from './reducer';
 import { mockIndexFields } from '../../common/containers/source/mock';
 
-const dataViewPickerState = structuredClone(initialDataViewPickerState).dataViewPicker;
+const dataViewManagerState = structuredClone(initialDataViewManagerState).dataViewManager;
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -34,20 +34,20 @@ const mockDefaultDataViewSpec: DataViewSpec = {
 };
 
 export const mockDataViewPickerState: RootState = {
-  dataViewPicker: {
-    ...dataViewPickerState,
+  dataViewManager: {
+    ...dataViewManagerState,
     timeline: {
-      ...dataViewPickerState.timeline,
+      ...dataViewManagerState.timeline,
       dataView: { ...mockDefaultDataViewSpec, id: 'mock-timeline-data-view' },
       status: 'ready',
     },
     default: {
-      ...dataViewPickerState.default,
+      ...dataViewManagerState.default,
       dataView: mockDefaultDataViewSpec,
       status: 'ready',
     },
     analyzer: {
-      ...dataViewPickerState.analyzer,
+      ...dataViewManagerState.analyzer,
       dataView: mockDefaultDataViewSpec,
       status: 'ready',
     },

@@ -9,8 +9,8 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
-import { DataViewPickerScopeName } from '../../../data_view_picker/constants';
-import { useSelectDataView } from '../../../data_view_picker/hooks/use_select_data_view';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
@@ -69,7 +69,7 @@ export const useUpdateTimeline = () => {
           selectDataView({
             id: _timeline.dataViewId,
             fallbackPatterns: _timeline.indexNames,
-            scope: [DataViewPickerScopeName.timeline],
+            scope: [DataViewManagerScopeName.timeline],
           });
         } else {
           dispatch(

@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
 import { useDataView } from '../../hooks/use_data_view';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { shared } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
@@ -40,7 +40,7 @@ jest.mock('../../../common/lib/kibana', () => ({
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   ...jest.requireActual('@kbn/unified-search-plugin/public'),
   DataViewPicker: jest.fn((props) => (
-    <div data-test-subj="dataViewPicker">
+    <div data-test-subj="dataViewManager">
       <button
         type="button"
         onClick={() => props.onChangeDataView('new-data-view-id')}
@@ -95,7 +95,7 @@ describe('DataViewPicker', () => {
   it('renders with the current data view ID', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewPickerScopeName.default} />
+        <DataViewPicker scope={DataViewManagerScopeName.default} />
       </TestProviders>
     );
 
@@ -106,7 +106,7 @@ describe('DataViewPicker', () => {
   it('calls selectDataView when changing data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewPickerScopeName.default} />
+        <DataViewPicker scope={DataViewManagerScopeName.default} />
       </TestProviders>
     );
 
@@ -121,7 +121,7 @@ describe('DataViewPicker', () => {
   it('opens data view editor when creating a new data view', async () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewPickerScopeName.default} />
+        <DataViewPicker scope={DataViewManagerScopeName.default} />
       </TestProviders>
     );
 
@@ -155,7 +155,7 @@ describe('DataViewPicker', () => {
 
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewPickerScopeName.default} />
+        <DataViewPicker scope={DataViewManagerScopeName.default} />
       </TestProviders>
     );
 

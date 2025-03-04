@@ -48,7 +48,7 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
-import { mockDataViewPickerState } from '../../data_view_picker/redux/mock';
+import { mockDataViewPickerState } from '../../data_view_manager/redux/mock';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])

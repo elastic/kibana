@@ -29,10 +29,10 @@ export const createDataViewSelectedListener = (dependencies: {
         }
 
         const cachedAdHocDataView =
-          state.dataViewPicker.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
+          state.dataViewManager.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
 
         const cachedPersistedDataView =
-          state.dataViewPicker.shared.dataViews.find((dv) => dv.id === id) ?? null;
+          state.dataViewManager.shared.dataViews.find((dv) => dv.id === id) ?? null;
 
         const cachedDataView = cachedAdHocDataView || cachedPersistedDataView;
 

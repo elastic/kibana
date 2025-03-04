@@ -35,7 +35,7 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 /**
  * Should only be used once in the application, on the top level of the rendering tree
  */
-export const useInitDataViewPicker = () => {
+export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const { newDataViewPickerEnabled } = useEnableExperimental();

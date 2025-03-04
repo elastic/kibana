@@ -14,8 +14,8 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useDataView } from '../../../../../data_view_picker/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_picker/hooks/use_selected_patterns';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,

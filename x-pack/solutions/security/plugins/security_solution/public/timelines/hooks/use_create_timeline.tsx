@@ -19,10 +19,10 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
-import { useSelectDataView } from '../../data_view_picker/hooks/use_select_data_view';
-import { DataViewPickerScopeName } from '../../data_view_picker/constants';
-import { useDataView } from '../../data_view_picker/hooks/use_data_view';
-import { useSelectedPatterns } from '../../data_view_picker/hooks/use_selected_patterns';
+import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
+import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
@@ -59,9 +59,9 @@ export const useCreateTimeline = ({
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataView: experimentalDataView } = useDataView(DataViewPickerScopeName.default);
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.default);
 
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewPickerScopeName.default);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
 
   if (newDataViewPickerEnabled) {
     dataViewId = experimentalDataView.id ?? '';
@@ -94,7 +94,7 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         fallbackPatterns: selectedPatterns,
-        scope: [DataViewPickerScopeName.timeline],
+        scope: [DataViewManagerScopeName.timeline],
       });
 
       dispatch(

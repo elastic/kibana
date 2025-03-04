@@ -38,9 +38,9 @@ import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
 import { notesReducer } from '../../notes/store/notes.slice';
 import {
-  dataViewPickerReducer,
-  initialDataViewPickerState,
-} from '../../data_view_picker/redux/reducer';
+  dataViewManagerReducer as dataViewManagerReducer,
+  initialDataViewManagerState,
+} from '../../data_view_manager/redux/reducer';
 
 enableMapSet();
 
@@ -136,7 +136,7 @@ export const createInitialState = (
       savedSearch: undefined,
     },
     notes: notesState,
-    dataViewPicker: initialDataViewPickerState.dataViewPicker,
+    dataViewManager: initialDataViewManagerState.dataViewManager,
   };
 
   return preloadedState;
@@ -160,5 +160,5 @@ export const createReducer: (
     discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
     notes: notesReducer,
-    dataViewPicker: dataViewPickerReducer,
+    dataViewManager: dataViewManagerReducer,
   });
