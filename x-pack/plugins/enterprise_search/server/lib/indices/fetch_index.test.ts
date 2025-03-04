@@ -163,7 +163,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).resolves.toEqual({
       ...result,
       crawler: {
@@ -198,7 +198,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name', logger)
     ).resolves.toEqual({
       ...result,
       connector: { doc: 'doc', service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE },
