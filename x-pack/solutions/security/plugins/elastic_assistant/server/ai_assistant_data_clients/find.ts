@@ -76,8 +76,8 @@ export const findDocuments = async <TSearchSchema>({
         },
         _source: fields?.length
           ? {
-            includes: fields,
-          }
+              includes: fields,
+            }
           : true,
         from: (page - 1) * perPage,
         ignore_unavailable: true,

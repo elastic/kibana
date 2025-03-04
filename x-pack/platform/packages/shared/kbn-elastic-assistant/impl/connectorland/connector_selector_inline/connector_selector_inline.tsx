@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';

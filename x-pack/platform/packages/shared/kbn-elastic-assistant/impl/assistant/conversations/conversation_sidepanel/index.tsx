@@ -246,12 +246,7 @@ export const ConversationSidePanel = React.memo<Props>(
                               }}
                             />
                             {conversation.id === lastConversationId && (
-                              <div
-                                ref={internalSetObserver}
-                                css={css`
-                                  height: 1px;
-                                `}
-                              />
+                              <div ref={internalSetObserver} style={{ height: '1px' }} />
                             )}
                           </span>
                         );

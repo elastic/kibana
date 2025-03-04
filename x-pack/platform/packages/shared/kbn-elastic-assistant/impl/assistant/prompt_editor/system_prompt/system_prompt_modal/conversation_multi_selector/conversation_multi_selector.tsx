@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import { TEST_IDS } from '../../../../constants';
 import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
@@ -54,11 +53,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
               conversation.id === lastConversationId ? (
                 <div
                   ref={internalSetObserver}
-                  css={css`
-                    display: block;
-                    height: 1px;
-                    width: 1px;
-                  `}
+                  style={{ height: '1px', display: 'block', width: '1px' }}
                 />
               ) : undefined,
           };
