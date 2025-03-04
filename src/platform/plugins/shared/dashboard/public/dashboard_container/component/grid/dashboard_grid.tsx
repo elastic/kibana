@@ -9,13 +9,14 @@
 
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
 import { useEuiTheme } from '@elastic/eui';
+
 import { DashboardPanelState } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
@@ -33,6 +34,7 @@ export const DashboardGrid = ({
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
+  const firstRowId = useRef(uuidv4());
 
   const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
@@ -44,7 +46,9 @@ export const DashboardGrid = ({
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData[number] = {
+    const singleRow: GridLayoutData[string] = {
+      id: firstRowId.current,
+      order: 0,
       title: '', // we only support a single section currently, and it does not have a title
       isCollapsed: false,
       panels: {},
@@ -66,7 +70,7 @@ export const DashboardGrid = ({
       }
     });
 
-    return [singleRow];
+    return { [firstRowId.current]: singleRow };
   }, [panels]);
 
   const onLayoutChange = useCallback(
@@ -75,7 +79,7 @@ export const DashboardGrid = ({
 
       const currentPanels = dashboardApi.panels$.getValue();
       const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
-        newLayout[0].panels
+        newLayout[firstRowId.current].panels
       ).reduce((updatedPanelsAcc, panelLayout) => {
         updatedPanelsAcc[panelLayout.id] = {
           ...currentPanels[panelLayout.id],
