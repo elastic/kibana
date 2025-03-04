@@ -8,7 +8,6 @@
 import { type AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
 import { useKibana } from '../../common/lib/kibana';
-import { useBaseConversations } from '../use_conversation_store';
 import type {
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
@@ -20,33 +19,19 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {
     services: { telemetry },
   } = useKibana();
-  const baseConversations = useBaseConversations();
-
-  const getAnonymizedConversationTitle = useCallback(
-    async (title: string) => {
-      // With persistent storage for conversation replacing id to title, because id is UUID now
-      // and doesn't make any value for telemetry tracking
-      return baseConversations[title] ? title : 'Custom';
-    },
-    [baseConversations]
-  );
 
   const reportTelemetry = useCallback(
     async ({
       eventType,
-      params: { conversationId, ...rest },
+      params,
     }: {
       eventType: AssistantEventTypes;
       params:
         | ReportAssistantInvokedParams
         | ReportAssistantMessageSentParams
         | ReportAssistantQuickPromptParams;
-    }) =>
-      telemetry.reportEvent(eventType, {
-        ...rest,
-        conversationId: await getAnonymizedConversationTitle(conversationId),
-      }),
-    [getAnonymizedConversationTitle, telemetry]
+    }) => telemetry.reportEvent(eventType, params),
+    [telemetry]
   );
 
   return {

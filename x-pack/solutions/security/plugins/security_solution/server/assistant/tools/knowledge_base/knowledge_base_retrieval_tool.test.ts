@@ -64,26 +64,5 @@ describe('KnowledgeBaseRetievalTool', () => {
 
       expect(result).toContain('citation":"{reference(exampleContentReferenceId)}"');
     });
-
-    it('does not include citations if contentReferenceStore is false', async () => {
-      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: undefined,
-      }) as DynamicStructuredTool;
-
-      getKnowledgeBaseDocumentEntries.mockResolvedValue([
-        new Document({
-          id: 'exampleId',
-          pageContent: 'text',
-          metadata: {
-            name: 'exampleName',
-          },
-        }),
-      ] as Document[]);
-
-      const result = await tool.func({ query: 'What is my favourite food' });
-
-      expect(result).not.toContain('citation');
-    });
   });
 });

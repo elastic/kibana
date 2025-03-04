@@ -18,7 +18,7 @@ export const getIndexPipelineParameters = async (
   // we want to throw the error if getDefaultPipeline() fails so we're not catching it on purpose
   const [defaultPipeline, connector, customPipelineResp] = await Promise.all([
     getDefaultPipeline(client),
-    fetchConnectorByIndexName(client.asCurrentUser, indexName),
+    fetchConnectorByIndexName(client.asCurrentUser, indexName).catch(() => null),
     client.asCurrentUser.ingest
       .getPipeline({
         id: `${indexName}`,

@@ -70,82 +70,80 @@ export class FindSLOGroups {
           must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
-      body: {
-        aggs: {
-          groupBy: {
-            terms: {
-              field: groupBy,
-              size: 10000,
-              ...(hasSelectedTags && { include: groupsFilter }),
+      aggs: {
+        groupBy: {
+          terms: {
+            field: groupBy,
+            size: 10000,
+            ...(hasSelectedTags && { include: groupsFilter }),
+          },
+          aggs: {
+            worst: {
+              top_hits: {
+                sort: {
+                  errorBudgetRemaining: {
+                    order: 'asc',
+                  },
+                },
+                _source: {
+                  includes: [
+                    'sliValue',
+                    'status',
+                    'slo.id',
+                    'slo.instanceId',
+                    'slo.name',
+                    'slo.groupings',
+                  ],
+                },
+                size: 1,
+              },
             },
-            aggs: {
-              worst: {
-                top_hits: {
-                  sort: {
-                    errorBudgetRemaining: {
+            violated: {
+              filter: {
+                term: {
+                  status: 'VIOLATED',
+                },
+              },
+            },
+            healthy: {
+              filter: {
+                term: {
+                  status: 'HEALTHY',
+                },
+              },
+            },
+            degrading: {
+              filter: {
+                term: {
+                  status: 'DEGRADING',
+                },
+              },
+            },
+            noData: {
+              filter: {
+                term: {
+                  status: 'NO_DATA',
+                },
+              },
+            },
+            bucket_sort: {
+              bucket_sort: {
+                sort: [
+                  {
+                    _key: {
                       order: 'asc',
                     },
                   },
-                  _source: {
-                    includes: [
-                      'sliValue',
-                      'status',
-                      'slo.id',
-                      'slo.instanceId',
-                      'slo.name',
-                      'slo.groupings',
-                    ],
-                  },
-                  size: 1,
-                },
-              },
-              violated: {
-                filter: {
-                  term: {
-                    status: 'VIOLATED',
-                  },
-                },
-              },
-              healthy: {
-                filter: {
-                  term: {
-                    status: 'HEALTHY',
-                  },
-                },
-              },
-              degrading: {
-                filter: {
-                  term: {
-                    status: 'DEGRADING',
-                  },
-                },
-              },
-              noData: {
-                filter: {
-                  term: {
-                    status: 'NO_DATA',
-                  },
-                },
-              },
-              bucket_sort: {
-                bucket_sort: {
-                  sort: [
-                    {
-                      _key: {
-                        order: 'asc',
-                      },
-                    },
-                  ],
-                  from: (pagination.page - 1) * pagination.perPage,
-                  size: pagination.perPage,
-                },
+                ],
+                from: (pagination.page - 1) * pagination.perPage,
+                size: pagination.perPage,
               },
             },
           },
-          distinct_items: {
-            cardinality: {
-              field: groupBy,
-            },
+        },
+        distinct_items: {
+          cardinality: {
+            field: groupBy,
           },
         },
       },
