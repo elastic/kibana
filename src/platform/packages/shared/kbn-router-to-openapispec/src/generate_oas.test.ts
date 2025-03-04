@@ -8,6 +8,7 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
+import { get } from 'lodash';
 import { generateOpenApiDocument } from './generate_oas';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 import {
@@ -432,6 +433,86 @@ describe('generateOpenApiDocument', () => {
       expect(result.paths['/v2-1']!.get).not.toMatchObject({
         'x-state': expect.any(String),
       });
+    });
+  });
+
+  it('merges operation objects', async () => {
+    const oasOperationObject = () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              fooExample: {
+                value: 999,
+              },
+            },
+          },
+        },
+      },
+    });
+    const [routers, versionedRouters] = createTestRouters({
+      routers: {
+        testRouter: {
+          routes: [
+            {
+              method: 'get',
+              options: {
+                access: 'public',
+                oasOperationObject,
+              },
+            },
+            { method: 'post' },
+          ],
+        },
+      },
+      versionedRouters: {
+        testVersionedRouter: {
+          routes: [
+            {
+              options: {
+                access: 'public',
+                options: {
+                  oasOperationObject,
+                },
+              },
+            },
+          ],
+        },
+      },
+      bodySchema: createSharedConfigSchema(),
+    });
+
+    const oas = await generateOpenApiDocument(
+      { routers, versionedRouters },
+      {
+        title: 'test',
+        baseUrl: 'https://test.oas',
+        version: '99.99.99',
+      }
+    );
+
+    expect(
+      get(oas, [
+        'paths',
+        '/foo/{id}/{path}',
+        'get',
+        'requestBody',
+        'content',
+        'application/json',
+        'examples',
+      ])
+    ).toEqual({
+      fooExample: {
+        value: 999,
+      },
+    });
+
+    expect(
+      get(oas, ['paths', '/bar', 'get', 'requestBody', 'content', 'application/json', 'examples'])
+    ).toEqual({
+      fooExample: {
+        value: 999,
+      },
     });
   });
 });
