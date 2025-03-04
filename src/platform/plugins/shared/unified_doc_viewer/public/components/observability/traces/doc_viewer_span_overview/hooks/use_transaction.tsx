@@ -23,35 +23,44 @@ interface GetTransactionParams {
   transactionId: string;
   indexPattern: string;
   data: DataPublicPluginStart;
+  signal: AbortSignal;
 }
 
-async function getTransactionData({ transactionId, indexPattern, data }: GetTransactionParams) {
+async function getTransactionData({
+  transactionId,
+  indexPattern,
+  data,
+  signal,
+}: GetTransactionParams) {
   return lastValueFrom(
-    data.search.search({
-      params: {
-        index: indexPattern,
-        size: 1,
-        body: {
-          timeout: '20s',
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    'transaction.id': transactionId,
+    data.search.search(
+      {
+        params: {
+          index: indexPattern,
+          size: 1,
+          body: {
+            timeout: '20s',
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'transaction.id': transactionId,
+                    },
                   },
-                },
-                {
-                  term: {
-                    'processor.event': 'transaction',
+                  {
+                    term: {
+                      'processor.event': 'transaction',
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
         },
       },
-    })
+      { abortSignal: signal }
+    )
   );
 }
 
@@ -61,18 +70,26 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    let isMounted = true;
+    if (!transactionId) {
+      setTransaction({ name: '' });
+      setLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const { signal } = controller;
 
     const fetchData = async () => {
-      if (transactionId) {
-        try {
-          setLoading(true);
-          const result = await getTransactionData({ transactionId, indexPattern, data });
+      try {
+        setLoading(true);
+        const result = await getTransactionData({ transactionId, indexPattern, data, signal });
+
+        if (!signal.aborted) {
           const transactionName = result.rawResponse.hits.hits[0]?._source.transaction?.name;
-          if (isMounted) {
-            setTransaction(transactionName ? { name: transactionName } : null);
-          }
-        } catch (err) {
+          setTransaction(transactionName ? { name: transactionName } : null);
+        }
+      } catch (err) {
+        if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
             title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTransaction.error', {
@@ -80,23 +97,20 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
             }),
             text: error.message,
           });
-
           setTransaction({ name: '' });
-        } finally {
-          if (isMounted) {
-            setLoading(false);
-          }
         }
-      } else {
-        setTransaction({ name: '' });
-        setLoading(false);
+      } finally {
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
 
     return function onUnmount() {
-      isMounted = false;
+      // isMounted = false;
+      controller.abort();
     };
   }, [core.notifications.toasts, data, indexPattern, transactionId]);
 
