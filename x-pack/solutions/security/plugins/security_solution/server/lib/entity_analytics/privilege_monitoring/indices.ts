@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingTypeMapping } from "@elastic/elasticsearch/lib/api/types";
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 // Static index names: may be more obvious and easier to manage.
 export const privilegedMonitorBaseIndexName = '.entity_analytics.monitoring';
@@ -19,7 +19,7 @@ export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
 export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
-  'event.ingested': { 
+  'event.ingested': {
     type: 'date',
   },
   '@timestamp': {
@@ -34,7 +34,7 @@ export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
 };
 
 export const PRIVILEGED_MONITOR_GROUPS_INDEX_MAPPING: MappingProperties = {
-  'event.ingested': { 
+  'event.ingested': {
     type: 'date',
   },
   '@timestamp': {
@@ -43,10 +43,10 @@ export const PRIVILEGED_MONITOR_GROUPS_INDEX_MAPPING: MappingProperties = {
   'group.name': {
     type: 'keyword',
   },
-  'indexPattern': {
+  indexPattern: {
     type: 'keyword',
   },
-  'nameMatcher': {
+  nameMatcher: {
     type: 'keyword',
   },
   'labels.is_privileged': {
