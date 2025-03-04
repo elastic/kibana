@@ -25,6 +25,7 @@ export const createObservabilityTracesSpanDocumentProfileProvider = (
   profile: {
     getDocViewer: createGetDocViewer('traces-*'),
     // TODO add APM configured indexes instead of traces-*, currently blocked by https://github.com/elastic/kibana/issues/211414
+    // this will be handled in https://github.com/elastic/kibana/issues/213112
   },
   resolve: ({ record }) => {
     const isApmEnabled = services.application.capabilities.apm?.show;
@@ -50,6 +51,7 @@ export const createObservabilityTracesSpanDocumentProfileProvider = (
 
 const getIsSpanRecord = (record: DataTableRecord) => {
   // TODO add condition to check on the document _index against APM configured indexes, currently blocked by https://github.com/elastic/kibana/issues/211414
+  // this will be handled in https://github.com/elastic/kibana/issues/213112
   return isSpanDocument(record);
 };
 

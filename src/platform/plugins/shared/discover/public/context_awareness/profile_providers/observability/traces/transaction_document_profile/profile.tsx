@@ -49,6 +49,7 @@ export const createObservabilityTracesTransactionDocumentProfileProvider = (
 
 const getIsTransactionRecord = (record: DataTableRecord) => {
   // TODO add condition to check on the document _index against APM configured indexes, currently blocked by https://github.com/elastic/kibana/issues/211414
+  // this will be handled in https://github.com/elastic/kibana/issues/213112
   return isTransactionDocument(record);
 };
 
