@@ -61,14 +61,17 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
       if (transactionId) {
         try {
           setLoading(true);
           const result = await getTransactionData({ transactionId, indexPattern, data });
           const transactionName = result.rawResponse.hits.hits[0]?._source.transaction?.name;
-
-          setTransaction(transactionName ? { name: transactionName } : null);
+          if (isMounted) {
+            setTransaction(transactionName ? { name: transactionName } : null);
+          }
         } catch (err) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
@@ -80,7 +83,9 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
 
           setTransaction({ name: '' });
         } finally {
-          setLoading(false);
+          if (isMounted) {
+            setLoading(false);
+          }
         }
       } else {
         setTransaction({ name: '' });
@@ -89,6 +94,10 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     };
 
     fetchData();
+
+    return function onUnmount() {
+      isMounted = false;
+    };
   }, [core.notifications.toasts, data, indexPattern, transactionId]);
 
   return { loading, transaction };
