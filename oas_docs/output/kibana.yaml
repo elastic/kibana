@@ -24454,9 +24454,6 @@ paths:
                                   type: string
                                 started_at:
                                   type: string
-                              required:
-                                - name
-                                - started_at
                             latest_install_failed_attempts:
                               items:
                                 additionalProperties: true
@@ -25318,9 +25315,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -25945,9 +25939,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -26675,10 +26666,65 @@ paths:
                         proxy_id:
                           nullable: true
                           type: string
+                        secrets:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ssl:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                es_key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                                key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                        ssl:
+                          additionalProperties: false
+                          nullable: true
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            client_auth:
+                              enum:
+                                - optional
+                                - required
+                                - none
+                              type: string
+                            es_certificate:
+                              type: string
+                            es_certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            es_key:
+                              type: string
+                            key:
+                              type: string
                       required:
-                        - id
                         - name
                         - host_urls
+                        - id
                     type: array
                   page:
                     type: number
@@ -26750,6 +26796,61 @@ paths:
                 proxy_id:
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        es_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    client_auth:
+                      enum:
+                        - optional
+                        - required
+                        - none
+                      type: string
+                    es_certificate:
+                      type: string
+                    es_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_key:
+                      type: string
+                    key:
+                      type: string
               required:
                 - name
                 - host_urls
@@ -26785,10 +26886,65 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          client_auth:
+                            enum:
+                              - optional
+                              - required
+                              - none
+                            type: string
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -26903,10 +27059,65 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          client_auth:
+                            enum:
+                              - optional
+                              - required
+                              - none
+                            type: string
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -26967,6 +27178,61 @@ paths:
                 proxy_id:
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        es_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    client_auth:
+                      enum:
+                        - optional
+                        - required
+                        - none
+                      type: string
+                    es_certificate:
+                      type: string
+                    es_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_key:
+                      type: string
+                    key:
+                      type: string
               required:
                 - proxy_id
       responses:
@@ -27001,10 +27267,65 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          client_auth:
+                            enum:
+                              - optional
+                              - required
+                              - none
+                            type: string
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -41093,6 +41414,8 @@ paths:
                     type: boolean
                   pipeline_exists:
                     type: boolean
+                  product_documentation_status:
+                    type: string
                   security_labs_exists:
                     type: boolean
                   user_data_exists:
@@ -51598,9 +51921,6 @@ components:
         id:
           description: The conversation id.
           type: string
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -51623,16 +51943,13 @@ components:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
         createdAt:
-          description: The last time conversation was updated.
+          description: The time conversation was created.
           type: string
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -51859,7 +52176,6 @@ components:
     Security_AI_Assistant_API_FindConversationsSortField:
       enum:
         - created_at
-        - is_default
         - title
         - updated_at
       type: string
