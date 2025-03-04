@@ -9,7 +9,7 @@
     "build:antlr4:esql": "npm run build:antlr4:esql:parser && npm run build:antlr4:esql:lexer",
     "postbuild:antlr4:esql": "mv src/antlr/esql_parserListener.ts src/antlr/esql_parser_listener.ts",
     "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/antlr/parser src/antlr/esql_parser.g4",
-    "postbuild:antlr4:esql:parser": "ls src && ls src/antlr && ls src/antlr/esql_parser.ts && sed -i '' -e '1s/^/\\/\\/ @ts-nocheck\\n/' src/antlr/esql_parser.ts",
+    "postbuild:antlr4:esql:parser": "ls -l src/antlr/esql_parser.ts && sed -i '' -e '1s/^/\\/\\/ @ts-nocheck\\n/' src/antlr/esql_parser.ts",
     "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4",
     "postbuild:antlr4:esql:lexer": "sed -i '' -e '1s/^/\\/\\/ @ts-nocheck\\n/' src/antlr/esql_lexer.ts"
   },
