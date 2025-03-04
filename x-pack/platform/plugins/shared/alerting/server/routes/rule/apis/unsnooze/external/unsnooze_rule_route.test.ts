@@ -31,7 +31,7 @@ describe('unsnoozeAlertRoute', () => {
     const [config, handler] = router.delete.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(
-      `"/api/alerting/rule/{rule_id}/snooze_schedule/{schedule_id}"`
+      `"/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}"`
     );
 
     rulesClient.unsnooze.mockResolvedValueOnce();
@@ -40,8 +40,8 @@ describe('unsnoozeAlertRoute', () => {
       { rulesClient },
       {
         params: {
-          rule_id: 'rule_1',
-          schedule_id: 'snooze_schedule_1',
+          ruleId: 'rule_1',
+          scheduleId: 'snooze_schedule_1',
         },
       },
       ['noContent']
@@ -54,6 +54,7 @@ describe('unsnoozeAlertRoute', () => {
       Array [
         Object {
           "id": "rule_1",
+          "isPublic": true,
           "scheduleIds": Array [
             "snooze_schedule_1",
           ],

@@ -22,9 +22,8 @@ import {
 export default function createUnsnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const NOW = new Date().toISOString();
 
-  describe('unsnooze', () => {
+  describe('unsnooze_internal', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -63,24 +62,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const { body: snoozeSchedule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
-            .set('kbn-xsrf', 'foo')
-            .set('content-type', 'application/json')
-            .send({
-              schedule: {
-                custom: {
-                  duration: '240h',
-                  start: NOW,
-                  recurring: {
-                    occurrences: 1,
-                  },
-                },
-              },
-            })
-            .expect(200);
-
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, snoozeSchedule.id);
+          const response = await alertUtils.getUnsnoozeInternalRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -140,24 +122,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const { body: snoozeSchedule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
-            .set('kbn-xsrf', 'foo')
-            .set('content-type', 'application/json')
-            .send({
-              schedule: {
-                custom: {
-                  duration: '240h',
-                  start: NOW,
-                  recurring: {
-                    occurrences: 1,
-                  },
-                },
-              },
-            })
-            .expect(200);
-
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, snoozeSchedule?.id);
+          const response = await alertUtils.getUnsnoozeInternalRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -214,24 +179,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const { body: snoozeSchedule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
-            .set('kbn-xsrf', 'foo')
-            .set('content-type', 'application/json')
-            .send({
-              schedule: {
-                custom: {
-                  duration: '240h',
-                  start: NOW,
-                  recurring: {
-                    occurrences: 1,
-                  },
-                },
-              },
-            })
-            .expect(200);
-
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, snoozeSchedule?.id);
+          const response = await alertUtils.getUnsnoozeInternalRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -288,24 +236,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const { body: snoozeSchedule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
-            .set('kbn-xsrf', 'foo')
-            .set('content-type', 'application/json')
-            .send({
-              schedule: {
-                custom: {
-                  duration: '240h',
-                  start: NOW,
-                  recurring: {
-                    occurrences: 1,
-                  },
-                },
-              },
-            })
-            .expect(200);
-
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, snoozeSchedule?.id);
+          const response = await alertUtils.getUnsnoozeInternalRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':

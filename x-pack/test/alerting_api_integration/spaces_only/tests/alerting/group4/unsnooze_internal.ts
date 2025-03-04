@@ -21,7 +21,6 @@ import {
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const NOW = new Date().toISOString();
 
   describe('unsnooze_internal', function () {
     this.tags('skipFIPS');
@@ -61,26 +60,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      const { body: snoozeSchedule } = await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`
-        )
-        .set('kbn-xsrf', 'foo')
-        .set('content-type', 'application/json')
-        .send({
-          schedule: {
-            custom: {
-              duration: '240h',
-              start: NOW,
-              recurring: {
-                occurrences: 1,
-              },
-            },
-          },
-        })
-        .expect(200);
-
-      const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, snoozeSchedule.id);
+      const response = await alertUtils.getUnsnoozeInternalRequest(createdAlert.id);
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');

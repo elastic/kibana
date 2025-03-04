@@ -21,7 +21,7 @@ export const unsnoozeRuleRoute = (
 ) => {
   router.delete(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{rule_id}/snooze_schedule/{schedule_id}`,
+      path: `${BASE_ALERTING_API_PATH}/rule/{ruleId}/snooze_schedule/{scheduleId}`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
@@ -52,9 +52,9 @@ export const unsnoozeRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const { rule_id, schedule_id }: UnsnoozeParams = req.params;
+        const { ruleId, scheduleId }: UnsnoozeParams = req.params;
         try {
-          await rulesClient.unsnooze({ id: rule_id, scheduleIds: [schedule_id] });
+          await rulesClient.unsnooze({ id: ruleId, scheduleIds: [scheduleId], isPublic: true });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleMutedError) {
