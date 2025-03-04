@@ -180,9 +180,11 @@ describe('Discover documents layout', () => {
 
     it('should pass pagination mode from profile', async () => {
       const { profilesManagerMock, dataSourceProfileProviderMock } = createContextAwarenessMocks();
-      jest.spyOn(dataSourceProfileProviderMock.profile, 'getPaginationConfig').mockReturnValue({
-        paginationMode: 'singlePage',
-      });
+      jest
+        .spyOn(dataSourceProfileProviderMock.profile, 'getPaginationConfig')
+        .mockReturnValue(() => ({
+          paginationMode: 'singlePage',
+        }));
 
       await profilesManagerMock.resolveDataSourceProfile({});
       const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock, profilesManagerMock);

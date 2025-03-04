@@ -258,6 +258,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           isCompatible: ({ field }) => field.name !== 'message',
         },
       ],
+    getPaginationConfig: (prev) => () => ({
+      paginationMode: 'singlePage',
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;

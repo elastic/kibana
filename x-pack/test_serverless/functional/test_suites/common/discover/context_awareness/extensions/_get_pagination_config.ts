@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL mode', () => {
-      it('should render default pagination with page numbers', async () => {
+      it('should render without pagination using a single page', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: { esql: 'from logstash* | sort @timestamp desc' },

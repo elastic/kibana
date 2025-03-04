@@ -339,7 +339,7 @@ export interface Profile {
    * Note: This extension point currently only returns `paginationMode` but can be extended to return `pageSize` etc as well.
    * @returns The pagination mode extension
    */
-  getPaginationConfig: PaginationConfigExtension;
+  getPaginationConfig: () => PaginationConfigExtension;
 
   /**
    * Document viewer flyout

@@ -983,8 +983,8 @@ export class DataGridService extends FtrService {
     return (await this.getInTableSearchCellMatchElements(rowIndex, columnName)).length;
   }
 
-  public async scrollTo(targetIndex: number) {
-    const dataGridTargetIndex = targetIndex - 1; // 0-based index
+  public async scrollTo(rowCount: number) {
+    const dataGridTargetIndex = rowCount - 1; // 0-based index
     let lastRowIndex = -1;
 
     while (true) {

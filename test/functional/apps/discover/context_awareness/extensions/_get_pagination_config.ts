@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL mode', () => {
-      it('should render default pagination with page numbers', async () => {
+      it('should render without pagination using a single page', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: { esql: 'from logstash* | sort @timestamp desc' },
@@ -73,6 +73,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('pagination-button-previous');
         await testSubjects.existOrFail('pagination-button-next');
         await dataGrid.checkCurrentRowsPerPageToBe(100);
+      });
+
+      xit('should render single page pagination without page numbers', async () => {
+        await common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
+        await dataViews.createFromSearchBar({
+          name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
+          adHoc: true,
+          hasTimeField: true,
+        });
+        await discover.waitUntilSearchingHasFinished();
+        await testSubjects.missingOrFail('tablePaginationPopoverButton');
+        await testSubjects.missingOrFail('pagination-button-previous');
+        await testSubjects.missingOrFail('pagination-button-next');
       });
     });
   });

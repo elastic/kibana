@@ -1162,15 +1162,14 @@ export const UnifiedDataTable = ({
     [rowCount]
   );
 
-  const { run: throttledHandleItemsRendered } = useThrottleFn(handleItemsRendered, { wait: 500 });
+  const { run: throttledHandleItemsRendered } = useThrottleFn(handleItemsRendered, { wait: 200 });
 
   const virtualizationOptions = useMemo(() => {
     const options = {
-      onItemsRendered:
-        paginationMode === DEFAULT_PAGINATION_MODE ? undefined : throttledHandleItemsRendered,
+      onItemsRendered: paginationMode === 'multiPage' ? undefined : throttledHandleItemsRendered,
     };
 
-    // Don't use row "overscan" when showing Document/Summary column since
+    // Don't use row "overscan" when showing Summary column since
     // rendering so much DOM content in each cell impacts performance
     if (defaultColumns) {
       return options;

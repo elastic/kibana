@@ -345,9 +345,9 @@ function DiscoverDocumentsComponent({
 
   const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
   const paginationModeConfig = useMemo(() => {
-    return getPaginationConfigAccessor({
+    return getPaginationConfigAccessor(() => ({
       paginationMode: DEFAULT_PAGINATION_MODE,
-    });
+    }))();
   }, [getPaginationConfigAccessor]);
 
   const callouts = useMemo(
