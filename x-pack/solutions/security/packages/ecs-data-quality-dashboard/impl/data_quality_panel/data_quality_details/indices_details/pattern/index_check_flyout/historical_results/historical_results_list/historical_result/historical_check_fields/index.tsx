@@ -19,11 +19,16 @@ import { CheckFieldsTabs } from '../../../../check_fields_tabs';
 import { historicalResultsCheckFieldsButtonGroupCss } from '../styles';
 
 export interface Props {
+  checkedAt: number;
   indexName: string;
   historicalResult: NonLegacyHistoricalResult;
 }
 
-const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historicalResult }) => {
+const HistoricalCheckFieldsComponent: React.FC<Props> = ({
+  checkedAt,
+  indexName,
+  historicalResult,
+}) => {
   const { incompatibleMappingsFields, incompatibleValuesFields, sameFamilyFields } =
     getIncompatibleAndSameFamilyFieldsFromHistoricalResult(historicalResult);
 
@@ -47,6 +52,7 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
         badgeCount: incompatibleFieldCount,
         content: (
           <IncompatibleTab
+            checkedAt={checkedAt}
             docsCount={docsCount}
             ilmPhase={ilmPhase}
             indexName={indexName}
@@ -83,6 +89,7 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
       },
     ],
     [
+      checkedAt,
       customFieldCount,
       docsCount,
       ecsFieldCount,

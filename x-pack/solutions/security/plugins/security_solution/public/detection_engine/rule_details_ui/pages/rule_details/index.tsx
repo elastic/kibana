@@ -433,6 +433,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       </EuiFlexItem>
     ) : (
       <RuleStatusFailedCallOut
+        ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
         ruleName={rule?.immutable ? rule?.name : undefined}
         dataSources={rule?.immutable ? ruleIndex : undefined}
         status={lastExecutionStatus}
