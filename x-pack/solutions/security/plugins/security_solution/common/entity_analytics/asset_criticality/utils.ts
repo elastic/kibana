@@ -16,5 +16,8 @@ export const getAssetCriticalityEntityTypes = (experimentalFeatures: Experimenta
   const allEntityTypes = getAllEntityTypes();
   const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
 
-  return allEntityTypes.filter((value) => !disabledEntityTypes.includes(value));
+  return allEntityTypes.filter(
+    (value) =>
+      !disabledEntityTypes.includes(value) && !ASSET_CRITICALITY_UNAVAILABLE_TYPES.includes(value)
+  );
 };
