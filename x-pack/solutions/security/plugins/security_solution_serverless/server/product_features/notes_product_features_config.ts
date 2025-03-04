@@ -11,6 +11,7 @@ import type {
 } from '@kbn/security-solution-features';
 import {
   notesDefaultProductFeaturesConfig,
+  nonNotesDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
 import type { ProductFeatureNotesFeatureKey } from '@kbn/security-solution-features/keys';
@@ -35,3 +36,10 @@ const notesProductFeaturesConfig: Record<
 export const getNotesProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesNotesConfig =>
     createEnabledProductFeaturesConfigMap(notesProductFeaturesConfig, enabledProductFeatureKeys);
+
+export const getNonNotesProductFeaturesConfigurator =
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesNotesConfig =>
+    createEnabledProductFeaturesConfigMap(
+      nonNotesDefaultProductFeaturesConfig,
+      enabledProductFeatureKeys
+    );

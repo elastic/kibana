@@ -35,3 +35,10 @@ export const notesDefaultProductFeaturesConfig: Record<
     },
   },
 };
+
+export const nonNotesDefaultProductFeaturesConfig: Record<
+  ProductFeatureNotesFeatureKey,
+  ProductFeatureKibanaConfig
+> = {
+  [ProductFeatureNotesFeatureKey.notes]: {},
+};
