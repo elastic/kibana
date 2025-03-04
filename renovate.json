@@ -3116,7 +3116,9 @@
         "redux-thunk"
       ],
       "reviewers": [
-        "team:kibana-visualizations"
+        "team:kibana-presentation",
+        "team:kibana-management",
+        "team:security-solution"
       ],
       "matchBaseBranches": [
         "main"
