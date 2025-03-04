@@ -40,7 +40,7 @@ python3 "$BUILD_SCRIPT_SYMLINK/build.py" "$CHROMIUM_COMMIT_HASH" "$PLATFORM_VARI
 
 "$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" --unset-impersonation
 
-echo "---Persisting build artefacts to buildkite"
+echo "---Persisting build artefact to buildkite"
 
 buildkite-agent artifact upload "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*"
 
