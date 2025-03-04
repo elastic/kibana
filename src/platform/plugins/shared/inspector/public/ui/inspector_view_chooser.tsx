@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiContextMenuItem, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiContextMenuItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { InspectorViewDescription } from '../types';
 
 interface Props {
@@ -62,24 +61,6 @@ export class InspectorViewChooser extends Component<Props, State> {
       </EuiContextMenuItem>
     );
   };
-
-  renderViewButton() {
-    return (
-      <EuiButtonEmpty
-        size="s"
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.toggleSelector}
-        data-test-subj="inspectorViewChooser"
-      >
-        <FormattedMessage
-          id="inspector.view"
-          defaultMessage="View: {viewName}"
-          values={{ viewName: this.props.selectedView.title }}
-        />
-      </EuiButtonEmpty>
-    );
-  }
 
   renderSingleView() {
     return (
