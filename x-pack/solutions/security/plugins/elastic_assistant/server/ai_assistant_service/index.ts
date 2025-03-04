@@ -18,6 +18,7 @@ import {
   IndicesSimulateTemplateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { omit, some } from 'lodash';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
@@ -105,6 +106,7 @@ export class AIAssistantService {
   private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
+  private isProductDocumentationInProgress: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -168,6 +170,14 @@ export class AIAssistantService {
     this.isKBSetupInProgress.set(spaceId, isInProgress);
   }
 
+  public getIsProductDocumentationInProgress() {
+    return this.isProductDocumentationInProgress;
+  }
+
+  public setIsProductDocumentationInProgress(isInProgress: boolean) {
+    this.isProductDocumentationInProgress = isInProgress;
+  }
+
   private createDataStream: CreateDataStream = ({
     resource,
     kibanaVersion,
@@ -218,7 +228,11 @@ export class AIAssistantService {
 
       if (this.productDocManager) {
         // install product documentation without blocking other resources
-        void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
+        void ensureProductDocumentationInstalled({
+          productDocManager: this.productDocManager,
+          logger: this.options.logger,
+          setIsProductDocumentationInProgress: this.setIsProductDocumentationInProgress.bind(this),
+        });
       }
 
       await this.conversationsDataStream.install({
@@ -476,6 +490,16 @@ export class AIAssistantService {
     }
   }
 
+  public async getProductDocumentationStatus(): Promise<InstallationStatus> {
+    const status = await this.productDocManager?.getStatus();
+
+    if (!status) {
+      return 'uninstalled';
+    }
+
+    return this.isProductDocumentationInProgress ? 'installing' : status.status;
+  }
+
   public async createAIAssistantConversationsDataClient(
     opts: CreateAIAssistantClientParams & GetAIAssistantConversationsDataClientParams
   ): Promise<AIAssistantConversationsDataClient | null> {
@@ -530,6 +554,7 @@ export class AIAssistantService {
       ingestPipelineResourceName: this.resourceNames.pipelines.knowledgeBase,
       getElserId: this.getElserId,
       getIsKBSetupInProgress: this.getIsKBSetupInProgress.bind(this),
+      getProductDocumentationStatus: this.getProductDocumentationStatus.bind(this),
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
