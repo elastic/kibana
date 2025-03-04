@@ -196,6 +196,10 @@ export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
 };
 
+export const getReviewSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="reviewSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
 export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
 export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE =
