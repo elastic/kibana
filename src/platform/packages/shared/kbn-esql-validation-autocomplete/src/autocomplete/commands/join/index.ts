@@ -115,10 +115,6 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
 
   const position = getPosition(commandText, command);
 
-  const createIndexCommandSuggestion = getLookupIndexCreateSuggestion();
-
-  const suggestions: SuggestionRawDefinition[] = [createIndexCommandSuggestion];
-
   switch (position.pos) {
     case 'type':
     case 'after_type':
@@ -128,29 +124,34 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
         mnemonic.startsWith(commandText.toUpperCase())
       );
 
-      if (filteredMnemonics.length > 0) {
-        suggestions.push(
-          ...filteredMnemonics.map(
-            ([mnemonic, description], i) =>
-              ({
-                label: mnemonic,
-                text: mnemonic + ' $0',
-                detail: description,
-                kind: 'Keyword',
-                sortText: `${i}-MNEMONIC`,
-                command: TRIGGER_SUGGESTION_COMMAND,
-              } as SuggestionRawDefinition)
-          )
-        );
+      if (!filteredMnemonics.length) {
+        return [];
       }
+
+      return filteredMnemonics.map(
+        ([mnemonic, description], i) =>
+          ({
+            label: mnemonic,
+            text: mnemonic + ' $0',
+            detail: description,
+            kind: 'Keyword',
+            sortText: `${i}-MNEMONIC`,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          } as SuggestionRawDefinition)
+      );
     }
 
     case 'after_mnemonic':
+      const createIndexCommandSuggestion = getLookupIndexCreateSuggestion();
+      return [createIndexCommandSuggestion];
     case 'index': {
       const joinIndices = await callbacks?.getJoinIndices?.();
-      if (joinIndices) {
-        suggestions.push(...joinIndicesToSuggestions(joinIndices.indices));
+
+      if (!joinIndices) {
+        return [];
       }
+
+      return joinIndicesToSuggestions(joinIndices.indices);
     }
 
     case 'after_index': {
@@ -168,12 +169,13 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
         command: TRIGGER_SUGGESTION_COMMAND,
       };
 
-      suggestions.push(suggestion);
+      return [suggestion];
     }
 
     case 'after_on': {
       const fields = await suggestFields(command, getColumnsByType, callbacks);
-      suggestions.push(...fields);
+
+      return fields;
     }
 
     case 'condition': {
@@ -183,12 +185,15 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
 
       if (commaIsLastToken) {
         const fields = await suggestFields(command, getColumnsByType, callbacks);
-        suggestions.push(...fields);
-      } else {
-        suggestions.push(pipeCompleteItem, commaCompleteItem);
+
+        return fields;
       }
+
+      return [pipeCompleteItem, commaCompleteItem];
     }
   }
+
+  const suggestions: SuggestionRawDefinition[] = [];
 
   return suggestions;
 };
