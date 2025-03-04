@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { AgentFactory } from './orchestration';
+import type { AgentFactory } from './orchestration';
+import type { ConversationService } from './conversations';
 
 export interface InternalServices {
   agentFactory: AgentFactory;
+  conversationService: ConversationService;
 }

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export type { InternalServices } from './types';
-export { ConversationServiceImpl } from './conversations';
-export {}
+import type { Conversation } from '../conversations';
+
+export interface ListConversationPayload {
+
+}
+
+export interface ListConversationResponse {
+  conversations: Conversation[];
+}

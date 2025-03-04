@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { InternalServices } from './types';
-export { ConversationServiceImpl } from './conversations';
-export {}
+export { ConversationServiceImpl, type ConversationService } from './conversation_service';

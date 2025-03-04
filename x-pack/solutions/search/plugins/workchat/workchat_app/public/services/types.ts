@@ -6,7 +6,9 @@
  */
 
 import type { ChatService } from './chat/chat_service';
+import type { ConversationService } from './conversation/conversation_service';
 
 export interface WorkChatServices {
   chatService: ChatService;
+  conversationService: ConversationService;
 }

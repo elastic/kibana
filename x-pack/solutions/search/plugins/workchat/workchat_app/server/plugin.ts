@@ -13,7 +13,9 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
+import { registerTypes } from './saved_objects';
 import type { InternalServices } from './services/types';
+import { ConversationServiceImpl } from './services';
 import { AgentFactory } from './services/orchestration';
 
 import type {
@@ -52,16 +54,25 @@ export class WorkChatAppPlugin
       },
     });
 
+    registerTypes({ savedObjects: core.savedObjects });
+
     return {};
   }
 
   public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
+    const conversationService = new ConversationServiceImpl({
+      savedObjects: core.savedObjects,
+      security: pluginsDependencies.security,
+      logger: this.logger.get('services.conversations'),
+    });
+
     const agentFactory = new AgentFactory({
       inference: pluginsDependencies.inference,
       logger: this.logger.get('services.agentFactory'),
     });
 
     this.services = {
+      conversationService,
       agentFactory,
     };
 
