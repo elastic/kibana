@@ -87,7 +87,7 @@ export class TempSummaryCleanupTask {
         params: {},
       });
     } catch (e) {
-      this.logger.debug(`Error scheduling task, error: ${e}`);
+      this.logger.error(`Error scheduling task, error: ${e}`);
     }
   }
 
