@@ -18,7 +18,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indicies';
+import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indices';
 import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from './constants';
 
@@ -90,7 +90,8 @@ export class PrivilegeMonitoringDataClient {
       // TODO: telemetry, report event. Reference entity_store_data_client.ts line 476
       await this.engineClient.update({
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
-        error: {// TODO: double check this, taken from entity_store_data_client.ts line 480 example.
+        error: {
+          // TODO: double check this, taken from entity_store_data_client.ts line 480 example.
           message: e.message,
           stack: e.stack,
           action: 'init',
