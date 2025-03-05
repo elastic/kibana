@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { compact, partition, uniqBy } from 'lodash';
+import { compact, uniqBy } from 'lodash';
 import { v4 } from 'uuid';
-import { AdHocInstruction, Instruction } from '../../../common/types';
+import { Instruction, InstructionOrPlainText } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
 import { InstructionOrCallback } from '../types';
 
@@ -25,13 +25,13 @@ export function getSystemMessageFromInstructions({
   // instructions provided by the user. These will be displayed after the application instructions and only if they fit within the token budget
   userInstructions: kbUserInstructions,
 
-  // ad-hoc instruction. Can be either user or application instruction
-  adHocInstructions,
+  // ad-hoc user instructions. These will be displayed after the application instructions and only if they fit within the token budget
+  adHocUserInstructions,
   availableFunctionNames,
 }: {
   applicationInstructions: InstructionOrCallback[];
   userInstructions: Instruction[];
-  adHocInstructions: AdHocInstruction[];
+  adHocUserInstructions: InstructionOrPlainText[];
   availableFunctionNames: string[];
 }): string {
   const allApplicationInstructions = compact(
@@ -43,28 +43,26 @@ export function getSystemMessageFromInstructions({
     })
   );
 
-  const adHocInstructionsWithId = adHocInstructions.map((adHocInstruction) => ({
-    ...adHocInstruction,
-    id: adHocInstruction?.id ?? v4(),
-  }));
-
-  // split ad hoc instructions into user instructions and application instructions
-  const [adHocUserInstructions, adHocApplicationInstructions] = partition(
-    adHocInstructionsWithId,
-    (instruction) => instruction.instruction_type === 'user_instruction'
+  const adHocUserInstructionsWithId: Instruction[] = adHocUserInstructions.map(
+    (adHocUserInstruction) =>
+      typeof adHocUserInstruction === 'string'
+        ? {
+            text: adHocUserInstruction,
+            id: v4(),
+          }
+        : adHocUserInstruction
   );
 
-  // all adhoc instructions and KB instructions.
+  // all adhoc user instructions and KB instructions.
   // adhoc instructions will be prioritized over Knowledge Base instructions if the id is the same
   const allUserInstructions = withTokenBudget(
-    uniqBy([...adHocUserInstructions, ...kbUserInstructions], (i) => i.id),
+    uniqBy([...adHocUserInstructionsWithId, ...kbUserInstructions], (i) => i.id),
     1000
   );
 
   return [
     // application instructions
     ...allApplicationInstructions,
-    ...adHocApplicationInstructions,
 
     // user instructions
     ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),

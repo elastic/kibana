@@ -15,7 +15,7 @@ import {
   type StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import type OpenAI from 'openai';
-import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { type InstructionOrPlainText } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import {
   createLlmProxy,
@@ -46,12 +46,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     async function addInterceptorsAndCallComplete({
       actions,
-      instructions,
+      userInstructions,
       format = 'default',
       conversationResponse,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-      instructions?: AdHocInstruction[];
+      userInstructions?: InstructionOrPlainText[];
       format?: 'openai' | 'default';
       conversationResponse: string | ToolMessage;
     }) {
@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             connectorId,
             persist: true,
             actions,
-            instructions,
+            userInstructions,
           },
         },
       });
@@ -160,12 +160,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         const { conversationSimulator } = await addInterceptorsAndCallComplete({
-          instructions: [
-            {
-              text: 'This is a random instruction',
-              instruction_type: 'user_instruction',
-            },
-          ],
+          userInstructions: ['This is a random instruction'],
           actions: [action],
           conversationResponse: {
             tool_calls: [toolCallMock],
