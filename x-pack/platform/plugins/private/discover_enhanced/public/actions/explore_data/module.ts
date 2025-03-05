@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './explore_data';
+export { ExploreDataChartAction } from './explore_data_chart_action';
+export { ExploreDataContextMenuAction } from './explore_data_context_menu_action';

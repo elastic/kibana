@@ -17,8 +17,8 @@ import {
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
 import { Config } from '../common';
+import { ACTION_EXPLORE_DATA, ACTION_EXPLORE_DATA_CHART } from './actions/explore_data/constants';
 
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;
@@ -55,13 +55,21 @@ export class DiscoverEnhancedPlugin
       const params = { start };
 
       if (this.config.actions.exploreDataInContextMenu.enabled) {
-        const exploreDataAction = new ExploreDataContextMenuAction(params);
-        uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
+        uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, ACTION_EXPLORE_DATA, async () => {
+          const { ExploreDataContextMenuAction } = await import('./actions/explore_data/module');
+          return new ExploreDataContextMenuAction(params);
+        });
       }
 
       if (this.config.actions.exploreDataInChart.enabled) {
-        const exploreDataChartAction = new ExploreDataChartAction(params);
-        uiActions.addTriggerAction(APPLY_FILTER_TRIGGER, exploreDataChartAction);
+        uiActions.addTriggerActionAsync(
+          APPLY_FILTER_TRIGGER,
+          ACTION_EXPLORE_DATA_CHART,
+          async () => {
+            const { ExploreDataChartAction } = await import('./actions/explore_data/module');
+            return new ExploreDataChartAction(params);
+          }
+        );
       }
     }
   }
