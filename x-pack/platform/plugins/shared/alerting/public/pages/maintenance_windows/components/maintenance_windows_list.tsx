@@ -30,6 +30,7 @@ import { TableActionsPopover } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
+import { useDeleteMaintenanceWindow } from '../../../hooks/use_delete_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   isLoading: boolean;
@@ -141,9 +142,24 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [finishAndArchiveMaintenanceWindow, refreshData]
     );
 
+    const { mutate: deleteMaintenanceWindow, isLoading: isLoadingDelete } =
+      useDeleteMaintenanceWindow();
+
+    const onDelete = useCallback(
+      (id: string) =>
+        deleteMaintenanceWindow({ maintenanceWindowId: id }, { onSuccess: () => refreshData() }),
+      [deleteMaintenanceWindow, refreshData]
+    );
+
     const isMutatingOrLoading = useMemo(() => {
-      return isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive || isLoading;
-    }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoading]);
+      return (
+        isLoadingFinish ||
+        isLoadingArchive ||
+        isLoadingFinishAndArchive ||
+        isLoadingDelete ||
+        isLoading
+      );
+    }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoadingDelete, isLoading]);
 
     const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
@@ -159,12 +175,13 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
                 onCancel={onCancel}
                 onArchive={onArchive}
                 onCancelAndArchive={onCancelAndArchive}
+                onDelete={onDelete}
               />
             );
           },
         },
       ],
-      [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onEdit]
+      [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onDelete, onEdit]
     );
 
     const columns = useMemo(

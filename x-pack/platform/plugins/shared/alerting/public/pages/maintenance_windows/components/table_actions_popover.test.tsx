@@ -49,6 +49,7 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
 
@@ -65,12 +66,14 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
+    expect(result.getByTestId('table-actions-delete')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is upcoming', () => {
@@ -83,11 +86,13 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
+    expect(result.getByTestId('table-actions-delete')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is finished', () => {
@@ -100,11 +105,13 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
+    expect(result.getByTestId('table-actions-delete')).toBeInTheDocument();
   });
 
   test('it shows the correct actions when a maintenance window is archived', () => {
@@ -117,10 +124,12 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-unarchive')).toBeInTheDocument();
+    expect(result.getByTestId('table-actions-delete')).toBeInTheDocument();
   });
 
   test('it shows the success toast when maintenance window id is copied', async () => {
@@ -139,6 +148,7 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
 
@@ -150,5 +160,31 @@ describe('TableActionsPopover', () => {
     expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
 
     Object.assign(navigator, global.window.navigator.clipboard);
+  });
+
+  test('it calls onDelete function when maintenance window is deleted', async () => {
+    const onDelete = jest.fn();
+    const user = userEvent.setup();
+    const result = appMockRenderer.render(
+      <TableActionsPopover
+        id={'123'}
+        isLoading={false}
+        status={MaintenanceWindowStatus.Archived}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onArchive={() => {}}
+        onCancelAndArchive={() => {}}
+        onDelete={onDelete}
+      />
+    );
+
+    await user.click(await result.findByTestId('table-actions-icon-button'));
+    expect(await result.findByTestId('table-actions-delete')).toBeInTheDocument();
+
+    await user.click(await result.findByTestId('table-actions-delete'));
+    const deleteModalConfirmButton = await result.findByTestId('confirmModalConfirmButton');
+    expect(deleteModalConfirmButton).toBeInTheDocument();
+    await user.click(deleteModalConfirmButton);
+    expect(onDelete).toHaveBeenCalledWith('123');
   });
 });

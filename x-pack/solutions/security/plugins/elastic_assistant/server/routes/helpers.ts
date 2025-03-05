@@ -21,7 +21,7 @@ import {
   Message,
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
-  DEFEND_INSIGHTS_TOOL_ID,
+  DEFEND_INSIGHTS_ID,
   ContentReferencesStore,
   ContentReferences,
   MessageMetadata,
@@ -290,7 +290,7 @@ export const langChainExecute = async ({
   });
   const assistantContext = context.elasticAssistant;
   // We don't (yet) support invoking these tools interactively
-  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
+  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_ID]);
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((tool) => !unsupportedTools.has(tool.id));
