@@ -319,25 +319,6 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux react-18 dependencies",
-      "matchDepNames": [
-        "react-18",
-        "react-dom-18"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "react-markdown",
       "matchDepNames": [
         "react-markdown"
@@ -3656,25 +3637,6 @@
       "matchDepNames": [
         "fnv-plus",
         "@types/fnv-plus"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "react-syntax-highlighter",
-      "matchDepNames": [
-        "react-syntax-highlighter",
-        "@types/react-syntax-highlighter"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
