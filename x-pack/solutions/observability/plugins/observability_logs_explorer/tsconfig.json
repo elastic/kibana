@@ -50,7 +50,5 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/deeplinks-analytics",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
