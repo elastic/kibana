@@ -186,7 +186,10 @@ export class LlmProxy {
     }).completeAfterIntercept();
   }
 
-  interceptSelectRelevantFieldsToolChoice() {
+  interceptSelectRelevantFieldsToolChoice({
+    from = 0,
+    to = 5,
+  }: { from?: number; to?: number } = {}) {
     let relevantFields: RelevantField[] = [];
     const simulator = this.interceptWithFunctionRequest({
       name: 'select_relevant_fields',
@@ -200,7 +203,7 @@ export class LlmProxy {
           .join('')
           .trim()
           .split('\n')
-          .slice(0, 5)
+          .slice(from, to)
           .map((line) => JSON.parse(line) as RelevantField);
 
         return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });

@@ -41,7 +41,8 @@ export function registerGetDatasetInfoFunction({
       } as const,
     },
     async ({ arguments: { index: indexPattern }, messages, chat }, signal) => {
-      return getDatasetInfo({ resources, indexPattern, signal, messages, chat });
+      const content = await getDatasetInfo({ resources, indexPattern, signal, messages, chat });
+      return { content };
     }
   );
 }
@@ -84,10 +85,8 @@ export async function getDatasetInfo({
 
   if (indices.length === 0 || indexPattern === '') {
     return {
-      content: {
-        indices,
-        fields: [],
-      },
+      indices,
+      fields: [],
     };
   }
 
@@ -102,19 +101,15 @@ export async function getDatasetInfo({
       chat,
     });
     return {
-      content: {
-        indices,
-        fields: relevantFieldNames.fields,
-        stats: relevantFieldNames.stats,
-      },
+      indices,
+      fields: relevantFieldNames.fields,
+      stats: relevantFieldNames.stats,
     };
   } catch (e) {
     resources.logger.error(`Error getting relevant field names: ${e.message}`);
     return {
-      content: {
-        indices,
-        fields: [],
-      },
+      indices,
+      fields: [],
     };
   }
 }
