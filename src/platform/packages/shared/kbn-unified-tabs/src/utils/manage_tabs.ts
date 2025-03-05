@@ -95,12 +95,24 @@ export const insertTabAfter = (
 };
 
 export const replaceTabWith = (
-  { items }: TabsState,
+  { items, selectedItem }: TabsState,
   item: TabItem,
   replaceWithItem: TabItem
 ): TabsState => {
+  const itemIndex = items.findIndex((i) => i.id === item.id);
+
+  if (itemIndex === -1) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
+  const nextItems = [...items];
+  nextItems[itemIndex] = replaceWithItem;
+
   return {
-    items: items.map((i) => (i.id === item.id ? replaceWithItem : i)),
+    items: nextItems,
     selectedItem: replaceWithItem,
   };
 };

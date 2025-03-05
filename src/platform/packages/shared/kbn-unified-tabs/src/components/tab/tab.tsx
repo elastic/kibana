@@ -48,7 +48,7 @@ export const Tab: React.FC<TabProps> = ({
 
   const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
-    defaultMessage: 'Close',
+    defaultMessage: 'Close session',
   });
 
   const onSelectEvent = useCallback(
@@ -83,6 +83,9 @@ export const Tab: React.FC<TabProps> = ({
   return (
     <EuiFlexGroup
       ref={containerRef}
+      {...getTabAttributes(item, tabContentId)}
+      role="tab"
+      aria-selected={isSelected}
       alignItems="center"
       css={getTabContainerCss(euiTheme, isSelected)}
       data-test-subj={tabContainerDataTestSubj}
@@ -101,12 +104,9 @@ export const Tab: React.FC<TabProps> = ({
       ) : (
         <>
           <button
-            {...getTabAttributes(item, tabContentId)}
-            aria-selected={isSelected}
             css={getTabButtonCss(euiTheme)}
             className="unifiedTabs__tabBtn"
             data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-            role="tab"
             type="button"
             onClick={onSelectEvent}
             onDoubleClick={() => setIsInlineEditActive(true)}

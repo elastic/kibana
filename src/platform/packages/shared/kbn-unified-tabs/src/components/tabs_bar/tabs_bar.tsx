@@ -36,7 +36,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
-    defaultMessage: 'New',
+    defaultMessage: 'New session',
   });
 
   return (

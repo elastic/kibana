@@ -24,7 +24,12 @@ export default {
 };
 
 const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
-  <Tab {...args} onSelect={action('onSelect')} onClose={action('onClose')} />
+  <Tab
+    {...args}
+    onLabelEdited={action('onLabelEdited')}
+    onSelect={action('onSelect')}
+    onClose={action('onClose')}
+  />
 );
 
 export const Default = TabTemplate.bind({});
