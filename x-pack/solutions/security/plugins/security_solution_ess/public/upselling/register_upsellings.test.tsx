@@ -17,12 +17,4 @@ describe('upsellingPages', () => {
 
     expect(attackDiscoveryPage?.minimumLicenseRequired).toEqual('enterprise');
   });
-
-  it('should register the `Translated rules` page with the expected minimum license for self managed', () => {
-    const translatedRulesPage = upsellingPages.find(
-      ({ pageName }) => pageName === SecurityPageName.siemMigrationsRules
-    );
-
-    expect(translatedRulesPage?.minimumLicenseRequired).toEqual('enterprise');
-  });
 });

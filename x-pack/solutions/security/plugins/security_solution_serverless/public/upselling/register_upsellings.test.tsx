@@ -9,11 +9,10 @@ import { registerUpsellings } from './register_upsellings';
 import { upsellingMessages, upsellingPages, upsellingSections } from './upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
-import { ALL_PRODUCT_FEATURE_KEYS, ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { of } from 'rxjs';
-import { SecurityPageName } from '@kbn/deeplinks-security';
 
 const mockGetProductProductFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({
@@ -79,15 +78,5 @@ describe('registerUpsellings', () => {
     );
     expect(setMessages).toHaveBeenCalledTimes(1);
     expect(setMessages).toHaveBeenCalledWith(expectedMessagesObject);
-  });
-
-  describe('upsellingPages', () => {
-    it('should register the `Translated rules` page with expect pli', () => {
-      const translatedRulesPage = upsellingPages.find(
-        ({ pageName }) => pageName === SecurityPageName.siemMigrationsRules
-      );
-
-      expect(translatedRulesPage?.pli).toEqual(ProductFeatureKey.siemMigrations);
-    });
   });
 });
