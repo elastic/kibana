@@ -76,26 +76,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const saveButton = await testSubjects.find(ui.pages.settings.saveButton);
         await saveButton.click();
         // wait for page to refrsh
-        await testSubjects.missingOrFail(ui.pages.settings.searchConnectorIndexPatternInput, { timeout: 2000 });
+        await testSubjects.missingOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
+          timeout: 2000,
+        });
         // wait for the new page to fully load
-        await testSubjects.existOrFail(ui.pages.settings.searchConnectorIndexPatternInput, { timeout: 2000 });
+        await testSubjects.existOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
+          timeout: 2000,
+        });
         expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be(
           testSearchConnectorIndexPattern
-        );        
+        );
         // reset the value back to default
         const resetToDefaultLink = await testSubjects.find(ui.pages.settings.resetToDefaultLink);
         await resetToDefaultLink.click();
 
-        expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be(
-          ''
-        );
-       await saveButton.click();
-       await testSubjects.missingOrFail(ui.pages.settings.searchConnectorIndexPatternInput, { timeout: 2000 });
-       // wait for the new page to fully load
-       await testSubjects.existOrFail(ui.pages.settings.searchConnectorIndexPatternInput, { timeout: 2000 });
-       expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be(
-        ''
-      );
+        expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be('');
+        await saveButton.click();
+        await testSubjects.missingOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
+          timeout: 2000,
+        });
+        // wait for the new page to fully load
+        await testSubjects.existOrFail(ui.pages.settings.searchConnectorIndexPatternInput, {
+          timeout: 2000,
+        });
+        expect(await searchConnectorIndexPatternInput.getAttribute('value')).to.be('');
       });
       it('displays failure toast on failed request', async () => {
         const searchConnectorIndexPatternInput = await testSubjects.find(
