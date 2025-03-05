@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/streams-app-wrapper-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/target/**/*",
+      "!{projectRoot}/.storybook/**/*.js"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {}
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/solutions/observability/plugins/observability_streams_wrapper"
+}

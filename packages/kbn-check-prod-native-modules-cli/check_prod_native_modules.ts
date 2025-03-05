@@ -111,7 +111,7 @@ async function checkProdNativeModules(log: ToolingLog) {
 
     // Converts rawProductionDependencies into a simple Map of production dependencies
     const productionDependencies: Map<string, boolean> = new Map();
-    rawProductionDependencies.forEach((depInfo, depKey) => {
+    rawProductionDependencies?.forEach((depInfo, depKey) => {
       productionDependencies.set(`${depInfo.name}@${depInfo.version}`, true);
     });
 

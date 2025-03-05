@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/nx",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**/*.ts",
+      "{projectRoot}/src/**/*.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "generateAllTypecheckConfigs": {
+      "command": "node scripts/type_check.js --configs-only",
+      "cache": false,
+      "inputs": []
+    },
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {},
+    "noop": {
+      "executor": "@kbn/nx:noop",
+      "options": {
+        "commands": []
+      }
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-nx"
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/elastic-assistant-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/lib/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/scripts/**/*.ts",
+      "{projectRoot}/server/**/*.json",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {}
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/solutions/security/plugins/elastic_assistant"
+}

@@ -13,7 +13,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".storybook/**/*.ts",
-    ".storybook/**/*.tsx",
+    ".storybook/**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -40,6 +40,6 @@
     "@kbn/inference-common",
     "@kbn/storybook",
     "@kbn/ai-assistant-icon",
-    "@kbn/datemath",
+    "@kbn/datemath"
   ]
 }

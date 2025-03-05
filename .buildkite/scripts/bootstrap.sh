@@ -3,9 +3,20 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
+
+# if CI is not set, only run local bootstrap and exit
+if [[ -z "${CI:-}" ]]; then
+  # if bootstrap is happy, we're done
+  if yarn kbn bootstrap; then
+    exit 0
+  else
+    echo "Local bootstrap failed, retrying with force reinstall"
+    yarn kbn bootstrap --force-install
+    exit 1
+  fi
+fi
 
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
@@ -23,6 +34,11 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
+  fi
+
+  if [[ -d ~/.kibana/.nx ]]; then
+    echo "Copy .nx cache to kibana"
+    mv ~/.kibana/.nx ./
   fi
 fi
 
