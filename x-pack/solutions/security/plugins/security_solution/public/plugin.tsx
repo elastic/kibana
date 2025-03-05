@@ -207,6 +207,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     productFeatureKeys$
       .pipe(combineLatestWith(plugins.licensing.license$))
       .subscribe(([productFeatureKeys, license]) => {
+        if (!productFeatureKeys || !license) {
+          return;
+        }
+
         const isAssistantAvailable =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           license?.hasAtLeast('enterprise');
