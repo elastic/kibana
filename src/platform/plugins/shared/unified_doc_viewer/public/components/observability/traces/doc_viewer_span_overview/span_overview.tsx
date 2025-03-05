@@ -11,7 +11,7 @@ import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getTraceDocumentOverview } from '@kbn/discover-utils';
+import { TRANSACTION_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
@@ -37,7 +37,7 @@ export function SpanOverview({
 
   return (
     <TransactionProvider
-      transactionId={parsedDoc['transaction.id']}
+      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
       indexPattern={transactionIndexPattern}
     >
       <FieldActionsProvider

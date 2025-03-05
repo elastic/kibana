@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { PROCESSOR_EVENT_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 interface UseTransactionPrams {
@@ -45,12 +46,12 @@ async function getTransactionData({
                 must: [
                   {
                     term: {
-                      'transaction.id': transactionId,
+                      [TRANSACTION_ID_FIELD]: transactionId,
                     },
                   },
                   {
                     term: {
-                      'processor.event': 'transaction',
+                      [PROCESSOR_EVENT_FIELD]: 'transaction',
                     },
                   },
                 ],
