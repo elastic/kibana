@@ -20,6 +20,10 @@ Design goals:
 Each section of the app has its own `scope` that holds the selected data view, for that scope only. This is what makes having different data views selected for the timelines and alerts table at the same time.
 It is possible however to select the same data view for multiple scopes at the same time, by specifying multiple scopes in `useSelectDataView` hook call. See [useSelectDataView]('./hooks/use_select_data_view.ts') for reference.
 
+### Shared values
+
+Shared values (eg. list of currently loaded kibana data views) are stored in a dedicated portion of the state, `shared`. Values in this space are intended for reuse.
+
 ### Async effects such as data view updates / creation / fetching
 
 We are currently using redux toolkit listener middleware to implement side effects logic in Data View Picker for Security Solution plugin.

@@ -48,7 +48,7 @@ export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>
     },
   });
 
-export const shared = createSlice({
+export const sharedDataViewManagerSlice = createSlice({
   name: `${SLICE_PREFIX}/shared`,
   initialState: initialSharedState,
   reducers: {

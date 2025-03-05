@@ -10,7 +10,7 @@ import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
-import { shared } from '../slices';
+import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 
@@ -41,11 +41,13 @@ describe('createInitListener', () => {
   });
 
   it('should load the data views and dispatch further actions', async () => {
-    await listener.effect(shared.actions.init(), mockListenerApi);
+    await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
 
     expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(shared.actions.setDataViews([]));
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      sharedDataViewManagerSlice.actions.setDataViews([])
+    );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
@@ -66,9 +68,11 @@ describe('createInitListener', () => {
     });
 
     it('should dispatch error correctly', async () => {
-      await listener.effect(shared.actions.init(), mockListenerApi);
+      await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
 
-      expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(shared.actions.error());
+      expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+        sharedDataViewManagerSlice.actions.error()
+      );
     });
   });
 });

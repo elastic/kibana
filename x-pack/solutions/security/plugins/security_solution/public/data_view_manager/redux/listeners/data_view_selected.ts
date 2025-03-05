@@ -10,7 +10,7 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
-import { shared } from '../slices';
+import { sharedDataViewManagerSlice } from '../slices';
 
 export const createDataViewSelectedListener = (dependencies: {
   dataViews: DataViewsServicePublic;
@@ -78,7 +78,7 @@ export const createDataViewSelectedListener = (dependencies: {
             id: `adhoc_${title}`,
             title,
           });
-          listenerApi.dispatch(shared.actions.addDataView(adhocDataView));
+          listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(adhocDataView));
           // eslint-disable-next-line require-atomic-updates
           dataViewSpec = adhocDataView.toSpec();
         } catch (error: unknown) {

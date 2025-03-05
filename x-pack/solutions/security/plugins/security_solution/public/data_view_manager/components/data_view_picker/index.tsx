@@ -15,7 +15,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
-import { shared } from '../../redux/slices';
+import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 
 export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
@@ -36,7 +36,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (newDataView) => {
-        dispatch(shared.actions.addDataView(newDataView));
+        dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
         selectDataView({ id: newDataView.id, scope: [props.scope] });
       },
       allowAdHocDataView: true,

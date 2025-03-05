@@ -10,7 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
 import { useDataView } from '../../hooks/use_data_view';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
-import { shared } from '../../redux/slices';
+import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -140,7 +140,9 @@ describe('DataViewPicker', () => {
 
     onSaveCallback(newDataView);
 
-    expect(mockDispatch).toHaveBeenCalledWith(shared.actions.addDataView(newDataView));
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sharedDataViewManagerSlice.actions.addDataView(newDataView)
+    );
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
       scope: ['default'],

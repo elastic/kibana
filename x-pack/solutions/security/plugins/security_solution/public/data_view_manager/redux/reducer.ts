@@ -12,7 +12,7 @@ import {
   createDataViewSelectionSlice,
   initialScopeState,
   initialSharedState,
-  shared,
+  sharedDataViewManagerSlice,
 } from './slices';
 
 export const scopes = {
@@ -35,7 +35,7 @@ export const dataViewManagerReducer = combineReducers({
   [DataViewManagerScopeName.timeline]: scopes[DataViewManagerScopeName.timeline].reducer,
   [DataViewManagerScopeName.detections]: scopes[DataViewManagerScopeName.detections].reducer,
   [DataViewManagerScopeName.analyzer]: scopes[DataViewManagerScopeName.analyzer].reducer,
-  shared: shared.reducer,
+  shared: sharedDataViewManagerSlice.reducer,
 });
 
 export type DataviewPickerState = ReturnType<typeof dataViewManagerReducer>;

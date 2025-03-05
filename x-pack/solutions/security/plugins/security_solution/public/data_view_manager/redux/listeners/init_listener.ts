@@ -8,13 +8,13 @@
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
-import { shared } from '../slices';
+import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 
 export const createInitListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
   return {
-    actionCreator: shared.actions.init,
+    actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (
       _action: AnyAction,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
@@ -23,7 +23,7 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
         const dataViews = await dependencies.dataViews.getAllDataViewLazy();
         const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
 
-        listenerApi.dispatch(shared.actions.setDataViews(dataViewSpecs));
+        listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
 
         // Preload the default data view for related scopes
         // NOTE: we will remove this ideally and load only when particular dataview is necessary
@@ -38,7 +38,7 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
           })
         );
       } catch (error: unknown) {
-        listenerApi.dispatch(shared.actions.error());
+        listenerApi.dispatch(sharedDataViewManagerSlice.actions.error());
       }
     },
   };

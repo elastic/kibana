@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
-import { shared } from '../redux/slices';
+import { sharedDataViewManagerSlice } from '../redux/slices';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -57,7 +57,7 @@ export const useInitDataViewManager = () => {
     dispatch(addListener(dataViewSelectedListener));
 
     // NOTE: this kicks off the data loading in the Data View Picker
-    dispatch(shared.actions.init());
+    dispatch(sharedDataViewManagerSlice.actions.init());
 
     return () => {
       dispatch(removeListener(dataViewsLoadingListener));
