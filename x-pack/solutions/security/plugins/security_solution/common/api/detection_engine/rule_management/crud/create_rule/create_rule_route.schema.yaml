@@ -149,7 +149,7 @@ paths:
                   type: 'threshold'
               example3:
                 summary: Machine learning rule
-                description: ml-cap rule that creates alerts, and sends Slack notifications, when the `linux_anomalous_network_activity_ecs` {ml} job discovers anomalies with a threshold of 70 or above
+                description: Machine learning rule that creates alerts, and sends Slack notifications, when the `linux_anomalous_network_activity_ecs` machine learning job discovers anomalies with a threshold of 70 or above.
                 value:
                   anomaly_threshold: 70
                   rule_id: 'ml_linux_network_high_threshold'
