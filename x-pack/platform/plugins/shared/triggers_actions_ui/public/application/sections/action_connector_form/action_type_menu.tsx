@@ -25,7 +25,7 @@ interface Props {
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   searchValue?: string;
-  selectedOptions?: Array<{ label: string; id: string }>;
+  selectedOptions?: Array<{ label: string; key: string }>;
 }
 
 export const ActionTypeMenu = ({
@@ -107,7 +107,7 @@ export const ActionTypeMenu = ({
             feature.toLowerCase()
           );
           const selectedCategories = selectedOptions.map((selectedOption) =>
-            selectedOption.id.toLowerCase()
+            selectedOption.key.toLowerCase()
           );
 
           return selectedCategories.some((selectedOption) =>

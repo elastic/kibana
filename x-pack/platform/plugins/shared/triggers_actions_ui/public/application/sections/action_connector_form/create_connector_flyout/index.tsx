@@ -80,20 +80,20 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<[{ label: string; id: string }]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string; key: string }>>([]);
 
   const categoryOptions: EuiSelectableOption[] = [
     {
       label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.alertingRules', {
         defaultMessage: 'Alerting Rules',
       }),
-      id: AlertingConnectorFeatureId,
+      key: AlertingConnectorFeatureId,
     },
     {
       label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cases', {
         defaultMessage: 'Cases',
       }),
-      id: CasesConnectorFeatureId,
+      key: CasesConnectorFeatureId,
     },
     {
       label: i18n.translate(
@@ -102,7 +102,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           defaultMessage: 'Endpoint Security',
         }
       ),
-      id: EndpointSecurityConnectorFeatureId,
+      key: EndpointSecurityConnectorFeatureId,
     },
     {
       label: i18n.translate(
@@ -111,7 +111,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           defaultMessage: 'Generative AI for Observability',
         }
       ),
-      id: GenerativeAIForObservabilityConnectorFeatureId,
+      key: GenerativeAIForObservabilityConnectorFeatureId,
     },
     {
       label: i18n.translate(
@@ -120,7 +120,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           defaultMessage: 'Generative AI for Search',
         }
       ),
-      id: GenerativeAIForSearchPlaygroundConnectorFeatureId,
+      key: GenerativeAIForSearchPlaygroundConnectorFeatureId,
     },
     {
       label: i18n.translate(
@@ -129,7 +129,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           defaultMessage: 'Generative AI for Security',
         }
       ),
-      id: GenerativeAIForSecurityConnectorFeatureId,
+      key: GenerativeAIForSecurityConnectorFeatureId,
     },
     {
       label: i18n.translate(
@@ -138,11 +138,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           defaultMessage: 'Security Solution',
         }
       ),
-      id: SecurityConnectorFeatureId,
+      key: SecurityConnectorFeatureId,
     },
-  ].map(({ label, id }) => ({
+  ].map(({ label, key }) => ({
     label,
-    id,
+    key,
     checked: selectedOptions.some((opt) => opt.label.includes(label)) ? 'on' : undefined,
   }));
 
