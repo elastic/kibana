@@ -763,7 +763,6 @@ export class StreamsClient {
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        routing: [],
         unwired: {},
       },
     }));
