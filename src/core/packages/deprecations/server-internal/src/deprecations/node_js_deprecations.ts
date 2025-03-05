@@ -29,8 +29,11 @@ export const registerNodeJsDeprecationsInfo = ({
   /**
    * Note: this deprecation is being detected on a best effort basis. It is possible
    * that multiple Kibanas are running with differing configuration in which case it depends
-   * on which Kibana handles the request deprecations... For now, building on the
-   * assumption that for this configuration this is a very edge case possibility.
+   * on which Kibana handles the deprecations request... For now, building on the
+   * assumption that for this configuration this is a very edge case possibility,
+   * however it might be awkward if users start addressing this deprecation, see
+   * it becomes resolved but missed some Kibanas. One mitigiation is that we
+   * should emit a warning log about this when starting Kibana.
    */
   if (isOpenSslLegacyProviderEnabled()) {
     deprecationsFactory.getRegistry('core.node_js_deprecations').registerDeprecations({
