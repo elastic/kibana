@@ -8,6 +8,7 @@
  */
 
 import { Required } from 'utility-types';
+import { Client } from '@elastic/elasticsearch';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
 import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtrace_es_client';
@@ -20,15 +21,29 @@ import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_cl
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
 
+export interface SynthtraceClients {
+  apmEsClient: ApmSynthtraceEsClient;
+  entitiesEsClient: EntitiesSynthtraceEsClient;
+  infraEsClient: InfraSynthtraceEsClient;
+  logsEsClient: LogsSynthtraceEsClient;
+  otelEsClient: OtelSynthtraceEsClient;
+  streamsClient: StreamsSynthtraceClient;
+  syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
+  esClient: Client;
+}
+
 export async function getClients({
   logger,
   options,
   packageVersion,
+  skipBootstrap,
 }: {
   logger: Logger;
   options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>;
   packageVersion?: string;
-}) {
+  skipBootstrap?: boolean;
+}): Promise<SynthtraceClients> {
   const apmKibanaClient = new ApmSynthtraceKibanaClient({
     logger,
     kibanaClient: options.kibana,
@@ -38,12 +53,14 @@ export async function getClients({
 
   if (!version) {
     version = await apmKibanaClient.fetchLatestApmPackageVersion();
-    await apmKibanaClient.installApmPackage(version);
+    if (!skipBootstrap) {
+      await apmKibanaClient.installApmPackage(version);
+    }
   } else if (version === 'latest') {
     version = await apmKibanaClient.fetchLatestApmPackageVersion();
   }
 
-  logger.info(`Using package version: ${version}`);
+  logger.debug(`Using package version: ${version}`);
 
   const apmEsClient = new ApmSynthtraceEsClient({
     ...options,
@@ -73,5 +90,6 @@ export async function getClients({
     streamsClient,
     syntheticsEsClient,
     entitiesKibanaClient,
+    esClient: options.client,
   };
 }

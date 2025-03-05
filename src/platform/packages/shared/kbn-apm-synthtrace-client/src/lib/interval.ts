@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
 import { castArray } from 'lodash';
 import moment, { unitOfTime } from 'moment';
 import { SynthtraceGenerator } from '../types';
 import { Fields } from './entity';
 import { Serializable } from './serializable';
+import { TimerangeProgressReporter } from './timerange_progress_reporter';
 
 export function parseInterval(interval: string): {
   intervalAmount: number;
@@ -32,6 +34,7 @@ interface IntervalOptions {
   to: Date;
   interval: string;
   rate?: number;
+  log: ToolingLog;
 }
 
 interface StepDetails {
@@ -87,9 +90,20 @@ export class Interval<TFields extends Fields = Fields> {
 
     let index = 0;
 
+    const calculateEvery = 10;
+
+    const reporter = new TimerangeProgressReporter({
+      log: this.options.log,
+      reportEvery: 5000,
+      total: timestamps.length,
+    });
+
     for (const timestamp of timestamps) {
       const events = castArray(map(timestamp, index, stepDetails));
       index++;
+      if (index % calculateEvery === 0) {
+        reporter.next(index);
+      }
       for (const event of events) {
         yield event;
       }

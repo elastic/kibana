@@ -23,8 +23,7 @@ export function parseDataset({ system, parser }: { parser: LoghubParser; system:
 
   const count = sortedLogLines.length;
 
-  // add one to separate start and end event
-  const range = max - min + 1;
+  const range = max - min;
 
   const rpm = count / (range / 1000 / 60);
 

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
+import { Condition, StreamUpsertRequest } from '@kbn/streams-schema';
+import { Readable, Transform, pipeline } from 'stream';
 import { Required } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import { internalKibanaHeaders } from '../shared/client_headers';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,23 +27,58 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
     this.dataStreams = ['logs', 'logs.*'];
   }
 
+  async forkStream(
+    streamName: string,
+    request: { stream: { name: string }; if: Condition }
+  ): Promise<{ acknowledged: true }> {
+    return this.kibana!.fetch(`/api/streams/${streamName}/_fork`, {
+      method: 'POST',
+      headers: {
+        ...internalKibanaHeaders(),
+      },
+      body: JSON.stringify(request),
+    });
+  }
+
+  async putStream(
+    streamName: string,
+    request: StreamUpsertRequest
+  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
+    return this.kibana!.fetch(`/api/streams/${streamName}`, {
+      method: 'PUT',
+      headers: {
+        ...internalKibanaHeaders(),
+      },
+      body: JSON.stringify(request),
+    });
+  }
+
   async enable() {
     await this.kibana!.fetch('/api/streams/_enable', {
       method: 'POST',
-      headers: { 'x-elastic-internal-origin': 'kibana' },
+      headers: {
+        ...internalKibanaHeaders(),
+      },
     });
   }
 
   async disable() {
     await this.kibana!.fetch('/api/streams/_disable', {
       method: 'POST',
-      headers: { 'x-elastic-internal-origin': 'kibana' },
+      timeout: 5 * 60 * 1000,
+      headers: {
+        ...internalKibanaHeaders(),
+      },
     });
   }
 
   override async clean(): Promise<void> {
-    await super.clean();
     await this.disable();
+    await super.clean();
+  }
+
+  async clearESCache(): Promise<void> {
+    await this.client.indices.clearCache();
   }
 }
 

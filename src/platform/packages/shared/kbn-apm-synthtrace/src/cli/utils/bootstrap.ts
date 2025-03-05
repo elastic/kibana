@@ -15,7 +15,10 @@ import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
 import { getEsClientTlsSettings } from './ssl';
 
-export async function bootstrap(runOptions: RunOptions) {
+export async function bootstrap({
+  skipClientBootstrap,
+  ...runOptions
+}: RunOptions & { skipClientBootstrap?: boolean }) {
   const logger = createLogger(runOptions.logLevel);
 
   const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
@@ -41,6 +44,7 @@ export async function bootstrap(runOptions: RunOptions) {
       concurrency: runOptions.concurrency,
       kibana: kibanaClient,
     },
+    skipBootstrap: skipClientBootstrap,
   });
 
   if (runOptions.clean) {

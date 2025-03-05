@@ -14,6 +14,8 @@ import { validateParser } from '../src/validate_parser';
 import { getParser } from '../src/get_parser';
 import { createLoghubGenerator } from './create_loghub_generator';
 import { parseDataset } from './parse_dataset';
+import { validateQueries } from '../src/validate_queries';
+import { getQueries } from '../src/get_queries';
 
 export class SampleParserClient {
   private readonly logger: ToolingLog;
@@ -21,23 +23,30 @@ export class SampleParserClient {
     this.logger = options.logger;
   }
 
-  async getLogGenerators({ rpm }: { rpm?: number }): Promise<StreamLogGenerator[]> {
+  async getLogGenerators({
+    rpm = 10000,
+    distribution = 'uniform',
+  }: {
+    rpm?: number;
+    distribution?: 'relative' | 'uniform';
+  }): Promise<StreamLogGenerator[]> {
     await ensureLoghubRepo({ log: this.logger });
     const systems = await readLoghubSystemFiles({ log: this.logger });
 
     const results = await Promise.all(
       systems.map(async (system) => {
-        await validateParser(system).catch((error) => {
+        await Promise.all([validateParser(system), validateQueries(system)]).catch((error) => {
           throw new AggregateError([error], `Parser for ${system.name} is not valid`);
         });
 
-        const parser = await getParser(system);
+        const [parser, queries] = await Promise.all([getParser(system), getQueries(system)]);
         const { rpm: systemRpm } = parseDataset({ system, parser });
 
         return {
           parser,
           system,
           rpm: systemRpm,
+          queries,
         };
       })
     );
@@ -45,15 +54,21 @@ export class SampleParserClient {
     const totalRpm = sumBy(results, ({ rpm: systemRpm }) => systemRpm);
 
     return await Promise.all(
-      results.map(({ system, parser, rpm: systemRpm }) => {
-        const share = systemRpm / totalRpm;
-        const targetRpm = rpm === undefined ? Math.min(100, systemRpm) : share * rpm;
+      results.map(({ system, parser, rpm: systemRpm, queries }) => {
+        let targetRpm: number;
+        if (distribution === 'relative') {
+          const share = systemRpm / totalRpm;
+          targetRpm = rpm === undefined ? Math.min(100, systemRpm) : share * rpm;
+        } else {
+          targetRpm = Math.round(rpm / results.length);
+        }
 
         return createLoghubGenerator({
           system,
           parser,
           log: this.logger,
           targetRpm: Math.max(1, targetRpm),
+          queries,
         });
       })
     );

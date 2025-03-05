@@ -24,3 +24,7 @@ export async function writeFileRecursively(filename: string, content: string) {
 export function getParserFilename(system: LoghubSystem) {
   return Path.join(LOGHUB_PARSER_DIR, system.name, 'parser.ts');
 }
+
+export function getQueriesFilename(system: LoghubSystem) {
+  return Path.join(LOGHUB_PARSER_DIR, system.name, 'queries.json');
+}

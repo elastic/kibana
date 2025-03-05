@@ -13,6 +13,7 @@ import { ensureLoghubRepo } from '../src/ensure_loghub_repo';
 import { readLoghubSystemFiles } from '../src/read_loghub_system_files';
 import { ensureValidParser } from '../src/ensure_valid_parser';
 import { createOpenAIClient } from '../src/create_openai_client';
+import { ensureValidQueries } from '../src/ensure_valid_queries';
 
 async function run({ log }: { log: ToolingLog }) {
   await ensureLoghubRepo({ log });
@@ -24,12 +25,19 @@ async function run({ log }: { log: ToolingLog }) {
 
   const results = await Promise.all(
     systems.map(async (system) => {
-      return limiter(() =>
-        ensureValidParser({
-          openAIClient,
-          log,
-          system,
-        })
+      return limiter(async () =>
+        Promise.all([
+          ensureValidParser({
+            openAIClient,
+            log,
+            system,
+          }),
+          ensureValidQueries({
+            openAIClient,
+            system,
+            log,
+          }),
+        ])
           .then(() => {
             return {
               name: system.name,
