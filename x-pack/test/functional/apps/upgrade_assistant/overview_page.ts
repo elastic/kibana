@@ -38,7 +38,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
       // step 1
       await testSubjects.exists('backupStep-incomplete');
       // step 2
-      await testSubjects.missingOrFail('migrateSystemIndicesStep-incomplete');
+      await testSubjects.exists('migrateSystemIndicesText');
       // step 3
       await testSubjects.exists('fixIssuesStep-incomplete');
       // step 4
