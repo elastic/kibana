@@ -70,9 +70,13 @@ async function getTransactionData({
   );
 }
 
+export interface TransactionWithOnlyName {
+  name: string;
+}
+
 const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
   const { data, core } = getUnifiedDocViewerServices();
-  const [transaction, setTransaction] = useState<{ [key: string]: string } | null>(null);
+  const [transaction, setTransaction] = useState<TransactionWithOnlyName | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
