@@ -9,6 +9,7 @@ endpoints. You can create and manage endpoints either from the {kib} UI or the {
 [role="screenshot"]
 image::images/inference-endpoints-ui.png[Inference endpoints UI]
 
+[[inference-endpoints-available-actions]]
 === Available actions:
 
 * Add new endpoint
