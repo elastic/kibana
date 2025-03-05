@@ -12,6 +12,7 @@ import { EcsFlat } from '@elastic/ecs';
 export {
   ATTR_HTTP_REQUEST_METHOD,
   ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
   ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions';
 
@@ -97,6 +98,22 @@ export const ATTR_EVENT_DATASET = EcsFlat['event.dataset'].name;
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-hostname
  */
 export const ATTR_HOST_HOSTNAME = EcsFlat['host.hostname'].name;
+
+/**
+ * Operating system name, including the version or code name.
+ *
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-host.html#ecs-host-nestings
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-os.html#field-os-full
+ */
+export const ATTR_HOST_OS_FULL = EcsFlat['host.os.full'].name;
+
+/**
+ * Operating system platform (such centos, ubuntu, windows).
+ *
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-host.html#ecs-host-nestings
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-os.html#field-os-platform
+ */
+export const ATTR_HOST_OS_PLATFORM = EcsFlat['host.os.platform'].name;
 
 /**
  * For log events the message field contains the log message, optimized for viewing in a log viewer.
@@ -239,6 +256,27 @@ export const ATTR_ERROR_EXCEPTION_MESSAGE = 'error.exception.message' as const;
  * @see https://www.elastic.co/guide/en/integrations/current/apm.html#apm-application-errors
  */
 export const ATTR_ERROR_EXCEPTION_TYPE = 'error.exception.type' as const;
+
+/**
+ * ISO country code, eg. US
+ *
+ * @see https://www.elastic.co/guide/en/integrations/current/apm.html#apm-traces
+ */
+export const ATTR_NETWORK_CARRIER_ICC = 'network.carrier.icc' as const;
+
+/**
+ * Carrier name, eg. Vodafone, T-Mobile, etc.
+ *
+ * @see https://www.elastic.co/guide/en/integrations/current/apm.html#apm-traces
+ */
+export const ATTR_NETWORK_CARRIER_NAME = 'network.carrier.name' as const;
+
+/**
+ * Network connection type, eg. "wifi", "cell"
+ *
+ * @see https://www.elastic.co/guide/en/integrations/current/apm.html#apm-traces
+ */
+export const ATTR_NETWORK_CONNECTION_TYPE = 'network.connection.type' as const;
 
 /**
  * Processor event.

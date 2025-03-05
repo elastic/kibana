@@ -6,13 +6,15 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+  ATTR_PROCESSOR_EVENT,
+  ATTR_SERVICE_ENVIRONMENT,
+  ATTR_SERVICE_NAME,
+  ATTR_TIMESTAMP,
+  ATTR_TRANSACTION_TYPE,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
+import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
 
@@ -49,7 +51,7 @@ export function getEnvironments({
         filter: [
           {
             range: {
-              '@timestamp': {
+              [ATTR_TIMESTAMP]: {
                 gte: start,
                 lte: end,
                 format: 'epoch_millis',
@@ -58,24 +60,24 @@ export function getEnvironments({
           },
           {
             term: {
-              [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+              [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
             },
           },
           {
             term: {
-              [PROCESSOR_EVENT]: 'transaction',
+              [ATTR_PROCESSOR_EVENT]: PROCESSOR_EVENT_VALUE_TRANSACTION,
             },
           },
           ...(serviceName === undefined || serviceName === null
             ? []
-            : [{ term: { [SERVICE_NAME]: serviceName } }]),
+            : [{ term: { [ATTR_SERVICE_NAME]: serviceName } }]),
         ],
       },
     },
     aggs: {
       environments: {
         terms: {
-          field: SERVICE_ENVIRONMENT,
+          field: ATTR_SERVICE_ENVIRONMENT,
           missing: ENVIRONMENT_NOT_DEFINED.value,
           size,
         },

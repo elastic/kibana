@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import {
-  CLIENT_GEO_COUNTRY_ISO_CODE,
-  USER_AGENT_DEVICE,
-  USER_AGENT_NAME,
-  USER_AGENT_OS,
-} from '../../../../../common/elasticsearch_fieldnames';
+  ATTR_CLIENT_GEO_COUNTRY_ISO_CODE,
+  ATTR_USER_AGENT_DEVICE_NAME,
+  ATTR_USER_AGENT_NAME,
+  ATTR_USER_AGENT_OS_NAME,
+} from '@kbn/observability-ui-semantic-conventions';
+import React from 'react';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
@@ -38,28 +37,28 @@ export function BreakdownFilter({ selectedBreakdown, onBreakdownChange, dataTest
       name: i18n.translate('xpack.ux.breakdownFilter.browser', {
         defaultMessage: 'Browser',
       }),
-      fieldName: USER_AGENT_NAME,
+      fieldName: ATTR_USER_AGENT_NAME,
       type: 'category',
     },
     {
       name: i18n.translate('xpack.ux.breakdownFilter.os', {
         defaultMessage: 'OS',
       }),
-      fieldName: USER_AGENT_OS,
+      fieldName: ATTR_USER_AGENT_OS_NAME,
       type: 'category',
     },
     {
       name: i18n.translate('xpack.ux.breakdownFilter.device', {
         defaultMessage: 'Device',
       }),
-      fieldName: USER_AGENT_DEVICE,
+      fieldName: ATTR_USER_AGENT_DEVICE_NAME,
       type: 'category',
     },
     {
       name: i18n.translate('xpack.ux.breakdownFilter.location', {
         defaultMessage: 'Location',
       }),
-      fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
+      fieldName: ATTR_CLIENT_GEO_COUNTRY_ISO_CODE,
       type: 'category',
     },
   ];

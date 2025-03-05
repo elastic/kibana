@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LegacyMetricState } from '@kbn/lens-plugin/common';
+import { ATTR_URL_FULL } from '@kbn/observability-ui-semantic-conventions';
 import { euiPaletteForStatus } from '@elastic/eui';
 import {
   SYNTHETICS_STEP_DURATION,
@@ -32,7 +33,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
     hasOperationType: true,
     definitionFields: [
       { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
-      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
+      { field: ATTR_URL_FULL, filters: buildExistsFilter('summary.up', dataView) },
     ],
     reportType: 'single-metric',
     baseFilters: [],
