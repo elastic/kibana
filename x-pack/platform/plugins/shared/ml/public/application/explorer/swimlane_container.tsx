@@ -57,7 +57,6 @@ import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
-import { useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -194,12 +193,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   onRenderComplete,
 }) => {
   const {
-    services: {
-      charts: {
-        theme: { useChartsBaseTheme },
-      },
-    },
-  } = useMlKibana();
+    theme: { useChartsBaseTheme },
+  } = chartsService;
+
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const { colorMode, euiTheme } = useEuiTheme();
