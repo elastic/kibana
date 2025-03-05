@@ -26,14 +26,6 @@ jobs:
           project-number: 1525
           owner: 'elastic'
 
-      - name: Update every issue in project 1141 (https://github.com/orgs/elastic/projects/1141)
-        uses: ./actions/github-projects/map-labels
-        with:
-          github-token: ${{secrets.PM_GH_TOKEN}}
-          all: 'true'
-          project-number: 1141
-          owner: 'elastic'
-
       - name: Update every issue in project 1538 (https://github.com/orgs/elastic/projects/1538)
         uses: ./actions/github-projects/map-labels
         with:
