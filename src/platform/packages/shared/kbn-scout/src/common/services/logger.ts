@@ -26,7 +26,7 @@ export class ScoutLogger extends ToolingLog {
   /**
    * Used to log a message for a service/fixture
    */
-  public serviceMessage(name: string, message) {
+  public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${name}`);
   }
 }
