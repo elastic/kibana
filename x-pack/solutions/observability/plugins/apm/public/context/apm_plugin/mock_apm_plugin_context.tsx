@@ -209,6 +209,7 @@ export function MockApmPluginContextWrapper({
   }
 
   performance.mark = jest.fn();
+  performance.clearMeasures = jest.fn();
 
   const contextHistory = useHistory();
 
