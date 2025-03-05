@@ -324,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show available data views after switching to classic mode', async () => {
+      it('should show available data views and search results after switching to classic mode', async () => {
         await discover.selectTextBaseLang();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -335,6 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedSearch.switchToDataViewMode();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
+        await discover.assertHitCount('14,004');
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );

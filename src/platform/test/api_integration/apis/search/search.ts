@@ -41,10 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
-              body: {
-                query: {
-                  match_all: {},
-                },
+              query: {
+                match_all: {},
               },
             },
           })
@@ -67,10 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
               terminateAfter: 1,
               index: 'log*',
               size: 1000,
-              body: {
-                query: {
-                  match_all: {},
-                },
+              query: {
+                match_all: {},
               },
             },
           })
@@ -89,10 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
-            body: {
-              query: {
-                match_all: {},
-              },
+            query: {
+              match_all: {},
             },
           })
           .expect(404);
@@ -106,10 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
-            body: {
-              query: {
-                match_all: {},
-              },
+            query: {
+              match_all: {},
             },
           })
           .expect(404);
@@ -128,10 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
               timeout: 1, // This should be a time range string!
               index: 'log*',
               size: 1000,
-              body: {
-                query: {
-                  match_all: {},
-                },
+              query: {
+                match_all: {},
               },
             },
           })

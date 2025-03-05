@@ -24,19 +24,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/alias');
       await es.indices.updateAliases({
-        body: {
-          actions: [
-            { add: { index: 'test1', alias: 'alias1' } },
-            { add: { index: 'test2', alias: 'alias1' } },
-            { add: { index: 'test3', alias: 'alias1' } },
-            { add: { index: 'test4', alias: 'alias1' } },
-            { add: { index: 'test5', alias: 'alias2' } },
-            { add: { index: 'test6', alias: 'alias2' } },
-            { add: { index: 'test7', alias: 'alias2' } },
-            { add: { index: 'test8', alias: 'alias2' } },
-            { add: { index: 'test9', alias: 'alias2' } },
-          ],
-        },
+        actions: [
+          { add: { index: 'test1', alias: 'alias1' } },
+          { add: { index: 'test2', alias: 'alias1' } },
+          { add: { index: 'test3', alias: 'alias1' } },
+          { add: { index: 'test4', alias: 'alias1' } },
+          { add: { index: 'test5', alias: 'alias2' } },
+          { add: { index: 'test6', alias: 'alias2' } },
+          { add: { index: 'test7', alias: 'alias2' } },
+          { add: { index: 'test8', alias: 'alias2' } },
+          { add: { index: 'test9', alias: 'alias2' } },
+        ],
       });
     });
 

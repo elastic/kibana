@@ -40,9 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     const fetchIndexContent = async () => {
       const body = await es.search<{ type: string }>({
         index: [MAIN_SAVED_OBJECT_INDEX, ANALYTICS_SAVED_OBJECT_INDEX],
-        body: {
-          size: 100,
-        },
+        size: 100,
       });
       return body.hits.hits
         .map((hit) => ({

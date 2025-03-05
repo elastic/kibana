@@ -33,49 +33,47 @@ export async function fetchElasticsearchVersions(
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.elasticsearch.cluster.id',
     ],
-    body: {
-      size: clusters.length,
-      sort: [
-        {
-          timestamp: {
-            order: 'desc' as const,
-            unmapped_type: 'long' as const,
+    size: clusters.length,
+    sort: [
+      {
+        timestamp: {
+          order: 'desc' as const,
+          unmapped_type: 'long' as const,
+        },
+      },
+    ],
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+            },
           },
-        },
-      ],
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+          createDatasetFilter(
+            'cluster_stats',
+            'cluster_stats',
+            getElasticsearchDataset('cluster_stats')
+          ),
+          {
+            range: {
+              timestamp: {
+                gte: 'now-2m',
               },
             },
-            createDatasetFilter(
-              'cluster_stats',
-              'cluster_stats',
-              getElasticsearchDataset('cluster_stats')
-            ),
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
-            },
-          ],
-        },
+          },
+        ],
       },
-      collapse: {
-        field: 'cluster_uuid',
-      },
+    },
+    collapse: {
+      field: 'cluster_uuid',
     },
   };
 
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

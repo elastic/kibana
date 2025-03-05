@@ -55,9 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           index: ANALYTICS_SAVED_OBJECT_INDEX,
           id: 'index-pattern:logstash-*',
-          body: {
-            doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
-          },
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
         },
         { meta: true }
       );
@@ -85,9 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           index: ANALYTICS_SAVED_OBJECT_INDEX,
           id: 'index-pattern:logstash-*',
-          body: {
-            doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
-          },
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
         },
         { meta: true }
       );
