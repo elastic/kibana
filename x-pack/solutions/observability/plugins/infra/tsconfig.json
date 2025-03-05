@@ -119,6 +119,7 @@
     "@kbn/config",
     "@kbn/response-ops-rule-params",
     "@kbn/charts-theme",
+    "@kbn/core-test-helpers-model-versions",
     "@kbn/traced-es-client",
     "@kbn/observability-utils-common"
   ],

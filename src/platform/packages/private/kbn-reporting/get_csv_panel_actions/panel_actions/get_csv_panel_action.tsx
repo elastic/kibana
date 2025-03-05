@@ -24,7 +24,6 @@ import {
   PublishesSavedSearch,
   HasTimeRange,
 } from '@kbn/discover-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   apiCanAccessViewMode,
@@ -158,7 +157,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       return false;
     }
 
-    return getInheritedViewMode(embeddable) !== ViewMode.EDIT;
+    return getInheritedViewMode(embeddable) !== 'edit';
   };
 
   /**

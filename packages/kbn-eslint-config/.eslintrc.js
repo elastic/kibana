@@ -120,7 +120,7 @@ module.exports = {
           from: 'zod',
           to: '@kbn/zod',
           disallowedMessage: `import from @kbn/zod instead`,
-          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
         },
         {
           from: 'styled-components',

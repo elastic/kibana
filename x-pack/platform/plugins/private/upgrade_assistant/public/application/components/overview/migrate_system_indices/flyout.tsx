@@ -26,6 +26,7 @@ import {
   EuiDescriptionList,
   EuiScreenReaderOnly,
   EuiBasicTableColumn,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import {
@@ -33,10 +34,15 @@ import {
   SystemIndicesMigrationFeature,
   MIGRATION_STATUS,
 } from '../../../../../common/types';
+import { MigrateSystemIndicesButton } from './migrate_button';
 
 export interface SystemIndicesFlyoutProps {
   closeFlyout: () => void;
   data: SystemIndicesMigrationStatus;
+  beginSystemIndicesMigration: () => void;
+  isInitialRequest: boolean;
+  isLoading: boolean;
+  migrationStatus?: MIGRATION_STATUS;
 }
 
 const i18nTexts = {
@@ -96,6 +102,12 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.systemIndices.unknownErrorLabel',
     {
       defaultMessage: 'Unknown error',
+    }
+  ),
+  migrationNotNeeded: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.migrationNotNeeded',
+    {
+      defaultMessage: 'Systems indices migration not needed',
     }
   ),
 };
@@ -166,7 +178,14 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
   return null;
 };
 
-export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
+export const SystemIndicesFlyout = ({
+  closeFlyout,
+  data,
+  beginSystemIndicesMigration,
+  isInitialRequest,
+  isLoading,
+  migrationStatus,
+}: SystemIndicesFlyoutProps) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, ReactNode>>({});
 
   const toggleRow = (feature: SystemIndicesMigrationFeature) => {
@@ -235,19 +254,32 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="flyoutDetails">
-        <EuiText>
-          <p>{i18nTexts.flyoutDescription}</p>
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiInMemoryTable<SystemIndicesMigrationFeature>
-          data-test-subj="featuresTable"
-          itemId="feature_name"
-          items={data.features}
-          columns={columns}
-          itemIdToExpandedRowMap={expandedRows}
-          pagination={true}
-          sorting={true}
-        />
+        {migrationStatus === 'NO_MIGRATION_NEEDED' && (
+          <EuiCallOut
+            title={i18nTexts.migrationNotNeeded}
+            iconType="cheer"
+            color="success"
+            data-test-subj="noMigrationNeededCallout"
+          />
+        )}
+
+        {migrationStatus !== 'NO_MIGRATION_NEEDED' && (
+          <>
+            <EuiText>
+              <p>{i18nTexts.flyoutDescription}</p>
+            </EuiText>
+            <EuiSpacer size="l" />
+            <EuiInMemoryTable<SystemIndicesMigrationFeature>
+              data-test-subj="featuresTable"
+              itemId="feature_name"
+              items={data.features}
+              columns={columns}
+              itemIdToExpandedRowMap={expandedRows}
+              pagination={true}
+              sorting={true}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -256,6 +288,18 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
+
+          {migrationStatus !== 'NO_MIGRATION_NEEDED' && (
+            <EuiFlexItem grow={false}>
+              <MigrateSystemIndicesButton
+                buttonProps={{ fill: true }}
+                beginSystemIndicesMigration={beginSystemIndicesMigration}
+                isInitialRequest={isInitialRequest}
+                isLoading={isLoading}
+                isMigrating={migrationStatus === 'IN_PROGRESS'}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

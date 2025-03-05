@@ -42,9 +42,10 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
  * @returns Created rule asset saved object
  */
 export const createRuleAssetSavedObjectOfType = <T extends TypeSpecificCreateProps>(
-  type: T['type']
+  type: T['type'],
+  rewrites?: Partial<PrebuiltRuleAsset>
 ) => ({
-  'security-rule': getPrebuiltRuleMockOfType<T>(type),
+  'security-rule': { ...getPrebuiltRuleMockOfType<T>(type), ...rewrites },
   ...ruleAssetSavedObjectESFields,
 });
 
@@ -114,7 +115,7 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
   es: Client,
   rules = SAMPLE_PREBUILT_RULES_WITH_HISTORICAL_VERSIONS
 ): Promise<void> => {
-  await es.bulk({
+  const response = await es.bulk({
     refresh: true,
     body: rules.flatMap((doc) => [
       {
@@ -126,4 +127,10 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
       doc,
     ]),
   });
+
+  if (response.errors) {
+    throw new Error(
+      `Unable to bulk create rule assets. Response items: ${JSON.stringify(response.items)}`
+    );
+  }
 };

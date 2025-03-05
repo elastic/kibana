@@ -21,13 +21,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: {
-      ruleUpgradeStates,
-      hasRulesToUpgrade,
-      loadingRules,
-      isRefetching,
-      isUpgradingSecurityPackages,
-    },
+    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
@@ -43,14 +37,10 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const doAllSelectedRulesHaveConflicts =
     isRulesCustomizationEnabled &&
     selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
-  const doAllRulesHaveConflicts =
-    isRulesCustomizationEnabled &&
-    ruleUpgradeStates.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
     canUserEditRules,
     doAllSelectedRulesHaveConflicts,
-    doAllRulesHaveConflicts,
     isPrebuiltRulesCustomizationEnabled: isRulesCustomizationEnabled,
   });
 
@@ -83,12 +73,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
             fill
             iconType="plusInCircle"
             onClick={upgradeAllRules}
-            disabled={
-              !canUserEditRules ||
-              !hasRulesToUpgrade ||
-              isRequestInProgress ||
-              doAllRulesHaveConflicts
-            }
+            disabled={!canUserEditRules || !hasRulesToUpgrade || isRequestInProgress}
             data-test-subj="upgradeAllRulesButton"
           >
             {i18n.UPDATE_ALL}
@@ -103,12 +88,10 @@ export const UpgradePrebuiltRulesTableButtons = ({
 const useBulkUpdateButtonsTooltipContent = ({
   canUserEditRules,
   doAllSelectedRulesHaveConflicts,
-  doAllRulesHaveConflicts,
   isPrebuiltRulesCustomizationEnabled,
 }: {
   canUserEditRules: boolean | null;
   doAllSelectedRulesHaveConflicts: boolean;
-  doAllRulesHaveConflicts: boolean;
   isPrebuiltRulesCustomizationEnabled: boolean;
 }) => {
   if (!canUserEditRules) {
@@ -122,13 +105,6 @@ const useBulkUpdateButtonsTooltipContent = ({
     return {
       selectedRulesButtonTooltip: undefined,
       allRulesButtonTooltip: undefined,
-    };
-  }
-
-  if (doAllRulesHaveConflicts) {
-    return {
-      selectedRulesButtonTooltip: i18n.BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS,
-      allRulesButtonTooltip: i18n.BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS,
     };
   }
 

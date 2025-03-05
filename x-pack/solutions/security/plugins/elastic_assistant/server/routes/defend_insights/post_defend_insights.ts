@@ -102,7 +102,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
           const actions = assistantContext.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const dataClient = await assistantContext.getDefendInsightsDataClient();
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
@@ -152,7 +152,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             esClient,
             latestReplacements,
-            contentReferencesStore: false,
+            contentReferencesStore: undefined,
             connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
             langSmithProject,
