@@ -53,7 +53,7 @@ describe('view saved search action', () => {
     const action = getViewDiscoverSessionAction(applicationMock, services.locator);
     expect(
       await action.isCompatible?.({
-        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject('edit') }
+        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject('edit') },
       })
     ).toBe(false);
   });
