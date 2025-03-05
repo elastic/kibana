@@ -231,7 +231,6 @@ export interface SubPlugins {
   alerts: Detections;
   assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
-  cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
   exceptions: Exceptions;
@@ -255,7 +254,6 @@ export interface StartedSubPlugins {
   alerts: Awaited<ReturnType<Detections['start']>>;
   assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
-  cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;
   exceptions: ReturnType<Exceptions['start']>;
