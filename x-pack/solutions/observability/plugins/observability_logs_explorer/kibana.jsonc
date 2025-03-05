@@ -20,7 +20,8 @@
       "share",
       "kibanaUtils",
       "dataQuality",
-      "logsDataAccess"
+      "logsDataAccess",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "serverless",

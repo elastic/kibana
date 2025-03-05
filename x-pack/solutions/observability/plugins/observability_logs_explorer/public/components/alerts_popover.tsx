@@ -23,10 +23,12 @@ import type { AlertParams } from '@kbn/observability-plugin/public/components/cu
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import useAsync from 'react-use/lib/useAsync';
 import { useBoolean } from '@kbn/react-hooks';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
 
@@ -44,8 +46,9 @@ function getQuery(query?: Query | AggregateQuery): Query {
 
 export const AlertsPopover = () => {
   const {
-    services: { triggersActionsUi, slo, application, http },
+    services: { triggersActionsUi, slo, ...services },
   } = useKibanaContextForPlugin();
+  const { application, http,} = services
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
@@ -59,6 +62,7 @@ export const AlertsPopover = () => {
     if (
       isAddRuleFlyoutOpen &&
       triggersActionsUi &&
+      isValidRuleFormPlugins(services) &&
       pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
       const { logsExplorerState } = pageState.context;
@@ -67,11 +71,16 @@ export const AlertsPopover = () => {
         pageState.context.allSelection
       ).toDataviewSpec();
 
-      return triggersActionsUi.getAddRuleFlyout<ThresholdRuleTypeParams>({
-        consumer: 'logs',
-        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        canChangeTrigger: false,
-        initialValues: {
+      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+      return <RuleFormFlyout 
+      plugins={{
+          ...services,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        }}
+        consumer='logs'
+        ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+        initialValues={{
           params: {
             searchConfiguration: {
               index,
@@ -82,10 +91,12 @@ export const AlertsPopover = () => {
                 logsExplorerState.controls
               ),
             },
-          },
-        },
-        onClose: closeAddRuleFlyout,
-      });
+          }
+        }}
+        onSubmit={closeAddRuleFlyout}
+        onCancel={closeAddRuleFlyout}
+      />;
+
     }
   }, [closeAddRuleFlyout, triggersActionsUi, pageState, isAddRuleFlyoutOpen]);
 

@@ -31,6 +31,8 @@ import {
   ObservabilityLogsExplorerLocators,
   ObservabilityLogsExplorerLocationState,
 } from '../common/locators';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface ObservabilityLogsExplorerPluginSetup {
   locators: ObservabilityLogsExplorerLocators;
@@ -61,6 +63,8 @@ export interface ObservabilityLogsExplorerStartDeps {
   dataViewEditor?: DataViewEditorStart;
   lens?: LensPublicStart;
   share: SharePluginStart;
+  charts?: ChartsPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export type ObservabilityLogsExplorerHistory =
