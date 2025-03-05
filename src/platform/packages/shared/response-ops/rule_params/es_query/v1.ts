@@ -175,7 +175,7 @@ function validateParams(anyParams: unknown): string | undefined {
     }
   }
 
-  if (groupBy === 'row' && isEsqlQueryRule(searchType)) {
+  if (groupBy === 'row' && !isEsqlQueryRule(searchType)) {
     return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidRowGroupByErrorMessage', {
       defaultMessage: '[groupBy]: groupBy must be all or top when [searchType] is not esqlQuery',
     });
