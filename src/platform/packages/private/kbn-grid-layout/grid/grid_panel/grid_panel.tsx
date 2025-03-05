@@ -50,6 +50,14 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     `;
   }, [gridLayoutStateManager, rowId, panelId]);
 
+  useEffect(() => {
+    return () => {
+      // remove reference on unmount
+      delete gridLayoutStateManager.panelRefs.current[rowId][panelId];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(
     () => {
       /** Update the styles of the panel via a subscription to prevent re-renders */

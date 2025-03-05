@@ -53,6 +53,14 @@ export const GridRowHeader = React.memo(
     );
 
     useEffect(() => {
+      return () => {
+        // remove reference on unmount
+        delete gridLayoutStateManager.headerRefs.current[rowId];
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
       /**
        * This subscription is responsible for controlling whether or not the section title is
        * editable and hiding all other "edit mode" actions (delete section, move section, etc)
@@ -82,14 +90,17 @@ export const GridRowHeader = React.memo(
           if (!headerRef) return;
 
           if (activeRow?.id === rowId) {
+            const width = headerRef.getBoundingClientRect().width;
             setIsActive(true);
             headerRef.style.position = 'fixed';
+            headerRef.style.width = `${width}px`;
             headerRef.style.top = `${activeRow.startingPosition.top}px`;
             headerRef.style.right = `${activeRow.startingPosition.right}px`;
             headerRef.style.transform = `translate(${activeRow.translate.left}px, ${activeRow.translate.top}px)`;
           } else {
             setIsActive(false);
             headerRef.style.position = 'relative';
+            headerRef.style.width = ``;
             headerRef.style.top = ``;
             headerRef.style.right = ``;
             headerRef.style.transform = ``;
