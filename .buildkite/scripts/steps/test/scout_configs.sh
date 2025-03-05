@@ -40,8 +40,8 @@ fi
 
 if [ "$configs" == "" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading scout test configuration"
-  download_artifact scout_test_configs.json .
-  configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_test_configs.json)
+  download_artifact scout_playwright_configs.json .
+  configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_playwright_configs.json)
 fi
 
 if [ "$configs" == "" ]; then
