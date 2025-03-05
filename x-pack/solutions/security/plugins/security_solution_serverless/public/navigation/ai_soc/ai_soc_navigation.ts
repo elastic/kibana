@@ -12,9 +12,9 @@ import type {
 } from '@kbn/core-chrome-browser';
 
 import type { WritableDraft } from 'immer/dist/internal';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
 // import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import { AiForTheSocIcon } from './icons';
 import { findAndRemoveNodes } from './utils';
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine, ProductTier } from '../../../common/product';
@@ -35,7 +35,7 @@ const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
   type: 'navGroup',
   id: 'security_solution_ai_nav',
   title: 'AI for SOC',
-  icon: AssistantIcon,
+  icon: AiForTheSocIcon,
   breadcrumbStatus: 'hidden',
   defaultIsCollapsed: false,
   isCollapsible: false,

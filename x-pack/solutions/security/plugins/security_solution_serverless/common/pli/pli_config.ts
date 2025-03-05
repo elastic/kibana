@@ -17,18 +17,23 @@ type PliProductFeatures = Readonly<
 export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   [ProductLine.aiSoc]: {
     search_ai_lake: [
-      ProductFeatureKey.externalDetections,
+      ProductFeatureKey.externalDetections, // basic-rules, alerts-summary
       ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.assistant,
-      ProductFeatureKey.threatIntelligence,
+      ProductFeatureKey.threatIntelligence, // TODO check -  not sure why - but without it - the navigation link is visible
     ],
     essentials: [
-      ProductFeatureKey.externalDetections,
+      ProductFeatureKey.externalDetections, // basic-rules, alerts-summary
       ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.assistant,
       ProductFeatureKey.threatIntelligence,
     ],
-    complete: [],
+    complete: [
+      ProductFeatureKey.externalDetections, // basic-rules, alerts-summary
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.threatIntelligence,
+    ],
   },
   [ProductLine.security]: {
     search_ai_lake: [],
@@ -55,7 +60,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     ],
   },
   [ProductLine.endpoint]: {
-    search_ai_lake: [],
+    search_ai_lake: [], // endpoint add-on not available in search_ai_lake tier
     essentials: [
       ProductFeatureKey.endpointPolicyProtections,
       ProductFeatureKey.endpointArtifactManagement,
@@ -75,7 +80,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     ],
   },
   [ProductLine.cloud]: {
-    search_ai_lake: [],
+    search_ai_lake: [], // cloud add-on not available in search_ai_lake tier
     essentials: [ProductFeatureKey.cloudSecurityPosture],
     complete: [ProductFeatureKey.cloudSecurityPosture],
   },
