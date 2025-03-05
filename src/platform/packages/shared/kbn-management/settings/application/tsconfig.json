@@ -36,5 +36,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/spaces-plugin",
   ]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 
@@ -80,7 +80,7 @@ const _buildInactiveCondition = (opts: {
 
   return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
     'policy_id'
-  )}.size() > 0 && ${policyClauses}`;
+  )}.size() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(

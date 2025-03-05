@@ -42,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/191027
-    describe.skip('CIS_GCP Organization', () => {
+    describe('CIS_GCP Organization', () => {
       it('Switch between Manual and Google cloud shell', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);

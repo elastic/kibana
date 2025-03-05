@@ -40,6 +40,7 @@ export const createOrUpdateIndex = async ({
           indices.map(async (index) => {
             try {
               await retryTransientEsErrors(
+                // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
                 () => esClient.indices.putMapping({ index, body: options.mappings }),
                 { logger }
               );

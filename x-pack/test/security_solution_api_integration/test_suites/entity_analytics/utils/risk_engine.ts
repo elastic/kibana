@@ -188,10 +188,8 @@ export const deleteAllRiskScores = async (
     async () => {
       await es.deleteByQuery({
         index,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
         ignore_unavailable: true,
         refresh: true,

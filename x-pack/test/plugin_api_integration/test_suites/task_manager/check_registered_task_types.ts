@@ -144,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:user-artifact-packager',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
         'fleet:delete-unenrolled-agents-task',
@@ -155,6 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
+        'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
         'obs-ai-assistant:knowledge-base-migration',
@@ -175,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
       ]);

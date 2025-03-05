@@ -23,10 +23,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import type {
-  BulkOperationType,
-  BulkResponseItem,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,

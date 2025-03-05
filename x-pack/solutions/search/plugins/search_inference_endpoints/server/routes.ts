@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
@@ -55,7 +56,12 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
 
       const { type, id } = request.params;
       const { scanUsage } = request.query;
-      const result = await deleteInferenceEndpoint(asCurrentUser, type, id, scanUsage ?? false);
+      const result = await deleteInferenceEndpoint(
+        asCurrentUser,
+        type as InferenceTaskType,
+        id,
+        scanUsage ?? false
+      );
 
       return response.ok({ body: result });
     })

@@ -1,6 +1,6 @@
 # APM E2E
 
-APM uses [FTR](../../../../../../packages/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e`.
+APM uses [FTR](../../../../../../src/platform/packages/shared/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e`.
 
 ## Tips and best practices
 

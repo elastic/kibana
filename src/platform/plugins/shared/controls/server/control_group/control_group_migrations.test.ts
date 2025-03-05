@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  type ControlPanelState,
   type ControlWidth,
   type DefaultDataControlState,
-  type SerializedControlState,
 } from '../../common';
 import { OptionsListControlState } from '../../common/options_list';
 import { mockDataControlState, mockOptionsListControlState } from '../mocks';
@@ -22,87 +21,67 @@ import { getDefaultControlGroupState } from './control_group_persistence';
 import type { SerializableControlGroupState } from './types';
 
 describe('migrate control group', () => {
-  const getOptionsListControl = (
-    order: number,
-    input?: Partial<OptionsListControlState & { id: string }>
-  ) => {
+  const getOptionsListControl = (order: number, input?: Partial<OptionsListControlState>) => {
     return {
       type: OPTIONS_LIST_CONTROL,
       order,
       width: 'small' as ControlWidth,
       grow: true,
       explicitInput: { ...mockOptionsListControlState, ...input },
-    } as ControlPanelState<SerializedControlState<OptionsListControlState>>;
+    } as unknown as SerializableRecord;
   };
 
-  const getRangeSliderControl = (
-    order: number,
-    input?: Partial<DefaultDataControlState & { id: string }>
-  ) => {
+  const getRangeSliderControl = (order: number, input?: Partial<DefaultDataControlState>) => {
     return {
       type: RANGE_SLIDER_CONTROL,
       order,
       width: 'medium' as ControlWidth,
       grow: false,
       explicitInput: { ...mockDataControlState, ...input },
-    } as ControlPanelState<SerializedControlState<DefaultDataControlState>>;
-  };
-
-  const getControlGroupState = (
-    panels: Array<ControlPanelState<SerializedControlState>>
-  ): SerializableControlGroupState => {
-    const panelsObjects = panels.reduce((acc, panel) => {
-      return { ...acc, [panel.explicitInput.id]: panel };
-    }, {});
-
-    return {
-      ...getDefaultControlGroupState(),
-      panels: panelsObjects,
-    };
+    } as unknown as SerializableRecord;
   };
 
   describe('remove hideExclude and hideExists', () => {
     test('should migrate single options list control', () => {
       const migratedControlGroupState: SerializableControlGroupState =
-        removeHideExcludeAndHideExists(
-          getControlGroupState([getOptionsListControl(0, { id: 'testPanelId', hideExclude: true })])
-        );
+        removeHideExcludeAndHideExists({
+          ...getDefaultControlGroupState(),
+          panels: {
+            testPanelId: getOptionsListControl(0, { hideExclude: true }),
+          },
+        });
       expect(migratedControlGroupState.panels).toEqual({
-        testPanelId: getOptionsListControl(0, { id: 'testPanelId' }),
+        testPanelId: getOptionsListControl(0),
       });
     });
 
     test('should migrate multiple options list controls', () => {
       const migratedControlGroupInput: SerializableControlGroupState =
-        removeHideExcludeAndHideExists(
-          getControlGroupState([
-            getOptionsListControl(0, { id: 'testPanelId1' }),
-            getOptionsListControl(1, { id: 'testPanelId2', hideExclude: false }),
-            getOptionsListControl(2, { id: 'testPanelId3', hideExists: true }),
-            getOptionsListControl(3, {
-              id: 'testPanelId4',
+        removeHideExcludeAndHideExists({
+          ...getDefaultControlGroupState(),
+          panels: {
+            testPanelId1: getOptionsListControl(0),
+            testPanelId2: getOptionsListControl(1, { hideExclude: false }),
+            testPanelId3: getOptionsListControl(2, { hideExists: true }),
+            testPanelId4: getOptionsListControl(3, {
               hideExclude: true,
               hideExists: false,
             }),
-            getOptionsListControl(4, {
-              id: 'testPanelId5',
+            testPanelId5: getOptionsListControl(4, {
               hideExists: true,
               hideExclude: false,
               singleSelect: true,
               runPastTimeout: true,
               selectedOptions: ['test'],
             }),
-          ])
-        );
+          },
+        });
       expect(migratedControlGroupInput.panels).toEqual({
-        testPanelId1: getOptionsListControl(0, { id: 'testPanelId1' }),
-        testPanelId2: getOptionsListControl(1, { id: 'testPanelId2' }),
-        testPanelId3: getOptionsListControl(2, { id: 'testPanelId3' }),
-        testPanelId4: getOptionsListControl(3, {
-          id: 'testPanelId4',
-        }),
+        testPanelId1: getOptionsListControl(0),
+        testPanelId2: getOptionsListControl(1),
+        testPanelId3: getOptionsListControl(2),
+        testPanelId4: getOptionsListControl(3),
         testPanelId5: getOptionsListControl(4, {
-          id: 'testPanelId5',
           singleSelect: true,
           runPastTimeout: true,
           selectedOptions: ['test'],
@@ -112,20 +91,20 @@ describe('migrate control group', () => {
 
     test('should migrate multiple different types of controls', () => {
       const migratedControlGroupInput: SerializableControlGroupState =
-        removeHideExcludeAndHideExists(
-          getControlGroupState([
-            getOptionsListControl(0, {
-              id: 'testPanelId1',
+        removeHideExcludeAndHideExists({
+          ...getDefaultControlGroupState(),
+          panels: {
+            testPanelId1: getOptionsListControl(0, {
               hideExists: true,
               hideExclude: true,
               runPastTimeout: true,
             }),
-            getRangeSliderControl(1, { id: 'testPanelId2' }),
-          ])
-        );
+            testPanelId2: getRangeSliderControl(1),
+          },
+        });
       expect(migratedControlGroupInput.panels).toEqual({
-        testPanelId1: getOptionsListControl(0, { id: 'testPanelId1', runPastTimeout: true }),
-        testPanelId2: getRangeSliderControl(1, { id: 'testPanelId2' }),
+        testPanelId1: getOptionsListControl(0, { runPastTimeout: true }),
+        testPanelId2: getRangeSliderControl(1),
       });
     });
   });

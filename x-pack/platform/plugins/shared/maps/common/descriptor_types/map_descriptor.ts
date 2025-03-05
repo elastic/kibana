@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
 import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
@@ -105,6 +105,7 @@ export type MapSettings = {
   keydownScrollZoom: boolean;
   maxZoom: number;
   minZoom: number;
+  projection: 'globeInterpolate' | 'mercator';
   showScaleControl: boolean;
   showSpatialFilters: boolean;
   showTimesliderToggleButton: boolean;
