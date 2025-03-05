@@ -23,6 +23,7 @@ import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 import { useAbortableAsync } from './use_abortable_async';
 import { useScopes } from './use_scopes';
+import { isConversationOwnedByUser } from '../utils/is_conversation_owned_by_current_user';
 
 function createNewConversation({
   title = EMPTY_CONVERSATION_TITLE,
@@ -127,6 +128,7 @@ export function useConversation({
     if (!displayedConversationId || !conversation.value) {
       throw new Error('Cannot duplicate the conversation if conversation is not stored');
     }
+
     try {
       const duplicatedConversation = await service.callApi(
         `POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate`,
@@ -239,25 +241,20 @@ export function useConversation({
       }
     );
 
-  const isConversationOwnedByUser = (conversationUser: Conversation['user']): boolean => {
-    if (!initialConversationId) return true;
-
-    if (!conversationUser || !currentUser) return false;
-
-    return conversationUser.id && currentUser.profile_uid
-      ? conversationUser.id === currentUser.profile_uid
-      : conversationUser.name === currentUser.username;
-  };
+  const conversationId =
+    conversation.value?.conversation && 'id' in conversation.value.conversation
+      ? conversation.value.conversation.id
+      : undefined;
 
   return {
     conversation,
-    conversationId:
-      conversation.value?.conversation && 'id' in conversation.value.conversation
-        ? conversation.value.conversation.id
-        : undefined,
-    isConversationOwnedByCurrentUser: isConversationOwnedByUser(
-      conversation.value && 'user' in conversation.value ? conversation.value.user : undefined
-    ),
+    conversationId,
+    isConversationOwnedByCurrentUser: isConversationOwnedByUser({
+      conversationId,
+      conversationUser:
+        conversation.value && 'user' in conversation.value ? conversation.value.user : undefined,
+      currentUser,
+    }),
     user:
       initialConversationId && conversation.value?.conversation && 'user' in conversation.value
         ? {

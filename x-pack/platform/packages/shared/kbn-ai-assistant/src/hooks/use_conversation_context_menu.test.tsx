@@ -6,7 +6,6 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { i18n } from '@kbn/i18n';
 import { renderHook, act } from '@testing-library/react';
 import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -104,9 +103,7 @@ describe('useConversationContextMenu', () => {
     });
 
     expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: i18n.translate('xpack.aiAssistant.flyout.deleteConversationErrorToast', {
-        defaultMessage: 'Could not delete conversation',
-      }),
+      title: 'Could not delete conversation',
     });
   });
 
@@ -144,9 +141,7 @@ describe('useConversationContextMenu', () => {
     );
 
     expect(mockNotifications.toasts.addSuccess).toHaveBeenCalledWith({
-      title: i18n.translate('xpack.aiAssistant.copyConversationSuccessToast', {
-        defaultMessage: 'Conversation content copied to clipboard in JSON format',
-      }),
+      title: 'Conversation content copied to clipboard in JSON format',
     });
   });
 
@@ -164,9 +159,7 @@ describe('useConversationContextMenu', () => {
       '/app/observabilityAIAssistant/conversations/1'
     );
     expect(mockNotifications.toasts.addSuccess).toHaveBeenCalledWith({
-      title: i18n.translate('xpack.aiAssistant.copyUrlSuccessToast', {
-        defaultMessage: 'Conversation URL copied to clipboard',
-      }),
+      title: 'Conversation URL copied to clipboard',
     });
   });
 
@@ -185,9 +178,7 @@ describe('useConversationContextMenu', () => {
     });
 
     expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: i18n.translate('xpack.aiAssistant.copyUrlErrorToast', {
-        defaultMessage: 'Could not copy conversation URL',
-      }),
+      title: 'Could not copy conversation URL',
     });
   });
 });

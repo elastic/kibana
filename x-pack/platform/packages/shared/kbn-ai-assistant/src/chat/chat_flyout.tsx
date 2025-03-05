@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -236,6 +237,7 @@ export function ChatFlyout({
                   conversations={conversations}
                   isLoading={isLoadingConversationList}
                   selectedConversationId={conversationId}
+                  currentUser={currentUser as AuthenticatedUser}
                   onConversationSelect={(nextConversationId) => {
                     setConversationId(nextConversationId);
                   }}

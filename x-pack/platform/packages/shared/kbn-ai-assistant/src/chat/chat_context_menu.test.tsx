@@ -21,14 +21,17 @@ describe('ChatContextMenu', () => {
   const onCopyToClipboardClick = jest.fn();
   const onCopyUrlClick = jest.fn();
   const onDeleteClick = jest.fn();
+  const onDuplicateConversationClick = jest.fn();
 
   const renderComponent = (props = {}) =>
     render(
       <ChatContextMenu
         isConversationOwnedByCurrentUser={true}
+        conversationTitle="Test Conversation"
         onCopyToClipboardClick={onCopyToClipboardClick}
         onCopyUrlClick={onCopyUrlClick}
         onDeleteClick={onDeleteClick}
+        onDuplicateConversationClick={onDuplicateConversationClick}
         {...props}
       />
     );
@@ -47,9 +50,9 @@ describe('ChatContextMenu', () => {
   it('opens the popover on button click', () => {
     renderComponent();
     const button = screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon');
-
     fireEvent.click(button);
     expect(screen.getByText('Copy to clipboard')).toBeInTheDocument();
+    expect(screen.getByText('Duplicate')).toBeInTheDocument();
   });
 
   it('calls onCopyToClipboardClick when Copy to clipboard is clicked', () => {
@@ -64,6 +67,13 @@ describe('ChatContextMenu', () => {
     fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
     fireEvent.click(screen.getByText('Copy URL'));
     expect(onCopyUrlClick).toHaveBeenCalled();
+  });
+
+  it('calls onDuplicateConversationClick when Duplicate is clicked', () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
+    fireEvent.click(screen.getByText('Duplicate'));
+    expect(onDuplicateConversationClick).toHaveBeenCalled();
   });
 
   it('calls onDeleteClick when delete is confirmed', async () => {

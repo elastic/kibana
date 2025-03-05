@@ -515,11 +515,7 @@ export function ChatBody({
                 className={promptEditorContainerClassName}
               >
                 <PromptEditor
-                  disabled={
-                    !connectors.selectedConnector ||
-                    !hasCorrectLicense ||
-                    (!!conversationId && !isConversationOwnedByCurrentUser)
-                  }
+                  disabled={!connectors.selectedConnector || !hasCorrectLicense}
                   hidden={connectors.loading || connectors.connectors?.length === 0}
                   loading={isLoading}
                   onChangeHeight={handleChangeHeight}

@@ -21,11 +21,13 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
 import { ConversationListItemLabel } from './conversation_list_item_label';
+import { isConversationOwnedByUser } from '../utils/is_conversation_owned_by_current_user';
 
 const panelClassName = css`
   max-height: 100%;
@@ -45,6 +47,7 @@ export function ConversationList({
   conversations,
   isLoading,
   selectedConversationId,
+  currentUser,
   onConversationSelect,
   newConversationHref,
   getConversationHref,
@@ -55,6 +58,7 @@ export function ConversationList({
   conversations: UseConversationListResult['conversations'];
   isLoading: boolean;
   selectedConversationId?: string;
+  currentUser: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
   onConversationSelect?: (conversationId?: string) => void;
   newConversationHref?: string;
   getConversationHref?: (conversationId: string) => string;
@@ -182,6 +186,11 @@ export function ConversationList({
                                 defaultMessage: 'Delete',
                               }
                             ),
+                            disabled: !isConversationOwnedByUser({
+                              conversationId: conversation.id,
+                              conversationUser: conversation.conversation.user,
+                              currentUser,
+                            }),
                             onClick: () => {
                               confirmDeleteCallback(
                                 i18n.translate(

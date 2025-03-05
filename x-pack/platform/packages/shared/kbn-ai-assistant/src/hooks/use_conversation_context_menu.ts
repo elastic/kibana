@@ -48,15 +48,17 @@ export function useConversationContextMenu({
         }
       );
 
-      setIsUpdatingConversationList(false);
       refreshConversations();
     } catch (err) {
       notifications!.toasts.addError(err, {
         title: i18n.translate('xpack.aiAssistant.flyout.deleteConversationErrorToast', {
           defaultMessage: 'Could not delete conversation',
         }),
+        toastMessage: err.body?.message,
       });
     }
+
+    setIsUpdatingConversationList(false);
   };
 
   const handleCopyConversationToClipboard = (conversation: Conversation) => {

@@ -162,6 +162,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(conversation._source!)) {
+      throw new Error('Deleting a conversation is only allowed for the owner of the conversation.');
+    }
+
     await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id!,
       index: conversation._index,
@@ -647,6 +651,10 @@ export class ObservabilityAIAssistantClient {
     const conversation = await this.get(conversationId);
     if (!conversation) {
       throw notFound();
+    }
+
+    if (!this.isConversationOwnedByUser(conversation)) {
+      throw new Error('Conversation access can only be updated by the owner of the conversation.');
     }
 
     const isPublic = access === ConversationAccess.SHARED;

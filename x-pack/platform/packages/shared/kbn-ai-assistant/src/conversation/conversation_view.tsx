@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
 import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -152,6 +153,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
           conversations={conversations}
           isLoading={isLoadingConversationList}
           newConversationHref={newConversationHref}
+          currentUser={currentUser as AuthenticatedUser}
           onConversationSelect={navigateToConversation}
           getConversationHref={getConversationHref}
           setIsUpdatingConversationList={setIsUpdatingConversationList}
