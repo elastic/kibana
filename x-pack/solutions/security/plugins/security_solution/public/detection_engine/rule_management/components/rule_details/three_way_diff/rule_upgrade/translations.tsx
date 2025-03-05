@@ -158,3 +158,11 @@ export const FIELD_MODIFIED_BADGE_DESCRIPTION = i18n.translate(
       'This field value differs from the one provided in the original version of the rule.',
   }
 );
+
+export const RULE_BASE_VERSION_IS_MISSING_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.baseVersionMissingDescription',
+  {
+    defaultMessage:
+      "The original, unedited version of this Elastic rule couldn't be found. This sometimes happens when a rule hasn't been updated in a while. You can still update this rule, but will only have access to its current version and the incoming Elastic update. Updating Elastic rules more often can help you avoid this in the future. We encourage you to review this update carefully and ensure your changes are not accidentally overwritten.",
+  }
+);
