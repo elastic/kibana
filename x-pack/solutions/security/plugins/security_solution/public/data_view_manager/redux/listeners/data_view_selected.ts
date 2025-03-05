@@ -7,6 +7,7 @@
 
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import isEmpty from 'lodash/isEmpty';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
@@ -45,7 +46,7 @@ export const createDataViewSelectedListener = (dependencies: {
         // This is required to compute browserFields later.
         // If the view is not returned here, it will be fetched further down this file, and that
         // should return the full data view.
-        if (!Object.keys(cachedDataView?.fields || {}).length) {
+        if (isEmpty(cachedDataView?.fields)) {
           return null;
         }
 
