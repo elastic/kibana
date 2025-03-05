@@ -149,9 +149,9 @@ export class RuleMigrationsTaskClient {
 
       const { rules } = await this.data.rules.getStats(migrationId);
       if (rules.total > 0) {
-        return { exists: true, stopped: false };
+        return { exists: true, stopped: true };
       }
-      return { exists: false, stopped: false };
+      return { exists: false, stopped: true };
     } catch (err) {
       this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };
