@@ -27,33 +27,77 @@ import {
 } from '../common/constants';
 
 const EsQueryRuleParamsSchemaProperties = {
+  /**
+   * The number of documents to pass to the configured actions when the threshold condition is met.
+   */
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
+  /**
+   * The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents.
+   * Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+   */
   timeWindowSize: schema.number({ min: 1 }),
+  /**
+   * Indicates whether to exclude matches from previous runs.
+   * If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run.
+   * This option is not available when a grouping field is specified.
+   */
   excludeHitsFromPreviousRun: schema.boolean({ defaultValue: true }),
+  /**
+   * The type of units for the time window.
+   * For example: seconds, minutes, hours, or days.
+   */
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
+  /**
+   * The threshold value that is used with the `thresholdComparator`.
+   * If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+   */
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
+  /**
+   * The comparison function for the threshold.
+   * For example: "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+   */
   thresholdComparator: getComparatorSchemaType(validateComparator),
-  // aggregation type
+  /**
+   * The type of aggregation to perform.
+   */
   aggType: schema.string({ validate: validateAggType, defaultValue: 'count' }),
-  // aggregation field
+  /**
+   * The name of the numeric field that is used in the aggregation.
+   * This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
+   */
   aggField: schema.maybe(schema.string({ minLength: 1 })),
-  // how to group
+  /**
+   * Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`).
+   * If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
+   */
   groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
-  // field to group on (for groupBy: top)
+  /**
+   * The names of up to four fields that are used for grouping the aggregation.
+   * This property is required when `groupBy` is `top`.
+   */
   termField: schema.maybe(
     schema.oneOf([
       schema.string({ minLength: 1 }),
       schema.arrayOf(schema.string(), { minSize: 2, maxSize: MAX_SELECTABLE_GROUP_BY_TERMS }),
     ])
   ),
-  // limit on number of groups returned
+  /**
+   * This property is required when `groupBy` is `top`.
+   * It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
+   */
   termSize: schema.maybe(schema.number({ min: 1 })),
+  /**
+   * The type of query.
+   */
   searchType: schema.oneOf(
     [schema.literal('searchSource'), schema.literal('esQuery'), schema.literal('esqlQuery')],
     {
       defaultValue: 'esQuery',
     }
   ),
+  /**
+   * The field that is used to calculate the time window.
+   */
   timeField: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('esQuery'),
@@ -74,6 +118,9 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.string({ minLength: 1 }),
     schema.never()
   ),
+  /**
+   * The indices to query.
+   */
   index: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('esQuery'),
