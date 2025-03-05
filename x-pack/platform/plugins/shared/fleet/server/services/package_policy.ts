@@ -70,8 +70,8 @@ import type {
   ExperimentalDataStreamFeature,
   DeletePackagePoliciesResponse,
   PolicySecretReference,
-  AssetsMap,
   AgentPolicy,
+  PackagePolicyAssetsMap,
 } from '../../common/types';
 import {
   FleetError,
@@ -148,7 +148,7 @@ import {
   deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
-import { getPackageAssetsMap } from './epm/packages/get';
+import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import {
@@ -174,12 +174,12 @@ async function getPkgInfoAssetsMap({
 }) {
   const packageInfosandAssetsMap = new Map<
     string,
-    { assetsMap: AssetsMap; pkgInfo: PackageInfo }
+    { assetsMap: PackagePolicyAssetsMap; pkgInfo: PackageInfo }
   >();
   await pMap(
     packageInfos,
     async (pkgInfo) => {
-      const assetsMap = await getPackageAssetsMap({
+      const assetsMap = await getAgentTemplateAssetsMap({
         logger,
         packageInfo: pkgInfo,
         savedObjectsClient,
@@ -385,7 +385,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
       }
-      const assetsMap = await getPackageAssetsMap({
+      const assetsMap = await getAgentTemplateAssetsMap({
         logger,
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
@@ -717,7 +717,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           `Package info and assets not found: ${packagePolicy.package.name}-${packagePolicy.package.version}`
         );
       }
-      const assetsMap = await getPackageAssetsMap({
+      const assetsMap = await getAgentTemplateAssetsMap({
         logger: appContextService.getLogger(),
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
@@ -1036,7 +1036,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         secretsToDelete = secretsRes.secretsToDelete;
         inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
       }
-      const assetsMap = await getPackageAssetsMap({
+      const assetsMap = await getAgentTemplateAssetsMap({
         logger,
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
@@ -1770,7 +1770,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageInfo,
       packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
     );
-    const assetsMap = await getPackageAssetsMap({
+    const assetsMap = await getAgentTemplateAssetsMap({
       logger: appContextService.getLogger(),
       packageInfo,
       savedObjectsClient: soClient,
@@ -1809,11 +1809,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       ({ packagePolicy, packageInfo, experimentalDataStreamFeatures } =
         await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion));
-      const assetsMap = await getPackageAssetsMap({
+
+      // const getAgentTemplateAssets =
+      // getAgentTemplateAssetsMap;
+      const assetsMap = await getAgentTemplateAssetsMap({
         logger: appContextService.getLogger(),
         packageInfo,
         savedObjectsClient: soClient,
       });
+      // const assetsMap = await getPackageAssetsMap({
+      //   logger: appContextService.getLogger(),
+      //   packageInfo,
+      //   savedObjectsClient: soClient,
+      // });
 
       // Ensure the experimental features from the Installation saved object come through on the package policy
       // during an upgrade dry run
@@ -1834,7 +1842,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     packagePolicy: PackagePolicy,
     packageInfo: PackageInfo,
-    assetsMap: AssetsMap
+    assetsMap: PackagePolicyAssetsMap
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     const updatedPackagePolicy = updatePackageInputs(
       {
@@ -2507,7 +2515,7 @@ export async function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: AssetsMap
+  assetsMap: PackagePolicyAssetsMap
 ): Promise<PackagePolicyInput[]> {
   const inputsPromises = inputs.map(async (input) => {
     const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
@@ -2526,7 +2534,7 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: AssetsMap
+  assetsMap: PackagePolicyAssetsMap
 ) {
   const packagePolicyTemplate = input.policy_template
     ? pkgInfo.policy_templates?.find(
@@ -2575,7 +2583,7 @@ async function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: AssetsMap
+  assetsMap: PackagePolicyAssetsMap
 ) {
   const streamsPromises = input.streams.map((stream) =>
     _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
@@ -2646,7 +2654,7 @@ async function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: AssetsMap
+  assetsMap: PackagePolicyAssetsMap
 ) {
   let stream = streamIn;
 

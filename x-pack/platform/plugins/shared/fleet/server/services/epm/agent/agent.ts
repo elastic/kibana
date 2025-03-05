@@ -79,7 +79,7 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
-    logger.debug(`Building agent template variables`);
+    // logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
       throw new PackageInvalidArchiveError(
