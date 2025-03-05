@@ -27,15 +27,15 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_TRANSACTION_DURATION_US,
   ATTR_TRANSACTION_TYPE,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
 import { useMemo } from 'react';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
 const getWhereQuery = (serviceName: string) => {
   return {
-    query: `${ATTR_TRANSACTION_TYPE} : "${TRANSACTION_PAGE_LOAD}" and ${ATTR_SERVICE_NAME} : "${serviceName}"`,
+    query: `${ATTR_TRANSACTION_TYPE} : "${TRANSACTION_TYPE_VALUE_PAGE_LOAD}" and ${ATTR_SERVICE_NAME} : "${serviceName}"`,
     language: 'kuery',
   };
 };

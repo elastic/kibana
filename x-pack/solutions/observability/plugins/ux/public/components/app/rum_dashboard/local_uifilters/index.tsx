@@ -17,6 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ESFilter } from '@kbn/es-types';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_TRANSACTION_TYPE,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
+} from '@kbn/observability-ui-semantic-conventions';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -32,8 +37,6 @@ import {
   uxLocalUIFilterNames,
 } from '../../../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 
 const filterNames: UxLocalUIFilterName[] = ['location', 'device', 'os', 'browser'];
 
@@ -41,7 +44,7 @@ export const getExcludedName = (filterName: string) => {
   return `${filterName}Excluded` as UxLocalUIFilterName;
 };
 
-const RUM_DATA_FILTERS = [{ term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } }];
+const RUM_DATA_FILTERS = [{ term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_LOAD } }];
 
 function LocalUIFilters() {
   const { dataViewTitle, dataView } = useDataView();
@@ -67,7 +70,7 @@ function LocalUIFilters() {
     if (serviceName) {
       dataFilters.push({
         term: {
-          [SERVICE_NAME]: serviceName,
+          [ATTR_SERVICE_NAME]: serviceName,
         },
       });
     }

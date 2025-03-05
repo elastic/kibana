@@ -23,6 +23,8 @@ import {
   ATTR_USER_AGENT_OS_NAME,
   ATTR_USER_AGENT_OS_VERSION,
   ATTR_USER_AGENT_VERSION,
+  TRANSACTION_TYPE_VALUE_PAGE_EXIT,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
@@ -88,7 +90,11 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
       ATTR_URL_FULL,
     ],
     baseFilters: [
-      ...buildPhrasesFilter(ATTR_TRANSACTION_TYPE, ['page-load', 'page-exit'], dataView),
+      ...buildPhrasesFilter(
+        ATTR_TRANSACTION_TYPE,
+        [TRANSACTION_TYPE_VALUE_PAGE_LOAD, TRANSACTION_TYPE_VALUE_PAGE_EXIT],
+        dataView
+      ),
       ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: { ...FieldLabels, [ATTR_SERVICE_NAME]: 'Web Application' },
@@ -176,6 +182,9 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
-    query: { query: `${ATTR_TRANSACTION_TYPE}: ("page-load" or "page-exit")`, language: 'kuery' },
+    query: {
+      query: `${ATTR_TRANSACTION_TYPE}: ("${TRANSACTION_TYPE_VALUE_PAGE_LOAD}" or "${TRANSACTION_TYPE_VALUE_PAGE_EXIT}")`,
+      language: 'kuery',
+    },
   };
 }

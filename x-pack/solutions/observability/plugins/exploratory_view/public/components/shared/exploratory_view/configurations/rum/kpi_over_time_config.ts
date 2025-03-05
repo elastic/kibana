@@ -25,6 +25,7 @@ import {
   ATTR_USER_AGENT_OS_NAME,
   ATTR_USER_AGENT_VERSION,
   PROCESSOR_EVENT_VALUE_TRANSACTION,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
@@ -85,7 +86,7 @@ export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig 
       LABEL_FIELDS_BREAKDOWN,
     ],
     baseFilters: [
-      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, TRANSACTION_TYPE_VALUE_PAGE_LOAD, dataView),
       ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, PROCESSOR_EVENT_VALUE_TRANSACTION, dataView),
     ],
     labels: { ...FieldLabels, [ATTR_SERVICE_NAME]: WEB_APPLICATION_LABEL },

@@ -13,8 +13,9 @@ import {
   ATTR_URL_FULL,
   PROCESSOR_EVENT_VALUE_ERROR,
   PROCESSOR_EVENT_VALUE_TRANSACTION,
+  TRANSACTION_TYPE_VALUE_PAGE_EXIT,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
-import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
 import { rangeQuery } from './range_query';
@@ -37,7 +38,7 @@ export function getRumPageLoadTransactionsProjection({
   const bool = {
     filter: [
       ...rangeQuery(start, end),
-      { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+      { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_LOAD } },
       { terms: { [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_TRANSACTION] } },
       ...(checkFetchStartFieldExists
         ? [
@@ -87,7 +88,7 @@ export function getRumPageExitTransactionsProjection({
   const bool = {
     filter: [
       ...rangeQuery(start, end),
-      { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_EXIT } },
+      { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_EXIT } },
       { terms: { [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_TRANSACTION] } },
       ...(urlQuery
         ? [

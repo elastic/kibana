@@ -55,8 +55,19 @@ export const ATTR_NETWORK_CONNECTION_TYPE = 'network.connection.type' as const;
  */
 export const ATTR_PROCESSOR_EVENT = 'processor.event' as const;
 
+/**
+ * Enum value "error" for attribute {@link ATTR_PROCESSOR_EVENT}.
+ */
 export const PROCESSOR_EVENT_VALUE_ERROR = 'error' as const;
+
+/**
+ * Enum value "metric" for attribute {@link ATTR_PROCESSOR_EVENT}.
+ */
 export const PROCESSOR_EVENT_VALUE_METRIC = 'metric' as const;
+
+/**
+ * Enum value "transaction" for attribute {@link ATTR_PROCESSOR_EVENT}.
+ */
 export const PROCESSOR_EVENT_VALUE_TRANSACTION = 'transaction' as const;
 
 /**
@@ -82,6 +93,16 @@ export const ATTR_TRANSACTION_NAME = 'transaction.name' as const;
  * @see https://github.com/elastic/apm-data/blob/main/input/elasticapm/docs/spec/v2/transaction.json
  */
 export const ATTR_TRANSACTION_TYPE = 'transaction.type' as const;
+
+/**
+ * Enum value "page-exit" for attribute {@link ATTR_TRANSACTION_TYPE}.
+ */
+export const TRANSACTION_TYPE_VALUE_PAGE_EXIT = 'page-exit' as const;
+
+/**
+ * Enum value "page-load" for attribute {@link ATTR_TRANSACTION_TYPE}.
+ */
+export const TRANSACTION_TYPE_VALUE_PAGE_LOAD = 'page-load' as const;
 
 // This is used in the UX plugin
 export const ATTR_TRANSACTION_URL = 'transaction.url' as const;

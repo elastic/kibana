@@ -19,11 +19,11 @@ import {
   ATTR_TRANSACTION_TYPE,
   ATTR_URL_FULL,
   PROCESSOR_EVENT_VALUE_TRANSACTION,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
 import { EuiText } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { getEsFilter } from '../../../../services/data/get_es_filter';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { UxUIFilters } from '../../../../../typings/ui_filters';
@@ -207,7 +207,7 @@ export function getVisitorBreakdownLensAttributes({
           query: {
             bool: {
               filter: [
-                { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+                { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_LOAD } },
                 {
                   terms: {
                     [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_TRANSACTION],

@@ -11,6 +11,8 @@ import {
   ATTR_TRANSACTION_DURATION_US,
   ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
   ATTR_TRANSACTION_TYPE,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels } from '../constants';
@@ -32,8 +34,8 @@ export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
     definitionFields: [ATTR_SERVICE_NAME],
     reportType: 'single-metric',
     baseFilters: [
-      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, 'transaction', dataView),
+      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, TRANSACTION_TYPE_VALUE_PAGE_LOAD, dataView),
+      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, PROCESSOR_EVENT_VALUE_TRANSACTION, dataView),
     ],
     metricOptions: [
       {

@@ -12,10 +12,10 @@ import {
   ATTR_TIMESTAMP,
   ATTR_TRANSACTION_ID,
   ATTR_TRANSACTION_TYPE,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { getRumErrorsProjection } from './projections';
 
 export function jsErrorsQuery(
@@ -63,7 +63,7 @@ export function jsErrorsQuery(
           impactedPages: {
             filter: {
               term: {
-                [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+                [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_LOAD,
               },
             },
             aggs: {

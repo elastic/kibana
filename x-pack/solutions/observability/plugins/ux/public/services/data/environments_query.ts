@@ -13,8 +13,8 @@ import {
   ATTR_TIMESTAMP,
   ATTR_TRANSACTION_TYPE,
   PROCESSOR_EVENT_VALUE_TRANSACTION,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
 
@@ -60,7 +60,7 @@ export function getEnvironments({
           },
           {
             term: {
-              [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+              [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_LOAD,
             },
           },
           {
