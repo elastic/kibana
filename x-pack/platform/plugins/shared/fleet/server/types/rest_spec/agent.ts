@@ -68,6 +68,11 @@ export const GetAgentsRequestSchema = {
         if (!usingSearchAfter && request.page * request.perPage > SO_SEARCH_LIMIT) {
           return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
         }
+
+        // If using searchAfter, ensure that incompatible pagination parameters are not used
+        if (usingSearchAfter && request.page) {
+          return 'You cannot use page parameter when using searchAfter';
+        }
       },
     }
   ),

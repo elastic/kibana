@@ -193,6 +193,7 @@ export const getAgentsHandler: FleetRequestHandler<
     kuery: request.query.kuery,
     sortField: request.query.sortField,
     sortOrder: request.query.sortOrder,
+    searchAfter: request.query.searchAfter,
     getStatusSummary: request.query.getStatusSummary,
   });
 

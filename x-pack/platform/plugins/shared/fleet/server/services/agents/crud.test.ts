@@ -511,7 +511,7 @@ describe('Agents CRUD test', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.openPointInTime.mockResolvedValueOnce({ id: 'test-pit' } as any);
 
-      await openPointInTime(esClient, AGENTS_INDEX);
+      await openPointInTime(esClient);
 
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User opened point in time query [index=${AGENTS_INDEX}] [pitId=test-pit]`,

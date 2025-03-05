@@ -92,7 +92,9 @@ export interface AgentClient {
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
       searchAfter?: SortResults;
+      openPit?: boolean;
       pitId?: string;
+      pitKeepAlive?: string;
       getStatusSummary?: boolean;
     }
   ): Promise<{
@@ -133,6 +135,11 @@ class AgentClientImpl implements AgentClient {
     options: ListWithKuery & {
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
+      searchAfter?: SortResults;
+      openPit?: boolean;
+      pitId?: string;
+      pitKeepAlive?: string;
+      getStatusSummary?: boolean;
     }
   ) {
     await this.#runPreflight();
