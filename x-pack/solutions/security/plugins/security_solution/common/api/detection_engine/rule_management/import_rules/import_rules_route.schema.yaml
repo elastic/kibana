@@ -13,10 +13,10 @@ paths:
         Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
-        
+
         > warn
         > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
-        
+
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
         > info
@@ -25,7 +25,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/8.17/managing-saved-objects.html#managing-saved-objects-export-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-export.html) and [import](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-import.html) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html#managing-saved-objects-export-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-export.html) and [import](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-import.html) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.DO
       tags:
@@ -36,7 +36,7 @@ paths:
             curl -X POST "<KibanaURL>/api/detection_engine/rules/_import"
             -u <username>:<password> -H 'kbn-xsrf: true'
             -H 'Content-Type: multipart/form-data'
-            --form "file=@<link to file>" 
+            --form "file=@<link to file>"
       requestBody:
         required: true
         content:
@@ -143,4 +143,3 @@ paths:
                     exceptions_errors: []
                     exceptions_success: true
                     exceptions_success_count: 0
-              
