@@ -27,12 +27,12 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   ObservabilityLogsExplorerLocators,
   ObservabilityLogsExplorerLocationState,
 } from '../common/locators';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface ObservabilityLogsExplorerPluginSetup {
   locators: ObservabilityLogsExplorerLocators;

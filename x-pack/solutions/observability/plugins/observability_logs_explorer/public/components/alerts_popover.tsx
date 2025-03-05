@@ -25,9 +25,9 @@ import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import useAsync from 'react-use/lib/useAsync';
 import { useBoolean } from '@kbn/react-hooks';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 const defaultQuery: Query = {
   language: 'kuery',
