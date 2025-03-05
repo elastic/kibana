@@ -21,9 +21,9 @@ export function HttpStatusCode({ code }: HttpStatusCodeProps) {
   return (
     <EuiBadge
       color={useGetHttpStatusColor(code)}
-      data-test-subj="docViewerObservabilityTracesHttpStatusCodeBadge"
+      data-test-subj="unifiedDocViewerObservabilityTracesHttpStatusCodeBadge"
     >
-      <EuiText size="xs" data-test-subj="docViewerObservabilityTracesHttpStatusCodeText">
+      <EuiText size="xs" data-test-subj="unifiedDocViewerObservabilityTracesHttpStatusCodeText">
         {code} {httpStatusCodes[code.toString()]}
       </EuiText>
     </EuiBadge>
