@@ -38,7 +38,8 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_ma
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/211959
+describe.skip(
   'Rule actions during detection rule creation',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {

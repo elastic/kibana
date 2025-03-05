@@ -158,6 +158,12 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.hasAction.mockReturnValue(false);
     functionClientMock.getActions.mockReturnValue([]);
 
+    internalUserEsClientMock.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    } as any);
+
     currentUserEsClientMock.search.mockResolvedValue({
       hits: {
         hits: [],
@@ -510,6 +516,9 @@ describe('Observability AI Assistant client', () => {
                   labels: {},
                   numeric_labels: {},
                   public: false,
+                  user: {
+                    name: 'johndoe',
+                  },
                   messages: [user('How many alerts do I have?')],
                 },
               },
@@ -766,6 +775,7 @@ describe('Observability AI Assistant client', () => {
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
+          logger: expect.any(Object),
           connectorId: 'foo',
           messages: [
             {

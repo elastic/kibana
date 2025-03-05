@@ -38,15 +38,13 @@ async function fetchDocs(esClient: ElasticsearchClient, index: string, type: str
   const body = await esClient.search<any>({
     index,
     size: 10000,
-    body: {
-      query: {
-        bool: {
-          should: [
-            {
-              term: { type },
-            },
-          ],
-        },
+    query: {
+      bool: {
+        should: [
+          {
+            term: { type },
+          },
+        ],
       },
     },
   });
