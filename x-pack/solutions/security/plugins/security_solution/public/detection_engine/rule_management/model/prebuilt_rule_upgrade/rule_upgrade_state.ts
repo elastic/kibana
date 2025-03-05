@@ -17,4 +17,8 @@ export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
    * Indicates whether there are conflicts blocking rule upgrading.
    */
   hasUnresolvedConflicts: boolean;
+  /**
+   * Indicates whether there are non-solvable conflicts blocking rule upgrading.
+   */
+  hasNonSolvableUnresolvedConflicts: boolean;
 }
