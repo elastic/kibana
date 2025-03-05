@@ -2292,10 +2292,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@99.3.0-borealis.0":
-  version "99.3.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.3.0-borealis.0.tgz#e8c26a9d160783682bcdeea65846d8295e7cd391"
-  integrity sha512-T88s2vQHEHy6g/mA8K2cDr3IUKFGZcdNHFIRUqJwYjBW6JwHyLkrFZuFweK88IyJv1F8vsTv1RlCeeta/AZlLA==
+"@elastic/eui@99.4.0-borealis.0":
+  version "99.4.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.4.0-borealis.0.tgz#8637698371fa3c6827da4f7cb689d3cd39de3841"
+  integrity sha512-ws2OVe67WrO9CBkembcqBXFh3Lo10HRvk19MZZL22RoZ3dyGlNr0WTxvZpLPEykycOaOCnf3hAo9p8V16wPWvw==
   dependencies:
     "@elastic/eui-theme-common" "0.0.10"
     "@elastic/prismjs-esql" "^1.0.0"
