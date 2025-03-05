@@ -24,6 +24,7 @@ import {
 } from '@kbn/optimizer-webpack-helpers';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
+import { defineReactCompilerLoaderOption, reactCompilerLoader } from 'react-compiler-webpack';
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
@@ -241,14 +242,27 @@ export function getWebpackConfig(
         {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+          use: [
+            {
+              loader: reactCompilerLoader,
+              options: defineReactCompilerLoaderOption({
+                sources: (filename) => {
+                  if (filename.includes('@kbn/') || filename.includes('x-pack/')) {
+                    return true;
+                  }
+                  return filename.indexOf('node_modules') === -1;
+                },
+              }),
             },
-          },
+            {
+              loader: 'babel-loader',
+              options: {
+                babelrc: false,
+                envName: worker.dist ? 'production' : 'development',
+                presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+              },
+            },
+          ],
         },
         {
           test: /\.peggy$/,
@@ -297,6 +311,7 @@ export function getWebpackConfig(
           worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
         react: worker.reactVersion === '18' ? 'react-18' : 'react',
+        'react/compiler-runtime': require.resolve('react-compiler-runtime'),
       },
     },
 
