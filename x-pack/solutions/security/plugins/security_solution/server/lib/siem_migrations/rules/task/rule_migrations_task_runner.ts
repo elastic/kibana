@@ -119,7 +119,7 @@ export class RuleMigrationTaskRunner {
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
   private async initialize() {
     assert(this.retriever, 'setup() must be called before initialize()');
-    this.retriever.initialize();
+    await this.retriever.initialize();
   }
 
   public async run(invocationConfig: RunnableConfig): Promise<void> {
