@@ -573,6 +573,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     [1, 2, 3].map((index) => ({
       title: `${plugin}-${index}`,
       key: plugin,
+      usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
       group: rawScoutConfigs[plugin].group,
     }))
   );
@@ -586,11 +587,11 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             key: 'scout-configs',
             depends_on: ['build'],
             steps: scoutGroups.map(
-              ({ title, key, group }): BuildkiteStep => ({
+              ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
                 label: `Scout: [ ${group} / ${title} ] plugin`,
                 command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
                 timeout_in_minutes: 60,
-                agents: expandAgentQueue('n2-8-spot'),
+                agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
                 env: {
                   SCOUT_CONFIG_GROUP_KEY: key,
                   SCOUT_CONFIG_GROUP_TYPE: group,
