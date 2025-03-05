@@ -26,9 +26,9 @@ import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import useAsync from 'react-use/lib/useAsync';
 import { useBoolean } from '@kbn/react-hooks';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
 
@@ -48,7 +48,7 @@ export const AlertsPopover = () => {
   const {
     services: { triggersActionsUi, slo, ...services },
   } = useKibanaContextForPlugin();
-  const { application, http,} = services
+  const { application, http } = services;
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
@@ -72,31 +72,32 @@ export const AlertsPopover = () => {
       ).toDataviewSpec();
 
       const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
-      return <RuleFormFlyout 
-      plugins={{
-          ...services,
-          ruleTypeRegistry,
-          actionTypeRegistry,
-        }}
-        consumer='logs'
-        ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
-        initialValues={{
-          params: {
-            searchConfiguration: {
-              index,
-              query: getQuery(logsExplorerState.query),
-              filter: getDiscoverFiltersFromState(
-                index.id,
-                logsExplorerState.filters,
-                logsExplorerState.controls
-              ),
+      return (
+        <RuleFormFlyout
+          plugins={{
+            ...services,
+            ruleTypeRegistry,
+            actionTypeRegistry,
+          }}
+          consumer="logs"
+          ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+          initialValues={{
+            params: {
+              searchConfiguration: {
+                index,
+                query: getQuery(logsExplorerState.query),
+                filter: getDiscoverFiltersFromState(
+                  index.id,
+                  logsExplorerState.filters,
+                  logsExplorerState.controls
+                ),
+              },
             },
-          }
-        }}
-        onSubmit={closeAddRuleFlyout}
-        onCancel={closeAddRuleFlyout}
-      />;
-
+          }}
+          onSubmit={closeAddRuleFlyout}
+          onCancel={closeAddRuleFlyout}
+        />
+      );
     }
   }, [closeAddRuleFlyout, triggersActionsUi, pageState, isAddRuleFlyoutOpen]);
 
