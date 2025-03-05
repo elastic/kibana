@@ -17,6 +17,7 @@ import {
   closeTab,
   selectTab,
   insertTabAfter,
+  replaceTabWith,
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
@@ -69,6 +70,14 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     [_setState, onChanged]
   );
 
+  const onLabelEdited = useCallback(
+    (item: TabItem, newLabel: string) => {
+      const editedItem = { ...item, label: newLabel };
+      changeState((prevState) => replaceTabWith(prevState, item, editedItem));
+    },
+    [changeState]
+  );
+
   const onSelect = useCallback(
     (item: TabItem) => {
       changeState((prevState) => selectTab(prevState, item));
@@ -116,6 +125,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}
           onAdd={onAdd}
+          onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onClose={onClose}
         />

@@ -16,7 +16,7 @@ import type { TabItem } from '../../types';
 
 export type TabsBarProps = Pick<
   TabProps,
-  'getTabMenuItems' | 'onSelect' | 'onClose' | 'tabContentId'
+  'getTabMenuItems' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -29,6 +29,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   tabContentId,
   getTabMenuItems,
   onAdd,
+  onLabelEdited,
   onSelect,
   onClose,
 }) => {
@@ -58,6 +59,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
             isSelected={selectedItem?.id === item.id}
             tabContentId={tabContentId}
             getTabMenuItems={getTabMenuItems}
+            onLabelEdited={onLabelEdited}
             onSelect={onSelect}
             onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
           />

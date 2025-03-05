@@ -94,6 +94,17 @@ export const insertTabAfter = (
   };
 };
 
+export const replaceTabWith = (
+  { items }: TabsState,
+  item: TabItem,
+  replaceWithItem: TabItem
+): TabsState => {
+  return {
+    items: items.map((i) => (i.id === item.id ? replaceWithItem : i)),
+    selectedItem: replaceWithItem,
+  };
+};
+
 export const closeOtherTabs = (_: TabsState, item: TabItem): TabsState => {
   return {
     items: [item],
