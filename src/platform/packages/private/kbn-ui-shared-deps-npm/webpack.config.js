@@ -137,10 +137,8 @@ module.exports = (_, argv) => {
         moment: MOMENT_SRC,
         // NOTE: Used to include react profiling on bundles
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
-        'react-dom$':
-          process.env.REACT_18 === 'true' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+        'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
-        react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
         // NOTE: We use this to make sure that buffer and punycode bundled are the ones
         // installed from node-stdlib-browser and are in sync in between shared deps and plugins bundles
         buffer: [
