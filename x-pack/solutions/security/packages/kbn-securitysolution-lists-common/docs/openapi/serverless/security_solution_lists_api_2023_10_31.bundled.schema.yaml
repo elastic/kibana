@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
-  title: Security Lists API (Elastic Cloud and self-hosted)
+  title: Security Lists API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
@@ -2931,7 +2931,7 @@ tags:
       [Create list data streams](../operation/operation-createlistindex)
       endpoint. Once these data streams are created, your role needs privileges
       to manage rules. Refer to [Enable and access
-      detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui)
+      detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui)
       for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists

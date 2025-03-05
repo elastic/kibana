@@ -86,7 +86,7 @@ export class Client {
     this.log.info(`${new Date().toISOString()} Calling API BulkDeleteListItems`);
     return this.kbnClient
       .request<BulkDeleteListItemsResponse>({
-        path: '/api/lists/items',
+        path: '/api/lists/items/_bulk',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },

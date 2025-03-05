@@ -3,7 +3,7 @@ info:
   title: Bulk delete value list item API endpoint
   version: '2023-10-31'
 paths:
-  /api/lists/items:
+  /api/lists/items/_bulk:
     delete:
       x-labels: [serverless, ess]
       operationId: BulkDeleteListItems

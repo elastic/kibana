@@ -46,7 +46,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     bulkDeleteListItems(props: BulkDeleteListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .delete(routeWithNamespace('/api/lists/items/_bulk', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

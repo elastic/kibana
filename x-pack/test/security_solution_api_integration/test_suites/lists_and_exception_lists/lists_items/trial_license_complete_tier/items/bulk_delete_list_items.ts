@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import {
   LIST_URL,
-  LIST_ITEM_URL,
+  LIST_ITEMS_URL,
   LIST_ITEM_URL_BULK,
   LIST_INDEX,
 } from '@kbn/securitysolution-list-constants';
@@ -56,13 +56,13 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest.get(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
         // create a list item
         await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(200);
 
         await supertest
-          .get(`${LIST_ITEM_URL}?id=${getCreateMinimalListItemSchemaMock().id}`)
+          .get(`${LIST_ITEMS_URL}?id=${getCreateMinimalListItemSchemaMock().id}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
 
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // create a list item
         const { body: bodyWithCreateListItem } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send({ ...getCreateMinimalListItemSchemaMock(), id: undefined })
           .expect(200);
@@ -114,12 +114,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         // create two list items
         const { body: bodyWithCreateListItem } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send({ ...getCreateMinimalListItemSchemaMock(), id: undefined })
           .expect(200);
         const { body: bodyWithCreateListItem2 } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateMinimalListItemSchemaMock(),
@@ -131,7 +131,10 @@ export default ({ getService }: FtrProviderContext) => {
         // ensure they are fetch-able
         [bodyWithCreateListItem.id, bodyWithCreateListItem2.id].every(
           async (bodyId) =>
-            await supertest.get(`${LIST_ITEM_URL}?id=${bodyId}`).set('kbn-xsrf', 'true').expect(200)
+            await supertest
+              .get(`${LIST_ITEMS_URL}?id=${bodyId}`)
+              .set('kbn-xsrf', 'true')
+              .expect(200)
         );
 
         // delete list items by their ids
@@ -145,7 +148,10 @@ export default ({ getService }: FtrProviderContext) => {
         // try to fetch deleted items, expect 404's
         [bodyWithCreateListItem.id, bodyWithCreateListItem2.id].every(
           async (bodyId) =>
-            await supertest.get(`${LIST_ITEM_URL}?id=${bodyId}`).set('kbn-xsrf', 'true').expect(404)
+            await supertest
+              .get(`${LIST_ITEMS_URL}?id=${bodyId}`)
+              .set('kbn-xsrf', 'true')
+              .expect(404)
         );
       });
 
