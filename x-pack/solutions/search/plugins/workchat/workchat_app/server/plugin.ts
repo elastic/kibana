@@ -62,7 +62,7 @@ export class WorkChatAppPlugin
   public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
     const conversationService = new ConversationServiceImpl({
       savedObjects: core.savedObjects,
-      security: pluginsDependencies.security,
+      security: core.security,
       logger: this.logger.get('services.conversations'),
     });
 

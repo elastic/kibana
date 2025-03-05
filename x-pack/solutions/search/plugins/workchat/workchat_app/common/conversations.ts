@@ -8,26 +8,28 @@
 import type { Message } from './messages';
 
 export interface Conversation {
-  conversationId: string;
+  id: string;
   agentId: string;
   title: string;
   lastUpdated: string;
+  user: {
+    id: string;
+    name: string;
+  };
   events: ConversationEvent[];
 }
 
-export enum ConversationEventType {
-  message = 'message',
-}
-
-interface EventBase<T extends ConversationEventType> {
+interface EventBase<T extends string> {
   type: T;
   id: string;
   createdAt: string;
 }
 
-export interface ConversationMessageEvent extends EventBase<ConversationEventType.message> {
+export interface ConversationMessageEvent extends EventBase<'message'> {
   message: Message;
 }
 
 // only one type of event for now
 export type ConversationEvent = ConversationMessageEvent;
+
+export type ConversationCreateRequest = Omit<Conversation, 'id' | 'lastUpdated' | 'user'>;

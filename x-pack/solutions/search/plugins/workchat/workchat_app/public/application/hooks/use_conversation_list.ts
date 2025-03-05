@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import type { Conversation } from '../../../common/conversations';
 import { useWorkChatServices } from './use_workchat_service';
 
@@ -29,6 +29,10 @@ export const useConversationList = () => {
     setConversations(nextConversations);
     setLoading(false);
   }, [conversationService]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   return {
     conversations,

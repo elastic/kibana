@@ -6,10 +6,47 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { Conversation } from '../../../common/conversations';
+import type { Conversation, ConversationCreateRequest } from '../../../common/conversations';
 import type { ConversationAttributes } from '../../saved_objects/conversations';
+import type { ClientUser } from './types';
 
-export const fromModel = (obj: SavedObject<ConversationAttributes>): Conversation => {
-  // TODO
-  return obj;
+export const savedObjectToModel = ({
+  attributes,
+}: SavedObject<ConversationAttributes>): Conversation => {
+  return {
+    id: attributes.conversation_id,
+    agentId: attributes.agent_id,
+    title: attributes.title,
+    lastUpdated: attributes.last_updated,
+    user: {
+      id: attributes.user_id,
+      name: attributes.user_name,
+    },
+    events: attributes.events,
+  };
+};
+
+export const createRequestToRaw = ({
+  conversation,
+  id,
+  user,
+  creationDate,
+}: {
+  conversation: ConversationCreateRequest;
+  id: string;
+  user: ClientUser;
+  creationDate: Date;
+}): ConversationAttributes => {
+  return {
+    conversation_id: id,
+    agent_id: conversation.agentId,
+    title: conversation.title,
+    last_updated: creationDate.toISOString(),
+    user_id: user.id,
+    user_name: user.username,
+    events: conversation.events,
+    access_control: {
+      public: false,
+    },
+  };
 };

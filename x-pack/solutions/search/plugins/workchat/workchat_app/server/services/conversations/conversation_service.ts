@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  SavedObjectsServiceStart,
+  KibanaRequest,
+  Logger,
+  SecurityServiceStart,
+} from '@kbn/core/server';
 import { conversationTypeName } from '../../saved_objects/conversations';
 import { ConversationClientImpl, ConversationClient } from './conversation_client';
 
 interface ConversationServiceOptions {
   logger: Logger;
   savedObjects: SavedObjectsServiceStart;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
 }
 
 export interface ConversationService {
@@ -25,7 +29,7 @@ export interface ConversationService {
 
 export class ConversationServiceImpl implements ConversationService {
   private readonly savedObjects: SavedObjectsServiceStart;
-  private readonly security: SecurityPluginStart;
+  private readonly security: SecurityServiceStart;
   private readonly logger: Logger;
 
   constructor({ savedObjects, security, logger }: ConversationServiceOptions) {
