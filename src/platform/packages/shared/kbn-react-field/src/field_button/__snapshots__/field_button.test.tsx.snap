@@ -19,7 +19,18 @@ exports[`fieldAction is rendered 1`] = `
     </span>
   </button>
   <div
-    className="kbnFieldButton__fieldAction"
+    css={
+      Object {
+        "map": undefined,
+        "name": "135l7mr",
+        "next": undefined,
+        "styles": "
+            margin-left: 8px;
+            line-height: 32px;
+          ",
+        "toString": [Function],
+      }
+    }
   >
     <span>
       fieldAction
@@ -37,7 +48,18 @@ exports[`fieldIcon is rendered 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__fieldIcon"
+      css={
+        Object {
+          "map": undefined,
+          "name": "10b8stw",
+          "next": undefined,
+          "styles": "
+            flex-shrink: 0;
+            line-height: 0;
+          ",
+          "toString": [Function],
+        }
+      }
     >
       <span>
         fieldIcon
@@ -145,7 +167,18 @@ exports[`with drag handle is rendered 1`] = `
   className="kbnFieldButton kbnFieldButton--s"
 >
   <div
-    className="kbnFieldButton__dragHandle"
+    css={
+      Object {
+        "map": undefined,
+        "name": "55j5ev",
+        "next": undefined,
+        "styles": "
+            margin-right: 8px;
+            line-height: 32px;
+          ",
+        "toString": [Function],
+      }
+    }
   >
     <span>
       drag

@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 
-import { CommonProps } from '@elastic/eui';
+import { CommonProps, useEuiTheme } from '@elastic/eui';
 import './field_button.scss';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
@@ -90,6 +90,7 @@ export function FieldButton({
   buttonProps,
   ...rest
 }: FieldButtonProps) {
+  const { euiTheme } = useEuiTheme();
   const classes = classNames(
     'kbnFieldButton',
     size ? sizeToClassNameMap[size] : null,
@@ -101,6 +102,15 @@ export function FieldButton({
   );
 
   const contentClasses = classNames('kbn-resetFocusState', 'kbnFieldButton__button');
+
+  const contentCss = css`
+    flex-grow: 1;
+    text-align: left;
+    padding: ${size === 'xs' ? euiTheme.size.xs : euiTheme.size.s} 0;
+    display: flex;
+    align-items: flex-start;
+    line-height: normal;
+  `;
 
   const innerContent = (
     <>
@@ -115,17 +125,46 @@ export function FieldButton({
         </span>
       )}
       {fieldName && (
-        <span className="kbnFieldButton__name eui-textBreakAll">
+        <span
+          className="kbnFieldButton__name eui-textBreakAll" // kbnFieldButton__name class is used in functional tests
+          css={css`
+            flex-grow: 1;
+            padding: 0 ${euiTheme.size.s};
+          `}
+        >
           <span className="kbnFieldButton__nameInner">{fieldName}</span>
         </span>
       )}
-      {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+      {fieldInfoIcon && (
+        <div
+          className="kbnFieldButton__infoIcon" // kbnFieldButton__infoIcon class is used in unit test
+          css={css`
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: ${euiTheme.size.base};
+            flex-shrink: 0;
+            line-height: 0;
+          `}
+        >
+          {fieldInfoIcon}
+        </div>
+      )}
     </>
   );
 
   return (
     <div className={classes} {...rest}>
-      {dragHandle && <div className="kbnFieldButton__dragHandle">{dragHandle}</div>}
+      {dragHandle && (
+        <div
+          css={css`
+            margin-right: ${size === 'xs' ? undefined : euiTheme.size.s};
+            line-height: ${size === 'xs' ? euiTheme.size.l : euiTheme.size.xl};
+          `}
+        >
+          {dragHandle}
+        </div>
+      )}
       {onClick ? (
         <button
           onClick={(e) => {
@@ -136,17 +175,27 @@ export function FieldButton({
           }}
           data-test-subj={dataTestSubj}
           className={contentClasses}
+          css={contentCss}
           {...buttonProps}
         >
           {innerContent}
         </button>
       ) : (
-        <div className={contentClasses} data-test-subj={dataTestSubj}>
+        <div className={contentClasses} css={contentCss} data-test-subj={dataTestSubj}>
           {innerContent}
         </div>
       )}
 
-      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
+      {fieldAction && (
+        <div
+          css={css`
+            margin-left: ${size === 'xs' ? euiTheme.size.xs : euiTheme.size.s};
+            line-height: ${size === 'xs' ? euiTheme.size.l : euiTheme.size.xl};
+          `}
+        >
+          {fieldAction}
+        </div>
+      )}
     </div>
   );
 }
