@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { partition } from 'lodash';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
@@ -15,16 +16,17 @@ import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_pa
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
-import type {
-  FindRulesSortField,
-  RuleFieldsToUpgrade,
-  RuleResponse,
-  RuleSignatureId,
-  RuleUpgradeSpecifier,
+import {
+  ThreeWayDiffConflict,
+  type FindRulesSortField,
+  type RuleFieldsToUpgrade,
+  type RuleResponse,
+  type RuleSignatureId,
+  type RuleUpgradeSpecifier,
+  UpgradeConflictResolutionEnum,
 } from '../../../../common/api/detection_engine';
 import { usePrebuiltRulesUpgradeState } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
-import { useUpgradeWithConflictsModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal';
 import * as ruleDetailsI18n from '../components/rule_details/translations';
 import * as i18n from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/translations';
 import { UpgradeFlyoutSubHeader } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_flyout_subheader';
@@ -36,6 +38,11 @@ import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
 import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
+import {
+  UpgradeModalConfirmLevels,
+  useUpgradeWithConflictsModal,
+  useUpgradeWithSolvableConflictsModal,
+} from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_with_conflicts_modals';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
@@ -97,29 +104,45 @@ export function usePrebuiltRulesUpgrade({
     confirmLegacyMLJobs,
     isLoading: areMlJobsLoading,
   } = useOutdatedMlJobsUpgradeModal();
+  const {
+    modal: upgradeSolvableConflictsModal,
+    confirmConflictsUpgrade: confirmSolvableConflictsUpgrade,
+  } = useUpgradeWithSolvableConflictsModal();
   const { modal: upgradeConflictsModal, confirmConflictsUpgrade } = useUpgradeWithConflictsModal();
 
   const { mutateAsync: upgradeRulesRequest } = usePerformUpgradeRules();
 
-  const upgradeRulesToResolved = useCallback(
-    async (ruleIds: RuleSignatureId[]) => {
-      const conflictRuleIdsSet = new Set(
-        ruleIds.filter(
-          (ruleId) =>
-            rulesUpgradeState[ruleId].diff.num_fields_with_conflicts > 0 &&
-            rulesUpgradeState[ruleId].hasUnresolvedConflicts
-        )
+  const getConflictRuleIds = useCallback(
+    (ruleIds: string[]) => {
+      const [conflictRuleIds, noConflictRuleIds] = partition(
+        ruleIds,
+        (ruleId: string) =>
+          rulesUpgradeState[ruleId].diff.num_fields_with_conflicts > 0 &&
+          rulesUpgradeState[ruleId].hasUnresolvedConflicts
       );
 
-      const upgradingRuleIds = ruleIds.filter((ruleId) => !conflictRuleIdsSet.has(ruleId));
-      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = upgradingRuleIds.map((ruleId) => ({
-        rule_id: ruleId,
-        version: rulesUpgradeState[ruleId].target_rule.version,
-        revision: rulesUpgradeState[ruleId].revision,
-        fields: constructRuleFieldsToUpgrade(rulesUpgradeState[ruleId]),
-      }));
+      const [solvableConflictRuleIds, nonSolvableConflictRuleIds] = partition(
+        conflictRuleIds,
+        (ruleId: string) =>
+          rulesUpgradeState[ruleId].diff.field_conflict_level === ThreeWayDiffConflict.SOLVABLE
+      );
 
-      setLoadingRules((prev) => [...prev, ...upgradingRuleIds]);
+      return {
+        noConflictRuleIds,
+        solvableConflictRuleIds,
+        nonSolvableConflictRuleIds,
+      };
+    },
+    [rulesUpgradeState]
+  );
+
+  const upgradeRulesToResolved = useCallback(
+    async (ruleIds: RuleSignatureId[]) => {
+      const { noConflictRuleIds, solvableConflictRuleIds, nonSolvableConflictRuleIds } =
+        getConflictRuleIds(ruleIds);
+
+      const upgradingRuleIds = [...noConflictRuleIds];
+      let includeSolvableRuleConflicts = false;
 
       try {
         // Handle MLJobs modal
@@ -127,14 +150,40 @@ export function usePrebuiltRulesUpgrade({
           return;
         }
 
-        if (conflictRuleIdsSet.size > 0 && !(await confirmConflictsUpgrade())) {
+        if (solvableConflictRuleIds.length > 0) {
+          // Display the solvable conflicts confirmation modal if there are any solvable conflicts in the selected rules for upgrade
+          const confirmationModalResult = await confirmSolvableConflictsUpgrade();
+
+          if (confirmationModalResult === UpgradeModalConfirmLevels.Cancel) {
+            return;
+          } else if (confirmationModalResult === UpgradeModalConfirmLevels.Solvable) {
+            upgradingRuleIds.push(...solvableConflictRuleIds);
+            includeSolvableRuleConflicts = true;
+          }
+        } else if (nonSolvableConflictRuleIds.length > 0 && !(await confirmConflictsUpgrade())) {
+          // We still show a confirmation modal if there are non-solvable conflicts in the selected rules
           return;
         }
+
+        setLoadingRules((prev) => [...prev, ...upgradingRuleIds]);
+
+        const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = upgradingRuleIds.map((ruleId) => ({
+          rule_id: ruleId,
+          version: rulesUpgradeState[ruleId].target_rule.version,
+          revision: rulesUpgradeState[ruleId].revision,
+          fields: constructRuleFieldsToUpgrade(
+            rulesUpgradeState[ruleId],
+            includeSolvableRuleConflicts
+          ),
+        }));
 
         await upgradeRulesRequest({
           mode: 'SPECIFIC_RULES',
           pick_version: 'MERGED',
           rules: ruleUpgradeSpecifiers,
+          on_conflict: includeSolvableRuleConflicts
+            ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+            : undefined,
         });
       } catch {
         // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -149,10 +198,12 @@ export function usePrebuiltRulesUpgrade({
       }
     },
     [
-      rulesUpgradeState,
+      getConflictRuleIds,
       confirmLegacyMLJobs,
       confirmConflictsUpgrade,
       upgradeRulesRequest,
+      confirmSolvableConflictsUpgrade,
+      rulesUpgradeState,
       onUpgrade,
     ]
   );
@@ -224,16 +275,24 @@ export function usePrebuiltRulesUpgrade({
       const hasConflicts = dryRunResults.results.skipped.some(
         (skippedRule) => skippedRule.reason === 'CONFLICT'
       );
+      let includeSolvableRuleConflicts = false;
 
-      if (hasConflicts && !(await confirmConflictsUpgrade())) {
-        return;
+      if (hasConflicts) {
+        const confirmationModalResult = await confirmSolvableConflictsUpgrade();
+        if (confirmationModalResult === UpgradeModalConfirmLevels.Cancel) {
+          return;
+        } else if (confirmationModalResult === UpgradeModalConfirmLevels.Solvable) {
+          includeSolvableRuleConflicts = true;
+        }
       }
 
       await upgradeRulesRequest({
         mode: 'ALL_RULES',
         pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
         filter,
-        on_conflict: 'SKIP',
+        on_conflict: includeSolvableRuleConflicts
+          ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+          : UpgradeConflictResolutionEnum.SKIP,
       });
     } catch {
       // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -246,7 +305,7 @@ export function usePrebuiltRulesUpgrade({
     upgradeRulesRequest,
     isRulesCustomizationEnabled,
     filter,
-    confirmConflictsUpgrade,
+    confirmSolvableConflictsUpgrade,
   ]);
 
   const subHeaderFactory = useCallback(
@@ -398,6 +457,7 @@ export function usePrebuiltRulesUpgrade({
     rulePreviewFlyout,
     confirmLegacyMlJobsUpgradeModal,
     upgradeConflictsModal,
+    upgradeSolvableConflictsModal,
     openRulePreview,
     reFetchRules: refetch,
     upgradeRules,
@@ -405,7 +465,10 @@ export function usePrebuiltRulesUpgrade({
   };
 }
 
-function constructRuleFieldsToUpgrade(ruleUpgradeState: RuleUpgradeState): RuleFieldsToUpgrade {
+function constructRuleFieldsToUpgrade(
+  ruleUpgradeState: RuleUpgradeState,
+  includeSolvableConflicts: boolean = false
+): RuleFieldsToUpgrade {
   const ruleFieldsToUpgrade: Record<string, unknown> = {};
 
   for (const [fieldName, fieldUpgradeState] of Object.entries(
@@ -415,6 +478,13 @@ function constructRuleFieldsToUpgrade(ruleUpgradeState: RuleUpgradeState): RuleF
       ruleFieldsToUpgrade[fieldName] = {
         pick_version: 'RESOLVED',
         resolved_value: fieldUpgradeState.resolvedValue,
+      };
+    } else if (
+      includeSolvableConflicts &&
+      fieldUpgradeState.state === FieldUpgradeStateEnum.SolvableConflict
+    ) {
+      ruleFieldsToUpgrade[fieldName] = {
+        pick_version: 'MERGED',
       };
     }
   }
