@@ -24,6 +24,7 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -61,7 +62,6 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
-import { ProductFeatureAssistantKey } from '../../../packages/features/src/product_features_keys';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -204,15 +204,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    productFeatureKeys$.pipe(withLatestFrom(plugins.licensing.license$)).subscribe(([productFeatureKeys, license]) => {
+    productFeatureKeys$
+      .pipe(withLatestFrom(plugins.licensing.license$))
+      .subscribe(([productFeatureKeys, license]) => {
+        const isAssistantAvailable =
+          productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          license?.hasAtLeast('enterprise');
+        const assistantManagementApp = management?.sections.section.kibana.getApp(
+          'securityAiAssistantManagement'
+        );
 
-      const isAssistantAvailable = productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) && license?.hasAtLeast('enterprise');
-      const assistantManagementApp = management?.sections.section.kibana.getApp('securityAiAssistantManagement')
-
-      if (!isAssistantAvailable) {
-        assistantManagementApp?.disable();
-      }
-    });
+        if (!isAssistantAvailable) {
+          assistantManagementApp?.disable();
+        }
+      });
 
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()

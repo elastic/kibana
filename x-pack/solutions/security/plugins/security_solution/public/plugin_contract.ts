@@ -7,13 +7,16 @@
 import { BehaviorSubject } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { CoreStart } from '@kbn/core/public';
+import type {
+  ProductFeatureKeyType,
+  ProductFeatureKeys,
+} from '@kbn/security-solution-features/src/types';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import { OnboardingService } from './onboarding/service';
-import { ProductFeatureKeyType, ProductFeatureKeys } from '../../../packages/features/src/types';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
@@ -31,7 +34,6 @@ export class PluginContract {
   }
 
   public getSetupContract(): PluginSetup {
-
     return {
       resolver: lazyResolver,
       experimentalFeatures: { ...this.experimentalFeatures },

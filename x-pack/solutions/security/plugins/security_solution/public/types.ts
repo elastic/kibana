@@ -62,6 +62,7 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -96,7 +97,6 @@ import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
-import { ProductFeatureKeys } from '../../../packages/features';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
