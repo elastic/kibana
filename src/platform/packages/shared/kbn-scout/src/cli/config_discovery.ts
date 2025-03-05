@@ -45,8 +45,8 @@ export const discoverPlaywrightConfigs: Command<void> = {
         : `Found Playwright config files in '${pluginsMap.size}' plugins`;
 
     if (pluginsMap.size > 0 && flagsReader.boolean('save')) {
-      if (!Fs.existsSync(SCOUT_OUTPUT_ROOT)) {
-        Fs.mkdirSync(SCOUT_OUTPUT_ROOT, { recursive: true });
+      if (!fs.existsSync(SCOUT_OUTPUT_ROOT)) {
+        fs.mkdirSync(SCOUT_OUTPUT_ROOT, { recursive: true });
       }
       const scoutConfigsFilePath = resolve(SCOUT_OUTPUT_ROOT, 'scout_playwright_configs.json');
       fs.writeFileSync(
