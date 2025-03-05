@@ -3475,6 +3475,40 @@ paths:
       tags:
         - alerting
       x-beta: true
+  /api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}:
+    delete:
+      operationId: delete-alerting-rule-ruleid-snooze-schedule-scheduleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: scheduleId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given id does not exist.
+      summary: Delete a snooze schedule for a rule
+      tags:
+        - alerting
+      x-beta: true
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
