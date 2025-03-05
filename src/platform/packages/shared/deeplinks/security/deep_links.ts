@@ -32,7 +32,6 @@ export enum SecurityPageName {
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    */
-  cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
   dataQuality = 'data_quality',
   detections = 'detections',

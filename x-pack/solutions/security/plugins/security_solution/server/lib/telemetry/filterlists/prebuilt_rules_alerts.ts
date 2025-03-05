@@ -83,6 +83,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     provider: true,
     region: true,
   },
+  cloud_defend: true,
   container: {
     id: true,
     image: {
