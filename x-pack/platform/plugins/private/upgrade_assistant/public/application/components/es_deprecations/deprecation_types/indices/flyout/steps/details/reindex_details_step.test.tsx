@@ -159,6 +159,7 @@ describe('ReindexDetailsFlyoutStep', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="closeReindexButton"
                 flush="left"
                 iconType="cross"
                 onClick={[MockFunction]}
@@ -261,6 +262,7 @@ describe('ReindexDetailsFlyoutStep', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="closeReindexButton"
                 flush="left"
                 iconType="cross"
                 onClick={[MockFunction]}
@@ -344,6 +346,7 @@ describe('ReindexDetailsFlyoutStep', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="closeReindexButton"
                 flush="left"
                 iconType="cross"
                 onClick={[MockFunction]}
@@ -417,6 +420,7 @@ describe('ReindexDetailsFlyoutStep', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="closeReindexButton"
                 flush="left"
                 iconType="cross"
                 onClick={[MockFunction]}
