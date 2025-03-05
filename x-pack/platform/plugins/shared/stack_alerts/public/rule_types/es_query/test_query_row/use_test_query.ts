@@ -19,6 +19,7 @@ interface TestQueryFetchResponse {
   testResults: ParsedAggregationResults;
   isGrouped: boolean;
   timeWindow: string;
+  isGroupedByRow?: boolean;
   preview?: TestQueryPreview;
   warning?: string;
 }
@@ -63,7 +64,8 @@ export function useTestQuery(fetch: () => Promise<TestQueryFetchResponse>) {
     });
 
     try {
-      const { testResults, isGrouped, timeWindow, preview, warning } = await fetch();
+      const { testResults, isGrouped, isGroupedByRow, timeWindow, preview, warning } =
+        await fetch();
       let trimmedPreview = null;
       if (preview) {
         trimmedPreview = {
@@ -73,14 +75,23 @@ export function useTestQuery(fetch: () => Promise<TestQueryFetchResponse>) {
       }
       if (isGrouped) {
         const count = testResults.results.length;
+        const result = isGroupedByRow
+          ? i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedByRowResponse', {
+              defaultMessage: 'Query returned {rows} rows in the last {window}.',
+              values: {
+                rows: count,
+                window: timeWindow,
+              },
+            })
+          : i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
+              defaultMessage: 'Grouped query matched {groups} groups in the last {window}.',
+              values: {
+                groups: testResults.results.length,
+                window: timeWindow,
+              },
+            });
         setTestQueryResponse({
-          result: i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
-            defaultMessage: 'Query returned {rows} rows in the last {window}.',
-            values: {
-              rows: count,
-              window: timeWindow,
-            },
-          }),
+          result,
           error: null,
           warning: warning ?? null,
           isLoading: false,

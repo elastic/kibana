@@ -149,7 +149,8 @@ export const EsqlQueryExpression: React.FC<
       setIsLoading(false);
       return {
         testResults: parseAggregationResults(results),
-        isGrouped: isGroupAgg,
+        groupBy: isGroupAgg,
+        isGroupedByRow: isGroupAgg,
         timeWindow: window,
         preview: {
           cols,
