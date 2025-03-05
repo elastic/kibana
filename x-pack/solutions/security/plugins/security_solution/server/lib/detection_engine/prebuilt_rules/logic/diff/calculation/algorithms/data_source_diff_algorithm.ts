@@ -27,7 +27,8 @@ import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
  * Takes a type of `RuleDataSource | undefined` because the data source can be index patterns, a data view id, or neither in some cases
  */
 export const dataSourceDiffAlgorithm = (
-  versions: ThreeVersionsOf<RuleDataSource | undefined>
+  versions: ThreeVersionsOf<RuleDataSource | undefined>,
+  isRuleCustomized: boolean
 ): ThreeWayDiff<RuleDataSource | undefined> => {
   const {
     base_version: baseVersion,
@@ -46,6 +47,7 @@ export const dataSourceDiffAlgorithm = (
     currentVersion,
     targetVersion,
     diffOutcome,
+    isRuleCustomized,
   });
 
   return {
@@ -73,6 +75,7 @@ interface MergeArgs {
   currentVersion: RuleDataSource | undefined;
   targetVersion: RuleDataSource | undefined;
   diffOutcome: ThreeWayDiffOutcome;
+  isRuleCustomized: boolean;
 }
 
 const mergeVersions = ({
@@ -80,6 +83,7 @@ const mergeVersions = ({
   currentVersion,
   targetVersion,
   diffOutcome,
+  isRuleCustomized,
 }: MergeArgs): MergeResult => {
   const dedupedBaseVersion = baseVersion ? getDedupedDataSourceVersion(baseVersion) : baseVersion;
   const dedupedCurrentVersion = currentVersion
@@ -90,9 +94,6 @@ const mergeVersions = ({
     : targetVersion;
 
   switch (diffOutcome) {
-    // Scenario -AA is treated as scenario AAA:
-    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
-    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
@@ -140,14 +141,26 @@ const mergeVersions = ({
       };
     }
 
-    // Scenario -AB is treated as scenario ABC, but marked as
-    // SOLVABLE, and returns the target version as the merged version
-    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    // Missing base versions always return target version
+    // Scenario -AA is treated as AAA
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate: {
+      return {
+        conflict: ThreeWayDiffConflict.NONE,
+        mergedVersion: dedupedTargetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
+      };
+    }
+
+    // Missing base versions always return target version
+    // If the rule is customized, we return a SOLVABLE conflict
+    // Otherwise we treat scenario -AB as AAB
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
       return {
-        mergedVersion: targetVersion,
+        conflict: isRuleCustomized ? ThreeWayDiffConflict.SOLVABLE : ThreeWayDiffConflict.NONE,
+        mergedVersion: dedupedTargetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
-        conflict: ThreeWayDiffConflict.SOLVABLE,
       };
     }
     default:
