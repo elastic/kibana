@@ -15,8 +15,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-plugins-server",
-    "@kbn/config-schema",
     "@kbn/developer-examples-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/sse-utils-client",
+    "@kbn/sse-utils-server",
+    "@kbn/sse-utils",
   ]
 }
