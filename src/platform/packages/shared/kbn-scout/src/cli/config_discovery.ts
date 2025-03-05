@@ -39,8 +39,8 @@ export const discoverPlaywrightConfigs: Command<void> = {
 
     const finalMessage =
       pluginsMap.size === 0
-        ? 'No playwright config files found'
-        : `Found playwright config files in '${pluginsMap.size}' plugins`;
+        ? 'No Playwright config files found'
+        : `Found Playwright config files in '${pluginsMap.size}' plugins`;
 
     if (pluginsMap.size > 0 && flagsReader.boolean('save')) {
       const filename = 'scout_test_configs.json';
