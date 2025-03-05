@@ -12,7 +12,7 @@ import { CiStats } from '#pipeline-utils';
 
 (async () => {
   try {
-    const scoutConfigsPath = path.resolve(process.cwd(), 'scout_test_configs.json');
+    const scoutConfigsPath = path.resolve(process.cwd(), '.scout', 'scout_playwright_configs.json');
     await CiStats.pickScoutTestGroupRunOrder(scoutConfigsPath);
   } catch (ex) {
     console.error('CI Stats Error', ex.message);
