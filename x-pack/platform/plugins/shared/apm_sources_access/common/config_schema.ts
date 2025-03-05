@@ -6,6 +6,9 @@
  */
 import { type TypeOf, schema } from '@kbn/config-schema';
 
+/**
+ * Schema for APM indices
+ */
 export const indicesSchema = schema.object({
   transaction: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }), // TODO: remove apm-* pattern in 9.0
   span: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }),
@@ -15,9 +18,18 @@ export const indicesSchema = schema.object({
   sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
 });
 
+/**
+ * Schema for APM Sources configuration
+ */
 export const configSchema = schema.object({
   indices: indicesSchema,
 });
 
+/**
+ * Schema for APM Sources configuration
+ */
 export type APMSourcesAccessConfig = TypeOf<typeof configSchema>;
+/**
+ * Schema for APM indices
+ */
 export type APMIndices = APMSourcesAccessConfig['indices'];

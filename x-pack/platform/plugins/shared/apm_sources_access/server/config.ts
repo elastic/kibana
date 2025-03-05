@@ -8,6 +8,9 @@
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { type APMSourcesAccessConfig, configSchema } from '../common/config_schema';
 
+/**
+ * Plugin configuration for the apm_sources_access.
+ */
 export const config: PluginConfigDescriptor<APMSourcesAccessConfig> = {
   deprecations: ({ renameFromRoot, deprecate }) => [
     // deprecations
