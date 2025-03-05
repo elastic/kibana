@@ -10,19 +10,14 @@ paths:
       operationId: PatchRule
       summary: Patch a detection rule
       description: |
-        Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
+        Update specific fields of an existing detection rule using the `rule_id` or `id` field.
 
         The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
 
         > warn
-        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-        You can use `PUT` or `PATCH` methods to update rules, where:
-
-        * `PUT` replaces the original rule and deletes fields that are not specified.
-        * `PATCH` updates the specified fields.
 
         > info
         > You cannot modify the `id` or `rule_id` values.
@@ -36,8 +31,8 @@ paths:
               $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RulePatchProps'
             examples:
               example1:
-                summary: Example using PATCH method
-                description: Example request to update a rule using PATCH method
+                summary: Update MITRE ATT&CK mappings
+                description: This is an example request to update the `threat` field of the rule with a signature id of `process_started_by_ms_office_program_possible_payload`. In the `threat` object, we specify mappings of this rule to some tactics and techniques of the MITRE ATT&CK threat framework. 
                 value:
                   rule_id: 'process_started_by_ms_office_program_possible_payload'
                   threat:

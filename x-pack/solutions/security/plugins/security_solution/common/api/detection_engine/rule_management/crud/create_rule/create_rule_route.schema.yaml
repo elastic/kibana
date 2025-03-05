@@ -14,6 +14,7 @@ paths:
 
         > warn
         > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
         You can create the following types of rules:
@@ -204,7 +205,10 @@ paths:
                       type: 'keyword'
               example5:
                 summary: Indicator match rule
-                description: Indicator match rule that creates an alert when one of the following is true - The event's destination IP address *and* port number matches destination IP *and* port values in the `threat_index` index. The event's source IP address matches a host IP address value in the `threat_index` index.
+                description: |
+                  Indicator match rule that creates an alert when one of the following is true:
+                  * The event's destination IP address *and* port number matches destination IP *and* port values in the `threat_index` index. 
+                  * The event's source IP address matches a host IP address value in the `threat_index` index.
                 value:
                   type: 'threat_match'
                   actions: []

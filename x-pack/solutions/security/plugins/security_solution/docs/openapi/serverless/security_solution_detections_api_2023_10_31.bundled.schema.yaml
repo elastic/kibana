@@ -265,8 +265,8 @@ paths:
               --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
     patch:
       description: >
-        Update a detection rule using the `rule_id` or `id` field. The original
-        rule is replaced, and all unspecified fields are deleted.
+        Update specific fields of an existing detection rule using the `rule_id`
+        or `id` field.
 
 
         The `id` is a unique identifier for each data item, while `rule_id` is a
@@ -275,7 +275,7 @@ paths:
 
         > warn
 
-        > When used with  [API
+        > When used with [API
         key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
         authentication, the user's key gets assigned to the affected rules. If
         the user's key gets deleted or the user becomes inactive, the rules will
@@ -287,15 +287,6 @@ paths:
         behavior might change.
 
 
-        You can use `PUT` or `PATCH` methods to update rules, where:
-
-
-        * `PUT` replaces the original rule and deletes fields that are not
-        specified.
-
-        * `PATCH` updates the specified fields.
-
-
         > info
 
         > You cannot modify the `id` or `rule_id` values.
@@ -305,8 +296,13 @@ paths:
           application/json:
             examples:
               example1:
-                description: Example request to update a rule using PATCH method
-                summary: Example using PATCH method
+                description: >-
+                  This is an example request to update the `threat` field of the
+                  rule with a signature id of
+                  `process_started_by_ms_office_program_possible_payload`. In
+                  the `threat` object, we specify mappings of this rule to some
+                  tactics and techniques of the MITRE ATT&CK threat framework.
+                summary: Update MITRE ATT&CK mappings
                 value:
                   rule_id: process_started_by_ms_office_program_possible_payload
                   threat:
@@ -390,6 +386,7 @@ paths:
         the user's key gets deleted or the user becomes inactive, the rules will
         stop running.
 
+
         > If the API key that is used for authorization has different privileges
         than the key that created or most recently updated the rule, the rule
         behavior might change.
@@ -422,9 +419,9 @@ paths:
         * **New terms**: Generates an alert for each new term detected in source
         documents within a specified time range.
 
-        * **[Elasticsearch Query Language
-        (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)**:
-        Uses ES|QL to find events and aggregate search results.
+        * **ES|QL**: Uses [Elasticsearch Query Language
+        (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)
+        to find events and aggregate search results.
 
         * **Machine learning rules**: Creates an alert when a machine learning
         job discovers an anomaly above the defined threshold.
@@ -607,9 +604,10 @@ paths:
                   type: threshold
               example3:
                 description: >-
-                  ml-cap rule that creates alerts, and sends Slack
+                  Machine learning rule that creates alerts, and sends Slack
                   notifications, when the `linux_anomalous_network_activity_ecs`
-                  {ml} job discovers anomalies with a threshold of 70 or above
+                  machine learning job discovers anomalies with a threshold of
+                  70 or above.
                 summary: Machine learning rule
                 value:
                   actions:
@@ -674,12 +672,15 @@ paths:
                     - rundll32.exe
                   type: eql
               example5:
-                description: >-
+                description: >
                   Indicator match rule that creates an alert when one of the
-                  following is true - The event's destination IP address *and*
-                  port number matches destination IP *and* port values in the
-                  `threat_index` index. The event's source IP address matches a
-                  host IP address value in the `threat_index` index.
+                  following is true:
+
+                  * The event's destination IP address *and* port number matches
+                  destination IP *and* port values in the `threat_index` index. 
+
+                  * Jacek The event's source IP address matches a host IP
+                  address value in the `threat_index` index.
                 summary: Indicator match rule
                 value:
                   actions: []
@@ -1225,7 +1226,7 @@ paths:
 
         > warn
 
-        > When used with  [API
+        > When used with [API
         key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
         authentication, the user's key gets assigned to the affected rules. If
         the user's key gets deleted or the user becomes inactive, the rules will
@@ -1237,15 +1238,6 @@ paths:
         behavior might change.
 
 
-        You can use `PUT` or `PATCH` methods to update rules, where:
-
-
-        * `PUT` replaces the original rule and deletes fields that are not
-        specified.
-
-        * `PATCH` updates the specified fields.
-
-
         > info
 
         > You cannot modify the `id` or `rule_id` values.
@@ -1255,8 +1247,7 @@ paths:
           application/json:
             examples:
               example1:
-                description: Example request to update a rule using PATCH method
-                summary: Example using PATCH method
+                summary: Update Rule example
                 value:
                   rule_id: process_started_by_ms_office_program_possible_payload
                   threat:
@@ -2024,6 +2015,7 @@ paths:
         authentication, the user's key gets assigned to the affected rules. If
         the user's key gets deleted or the user becomes inactive, the rules will
         stop running.
+
 
         > If the API key that is used for authorization has different privileges
         than the key that created or most recently updated the rule, the rule
