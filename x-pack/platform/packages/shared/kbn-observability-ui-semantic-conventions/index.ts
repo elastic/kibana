@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
-
 // Stable OpenTelemetry Semantic Conventions fields
 // See https://github.com/open-telemetry/opentelemetry-js/blob/main/semantic-conventions/src/stable_attributes.ts
 export {
@@ -36,7 +34,7 @@ export {
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-agent.html#field-agent-name
  */
-export const ATTR_AGENT_NAME = EcsFlat['agent.name'].name;
+export const ATTR_AGENT_NAME = 'agent.name' as const;
 
 /**
  * Type of the agent.
@@ -45,7 +43,7 @@ export const ATTR_AGENT_NAME = EcsFlat['agent.name'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-agent.html#field-agent-type
  */
-export const ATTR_AGENT_TYPE = EcsFlat['agent.type'].name;
+export const ATTR_AGENT_TYPE = 'agent.type' as const;
 
 /**
  * Country ISO code.
@@ -53,7 +51,7 @@ export const ATTR_AGENT_TYPE = EcsFlat['agent.type'].name;
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-client.html#ecs-client-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-geo.html#field-geo-country-iso-code
  */
-export const ATTR_CLIENT_GEO_COUNTRY_ISO_CODE = EcsFlat['client.geo.country_iso_code'].name;
+export const ATTR_CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code' as const;
 
 /**
  * Country name.
@@ -61,7 +59,7 @@ export const ATTR_CLIENT_GEO_COUNTRY_ISO_CODE = EcsFlat['client.geo.country_iso_
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-client.html#ecs-client-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-geo.html#field-geo-country-name
  */
-export const ATTR_CLIENT_GEO_COUNTRY_NAME = EcsFlat['client.geo.country_name'].name;
+export const ATTR_CLIENT_GEO_COUNTRY_NAME = 'client.geo.country_name' as const;
 
 /**
  * Country ISO code.
@@ -69,7 +67,7 @@ export const ATTR_CLIENT_GEO_COUNTRY_NAME = EcsFlat['client.geo.country_name'].n
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-client.html#ecs-client-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-geo.html#field-geo-region-iso-code
  */
-export const ATTR_CLIENT_GEO_REGION_ISO_CODE = EcsFlat['client.geo.region_iso_code'].name;
+export const ATTR_CLIENT_GEO_REGION_ISO_CODE = 'client.geo.region_iso_code' as const;
 
 /**
  * An overarching type for the data stream.
@@ -77,7 +75,7 @@ export const ATTR_CLIENT_GEO_REGION_ISO_CODE = EcsFlat['client.geo.region_iso_co
  
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-data_stream.html#field-data-stream-type
  */
-export const ATTR_DATA_STREAM_TYPE = EcsFlat['data_stream.type'].name;
+export const ATTR_DATA_STREAM_TYPE = 'data_stream.type' as const;
 
 /**
  * Name of the dataset.
@@ -88,7 +86,7 @@ export const ATTR_DATA_STREAM_TYPE = EcsFlat['data_stream.type'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-dataset
  */
-export const ATTR_EVENT_DATASET = EcsFlat['event.dataset'].name;
+export const ATTR_EVENT_DATASET = 'event.dataset' as const;
 
 /**
  * Hostname of the host.
@@ -97,7 +95,7 @@ export const ATTR_EVENT_DATASET = EcsFlat['event.dataset'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-hostname
  */
-export const ATTR_HOST_HOSTNAME = EcsFlat['host.hostname'].name;
+export const ATTR_HOST_HOSTNAME = 'host.hostname' as const;
 
 /**
  * Operating system name, including the version or code name.
@@ -105,7 +103,7 @@ export const ATTR_HOST_HOSTNAME = EcsFlat['host.hostname'].name;
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-host.html#ecs-host-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-os.html#field-os-full
  */
-export const ATTR_HOST_OS_FULL = EcsFlat['host.os.full'].name;
+export const ATTR_HOST_OS_FULL = 'host.os.full' as const;
 
 /**
  * Operating system platform (such centos, ubuntu, windows).
@@ -113,7 +111,7 @@ export const ATTR_HOST_OS_FULL = EcsFlat['host.os.full'].name;
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-host.html#ecs-host-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-os.html#field-os-platform
  */
-export const ATTR_HOST_OS_PLATFORM = EcsFlat['host.os.platform'].name;
+export const ATTR_HOST_OS_PLATFORM = 'host.os.platform' as const;
 
 /**
  * For log events the message field contains the log message, optimized for viewing in a log viewer.
@@ -124,7 +122,7 @@ export const ATTR_HOST_OS_PLATFORM = EcsFlat['host.os.platform'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-base.html#field-message
  */
-export const ATTR_MESSAGE = EcsFlat.message.name;
+export const ATTR_MESSAGE = 'message' as const;
 
 /**
  * User-defined description of a location, at the level of granularity they care about.
@@ -136,21 +134,21 @@ export const ATTR_MESSAGE = EcsFlat.message.name;
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-observer.html#ecs-observer-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-geo.html#field-geo-name
  */
-export const ATTR_OBSERVER_GEO_NAME = EcsFlat['observer.geo.name'].name;
+export const ATTR_OBSERVER_GEO_NAME = 'observer.geo.name' as const;
 
 /**
  * Name of the resource being acted upon.
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-orchestrator.html#field-orchestrator-resource-name
  */
-export const ATTR_ORCHESTRATOR_RESOURCE_NAME = EcsFlat['orchestrator.resource.name'].name;
+export const ATTR_ORCHESTRATOR_RESOURCE_NAME = 'orchestrator.resource.name' as const;
 
 /**
  * Thread name.
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-process.html#field-process-thread-name
  */
-export const ATTR_PROCESS_THREAD_NAME = EcsFlat['process.thread.name'].name;
+export const ATTR_PROCESS_THREAD_NAME = 'process.thread.name' as const;
 
 /**
  * [beta] This field is beta and subject to change.
@@ -161,7 +159,7 @@ export const ATTR_PROCESS_THREAD_NAME = EcsFlat['process.thread.name'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-service.html#field-service-environment
  */
-export const ATTR_SERVICE_ENVIRONMENT = EcsFlat['service.environment'].name;
+export const ATTR_SERVICE_ENVIRONMENT = 'service.environment' as const;
 
 /**
  * The type of the service data is collected from.
@@ -172,7 +170,7 @@ export const ATTR_SERVICE_ENVIRONMENT = EcsFlat['service.environment'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-service.html#field-service-type
  */
-export const ATTR_SERVICE_TYPE = EcsFlat['service.type'].name;
+export const ATTR_SERVICE_TYPE = 'service.type' as const;
 
 /**
  * List of keywords used to tag each event.
@@ -181,7 +179,7 @@ export const ATTR_SERVICE_TYPE = EcsFlat['service.type'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-base.html#field-tags
  */
-export const ATTR_TAGS = EcsFlat.tags.name;
+export const ATTR_TAGS = 'tags' as const;
 
 /**
  * Date/time when the event originated.
@@ -193,7 +191,7 @@ export const ATTR_TAGS = EcsFlat.tags.name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-base.html#field-timestamp
  */
-export const ATTR_TIMESTAMP = EcsFlat['@timestamp'].name;
+export const ATTR_TIMESTAMP = '@timestamp' as const;
 
 /**
  * Unique identifier of the transaction within the scope of its trace.
@@ -202,21 +200,21 @@ export const ATTR_TIMESTAMP = EcsFlat['@timestamp'].name;
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-tracing.html#field-transaction-id
  */
-export const ATTR_TRANSACTION_ID = EcsFlat['transaction.id'].name;
+export const ATTR_TRANSACTION_ID = 'transaction.id' as const;
 
 /**
  * Port of the request, such as 443.
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-url.html#field-url-port
  */
-export const ATTR_URL_PORT = EcsFlat['url.port'].name;
+export const ATTR_URL_PORT = 'url.port' as const;
 
 /**
  * Name of the device.
  *
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-user_agent.html#field-user-agent-device-name
  */
-export const ATTR_USER_AGENT_DEVICE_NAME = EcsFlat['user_agent.device.name'].name;
+export const ATTR_USER_AGENT_DEVICE_NAME = 'user_agent.device.name' as const;
 
 /**
  * Operating system name, without the version.
@@ -224,7 +222,7 @@ export const ATTR_USER_AGENT_DEVICE_NAME = EcsFlat['user_agent.device.name'].nam
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-user_agent.html#ecs-user_agent-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-os.html
  */
-export const ATTR_USER_AGENT_OS_NAME = EcsFlat['user_agent.os.name'].name;
+export const ATTR_USER_AGENT_OS_NAME = 'user_agent.os.name' as const;
 
 /**
  * Operating system version as a raw string.
@@ -232,7 +230,7 @@ export const ATTR_USER_AGENT_OS_NAME = EcsFlat['user_agent.os.name'].name;
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-user_agent.html#ecs-user_agent-nestings
  * @see https://www.elastic.co/guide/en/ecs/current/ecs-os.html
  */
-export const ATTR_USER_AGENT_OS_VERSION = EcsFlat['user_agent.os.version'].name;
+export const ATTR_USER_AGENT_OS_VERSION = 'user_agent.os.version' as const;
 
 // APM fields
 

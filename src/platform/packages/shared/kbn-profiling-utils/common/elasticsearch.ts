@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ATTR_STACKTRACE_COUNT,
-  ATTR_STACKTRACE_ID,
-} from '@kbn/observability-ui-semantic-conventions';
 import { UnionToIntersection, ValuesType } from 'utility-types';
 
 /**
  * Profiling Elasticsearch fields
+ *
+ * These are not exported. They are defined as literals here to make the types below work.
+ * Use @kbn/observability-ui-semantic-conventions outside of this file to access
+ * field names.
  */
-export enum ProfilingESField {
+enum ProfilingESField {
   Timestamp = '@timestamp',
   ContainerName = 'container.name',
   ProcessThreadName = 'process.thread.name',
+  StacktraceCount = 'Stacktrace.count',
   HostID = 'host.id',
   HostName = 'host.name',
   HostIP = 'host.ip',
   OrchestratorResourceName = 'orchestrator.resource.name',
   ServiceName = 'service.name',
+  StacktraceID = 'Stacktrace.id',
   StacktraceFrameIDs = 'Stacktrace.frame.ids',
   StacktraceFrameTypes = 'Stacktrace.frame.types',
   StackframeFileName = 'Stackframe.file.name',
@@ -72,11 +74,11 @@ export type ProfilingESEvent = DedotObject<{
   [ProfilingESField.Timestamp]: string;
   [ProfilingESField.ContainerName]: string;
   [ProfilingESField.ProcessThreadName]: string;
-  [ATTR_STACKTRACE_COUNT]: number;
+  [ProfilingESField.StacktraceCount]: number;
   [ProfilingESField.HostID]: string;
   [ProfilingESField.OrchestratorResourceName]: string;
   [ProfilingESField.ServiceName]: string;
-  [ATTR_STACKTRACE_ID]: string;
+  [ProfilingESField.StacktraceID]: string;
 }>;
 
 export type ProfilingStackTrace = DedotObject<{
