@@ -38,6 +38,7 @@ const MAX_TOP_HITS_SIZE = 100;
 
 export const isCountAggregation = (aggType: string) => aggType === 'count';
 export const isGroupAggregation = (termField?: string | string[]) => !!termField;
+export const isPerRowAggregation = (groupBy?: string) => groupBy === 'row';
 
 export const buildAggregation = ({
   timeSeries,

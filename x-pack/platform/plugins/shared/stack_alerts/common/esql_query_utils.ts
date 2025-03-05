@@ -53,9 +53,9 @@ export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): 
 export const getEsQueryHits = (
   table: EsqlTable,
   query: string,
-  alertType?: string
+  isGroupAgg: boolean
 ): EsQueryHits => {
-  if (alertType) {
+  if (isGroupAgg) {
     const alertId = getAlertId(query, table.columns);
     return toGroupedEsQueryHits(table, alertId);
   }
@@ -102,7 +102,7 @@ export const toGroupedEsQueryHits = (table: EsqlTable, alertId: string[]): EsQue
     const document = rowToDocument(table.columns, row);
     const id = alertId.map((a) => document[a] ?? 'undefined').join(',');
     const hit = {
-      _id: id,
+      _id: ESQL_DOCUMENT_ID,
       _index: '',
       _source: document,
     };
@@ -159,7 +159,7 @@ export const transformDatatableToEsqlTable = (datatable: Datatable): EsqlTable =
   return { columns, values };
 };
 
-const getAlertId = (query: string, resultColumns: EsqlResultColumn[]): string[] => {
+export const getAlertId = (query: string, resultColumns: EsqlResultColumn[]): string[] => {
   const { root } = parse(query);
   const commands = root.commands;
   const columns = resultColumns.map((c) => c.name);
@@ -232,7 +232,9 @@ const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: stri
       if (isOptionItem(renameArg) && renameArg.name === 'as') {
         const [original, renamed] = renameArg.args;
         if (isColumnItem(original) && isColumnItem(renamed)) {
-          return updatedFields.map((field) => (field === original.name ? renamed.name : field));
+          updatedFields = updatedFields.map((field) =>
+            field === original.name ? renamed.name : field
+          );
         }
       }
     }

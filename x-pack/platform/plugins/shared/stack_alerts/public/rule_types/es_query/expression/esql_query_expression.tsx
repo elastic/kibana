@@ -27,16 +27,17 @@ import {
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,
+  isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, ALERT_TYPE } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
 import { transformDatatableToEsqlTable, getEsQueryHits } from '../../../../common';
 
-const ALL_DOCUMENTS = 'allDocuments';
+const ALL_DOCUMENTS = 'all';
 const alertingOptions = [
   {
     id: ALL_DOCUMENTS,
@@ -45,7 +46,7 @@ const alertingOptions = [
     }),
   },
   {
-    id: `${ALERT_TYPE.alertPerRow}`,
+    id: 'row',
     label: i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowLabel', {
       defaultMessage: 'Create one alert per row',
     }),
@@ -61,7 +62,7 @@ export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
   const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, alertType } = ruleParams;
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -76,18 +77,17 @@ export const EsqlQueryExpression: React.FC<
     size: isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
     esqlQuery: esqlQuery ?? { esql: '' },
     aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-    groupBy: DEFAULT_VALUES.GROUP_BY,
+    groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
     // The sourceFields param is ignored for the ES|QL type
     sourceFields: [],
-    alertType,
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [radioIdSelected, setRadioIdSelected] = useState(alertType ?? ALL_DOCUMENTS);
+  const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -113,6 +113,7 @@ export const EsqlQueryExpression: React.FC<
   }, []);
 
   const onTestQuery = useCallback(async () => {
+    const isGroupAgg = isPerRowAggregation(groupBy);
     const window = `${timeWindowSize}${timeWindowUnit}`;
     const emptyResult = {
       testResults: { results: [], truncated: false },
@@ -142,13 +143,13 @@ export const EsqlQueryExpression: React.FC<
       const { results, duplicateAlertIds, rows, cols } = getEsQueryHits(
         esqlTable,
         esqlQuery.esql,
-        alertType
+        isGroupAgg
       );
 
       setIsLoading(false);
       return {
         testResults: parseAggregationResults(results),
-        isGrouped: !!alertType,
+        isGrouped: isGroupAgg,
         timeWindow: window,
         preview: {
           cols,
@@ -171,7 +172,7 @@ export const EsqlQueryExpression: React.FC<
     expressions,
     timeField,
     isServerless,
-    alertType,
+    groupBy,
   ]);
 
   const refreshTimeFields = useCallback(
@@ -261,17 +262,18 @@ export const EsqlQueryExpression: React.FC<
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryAlertTypePrompt"
+            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryGroupByPrompt"
             defaultMessage="Select alert group"
           />
         }
       >
         <EuiRadioGroup
+          data-test-subj="groupByRadioGroup"
           options={alertingOptions}
           idSelected={radioIdSelected}
           onChange={(optionId) => {
             setRadioIdSelected(optionId);
-            setParam('alertType', optionId !== ALL_DOCUMENTS ? optionId : undefined);
+            setParam('groupBy', optionId);
           }}
         />
       </EuiFormRow>

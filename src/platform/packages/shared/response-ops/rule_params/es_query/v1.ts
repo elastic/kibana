@@ -87,12 +87,6 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
   ),
-  alertType: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal('esqlQuery'),
-    schema.maybe(schema.oneOf([schema.literal('alertPerRow')])),
-    schema.never()
-  ),
   sourceFields: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -152,6 +146,12 @@ function validateParams(anyParams: unknown): string | undefined {
 
   // check grouping
   if (groupBy === 'top') {
+    if (isEsqlQueryRule(searchType)) {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidTopGroupByErrorMessage', {
+        defaultMessage: '[groupBy]: groupBy should be all or row when [searchType] is esqlQuery',
+      });
+    }
+
     if (termField == null) {
       return i18n.translate('xpack.responseOps.ruleParams.esQuery.termFieldRequiredErrorMessage', {
         defaultMessage: '[termField]: termField required when [groupBy] is top',
@@ -173,6 +173,12 @@ function validateParams(anyParams: unknown): string | undefined {
         }
       );
     }
+  }
+
+  if (groupBy === 'row' && isEsqlQueryRule(searchType)) {
+    return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidRowGroupByErrorMessage', {
+      defaultMessage: '[groupBy]: groupBy must be all or top when [searchType] is not esqlQuery',
+    });
   }
 
   if (isSearchSourceRule(searchType)) {

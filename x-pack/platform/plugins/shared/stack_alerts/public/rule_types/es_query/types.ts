@@ -17,11 +17,6 @@ export enum SearchType {
   esqlQuery = 'esqlQuery',
 }
 
-export enum ALERT_TYPE {
-  alertPerRow,
-}
-export type AlertType = keyof typeof ALERT_TYPE;
-
 export interface SourceField {
   label: string;
   searchPath: string;
@@ -72,7 +67,6 @@ export interface OnlyEsqlQueryRuleParams {
   searchType?: 'esqlQuery';
   esqlQuery: AggregateQuery;
   timeField: string;
-  alertType?: AlertType;
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;

@@ -12,6 +12,8 @@ import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
+import { getEsQueryHits } from '../../../../common';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -34,7 +36,17 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
   groupBy: 'all',
   timeField: 'time',
 };
+
+jest.mock('../../../../common', () => {
+  const original = jest.requireActual('../../../../common');
+  return {
+    ...original,
+    getEsQueryHits: jest.fn(),
+  };
+});
+
 const logger = loggingSystemMock.create().get();
+const mockRuleResultService = publicRuleResultServiceMock.create();
 
 describe('fetchEsqlQuery', () => {
   describe('fetch', () => {
@@ -59,6 +71,7 @@ describe('fetchEsqlQuery', () => {
             logger,
             scopedClusterClient,
             share: {} as SharePluginStart,
+            ruleResultService: mockRuleResultService,
           },
           spacePrefix: '',
           publicBaseUrl: '',
@@ -162,5 +175,103 @@ describe('fetchEsqlQuery', () => {
         ]
       `);
     });
+  });
+
+  it('should bubble up warnings if there are duplicate alerts', async () => {
+    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      columns: [],
+      values: [],
+    });
+
+    (getEsQueryHits as jest.Mock).mockReturnValue({
+      results: {
+        esResult: {
+          _shards: { failed: 0, successful: 0, total: 0 },
+          aggregations: {
+            groupAgg: {
+              buckets: [
+                {
+                  doc_count: 1,
+                  key: '1.8.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: '1.8.0',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2023-07-12T13:32:04.174Z',
+                            'ecs.version': '1.8.0',
+                            'error.code': null,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  doc_count: 2,
+                  key: '1.2.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: '1.2.0',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': '400',
+                          },
+                        },
+                        {
+                          _id: '1.2.0',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': '200',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          hits: { hits: [] },
+          timed_out: false,
+          took: 0,
+        },
+        isCountAgg: false,
+        isGroupAgg: true,
+      },
+      duplicateAlertIds: new Set<string>(['1.2.0']),
+    });
+
+    await fetchEsqlQuery({
+      ruleId: 'testRuleId',
+      alertLimit: 1,
+      params: defaultParams,
+      services: {
+        logger,
+        scopedClusterClient,
+        share: {} as SharePluginStart,
+        ruleResultService: mockRuleResultService,
+      },
+      spacePrefix: '',
+      publicBaseUrl: '',
+      dateStart: new Date().toISOString(),
+      dateEnd: new Date().toISOString(),
+    });
+
+    expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+      'Your alerts dont appear to be unique which will delay recovery of your alerts. There are duplicates for alert ID(s): 1.2.0'
+    );
+    expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
+      'Your alerts dont appear to be unique which will delay recovery of your alerts. There are duplicates for alert ID(s): 1.2.0'
+    );
   });
 });

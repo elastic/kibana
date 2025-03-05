@@ -30,6 +30,7 @@ export {
   MAX_SOURCE_FIELDS_TO_COPY,
   isCountAggregation,
   isGroupAggregation,
+  isPerRowAggregation,
   buildAggregation,
   UngroupedGroupId,
   parseAggregationResults,

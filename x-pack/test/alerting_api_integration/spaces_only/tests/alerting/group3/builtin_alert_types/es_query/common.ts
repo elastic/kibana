@@ -123,8 +123,8 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     );
   }
 
-  async function getAllAADDocs(size: number): Promise<any> {
-    return await esTestIndexToolAAD.getAll(size);
+  async function getAllAADDocs(size: number, sort?: string): Promise<any> {
+    return await esTestIndexToolAAD.getAll(size, sort);
   }
 
   async function removeAllAADDocs(): Promise<any> {

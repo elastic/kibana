@@ -9,7 +9,11 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { getEcsGroups } from '@kbn/alerting-rule-utils';
-import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  isGroupAggregation,
+  isPerRowAggregation,
+  UngroupedGroupId,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -64,7 +68,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField) || (esqlQueryRule && params.alertType);
+  const isGroupAgg =
+    isGroupAggregation(params.termField) || (esqlQueryRule && isPerRowAggregation(params.groupBy));
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted

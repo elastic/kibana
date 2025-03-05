@@ -6,7 +6,10 @@
  */
 
 import { intersectionBy } from 'lodash';
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  isPerRowAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
@@ -67,11 +70,11 @@ export async function fetchEsqlQuery({
 
   const sourceFields = getSourceFields(response);
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
-
+  const isGroupAgg = isPerRowAggregation(params.groupBy);
   const { results, duplicateAlertIds } = getEsQueryHits(
     response,
     params.esqlQuery.esql,
-    params.alertType
+    isGroupAgg
   );
 
   if (ruleResultService && duplicateAlertIds.size > 0) {
