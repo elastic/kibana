@@ -17,6 +17,7 @@ image::images/inference-endpoints-ui.png[Inference endpoints UI]
 * Copy the inference endpoint ID
 * Delete endpoints
 
+[[inference-endpoints-add]]
 === Add new inference endpoint
 
 To add a new interference endpoint using the UI:
