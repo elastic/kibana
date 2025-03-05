@@ -121,7 +121,6 @@
     "@kbn/charts-theme",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/observability-utils-common",
-    "@kbn/deeplinks-management",
     "@kbn/response-ops-rule-form",
     "@kbn/traced-es-client",
     "@kbn/fields-metadata-plugin"
