@@ -80,7 +80,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string; key: string }>>([]);
+  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string; key?: string }>>(
+    []
+  );
 
   const categoryOptions: EuiSelectableOption[] = [
     {
