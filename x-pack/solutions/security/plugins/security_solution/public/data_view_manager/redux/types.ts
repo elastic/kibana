@@ -12,7 +12,7 @@ export interface ScopedDataViewSelectionState {
   /**
    * There are several states the picker can be in internally:
    * - pristine - not initialized yet
-   * - loading
+   * - loading - the dataView instance is loading with all associated fields, runtime fields, etc...
    * - error - some kind of a problem during data init
    * - ready - ready to provide index information to the client
    */
