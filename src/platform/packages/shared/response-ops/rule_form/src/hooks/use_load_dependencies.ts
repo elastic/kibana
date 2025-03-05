@@ -17,7 +17,7 @@ import {
   useLoadRuleTypesQuery,
   useFetchFlappingSettings,
 } from '@kbn/alerts-ui-shared';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   useLoadConnectors,
   useLoadConnectorTypes,

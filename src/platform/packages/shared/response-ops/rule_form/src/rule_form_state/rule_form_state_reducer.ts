@@ -8,7 +8,7 @@
  */
 
 import type { RuleActionParams } from '@kbn/alerting-types';
-import { isEmpty, omit, isEqual } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import type { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../common';
 import type { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';

@@ -16,7 +16,7 @@ import {
   fetchRuleTypeAadTemplateFields,
   getDescription,
 } from '@kbn/alerts-ui-shared/src/common/apis';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
