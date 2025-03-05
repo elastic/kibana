@@ -23,6 +23,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type {
   MinimumScheduleInterval,
   Rule,
