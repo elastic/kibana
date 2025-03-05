@@ -39,10 +39,33 @@ export const GetAgentsRequestSchema = {
       getStatusSummary: schema.boolean({ defaultValue: false }),
       sortField: schema.maybe(schema.string()),
       sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      searchAfter: schema.maybe(
+        schema.arrayOf(schema.oneOf([schema.number(), schema.string()]), {
+          minSize: 2,
+          maxSize: 2,
+        })
+      ),
+      openPit: schema.maybe(schema.boolean()),
+      pitId: schema.maybe(schema.string()),
+      pitKeepAlive: schema.maybe(schema.duration()),
     },
     {
       validate: (request) => {
-        if (request.page * request.perPage > SO_SEARCH_LIMIT) {
+        const usingSearchAfter = !!request.searchAfter;
+        const usingPIT = !!(request.openPit || request.pitId || request.pitKeepAlive);
+
+        // If using PIT search, ensure that all required PIT parameters are provided
+        if (usingPIT) {
+          if (request.openPit && request.pitId) {
+            return 'You cannot request to open a new point-in-time with an existing pitId or searchAfter parameters';
+          }
+          if (!request.pitKeepAlive) {
+            return 'You must provide pitKeepAlive when using point-in-time parameters';
+          }
+        }
+
+        // If not using searchAfter, ensure that pagination parameters are not over the search limit
+        if (!usingSearchAfter && request.page * request.perPage > SO_SEARCH_LIMIT) {
           return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
         }
       },

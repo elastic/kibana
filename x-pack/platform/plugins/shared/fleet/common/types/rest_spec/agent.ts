@@ -6,6 +6,7 @@
  */
 
 import type { SearchHit } from '@kbn/es-types';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   Agent,
@@ -24,6 +25,10 @@ export interface GetAgentsRequest {
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
+    searchAfter?: SortResults;
+    openPit?: boolean;
+    pitId?: string;
+    pitKeepAlive?: string;
   };
 }
 
