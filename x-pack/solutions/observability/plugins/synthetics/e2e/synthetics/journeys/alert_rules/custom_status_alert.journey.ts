@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after } from '@elastic/synthetics';
+import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
@@ -50,12 +50,17 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('manageStatusRuleName').click();
     await page.getByTestId('createNewStatusRule').click();
 
+    let requestMade = false;
+    page.on('request', (request) => {
+      if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
+        requestMade = true;
+      }
+    });
     await page.getByTestId('ruleFormStep-details').click();
     await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
     await page.getByTestId('ruleFlyoutFooterSaveButton').click();
     await page.getByTestId('confirmModalConfirmButton').click();
-
-    await page.waitForSelector(`text='Created rule "Synthetics status rule"'`);
+    expect(requestMade).toBe(true);
   });
 
   step('verify rule creation', async () => {
