@@ -238,10 +238,7 @@ function markBidirectionalConnections({ connections }: { connections: Connection
 
     if (reversedConnection) {
       reversedConnection.bidirectional = true;
-      return prev.concat({
-        ...connection,
-        isInverseEdge: true,
-      });
+      connection.isInverseEdge = true;
     }
 
     return prev.concat(connection);
