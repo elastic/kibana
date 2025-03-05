@@ -10,7 +10,7 @@
 import './overview.scss';
 
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
@@ -165,6 +165,19 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboards', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+  const mainAppsUserHasAccessTo = useMemo(() => {
+    const applications = [];
+
+    if (application.capabilities.dashboards_v2?.show) {
+      applications.push('dashboards');
+    }
+
+    if (application.capabilities.discover_v2?.show) {
+      applications.push('discover');
+    }
+
+    return applications;
+  }, [application.capabilities]);
 
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
@@ -256,13 +269,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           </h2>
         </EuiScreenReaderOnly>
 
-        {mainApps.length ? (
+        {mainAppsUserHasAccessTo.length ? (
           <>
             <EuiFlexGroup
               className="kbnOverviewApps__group kbnOverviewApps__group--primary"
               justifyContent="center"
             >
-              {mainApps.map(renderAppCard)}
+              {mainAppsUserHasAccessTo.map(renderAppCard)}
             </EuiFlexGroup>
 
             <EuiSpacer size="l" />
