@@ -223,11 +223,11 @@ function InnerGrokAiSuggestions({
   const hasValidField = useMemo(() => {
     return Boolean(
       currentFieldName &&
-        filteredSamples.some(
+        previewDocuments.some(
           (sample) => sample[currentFieldName] && typeof sample[currentFieldName] === 'string'
         )
     );
-  }, [filteredSamples, currentFieldName]);
+  }, [previewDocuments, currentFieldName]);
 
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
