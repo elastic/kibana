@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { InternalServices } from './types';
-export { IntegrationsService } from './integrations/integrations_service';
-export { ConversationServiceImpl } from './conversations';
+export const PLUGIN_ID = 'wciSalesforce';
+export const PLUGIN_NAME = 'wciSalesforce';

@@ -9,7 +9,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const basePrompt = async ({ message }: { message: string }) => {
   return await ChatPromptTemplate.fromMessages([
-    ['system', 'You are a helpful assistant'],
+    ['system', 'You are a helpful assistant. Use the tools provided to answer the user\'s question. Use the search docs tool to search the knowledge base for relevant documents.'],
     ['user', message],
   ]).invoke({});
 };

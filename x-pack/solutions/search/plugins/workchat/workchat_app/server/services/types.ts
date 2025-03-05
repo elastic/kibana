@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { IntegrationsService } from './integrations/integrations_service';
 import type { AgentFactory } from './orchestration';
 import type { ConversationService } from './conversations';
 
 export interface InternalServices {
   agentFactory: AgentFactory;
   conversationService: ConversationService;
+  integrationsService: IntegrationsService;
 }
