@@ -143,12 +143,16 @@ describe('Download Service', () => {
     jest
       .mocked(appContextService.getExperimentalFeatures)
       .mockReturnValue({ useSpaceAwareness: true } as any);
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+      canEncrypt: true,
+    } as any);
   });
   afterEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeDefaultSourceFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
   });
   const esClient = elasticsearchServiceMock.createInternalClient();
 
@@ -210,6 +214,41 @@ describe('Download Service', () => {
         'existing-default-download-source',
         { is_default: false }
       );
+    });
+
+    it('should throw if encryptedSavedObject is not configured', async () => {
+      const soClient = getMockedSoClient();
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: false,
+      } as any);
+      await expect(
+        downloadSourceService.create(
+          soClient,
+          esClient,
+          {
+            is_default: true,
+            name: 'Test',
+            host: 'http://test.co',
+          },
+          { id: 'download-source-test' }
+        )
+      ).rejects.toThrow(`Agent binary source needs encrypted saved object api key to be set`);
+    });
+
+    it('should work if encryptedSavedObject is configured', async () => {
+      const soClient = getMockedSoClient();
+
+      await downloadSourceService.create(
+        soClient,
+        esClient,
+        {
+          is_default: true,
+          name: 'Test',
+          host: 'http://test.co',
+        },
+        { id: 'download-source-test' }
+      );
+      expect(soClient.create).toBeCalled();
     });
   });
 

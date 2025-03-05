@@ -26,10 +26,14 @@ import type {
   DownloadSourceBase,
   PolicySecretReference,
 } from '../types';
-import { DownloadSourceError, FleetError } from '../errors';
+import {
+  DownloadSourceError,
+  FleetEncryptedSavedObjectEncryptionKeyRequired,
+  FleetError,
+} from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
-import { deleteDownloadSourceSecrets, isSecretStorageEnabled } from './secrets';
+import { deleteDownloadSourceSecrets, deleteSecrets, isSecretStorageEnabled } from './secrets';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
@@ -108,6 +112,12 @@ class DownloadSourceService {
     logger.debug(`Creating new download source`);
 
     const data: DownloadSourceSOAttributes = { ...omit(downloadSource, ['ssl', 'secrets']) };
+
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `Agent binary source needs encrypted saved object api key to be set`
+      );
+    }
 
     await this.requireUniqueName(soClient, {
       name: downloadSource.name,
@@ -216,6 +226,15 @@ class DownloadSourceService {
         updateData.ssl = JSON.stringify({ ...newData.ssl, ...newData.secrets.ssl });
       }
     }
+
+    if (secretsToDelete.length) {
+      try {
+        await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
+      } catch (err) {
+        logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+      }
+    }
+
     const soResponse = await this.encryptedSoClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,

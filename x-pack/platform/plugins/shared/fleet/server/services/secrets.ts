@@ -954,9 +954,8 @@ export async function extractAndWriteFleetServerHostsSecrets(opts: {
 }): Promise<{ fleetServerHost: NewFleetServerHost; secretReferences: PolicySecretReference[] }> {
   const { fleetServerHost, esClient, secretHashes = {} } = opts;
 
-  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
-    (path) => typeof path.value === 'string'
-  );
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
+
   const secretRes = await extractAndWriteSOSecrets<NewFleetServerHost>({
     soObject: fleetServerHost,
     secretPaths,
@@ -1002,10 +1001,7 @@ export async function deleteFleetServerHostsSecrets(opts: {
 }): Promise<void> {
   const { fleetServerHost, esClient } = opts;
 
-  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
-    (path) => typeof path.value === 'string'
-  );
-
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
   await deleteSOSecrets(esClient, secretPaths);
 }
 
@@ -1098,9 +1094,20 @@ export async function deleteDownloadSourceSecrets(opts: {
 }): Promise<void> {
   const { downloadSource, esClient } = opts;
 
-  const secretPaths = getDownloadSourcesSecretPaths(downloadSource).filter(
-    (path) => typeof path.value === 'string'
-  );
+  const secretPaths = getDownloadSourcesSecretPaths(downloadSource);
 
   await deleteSOSecrets(esClient, secretPaths);
+}
+
+export function getDownloadSourceSecretReferences(
+  downloadSource: DownloadSource
+): PolicySecretReference[] {
+  const secretPaths: PolicySecretReference[] = [];
+
+  if (typeof downloadSource.secrets?.ssl?.key === 'object') {
+    secretPaths.push({
+      id: downloadSource.secrets.ssl.key.id,
+    });
+  }
+  return secretPaths;
 }
