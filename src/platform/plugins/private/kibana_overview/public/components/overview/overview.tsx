@@ -165,6 +165,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboards', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+  const mainAppsUserHasAccessTo = mainApps.filter(
+    (id) => application.capabilities[`${id}_v2`]?.show === true
+  );
 
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
@@ -256,13 +259,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           </h2>
         </EuiScreenReaderOnly>
 
-        {mainApps.length ? (
+        {mainAppsUserHasAccessTo.length ? (
           <>
             <EuiFlexGroup
               className="kbnOverviewApps__group kbnOverviewApps__group--primary"
               justifyContent="center"
             >
-              {mainApps.map(renderAppCard)}
+              {mainAppsUserHasAccessTo.map(renderAppCard)}
             </EuiFlexGroup>
 
             <EuiSpacer size="l" />
