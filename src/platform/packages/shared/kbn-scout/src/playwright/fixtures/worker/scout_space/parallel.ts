@@ -118,7 +118,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
-      log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`)
+      log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
       await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call
