@@ -9,19 +9,19 @@ import React from 'react';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { RuleUpdateCallout } from '../components/rule_details/rule_update_callout';
 
-interface UseRuleUpdateCalloutProps {
+interface UseRuleUpgradeCalloutProps {
   rule: RuleResponse | null;
   message: string;
   actionButton?: JSX.Element;
   onUpgrade?: () => void;
 }
 
-export const useRuleUpdateCallout = ({
+export const useRuleUpgradeCallout = ({
   rule,
   message,
   actionButton,
   onUpgrade,
-}: UseRuleUpdateCalloutProps): JSX.Element | null =>
+}: UseRuleUpgradeCalloutProps): JSX.Element | null =>
   !rule || rule.rule_source.type !== 'external' ? null : (
     <RuleUpdateCallout
       actionButton={actionButton}

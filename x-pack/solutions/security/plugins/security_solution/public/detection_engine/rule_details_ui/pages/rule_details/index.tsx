@@ -148,7 +148,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useRuleUpgradeCallout } from '../../../rule_management/hooks/use_rule_upgrade_callout';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -395,7 +395,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
 
-  const upgradeCallout = useRuleUpdateCallout({
+  const upgradeCallout = useRuleUpgradeCallout({
     rule,
     message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
     onUpgrade: refreshRule,

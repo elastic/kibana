@@ -76,7 +76,7 @@ import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/lo
 import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
-import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useRuleUpgradeCallout } from '../../../rule_management/hooks/use_rule_upgrade_callout';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -511,7 +511,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [navigateToApp, ruleId]
   );
 
-  const upgradeCallout = useRuleUpdateCallout({
+  const upgradeCallout = useRuleUpgradeCallout({
     rule,
     message: ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE,
     actionButton: (
