@@ -10,7 +10,10 @@ paths:
       operationId: BulkCreateRules
       deprecated: true
       summary: Create multiple detection rules 
-      description: Create new detection rules in bulk.
+      description: |
+        Create new detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       tags:
         - Bulk API
       requestBody:

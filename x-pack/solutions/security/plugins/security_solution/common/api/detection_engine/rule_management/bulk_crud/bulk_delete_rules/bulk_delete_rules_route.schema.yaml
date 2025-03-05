@@ -10,7 +10,10 @@ paths:
       operationId: BulkDeleteRules
       deprecated: true
       summary: Delete multiple detection rules
-      description: Delete detection rules in bulk.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       tags:
         - Bulk API
       requestBody:
@@ -61,7 +64,10 @@ paths:
       operationId: BulkDeleteRulesPost
       deprecated: true
       summary: Delete multiple detection rules
-      description: Deletes multiple rules.
+      description: |
+        Deletes multiple rules.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       tags:
         - Bulk API
       requestBody:

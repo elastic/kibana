@@ -14,6 +14,9 @@ paths:
         Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
         > info
         > You cannot modify the `id` or `rule_id` values.
+        
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       tags:
         - Bulk API
       requestBody:
