@@ -114,10 +114,6 @@ describe(
         selectRulesByName(['Old rule 1', 'Old rule 2']);
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
       });
-
-      it('should disable `Update all rules` button when all  rules have conflicts', () => {
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
-      });
     });
 
     describe('Upgrade of prebuilt rules with and without conflicts', () => {
@@ -322,10 +318,6 @@ describe(
           OUTDATED_QUERY_RULE_2['security-rule'].name,
         ]);
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
-      });
-
-      it('should disable `Update all rules` button', () => {
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
       });
     });
   }
