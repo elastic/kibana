@@ -8,9 +8,11 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Subject, combineLatest, debounceTime, map, skip, take } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EuiBadge,
@@ -88,8 +90,8 @@ export const GridExample = ({
             const currentPanel = panels[panelId];
             const savedPanel = savedState.current.panels[panelId];
             panelsAreEqual = deepEqual(
-              { row: 0, ...currentPanel.gridData },
-              { row: 0, ...savedPanel.gridData }
+              { row: 'first', ...currentPanel.gridData },
+              { row: 'first', ...savedPanel.gridData }
             );
           }
           const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
@@ -147,15 +149,17 @@ export const GridExample = ({
   );
 
   const addNewSection = useCallback(() => {
-    mockDashboardApi.rows$.next([
-      ...mockDashboardApi.rows$.getValue(),
-      {
-        title: i18n.translate('examples.gridExample.defaultSectionTitle', {
-          defaultMessage: 'New collapsible section',
-        }),
-        collapsed: false,
-      },
-    ]);
+    const rows = cloneDeep(mockDashboardApi.rows$.getValue());
+    const id = uuidv4();
+    rows[id] = {
+      id,
+      order: Object.keys(rows).length,
+      title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+        defaultMessage: 'New collapsible section',
+      }),
+      collapsed: false,
+    };
+    mockDashboardApi.rows$.next(rows);
 
     // scroll to bottom after row is added
     layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
