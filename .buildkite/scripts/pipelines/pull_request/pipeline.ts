@@ -212,20 +212,18 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml'));
     }
 
-    // disabled in https://github.com/elastic/kibana/pull/195148
-    // waiting for release of https://github.com/elastic/docsmobile/pull/949
-    // if (
-    //   (await doAnyChangesMatch([
-    //     /\.docnav\.json$/,
-    //     /\.apidocs\.json$/,
-    //     /\.devdocs\.json$/,
-    //     /\.mdx$/,
-    //     /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
-    //   ])) ||
-    //   GITHUB_PR_LABELS.includes('ci:build-next-docs')
-    // ) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
-    // }
+    if (
+      (await doAnyChangesMatch([
+        /\.docnav\.json$/,
+        /\.apidocs\.json$/,
+        /\.devdocs\.json$/,
+        /\.mdx$/,
+        /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:build-next-docs')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
+    }
 
     if (
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
