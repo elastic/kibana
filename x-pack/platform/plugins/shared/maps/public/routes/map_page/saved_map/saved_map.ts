@@ -69,6 +69,8 @@ function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
     : [];
   return setMapSettings({
     ...settings,
+    // Set projection to 'mercator' to avoid changing existing maps
+    projection: !settings.projection ? 'mercator' : settings.projection,
     customIcons: decodedCustomIcons,
   });
 }

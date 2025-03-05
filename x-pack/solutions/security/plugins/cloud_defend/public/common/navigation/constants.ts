@@ -15,7 +15,7 @@ const NAV_ITEMS_NAMES = {
 };
 
 /** The base path for all cloud defend pages. */
-export const CLOUD_DEFEND_BASE_PATH = '/cloud_defend';
+const CLOUD_DEFEND_BASE_PATH = '/cloud_defend';
 
 export const cloudDefendPages: Record<CloudDefendPage, CloudDefendPageNavigationItem> = {
   policies: {

@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const createRuleButton = await testSubjects.find('discoverAppMenuCustomThresholdRule');
       await createRuleButton.click();
 
-      const ruleTitleElement = await testSubjects.find('selectedRuleTypeTitle');
+      const ruleTitleElement = await testSubjects.find('ruleDefinitionHeaderRuleTypeName');
 
       await retry.try(async () => {
         expect(await ruleTitleElement.getVisibleText()).to.equal('Custom threshold');

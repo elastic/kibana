@@ -11,14 +11,14 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardLocatorParams,
+  DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public/dashboard_container/external_api/dashboard_renderer';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -41,7 +41,7 @@ const DashboardRendererComponent = ({
   query,
   savedObjectId,
   timeRange,
-  viewMode = ViewMode.VIEW,
+  viewMode = 'view',
 }: {
   canReadDashboard: boolean;
   dashboardContainer?: DashboardApi;

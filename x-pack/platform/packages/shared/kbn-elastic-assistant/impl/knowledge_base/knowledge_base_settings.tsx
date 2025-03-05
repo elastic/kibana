@@ -60,11 +60,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isElserEnabled = kbStatus?.elser_exists ?? false;
     const isSecurityLabsEnabled = kbStatus?.security_labs_exists ?? false;
     const isKnowledgeBaseSetup =
-      (isElserEnabled &&
-        kbStatus?.index_exists &&
-        kbStatus?.pipeline_exists &&
-        (isSecurityLabsEnabled || kbStatus?.user_data_exists)) ??
-      false;
+      (isElserEnabled && (isSecurityLabsEnabled || kbStatus?.user_data_exists)) ?? false;
     const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
     const isSetupAvailable = kbStatus?.is_setup_available ?? false;
 

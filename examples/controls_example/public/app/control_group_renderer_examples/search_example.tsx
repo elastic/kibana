@@ -180,7 +180,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           onClick={() => {
             if (controlGroupAPI) {
               Object.values(controlGroupAPI.children$.getValue()).forEach((controlApi) => {
-                (controlApi as DefaultControlApi)?.clearSelections();
+                (controlApi as DefaultControlApi)?.clearSelections?.();
               });
             }
           }}

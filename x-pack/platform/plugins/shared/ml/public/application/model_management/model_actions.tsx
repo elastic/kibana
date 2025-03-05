@@ -245,20 +245,7 @@ export function useModelActions({
 
           if (!modelDeploymentParams) return;
 
-          trainedModelsService.startModelDeployment(
-            item.model_id,
-            {
-              priority: modelDeploymentParams.priority!,
-              threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
-              number_of_allocations: modelDeploymentParams.number_of_allocations,
-              deployment_id: modelDeploymentParams.deployment_id,
-            },
-            {
-              ...(modelDeploymentParams.adaptive_allocations?.enabled
-                ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
-                : {}),
-            }
-          );
+          trainedModelsService.startModelDeployment(item.model_id, modelDeploymentParams);
         },
       },
       {
@@ -296,18 +283,7 @@ export function useModelActions({
 
           if (!deploymentParams) return;
 
-          trainedModelsService.updateModelDeployment(
-            item.model_id,
-            deploymentParams.deployment_id!,
-            {
-              ...(deploymentParams.adaptive_allocations
-                ? { adaptive_allocations: deploymentParams.adaptive_allocations }
-                : {
-                    number_of_allocations: deploymentParams.number_of_allocations!,
-                    adaptive_allocations: { enabled: false },
-                  }),
-            }
-          );
+          trainedModelsService.updateModelDeployment(item.model_id, deploymentParams);
         },
       },
       {

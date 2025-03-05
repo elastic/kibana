@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
@@ -15,7 +15,6 @@ import {
   getFunctionSuggestions,
   getControlSuggestionIfSupported,
 } from '../../factories';
-import { ESQLVariableType } from '../../../shared/types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
 import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';

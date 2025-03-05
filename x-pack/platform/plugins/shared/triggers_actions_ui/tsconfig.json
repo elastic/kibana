@@ -76,7 +76,8 @@
     "@kbn/charts-theme",
     "@kbn/rrule",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": ["target/**/*"]
 }

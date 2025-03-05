@@ -384,8 +384,7 @@ describe('bootstrapRenderer', () => {
 
     expect(getThemeTagMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        // 'amsterdam' is mapped to 'v8' for backwards compatibility
-        name: 'v8',
+        name: 'amsterdam',
       })
     );
   });

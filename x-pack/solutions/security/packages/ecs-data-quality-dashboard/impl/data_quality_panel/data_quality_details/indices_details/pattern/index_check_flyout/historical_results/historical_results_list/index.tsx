@@ -34,9 +34,10 @@ import { textCss } from '../styles';
 
 interface Props {
   indexName: string;
+  checkedAt?: number;
 }
 
-export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
+export const HistoricalResultsListComponent: FC<Props> = ({ checkedAt, indexName }) => {
   const [accordionState, setAccordionState] = useState<Record<number, boolean>>(() => ({}));
   const historicalResultsAccordionId = useGeneratedHtmlId({ prefix: 'historicalResultsAccordion' });
   const { historicalResultsState } = useHistoricalResultsContext();
@@ -90,7 +91,11 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
                   </EuiFlexGroup>
                 }
               >
-                <HistoricalResult indexName={indexName} historicalResult={result} />
+                <HistoricalResult
+                  indexName={indexName}
+                  historicalResult={result}
+                  checkedAt={result.checkedAt}
+                />
               </EuiAccordion>
             </Fragment>
           ))}

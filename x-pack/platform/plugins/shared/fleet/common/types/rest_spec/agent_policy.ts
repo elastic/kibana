@@ -50,6 +50,9 @@ export interface GetAutoUpgradeAgentsStatusResponse {
 
 export interface CreateAgentPolicyRequest {
   body: NewAgentPolicy;
+  query: {
+    sys_monitoring?: boolean;
+  };
 }
 
 export interface CreateAgentPolicyResponse {

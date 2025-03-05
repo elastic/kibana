@@ -11,7 +11,7 @@ import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { IdentifierControlForm } from './identifier_control_form';
 import { ESQLControlState, EsqlControlType } from '../types';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -40,12 +40,14 @@ const RefreshButton = ({
   selectConnector,
   currentConnector,
   isLoading,
+  hasValidField,
 }: {
   generatePatterns: () => void;
   selectConnector?: UseGenAIConnectorsResult['selectConnector'];
   connectors?: FindActionResult[];
   currentConnector?: string;
   isLoading: boolean;
+  hasValidField: boolean;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
@@ -55,21 +57,34 @@ const RefreshButton = ({
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="sparkles"
-          data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
-          onClick={generatePatterns}
-          isLoading={isLoading}
-          disabled={currentConnector === undefined}
+        <EuiToolTip
+          content={
+            !hasValidField &&
+            i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestionsTooltip',
+              {
+                defaultMessage:
+                  'Make sure the configured field is valid and has samples in existing documents',
+              }
+            )
+          }
         >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
-            {
-              defaultMessage: 'Generate patterns',
-            }
-          )}
-        </EuiButton>
+          <EuiButton
+            size="s"
+            iconType="sparkles"
+            data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
+            onClick={generatePatterns}
+            isLoading={isLoading}
+            disabled={currentConnector === undefined || !hasValidField}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+              {
+                defaultMessage: 'Generate patterns',
+              }
+            )}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexItem>
       {connectors && connectors.length > 1 && (
         <EuiFlexItem grow={false}>
@@ -205,7 +220,16 @@ function InnerGrokAiSuggestions({
     content = <EuiCallOut color="danger">{suggestionsError.message}</EuiCallOut>;
   }
 
-  const currentPatterns = form.getValues().patterns;
+  const { field: currentFieldName, patterns: currentPatterns } = form.getValues();
+
+  const hasValidField = useMemo(() => {
+    return Boolean(
+      currentFieldName &&
+        filteredSamples.some(
+          (sample) => sample[currentFieldName] && typeof sample[currentFieldName] === 'string'
+        )
+    );
+  }, [filteredSamples, currentFieldName]);
 
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
@@ -323,6 +347,7 @@ function InnerGrokAiSuggestions({
             connectors={genAiConnectors?.connectors}
             selectConnector={genAiConnectors?.selectConnector}
             currentConnector={currentConnector}
+            hasValidField={hasValidField}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -365,7 +390,7 @@ export function GrokAiSuggestions() {
     );
   }
 
-  if (!isAiEnabled || !props.filteredSamples.length) {
+  if (!isAiEnabled) {
     return null;
   }
   return <InnerGrokAiSuggestions {...props} />;

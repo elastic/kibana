@@ -7,11 +7,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { Document } from '@langchain/core/documents';
+import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
-
 import {
   ContentReferencesStore,
-  DEFEND_INSIGHTS_TOOL_ID,
+  DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
@@ -36,9 +37,9 @@ describe('defend insights route helpers', () => {
 
   describe('getAssistantTool', () => {
     it('should return the defend-insights tool', () => {
-      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_TOOL_ID }]);
+      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_ID }]);
       const result = getAssistantTool(getRegisteredTools, 'pluginName');
-      expect(result).toEqual({ id: DEFEND_INSIGHTS_TOOL_ID });
+      expect(result).toEqual({ id: DEFEND_INSIGHTS_ID });
     });
   });
 
@@ -105,6 +106,7 @@ describe('defend insights route helpers', () => {
   describe('updateDefendInsights', () => {
     it('should update defend insights', async () => {
       const params = {
+        anonymizedEvents: [{}, {}, {}, {}, {}] as any as Document[],
         apiConfig: {
           connectorId: 'connector-id1',
           actionTypeId: 'action-type-id1',
@@ -112,6 +114,7 @@ describe('defend insights route helpers', () => {
           provider: OpenAiProviderType.OpenAi,
         },
         defendInsightId: 'insight-id1',
+        insights: ['insight1', 'insight2'] as any as DefendInsights,
         authenticatedUser: {} as any,
         dataClient: {
           getDefendInsight: jest.fn().mockResolvedValueOnce({
@@ -154,40 +157,6 @@ describe('defend insights route helpers', () => {
       });
       expect(params.telemetry.reportEvent).toHaveBeenCalledWith(
         DEFEND_INSIGHT_SUCCESS_EVENT.eventType,
-        expect.any(Object)
-      );
-    });
-
-    it('should handle error if rawDefendInsights is null', async () => {
-      const params = {
-        apiConfig: {
-          connectorId: 'connector-id1',
-          actionTypeId: 'action-type-id1',
-          model: 'model',
-          provider: OpenAiProviderType.OpenAi,
-        },
-        defendInsightId: 'id',
-        authenticatedUser: {} as any,
-        dataClient: {
-          getDefendInsight: jest.fn().mockResolvedValueOnce({
-            status: DefendInsightStatus.Enum.running,
-            backingIndex: 'index',
-            generationIntervals: [],
-          }),
-          updateDefendInsight: jest.fn(),
-        } as any,
-        latestReplacements: {},
-        logger: { error: jest.fn() } as any,
-        rawDefendInsights: null,
-        startTime: moment(),
-        telemetry: { reportEvent: jest.fn() } as any,
-      };
-      await updateDefendInsights(params);
-
-      expect(params.logger.error).toHaveBeenCalledTimes(1);
-      expect(params.telemetry.reportEvent).toHaveBeenCalledTimes(1);
-      expect(params.telemetry.reportEvent).toHaveBeenCalledWith(
-        DEFEND_INSIGHT_ERROR_EVENT.eventType,
         expect.any(Object)
       );
     });
