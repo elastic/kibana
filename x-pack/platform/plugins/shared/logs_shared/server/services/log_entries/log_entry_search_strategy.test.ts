@@ -6,7 +6,7 @@
  */
 
 import { errors, TransportResult } from '@elastic/elasticsearch';
-import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -89,23 +89,21 @@ describe('LogEntry search strategy', () => {
     expect(esClient.asyncSearch.submit).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'log-indices-*',
-        body: expect.objectContaining({
-          track_total_hits: false,
-          terminate_after: 1,
-          query: {
-            ids: {
-              values: ['LOG_ENTRY_ID'],
+        track_total_hits: false,
+        terminate_after: 1,
+        query: {
+          ids: {
+            values: ['LOG_ENTRY_ID'],
+          },
+        },
+        runtime_mappings: {
+          runtime_field: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
             },
           },
-          runtime_mappings: {
-            runtime_field: {
-              type: 'keyword',
-              script: {
-                source: 'emit("runtime value")',
-              },
-            },
-          },
-        }),
+        },
       }),
       expect.anything()
     );

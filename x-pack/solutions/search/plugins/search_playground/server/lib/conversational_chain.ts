@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { Document } from '@langchain/core/documents';
 import {
   ChatPromptTemplate,

@@ -84,7 +84,6 @@ export const TestProvidersComponent: React.FC<Props> = ({
             }}
             getComments={mockGetComments}
             http={mockHttp}
-            baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             {...providerContext}
             currentAppId={'test'}

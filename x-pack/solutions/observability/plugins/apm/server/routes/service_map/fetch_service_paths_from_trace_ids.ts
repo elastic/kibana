@@ -66,21 +66,19 @@ export async function fetchServicePathsFromTraceIds({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body: {
-      terminate_after: terminateAfter,
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: traceIds,
-              },
+    terminate_after: terminateAfter,
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              [TRACE_ID]: traceIds,
             },
-            ...rangeQuery(startRange, endRange),
-          ],
-        },
+          },
+          ...rangeQuery(startRange, endRange),
+        ],
       },
     },
   };
@@ -320,12 +318,9 @@ export async function fetchServicePathsFromTraceIds({
 
   const serviceMapParamsWithAggs = {
     ...serviceMapParams,
-    body: {
-      ...serviceMapParams.body,
-      size: 1,
-      terminate_after: numDocsPerShardAllowed,
-      aggs: serviceMapAggs,
-    },
+    size: 1,
+    terminate_after: numDocsPerShardAllowed,
+    aggs: serviceMapAggs,
   };
 
   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 

@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useState, ReactNode } from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import {
   Comparators,
