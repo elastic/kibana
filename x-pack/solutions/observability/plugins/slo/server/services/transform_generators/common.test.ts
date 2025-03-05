@@ -120,14 +120,23 @@ describe('common', () => {
     it('returns the query if it is a valid Elasticsearch query', () => {
       expect(getElasticsearchQueryOrThrow('monitor.status: down')).toEqual({
         bool: {
-          minimum_should_match: 1,
-          should: [
+          filter: [
             {
-              match: {
-                'monitor.status': 'down',
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      'monitor.status': 'down',
+                    },
+                  },
+                ],
               },
             },
           ],
+          must: [],
+          must_not: [],
+          should: [],
         },
       });
     });
@@ -152,16 +161,25 @@ describe('common', () => {
       });
       expect(getElasticsearchQueryOrThrow('monitor.status: *own', mockDataView)).toEqual({
         bool: {
-          minimum_should_match: 1,
-          should: [
+          filter: [
             {
-              wildcard: {
-                'monitor.status': {
-                  value: '*own',
-                },
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    wildcard: {
+                      'monitor.status': {
+                        value: '*own',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
+          must: [],
+          must_not: [],
+          should: [],
         },
       });
     });

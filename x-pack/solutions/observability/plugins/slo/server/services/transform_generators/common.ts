@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/logging';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -15,21 +15,19 @@ import { InvalidTransformError } from '../../errors';
 
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?: DataView) {
   try {
-    if (kqlQuerySchema.is(kuery)) {
-      return toElasticsearchQuery(fromKueryExpression(kuery), dataView);
-    } else {
-      return buildEsQuery(
-        dataView,
-        {
-          query: kuery?.kqlQuery,
-          language: 'kuery',
-        },
-        kuery?.filters,
-        {
-          allowLeadingWildcards: true,
-        }
-      );
-    }
+    const kqlQuery = kqlQuerySchema.is(kuery) ? kuery : kuery.kqlQuery;
+    const filters = kqlQuerySchema.is(kuery) ? [] : kuery.filters;
+    return buildEsQuery(
+      dataView,
+      {
+        query: kqlQuery,
+        language: 'kuery',
+      },
+      filters,
+      {
+        allowLeadingWildcards: true,
+      }
+    );
   } catch (err) {
     if (kqlQuerySchema.is(kuery)) {
       throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
