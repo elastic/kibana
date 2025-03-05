@@ -43,7 +43,7 @@ export async function runDockerGenerator(
   let baseImageName = '';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
   /**
-   * Renovate config contains a regex manager to automatically updates this Chainguard reference
+   * Renovate config contains a regex manager to automatically update both Chainguard references
    *
    * If this logic moves to another file or under another name, then the Renovate regex manager
    * for automatic Chainguard updates will break.
