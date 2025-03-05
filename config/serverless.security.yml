@@ -181,3 +181,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
   - siemMigrationsDisabled
+
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
+xpack.task_manager.capacity: 20
