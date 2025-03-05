@@ -173,12 +173,14 @@ describe('vega_map_view/view', () => {
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
       expect(maplibregl.Map).toHaveBeenCalledWith({
+        attributionControl: {
+          customAttribution: 'tilemap-attribution',
+        },
         style: {
           version: 8,
           sources: {},
           layers: [],
         },
-        customAttribution: 'tilemap-attribution',
         container: vegaMapView._container,
         minZoom: 0,
         maxZoom: 20,
@@ -197,12 +199,14 @@ describe('vega_map_view/view', () => {
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
       expect(maplibregl.Map).toHaveBeenCalledWith({
+        attributionControl: {
+          customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],
+        },
         style: {
           version: 8,
           sources: {},
           layers: [],
         },
-        customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],
         container: vegaMapView._container,
         minZoom: 0,
         maxZoom: 20,
@@ -226,25 +230,25 @@ describe('vega_map_view/view', () => {
       beforeEach(async () => {
         vegaMapView = await createVegaMapView();
         await vegaMapView.init();
-        maplibregl.mocks.setCenter.mockReset();
-        maplibregl.mocks.zoomTo.mockReset();
-        maplibregl.mocks.fitBounds.mockReset();
+        (maplibregl as any).mocks.setCenter.mockReset();
+        (maplibregl as any).mocks.zoomTo.mockReset();
+        (maplibregl as any).mocks.fitBounds.mockReset();
       });
 
       test('should set just lat lng', async () => {
         vegaMapView.setMapViewHandler(1, 2);
-        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
+        expect((maplibregl as any).mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
       });
 
       test('should set just lng lat via array', async () => {
         vegaMapView.setMapViewHandler([1, 2]);
-        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 2, lng: 1 });
+        expect((maplibregl as any).mocks.setCenter).toHaveBeenCalledWith({ lat: 2, lng: 1 });
       });
 
       test('should set lat lng and zoom', async () => {
         vegaMapView.setMapViewHandler(1, 2, 6);
-        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
-        expect(maplibregl.mocks.zoomTo).toHaveBeenCalledWith(6);
+        expect((maplibregl as any).mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
+        expect((maplibregl as any).mocks.zoomTo).toHaveBeenCalledWith(6);
       });
 
       test('should set bounds', async () => {
@@ -252,7 +256,7 @@ describe('vega_map_view/view', () => {
           [1, 2],
           [6, 7],
         ]);
-        expect(maplibregl.mocks.fitBounds).toHaveBeenCalledWith([
+        expect((maplibregl as any).mocks.fitBounds).toHaveBeenCalledWith([
           { lat: 2, lng: 1 },
           { lat: 7, lng: 6 },
         ]);

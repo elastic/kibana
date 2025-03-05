@@ -20,16 +20,15 @@ export interface UseGetPreviewData {
 
 interface Props {
   isValid: boolean;
-  groupBy?: string | string[];
-  instanceId?: string;
   remoteName?: string;
-  groupings?: Record<string, unknown>;
+  groupings?: Record<string, string | number>;
   objective?: Objective;
   indicator: Indicator;
   range: {
     from: Date;
     to: Date;
   };
+  groupBy?: string[];
 }
 
 export function useGetPreviewData({
@@ -37,15 +36,21 @@ export function useGetPreviewData({
   range,
   indicator,
   objective,
-  groupBy,
   groupings,
-  instanceId,
   remoteName,
+  groupBy,
 }: Props): UseGetPreviewData {
   const { sloClient } = usePluginContext();
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: sloKeys.preview(indicator, range, groupings),
+    queryKey: sloKeys.preview({
+      range,
+      indicator,
+      objective,
+      groupings,
+      remoteName,
+      groupBy,
+    }),
     queryFn: async ({ signal }) => {
       const response = await sloClient.fetch('POST /internal/observability/slos/_preview', {
         params: {
@@ -55,17 +60,16 @@ export function useGetPreviewData({
               from: range.from.toISOString(),
               to: range.to.toISOString(),
             },
-            groupBy,
-            instanceId,
             groupings,
             remoteName,
-            ...(objective ? { objective } : null),
+            objective,
+            groupBy,
           },
         },
         signal,
       });
 
-      return Array.isArray(response) ? response : [];
+      return response;
     },
     retry: false,
     refetchOnWindowFocus: false,
