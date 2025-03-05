@@ -37,10 +37,7 @@ import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import type { RuleUiAction } from './types';
 
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import { getActionFormLazy } from './common/get_action_form';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -55,15 +52,15 @@ import { getRulesListLazy } from './common/get_rules_list';
 import { getActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { ExperimentalFeatures, ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
-import { TriggersActionsUiConfigType } from '../common/types';
-import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
-import { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
-import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
-import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+import type { TriggersActionsUiConfigType } from '../common/types';
+import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import type { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
+import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
+import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
