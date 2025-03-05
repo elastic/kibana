@@ -1109,7 +1109,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /test/functional/firefox/discover.config.ts @elastic/kibana-data-discovery
 /test/functional/fixtures/es_archiver/discover @elastic/kibana-data-discovery
 /test/api_integration/apis/saved_queries @elastic/kibana-data-discovery
-/x-pack/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
+/x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/security/config.examples.ts   @elastic/kibana-data-discovery
@@ -1536,7 +1536,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Machine Learning
 /x-pack/test/stack_functional_integration/apps/ml @elastic/ml-ui
 /x-pack/test/functional/fixtures/kbn_archiver/ml @elastic/ml-ui
-/x-pack/test/api_integration/apis/file_upload @elastic/ml-ui
+/x-pack/platform/test/api_integration/apis/file_upload @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
@@ -1559,7 +1559,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Additional plugins and packages maintained by the ML team.
 /test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
-/x-pack/test/api_integration/apis/aiops/ @elastic/ml-ui
+/x-pack/platform/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/aiops @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
@@ -1663,7 +1663,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/test/api_integration/services/es_supertest_without_auth.js @elastic/appex-qa
 /x-pack/test/api_integration/config.ts @elastic/appex-qa
-/x-pack/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
+/x-pack/platform/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
 /x-pack/test/tsconfig.json @elastic/appex-qa
 /x-pack/test/load @elastic/appex-qa
 /test/tsconfig.json @elastic/appex-qa
@@ -1775,7 +1775,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/page_objects/banners_page.ts @elastic/kibana-core
 /x-pack/test/common/lib/test_data_loader.ts @elastic/kibana-core
 /x-pack/test/api_integration/services/usage_api.ts @elastic/kibana-core
-/x-pack/test/api_integration/apis/kibana @elastic/kibana-core
+/x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /test/api_integration/fixtures/import.ndjson @elastic/kibana-core
 /x-pack/test/plugin_api_integration @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
 /x-pack/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
@@ -1835,7 +1835,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/apis/telemetry @elastic/kibana-core
 /x-pack/test/api_integration/apis/status @elastic/kibana-core
 /x-pack/test/api_integration/apis/stats @elastic/kibana-core
-/x-pack/test/api_integration/apis/kibana/stats @elastic/kibana-core
+/x-pack/platform/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/test/api_integration/deployment_agnostic/apis/core/ @elastic/kibana-core
 /x-pack/test/api_integration/deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
@@ -1868,7 +1868,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # AppEx Platform Services Security
 //x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 /x-pack/test/api_integration/apis/es  @elastic/kibana-security
-/x-pack/test/api_integration/apis/features  @elastic/kibana-security
+/x-pack/platform/test/api_integration/apis/features  @elastic/kibana-security
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
@@ -2107,7 +2107,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/apis/watcher @elastic/kibana-management
 /x-pack/test/api_integration/apis/upgrade_assistant @elastic/kibana-core
 /x-pack/test/api_integration/apis/searchprofiler @elastic/kibana-management
-/x-pack/test/api_integration/apis/console @elastic/kibana-management
+/x-pack/platform/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/painless_lab/ @elastic/kibana-management
@@ -2124,7 +2124,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/deployment_agnostic/apis/management/ @elastic/kibana-management
 /x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
 /x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management
-/x-pack/test/api_integration/apis/grok_debugger @elastic/kibana-management
+/x-pack/platform/test/api_integration/apis/grok_debugger @elastic/kibana-management
 /x-pack/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/**/grok_debugger.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/group1/helpers.ts @elastic/kibana-management
@@ -2673,7 +2673,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux
-/x-pack/test/api_integration/apis/content_management @elastic/appex-sharedux
+/x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_selection.ts @elastic/appex-sharedux
