@@ -78,7 +78,7 @@ export const sampleAttributeCoreWebVital = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: '${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} > 4000',
+                  query: `${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} > 4000`,
                 },
                 isBucketed: false,
                 label: 'Poor',
@@ -108,8 +108,7 @@ export const sampleAttributeCoreWebVital = {
     filters: [],
     query: {
       language: 'kuery',
-      query:
-        '${ATTR_TRANSACTION_TYPE}: (page-load or page-exit) and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE}: ("page-load" or "page-exit")',
+      query: `${ATTR_TRANSACTION_TYPE}: (page-load or page-exit) and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE}: ("page-load" or "page-exit")`,
     },
     visualization: {
       axisTitlesVisibilitySettings: {
