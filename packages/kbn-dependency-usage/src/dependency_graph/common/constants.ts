@@ -8,13 +8,23 @@
  */
 
 export const aggregationGroups = [
-  'x-pack/plugins',
+  'x-pack/solutions/observability/plugins',
+  'x-pack/solutions/observability/packages',
+  'x-pack/solutions/security/plugins',
+  'x-pack/solutions/security/packages',
+  'x-pack/solutions/search/plugins',
+  'x-pack/solutions/search/packages',
+  'x-pack/platform/plugins',
+  'x-pack/platform/packages',
   'x-pack/packages',
-  'src/plugins',
+  'src/platform/plugins',
+  'src/platform/packages',
+  'src/core/packages',
   'packages',
   'src',
   'x-pack/test',
   'x-pack/test_serverless',
+  'test',
 ];
 
 export const excludePaths = [
