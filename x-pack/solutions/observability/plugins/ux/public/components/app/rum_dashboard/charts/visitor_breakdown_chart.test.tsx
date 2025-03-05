@@ -14,6 +14,7 @@ import {
 } from './visitor_breakdown_chart';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ATTR_USER_AGENT_OS_NAME } from '@kbn/observability-ui-semantic-conventions';
 
 jest.mock('../../../../hooks/use_kibana_services');
 jest.mock('uuid');
@@ -31,7 +32,7 @@ describe('VisitorBreakdownChart', () => {
   describe('getVisitorBreakdownLensAttributes', () => {
     test('generates expected lens attributes', () => {
       const props = {
-        metric: VisitorBreakdownMetric.OS_BREAKDOWN,
+        metric: ATTR_USER_AGENT_OS_NAME,
         uiFilters: {
           environment: 'ENVIRONMENT_ALL',
         },
@@ -62,7 +63,7 @@ describe('VisitorBreakdownChart', () => {
       const props = {
         start: '0',
         end: '5000',
-        metric: VisitorBreakdownMetric.OS_BREAKDOWN,
+        metric: ATTR_USER_AGENT_OS_NAME,
         uiFilters: {
           environment: 'ENVIRONMENT_ALL',
         },

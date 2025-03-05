@@ -18,6 +18,8 @@ import {
   ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
   ATTR_TRANSACTION_TYPE,
   ATTR_URL_FULL,
+  ATTR_USER_AGENT_NAME,
+  ATTR_USER_AGENT_OS_NAME,
   PROCESSOR_EVENT_VALUE_TRANSACTION,
   TRANSACTION_TYPE_VALUE_PAGE_LOAD,
 } from '@kbn/observability-ui-semantic-conventions';
@@ -30,10 +32,7 @@ import type { UxUIFilters } from '../../../../../typings/ui_filters';
 
 const BUCKET_SIZE = 9;
 
-export enum VisitorBreakdownMetric {
-  OS_BREAKDOWN = 'user_agent.os.name',
-  UA_BREAKDOWN = 'user_agent.name',
-}
+export type VisitorBreakdownMetric = typeof ATTR_USER_AGENT_NAME | typeof ATTR_USER_AGENT_OS_NAME;
 
 interface LensAttributes {
   metric: VisitorBreakdownMetric;
