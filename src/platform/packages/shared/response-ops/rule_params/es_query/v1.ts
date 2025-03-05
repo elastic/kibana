@@ -88,6 +88,7 @@ const EsQueryRuleParamsSchemaProperties = {
   termSize: schema.maybe(schema.number({ min: 1 })),
   /**
    * The type of query.
+   * For example: `esQuery` for Elasticsearch Query DSL or `esqlQuery` for Elasticsearch Query Language (ES|QL).
    */
   searchType: schema.oneOf(
     [schema.literal('searchSource'), schema.literal('esQuery'), schema.literal('esqlQuery')],
@@ -104,7 +105,9 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.string({ minLength: 1 }),
     schema.maybe(schema.string({ minLength: 1 }))
   ),
-  // searchSource rule param only
+  /**
+   * The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
+   */
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('searchSource'),
@@ -127,7 +130,9 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
     schema.never()
   ),
-  // esqlQuery rule params only
+  /**
+   * The query definition in Elasticsearch Query Language.
+   */
   esqlQuery: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('esqlQuery'),

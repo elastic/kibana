@@ -24,28 +24,54 @@ import {
 export type Params = TypeOf<typeof ParamsSchema>;
 
 export const CoreQueryParamsSchemaProperties = {
-  // name of the indices to search
+  /**
+   * The indices to query.
+   */
   index: schema.oneOf([
     schema.string({ minLength: 1 }),
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
   ]),
-  // field in index used for date/time
+  /**
+   * The field that is used to calculate the time window.
+   */
   timeField: schema.string({ minLength: 1 }),
-  // aggregation type
+  /**
+   * The type of aggregation to perform.
+   */
   aggType: schema.string({ validate: validateAggType, defaultValue: 'count' }),
-  // aggregation field
+  /**
+   * The name of the numeric field that is used in the aggregation.
+   * This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
+   */
   aggField: schema.maybe(schema.string({ minLength: 1 })),
-  // how to group
+  /**
+   * Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`).
+   * If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
+   */
   groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
-  // field to group on (for groupBy: top)
+  /**
+   * The names of up to four fields that are used for grouping the aggregation.
+   * This property is required when `groupBy` is `top`.
+   */
   termField: schema.maybe(schema.string({ minLength: 1 })),
-  // filter field
+  /**
+   * A Kiban Query Language (KQL) expression thats limits the scope of alerts.
+   */
   filterKuery: schema.maybe(schema.string({ validate: validateKuery })),
-  // limit on number of groups returned
+  /**
+   * This property is required when `groupBy` is `top`.
+   * It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
+   */
   termSize: schema.maybe(schema.number({ min: 1 })),
-  // size of time window for date range aggregations
+  /**
+   * The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents.
+   * Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+   */
   timeWindowSize: schema.number({ min: 1 }),
-  // units of time window for date range aggregations
+  /**
+   * The type of units for the time window.
+   * For example: seconds, minutes, hours, or days.
+   */
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
 };
 
