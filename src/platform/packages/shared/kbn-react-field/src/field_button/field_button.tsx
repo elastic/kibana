@@ -85,7 +85,7 @@ export function FieldButton({
   ...rest
 }: FieldButtonProps) {
   const { euiTheme } = useEuiTheme();
-  const classes = classNames('kbnFieldButton', className);
+  const classes = classNames('kbnFieldButton', className); // kbnFieldButton is used in tests and draggable styles
 
   const contentClasses = classNames('kbn-resetFocusState', 'kbnFieldButton__button');
 
