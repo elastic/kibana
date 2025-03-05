@@ -491,8 +491,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Create new detection rules in bulk.
-   */
+    * Create new detection rules in bulk.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+    */
   async bulkCreateRules(props: BulkCreateRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkCreateRules`);
     return this.kbnClient
@@ -507,8 +510,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete detection rules in bulk.
-   */
+    * Delete detection rules in bulk.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+    */
   async bulkDeleteRules(props: BulkDeleteRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRules`);
     return this.kbnClient
@@ -523,8 +529,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Deletes multiple rules.
-   */
+    * Deletes multiple rules.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+    */
   async bulkDeleteRulesPost(props: BulkDeleteRulesPostProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRulesPost`);
     return this.kbnClient
@@ -539,8 +548,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Update specific fields of existing detection rules using the `rule_id` or `id` field.
-   */
+    * Update specific fields of existing detection rules using the `rule_id` or `id` field.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+    */
   async bulkPatchRules(props: BulkPatchRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkPatchRules`);
     return this.kbnClient
@@ -558,6 +570,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` or `rule_id` values.
+
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
 
     */
   async bulkUpdateRules(props: BulkUpdateRulesProps) {

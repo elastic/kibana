@@ -355,7 +355,10 @@ paths:
   /api/detection_engine/rules/_bulk_create:
     post:
       deprecated: true
-      description: Create new detection rules in bulk.
+      description: |
+        Create new detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkCreateRules
       requestBody:
         content:
@@ -380,7 +383,10 @@ paths:
   /api/detection_engine/rules/_bulk_delete:
     delete:
       deprecated: true
-      description: Delete detection rules in bulk.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRules
       requestBody:
         content:
@@ -431,7 +437,10 @@ paths:
         - Bulk API
     post:
       deprecated: true
-      description: Deletes multiple rules.
+      description: |
+        Deletes multiple rules.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRulesPost
       requestBody:
         content:
@@ -483,9 +492,13 @@ paths:
   /api/detection_engine/rules/_bulk_update:
     patch:
       deprecated: true
-      description: >-
+      description: >
         Update specific fields of existing detection rules using the `rule_id`
         or `id` field.
+
+        > warn
+
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkPatchRules
       requestBody:
         content:
@@ -516,6 +529,11 @@ paths:
         > info
 
         > You cannot modify the `id` or `rule_id` values.
+
+
+        > warn
+
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkUpdateRules
       requestBody:
         content:
