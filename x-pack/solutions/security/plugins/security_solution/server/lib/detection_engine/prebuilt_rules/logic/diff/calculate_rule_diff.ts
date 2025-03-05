@@ -150,13 +150,13 @@ const getNumberOfFieldsByChangeType = (fieldsDiff: RuleFieldsDiff) =>
 
 const getFieldConflictLevel = (fieldsDiff: RuleFieldsDiff): ThreeWayDiffConflict => {
   let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
-  Object.values<ThreeWayDiff<unknown>>(fieldsDiff).forEach((fieldDiff) => {
+  for (const fieldDiff of Object.values<ThreeWayDiff<unknown>>(fieldsDiff)) {
     if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
       // return early as there is no higher severity
       return ThreeWayDiffConflict.NON_SOLVABLE;
     } else if (fieldDiff.conflict === ThreeWayDiffConflict.SOLVABLE) {
       mostSevereFieldConflict = ThreeWayDiffConflict.SOLVABLE;
     }
-  });
+  }
   return mostSevereFieldConflict;
 };

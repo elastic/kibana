@@ -698,7 +698,14 @@ export const COLUMN_INTEGRATIONS = i18n.translate(
 export const COLUMN_MODIFIED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.modifiedTitle',
   {
-    defaultMessage: 'MODIFIED',
+    defaultMessage: 'Modified',
+  }
+);
+
+export const COLUMN_CONFLICT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.conflictTitle',
+  {
+    defaultMessage: 'Conflict',
   }
 );
 
@@ -853,6 +860,36 @@ export const MODIFIED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.modifiedTooltipDescription',
   {
     defaultMessage: 'This Elastic rule has been modified.',
+  }
+);
+
+export const SOLVABLE_CONFLICT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictLabel',
+  {
+    defaultMessage: 'Auto-resolved conflict',
+  }
+);
+
+export const SOLVABLE_CONFLICT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictTooltipDescription',
+  {
+    defaultMessage:
+      'This Elastic rule has auto-resolved conflicts that require review before upgrade.',
+  }
+);
+
+export const NON_SOLVABLE_CONFLICT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.nonSolvableConflictLabel',
+  {
+    defaultMessage: 'Unresolved conflict',
+  }
+);
+
+export const NON_SOLVABLE_CONFLICT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.nonSolvableConflictTooltipDescription',
+  {
+    defaultMessage:
+      'This Elastic rule has unresolved conflicts that require editing before upgrade.',
   }
 );
 

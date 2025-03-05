@@ -21,6 +21,8 @@ import { calculateRuleFieldsDiff } from '../../logic/diff/calculation/calculate_
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getValueForField } from './get_value_for_field';
+import type { UpgradeConflictResolution } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
@@ -42,7 +44,7 @@ export const createModifiedPrebuiltRuleAssets = ({
     const {
       pick_version: globalPickVersion = defaultPickVersion,
       mode,
-      allow_solvable_conflicts: allowSolvableConflicts,
+      on_conflict: onConflict,
     } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =
@@ -82,7 +84,7 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
               const fieldsWithConflicts = Object.keys(
-                getFieldsDiffConflicts(calculatedRuleDiff, allowSolvableConflicts)
+                getFieldsDiffConflicts(calculatedRuleDiff, onConflict)
               );
               if (fieldsWithConflicts.length > 0) {
                 // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
@@ -160,10 +162,10 @@ function createModifiedPrebuiltRuleAsset({
 
 const getFieldsDiffConflicts = (
   ruleFieldsDiff: Partial<AllFieldsDiff>,
-  allowSolvableConflicts: boolean = false
+  onConflict?: UpgradeConflictResolution
 ) =>
   pickBy(ruleFieldsDiff, (diff) => {
-    return allowSolvableConflicts
+    return onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
       ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
       : diff.conflict !== 'NONE';
   });

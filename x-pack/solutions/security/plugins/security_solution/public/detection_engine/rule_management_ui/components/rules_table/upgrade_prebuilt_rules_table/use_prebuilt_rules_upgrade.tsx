@@ -26,6 +26,7 @@ import {
   type RuleResponse,
   type RuleSignatureId,
   type RuleUpgradeSpecifier,
+  UpgradeConflictResolutionEnum,
 } from '../../../../../../common/api/detection_engine';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { useOutdatedMlJobsUpgradeModal } from './use_ml_jobs_upgrade_modal';
@@ -182,7 +183,9 @@ export function usePrebuiltRulesUpgrade({
           mode: 'SPECIFIC_RULES',
           pick_version: 'MERGED',
           rules: ruleUpgradeSpecifiers,
-          allow_solvable_conflicts: includeSolvableRuleConflicts,
+          on_conflict: includeSolvableRuleConflicts
+            ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+            : undefined,
         });
       } catch {
         // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -289,8 +292,9 @@ export function usePrebuiltRulesUpgrade({
         mode: 'ALL_RULES',
         pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
         filter,
-        on_conflict: 'SKIP',
-        allow_solvable_conflicts: includeSolvableRuleConflicts,
+        on_conflict: includeSolvableRuleConflicts
+          ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+          : UpgradeConflictResolutionEnum.SKIP,
       });
     } catch {
       // Error is handled by the mutation's onError callback, so no need to do anything here

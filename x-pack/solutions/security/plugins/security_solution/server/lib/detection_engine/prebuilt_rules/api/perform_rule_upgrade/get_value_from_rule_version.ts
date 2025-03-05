@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type {
-  RuleFieldsToUpgrade,
-  AllFieldsDiff,
+import {
+  type RuleFieldsToUpgrade,
+  type AllFieldsDiff,
+  type UpgradeConflictResolution,
+  UpgradeConflictResolutionEnum,
 } from '../../../../../../common/api/detection_engine';
 import { RULE_DEFAULTS } from '../../../rule_management/logic/detection_rules_client/mergers/apply_rule_defaults';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -24,13 +26,13 @@ export const getValueFromMergedVersion = ({
   upgradeableRule,
   fieldUpgradeSpecifier,
   ruleFieldsDiff,
-  allowSolvableConflicts,
+  onConflict,
 }: {
   fieldName: keyof PrebuiltRuleAsset;
   upgradeableRule: RuleTriad;
   fieldUpgradeSpecifier: NonNullable<RuleFieldsToUpgrade[keyof RuleFieldsToUpgrade]>;
   ruleFieldsDiff: AllFieldsDiff;
-  allowSolvableConflicts?: boolean;
+  onConflict?: UpgradeConflictResolution;
 }) => {
   const ruleId = upgradeableRule.target.rule_id;
   const diffableRuleFieldName = mapRuleFieldToDiffableRuleField({
@@ -42,7 +44,7 @@ export const getValueFromMergedVersion = ({
     const ruleFieldDiff = ruleFieldsDiff[diffableRuleFieldName];
 
     if (
-      ruleFieldDiff && allowSolvableConflicts
+      ruleFieldDiff && onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
         ? ruleFieldDiff.conflict !== 'NONE' && ruleFieldDiff.conflict !== 'SOLVABLE'
         : ruleFieldDiff.conflict !== 'NONE'
     ) {

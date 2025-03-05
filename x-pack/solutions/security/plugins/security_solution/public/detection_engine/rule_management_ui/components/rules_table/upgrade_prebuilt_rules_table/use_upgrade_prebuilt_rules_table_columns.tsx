@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
@@ -65,7 +66,7 @@ const RULE_NAME_COLUMN: TableColumn = {
   ),
   sortable: true,
   truncateText: true,
-  width: '60%',
+  width: '50%',
   align: 'left',
 };
 
@@ -139,6 +140,45 @@ const MODIFIED_COLUMN: TableColumn = {
     );
   },
   width: '90px',
+  truncateText: true,
+};
+
+const CONFLICT_COLUMN: TableColumn = {
+  field: 'diff.field_conflict_level',
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_CONFLICT} />,
+  align: 'center',
+  render: (conflictLevel: ThreeWayDiffConflict) => {
+    if (conflictLevel === ThreeWayDiffConflict.NONE) {
+      return null;
+    }
+
+    if (conflictLevel === ThreeWayDiffConflict.SOLVABLE) {
+      return (
+        <EuiToolTip content={i18n.SOLVABLE_CONFLICT_TOOLTIP}>
+          <EuiBadge
+            color="warning"
+            data-test-subj="upgradeRulesTableSolvableConflictColumnBadge"
+            aria-label={i18n.SOLVABLE_CONFLICT_LABEL}
+          >
+            {i18n.SOLVABLE_CONFLICT_LABEL}
+          </EuiBadge>
+        </EuiToolTip>
+      );
+    }
+
+    return (
+      <EuiToolTip content={i18n.NON_SOLVABLE_CONFLICT_TOOLTIP}>
+        <EuiBadge
+          color="danger"
+          data-test-subj="upgradeRulesTableUnsolvableConflictColumnBadge"
+          aria-label={i18n.NON_SOLVABLE_CONFLICT_LABEL}
+        >
+          {i18n.NON_SOLVABLE_CONFLICT_LABEL}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  },
+  width: '170px',
   truncateText: true,
 };
 
@@ -217,6 +257,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
     () => [
       RULE_NAME_COLUMN,
       ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
+      CONFLICT_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -238,7 +279,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         sortable: ({ current_rule: { severity } }: RuleUpgradeState) =>
           getNormalizedSeverity(severity),
         truncateText: true,
-        width: '12%',
+        width: '10%',
       },
       ...(hasCRUDPermissions
         ? [
