@@ -1457,6 +1457,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
+/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
+/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
 # Observability-ui
 /x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
@@ -1464,6 +1466,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
 /x-pack/test/functional/page_objects/observability_page.ts @elastic/observability-ui
 /x-pack/test_serverless/**/test_suites/observability/config.ts @elastic/observability-ui
+/test/functional/apps/discover/observability/config.ts @elastic/observability-ui
+/test/functional/apps/discover/observability/index.ts @elastic/observability-ui
 
 # Observability onboarding tour
 /x-pack/solutions/observability/plugins/observability_shared/public/components/tour @elastic/appex-sharedux

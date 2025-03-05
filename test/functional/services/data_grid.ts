@@ -983,7 +983,7 @@ export class DataGridService extends FtrService {
     return (await this.getInTableSearchCellMatchElements(rowIndex, columnName)).length;
   }
 
-  public async scrollTo(rowCount: number) {
+  public async scrollTo(rowCount: number, finalScrollIncrement: number = 100) {
     const dataGridTargetIndex = rowCount - 1; // 0-based index
     let lastRowIndex = -1;
 
@@ -994,6 +994,7 @@ export class DataGridService extends FtrService {
         (await lastRow.getAttribute('data-grid-row-index')) as string,
         10
       );
+
       const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
 
       if (currentLastRowIndex === lastRowIndex) {
@@ -1001,7 +1002,7 @@ export class DataGridService extends FtrService {
       }
 
       if (currentLastRowIndex >= dataGridTargetIndex) {
-        await this.browser.execute('arguments[0].scrollTop += 100', container); // Final scroll increment
+        await this.browser.execute(`arguments[0].scrollTop += ${finalScrollIncrement}`, container); // Final scroll increment
         break; // Exit if reached the target index
       }
 

@@ -63,19 +63,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('data view mode', () => {
-      it('should render default pagination with page numbers', async () => {
+      it('should render single page pagination without page numbers', async () => {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs,logstash*');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('tablePaginationPopoverButton');
-        await testSubjects.existOrFail('pagination-button-previous');
-        await testSubjects.existOrFail('pagination-button-next');
-        await dataGrid.checkCurrentRowsPerPageToBe(100);
+        await testSubjects.missingOrFail('tablePaginationPopoverButton');
+        await testSubjects.missingOrFail('pagination-button-previous');
+        await testSubjects.missingOrFail('pagination-button-next');
       });
 
-      xit('should render single page pagination without page numbers', async () => {
+      it('should render default pagination with page numbers', async () => {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
@@ -85,9 +84,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hasTimeField: true,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('tablePaginationPopoverButton');
-        await testSubjects.missingOrFail('pagination-button-previous');
-        await testSubjects.missingOrFail('pagination-button-next');
+
+        await testSubjects.existOrFail('tablePaginationPopoverButton');
+        await testSubjects.existOrFail('pagination-button-previous');
+        await testSubjects.existOrFail('pagination-button-next');
+        await dataGrid.checkCurrentRowsPerPageToBe(100);
       });
     });
   });

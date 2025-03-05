@@ -19,6 +19,7 @@ import {
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
+  DEFAULT_PAGINATION_MODE,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../../components/discover_grid';
 import './saved_search_grid.scss';
@@ -117,6 +118,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     gridProps.rowHeightState,
   ]);
 
+  const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
+  const paginationModeConfig = useMemo(() => {
+    return getPaginationConfigAccessor(() => ({
+      paginationMode: DEFAULT_PAGINATION_MODE,
+    }))();
+  }, [getPaginationConfigAccessor]);
+
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
@@ -127,6 +135,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       <DiscoverGridMemoized
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}
+        paginationMode={paginationModeConfig.paginationMode}
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
