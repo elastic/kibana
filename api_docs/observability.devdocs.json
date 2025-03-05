@@ -8904,6 +8904,26 @@
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
