@@ -94,30 +94,31 @@ describe('useFetchAlertsFieldsQuery', () => {
       }
     );
 
+    expect(mockHttpGet).toHaveBeenCalledTimes(1);
+
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(1);
-    });
-    expect(result.current.data).toEqual({
-      browserFields: { fakeCategory: {} },
-      fields: [
-        {
-          name: 'fakeCategory',
-        },
-      ],
+      expect(result.current.data).toEqual({
+        browserFields: { fakeCategory: {} },
+        fields: [
+          {
+            name: 'fakeCategory',
+          },
+        ],
+      });
     });
 
     rerender();
 
+    expect(mockHttpGet).toHaveBeenCalledTimes(1);
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(1);
-    });
-    expect(result.current.data).toEqual({
-      browserFields: { fakeCategory: {} },
-      fields: [
-        {
-          name: 'fakeCategory',
-        },
-      ],
+      expect(result.current.data).toEqual({
+        browserFields: { fakeCategory: {} },
+        fields: [
+          {
+            name: 'fakeCategory',
+          },
+        ],
+      });
     });
   });
 
@@ -134,9 +135,9 @@ describe('useFetchAlertsFieldsQuery', () => {
     );
 
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(0);
+      expect(result.current.data).toEqual(emptyData);
     });
-    expect(result.current.data).toEqual(emptyData);
+    expect(mockHttpGet).toHaveBeenCalledTimes(0);
   });
 
   it('should filter out the non valid feature id', async () => {

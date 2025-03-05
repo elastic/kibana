@@ -148,7 +148,9 @@ describe('rule_event_log_list_table', () => {
     fireEvent.click(button);
 
     const timeStampCellPopover = screen.getByTestId('dataGridHeaderCellActionGroup-timestamp');
-    const firstListItemButton = within(timeStampCellPopover).getByRole('button');
+    const firstListItemButton = within(timeStampCellPopover).getByRole('button', {
+      name: 'Sort A-Z',
+    });
     fireEvent.click(firstListItemButton);
 
     await waitFor(() => {
@@ -173,7 +175,9 @@ describe('rule_event_log_list_table', () => {
     fireEvent.click(button);
 
     const timeStampCellPopover = screen.getByTestId('dataGridHeaderCellActionGroup-timestamp');
-    const firstListItemButton = within(timeStampCellPopover).getByRole('button');
+    const firstListItemButton = within(timeStampCellPopover).getByRole('button', {
+      name: 'Sort Z-A',
+    });
     fireEvent.click(firstListItemButton);
 
     await waitFor(() => {
