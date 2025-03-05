@@ -16,6 +16,7 @@ import {
   ModeEnum,
   PickVersionValuesEnum,
   SkipRuleUpgradeReasonEnum,
+  ThreeWayDiffConflict,
   UpgradeConflictResolutionEnum,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
@@ -157,10 +158,15 @@ export const performRuleUpgradeHandler = async (
         if (onConflict === UpgradeConflictResolutionEnum.SKIP) {
           const ruleDiff = calculateRuleDiff(ruleVersions);
           const hasConflict = ruleDiff.ruleDiff.num_fields_with_conflicts > 0;
+
           if (hasConflict) {
             skippedRules.push({
               rule_id: targetRule.rule_id,
               reason: SkipRuleUpgradeReasonEnum.CONFLICT,
+              conflict:
+                ruleDiff.ruleDiff.num_fields_with_non_solvable_conflicts > 0
+                  ? ThreeWayDiffConflict.NON_SOLVABLE
+                  : ThreeWayDiffConflict.SOLVABLE,
             });
             return;
           }

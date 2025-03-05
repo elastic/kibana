@@ -15,16 +15,22 @@ import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_pa
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
-import type {
-  FindRulesSortField,
-  RuleFieldsToUpgrade,
-  RuleResponse,
-  RuleSignatureId,
-  RuleUpgradeSpecifier,
+import {
+  type FindRulesSortField,
+  type RuleFieldsToUpgrade,
+  type RuleResponse,
+  type RuleSignatureId,
+  type RuleUpgradeSpecifier,
+  ThreeWayDiffConflict,
+  SkipRuleUpgradeReasonEnum,
+  UpgradeConflictResolutionEnum,
 } from '../../../../common/api/detection_engine';
 import { usePrebuiltRulesUpgradeState } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
-import { useUpgradeWithConflictsModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal';
+import {
+  ConfirmRulesUpgrade,
+  useUpgradeWithConflictsModal,
+} from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal';
 import * as ruleDetailsI18n from '../components/rule_details/translations';
 import * as i18n from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/translations';
 import { UpgradeFlyoutSubHeader } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_flyout_subheader';
@@ -127,10 +133,6 @@ export function usePrebuiltRulesUpgrade({
           return;
         }
 
-        if (conflictRuleIdsSet.size > 0 && !(await confirmConflictsUpgrade())) {
-          return;
-        }
-
         await upgradeRulesRequest({
           mode: 'SPECIFIC_RULES',
           pick_version: 'MERGED',
@@ -148,13 +150,7 @@ export function usePrebuiltRulesUpgrade({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [
-      rulesUpgradeState,
-      confirmLegacyMLJobs,
-      confirmConflictsUpgrade,
-      upgradeRulesRequest,
-      onUpgrade,
-    ]
+    [rulesUpgradeState, confirmLegacyMLJobs, upgradeRulesRequest, onUpgrade]
   );
 
   const upgradeRulesToTarget = useCallback(
@@ -221,12 +217,44 @@ export function usePrebuiltRulesUpgrade({
         on_conflict: 'SKIP',
       });
 
-      const hasConflicts = dryRunResults.results.skipped.some(
-        (skippedRule) => skippedRule.reason === 'CONFLICT'
-      );
+      const numOfRulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
+        (x) =>
+          x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
+          x.conflict === ThreeWayDiffConflict.SOLVABLE
+      ).length;
+      const numOfRulesWithNonSolvableConflicts = dryRunResults.results.skipped.filter(
+        (x) =>
+          x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
+          x.conflict === ThreeWayDiffConflict.NON_SOLVABLE
+      ).length;
 
-      if (hasConflicts && !(await confirmConflictsUpgrade())) {
-        return;
+      if (numOfRulesWithSolvableConflicts === 0 && numOfRulesWithNonSolvableConflicts === 0) {
+        await upgradeRulesRequest({
+          mode: 'ALL_RULES',
+          pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
+          filter,
+          on_conflict: 'SKIP',
+        });
+      } else {
+        const result = await confirmConflictsUpgrade({
+          numOfRulesWithoutConflicts: dryRunResults.results.updated.length,
+          numOfRulesWithSolvableConflicts,
+          numOfRulesWithNonSolvableConflicts,
+        });
+
+        if (!result) {
+          return;
+        }
+
+        await upgradeRulesRequest({
+          mode: 'ALL_RULES',
+          pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
+          filter,
+          on_conflict:
+            result === ConfirmRulesUpgrade.WithSolvableConflicts
+              ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+              : UpgradeConflictResolutionEnum.SKIP,
+        });
       }
 
       await upgradeRulesRequest({
