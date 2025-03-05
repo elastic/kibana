@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { EngineDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import { privilegeMonitoringTypeName } from './privilege_monitoring_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
@@ -14,14 +15,10 @@ interface PrivilegeMonitoringEngineDescriptorDependencies {
   namespace: string;
 }
 
-// TODO: will be updated with openAPI generated types
 interface PrivilegedMonitoringEngineDescriptor {
-  status: string;
-  apiKey: string;
+  status: EngineDescriptor['status'];
   error?: Record<string, unknown>;
 }
-
-export type PrivilegeMonitoringEngineStatus = 'installing' | 'started' | 'stopped' | 'error';
 
 export class PrivilegeMonitoringEngineDescriptorClient {
   constructor(private readonly deps: PrivilegeMonitoringEngineDescriptorDependencies) {}
@@ -39,7 +36,6 @@ export class PrivilegeMonitoringEngineDescriptorClient {
       privilegeMonitoringTypeName,
       {
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING,
-        apiKey: '',
       },
       { id: this.getSavedObjectId() }
     );
@@ -76,7 +72,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     return attributes;
   }
 
-  async updateStatus(status: PrivilegeMonitoringEngineStatus) {
+  async updateStatus(status: EngineDescriptor['status']) {
     return this.update({ status });
   }
 
