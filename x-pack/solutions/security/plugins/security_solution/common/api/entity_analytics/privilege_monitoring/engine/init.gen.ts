@@ -14,9 +14,9 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
+
+import { EngineDescriptor } from '../common.gen';
 
 export type InitMonitoringEngineResponse = z.infer<typeof InitMonitoringEngineResponse>;
-export const InitMonitoringEngineResponse = z.object({
-  acknowledged: z.boolean().optional(),
-});
+export const InitMonitoringEngineResponse = EngineDescriptor;

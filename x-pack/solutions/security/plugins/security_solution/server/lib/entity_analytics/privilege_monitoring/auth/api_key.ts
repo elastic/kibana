@@ -131,7 +131,7 @@ export const generateAPIKey = async (
   }
 };
 
-export const SO_PRIVILEGE_MONITORING_API_KEY_TYPE = 'entity-discovery-api-key';
+export const SO_PRIVILEGE_MONITORING_API_KEY_TYPE = 'privmon-api-key';
 
 export const PrivilegeMonitoringApiKeyType: SavedObjectsType = {
   name: SO_PRIVILEGE_MONITORING_API_KEY_TYPE,

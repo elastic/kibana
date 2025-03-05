@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { InitMonitoringEngineResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
@@ -41,12 +42,6 @@ interface PrivilegeMonitoringClientOpts {
   apiKeyManager?: ApiKeyManager;
 }
 
-// TODO: update this - need some openAPI generated types here
-interface InitPrivilegedMonitoringEntityEngineResponse {
-  status: string;
-  apiKey: string;
-}
-
 export class PrivilegeMonitoringDataClient {
   private apiKeyGenerator?: ApiKeyManager;
   private esClient: ElasticsearchClient;
@@ -67,39 +62,44 @@ export class PrivilegeMonitoringDataClient {
      */
   }
 
-  async init(): Promise<InitPrivilegedMonitoringEntityEngineResponse> {
+  async init(): Promise<InitMonitoringEngineResponse> {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
-
     this.audit(
       PrivilegeMonitoringEngineActions.INIT,
       EngineComponentResourceEnum.privmon_engine,
       'Initializing privilege monitoring engine'
     );
 
-    await this.createOrUpdateIndex().catch((e) => {
-      if (e.meta.body.error.type === 'resource_already_exists_exception') {
-        this.opts.logger.info('Privilege monitoring index already exists');
-      }
-    });
-
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
 
-    if (this.apiKeyGenerator) {
-      await this.apiKeyGenerator.generate(); // TODO: need this in a saved object?
-    }
-
     try {
+      await this.createOrUpdateIndex().catch((e) => {
+        if (e.meta.body.error.type === 'resource_already_exists_exception') {
+          this.opts.logger.info('Privilege monitoring index already exists');
+        }
+      });
+
+      if (this.apiKeyGenerator) {
+        await this.apiKeyGenerator.generate(); // TODO: need this in a saved object?
+      }
+
       await startPrivilegeMonitoringTask({
         logger: this.opts.logger,
         namespace: this.opts.namespace,
         taskManager: this.opts.taskManager,
       });
     } catch (e) {
-      this.log('error', `Error starting privilege monitoring task: ${e}`);
-      // TODO: audit failed initialization here
+      this.log('error', `Error initializing privilege monitoring engine: ${e}`);
+      this.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to initialize privilege monitoring engine',
+        e
+      );
+
       // TODO: telemetry, report event. Reference entity_store_data_client.ts line 476
       await this.engineClient.update({
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
@@ -111,7 +111,6 @@ export class PrivilegeMonitoringDataClient {
         },
       });
     }
-
     return descriptor;
   }
 

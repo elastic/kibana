@@ -19,7 +19,7 @@ export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   STARTED: 'started',
   STOPPED: 'stopped',
   ERROR: 'error',
-};
+} as const;
 
 // Base constants
 export const PRIVMON_BASE_PREFIX = 'privmon' as const;
