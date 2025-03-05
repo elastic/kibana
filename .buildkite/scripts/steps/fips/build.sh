@@ -31,13 +31,13 @@ node scripts/build \
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "./*docker-image*.tar.gz"
 
-KIBANA_WOLFI_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
 
 cat <<EOF | buildkite-agent annotate --style "info" --context fips
   ### Kibana FIPS Image
 
-  Wolfi image: \`$KIBANA_WOLFI_FIPS_IMAGE\`
+  Wolfi image: \`$KIBANA_FIPS_IMAGE\`
 EOF
 
-buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana Wolfi FIPS Image: \`$KIBANA_WOLFI_FIPS_IMAGE\`"
+buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana FIPS Image: \`$KIBANA_WOLFI_FIPS_IMAGE\`"
 buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
