@@ -8,7 +8,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Plugin } from '@kbn/core/public';
 import { registerServices } from './register_services';
 
+/**
+ * APM Source setup services
+ */
 export type ApmSourceAccessPluginSetup = ReturnType<ApmSourceAccessPlugin['setup']>;
+/**
+ * APM Source start services
+ */
 export type ApmSourceAccessPluginStart = ReturnType<ApmSourceAccessPlugin['start']>;
 
 export class ApmSourceAccessPlugin

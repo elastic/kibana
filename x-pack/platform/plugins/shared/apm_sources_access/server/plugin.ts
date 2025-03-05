@@ -23,7 +23,13 @@ import {
 } from './saved_objects/apm_indices';
 import { uiSettings } from '../common/ui_settings';
 
+/**
+ * APM Source setup services
+ */
 export type ApmSourcesAccessPluginSetup = ReturnType<ApmSourcesAccessPlugin['setup']>;
+/**
+ * APM Source start services
+ */
 export type ApmSourcesAccessPluginStart = ReturnType<ApmSourcesAccessPlugin['start']>;
 
 export class ApmSourcesAccessPlugin
@@ -42,6 +48,10 @@ export class ApmSourcesAccessPlugin
     return { ...this.config.indices, ...apmIndicesFromSavedObject };
   };
 
+  /**
+   * Registers the saved object definition and ui settings
+   * for APM Sources.
+   */
   public setup(core: CoreSetup) {
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
@@ -59,6 +69,9 @@ export class ApmSourcesAccessPlugin
     };
   }
 
+  /**
+   * Initialises the user value for APM Sources UI settings.
+   */
   public start(core: CoreStart) {
     const initSettings = async () => {
       const soClient = core.savedObjects.createInternalRepository();
