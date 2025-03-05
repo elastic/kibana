@@ -29,9 +29,9 @@ export class SecuritySolutionEssPlugin
 {
   public setup(
     _core: CoreSetup,
-    _setupDeps: SecuritySolutionEssPluginSetupDeps
+    setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
-    const { securitySolution } = _setupDeps;
+    const { securitySolution } = setupDeps;
 
     securitySolution.setProductFeatureKeys(DEFAULT_PRODUCT_FEATURES);
 
