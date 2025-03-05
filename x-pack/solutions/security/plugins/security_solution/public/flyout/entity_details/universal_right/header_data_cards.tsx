@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
@@ -37,7 +38,9 @@ export const HeaderDataCards = ({
   category: string;
   type: string;
 }) => {
-  const [selectValue, setSelectValue] = useState(criticality);
+  const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
+    criticality || 'unassigned'
+  );
 
   const cards = useMemo(
     () => [

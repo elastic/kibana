@@ -14,7 +14,7 @@ interface ExpandableBadgeGroupProps {
   /** Array of EuiBadges to display */
   badges: EuiBadgeProps[];
   /** The initial number of badges to show before expanding. Defaults to 'all' if not set */
-  initialBadgeLimit?: number;
+  initialBadgeLimit?: number | 'all';
   /** The maximum height of the badge group in pixels. If not set the expandable container will not have inner scrolling */
   maxHeight?: number;
 }

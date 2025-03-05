@@ -235,7 +235,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({
       <EuiModalBody>
         <EuiSuperSelect
           id={basicSelectId}
-          options={options}
+          options={assetCriticalityOptions}
           valueOfSelected={value}
           onChange={setNewValue}
           aria-label={PICK_ASSET_CRITICALITY}
