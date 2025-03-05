@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
 import type { InitMonitoringEngineResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import {
   EngineComponentResourceEnum,
@@ -29,6 +30,10 @@ import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privil
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from './constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { PrivilegeMonitoringEngineActions } from './auditing/actions';
+import {
+  PRIVMON_ENGINE_INITIALIZATION_EVENT,
+  PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+} from '../../telemetry/event_based/events';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -66,6 +71,8 @@ export class PrivilegeMonitoringDataClient {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
+    const setupStartTime = moment().utc().toISOString();
+
     this.audit(
       PrivilegeMonitoringEngineActions.INIT,
       EngineComponentResourceEnum.privmon_engine,
@@ -91,6 +98,12 @@ export class PrivilegeMonitoringDataClient {
         namespace: this.opts.namespace,
         taskManager: this.opts.taskManager,
       });
+
+      const setupEndTime = moment().utc().toISOString();
+      const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
+      this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
+        duration,
+      });
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -100,7 +113,10 @@ export class PrivilegeMonitoringDataClient {
         e
       );
 
-      // TODO: telemetry, report event. Reference entity_store_data_client.ts line 476
+      this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
+        error: e.message,
+      });
+
       await this.engineClient.update({
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
         error: {
