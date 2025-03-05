@@ -1143,13 +1143,6 @@ export const HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE = i18n.translate(
   }
 );
 
-export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton',
-  {
-    defaultMessage: 'Review update',
-  }
-);
-
 export const HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton',
   {

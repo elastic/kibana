@@ -89,5 +89,5 @@ export interface RuleUpgradeInfoForReview {
   target_rule: RuleResponse;
   diff: PartialRuleDiff;
   revision: number;
-  hasBaseVersion: boolean;
+  has_base_version: boolean;
 }

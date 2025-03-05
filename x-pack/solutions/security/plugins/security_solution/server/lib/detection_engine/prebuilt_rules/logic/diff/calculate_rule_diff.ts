@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   DiffableRule,
   FullRuleDiff,
@@ -67,8 +68,7 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
 
   invariant(current != null, 'current version is required');
   const diffableCurrentVersion = convertRuleToDiffable(current);
-  const isRuleCustomized =
-    current.rule_source.type === 'external' && current.rule_source.is_customized === true;
+  const isCustomized = isRuleCustomized(current);
 
   invariant(target != null, 'target version is required');
   const diffableTargetVersion = convertRuleToDiffable(
@@ -86,7 +86,7 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
       current_version: diffableCurrentVersion,
       target_version: diffableTargetVersion,
     },
-    isRuleCustomized
+    isCustomized
   );
 
   const {

@@ -18,7 +18,7 @@ import { invariant } from '../../../../../../common/utils/invariant';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';
 import { usePrebuiltRulesStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
-import { usePrebuiltRulesUpgrade } from './use_prebuilt_rules_upgrade';
+import { usePrebuiltRulesUpgrade } from '../../../../rule_management/hooks/use_prebuilt_rules_upgrade';
 
 export interface UpgradePrebuiltRulesSortingOptions {
   field:

@@ -436,7 +436,7 @@ function createRuleUpgradeInfoMock(
       field_conflict_level: ThreeWayDiffConflict.NONE,
       fields: {},
     },
-    hasBaseVersion: true,
+    has_base_version: true,
     version: 1,
     revision: 1,
     ...rewrites,
