@@ -33,7 +33,7 @@ shopt -u nullglob
 if [ ${#files[@]} -gt 0 ]; then
     echo "---Chromium build already exists in the bucket, skipping build"
     # Upload the existing build artifact to buildkite so it can be used in the next steps, 
-    # and accessible with necessarily through the storage bucket itself
+    # and accessible without necessarily having access to the storage bucket itself
     buildkite-agent artifact upload "chromium-*"
 else
     echo "---Chromium build does not exist in the bucket, proceeding with the build"
