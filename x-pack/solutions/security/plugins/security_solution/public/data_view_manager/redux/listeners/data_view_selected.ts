@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewSpec, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
@@ -21,6 +21,11 @@ export const createDataViewSelectedListener = (dependencies: {
       action: ReturnType<typeof selectDataViewAsync>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
+      let dataViewByIdError: unknown;
+      let adhocDataViewCreationError: unknown;
+      let dataViewById: DataView | null = null;
+      let adHocDataView: DataView | null = null;
+
       const state = listenerApi.getState();
 
       const findCachedDataView = (id: string | null | undefined) => {
@@ -47,49 +52,47 @@ export const createDataViewSelectedListener = (dependencies: {
         return cachedDataView;
       };
 
-      let dataViewByIdError: unknown;
-      let adhocDataViewCreationError: unknown;
-
       /**
        * Try to locate the data view in cached entries first
        */
-      let dataViewSpec: DataViewSpec | null = findCachedDataView(action.payload.id);
+      const cachedDataViewSpec = findCachedDataView(action.payload.id);
 
-      if (!dataViewSpec) {
+      if (!cachedDataViewSpec) {
         try {
           if (action.payload.id) {
-            const dataViewById = await dependencies.dataViews.get(action.payload.id);
-            // eslint-disable-next-line require-atomic-updates
-            dataViewSpec = dataViewById.toSpec();
+            dataViewById = await dependencies.dataViews.get(action.payload.id);
           }
         } catch (error: unknown) {
           dataViewByIdError = error;
         }
       }
 
-      if (!dataViewSpec) {
+      if (!dataViewById) {
         try {
           const title = action.payload.fallbackPatterns?.join(',') ?? '';
           if (!title.length) {
             throw new Error('empty adhoc title field');
           }
 
-          const adhocDataView = await dependencies.dataViews.create({
+          adHocDataView = await dependencies.dataViews.create({
             id: `adhoc_${title}`,
             title,
           });
-          listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(adhocDataView));
-          // eslint-disable-next-line require-atomic-updates
-          dataViewSpec = adhocDataView.toSpec();
+          if (adHocDataView) {
+            listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(adHocDataView));
+          }
         } catch (error: unknown) {
           adhocDataViewCreationError = error;
         }
       }
 
+      const resolvedSpecToUse =
+        cachedDataViewSpec || dataViewById?.toSpec() || adHocDataView?.toSpec();
+
       action.payload.scope.forEach((scope) => {
         const currentScopeActions = scopes[scope].actions;
-        if (dataViewSpec) {
-          listenerApi.dispatch(currentScopeActions.setSelectedDataView(dataViewSpec));
+        if (resolvedSpecToUse) {
+          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedSpecToUse));
         } else if (dataViewByIdError || adhocDataViewCreationError) {
           const err = dataViewByIdError || adhocDataViewCreationError;
           listenerApi.dispatch(
