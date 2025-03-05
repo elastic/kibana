@@ -8,7 +8,7 @@
 import { Stream } from 'stream';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ExportListItemsRequestQuery } from '@kbn/securitysolution-lists-common/api';
 
@@ -20,7 +20,7 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      path: `${LIST_ITEM_URL}/_export`,
+      path: `${LIST_ITEMS_URL}/_export`,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],

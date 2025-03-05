@@ -9,7 +9,7 @@ import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   ImportListItemsRequestQuery,
@@ -38,7 +38,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
           payload: config.importTimeout.asMilliseconds(),
         },
       },
-      path: `${LIST_ITEM_URL}/_import`,
+      path: `${LIST_ITEMS_URL}/_import`,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
