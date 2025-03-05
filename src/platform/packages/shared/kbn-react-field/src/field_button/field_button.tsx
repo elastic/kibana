@@ -11,8 +11,7 @@ import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 
-import { CommonProps, useEuiTheme } from '@elastic/eui';
-import './field_button.scss';
+import { CommonProps, useEuiTheme, useEuiFontSize, useEuiFocusRing } from '@elastic/eui';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -66,14 +65,9 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
 }
 
-const sizeToClassNameMap = {
-  xs: 'kbnFieldButton--xs',
-  s: 'kbnFieldButton--s',
-} as const;
+export type ButtonSize = 'xs' | 's';
 
-export type ButtonSize = keyof typeof sizeToClassNameMap;
-
-export const SIZES = Object.keys(sizeToClassNameMap) as ButtonSize[];
+export const SIZES: ButtonSize[] = ['xs', 's'];
 
 export function FieldButton({
   size,
@@ -91,15 +85,7 @@ export function FieldButton({
   ...rest
 }: FieldButtonProps) {
   const { euiTheme } = useEuiTheme();
-  const classes = classNames(
-    'kbnFieldButton',
-    size ? sizeToClassNameMap[size] : null,
-    {
-      'kbnFieldButton-isActive': isActive,
-      'kbnFieldButton--flushBoth': flush === 'both',
-    },
-    className
-  );
+  const classes = classNames('kbnFieldButton', className);
 
   const contentClasses = classNames('kbn-resetFocusState', 'kbnFieldButton__button');
 
@@ -154,7 +140,25 @@ export function FieldButton({
   );
 
   return (
-    <div className={classes} {...rest}>
+    <div
+      className={classes}
+      css={css`
+        ${useEuiFontSize(size)}
+        border-radius: ${euiTheme.border.radius};
+        margin-bottom: ${euiTheme.size.xs};
+        display: flex;
+        align-items: flex-start;
+        padding-block: 0;
+        padding-inline: ${flush === 'both' ? 0 : euiTheme.size.s};
+        transition: box-shadow ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+          background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+
+        &:focus-within {
+          ${useEuiFocusRing()}
+        }
+      `}
+      {...rest}
+    >
       {dragHandle && (
         <div
           css={css`

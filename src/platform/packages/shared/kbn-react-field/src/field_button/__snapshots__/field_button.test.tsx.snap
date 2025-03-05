@@ -2,7 +2,7 @@
 
 exports[`fieldAction is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -41,7 +41,7 @@ exports[`fieldAction is rendered 1`] = `
 
 exports[`fieldIcon is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -80,7 +80,7 @@ exports[`fieldIcon is rendered 1`] = `
 
 exports[`isActive defaults to false 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -101,7 +101,7 @@ exports[`isActive defaults to false 1`] = `
 
 exports[`isActive renders true 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s kbnFieldButton-isActive"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -122,7 +122,7 @@ exports[`isActive renders true 1`] = `
 
 exports[`sizes s is applied 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -143,7 +143,7 @@ exports[`sizes s is applied 1`] = `
 
 exports[`sizes xs is applied 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--xs"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -164,7 +164,7 @@ exports[`sizes xs is applied 1`] = `
 
 exports[`with drag handle is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <div
     css={
