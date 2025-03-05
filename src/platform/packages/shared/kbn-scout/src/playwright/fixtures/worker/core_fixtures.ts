@@ -14,18 +14,16 @@ import {
   createKbnUrl,
   getEsClient,
   getKbnClient,
-  getLogger,
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
 } from '../../../common/services';
-import { ScoutTestOptions } from '../../types';
-import { ScoutTestConfig } from '.';
-import { ScoutLogger } from '../../../common';
+import type { ScoutTestOptions } from '../../types';
+import type { ScoutTestConfig } from '.';
+import type { ScoutLogger } from './log';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';
-export type { ScoutLogger } from '../../../common';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../types';
@@ -48,15 +46,6 @@ export const coreWorkerFixtures = base.extend<
     samlAuth: SamlSessionManager;
   }
 >({
-  // Provides a scoped logger instance for each worker. This logger is shared across
-  // all other fixtures within the worker scope.
-  log: [
-    ({}, use) => {
-      use(getLogger());
-    },
-    { scope: 'worker' },
-  ],
-
   /**
    * Loads the test server configuration from the source file based on local or cloud
    * target, located by default in '.scout/servers' directory. It supplies Playwright

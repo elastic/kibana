@@ -10,8 +10,8 @@
 import { ToolingLog } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
-  constructor() {
-    super({ level: 'verbose', writeTo: process.stdout }, { context: 'scout' });
+  constructor(workerContext: string) {
+    super({ level: 'verbose', writeTo: process.stdout }, { context: workerContext });
     this.serviceLoaded('logger');
   }
 
@@ -24,16 +24,17 @@ export class ScoutLogger extends ToolingLog {
   }
 }
 
-let loggerInstance: ScoutLogger | null = null;
+const loggerInstances = new Map<string, ScoutLogger>();
 
 /**
- * Singleton logger instance to share across the Scout components
- * @returns {ScoutLogger}
+ * Singleton logger instance for specific worker to share across the Scout components
+ * @param workerContext logger context, e.g. `scout-1`
+ * @returns {ScoutLogger} logger instance
  */
-export function getLogger(): ScoutLogger {
-  if (!loggerInstance) {
-    loggerInstance = new ScoutLogger();
+export function getLogger(workerContext: string): ScoutLogger {
+  if (!loggerInstances.has(workerContext)) {
+    loggerInstances.set(workerContext, new ScoutLogger(workerContext));
   }
 
-  return loggerInstance;
+  return loggerInstances.get(workerContext)!;
 }

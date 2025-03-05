@@ -25,9 +25,11 @@ import {
   validateTagsFixture,
 } from './test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
+import { logParallelFixture } from './worker/log';
 
 export const scoutParallelFixtures = mergeTests(
   // worker scope fixtures
+  logParallelFixture,
   coreWorkerFixtures,
   scoutSpaceParallelFixture,
   apiFixtures,
