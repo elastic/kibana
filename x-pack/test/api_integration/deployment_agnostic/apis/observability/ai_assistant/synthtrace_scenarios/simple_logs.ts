@@ -6,9 +6,9 @@
  */
 
 import { timerange, log } from '@kbn/apm-synthtrace-client';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export async function createSimpleLogs(
+export async function createSimpleSyntheticLogs(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
   const synthtrace = getService('synthtrace');

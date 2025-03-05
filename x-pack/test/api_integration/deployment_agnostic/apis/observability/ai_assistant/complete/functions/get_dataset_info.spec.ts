@@ -18,7 +18,7 @@ import {
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { getMessageAddedEvents } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { createSimpleLogs } from './synthtrace_scenarios/simple_logs';
+import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
 
 const USER_MESSAGE = 'Do I have any Apache logs?';
 
@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let getRelevantFields: () => Promise<RelevantField[]>;
 
     before(async () => {
-      ({ logSynthtraceEsClient } = await createSimpleLogs(getService));
+      ({ logSynthtraceEsClient } = await createSimpleSyntheticLogs(getService));
       primarySystemMessage = await getSystemMessage(getService);
 
       llmProxy = await createLlmProxy(log);
