@@ -31,64 +31,66 @@ interface EntityCellProps {
 
 const AddFilter: FC<EntityCellProps> = ({ entityName, entityValue, filter }) => {
   const { filterButton } = useEntityCellStyles();
-  if (filter !== undefined) {
-    return (
-      <EuiToolTip
-        content={
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
-            defaultMessage="Add filter"
-          />
-        }
-      >
-        <EuiButtonIcon
-          size="s"
-          data-test-subj={`mlAnomaliesTableEntityCellAddFilterButton-${entityValue}`}
-          css={filterButton}
-          onClick={blurButtonOnClick(() => {
-            filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.ADD);
-          })}
-          iconType="plusInCircle"
-          aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
-            defaultMessage: 'Add filter',
-          })}
-        />
-      </EuiToolTip>
-    );
-  } else {
+
+  if (filter === undefined) {
     return null;
   }
+
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
+          defaultMessage="Add filter"
+        />
+      }
+    >
+      <EuiButtonIcon
+        size="s"
+        data-test-subj={`mlAnomaliesTableEntityCellAddFilterButton-${entityValue}`}
+        css={filterButton}
+        onClick={blurButtonOnClick(() => {
+          filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.ADD);
+        })}
+        iconType="plusInCircle"
+        aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
+          defaultMessage: 'Add filter',
+        })}
+      />
+    </EuiToolTip>
+  );
 };
 
 const RemoveFilter: FC<EntityCellProps> = ({ entityName, entityValue, filter }) => {
   const { filterButton } = useEntityCellStyles();
-  if (filter !== undefined) {
-    return (
-      <EuiToolTip
-        content={
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
-            defaultMessage="Remove filter"
-          />
-        }
-      >
-        <EuiButtonIcon
-          size="s"
-          data-test-subj={`mlAnomaliesTableEntityCellRemoveFilterButton-${entityValue}`}
-          css={filterButton}
-          onClick={blurButtonOnClick(() => {
-            filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.REMOVE);
-          })}
-          iconType="minusInCircle"
-          aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
-            defaultMessage: 'Remove filter',
-          })}
-        />
-      </EuiToolTip>
-    );
-  } else {
+
+  if (filter === undefined) {
     return null;
   }
+
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
+          defaultMessage="Remove filter"
+        />
+      }
+    >
+      <EuiButtonIcon
+        size="s"
+        data-test-subj={`mlAnomaliesTableEntityCellRemoveFilterButton-${entityValue}`}
+        css={filterButton}
+        onClick={blurButtonOnClick(() => {
+          filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.REMOVE);
+        })}
+        iconType="minusInCircle"
+        aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
+          defaultMessage: 'Remove filter',
+        })}
+      />
+    </EuiToolTip>
+  );
 };
 
 /*

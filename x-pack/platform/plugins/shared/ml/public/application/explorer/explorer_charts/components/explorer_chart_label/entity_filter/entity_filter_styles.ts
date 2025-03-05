@@ -17,7 +17,6 @@ export const useEntityFilterStyles = () => {
       opacity: 0.5,
       width: euiTheme.size.base,
       height: euiTheme.size.base,
-      '-webkit-transform': 'translateY(-1px)',
       transform: 'translateY(-1px)',
       '&:hover': {
         opacity: 1,
