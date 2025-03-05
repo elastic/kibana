@@ -55,6 +55,7 @@ export function ChatSharingMenu({
       description: i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.privateDescription', {
         defaultMessage: 'This conversation is only visible to you.',
       }),
+      'data-test-subj': 'observabilityAiAssistantChatPrivateOption',
     },
     {
       key: ConversationAccess.SHARED,
@@ -63,6 +64,7 @@ export function ChatSharingMenu({
       description: i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.sharedDescription', {
         defaultMessage: 'Team members can view this conversation.',
       }),
+      'data-test-subj': 'observabilityAiAssistantChatSharedOption',
     },
   ];
 
@@ -87,6 +89,7 @@ export function ChatSharingMenu({
       <EuiBadge
         iconType={selectedValue === ConversationAccess.SHARED ? 'users' : 'lock'}
         color="default"
+        data-test-subj="observabilityAiAssistantChatAccessBadge"
       >
         {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
       </EuiBadge>
@@ -106,6 +109,7 @@ export function ChatSharingMenu({
               defaultMessage: 'Toggle sharing options',
             }
           )}
+          data-test-subj="observabilityAiAssistantChatAccessBadge"
         >
           {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
           <EuiIcon type="arrowDown" size="m" style={{ paddingLeft: euiTheme.size.xs }} />

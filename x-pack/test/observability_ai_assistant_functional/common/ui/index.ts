@@ -33,13 +33,19 @@ const pages = {
     tableAuthorCell: 'knowledgeBaseTableAuthorCell',
   },
   conversations: {
-    setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
+    setupGenAiConnectorsButtonSelector:
+      'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
     connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
     conversationsPage: 'observabilityAiAssistantConversationsPage',
+    access: {
+      shareButton: 'observabilityAiAssistantChatAccessBadge',
+      sharedOption: 'observabilityAiAssistantChatSharedOption',
+      privateOption: 'observabilityAiAssistantChatPrivateOption',
+    },
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',

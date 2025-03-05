@@ -141,7 +141,7 @@ export class ObservabilityAIAssistantClient {
       return false;
     }
 
-    return conversation.user.id
+    return conversation.user.id && user.id
       ? conversation.user.id === user.id
       : conversation.user.name === user.name;
   };
