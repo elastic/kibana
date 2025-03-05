@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { SecurityPageName } from '../../../../app/types';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -68,7 +68,6 @@ export const RuleUpdateCallouts = ({
           />
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
     </>
   );
 };
