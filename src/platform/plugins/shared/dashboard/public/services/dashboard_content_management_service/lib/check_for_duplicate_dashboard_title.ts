@@ -9,7 +9,7 @@
 
 import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { extractTitleAndCount } from '../../../dashboard_container/embeddable/api/lib/extract_title_and_count';
+import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
 import { contentManagementService } from '../../kibana_services';
 
 export interface DashboardDuplicateTitleCheckProps {

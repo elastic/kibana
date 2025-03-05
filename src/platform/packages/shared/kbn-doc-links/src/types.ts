@@ -70,6 +70,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly elasticsearchOutput: string;
     readonly elasticsearchModule: string;
+    readonly kafkaOutput: string;
     readonly startup: string;
     readonly exportedFields: string;
     readonly suricataModule: string;
