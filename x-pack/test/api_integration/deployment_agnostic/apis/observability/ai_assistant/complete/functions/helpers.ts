@@ -13,6 +13,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../../services/observability_ai_assistant_api';
 
 function decodeEvents(body: Readable | string) {
@@ -72,4 +73,29 @@ export async function invokeChatCompleteWithFunctionRequest({
   expect(status).to.be(200);
 
   return body;
+}
+
+// order of instructions can vary, so we sort to compare them
+export function systemMessageSorted(message: string) {
+  return message
+    .split('\n\n')
+    .map((line) => line.trim())
+    .sort();
+}
+
+export async function getSystemMessage(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const apiClient = getService('observabilityAIAssistantApi');
+
+  const { body } = await apiClient.editor({
+    endpoint: 'GET /internal/observability_ai_assistant/functions',
+    params: {
+      query: {
+        scopes: ['observability'],
+      },
+    },
+  });
+
+  return body.systemMessage;
 }

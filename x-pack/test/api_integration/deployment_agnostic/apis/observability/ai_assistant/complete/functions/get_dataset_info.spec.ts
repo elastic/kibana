@@ -16,7 +16,7 @@ import {
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { getMessageAddedEvents } from './helpers';
+import { getMessageAddedEvents, getSystemMessage, systemMessageSorted } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
 
@@ -47,14 +47,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let messageAddedEvents: MessageAddEvent[];
       let logSynthtraceEsClient: LogsSynthtraceEsClient;
-      let primarySystemMessage: string;
       let getRelevantFields: () => Promise<RelevantField[]>;
 
       const USER_MESSAGE = 'Do I have any Apache logs?';
 
       before(async () => {
         ({ logSynthtraceEsClient } = await createSimpleSyntheticLogs({ getService }));
-        primarySystemMessage = await getSystemMessage(getService);
 
         void llmProxy.interceptWithFunctionRequest({
           name: 'get_dataset_info',
@@ -179,7 +177,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           describe('The system message', () => {
-            it('has the primary system message', () => {
+            it('has the primary system message', async () => {
+              const primarySystemMessage = await getSystemMessage(getService);
               expect(systemMessageSorted(firstRequestBody.messages[0].content as string)).to.eql(
                 systemMessageSorted(primarySystemMessage)
               );
@@ -348,27 +347,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
-}
-
-// order of instructions can vary, so we sort to compare them
-function systemMessageSorted(message: string) {
-  return message
-    .split('\n\n')
-    .map((line) => line.trim())
-    .sort();
-}
-
-async function getSystemMessage(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-  const apiClient = getService('observabilityAIAssistantApi');
-
-  const { body } = await apiClient.editor({
-    endpoint: 'GET /internal/observability_ai_assistant/functions',
-    params: {
-      query: {
-        scopes: ['observability'],
-      },
-    },
-  });
-
-  return body.systemMessage;
 }

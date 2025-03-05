@@ -20,7 +20,7 @@ import {
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { getMessageAddedEvents } from './helpers';
+import { getMessageAddedEvents, getSystemMessage, systemMessageSorted } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
 
@@ -41,7 +41,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let roleAuthc: RoleCredentials;
     let createdRuleId: string;
     let getRelevantFields: () => Promise<RelevantField[]>;
-    let primarySystemMessage: string;
 
     before(async () => {
       ({ apmSynthtraceEsClient } = await createSyntheticApmData(getService));
@@ -95,19 +94,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       messageAddedEvents = getMessageAddedEvents(body);
-
-      const {
-        body: { systemMessage },
-      } = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/functions',
-        params: {
-          query: {
-            scopes: ['observability'],
-          },
-        },
-      });
-
-      primarySystemMessage = systemMessage;
     });
 
     after(async () => {
@@ -209,9 +195,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('The system message', () => {
-          it('has the primary system message', () => {
-            expect(sortSystemMessage(firstRequestBody.messages[0].content as string)).to.eql(
-              sortSystemMessage(primarySystemMessage)
+          it('has the primary system message', async () => {
+            const primarySystemMessage = await getSystemMessage(getService);
+            expect(systemMessageSorted(firstRequestBody.messages[0].content as string)).to.eql(
+              systemMessageSorted(primarySystemMessage)
             );
           });
 
@@ -468,12 +455,4 @@ async function createSyntheticApmData(
   await apmSynthtraceEsClient.index(events);
 
   return { apmSynthtraceEsClient };
-}
-
-// order of instructions can vary, so we sort to compare them
-function sortSystemMessage(message: string) {
-  return message
-    .split('\n\n')
-    .map((line) => line.trim())
-    .sort();
 }
