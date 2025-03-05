@@ -280,13 +280,15 @@ const option = (
     <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
   ),
 });
-const options: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> = [
-  option('unassigned'),
-  option('low_impact'),
-  option('medium_impact'),
-  option('high_impact'),
-  option('extreme_impact'),
-];
+
+export const assetCriticalityOptions: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> =
+  [
+    option('unassigned'),
+    option('low_impact'),
+    option('medium_impact'),
+    option('high_impact'),
+    option('extreme_impact'),
+  ];
 
 export const AssetCriticalityAccordion = React.memo(AssetCriticalityAccordionComponent);
 AssetCriticalityAccordion.displayName = 'AssetCriticalityAccordion';

@@ -27,13 +27,13 @@ interface ExpandableBadgeGroupProps {
  */
 export const ExpandableBadgeGroup = ({
   badges,
-  initialBadgeLimit,
+  initialBadgeLimit = 'all',
   maxHeight,
 }: ExpandableBadgeGroupProps) => {
-  const [badgesToShow, setBadgesToShow] = useState<number | 'all'>(initialBadgeLimit || 'all');
+  const [visibleBadgesCount, setVisibleBadgesCount] = useState<number | 'all'>(initialBadgeLimit);
 
   // Calculate the number of remaining badges. If 'all' badges are shown, the remaining count is 0.
-  const remainingCount = badgesToShow === 'all' ? 0 : badges.length - badgesToShow;
+  const remainingCount = visibleBadgesCount === 'all' ? 0 : badges.length - visibleBadgesCount;
   const maxScrollHeight = maxHeight ? `${maxHeight}px` : 'initial';
 
   const badgeElements = useMemo(
@@ -51,14 +51,14 @@ export const ExpandableBadgeGroup = ({
     >
       {
         // Show all badges if 'all' is set, otherwise show the first `badgesToShow` badges
-        badgesToShow === 'all' ? badgeElements : badgeElements.slice(0, badgesToShow)
+        visibleBadgesCount === 'all' ? badgeElements : badgeElements.slice(0, visibleBadgesCount)
       }
       {
         // Show the expand badge if there are remaining badges to show
-        remainingCount > 0 && badgesToShow !== 'all' && (
+        remainingCount > 0 && visibleBadgesCount !== 'all' && (
           <EuiBadge
             color="hollow"
-            onClick={() => setBadgesToShow('all')}
+            onClick={() => setVisibleBadgesCount('all')}
             onClickAriaLabel={i18n.translate(
               'xpack.securitySolution.expandableBadgeGroup.expandBadgeAriaLabel',
               { defaultMessage: 'Expand Remaining Badges' }

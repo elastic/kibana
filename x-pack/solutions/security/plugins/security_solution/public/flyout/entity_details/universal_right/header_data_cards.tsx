@@ -23,44 +23,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { AssetCriticalityBadge } from '../../../entity_analytics/components/asset_criticality';
+import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
-
-const options = [
-  {
-    value: 'unassigned',
-    inputDisplay: (
-      <AssetCriticalityBadge criticalityLevel={'unassigned'} style={{ lineHeight: 'inherit' }} />
-    ),
-  },
-  {
-    value: 'low_impact',
-    inputDisplay: (
-      <AssetCriticalityBadge criticalityLevel={'low_impact'} style={{ lineHeight: 'inherit' }} />
-    ),
-  },
-  {
-    value: 'medium_impact',
-    inputDisplay: (
-      <AssetCriticalityBadge criticalityLevel={'medium_impact'} style={{ lineHeight: 'inherit' }} />
-    ),
-  },
-  {
-    value: 'high_impact',
-    inputDisplay: (
-      <AssetCriticalityBadge criticalityLevel={'high_impact'} style={{ lineHeight: 'inherit' }} />
-    ),
-  },
-  {
-    value: 'extreme_impact',
-    inputDisplay: (
-      <AssetCriticalityBadge
-        criticalityLevel={'extreme_impact'}
-        style={{ lineHeight: 'inherit' }}
-      />
-    ),
-  },
-];
 
 export const HeaderDataCards = ({
   criticality,
@@ -98,7 +62,7 @@ export const HeaderDataCards = ({
               fullWidth={false}
               compressed
               hasDividers
-              options={options}
+              options={assetCriticalityOptions}
               valueOfSelected={selectValue}
               onChange={(newValue) => setSelectValue(newValue)}
             />
