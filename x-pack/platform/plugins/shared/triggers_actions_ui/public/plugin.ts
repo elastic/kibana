@@ -35,7 +35,6 @@ import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
-import type { RuleUiAction } from './types';
 
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
