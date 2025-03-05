@@ -20,10 +20,10 @@ export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   type: 'drag' | 'resize',
-  rowIndex: number,
+  rowId: string,
   panelId: string
 ) => {
-  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+  const panelRef = gridLayoutStateManager.panelRefs.current[rowId][panelId];
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
@@ -32,7 +32,7 @@ export const startAction = (
     type,
     id: panelId,
     panelDiv: panelRef,
-    targetRowIndex: rowIndex,
+    targetRow: rowId,
     pointerOffsets: getPointerOffsets(e, panelRect),
   });
 
@@ -74,8 +74,7 @@ export const moveAction = (
 
   const currentLayout = proposedGridLayout$.value;
 
-  const currentPanelData =
-    currentLayout?.[interactionEvent.targetRowIndex].panels[interactionEvent.id];
+  const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
 
   if (!currentPanelData) {
     return;
@@ -88,7 +87,6 @@ export const moveAction = (
       ? getResizePreviewRect({
           interactionEvent,
           pointerPixel,
-          runtimeSettings,
         })
       : getDragPreviewRect({
           interactionEvent,
@@ -101,37 +99,37 @@ export const moveAction = (
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
   // find the grid that the preview rect is over
-  const lastRowIndex = interactionEvent.targetRowIndex;
-  const targetRowIndex = (() => {
-    if (isResize) return lastRowIndex;
+  const lastRowId = interactionEvent.targetRow;
+  const targetRowId = (() => {
+    if (isResize) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
 
     let highestOverlap = -Infinity;
-    let highestOverlapRowIndex = -1;
-    gridRowElements.forEach((row, index) => {
+    let highestOverlapRowId = '';
+    Object.entries(gridRowElements).forEach(([id, row]) => {
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
         Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
       if (overlap > highestOverlap) {
         highestOverlap = overlap;
-        highestOverlapRowIndex = index;
+        highestOverlapRowId = id;
       }
     });
-    return highestOverlapRowIndex;
+    return highestOverlapRowId;
   })();
-  const hasChangedGridRow = targetRowIndex !== lastRowIndex;
+  const hasChangedGridRow = targetRowId !== lastRowId;
 
   // re-render when the target row changes
   if (hasChangedGridRow) {
     interactionEvent$.next({
       ...interactionEvent,
-      targetRowIndex,
+      targetRow: targetRowId,
     });
   }
 
   // calculate the requested grid position
-  const targetedGridRow = gridRowElements[targetRowIndex];
+  const targetedGridRow = gridRowElements[targetRowId];
   const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
   const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
 
@@ -167,21 +165,22 @@ export const moveAction = (
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
     // remove the panel from the row it's currently in.
-    const nextLayout = currentLayout.map((row) => {
+    const nextLayout = cloneDeep(currentLayout);
+    Object.entries(nextLayout).forEach(([rowId, row]) => {
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
-      return { ...row, panels: { ...otherPanels } };
+      nextLayout[rowId] = { ...row, panels: { ...otherPanels } };
     });
 
     // resolve destination grid
-    const destinationGrid = nextLayout[targetRowIndex];
+    const destinationGrid = nextLayout[targetRowId];
     const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedPanelData);
-    nextLayout[targetRowIndex] = resolvedDestinationGrid;
+    nextLayout[targetRowId] = resolvedDestinationGrid;
 
     // resolve origin grid
     if (hasChangedGridRow) {
-      const originGrid = nextLayout[lastRowIndex];
+      const originGrid = nextLayout[lastRowId];
       const resolvedOriginGrid = resolveGridRow(originGrid);
-      nextLayout[lastRowIndex] = resolvedOriginGrid;
+      nextLayout[lastRowId] = resolvedOriginGrid;
     }
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);

@@ -22,6 +22,7 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -46,15 +47,24 @@ const getSummaryProps = (
   isDetails: false,
   row: record,
   dataView: dataViewMock,
-  fieldFormats: fieldFormatsMock,
+  fieldFormats: {
+    ...fieldFormatsMock,
+    getDefaultInstance: jest
+      .fn()
+      .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
+        ...fieldFormatsMock.getDefaultInstance(...params),
+        convert: jest.fn().mockImplementation((t: string) => String(t)),
+      })),
+  },
   setCellProps: () => {},
   closePopover: () => {},
   density: DataGridDensity.COMPACT,
-  rowHeight: ROWS_HEIGHT_OPTIONS.single,
+  rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
+  isTracesSummary: false,
   ...opts,
 });
 
@@ -172,6 +182,38 @@ describe('SummaryColumn', () => {
           `dataTableCellAction_copyToClipboardAction_${constants.SERVICE_NAME_FIELD}`
         )
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('when rendering trace badges', () => {
+    it('should display service.name with different fields exposed', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'success',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.TRANSACTION_NAME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.TRANSACTION_DURATION_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.CONTAINER_NAME_FIELD}`)
+      ).not.toBeInTheDocument();
     });
   });
 

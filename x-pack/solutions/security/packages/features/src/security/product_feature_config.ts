@@ -83,6 +83,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.globalArtifactManagement,
     ],
   },
 
@@ -135,4 +136,5 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   // Security PLIs
   [ProductFeatureSecurityKey.automaticImport]: {},
+  [ProductFeatureSecurityKey.prebuiltRuleCustomization]: {},
 };

@@ -24,6 +24,7 @@ import {
   RULE_TAG_PLACEHOLDER,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 export const RuleDetails = () => {
   const { formData, baseErrors } = useRuleFormState();
@@ -103,6 +104,7 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
+        labelAppend={OptionalFieldLabel}
         isInvalid={!!baseErrors?.tags?.length}
         error={baseErrors?.tags}
       >

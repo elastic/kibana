@@ -177,7 +177,7 @@ describe('"Explore underlying data" panel action', () => {
       const { action, context, core } = setup();
 
       core.application.capabilities = { ...core.application.capabilities };
-      (core.application.capabilities as any).discover = {
+      (core.application.capabilities as any).discover_v2 = {
         show: false,
       };
 

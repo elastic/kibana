@@ -153,7 +153,6 @@ export async function openEditorFlyout({
         ownFocus: true,
         onClose: onCancel,
         outsideClickCloses: false,
-        className: 'linksPanelEditor',
         'data-test-subj': 'links--panelEditor--flyout',
       }
     );

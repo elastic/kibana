@@ -37,6 +37,7 @@ export const initSideNavigation = async (services: Services) => {
           management.id = 'stack_management';
           management.spaceBefore = null;
           management.children = stackManagementLinks;
+          delete management.link;
         }
       })
     )

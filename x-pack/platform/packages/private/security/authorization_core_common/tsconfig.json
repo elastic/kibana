@@ -6,5 +6,7 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/security-plugin-types-common",
+  ]
 }

@@ -161,6 +161,29 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Assign users',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_assign',
+                  name: 'Assign users to cases',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    assign: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 

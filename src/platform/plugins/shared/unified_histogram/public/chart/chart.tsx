@@ -28,7 +28,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { IKibanaSearchResponse } from '@kbn/search-types';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
 import {
   UnifiedHistogramSuggestionContext,
@@ -276,7 +276,7 @@ export function Chart({
 
   const canEditVisualizationOnTheFly = canCustomizeVisualization && chartVisible;
   const canSaveVisualization =
-    canEditVisualizationOnTheFly && services.capabilities.dashboard?.showWriteControls;
+    canEditVisualizationOnTheFly && services.capabilities.dashboard_v2?.showWriteControls;
 
   const actions: IconButtonGroupProps['buttons'] = [];
 

@@ -12,7 +12,7 @@ import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
-import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
+import { fetchDocument, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -27,11 +27,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      await enableStreams(apiClient);
-    });
-
-    after(async () => {
-      await disableStreams(apiClient);
     });
 
     it('non-wired data streams', async () => {
@@ -62,10 +57,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{id}', {
+      const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
         params: {
           path: {
-            id: TEST_STREAM_NAME,
+            name: TEST_STREAM_NAME,
           },
           body: {
             dashboards: [],
@@ -95,8 +90,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(putResponse.body).to.have.property('acknowledged', true);
 
-      const getResponse = await apiClient.fetch('GET /api/streams/{id}', {
-        params: { path: { id: TEST_STREAM_NAME } },
+      const getResponse = await apiClient.fetch('GET /api/streams/{name}', {
+        params: { path: { name: TEST_STREAM_NAME } },
       });
 
       expect(getResponse.status).to.eql(200);
@@ -113,6 +108,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(dashboards).to.eql([]);
 
       expect(stream).to.eql({
+        name: TEST_STREAM_NAME,
         ingest: {
           lifecycle: { inherit: {} },
           processing: [
@@ -183,9 +179,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{id}', {
+      const response = await apiClient.fetch('PUT /api/streams/{name}', {
         params: {
-          path: { id: TEST_STREAM_NAME },
+          path: { name: TEST_STREAM_NAME },
           body: {
             dashboards: [],
             stream: {
@@ -222,10 +218,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{id}', {
+      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name}', {
         params: {
           path: {
-            id: TEST_STREAM_NAME,
+            name: TEST_STREAM_NAME,
           },
         },
       });
@@ -240,6 +236,96 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         (stream) => stream.name === TEST_STREAM_NAME
       );
       expect(classicStream).to.eql(undefined);
+    });
+
+    describe('Classic stream without pipeline', () => {
+      const TEMPLATE_NAME = 'mytemplate';
+      const DATA_STREAM_NAME = 'mytest-abc';
+
+      before(async () => {
+        await esClient.indices.putIndexTemplate({
+          name: TEMPLATE_NAME,
+          index_patterns: ['mytest*'],
+          priority: 1000,
+          template: {
+            lifecycle: {
+              data_retention: '7d',
+            },
+          },
+          data_stream: {
+            allow_custom_routing: false,
+            hidden: false,
+          },
+        });
+
+        await esClient.indices.createDataStream({
+          name: DATA_STREAM_NAME,
+        });
+      });
+
+      after(async () => {
+        await esClient.indices.deleteDataStream({
+          name: DATA_STREAM_NAME,
+        });
+
+        await esClient.indices.deleteIndexTemplate({
+          name: TEMPLATE_NAME,
+        });
+      });
+
+      it('Allows adding processing to classic streams without pipeline', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+          params: {
+            path: {
+              name: DATA_STREAM_NAME,
+            },
+            body: {
+              dashboards: [],
+              stream: {
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  routing: [],
+                  processing: [
+                    {
+                      grok: {
+                        if: { always: {} },
+                        field: 'message',
+                        patterns: [
+                          '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                        ],
+                      },
+                    },
+                  ],
+                  unwired: {},
+                },
+              },
+            },
+          },
+        });
+
+        expect(putResponse.status).to.eql(200);
+        expect(putResponse.body).to.have.property('acknowledged', true);
+      });
+
+      it('Executes processing on classic streams without pipeline', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, DATA_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, DATA_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
+      });
     });
   });
 }

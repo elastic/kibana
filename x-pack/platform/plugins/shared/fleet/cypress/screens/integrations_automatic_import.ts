@@ -7,7 +7,6 @@
 
 export const UPLOAD_PACKAGE_LINK = 'uploadPackageLink';
 export const ASSISTANT_BUTTON = 'assistantButton';
-export const TECH_PREVIEW_BADGE = 'techPreviewBadge';
 export const MISSING_PRIVILEGES = 'missingPrivilegesCallOut';
 
 export const CONNECTOR_BEDROCK = 'actionType-.bedrock';

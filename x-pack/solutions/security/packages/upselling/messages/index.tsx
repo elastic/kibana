@@ -54,3 +54,35 @@ export const UPGRADE_NOTES_MANAGEMENT_USER_FILTER = (requiredLicense: string) =>
       requiredLicense,
     },
   });
+
+export const PREBUILT_RULE_CUSTOMIZATION = (requiredLicense: string, licenseKind: string) =>
+  i18n.translate('securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell', {
+    defaultMessage: '{requiredLicense} {licenseKind} is required to customize prebuilt rules',
+    values: {
+      requiredLicense,
+      licenseKind,
+    },
+  });
+
+export const PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION = (
+  requiredLicense: string,
+  licenseKind: string
+) =>
+  i18n.translate(
+    'securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.descriptionUpsell',
+    {
+      defaultMessage:
+        "Without the {requiredLicense} {licenseKind}, prebuilt rules can't be customized. To access this feature, upgrade your {licenseKind} or contact your admin for assistance.",
+      values: {
+        requiredLicense,
+        licenseKind,
+      },
+    }
+  );
+
+export const SIEM_MIGRATION_MANAGER_LICENSE_BTN = i18n.translate(
+  'securitySolutionPackages.upselling.siemMigrations.manageLicenseBtn',
+  {
+    defaultMessage: 'Manage license',
+  }
+);

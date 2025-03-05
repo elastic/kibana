@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
 import { RulesParams } from '@kbn/observability-plugin/public';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -64,6 +65,7 @@ export interface Props {
 }
 
 export function SloListCompactView({ sloList, loading, error }: Props) {
+  const { services } = useKibana();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -71,14 +73,12 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     share: {
       url: { locators },
     },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana().services;
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = services;
   const spaceId = useSpace();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const sloIdsAndInstanceIds = sloList.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
+  const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
 
   const { data: permissions } = usePermissions();
   const filteredRuleTypes = useGetFilteredRuleTypes();
@@ -135,8 +135,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     setSloToDisable(undefined);
   };
 
-  const handleSavedRule = async () => {
+  const handleSavedRule = () => {
     queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
+    setSloToAddRule(undefined);
   };
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
@@ -182,13 +183,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       }),
       onClick: (slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
+          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
         );
         navigateToUrl(sloDetailsUrl);
       },
@@ -395,13 +390,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
+          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
         );
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
@@ -453,8 +442,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const historicalSliData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              historicalSummary.sloId === slo.id && historicalSummary.instanceId === slo.instanceId
           )?.data,
           'sli_value'
         );
@@ -487,8 +475,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const errorBudgetBurnDownData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              historicalSummary.sloId === slo.id && historicalSummary.instanceId === slo.instanceId
           )?.data,
           'error_budget_remaining'
         );
@@ -530,7 +517,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         tableLayout="auto"
       />
       {sloToAddRule ? (
-        <AddRuleFlyout
+        <RuleFormFlyout
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
@@ -538,11 +526,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             name: `${sloToAddRule.name} burn rate rule`,
             params: { sloId: sloToAddRule.id },
           }}
-          onSave={handleSavedRule}
-          onClose={() => {
+          onSubmit={handleSavedRule}
+          onCancel={() => {
             setSloToAddRule(undefined);
           }}
-          useRuleProducer
+          shouldUseRuleProducer
         />
       ) : null}
 

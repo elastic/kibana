@@ -87,7 +87,7 @@ export const createNavigationTree = ({
                   {
                     link: 'apm:services',
                     title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
-                      defaultMessage: 'Service inventory',
+                      defaultMessage: 'Service Inventory',
                     }),
                   },
                   { link: 'apm:traces' },
@@ -141,7 +141,7 @@ export const createNavigationTree = ({
                     title: i18n.translate(
                       'xpack.serverlessObservability.nav.infrastructureInventory',
                       {
-                        defaultMessage: 'Infrastructure inventory',
+                        defaultMessage: 'Infrastructure Inventory',
                       }
                     ),
                   },
@@ -355,10 +355,73 @@ export const createNavigationTree = ({
         breadcrumbStatus: 'hidden',
         children: [
           {
-            link: 'management',
+            id: 'management',
             title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
               defaultMessage: 'Management',
             }),
+            spaceBefore: null,
+            renderAs: 'panelOpener',
+            children: [
+              {
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.data', {
+                  defaultMessage: 'Data',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+                  { link: 'management:transform', breadcrumbStatus: 'hidden' },
+                  { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+                  { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
+                  { link: 'management:jobsListLink', breadcrumbStatus: 'hidden' },
+                  { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
+                  { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
+                  { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+                ],
+              },
+              {
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.access', {
+                  defaultMessage: 'Access',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [{ link: 'management:api_keys', breadcrumbStatus: 'hidden' }],
+              },
+              {
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.alertsAndInsights', {
+                  defaultMessage: 'Alerts and insights',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                  { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
+                ],
+              },
+              {
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
+                  defaultMessage: 'Content',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                  { link: 'management:objects', breadcrumbStatus: 'hidden' },
+                  { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
+                  { link: 'management:reporting', breadcrumbStatus: 'hidden' },
+                  { link: 'management:tags', breadcrumbStatus: 'hidden' },
+                ],
+              },
+              {
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.other', {
+                  defaultMessage: 'Other',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:settings', breadcrumbStatus: 'hidden' },
+                  {
+                    link: 'management:observabilityAiAssistantManagement',
+                    breadcrumbStatus: 'hidden',
+                  },
+                ],
+              },
+            ],
           },
           {
             link: 'integrations',

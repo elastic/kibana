@@ -76,7 +76,7 @@ export const initRoutes = (
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, config);
+  registerPrebuiltRulesRoutes(router);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -140,5 +140,5 @@ export const initRoutes = (
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
-  registerAssetInventoryRoutes({ router, config, logger });
+  registerAssetInventoryRoutes({ router, config, logger, getStartServices });
 };

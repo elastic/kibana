@@ -23,9 +23,9 @@ import {
 
 import {
   DASHBOARD_LINK_TYPE,
-  LinksLayoutType,
   LinksTextOverflowType,
   LINKS_VERTICAL_LAYOUT,
+  LinksLayoutType,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import { LinksParentApi, ResolvedLink } from '../../types';

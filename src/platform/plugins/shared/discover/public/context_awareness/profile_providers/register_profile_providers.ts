@@ -28,7 +28,9 @@ import {
 } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
+import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
+import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -123,6 +125,7 @@ export const registerEnabledProfileProviders = <
 const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleRootProfileProvider(),
   createExampleSolutionViewRootProfileProvider(),
+  createClassicNavRootProfileProvider(providerServices),
   createSecurityRootProfileProvider(providerServices),
   createObservabilityRootProfileProvider(providerServices),
 ];
@@ -135,6 +138,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
   createDeprecationLogsDataSourceProfileProvider(),
+  createTracesDataSourceProfileProvider(),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];
 

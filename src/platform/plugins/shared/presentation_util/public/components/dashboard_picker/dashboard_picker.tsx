@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SearchIn, SearchResult } from '@kbn/content-management-plugin/common';
 
 import { contentManagementService } from '../../services/kibana_services';
 
@@ -73,8 +74,11 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
     (async () => {
       setIsLoading(true);
 
-      const response = await contentManagementService.client.mSearch<DashboardHit>({
-        contentTypes: [{ contentTypeId: 'dashboard' }],
+      const response = await contentManagementService.client.search<
+        SearchIn<'dashboard'>,
+        SearchResult<DashboardHit>
+      >({
+        contentTypeId: 'dashboard',
         query: {
           text: debouncedQuery ? `${debouncedQuery}*` : undefined,
           limit: 30,
@@ -123,7 +127,9 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
             <EuiText
               size="s"
               css={css`
-                color: ${selectedDashboard ? euiTheme.colors.text : euiTheme.colors.disabledText};
+                color: ${selectedDashboard
+                  ? euiTheme.colors.textParagraph
+                  : euiTheme.colors.textDisabled};
               `}
             >
               {selectedDashboard?.label ??

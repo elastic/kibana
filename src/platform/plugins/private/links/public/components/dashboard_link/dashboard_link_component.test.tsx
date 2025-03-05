@@ -12,7 +12,6 @@ import React from 'react';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
 import {
   LINKS_VERTICAL_LAYOUT,
   LINK_TEXT_OVERFLOW_ELLIPSIS,

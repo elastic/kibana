@@ -12,7 +12,7 @@ import { render, within, fireEvent } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
@@ -56,6 +56,7 @@ describe('ValueControlForm', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataMock,
   };
 
   describe('Interval type', () => {

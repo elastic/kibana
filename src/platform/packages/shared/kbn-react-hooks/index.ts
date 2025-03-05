@@ -9,4 +9,7 @@
 
 export { useBoolean } from './src/use_boolean';
 export { useErrorTextStyle } from './src/use_error_text_style';
+export { useAbortController } from './src/use_abort_controller';
+export { useAbortableAsync } from './src/use_abortable_async';
+export type { UseAbortableAsync, AbortableAsyncState } from './src/use_abortable_async';
 export type { UseBooleanHandlers, UseBooleanResult } from './src/use_boolean';

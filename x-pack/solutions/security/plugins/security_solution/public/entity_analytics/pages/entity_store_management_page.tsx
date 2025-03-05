@@ -31,6 +31,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { i18n } from '@kbn/i18n';
 import { type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
@@ -61,6 +62,13 @@ const isEntityStoreEnabled = (status?: StoreStatus) => status === 'running';
 const canDeleteEntityEngine = (status?: StoreStatus) =>
   !['not_installed', 'installing'].includes(status || '');
 const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'not_installed';
+
+const entityStoreLabel = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title',
+  {
+    defaultMessage: 'Entity Store',
+  }
+);
 
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
@@ -147,12 +155,7 @@ export const EntityStoreManagementPage = () => {
     <>
       <EuiPageHeader
         data-test-subj="entityStoreManagementPage"
-        pageTitle={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
-            defaultMessage="Entity Store"
-          />
-        }
+        pageTitle={entityStoreLabel}
         alignItems="center"
         rightSideItems={
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
@@ -181,7 +184,7 @@ export const EntityStoreManagementPage = () => {
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.subTitle"
-          defaultMessage="Store host and user entities observed in events."
+          defaultMessage="Store data for entities observed in events."
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
@@ -381,12 +384,12 @@ const EnablementButton: React.FC<{
       )}
       <EntityStoreHealth currentEntityStoreStatus={status} />
       <EuiSwitch
-        showLabel={false}
-        label=""
+        label={entityStoreLabel}
         onChange={onSwitch}
         data-test-subj="entity-store-switch"
         checked={isEntityStoreEnabled(status)}
         disabled={isDisabled}
+        showLabel={false}
       />
     </EuiFlexGroup>
   );

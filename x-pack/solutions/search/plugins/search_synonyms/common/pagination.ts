@@ -7,7 +7,7 @@
 
 export const DEFAULT_PAGE_VALUE: Page = {
   from: 0,
-  size: 10,
+  size: 25,
 };
 
 export interface Pagination {

@@ -32,14 +32,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(
     createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(context);
 
-  const config = context.getService('config');
-  const license = config.get('esTestCluster.license');
-
   describe('copy to spaces', function () {
-    if (license === 'basic') {
-      this.tags('skipFIPS');
-    }
-
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

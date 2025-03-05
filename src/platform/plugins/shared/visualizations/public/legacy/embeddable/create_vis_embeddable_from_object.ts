@@ -58,9 +58,9 @@ export const createVisEmbeddableFromObject =
       }
 
       const capabilities = {
-        visualizeSave: Boolean(getCapabilities().visualize.save),
-        dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
-        visualizeOpen: Boolean(getCapabilities().visualize?.show),
+        visualizeSave: Boolean(getCapabilities().visualize_v2.save),
+        dashboardSave: Boolean(getCapabilities().dashboard_v2?.showWriteControls),
+        visualizeOpen: Boolean(getCapabilities().visualize_v2?.show),
       };
 
       return createVisualizeEmbeddableAsync(

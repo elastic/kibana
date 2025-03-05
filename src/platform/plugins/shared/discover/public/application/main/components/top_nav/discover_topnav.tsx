@@ -10,8 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { TextBasedLanguages } from '@kbn/esql-utils';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
@@ -49,8 +47,7 @@ export const DiscoverTopNav = ({
   onCancelClick,
 }: DiscoverTopNavProps) => {
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
-    services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
   const { savedDataViews, managedDataViews, adHocDataViews } =
     useInternalStateSelector(selectDataViewsForPicker);
@@ -174,9 +171,6 @@ export const DiscoverTopNav = ({
   );
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
-    const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);
-    const supportedTextBasedLanguages = isESQLModeEnabled ? [TextBasedLanguages.ESQL] : [];
-
     return {
       trigger: {
         label: dataView?.getName() || '',
@@ -188,7 +182,6 @@ export const DiscoverTopNav = ({
       onDataViewCreated: createNewDataView,
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
       onChangeDataView: stateContainer.actions.onChangeDataView,
-      textBasedLanguages: supportedTextBasedLanguages,
       adHocDataViews,
       managedDataViews,
       savedDataViews,
@@ -202,7 +195,6 @@ export const DiscoverTopNav = ({
     managedDataViews,
     savedDataViews,
     stateContainer,
-    uiSettings,
   ]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
@@ -235,9 +227,7 @@ export const DiscoverTopNav = ({
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
         showDatePicker={showDatePicker}
-        saveQueryMenuVisibility={
-          services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
         dataViewPickerOverride={

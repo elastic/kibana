@@ -24,15 +24,18 @@ run_tests() {
 
 EXIT_CODE=0
 
-# Discovery Enhanced
+# Discovery Enhanced && Maps
 for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
   run_tests "Discovery Enhanced: Parallel Workers" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts" "$run_mode"
   run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts" "$run_mode"
+  run_tests "Maps" "x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts" "$run_mode"
 done
 
 # Observability Onboarding
 for run_mode in "--stateful" "--serverless=oblt"; do
-  run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
+  run_tests "Observability Onboarding: Parallel Workers" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel.playwright.config.ts" "$run_mode"
+  # Disabled while we don't have any tests under the config
+  # run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
 done
 
 

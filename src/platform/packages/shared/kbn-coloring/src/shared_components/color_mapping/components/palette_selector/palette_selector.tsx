@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KbnPalettes } from '@kbn/palettes';
+import { KbnPalettes, getAppendedTag } from '@kbn/palettes';
 import { RootState, updatePalette } from '../../state/color_mapping';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
 
@@ -100,6 +100,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               'data-test-subj': `kbnColoring_ColorMapping_Palette-${palette.id}`,
               value: palette.id,
               title: palette.name,
+              append: getAppendedTag(palette.tag),
               palette: Array.from({ length: palette.colorCount }, (_, i) => {
                 return palette.getColor(i);
               }),

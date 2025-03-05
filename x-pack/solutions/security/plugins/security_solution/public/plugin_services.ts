@@ -137,6 +137,9 @@ export class PluginServices {
       startPlugins.data
     );
 
+    const telemetry = this.telemetry.start();
+    const siemMigrations = await createSiemMigrationsService(coreStart, startPlugins, telemetry);
+
     return {
       ...coreStart,
       ...plugins,
@@ -149,12 +152,12 @@ export class PluginServices {
       security: startPlugins.security,
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
-      telemetry: this.telemetry.start(),
+      telemetry,
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
       productDocBase: startPlugins.productDocBase,
-      siemMigrations: await createSiemMigrationsService(coreStart, startPlugins),
+      siemMigrations,
       ...(params && {
         onAppLeave: params.onAppLeave,
         setHeaderActionMenu: params.setHeaderActionMenu,

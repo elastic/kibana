@@ -63,12 +63,12 @@ export const getTopNavBadges = ({
           await stateContainer.actions.undoSavedSearchChanges();
         },
         onSave:
-          services.capabilities.discover.save && !isManaged
+          services.capabilities.discover_v2.save && !isManaged
             ? async () => {
                 await saveSearch();
               }
             : undefined,
-        onSaveAs: services.capabilities.discover.save
+        onSaveAs: services.capabilities.discover_v2.save
           ? async () => {
               await saveSearch(true);
             }

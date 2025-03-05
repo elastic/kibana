@@ -742,6 +742,39 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLQueryVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLQueryVariables",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLQueryVariables.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLResults",
         "type": "Function",
         "tags": [],
@@ -766,9 +799,9 @@
           },
           " | undefined; variables?: ",
           {
-            "pluginId": "@kbn/esql-validation-autocomplete",
+            "pluginId": "@kbn/esql-types",
             "scope": "common",
-            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "docId": "kibKbnEsqlTypesPluginApi",
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
@@ -990,9 +1023,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/esql-validation-autocomplete",
+                    "pluginId": "@kbn/esql-types",
                     "scope": "common",
-                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                    "docId": "kibKbnEsqlTypesPluginApi",
                     "section": "def-common.ESQLControlVariable",
                     "text": "ESQLControlVariable"
                   },
@@ -1282,9 +1315,9 @@
           },
           " | undefined, variables?: ",
           {
-            "pluginId": "@kbn/esql-validation-autocomplete",
+            "pluginId": "@kbn/esql-types",
             "scope": "common",
-            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "docId": "kibKbnEsqlTypesPluginApi",
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
@@ -1340,9 +1373,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
@@ -1789,9 +1822,9 @@
         "signature": [
           "(esql: string, variables: ",
           {
-            "pluginId": "@kbn/esql-validation-autocomplete",
+            "pluginId": "@kbn/esql-types",
             "scope": "common",
-            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "docId": "kibKbnEsqlTypesPluginApi",
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
@@ -1845,9 +1878,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
@@ -2131,18 +2164,6 @@
           "\"https://ela.st/esql-feedback\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.TextBasedLanguages",
-        "type": "string",
-        "tags": [],
-        "label": "TextBasedLanguages",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

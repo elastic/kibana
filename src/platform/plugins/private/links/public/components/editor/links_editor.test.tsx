@@ -88,6 +88,7 @@ describe('LinksEditor', () => {
   test('shows links in order', async () => {
     const expectedLinkIds = [...someLinks].sort((a, b) => a.order - b.order).map(({ id }) => id);
     renderEditor({ initialLinks: someLinks });
+
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
       LinksStrings.editor.panelEditor.getEditFlyoutTitle()
     );
@@ -120,11 +121,13 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
+    
     expect(onSaveToLibrary).toHaveBeenCalledWith(
       orderedLinks,
       LINKS_VERTICAL_LAYOUT,
       LINK_TEXT_OVERFLOW_ELLIPSIS
     );
+
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
@@ -135,6 +138,7 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
+
     expect(onAddToDashboard).toHaveBeenCalledWith(
       orderedLinks,
       LINKS_VERTICAL_LAYOUT,

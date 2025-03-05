@@ -25,7 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 
-export const EmptyPrompt: React.FC = () => {
+interface EmptyPromptProps {
+  getStartedAction: () => void;
+}
+export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
@@ -64,6 +67,7 @@ export const EmptyPrompt: React.FC = () => {
                       data-test-subj="searchSynonymsEmptyPromptGetStartedButton"
                       color="primary"
                       fill
+                      onClick={getStartedAction}
                     >
                       <FormattedMessage
                         id="xpack.searchSynonyms.emptyPrompt.getStartedButton"

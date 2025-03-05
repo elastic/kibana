@@ -25,6 +25,7 @@ import {
   useResizeObserver,
   EuiSwitch,
   EuiSwitchEvent,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -129,6 +130,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const { euiTheme } = useEuiTheme();
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
@@ -511,6 +513,12 @@ export const DocViewerTable = ({
           css={css`
             min-block-size: 0;
             display: block;
+            .euiDataGridRow {
+              &:hover {
+                // we keep using a deprecated shade until proper token is available
+                background-color: ${euiTheme.colors.lightestShade};
+              }
+            }
           `}
         >
           <EuiDataGrid

@@ -85,7 +85,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const toastNotifications = useToastNotifications();
     const { application, share, ...startServices } = useAppDependencies();
-    const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
+    const isDiscoverAvailable = application.capabilities.discover_v2?.show ?? false;
 
     useEffect(() => {
       let unmounted = false;

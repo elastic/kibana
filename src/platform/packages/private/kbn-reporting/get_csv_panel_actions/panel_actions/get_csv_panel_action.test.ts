@@ -71,7 +71,7 @@ describe('GetCsvReportPanelAction', () => {
     mockStartServicesPayload = [
       {
         ...core,
-        application: { capabilities: { dashboard: { downloadCsv: true } } },
+        application: { capabilities: { dashboard_v2: { downloadCsv: true } } },
       } as unknown as CoreStart,
       {
         data: dataPluginMock.createStartContract(),
@@ -93,7 +93,6 @@ describe('GetCsvReportPanelAction', () => {
       embeddable: {
         type: 'search',
         savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
-        getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({
           viewMode: 'list',
@@ -103,6 +102,8 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
         hasTimeRange: () => true,
+        title$: new BehaviorSubject('embeddable title'),
+        hideTitle$: new BehaviorSubject(false),
         parentApi: {
           viewMode$: new BehaviorSubject('view'),
         },
@@ -131,7 +132,7 @@ describe('GetCsvReportPanelAction', () => {
       columns: [],
       objectType: 'search',
       searchSource: {},
-      title: '',
+      title: 'embeddable title',
       version: '7.15.0',
     });
   });
@@ -165,7 +166,7 @@ describe('GetCsvReportPanelAction', () => {
       columns: ['column_a', 'column_b'],
       objectType: 'search',
       searchSource: { testData: 'testDataValue' },
-      title: '',
+      title: 'embeddable title',
       version: '7.15.0',
     });
   });
@@ -183,7 +184,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_searchsource', {
-      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'\',version:\'7.15.0\')"}',
+      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
       method: 'POST',
     });
   });

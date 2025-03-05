@@ -96,6 +96,17 @@ export interface LinksEditorProps {
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }
 
+export interface LinksEditorProps {
+  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
+  onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
+  onClose: () => void;
+  initialLinks?: ResolvedLink[];
+  initialLayout?: LinksLayoutType;
+  parentDashboardId?: string;
+  isByReference: boolean;
+  flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
+}
+
 const LinksEditor = ({
   onSaveToLibrary,
   onAddToDashboard,
