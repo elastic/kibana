@@ -7,10 +7,10 @@
 
 import type { Conversation } from '../conversations';
 
-export interface ListConversationPayload {
-
-}
+export interface ListConversationPayload {}
 
 export interface ListConversationResponse {
   conversations: Conversation[];
 }
+
+export type GetConversationResponse = Conversation;

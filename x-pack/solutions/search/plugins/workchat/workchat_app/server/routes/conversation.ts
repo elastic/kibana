@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { ListConversationResponse } from '../../common/http_api/conversation';
+import type {
+  ListConversationResponse,
+  GetConversationResponse,
+} from '../../common/http_api/conversation';
 import { InternalServices } from '../services';
 
 export const registerConversationRoutes = ({
@@ -19,6 +22,29 @@ export const registerConversationRoutes = ({
   logger: Logger;
   getServices: () => InternalServices;
 }) => {
+  router.get(
+    {
+      path: '/internal/workchat/conversations/{conversationId}',
+      validate: {
+        params: schema.object({
+          conversationId: schema.string(),
+        }),
+      },
+    },
+    async (ctx, request, res) => {
+      const { conversationService } = getServices();
+      const client = await conversationService.getScopedClient({ request });
+
+      const { conversationId } = request.params;
+
+      const conversation = await client.get({ conversationId });
+
+      return res.ok<GetConversationResponse>({
+        body: conversation,
+      });
+    }
+  );
+
   router.post(
     {
       path: '/internal/workchat/conversations',

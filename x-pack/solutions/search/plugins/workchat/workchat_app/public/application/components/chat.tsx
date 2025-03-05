@@ -7,12 +7,19 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiCommentList, EuiPanel } from '@elastic/eui';
-import { useChat } from '../hooks/use_chat';
+import { useConversation } from '../hooks/use_conversation';
 import { ChatInputForm } from './chat_input_form';
 import { ChatMessage } from './chat_message';
 
-export const Chat: React.FC<{}> = () => {
-  const { send, messages } = useChat();
+interface ChatProps {
+  conversationId?: string;
+}
+
+export const Chat: React.FC<ChatProps> = ({ conversationId }) => {
+  const { send, messages } = useConversation({
+    conversationId,
+    agentId: 'default',
+  });
 
   const onSubmit = useCallback(
     (message: string) => {

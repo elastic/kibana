@@ -6,13 +6,15 @@
  */
 
 import { css } from '@emotion/css';
-import React, { FC } from 'react';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Chat } from '../components/chat';
 import { ConversationList } from '../components/conversation_list';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { useConversationList } from '../hooks/use_conversation_list';
+import { useKibana } from '../hooks/use_kibana';
 
 const pageSectionContentClassName = css`
   width: 100%;
@@ -24,9 +26,15 @@ const pageSectionContentClassName = css`
   max-block-size: calc(100vh - 96px);
 `;
 
-export const WorkchatChatPage: FC<{}> = () => {
+export const WorkchatChatPage: React.FC<{}> = () => {
   useBreadcrumb([{ text: 'Kibana' }, { text: 'WorkChat' }]);
   const { conversations } = useConversationList();
+
+  const {
+    services: { application },
+  } = useKibana();
+
+  const { conversationId } = useParams<{ conversationId: string | undefined }>();
 
   return (
     <KibanaPageTemplate
@@ -37,7 +45,12 @@ export const WorkchatChatPage: FC<{}> = () => {
       panelled={false}
     >
       <KibanaPageTemplate.Sidebar>
-        <ConversationList conversations={conversations} />
+        <ConversationList
+          conversations={conversations}
+          onConversationSelect={(newConvId) => {
+            application.navigateToApp('workchat', { path: `/chat/${newConvId}` });
+          }}
+        />
       </KibanaPageTemplate.Sidebar>
 
       <KibanaPageTemplate.Section paddingSize="none" grow contentProps={{ css: 'height: 100%' }}>
@@ -63,7 +76,7 @@ export const WorkchatChatPage: FC<{}> = () => {
             </EuiPanel>
           </EuiFlexItem>
 
-          <Chat />
+          <Chat conversationId={conversationId} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

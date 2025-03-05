@@ -6,7 +6,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { ListConversationResponse } from '../../../common/http_api/conversation';
+import type {
+  ListConversationResponse,
+  GetConversationResponse,
+} from '../../../common/http_api/conversation';
 
 export class ConversationService {
   private readonly http: HttpSetup;
@@ -23,5 +26,11 @@ export class ConversationService {
       }
     );
     return response.conversations;
+  }
+
+  async get(conversationId: string) {
+    return await this.http.get<GetConversationResponse>(
+      `/internal/workchat/conversations/${conversationId}`
+    );
   }
 }

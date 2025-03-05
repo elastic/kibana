@@ -10,17 +10,22 @@ import type { ChatEvent } from '../../../common/chat_events';
 import type { Message } from '../../../common/messages';
 import { useWorkChatServices } from './use_workchat_service';
 
-export const useChat = () => {
+interface UseChatProps {
+  conversationId?: string;
+  agentId: string;
+}
+
+export const useChat = ({ conversationId, agentId }: UseChatProps) => {
   const { chatService } = useWorkChatServices();
   const [events, setEvents] = useState<ChatEvent[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
 
   const send = useCallback(
-    async (message: string) => {
-      setMessages((prevMessages) => [...prevMessages, { type: 'user', content: message }]);
+    async (nextMessage: string) => {
+      setMessages((prevMessages) => [...prevMessages, { type: 'user', content: nextMessage }]);
 
-      const events$ = await chatService.callAgent({ message });
+      const events$ = await chatService.converse({ nextMessage, conversationId, agentId });
 
       let chunks = '';
 
@@ -39,7 +44,7 @@ export const useChat = () => {
         },
       });
     },
-    [chatService]
+    [chatService, agentId, conversationId]
   );
 
   const allMessages: Message[] = useMemo(() => {
@@ -52,5 +57,6 @@ export const useChat = () => {
     send,
     events,
     messages: allMessages,
+    setMessages, // TODO: need abort / state clear / delete pending messages
   };
 };

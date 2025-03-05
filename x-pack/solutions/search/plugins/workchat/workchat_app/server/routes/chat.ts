@@ -26,14 +26,16 @@ export const registerChatRoutes = ({
       path: '/internal/workchat/chat',
       validate: {
         body: schema.object({
-          message: schema.string(),
+          conversationId: schema.maybe(schema.string()),
+          agentId: schema.string(),
+          nextMessage: schema.string(),
         }),
       },
     },
     async (ctx, request, res) => {
       const { chatService } = getServices();
 
-      const { message } = request.body;
+      const { nextMessage, conversationId, agentId } = request.body;
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
@@ -43,10 +45,10 @@ export const registerChatRoutes = ({
       try {
         const { events$ } = await chatService.converse({
           request,
-          agentId: 'TODO',
-          connectorId: 'azure-gpt4',
-          nextUserMessage: message,
-          conversationId: undefined, // TODO
+          connectorId: 'azure-gpt4', // TODO: auto-discover or something
+          agentId,
+          nextUserMessage: nextMessage,
+          conversationId,
         });
 
         return res.ok({

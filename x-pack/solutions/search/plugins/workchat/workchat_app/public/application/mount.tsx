@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { Route, Router } from '@kbn/shared-ux-router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { WorkChatServices } from '../services';
 import { WorkchatChatPage } from './pages/chat';
 import { WorkChatServicesContext } from './context/workchat_services_context';
@@ -33,9 +33,14 @@ export const mountApp = async ({
         <I18nProvider>
           <WorkChatServicesContext.Provider value={services}>
             <Router history={history}>
-              <Route path="/">
-                <WorkchatChatPage />
-              </Route>
+              <Routes>
+                <Route path="/chat/:conversationId">
+                  <WorkchatChatPage />
+                </Route>
+                <Route path="/">
+                  <WorkchatChatPage />
+                </Route>
+              </Routes>
             </Router>
           </WorkChatServicesContext.Provider>
         </I18nProvider>

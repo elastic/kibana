@@ -32,3 +32,7 @@ export const userMessageEvent = (
 export const isMessageEvent = (event: ConversationEvent): event is ConversationMessageEvent => {
   return event.type === 'message';
 };
+
+export const getMessages = (events: ConversationEvent[]): Message[] => {
+  return events.filter(isMessageEvent).map((event) => event.message);
+};
