@@ -65,6 +65,6 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
 
   step('verify rule creation', async () => {
     await syntheticsApp.goToRulesPage();
-    await page.waitForSelector(`text='Synthetics status rule'`);
+    await page.waitForSelector(`text='Synthetics monitor status rule'`);
   });
 });
