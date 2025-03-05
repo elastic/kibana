@@ -39,5 +39,5 @@ cat <<EOF | buildkite-agent annotate --style "info" --context fips
   Wolfi image: \`$KIBANA_FIPS_IMAGE\`
 EOF
 
-buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana FIPS Image: \`$KIBANA_WOLFI_FIPS_IMAGE\`"
+buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana FIPS Image: \`$KIBANA_FIPS_IMAGE\`"
 buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
