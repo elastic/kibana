@@ -470,8 +470,24 @@ export function dataFrameAnalyticsRoutes(
                 // If user does have privilege to delete the index, then delete the index
                 if (userCanDeleteDestIndex) {
                   try {
-                    await client.asCurrentUser.indices.delete({
+                    // It's possible that the destination index has been reindexed with a new name
+                    // so if it's an alias first, then delete the real index
+                    let destinationIndexToDelete = destinationIndex;
+                    const alias = await client.asCurrentUser.indices.getAlias({
                       index: destinationIndex,
+                    });
+                    if (alias) {
+                      const reindexedDestName = Object.keys(alias)[0];
+                      if (reindexedDestName) {
+                        const keys = Object.keys(alias[reindexedDestName]?.aliases);
+                        if (keys[0] === destinationIndex) {
+                          destinationIndexToDelete = reindexedDestName;
+                        }
+                      }
+                    }
+
+                    await client.asCurrentUser.indices.delete({
+                      index: destinationIndexToDelete,
                     });
                     destIndexDeleted.success = true;
                   } catch ({ body }) {
