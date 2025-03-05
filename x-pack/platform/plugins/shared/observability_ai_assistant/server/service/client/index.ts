@@ -279,8 +279,8 @@ export class ObservabilityAIAssistantClient {
                 chat: (name, chatParams) => {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
-                    ...chatParams,
                     systemMessage,
+                    ...chatParams,
                     signal,
                     simulateFunctionCalling,
                     connectorId,
