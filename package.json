@@ -1737,6 +1737,7 @@
     "dependency-check": "^4.1.0",
     "dependency-cruiser": "^16.8.0",
     "ejs": "^3.1.10",
+    "elasticsearch-8.x": "npm:@elastic/elasticsearch@8",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
     "eslint": "^8.57.0",
