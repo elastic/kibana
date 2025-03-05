@@ -31,15 +31,7 @@ import type {
   TooltipProps,
   TooltipValue,
 } from '@elastic/charts';
-import {
-  Chart,
-  Heatmap,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { Chart, Heatmap, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -65,6 +57,7 @@ import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
+import { useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -200,6 +193,13 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   yAxisWidth,
   onRenderComplete,
 }) => {
+  const {
+    services: {
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
+  } = useMlKibana();
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const { colorMode, euiTheme } = useEuiTheme();
@@ -217,6 +217,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
   );
+
+  const baseTheme = useChartsBaseTheme();
 
   const swimLanePoints = useMemo(() => {
     const showFilterContext = filterActive === true && swimlaneType === SWIMLANE_TYPE.OVERALL;
@@ -458,8 +460,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       <Tooltip {...tooltipOptions} />
                       <Settings
                         theme={themeOverrides}
-                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                        baseTheme={LEGACY_LIGHT_THEME}
+                        baseTheme={baseTheme}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
