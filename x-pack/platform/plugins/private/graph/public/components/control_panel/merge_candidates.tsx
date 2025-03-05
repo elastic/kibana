@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  UseEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
@@ -112,8 +120,8 @@ export const MergeCandidates = ({
                 />
               </EuiToolTip>
 
-              <span className="gphLinkSummary__term--1">{mc.term1}</span>
-              <span className="gphLinkSummary__term--2">{mc.term2}</span>
+              <span css={styles.term1}>{mc.term1}</span>
+              <span css={styles.term2}>{mc.term2}</span>
 
               <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg}>
                 <EuiButtonIcon
@@ -129,17 +137,31 @@ export const MergeCandidates = ({
             <VennDiagram leftValue={mc.v1} rightValue={mc.v2} overlap={mc.overlap} />
 
             <EuiToolTip content={leftTermCountMsg}>
-              <small className="gphLinkSummary__term--1">{mc.v1}</small>
+              <small css={styles.term1}>{mc.v1}</small>
             </EuiToolTip>
             <EuiToolTip content={bothTermsCountMsg}>
-              <small className="gphLinkSummary__term--1-2">&nbsp;({mc.overlap})&nbsp;</small>
+              <small css={styles.term1_2}>&nbsp;({mc.overlap})&nbsp;</small>
             </EuiToolTip>
             <EuiToolTip content={rightTermCountMsg}>
-              <small className="gphLinkSummary__term--2">{mc.v2}</small>
+              <small css={styles.term2}>{mc.v2}</small>
             </EuiToolTip>
           </div>
         );
       })}
     </div>
   );
+};
+
+const styles = {
+  term1: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.danger,
+    }),
+  term2: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.primary,
+    }),
+  term1_2: ({ euiTheme }: UseEuiTheme) => css`
+    color: color-mix(in srgb, ${euiTheme.colors.danger}, ${euiTheme.colors.primary});
+  `,
 };
