@@ -19,7 +19,6 @@ import { useActor } from '@xstate/react';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
-import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
@@ -29,8 +28,6 @@ import { useBoolean } from '@kbn/react-hooks';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-
-type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
 
 const defaultQuery: Query = {
   language: 'kuery',
