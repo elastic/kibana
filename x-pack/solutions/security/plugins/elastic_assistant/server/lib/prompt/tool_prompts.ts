@@ -29,7 +29,7 @@ export const localToolPrompts: Prompt[] = [
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
 
-  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer. The tool will validate the query.`,
     },
   },
   {

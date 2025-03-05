@@ -14,9 +14,10 @@ import { APP_UI_ID } from '../../../../common';
 import { getEsqlFromContent, getPromptSuffixForOssModel } from './common';
 import { NlToEsqlTaskEvent } from '@kbn/inference-plugin/server/tasks/nl_to_esql';
 import { ToolOptions } from '@kbn/inference-common';
-import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import { parse } from '@kbn/esql-ast';
 import isEmpty from 'lodash/isEmpty';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { NaturalLanguageToEsqlValidator } from './natual_language_to_esql_validator';
 
 // select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
@@ -34,7 +35,7 @@ const toolDetails = {
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
 
-  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer. The tool will validate the query.`,
 };
 
 export const NL_TO_ESQL_TOOL: AssistantTool = {
@@ -47,30 +48,23 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
+    const { connectorId, inference, logger, request, isOssModel, esClient } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
-    const callNaturalLanguageToEsql = async (question: string) => {
-      return lastValueFrom(
-        naturalLanguageToEsql({
-          client: inference.getClient({ request }),
-          connectorId,
-          input: question,
-          functionCalling: 'auto',
-          logger,
-        })
-      );
-    };
+    const naturalLanguageToEsqlValidator = new NaturalLanguageToEsqlValidator({
+      inference,
+      connectorId,
+      logger,
+      request,
+      esClient,
+    })
 
     return tool(
       async (input) => {
-        
-        const answer = esqlValidator(callNaturalLanguageToEsql)({question: input.question});
 
-        /* const generateEvent = await callNaturalLanguageToEsql(input.question);
+        const answer = await naturalLanguageToEsqlValidator.generateEsqlFromNaturalLanguage(input.question);
 
-        const answer = generateEvent.content ?? 'An error occurred in the tool'; */
-
+        console.log(`Received response from NL to ESQL tool: ${answer}`)
         logger.debug(`Received response from NL to ESQL tool: ${answer}`);
         return answer;
       },
@@ -87,44 +81,5 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     );
   },
 };
-
-type NatualLanguageToEsqlFunction = (question: string) => Promise<NlToEsqlTaskEvent<ToolOptions<string>>>
-const maxDepth = 3;
-
-const esqlValidator = (func: NatualLanguageToEsqlFunction) => {
-  return async (input: { question: string }) => {
-
-    const helper = async (question: string, depth = 0): Promise<(string | undefined)[]> => {
-      console.log(question);
-      if (depth >= maxDepth) {
-        return [`Unable to generate a valid query for the given question: "${question}"`];
-      }
-      const generateEvent = await func(question);
-      const queries = getEsqlFromContent(generateEvent.content);
-
-      const results = await Promise.all(
-        queries.map(async (query) => {
-          query = query+"."
-          if (isEmpty(query)) return undefined;
-
-          const { errors } = parse(query);
-
-          if (!isEmpty(errors)) {
-            const errorString = errors.map((e) => e.message).join("\n");
-            const retryString = `The following query has some syntax errors\n\n"${query}"\n\n${errorString}\n\nPlease try again.`;
-            return helper(retryString, depth + 1);
-          }
-
-          return query;
-        })
-      );
-
-      return results.flat();
-    };
-
-    return helper(input.question);
-  };
-};
-
 
 
