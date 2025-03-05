@@ -6,6 +6,7 @@
  */
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { v4 } from 'uuid';
 import { FunctionDefinition } from '../../../common/functions/types';
@@ -14,6 +15,8 @@ import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType } from '../runtime_types';
+import { getDatasetInfo } from '../../functions/get_dataset_info';
+import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',
@@ -75,6 +78,44 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         availableFunctionNames,
       }),
     };
+  },
+});
+
+const functionDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions/get_dataset_info',
+  params: t.type({
+    query: t.type({ index: t.string, connectorId: t.string }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources) => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    const {
+      query: { index, connectorId },
+    } = resources.params;
+
+    const controller = new AbortController();
+
+    const resp = await getDatasetInfo({
+      resources,
+      indexPattern: index,
+      signal: controller.signal,
+      messages: [],
+      chat: (operationName, params) => {
+        return client.chat(operationName, {
+          ...params,
+          stream: true,
+          tracer: new LangTracer(otelContext.active()),
+          connectorId,
+        });
+      },
+    });
+
+    return resp;
   },
 });
 
@@ -176,4 +217,5 @@ export const functionRoutes = {
   ...getFunctionsRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
+  ...functionDatasetInfoRoute,
 };

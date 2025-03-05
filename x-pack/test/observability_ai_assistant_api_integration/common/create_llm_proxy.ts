@@ -9,7 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction } from 'lodash';
+import { isString, once, pull, isFunction, last } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
@@ -36,6 +36,12 @@ export interface ToolMessage {
   content?: string;
   tool_calls?: ChatCompletionChunkToolCall[];
 }
+
+export interface RelevantField {
+  id: string;
+  name: string;
+}
+
 export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
   status: (code: number) => void;
@@ -178,6 +184,36 @@ export class LlmProxy {
         ],
       };
     }).completeAfterIntercept();
+  }
+
+  interceptSelectRelevantFieldsToolChoice() {
+    let relevantFields: RelevantField[] = [];
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'select_relevant_fields',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      arguments: (requestBody) => {
+        const messageWithFieldIds = last(requestBody.messages);
+        relevantFields = (messageWithFieldIds?.content as string)
+          .split('\n\n')
+          .slice(1)
+          .join('')
+          .trim()
+          .split('\n')
+          .slice(0, 5)
+          .map((line) => JSON.parse(line) as RelevantField);
+
+        return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });
+      },
+    });
+
+    return {
+      simulator,
+      getRelevantFields: async () => {
+        await simulator;
+        return relevantFields;
+      },
+    };
   }
 
   interceptTitle(title: string) {

@@ -17,6 +17,7 @@ import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ApmAlertFields } from '../../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
+  RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { getMessageAddedEvents } from './helpers';
@@ -32,7 +33,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const samlAuth = getService('samlAuth');
 
   describe('function: get_alerts_dataset_info', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
     let connectorId: string;
@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let roleAuthc: RoleCredentials;
     let createdRuleId: string;
-    let expectedRelevantFieldNames: string[];
+    let getRelevantFields: () => Promise<RelevantField[]>;
     let primarySystemMessage: string;
 
     before(async () => {
@@ -58,26 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         when: () => true,
       });
 
-      void llmProxy.interceptWithFunctionRequest({
-        name: 'select_relevant_fields',
-        // @ts-expect-error
-        when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
-        arguments: (requestBody) => {
-          const userMessage = last(requestBody.messages);
-          const topFields = (userMessage?.content as string)
-            .slice(204) // remove the prefix message and only get the JSON
-            .trim()
-            .split('\n')
-            .map((line) => JSON.parse(line))
-            .slice(0, 5);
-
-          expectedRelevantFieldNames = topFields.map(({ field }) => field);
-
-          const fieldIds = topFields.map(({ id }) => id);
-
-          return JSON.stringify({ fieldIds });
-        },
-      });
+      ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
 
       void llmProxy.interceptWithFunctionRequest({
         name: 'alerts',
@@ -254,14 +235,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains a system generated user message with a list of field candidates', () => {
-          const hasList = secondRequestBody.messages.some(
-            (message) =>
-              message.role === 'user' &&
-              (message.content as string).includes('Below is a list of fields.') &&
-              (message.content as string).includes('@timestamp')
-          );
+          const lastMessage = last(secondRequestBody.messages);
 
-          expect(hasList).to.be(true);
+          expect(lastMessage?.role).to.be('user');
+          expect(lastMessage?.content).to.contain('Below is a list of fields');
+          expect(lastMessage?.content).to.contain('@timestamp');
         });
 
         it('instructs the LLM to call the `select_relevant_fields` tool via `tool_choice`', () => {
@@ -294,7 +272,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(hasFunctionRequest).to.be(true);
         });
 
-        it('contains the `get_alerts_dataset_info` response', () => {
+        it('contains the `get_alerts_dataset_info` response', async () => {
           const functionResponse = last(thirdRequestBody.messages);
           const parsedContent = JSON.parse(functionResponse?.content as string) as {
             fields: string[];
@@ -303,7 +281,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const fieldNamesWithType = parsedContent.fields;
           const fieldNamesWithoutType = fieldNamesWithType.map((field) => field.split(':')[0]);
 
-          expect(fieldNamesWithoutType).to.eql(expectedRelevantFieldNames);
+          const relevantFields = await getRelevantFields();
+          expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
           expect(fieldNamesWithType).to.eql([
             '@timestamp:date',
             '_id:_id',
@@ -314,13 +293,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('emits a messageAdded event with the `get_alerts_dataset_info` function response', async () => {
-          const messageWithDatasetInfo = messageAddedEvents.find(
+          const eventWithDatasetInfo = messageAddedEvents.find(
             ({ message }) =>
               message.message.role === MessageRole.User &&
               message.message.name === 'get_alerts_dataset_info'
           );
 
-          const parsedContent = JSON.parse(messageWithDatasetInfo?.message.message.content!) as {
+          const parsedContent = JSON.parse(eventWithDatasetInfo?.message.message.content!) as {
             fields: string[];
           };
 
@@ -361,12 +340,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('emits a messageAdded event with the `alert` function response', async () => {
-          const messageWithAlerts = messageAddedEvents.find(
+          const event = messageAddedEvents.find(
             ({ message }) =>
               message.message.role === MessageRole.User && message.message.name === 'alerts'
           );
 
-          const parsedContent = JSON.parse(messageWithAlerts?.message.message.content!) as {
+          const parsedContent = JSON.parse(event?.message.message.content!) as {
             total: number;
             alerts: any[];
           };

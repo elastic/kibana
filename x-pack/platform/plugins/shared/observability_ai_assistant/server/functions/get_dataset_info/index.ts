@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { Message } from '../../../common';
 import { FunctionRegistrationParameters } from '..';
 import { FunctionVisibility } from '../../../common/functions/types';
+import { FunctionCallChatFunction, RespondFunctionResources } from '../../service/types';
 import { getRelevantFieldNames } from './get_relevant_field_names';
 
 export const GET_DATASET_INFO_FUNCTION_NAME = 'get_dataset_info';
@@ -32,68 +34,87 @@ export function registerGetDatasetInfoFunction({
           index: {
             type: 'string',
             description:
-              'index pattern the user is interested in or empty string to get information about all available indices',
+              'Index pattern the user is interested in or empty string to get information about all available indices. You are allowed to use wildcards like `logs*`.',
           },
         },
         required: ['index'],
       } as const,
     },
-    async ({ arguments: { index }, messages, chat }, signal) => {
-      const coreContext = await resources.context.core;
-
-      const esClient = coreContext.elasticsearch.client;
-      const savedObjectsClient = coreContext.savedObjects.client;
-
-      let indices: string[] = [];
-
-      try {
-        const body = await esClient.asCurrentUser.indices.resolveIndex({
-          name: index === '' ? ['*', '*:*'] : index.split(','),
-          expand_wildcards: 'open',
-        });
-        indices = [
-          ...body.indices.map((i) => i.name),
-          ...body.data_streams.map((d) => d.name),
-          ...body.aliases.map((d) => d.name),
-        ];
-      } catch (e) {
-        indices = [];
-      }
-
-      if (index === '') {
-        return {
-          content: {
-            indices,
-            fields: [],
-          },
-        };
-      }
-
-      if (indices.length === 0) {
-        return {
-          content: {
-            indices,
-            fields: [],
-          },
-        };
-      }
-
-      const relevantFieldNames = await getRelevantFieldNames({
-        index,
-        messages,
-        esClient: esClient.asCurrentUser,
-        dataViews: await resources.plugins.dataViews.start(),
-        savedObjectsClient,
-        signal,
-        chat,
-      });
-      return {
-        content: {
-          indices: [index],
-          fields: relevantFieldNames.fields,
-          stats: relevantFieldNames.stats,
-        },
-      };
+    async ({ arguments: { index: indexPattern }, messages, chat }, signal) => {
+      return getDatasetInfo({ resources, indexPattern, signal, messages, chat });
     }
   );
+}
+
+export async function getDatasetInfo({
+  resources,
+  indexPattern,
+  signal,
+  messages,
+  chat,
+}: {
+  resources: RespondFunctionResources;
+  indexPattern: string;
+  signal: AbortSignal;
+  messages: Message[];
+  chat: FunctionCallChatFunction;
+}) {
+  const coreContext = await resources.context.core;
+
+  const esClient = coreContext.elasticsearch.client;
+  const savedObjectsClient = coreContext.savedObjects.client;
+
+  let indices: string[] = [];
+
+  try {
+    const name = indexPattern === '' ? ['*', '*:*'] : `${indexPattern.split(',')}*`;
+    const body = await esClient.asCurrentUser.indices.resolveIndex({
+      name,
+      expand_wildcards: 'open',
+    });
+    indices = [
+      ...body.indices.map((i) => i.name),
+      ...body.data_streams.map((d) => d.name),
+      ...body.aliases.map((d) => d.name),
+    ];
+  } catch (e) {
+    resources.logger.error(`Error resolving index pattern: ${e.message}`);
+    indices = [];
+  }
+
+  if (indices.length === 0 || indexPattern === '') {
+    return {
+      content: {
+        indices,
+        fields: [],
+      },
+    };
+  }
+
+  try {
+    const relevantFieldNames = await getRelevantFieldNames({
+      index: indices,
+      messages,
+      esClient: esClient.asCurrentUser,
+      dataViews: await resources.plugins.dataViews.start(),
+      savedObjectsClient,
+      signal,
+      chat,
+    });
+    return {
+      content: {
+        indices,
+        fields: relevantFieldNames.fields,
+        stats: relevantFieldNames.stats,
+      },
+    };
+  } catch (e) {
+    resources.logger.error(`Error getting relevant field names: ${e.message}`);
+    return {
+      content: {
+        indices,
+        fields: [],
+      },
+    };
+  }
 }
