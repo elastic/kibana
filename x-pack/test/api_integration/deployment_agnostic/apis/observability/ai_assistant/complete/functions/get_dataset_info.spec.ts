@@ -18,7 +18,7 @@ import {
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { getMessageAddedEvents } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { createSyntheticApacheLogs } from './synthtrace_scenarios/apache_logs';
+import { createSimpleLogs } from './synthtrace_scenarios/simple_logs';
 
 const USER_MESSAGE = 'Do I have any Apache logs?';
 
@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let getRelevantFields: () => Promise<RelevantField[]>;
 
     before(async () => {
-      ({ logSynthtraceEsClient } = await createSyntheticApacheLogs(getService));
+      ({ logSynthtraceEsClient } = await createSimpleLogs(getService));
       primarySystemMessage = await getSystemMessage(getService);
 
       llmProxy = await createLlmProxy(log);
@@ -233,10 +233,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const functionResponseMessage = last(thirdRequestBody.messages);
           const parsedContent = JSON.parse(functionResponseMessage?.content as string);
           expect(Object.keys(parsedContent)).to.eql(['indices', 'fields', 'stats']);
-          expect(parsedContent.indices).to.eql([
-            'logs-apache.access-default',
-            'logs-apache.security-default',
-          ]);
+          expect(parsedContent.indices).to.eql(['logs-simple.logs-default']);
         });
 
         it('emits a messageAdded event with the `get_dataset_info` function response', async () => {
@@ -256,10 +253,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           const relevantFields = await getRelevantFields();
           expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
-          expect(parsedContent.indices).to.eql([
-            'logs-apache.access-default',
-            'logs-apache.security-default',
-          ]);
+          expect(parsedContent.indices).to.eql(['logs-simple.logs-default']);
         });
       });
     });
