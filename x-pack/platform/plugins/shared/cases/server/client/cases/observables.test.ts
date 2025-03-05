@@ -85,7 +85,7 @@ describe('addObservable', () => {
       )
     ).rejects.toThrow(
       Boom.forbidden(
-        'Failed to add observable: Error: Observable value is not valid for selected observable type.'
+        'Failed to add observable: Error: Observable value "not an ip" is not valid for selected observable type observable-type-ipv4.'
       )
     );
   });
@@ -184,7 +184,7 @@ describe('updateObservable', () => {
       )
     ).rejects.toThrow(
       Boom.forbidden(
-        'Failed to update observable: Error: Observable value is not valid for selected observable type.'
+        'Failed to update observable: Error: Observable value "not an ip" is not valid for selected observable type observable-type-ipv4.'
       )
     );
   });
