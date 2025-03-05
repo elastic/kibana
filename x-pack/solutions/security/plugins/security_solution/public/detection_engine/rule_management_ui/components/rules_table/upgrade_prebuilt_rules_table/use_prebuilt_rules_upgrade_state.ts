@@ -134,12 +134,18 @@ export function usePrebuiltRulesUpgradeState(
           fieldState === FieldUpgradeStateEnum.SolvableConflict ||
           fieldState === FieldUpgradeStateEnum.NonSolvableConflict
       );
+      const hasNonSolvableFieldConflicts = Object.values(fieldsUpgradeState).some(
+        ({ state: fieldState }) => fieldState === FieldUpgradeStateEnum.NonSolvableConflict
+      );
 
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
         fieldsUpgradeState,
         hasUnresolvedConflicts: isRulesCustomizationEnabled
           ? hasRuleTypeChange || hasFieldConflicts
+          : false,
+        hasNonSolvableUnresolvedConflicts: isRulesCustomizationEnabled
+          ? hasRuleTypeChange || hasNonSolvableFieldConflicts
           : false,
       };
     }

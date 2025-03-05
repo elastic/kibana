@@ -134,6 +134,17 @@ export class ObservabilityAIAssistantClient {
     };
   };
 
+  private isConversationOwnedByUser = (conversation: Conversation): boolean => {
+    const user = this.dependencies.user;
+    if (!conversation.user || !user) {
+      return false;
+    }
+
+    return conversation.user.id
+      ? conversation.user.id === user.id
+      : conversation.user.name === user.name;
+  };
+
   get = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
@@ -263,8 +274,8 @@ export class ObservabilityAIAssistantClient {
                 chat: (name, chatParams) => {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
-                    ...chatParams,
                     systemMessage,
+                    ...chatParams,
                     signal,
                     simulateFunctionCalling,
                     connectorId,
@@ -288,96 +299,108 @@ export class ObservabilityAIAssistantClient {
           shareReplay()
         );
 
-        const output$ = mergeOperator(
-          // get all the events from continuing the conversation
-          nextEvents$,
-          // wait until all dependencies have completed
-          forkJoin([
-            // get just the new messages
-            nextEvents$.pipe(extractMessages()),
-            // get just the title, and drop the token count events
-            title$.pipe(filter((value): value is string => typeof value === 'string')),
-            systemMessage$,
-          ]).pipe(
-            switchMap(([addedMessages, title, systemMessage]) => {
-              const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
+        const conversationWithMetaFields$ = from(
+          this.getConversationWithMetaFields(conversationId)
+        ).pipe(
+          switchMap((conversation) => {
+            if (isConversationUpdate && !conversation) {
+              return throwError(() => createConversationNotFoundError());
+            }
 
-              const lastMessage = last(initialMessagesWithAddedMessages);
+            if (conversation?._source && !this.isConversationOwnedByUser(conversation._source)) {
+              return throwError(
+                () => new Error('Cannot update conversation that is not owned by the user')
+              );
+            }
 
-              // if a function request is at the very end, close the stream to consumer
-              // without persisting or updating the conversation. we need to wait
-              // on the function response to have a valid conversation
-              const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+            return of(conversation);
+          })
+        );
 
-              if (!persist || isFunctionRequest) {
-                return of();
-              }
+        const output$ = conversationWithMetaFields$.pipe(
+          switchMap((conversation) => {
+            return mergeOperator(
+              // get all the events from continuing the conversation
+              nextEvents$,
+              // wait until all dependencies have completed
+              forkJoin([
+                // get just the new messages
+                nextEvents$.pipe(extractMessages()),
+                // get just the title, and drop the token count events
+                title$.pipe(filter((value): value is string => typeof value === 'string')),
+                systemMessage$,
+              ]).pipe(
+                switchMap(([addedMessages, title, systemMessage]) => {
+                  const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
 
-              if (isConversationUpdate) {
-                return from(this.getConversationWithMetaFields(conversationId))
-                  .pipe(
-                    switchMap((conversation) => {
-                      if (!conversation) {
-                        return throwError(() => createConversationNotFoundError());
-                      }
+                  const lastMessage = last(initialMessagesWithAddedMessages);
 
-                      return from(
-                        this.update(
-                          conversationId,
+                  // if a function request is at the very end, close the stream to consumer
+                  // without persisting or updating the conversation. we need to wait
+                  // on the function response to have a valid conversation
+                  const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                          merge(
-                            {},
+                  if (!persist || isFunctionRequest) {
+                    return of();
+                  }
 
-                            // base conversation without messages
-                            omit(conversation._source, 'messages'),
+                  if (isConversationUpdate && conversation) {
+                    return from(
+                      this.update(
+                        conversationId,
 
-                            // update messages and system message
-                            { messages: initialMessagesWithAddedMessages, systemMessage },
+                        merge(
+                          {},
 
-                            // update title
-                            {
-                              conversation: {
-                                title: title || conversation._source?.conversation.title,
-                              },
-                            }
-                          )
+                          // base conversation without messages
+                          omit(conversation._source, 'messages'),
+
+                          // update messages and system message
+                          { messages: initialMessagesWithAddedMessages, systemMessage },
+
+                          // update title
+                          {
+                            conversation: {
+                              title: title || conversation._source?.conversation.title,
+                            },
+                          }
                         )
-                      );
+                      )
+                    ).pipe(
+                      map((conversationUpdated): ConversationUpdateEvent => {
+                        return {
+                          conversation: conversationUpdated.conversation,
+                          type: StreamingChatResponseEventType.ConversationUpdate,
+                        };
+                      })
+                    );
+                  }
+
+                  return from(
+                    this.create({
+                      '@timestamp': new Date().toISOString(),
+                      conversation: {
+                        title,
+                        id: conversationId,
+                      },
+                      public: !!isPublic,
+                      labels: {},
+                      numeric_labels: {},
+                      systemMessage,
+                      messages: initialMessagesWithAddedMessages,
                     })
-                  )
-                  .pipe(
-                    map((conversation): ConversationUpdateEvent => {
+                  ).pipe(
+                    map((conversationCreated): ConversationCreateEvent => {
                       return {
-                        conversation: conversation.conversation,
-                        type: StreamingChatResponseEventType.ConversationUpdate,
+                        conversation: conversationCreated.conversation,
+                        type: StreamingChatResponseEventType.ConversationCreate,
                       };
                     })
                   );
-              }
-
-              return from(
-                this.create({
-                  '@timestamp': new Date().toISOString(),
-                  conversation: {
-                    title,
-                    id: conversationId,
-                  },
-                  public: !!isPublic,
-                  labels: {},
-                  numeric_labels: {},
-                  systemMessage,
-                  messages: initialMessagesWithAddedMessages,
                 })
-              ).pipe(
-                map((conversation): ConversationCreateEvent => {
-                  return {
-                    conversation: conversation.conversation,
-                    type: StreamingChatResponseEventType.ConversationCreate,
-                  };
-                })
-              );
-            })
-          )
+              )
+            );
+          })
         );
 
         return output$.pipe(
@@ -536,6 +559,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
+      throw new Error('Cannot update conversation that is not owned by the user');
+    }
+
     const updatedConversation: Conversation = merge(
       {},
       conversation,
@@ -601,6 +628,23 @@ export class ObservabilityAIAssistantClient {
     });
 
     return createdConversation;
+  };
+
+  duplicateConversation = async (conversationId: string): Promise<Conversation> => {
+    const conversation = await this.getConversationWithMetaFields(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+    const _source = conversation._source!;
+    return this.create({
+      ..._source,
+      conversation: {
+        ..._source.conversation,
+        id: v4(),
+      },
+      public: false,
+    });
   };
 
   recall = async ({

@@ -26,14 +26,14 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 export const GridRowTitle = React.memo(
   ({
     readOnly,
-    rowIndex,
+    rowId,
     editTitleOpen,
     setEditTitleOpen,
     toggleIsCollapsed,
     collapseButtonRef,
   }: {
     readOnly: boolean;
-    rowIndex: number;
+    rowId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
     toggleIsCollapsed: () => void;
@@ -42,7 +42,7 @@ export const GridRowTitle = React.memo(
     const { gridLayoutStateManager } = useGridLayoutContext();
 
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
+    const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowId];
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
 
     useEffect(() => {
@@ -51,7 +51,7 @@ export const GridRowTitle = React.memo(
        */
       const titleSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
-          map((gridLayout) => gridLayout[rowIndex]?.title ?? ''),
+          map((gridLayout) => gridLayout[rowId]?.title ?? ''),
           distinctUntilChanged()
         )
         .subscribe((title) => {
@@ -61,7 +61,7 @@ export const GridRowTitle = React.memo(
       return () => {
         titleSubscription.unsubscribe();
       };
-    }, [rowIndex, gridLayoutStateManager]);
+    }, [rowId, gridLayoutStateManager]);
 
     useEffect(() => {
       /**
@@ -75,11 +75,11 @@ export const GridRowTitle = React.memo(
     const updateTitle = useCallback(
       (title: string) => {
         const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
-        newLayout[rowIndex].title = title;
+        newLayout[rowId].title = title;
         gridLayoutStateManager.gridLayout$.next(newLayout);
         setEditTitleOpen(false);
       },
-      [rowIndex, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
+      [rowId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
 
     return (
@@ -94,9 +94,9 @@ export const GridRowTitle = React.memo(
             iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
             size="m"
-            id={`kbnGridRowTitle-${rowIndex}`}
-            aria-controls={`kbnGridRow-${rowIndex}`}
-            data-test-subj={`kbnGridRowTitle-${rowIndex}`}
+            id={`kbnGridRowTitle-${rowId}`}
+            aria-controls={`kbnGridRow-${rowId}`}
+            data-test-subj={`kbnGridRowTitle-${rowId}`}
             textProps={false}
             flush="both"
           >
@@ -123,7 +123,7 @@ export const GridRowTitle = React.memo(
               inputAriaLabel={i18n.translate('kbnGridLayout.row.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
               })}
-              data-test-subj={`kbnGridRowTitle-${rowIndex}--editor`}
+              data-test-subj={`kbnGridRowTitle-${rowId}--editor`}
             />
           </EuiFlexItem>
         ) : (
@@ -137,7 +137,7 @@ export const GridRowTitle = React.memo(
                   aria-label={i18n.translate('kbnGridLayout.row.editRowTitle', {
                     defaultMessage: 'Edit section title',
                   })}
-                  data-test-subj={`kbnGridRowTitle-${rowIndex}--edit`}
+                  data-test-subj={`kbnGridRowTitle-${rowId}--edit`}
                 />
               </EuiFlexItem>
             )}
