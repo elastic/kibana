@@ -168,6 +168,7 @@ export interface DocLinks {
     readonly engines: string;
     readonly indexApi: string;
     readonly inferenceApiCreate: string;
+    readonly inferenceApisConfigureChunking: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
