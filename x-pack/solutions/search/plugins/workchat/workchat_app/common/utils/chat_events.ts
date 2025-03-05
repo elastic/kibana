@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import type { ChatEvent, MessageEvent, ChunkEvent } from '../chat_events';
+import type { ChatEvent, MessageEvent, ChunkEvent, ConversationCreatedEvent } from '../chat_events';
+
+export const conversationCreatedEvent = ({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): ConversationCreatedEvent => {
+  return {
+    type: 'conversation_created',
+    conversation: { id, title },
+  };
+};
 
 export const isMessageEvent = (event: ChatEvent): event is MessageEvent => {
   return event.type === 'message';

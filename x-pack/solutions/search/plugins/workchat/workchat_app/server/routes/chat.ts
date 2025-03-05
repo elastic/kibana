@@ -43,7 +43,7 @@ export const registerChatRoutes = ({
       });
 
       try {
-        const { events$ } = await chatService.converse({
+        const events$ = await chatService.converse({
           request,
           connectorId: 'azure-gpt4', // TODO: auto-discover or something
           agentId,

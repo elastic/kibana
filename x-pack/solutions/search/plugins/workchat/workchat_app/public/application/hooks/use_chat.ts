@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo } from 'react';
-import type { ChatEvent } from '../../../common/chat_events';
+import { useCallback, useState, useMemo, useRef } from 'react';
+import type { ChatEvent, ConversationCreatedEvent } from '../../../common/chat_events';
 import type { Message } from '../../../common/messages';
 import { useWorkChatServices } from './use_workchat_service';
 
 interface UseChatProps {
-  conversationId?: string;
+  conversationId: string | undefined;
   agentId: string;
+  onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
 }
 
-export const useChat = ({ conversationId, agentId }: UseChatProps) => {
+export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseChatProps) => {
   const { chatService } = useWorkChatServices();
   const [events, setEvents] = useState<ChatEvent[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
+
+  // const onConversationUpdateRef = useRef(onConversationUpdate);
+  // onConversationUpdateRef.
 
   const send = useCallback(
     async (nextMessage: string) => {
@@ -36,6 +40,10 @@ export const useChat = ({ conversationId, agentId }: UseChatProps) => {
           if (event.type === 'message_chunk') {
             chunks += event.text_chunk;
             setPendingMessage(chunks);
+          }
+
+          if (event.type === 'conversation_created') {
+            onConversationUpdate(event.conversation);
           }
         },
         complete: () => {

@@ -7,18 +7,21 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiCommentList, EuiPanel } from '@elastic/eui';
+import { ConversationCreatedEventPayload } from '../../../common/chat_events';
 import { useConversation } from '../hooks/use_conversation';
 import { ChatInputForm } from './chat_input_form';
 import { ChatMessage } from './chat_message';
 
 interface ChatProps {
-  conversationId?: string;
+  conversationId: string | undefined;
+  onConversationUpdate: (changes: ConversationCreatedEventPayload) => void;
 }
 
-export const Chat: React.FC<ChatProps> = ({ conversationId }) => {
+export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate }) => {
   const { send, messages } = useConversation({
     conversationId,
     agentId: 'default',
+    onConversationUpdate,
   });
 
   const onSubmit = useCallback(

@@ -6,15 +6,18 @@
  */
 
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { ConversationCreatedEventPayload } from '../../../common/chat_events';
 import { Chat } from '../components/chat';
 import { ConversationList } from '../components/conversation_list';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useKibana } from '../hooks/use_kibana';
+
+const newConversationId = 'new';
 
 const pageSectionContentClassName = css`
   width: 100%;
@@ -28,13 +31,32 @@ const pageSectionContentClassName = css`
 
 export const WorkchatChatPage: React.FC<{}> = () => {
   useBreadcrumb([{ text: 'Kibana' }, { text: 'WorkChat' }]);
-  const { conversations } = useConversationList();
-
   const {
     services: { application },
   } = useKibana();
 
-  const { conversationId } = useParams<{ conversationId: string | undefined }>();
+  const { conversations, refresh: refreshConversations } = useConversationList();
+
+  const { conversationId: conversationIdFromParams } = useParams<{
+    conversationId: string | undefined;
+  }>();
+
+  const actualConversationId = useMemo(() => {
+    return conversationIdFromParams === newConversationId ? undefined : conversationIdFromParams;
+  }, [conversationIdFromParams]);
+
+  const [conversationId, setConversationId] = useState<string | undefined>(actualConversationId);
+
+  const onConversationUpdate = useCallback(
+    (changes: ConversationCreatedEventPayload) => {
+      if (!conversationId) {
+        setConversationId(changes.id);
+        application.navigateToApp('workchat', { path: `/chat/${changes.id}` });
+      }
+      refreshConversations();
+    },
+    [application, conversationId, refreshConversations]
+  );
 
   return (
     <KibanaPageTemplate
@@ -49,6 +71,9 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           conversations={conversations}
           onConversationSelect={(newConvId) => {
             application.navigateToApp('workchat', { path: `/chat/${newConvId}` });
+          }}
+          onNewConversationSelect={() => {
+            application.navigateToApp('workchat', { path: `/chat/${newConversationId}` });
           }}
         />
       </KibanaPageTemplate.Sidebar>
@@ -76,7 +101,7 @@ export const WorkchatChatPage: React.FC<{}> = () => {
             </EuiPanel>
           </EuiFlexItem>
 
-          <Chat conversationId={conversationId} />
+          <Chat conversationId={actualConversationId} onConversationUpdate={onConversationUpdate} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

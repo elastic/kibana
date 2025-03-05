@@ -16,9 +16,14 @@ export interface ChunkEvent extends ChatEventBase {
   text_chunk: string;
 }
 
-export interface CustomEvent extends ChatEventBase {
-  type: 'custom';
-  content: Record<string, any>;
+export interface ConversationCreatedEventPayload {
+  id: string;
+  title: string;
+}
+
+export interface ConversationCreatedEvent extends ChatEventBase {
+  type: 'conversation_created';
+  conversation: ConversationCreatedEventPayload;
 }
 
 export interface MessageEvent extends ChatEventBase {
@@ -26,4 +31,4 @@ export interface MessageEvent extends ChatEventBase {
   message: Message;
 }
 
-export type ChatEvent = ChunkEvent | CustomEvent | MessageEvent;
+export type ChatEvent = ChunkEvent | MessageEvent | ConversationCreatedEvent;
