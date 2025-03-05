@@ -54,6 +54,13 @@ export type ESQLEditorProps = Simplify<
   >
 >;
 
+/**
+ * This is a wrapper around the Monaco ESQL editor for Lens
+ * It handles its internal state and update both attributes & activeData on changes
+ * in the Redux store.
+ * Mind that this component will render either inline (classic React)
+ * or in a portal if the editorContainer props is provided
+ */
 export function ESQLEditor({
   data,
   attributes,
