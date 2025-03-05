@@ -48,7 +48,7 @@ export const AlertsPopover = () => {
   const {
     services: { triggersActionsUi, slo, ...services },
   } = useKibanaContextForPlugin();
-  const { application, http,} = services
+  const { application, http } = services;
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
@@ -72,33 +72,34 @@ export const AlertsPopover = () => {
       ).toDataviewSpec();
 
       const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
-      return <RuleFormFlyout 
-      plugins={{
-          ...services,
-          ruleTypeRegistry,
-          actionTypeRegistry,
-        }}
-        consumer='logs'
-        ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
-        initialValues={{
-          params: {
-            searchConfiguration: {
-              index,
-              query: getQuery(logsExplorerState.query),
-              filter: getDiscoverFiltersFromState(
-                index.id,
-                logsExplorerState.filters,
-                logsExplorerState.controls
-              ),
+      return (
+        <RuleFormFlyout
+          plugins={{
+            ...services,
+            ruleTypeRegistry,
+            actionTypeRegistry,
+          }}
+          consumer="logs"
+          ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+          initialValues={{
+            params: {
+              searchConfiguration: {
+                index,
+                query: getQuery(logsExplorerState.query),
+                filter: getDiscoverFiltersFromState(
+                  index.id,
+                  logsExplorerState.filters,
+                  logsExplorerState.controls
+                ),
+              },
             },
-          }
-        }}
-        onSubmit={closeAddRuleFlyout}
-        onCancel={closeAddRuleFlyout}
-      />;
-
+          }}
+          onSubmit={closeAddRuleFlyout}
+          onCancel={closeAddRuleFlyout}
+        />
+      );
     }
-  }, [closeAddRuleFlyout, triggersActionsUi, pageState, isAddRuleFlyoutOpen]);
+  }, [closeAddRuleFlyout, triggersActionsUi, pageState, isAddRuleFlyoutOpen, services]);
 
   const createSLOFlyout = useMemo(() => {
     if (isCreateSLOFlyoutOpen && pageState.matches({ initialized: 'validLogsExplorerState' })) {
