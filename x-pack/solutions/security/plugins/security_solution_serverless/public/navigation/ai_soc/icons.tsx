@@ -10,6 +10,6 @@ import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { IconAiForTheSocLazy } from '../../common/lazy_icons';
 
-export const AiForTheSocIcon = ({ size = 'l', ...rest }: EuiIconProps) => {
+export const AiForTheSocIcon = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
   return <EuiIcon {...{ type: IconAiForTheSocLazy, size, ...rest }} />;
 };

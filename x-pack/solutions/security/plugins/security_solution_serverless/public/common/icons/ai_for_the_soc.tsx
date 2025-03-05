@@ -7,7 +7,7 @@
 import type { SVGProps } from 'react';
 import React from 'react';
 export const AiForTheSoc: React.FC<SVGProps<SVGSVGElement>> = (props) => (
-  <svg height="100%" width="100%" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <svg fill="none" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path
       fill="#F04E98"
       fillRule="evenodd"
