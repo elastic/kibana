@@ -23,6 +23,7 @@ import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
+import { registerEnterpriseSearchDeprecationRoutes } from '../lib/enterprise_search/enterprise_search_deprecations_routes';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
@@ -47,4 +48,7 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
 
   // Mark index as read-only and unfreeze it
   registerUpdateIndexRoute(dependencies);
+
+  // Enterprise Search deprecations
+  registerEnterpriseSearchDeprecationRoutes(dependencies);
 }

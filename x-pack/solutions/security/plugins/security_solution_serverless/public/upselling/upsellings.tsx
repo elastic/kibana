@@ -10,7 +10,8 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
-  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -32,6 +33,7 @@ import {
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
@@ -147,6 +149,11 @@ export const upsellingSections: UpsellingSections = [
       <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
     ),
   },
+  {
+    id: 'siem_migrations_start',
+    pli: ProductFeatureKey.siemMigrations,
+    component: SiemMigrationsStartUpsellSectionLazy,
+  },
 ];
 
 // Upselling for sections, linked by arbitrary ids
@@ -168,8 +175,17 @@ export const upsellingMessages: UpsellingMessages = [
   {
     id: 'prebuilt_rule_customization',
     pli: ProductFeatureKey.prebuiltRuleCustomization,
-    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION(
-      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? ''
+    message: PREBUILT_RULE_CUSTOMIZATION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
+      'feature tier'
+    ),
+  },
+  {
+    id: 'prebuilt_rule_customization_description',
+    pli: ProductFeatureKey.prebuiltRuleCustomization,
+    message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
+      'feature tier'
     ),
   },
 ];

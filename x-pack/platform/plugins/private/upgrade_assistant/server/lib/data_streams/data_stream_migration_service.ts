@@ -65,6 +65,9 @@ interface DataStreamMigrationService {
 
   /**
    * Marks the given indices as read-only.
+   * First it will roll over the write index if it exists in the deprecated indices.
+   * Then it will unfreeze the indices and set them to read-only.
+   * @param dataStreamName
    * @param indices
    */
   readonlyIndices: (dataStreamName: string, indices: string[]) => Promise<void>;
@@ -335,29 +338,23 @@ export const dataStreamMigrationServiceFactory = ({
 
     async readonlyIndices(dataStreamName: string, indices: string[]) {
       try {
-        const { data_streams: dataStreamsDeprecations } = await esClient.migration.deprecations({
-          filter_path: `data_streams`,
+        const { data_streams: dataStreamsDetails } = await esClient.indices.getDataStream({
+          name: dataStreamName,
         });
+        // Since we are not using a pattern it should only return one item
+        const dataStreamBackIndices = dataStreamsDetails[0].indices;
 
-        const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
-        if (!deprecationsDetails || !deprecationsDetails.length) {
-          throw error.cannotGrabMetadata(`Could not grab metadata for ${dataStreamName}.`);
-        }
-        // Find the first deprecation that has reindex_required set to true
-        const deprecationDetails = deprecationsDetails.find(
-          (deprecation) => deprecation._meta!.reindex_required
-        );
-        if (!deprecationDetails) {
-          throw error.cannotGrabMetadata(`Could not grab metadata for ${dataStreamName}.`);
-        }
+        // The last item in this array contains information about the stream’s current write index.
+        const writeIndex = dataStreamBackIndices[dataStreamBackIndices.length - 1].index_name;
+        const hasWriteIndex = indices.some((index) => index === writeIndex);
 
-        const rollOverResponse = await esClient.transport.request({
-          method: 'POST',
-          path: `/${dataStreamName}/_rollover/`,
-        });
-
-        if (!rollOverResponse.acknowledged) {
-          throw error.readonlyTaskFailed(`Could not rollover data stream ${dataStreamName}.`);
+        if (hasWriteIndex) {
+          const rollOverResponse = await esClient.indices.rollover({
+            alias: dataStreamName,
+          });
+          if (!rollOverResponse.acknowledged) {
+            throw error.readonlyTaskFailed(`Could not rollover data stream ${dataStreamName}.`);
+          }
         }
       } catch (err) {
         throw error.readonlyTaskFailed(`Could not migrate data stream ${dataStreamName}.`);

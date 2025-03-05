@@ -31,10 +31,10 @@ const indexName = 'indexName';
 const scopeId = 'scopeId';
 
 describe('useNavigateToLeftPanel', () => {
-  describe('newExpandableFlyoutNavigationEnabled is not enabled', () => {
+  describe('newExpandableFlyoutNavigationDisabled is true', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     });
 
@@ -83,10 +83,10 @@ describe('useNavigateToLeftPanel', () => {
     });
   });
 
-  describe('newExpandableFlyoutNavigationEnabled', () => {
+  describe('newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     });
 
     it('should enable navigation if isPreviewMode is false', () => {

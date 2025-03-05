@@ -203,6 +203,11 @@ export interface ReindexAction {
    * In future this could be an array of blockers.
    */
   blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+
+  /**
+   * The transform IDs that are currently targeting this index
+   */
+  transformIds?: string[];
 }
 
 export interface UnfreezeAction {

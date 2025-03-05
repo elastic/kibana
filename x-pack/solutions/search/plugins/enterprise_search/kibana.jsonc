@@ -12,7 +12,9 @@
     "id": "enterpriseSearch",
     "server": true,
     "browser": true,
-    "configPath": ["enterpriseSearch"],
+    "configPath": [
+      "enterpriseSearch"
+    ],
     "requiredPlugins": [
       "data",
       "features",
@@ -42,9 +44,10 @@
       "charts",
       "cloud",
       "lens",
-      "share",
-      "fleet"
+      "share"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

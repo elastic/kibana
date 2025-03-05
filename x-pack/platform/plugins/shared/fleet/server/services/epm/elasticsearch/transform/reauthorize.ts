@@ -12,13 +12,15 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { sortBy, uniqBy } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import pMap from 'p-map';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
-
 import { retryTransientEsErrors } from '../retry';
+
+const MAX_CONCURRENT_TRANSFORMS_OPERATIONS = 5;
 
 interface FleetTransformMetadata {
   fleet_transform_version?: string;
@@ -30,6 +32,7 @@ interface FleetTransformMetadata {
   last_authorized_by?: string;
   run_as_kibana_system?: boolean;
   transformId: string;
+  unattended?: boolean;
 }
 
 const isErrorResponse = (arg: unknown): arg is ErrorResponseBase =>
@@ -41,6 +44,7 @@ async function reauthorizeAndStartTransform({
   transformId,
   secondaryAuth,
   meta,
+  shouldStopBeforeStart,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -48,6 +52,7 @@ async function reauthorizeAndStartTransform({
   secondaryAuth?: SecondaryAuthorizationHeader;
   shouldInstallSequentially?: boolean;
   meta?: object;
+  shouldStopBeforeStart?: boolean;
 }): Promise<{ transformId: string; success: boolean; error: null | any }> {
   try {
     await retryTransientEsErrors(
@@ -69,6 +74,18 @@ async function reauthorizeAndStartTransform({
   }
 
   try {
+    // For unattended transforms, we need to stop the transform before starting it
+    // otherwise, starting transform will fail with a 409 error
+    if (shouldStopBeforeStart) {
+      await retryTransientEsErrors(
+        () =>
+          esClient.transform.stopTransform(
+            { transform_id: transformId, wait_for_completion: true },
+            { ignore: [404, 409] }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      );
+    }
     const startedTransform = await retryTransientEsErrors(
       () => esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
       { logger, additionalResponseStatuses: [400] }
@@ -119,27 +136,23 @@ export async function handleTransformReauthorizeAndStart({
     );
   }
 
-  const transformInfos = await Promise.all(
-    transforms.map(({ transformId }) =>
-      retryTransientEsErrors(
-        () =>
-          esClient.transform.getTransform(
-            {
-              transform_id: transformId,
-            },
-            { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
-          ),
-        { logger, additionalResponseStatuses: [400] }
-      )
-    )
+  const transformInfos = await retryTransientEsErrors(
+    () =>
+      esClient.transform.getTransform(
+        {
+          transform_id: transforms.map((t) => t.transformId).join(','),
+        },
+        { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
+      ),
+    { logger, additionalResponseStatuses: [400] }
   );
-
-  const transformsMetadata: FleetTransformMetadata[] = transformInfos
-    .flat()
-    .filter((t) => t.transforms !== undefined)
-    .map<FleetTransformMetadata>((t) => {
-      const transform = t.transforms?.[0];
-      return { ...transform._meta, transformId: transform?.id };
+  const transformsMetadata: FleetTransformMetadata[] = transformInfos.transforms
+    .map<FleetTransformMetadata>((transform) => {
+      return {
+        ...transform._meta,
+        transformId: transform?.id,
+        unattended: Boolean(transform.settings?.unattended),
+      };
     })
     .filter((t) => t?.run_as_kibana_system === false);
 
@@ -155,30 +168,35 @@ export async function handleTransformReauthorizeAndStart({
       (t) => t.order,
     ]);
 
-    for (const { transformId, ...meta } of sortedTransformsMetadata) {
+    for (const { transformId, unattended, ...meta } of sortedTransformsMetadata) {
       const authorizedTransform = await reauthorizeAndStartTransform({
         esClient,
         logger,
         transformId,
         secondaryAuth,
         meta: { ...meta, last_authorized_by: username },
+        shouldStopBeforeStart: unattended,
       });
 
       authorizedTransforms.push(authorizedTransform);
     }
   } else {
     // Else, create & start all the transforms at once for speed
-    const transformsPromises = transformsMetadata.map(async ({ transformId, ...meta }) => {
-      return await reauthorizeAndStartTransform({
-        esClient,
-        logger,
-        transformId,
-        secondaryAuth,
-        meta: { ...meta, last_authorized_by: username },
-      });
-    });
-
-    authorizedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
+    authorizedTransforms = await pMap(
+      transformsMetadata,
+      async ({ transformId, unattended, ...meta }) =>
+        reauthorizeAndStartTransform({
+          esClient,
+          logger,
+          transformId,
+          secondaryAuth,
+          meta: { ...meta, last_authorized_by: username },
+          shouldStopBeforeStart: unattended,
+        }),
+      {
+        concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+      }
+    ).then((results) => results.flat());
   }
 
   const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);

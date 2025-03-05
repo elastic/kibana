@@ -21,6 +21,13 @@ interface MlActionMetadata {
   snapshot_id: string;
   job_id: string;
 }
+
+interface IndexActionMetadata {
+  actions?: Action[];
+  reindex_required: boolean;
+  transform_ids: string[];
+}
+
 interface DataStreamActionMetadata {
   actions?: Action[];
 
@@ -103,8 +110,10 @@ export const getCorrectiveAction = (
   }
 
   if (requiresReindexAction) {
+    const transformIds = (metadata as IndexActionMetadata)?.transform_ids;
     return {
       type: 'reindex',
+      ...(transformIds?.length ? { transformIds } : {}),
     };
   }
 

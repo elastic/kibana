@@ -37,6 +37,16 @@ export async function getESUpgradeStatus(
         return deprecation;
       })
       .filter(({ type, correctiveAction }) => {
+        if (type === 'data_streams') {
+          const { excludedActions = [] } = (correctiveAction as DataStreamsAction).metadata;
+          const allActionsExcluded =
+            excludedActions.includes('readOnly') && excludedActions.includes('reindex');
+
+          return !allActionsExcluded;
+        }
+        return true;
+      })
+      .filter(({ type, correctiveAction }) => {
         /**
          * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
          * is set to `false`.

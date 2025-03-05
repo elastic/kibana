@@ -48,6 +48,8 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
 
+const ORDER = ['Low', 'Medium', 'High', 'Critical'];
+
 interface AlertCountInsightProps {
   /**
    * The name of the entity to filter the alerts by.
@@ -97,7 +99,12 @@ export const getFormattedAlertStats = (
     key: capitalize(key),
     count,
     color: getSeverityColor(key, euiTheme),
-  }));
+  })).sort((a, b) => {
+    const aIndex = ORDER.indexOf(a.key);
+    const bIndex = ORDER.indexOf(b.key);
+    return aIndex - bIndex;
+  });
+
   return alertStats;
 };
 
@@ -116,8 +123,8 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();

@@ -63,16 +63,20 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
               navLinksBuilder.except(
                 'monitoring',
                 'observabilityAIAssistant',
-                'enterpriseSearch',
                 'enterpriseSearchApplications',
                 'enterpriseSearchAnalytics',
                 'searchPlayground',
+                'searchSynonyms',
                 'searchInferenceEndpoints',
                 'guidedOnboardingFeature',
                 'securitySolutionAssistant',
                 'securitySolutionAttackDiscovery',
                 'securitySolutionSiemMigrations',
-                'dataQuality'
+                'dataQuality',
+                {
+                  feature: 'enterpriseSearch',
+                  apps: ['appSearch', 'workplaceSearch'],
+                }
               )
             );
             break;
