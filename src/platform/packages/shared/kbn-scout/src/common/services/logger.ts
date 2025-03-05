@@ -28,10 +28,10 @@ const loggerInstances = new Map<string, ScoutLogger>();
 
 /**
  * Singleton logger instance for specific worker to share across the Scout components
- * @param workerContext logger context, e.g. `scout-1`
+ * @param workerContext logger context, e.g. `scout-worker-1`; default is `scout`
  * @returns {ScoutLogger} logger instance
  */
-export function getLogger(workerContext: string): ScoutLogger {
+export function getLogger(workerContext: string = 'scout'): ScoutLogger {
   if (!loggerInstances.has(workerContext)) {
     loggerInstances.set(workerContext, new ScoutLogger(workerContext));
   }
