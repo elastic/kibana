@@ -8,7 +8,7 @@
  */
 
 import { LegendValue, Position } from '@elastic/charts';
-import { ArgTypes } from '@storybook/types';
+import type { ArgTypes } from '@storybook/react';
 import { EmptySizeRatios, LegendDisplay } from '../../../common';
 import { ChartTypes } from '../../../common/types';
 
