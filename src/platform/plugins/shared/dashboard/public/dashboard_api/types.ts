@@ -21,7 +21,6 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
   HasLastSavedChildState,
-  HasRuntimeChildState,
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
@@ -124,7 +123,6 @@ export interface DashboardState extends DashboardSettings {
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasExecutionContext &
-  HasRuntimeChildState &
   HasLastSavedChildState &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
@@ -185,7 +183,7 @@ export type DashboardApi = CanExpandPanels &
 export interface DashboardInternalApi {
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
-  getRuntimeStateForControlGroup: () => object | undefined;
+  getLastSavedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;

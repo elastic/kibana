@@ -34,7 +34,6 @@ import { runPanelPlacementStrategy } from '../dashboard_container/panel_placemen
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
 import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_placement/panel_placement_registry';
-import { UnsavedPanelState } from '../dashboard_container/types';
 import { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
@@ -44,7 +43,6 @@ import { PanelPlacementStrategy } from '../plugin_constants';
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
-  initialPanelsRuntimeState: UnsavedPanelState,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
   pushReferences: (references: Reference[]) => void
@@ -56,64 +54,50 @@ export function initializePanelsManager(
   function setPanels(panels: DashboardPanelMap) {
     if (panels !== panels$.value) panels$.next(panels);
   }
-  let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
-
-  function setRuntimeStateForChild(childId: string, state: object) {
-    restoredRuntimeState[childId] = state;
-  }
 
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
   if (incomingEmbeddable) {
-    let incomingEmbeddablePanelState: DashboardPanelState;
-    if (
-      incomingEmbeddable.embeddableId &&
-      Boolean(panels$.value[incomingEmbeddable.embeddableId])
-    ) {
-      // this embeddable already exists, just update the explicit input.
-      incomingEmbeddablePanelState = panels$.value[incomingEmbeddable.embeddableId];
-      const sameType = incomingEmbeddablePanelState.type === incomingEmbeddable.type;
+    const { serializedState, size, type } = incomingEmbeddable;
+    const newId = incomingEmbeddable.embeddableId ?? v4();
+    const existingPanel: DashboardPanelState | undefined = panels$.value[newId];
+    const sameType = existingPanel?.type === type;
 
-      incomingEmbeddablePanelState.type = incomingEmbeddable.type;
-      setRuntimeStateForChild(incomingEmbeddable.embeddableId, {
-        // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
-        ...(sameType ? incomingEmbeddablePanelState.explicitInput : {}),
-
-        ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId,
-
-        // maintain hide panel titles setting.
-        hidePanelTitles: incomingEmbeddablePanelState.explicitInput.hidePanelTitles,
-      });
-    } else {
-      // otherwise this incoming embeddable is brand new.
-      const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-      setRuntimeStateForChild(embeddableId, incomingEmbeddable.input);
+    const placeIncomingPanel = () => {
       const { newPanelPlacement } = runPanelPlacementStrategy(
         PanelPlacementStrategy.findTopLeftMostOpenSpace,
         {
-          width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
-          height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
+          width: size?.width ?? DEFAULT_PANEL_WIDTH,
+          height: size?.height ?? DEFAULT_PANEL_HEIGHT,
           currentPanels: panels$.value,
         }
       );
-      incomingEmbeddablePanelState = {
-        explicitInput: { id: embeddableId },
-        type: incomingEmbeddable.type,
-        gridData: {
-          ...newPanelPlacement,
-          i: embeddableId,
-        },
-      };
+      return { ...newPanelPlacement, i: newId };
+    };
+    if (serializedState?.references && serializedState.references.length > 0) {
+      pushReferences(prefixReferencesFromPanel(newId, serializedState.references ?? []));
     }
+
+    const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel();
+    const explicitInput = {
+      ...(sameType ? existingPanel?.explicitInput : {}),
+      ...serializedState.rawState,
+      id: newId,
+    };
+
+    const incomingPanelState: DashboardPanelState = {
+      type,
+      explicitInput,
+      gridData,
+    };
 
     setPanels({
       ...panels$.value,
-      [incomingEmbeddablePanelState.explicitInput.id]: incomingEmbeddablePanelState,
+      [newId]: incomingPanelState,
     });
-    trackPanel.setScrollToPanelId(incomingEmbeddablePanelState.explicitInput.id);
-    trackPanel.setHighlightPanelId(incomingEmbeddablePanelState.explicitInput.id);
+    trackPanel.setScrollToPanelId(newId);
+    trackPanel.setHighlightPanelId(newId);
   }
 
   async function untilEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {
@@ -170,18 +154,13 @@ export function initializePanelsManager(
         panelPackage: PanelPackage,
         displaySuccessMessage?: boolean
       ) => {
-        const { panelType: type, serializedState, initialState } = panelPackage;
+        const { panelType: type, serializedState } = panelPackage;
+        const newId = v4();
 
         usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
 
-        const newId = v4();
-
-        const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
-
-        const customPlacementSettings = getCustomPlacementSettingFunc
-          ? await getCustomPlacementSettingFunc(initialState)
-          : undefined;
-
+        // place new panel.
+        const customPlacementSettings = await getDashboardPanelPlacementSetting(type)?.();
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
           customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
           {
@@ -205,7 +184,6 @@ export function initializePanelsManager(
             id: newId,
           },
         };
-        if (initialState) setRuntimeStateForChild(newId, initialState);
 
         setPanels({ ...otherPanels, [newId]: newPanel });
         if (displaySuccessMessage) {
@@ -288,9 +266,6 @@ export function initializePanelsManager(
               references: getReferencesForPanelId(childId),
             };
       },
-      getRuntimeStateForChild: (childId: string) => {
-        return restoredRuntimeState?.[childId];
-      },
       panels$,
       removePanel: (id: string) => {
         const panels = { ...panels$.value };
@@ -314,12 +289,10 @@ export function initializePanelsManager(
         const oldPanel = panels[idToRemove];
         delete panels[idToRemove];
 
-        const { panelType: type, serializedState, initialState } = panelPackage;
+        const { panelType: type, serializedState } = panelPackage;
         if (serializedState?.references && serializedState.references.length > 0) {
           pushReferences(prefixReferencesFromPanel(id, serializedState?.references));
         }
-
-        if (initialState) setRuntimeStateForChild(id, initialState);
 
         setPanels({
           ...panels,
@@ -340,7 +313,6 @@ export function initializePanelsManager(
         return id;
       },
       setPanels,
-      setRuntimeStateForChild,
       untilEmbeddableLoaded,
     },
     comparators: {
@@ -355,7 +327,6 @@ export function initializePanelsManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
-        restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
         for (const panelId of Object.keys(currentChildren)) {

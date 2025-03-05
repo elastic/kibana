@@ -143,7 +143,7 @@ export function initializeUnsavedChangesManager({
         }
         dashboardStateToBackup.references = allReferences;
 
-        getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
+        // getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
       }
     });
 

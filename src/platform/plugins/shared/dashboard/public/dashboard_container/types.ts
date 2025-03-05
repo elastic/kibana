@@ -13,14 +13,6 @@ import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { DashboardContainerInput } from '../../common';
 import type { DashboardPanel } from '../../server/content_management';
 
-/**
- * @deprecated This type is meant for restoring Dashboard runtime state. Serialized state should always be used instead.
- * TODO: Remove this after `save and return` is accomplished via serializedState.
- */
-export interface UnsavedPanelState {
-  [key: string]: object | undefined;
-}
-
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
   | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }

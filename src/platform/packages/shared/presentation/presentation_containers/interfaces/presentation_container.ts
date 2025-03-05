@@ -16,21 +16,13 @@ import {
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 
-export interface PanelPackage<
-  SerializedStateType extends object = object,
-  RuntimeStateType extends object = object
-> {
+export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
 
   /**
    * The serialized state of this panel.
    */
-  serializedState?: SerializedPanelState<SerializedStateType>;
-
-  /**
-   * The runtime state of this panel. @deprecated Use `serializedState` instead.
-   */
-  initialState?: RuntimeStateType;
+  serializedState: SerializedPanelState<SerializedStateType>;
 }
 
 export interface PresentationContainer extends CanAddNewPanel {

@@ -35,19 +35,3 @@ export interface HasLastSavedChildState<SerializedState extends object = object>
   getLastSavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
   saveNotification$: Subject<void>; // a notification that state has been saved
 }
-
-/**
- * @deprecated Use `HasSerializedChildState` instead. All interactions between the container and the child should use the serialized state.
- */
-export interface HasRuntimeChildState<RuntimeState extends object = object> {
-  getRuntimeStateForChild: (childId: string) => Partial<RuntimeState> | undefined;
-}
-
-/**
- * @deprecated Use `HasSerializedChildState` instead. All interactions between the container and the child should use the serialized state.
- */
-export const apiHasRuntimeChildState = <RuntimeState extends object = object>(
-  api: unknown
-): api is HasRuntimeChildState<RuntimeState> => {
-  return Boolean(api && (api as HasRuntimeChildState).getRuntimeStateForChild);
-};

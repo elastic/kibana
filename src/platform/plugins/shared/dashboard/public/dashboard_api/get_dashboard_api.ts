@@ -17,9 +17,7 @@ import {
   getReferencesForControls,
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { UnsavedPanelState } from '../dashboard_container/types';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
@@ -43,11 +41,23 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 
+const defaultControlGroupState: ControlGroupSerializedState = {
+  autoApplySelections: true,
+  chainingSystem: 'HIERARCHICAL',
+  controls: [],
+  ignoreParentSettings: {
+    ignoreFilters: false,
+    ignoreQuery: false,
+    ignoreTimerange: false,
+    ignoreValidations: false,
+  },
+  labelPosition: 'oneLine',
+};
+
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddable,
   initialState,
-  initialPanelsRuntimeState,
   savedObjectResult,
   savedObjectId,
   lastSavedDashboardState,
@@ -56,7 +66,6 @@ export function getDashboardApi({
   lastSavedDashboardState?: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
-  initialPanelsRuntimeState?: UnsavedPanelState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
@@ -87,7 +96,6 @@ export function getDashboardApi({
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
-    initialPanelsRuntimeState ?? {},
     trackPanel,
     getPanelReferences,
     pushPanelReferences
@@ -245,28 +253,14 @@ export function getDashboardApi({
     internalApi: {
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
+      getLastSavedStateForControlGroup: () => {
+        return { references: [], rawState: defaultControlGroupState };
+      },
       getSerializedStateForControlGroup: () => {
         return {
-          rawState: savedObjectResult?.dashboardInput?.controlGroupInput
-            ? savedObjectResult.dashboardInput.controlGroupInput
-            : ({
-                autoApplySelections: true,
-                chainingSystem: 'HIERARCHICAL',
-                controls: [],
-                ignoreParentSettings: {
-                  ignoreFilters: false,
-                  ignoreQuery: false,
-                  ignoreTimerange: false,
-                  ignoreValidations: false,
-                },
-                labelPosition: 'oneLine',
-                showApplySelections: false,
-              } as ControlGroupSerializedState),
+          rawState: initialState.controlGroupInput ?? defaultControlGroupState,
           references: getReferencesForControls(references$.value ?? []),
         };
-      },
-      getRuntimeStateForControlGroup: () => {
-        return panelsManager!.api.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
