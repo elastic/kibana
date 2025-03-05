@@ -64,8 +64,7 @@ export const storybookAliases = {
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
-  // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
-  // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
+  security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
