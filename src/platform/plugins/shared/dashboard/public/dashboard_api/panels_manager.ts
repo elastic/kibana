@@ -30,14 +30,14 @@ import { coreServices, usageCollectionService } from '../services/kibana_service
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
-import { runPanelPlacementStrategy } from '../dashboard_container/panel_placement/place_new_panel_strategies';
+import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
 import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
-import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_placement/panel_placement_registry';
+import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
-import { placeClonePanel } from '../dashboard_container/panel_placement/place_clone_panel_strategy';
+import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
 import { PanelPlacementStrategy } from '../plugin_constants';
 
 export function initializePanelsManager(
@@ -83,7 +83,6 @@ export function initializePanelsManager(
     const explicitInput = {
       ...(sameType ? existingPanel?.explicitInput : {}),
       ...serializedState.rawState,
-      id: newId,
     };
 
     const incomingPanelState: DashboardPanelState = {
@@ -181,14 +180,13 @@ export function initializePanelsManager(
           },
           explicitInput: {
             ...serializedState?.rawState,
-            id: newId,
           },
         };
 
         setPanels({ ...otherPanels, [newId]: newPanel });
         if (displaySuccessMessage) {
           coreServices.notifications.toasts.addSuccess({
-            title: getPanelAddedSuccessString(newPanel.explicitInput.title),
+            title: getPanelAddedSuccessString((newPanel.explicitInput as { title?: string }).title),
             'data-test-subj': 'addEmbeddableToDashboardSuccess',
           });
           trackPanel.setScrollToPanelId(newId);
@@ -231,7 +229,7 @@ export function initializePanelsManager(
           width: panelToClone.gridData.w,
           height: panelToClone.gridData.h,
           currentPanels: panels$.value,
-          placeBesideId: panelToClone.explicitInput.id,
+          placeBesideId: idToDuplicate,
         });
 
         const newPanel = {
@@ -257,9 +255,8 @@ export function initializePanelsManager(
         return Object.keys(panels$.value).length;
       },
       getSerializedStateForChild: (childId: string) => {
-        const rawState = panels$.value[childId]?.explicitInput ?? { id: childId };
-        const { id, ...serializedState } = rawState;
-        return Object.keys(serializedState).length === 0
+        const rawState = panels$.value[childId]?.explicitInput ?? {};
+        return Object.keys(rawState).length === 0
           ? undefined
           : {
               rawState,

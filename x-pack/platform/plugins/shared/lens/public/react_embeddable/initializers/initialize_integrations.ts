@@ -11,14 +11,30 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { noop, omit } from 'lodash';
-import deepEqual from 'fast-deep-equal';
-import type {
-  HasSerializableState,
-  HasSerializedStateComparator,
-} from '@kbn/presentation-publishing';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { SavedObjectReference } from '@kbn/core/types';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices, LensSerializedState } from '../types';
+import type {
+  GetStateType,
+  LensEmbeddableStartServices,
+  LensSerializedState,
+  LensRuntimeState,
+} from '../types';
 import type { IntegrationCallbacks } from '../types';
+
+function cleanupSerializedState({
+  rawState,
+  references,
+}: {
+  rawState: LensRuntimeState;
+  references: SavedObjectReference[];
+}) {
+  const cleanedState = omit(rawState, 'searchSessionId');
+  return {
+    rawState: cleanedState,
+    references,
+  };
+}
 
 export function initializeIntegrations(
   getLatestState: GetStateType,
@@ -34,8 +50,7 @@ export function initializeIntegrations(
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState &
-    HasSerializedStateComparator<LensSerializedState>;
+    HasSerializableState<LensSerializedState>;
   cleanup: () => void;
   serialize: () => {};
   comparators: {};
@@ -48,15 +63,13 @@ export function initializeIntegrations(
        */
       serializeState: () => {
         const currentState = getLatestState();
-        const cleanedState = attributeService.extractReferences(currentState);
+        const cleanedState = cleanupSerializedState(
+          attributeService.extractReferences(currentState)
+        );
         if (cleanedState.rawState.savedObjectId) {
           return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
         }
         return cleanedState;
-      },
-      isSerializedStateEqual: (a, b) => {
-        // when comparing serialized Lens state, we should ignore search sessions because they are ephemeral.
-        return deepEqual(omit(a, 'searchSessionId'), omit(b, 'searchSessionId'));
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

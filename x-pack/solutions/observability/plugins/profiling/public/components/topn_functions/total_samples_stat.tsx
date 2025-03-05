@@ -9,7 +9,7 @@ import { EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Label } from './label';
-import { scaleValue } from './utils';
+import { scaleAndRoundValue } from './utils';
 
 interface Props {
   baselineTotalSamples: number;
@@ -24,7 +24,7 @@ export function TotalSamplesStat({
   comparisonTotalSamples,
   comparisonScaleFactor,
 }: Props) {
-  const scaledBaselineTotalSamples = scaleValue({
+  const scaledBaselineTotalSamples = scaleAndRoundValue({
     value: baselineTotalSamples,
     scaleFactor: baselineScaleFactor,
   });
@@ -44,7 +44,7 @@ export function TotalSamplesStat({
     );
   }
 
-  const scaledComparisonTotalSamples = scaleValue({
+  const scaledComparisonTotalSamples = scaleAndRoundValue({
     value: comparisonTotalSamples,
     scaleFactor: comparisonScaleFactor,
   });

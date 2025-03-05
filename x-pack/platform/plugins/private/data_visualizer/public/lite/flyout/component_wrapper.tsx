@@ -18,15 +18,24 @@ export const FileDataVisualizerLiteWrapper: FC<{
   resultLinks?: ResultLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
   onClose?: () => void;
-}> = ({ resultLinks, setUploadResults, autoAddInference, indexSettings, onClose }) => {
+}> = ({
+  resultLinks,
+  setUploadResults,
+  autoAddInference,
+  autoCreateDataView,
+  indexSettings,
+  onClose,
+}) => {
   return (
     <React.Suspense fallback={<div />}>
       <FileDataVisualizerLiteComponent
         resultLinks={resultLinks}
         setUploadResults={setUploadResults}
         autoAddInference={autoAddInference}
+        autoCreateDataView={autoCreateDataView}
         indexSettings={indexSettings}
         onClose={onClose}
       />
@@ -38,6 +47,7 @@ export function getFileDataVisualizerLiteWrapper(
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void,
   autoAddInference?: string,
+  autoCreateDataView?: boolean,
   indexSettings?: IndicesIndexSettings,
   onClose?: () => void
 ) {
@@ -46,6 +56,7 @@ export function getFileDataVisualizerLiteWrapper(
       resultLinks={resultLinks}
       setUploadResults={setUploadResults}
       autoAddInference={autoAddInference}
+      autoCreateDataView={autoCreateDataView}
       indexSettings={indexSettings}
       onClose={onClose}
     />

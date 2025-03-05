@@ -87,7 +87,12 @@ function ErrorsWarningsContent({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} css={euiTextBreakWord()}>
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    ${euiTextBreakWord()}
+                  `}
+                >
                   {item.message}
                 </EuiFlexItem>
               </EuiFlexGroup>

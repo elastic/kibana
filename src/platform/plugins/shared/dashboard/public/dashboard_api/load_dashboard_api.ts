@@ -9,13 +9,13 @@
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { cloneDeep } from 'lodash';
-import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
 import { logger } from '../services/logger';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getDashboardApi } from './get_dashboard_api';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { DashboardCreationOptions, DashboardState } from './types';
 
 export async function loadDashboardApi({
@@ -55,7 +55,7 @@ export async function loadDashboardApi({
   })();
 
   const lastSavedDashboardState: DashboardState = cloneDeep({
-    ...DEFAULT_DASHBOARD_INPUT,
+    ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
     references: savedObjectResult?.references,
   });

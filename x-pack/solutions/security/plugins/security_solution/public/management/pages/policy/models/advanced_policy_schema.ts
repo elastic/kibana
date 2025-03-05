@@ -100,7 +100,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users users.`,
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users.`,
       }
     ),
   },
@@ -336,7 +336,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users users.`,
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users.`,
       }
     ),
   },
@@ -593,7 +593,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users users.`,
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users.`,
       }
     ),
   },
@@ -905,6 +905,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
       {
         defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ransomware.dump_process',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.dump_process',
+      {
+        defaultMessage:
+          "A value of 'false' disables the generation of a memory dump of the Ransomware process. This is ignored if the canary protection is off. Default: true.",
       }
     ),
   },

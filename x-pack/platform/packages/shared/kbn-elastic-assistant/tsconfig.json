@@ -41,5 +41,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/spaces-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/datemath",
   ]
 }

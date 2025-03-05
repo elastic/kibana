@@ -241,8 +241,11 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
   alertsContextCount: number;
   alertsCount: number;
   configuredAlertsCount: number;
+  dateRangeDuration: number;
   discoveriesGenerated: number;
   durationMs: number;
+  hasFilter: boolean;
+  isDefaultDateRange: boolean;
   model?: string;
   provider?: string;
 }> = {
@@ -276,6 +279,13 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
         optional: false,
       },
     },
+    dateRangeDuration: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of time range of request in hours',
+        optional: false,
+      },
+    },
     discoveriesGenerated: {
       type: 'integer',
       _meta: {
@@ -287,6 +297,20 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
       type: 'integer',
       _meta: {
         description: 'Duration of request in ms',
+        optional: false,
+      },
+    },
+    hasFilter: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a filter was applied to the alerts used as context',
+        optional: false,
+      },
+    },
+    isDefaultDateRange: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the date range is the default of last 24 hours',
         optional: false,
       },
     },

@@ -24,6 +24,7 @@ import { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
+import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -71,10 +72,6 @@ export const getStatsOverviewEmbeddableFactory = (
           isEditingEnabled: () => true,
           onEdit: async () => {
             try {
-              const { openMonitorConfiguration } = await import(
-                '../common/monitors_open_configuration'
-              );
-
               const result = await openMonitorConfiguration({
                 coreStart,
                 pluginStart,

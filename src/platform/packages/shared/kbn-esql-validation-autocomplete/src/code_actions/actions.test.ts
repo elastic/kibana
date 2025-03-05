@@ -13,7 +13,7 @@ import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { CodeActionOptions } from './types';
 import type { ESQLRealField } from '../validation/types';
-import type { FieldType } from '../definitions/types';
+import { type FieldType, FunctionDefinitionTypes } from '../definitions/types';
 import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 
@@ -280,7 +280,7 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
       { relaxOnMissingCallbacks: false },
     ]) {
-      for (const fn of getAllFunctions({ type: 'eval' })) {
+      for (const fn of getAllFunctions({ type: FunctionDefinitionTypes.SCALAR })) {
         if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) {
           testQuickFixes(
             `FROM index | WHERE ${BROKEN_PREFIX}${fn.name}()`,
@@ -289,7 +289,7 @@ describe('quick fixes logic', () => {
           );
         }
       }
-      for (const fn of getAllFunctions({ type: 'eval' })) {
+      for (const fn of getAllFunctions({ type: FunctionDefinitionTypes.SCALAR })) {
         if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
         // add an A to the function name to make it invalid
         testQuickFixes(
@@ -318,7 +318,7 @@ describe('quick fixes logic', () => {
           { equalityCheck: 'include', ...options }
         );
       }
-      for (const fn of getAllFunctions({ type: 'agg' })) {
+      for (const fn of getAllFunctions({ type: FunctionDefinitionTypes.AGG })) {
         if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
 
         // add an A to the function name to make it invalid

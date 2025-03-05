@@ -125,23 +125,6 @@ export interface AppMockRenderer {
   clearQueryCache: () => Promise<void>;
 }
 
-export const testQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  /**
-   * React query prints the errors in the console even though
-   * all tests are passings. We turn them off for testing.
-   */
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
-  },
-});
-
 export const createAppMockRenderer = ({
   features,
   owner = mockedTestProvidersOwner,

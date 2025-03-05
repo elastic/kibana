@@ -15,7 +15,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { ConnectorRulesList } from './connector_rules_list';
 import { useKibana } from '../../../common/lib/kibana';
-import {} from '../../lib/rule_api/rules_kuery_filter';
 import { ActionConnector } from '../../../types';
 import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
 

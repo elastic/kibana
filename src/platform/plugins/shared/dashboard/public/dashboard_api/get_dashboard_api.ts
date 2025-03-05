@@ -23,9 +23,9 @@ import { LoadDashboardReturn } from '../services/dashboard_content_management_se
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { getSerializedState } from './get_serialized_state';
-import { openSaveModal } from './open_save_modal';
+import { openSaveModal } from './save_modal/open_save_modal';
 import { initializePanelsManager } from './panels_manager';
-import { initializeSearchSessionManager } from './search_session_manager';
+import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';

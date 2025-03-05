@@ -16,8 +16,8 @@ import { set } from '@kbn/safer-lodash-set';
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { coreServices, spacesService } from './kibana_services';
-import { DashboardState } from '../dashboard_api/types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_api/default_dashboard_input';
+import { DashboardState, UnsavedPanelState } from '../dashboard_api/types';
+import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_state';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
@@ -63,7 +63,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 
   public getViewMode = (): ViewMode => {
-    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? DEFAULT_DASHBOARD_INPUT.viewMode;
+    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? DEFAULT_DASHBOARD_STATE.viewMode;
   };
 
   public storeViewMode = (viewMode: ViewMode) => {

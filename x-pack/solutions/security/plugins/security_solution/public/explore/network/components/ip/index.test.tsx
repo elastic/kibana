@@ -45,15 +45,15 @@ describe('Port', () => {
     expect(wrapper.find('[data-test-subj="formatted-ip"]').first().text()).toEqual('10.1.2.3');
   });
 
-  test('it dispalys a button which opens the network/ip side panel', () => {
+  test('it displays a button which opens the network/ip side panel', () => {
     const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="draggable-truncatable-content"]').find('a').first().text()
-    ).toEqual('10.1.2.3');
+    expect(wrapper.find('[data-test-subj="network-details"]').find('a').first().text()).toEqual(
+      '10.1.2.3'
+    );
   });
 });

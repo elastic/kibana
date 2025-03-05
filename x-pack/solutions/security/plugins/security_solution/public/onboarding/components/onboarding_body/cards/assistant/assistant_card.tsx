@@ -18,15 +18,15 @@ import { CenteredLoadingSpinner } from '../../../../../common/components/centere
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
+import { ConnectorsMissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
 import { useStoredAssistantConnectorId } from '../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { ConnectorCards } from '../common/connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
-import type { AssistantCardMetadata } from './types';
-import { MissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
 import type { AIConnector } from '../common/connectors/types';
+import type { AssistantCardMetadata } from './types';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,
@@ -61,8 +61,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
-    getLastConversationId,
+    getLastConversation,
+    setLastConversation,
   } = useAssistantContext();
   const {
     allSystemPrompts,
@@ -70,18 +70,19 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
     refetchCurrentUserConversations,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   const { currentConversation, handleOnConversationSelected } = useCurrentConversation({
     allSystemPrompts,
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(),
+    lastConversation: getLastConversation(),
     mayUpdateConversations:
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
+    setLastConversation,
   });
 
   const onConversationChange = useCallback(
@@ -188,7 +189,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <MissingPrivilegesCallOut />
+        <ConnectorsMissingPrivilegesCallOut level="read" />
       )}
     </OnboardingCardContentPanel>
   );

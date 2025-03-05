@@ -8562,6 +8562,12 @@
                     "description": "Maximum payload size in bytes that is allowed."
                   }
                 },
+                "protocol": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Protocol to serve the requests (\"http1\" | \"http2\")"
+                  }
+                },
                 "rewriteBasePath": {
                   "type": "boolean",
                   "_meta": {
@@ -10499,6 +10505,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableAssetInventory": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "search:includeFrozen": {
           "type": "boolean",
           "_meta": {
@@ -11028,15 +11040,6 @@
           "type": "text",
           "_meta": {
             "description": "Non-default value of setting."
-          }
-        },
-        "observability:logsExplorer:allowedDataViews": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "Non-default value of setting."
-            }
           }
         },
         "observability:logSources": {
