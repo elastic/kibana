@@ -75,6 +75,7 @@ export function observableIntoEventSourceStream(
     // `:` denotes a comment - this is to keep the connection open
     // it will be ignored by the SSE parser on the client
     stream.write(': keep-alive\n');
+    stream.flush();
   }, 10000);
 
   const subscription = withSerializedErrors$.subscribe({
