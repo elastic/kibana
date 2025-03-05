@@ -12,6 +12,7 @@ import { DATE_CATEGORY_LABELS } from '../i18n';
 import { ConversationList } from './conversation_list';
 import { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConversationsByDate, useConversationContextMenu } from '../hooks';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 jest.mock('../hooks/use_conversations_by_date', () => ({
   useConversationsByDate: jest.fn(),
@@ -91,6 +92,15 @@ const mockCategorizedConversations = {
   OLDER: [],
 };
 
+const mockAuthenticatedUser = {
+  username: 'my_username',
+  profile_uid: 'my_profile_uid',
+  authentication_realm: {
+    type: 'my_realm_type',
+    name: 'my_realm_name',
+  },
+} as AuthenticatedUser;
+
 const defaultProps = {
   conversations: mockConversations,
   isLoading: false,
@@ -102,6 +112,7 @@ const defaultProps = {
   setIsUpdatingConversationList: jest.fn(),
   refreshConversations: jest.fn(),
   updateDisplayedConversation: jest.fn(),
+  currentUser: mockAuthenticatedUser,
 };
 
 describe('ConversationList', () => {
