@@ -26,6 +26,17 @@ export async function indexDocument(esClient: Client, index: string, document: J
   return response;
 }
 
+export async function indexAndAssertTargetStream(
+  esClient: Client,
+  target: string,
+  document: JsonObject
+) {
+  const response = await esClient.index({ index: 'logs', document, refresh: 'wait_for' });
+  const result = await fetchDocument(esClient, target, response._id);
+  expect(result._index).to.match(new RegExp(`^\.ds\-${target}-.*`));
+  return result;
+}
+
 export async function fetchDocument(esClient: Client, index: string, id: string) {
   const query = {
     ids: { values: [id] },
@@ -82,6 +93,23 @@ export async function getStream(
 ) {
   return await apiClient
     .fetch('GET /api/streams/{name}', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function getIlmStats(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/lifecycle/_stats', {
       params: {
         path: {
           name,
