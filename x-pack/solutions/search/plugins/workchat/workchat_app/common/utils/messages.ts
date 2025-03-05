@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { UserMessage } from '../messages';
+import type { Message, UserMessage, AssistantMessage } from '../messages';
 
 export const userMessage = (content: string): UserMessage => {
   return {
     type: 'user',
     content,
   };
+};
+
+export const isUserMessage = (message: Message): message is UserMessage => {
+  return message.type === 'user';
+};
+
+export const isAssistantMessage = (message: Message): message is AssistantMessage => {
+  return message.type === 'assistant';
 };

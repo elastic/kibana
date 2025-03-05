@@ -59,9 +59,13 @@ export class ChatService {
       });
     }
 
-    // TODO: update with userMessageEvent(nextUserMessage)
+    conversation.events.push(userMessageEvent(nextUserMessage));
 
     const agent = await this.agentFactory.getAgent({ request, connectorId, agentId });
-    agent.run()
+    const agentOutput = await agent.run({ conversation });
+
+    // TODO: update conversation with new messages
+
+    return agentOutput;
   }
 }

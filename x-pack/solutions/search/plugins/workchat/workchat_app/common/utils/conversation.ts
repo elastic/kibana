@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ConversationMessageEvent } from '../conversations';
+import type { ConversationMessageEvent, ConversationEvent } from '../conversations';
 import type { Message } from '../messages';
 import { userMessage } from './messages';
 
@@ -27,4 +27,8 @@ export const userMessageEvent = (
   options: { id?: string; createdAt?: string } = {}
 ) => {
   return messageEvent(userMessage(content), options);
+};
+
+export const isMessageEvent = (event: ConversationEvent): event is ConversationMessageEvent => {
+  return event.type === 'message';
 };

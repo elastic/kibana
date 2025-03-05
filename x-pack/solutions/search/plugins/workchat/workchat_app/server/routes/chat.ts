@@ -31,7 +31,7 @@ export const registerChatRoutes = ({
       },
     },
     async (ctx, request, res) => {
-      const { agentFactory } = getServices();
+      const { chatService } = getServices();
 
       const { message } = request.body;
 
@@ -41,15 +41,13 @@ export const registerChatRoutes = ({
       });
 
       try {
-
-        const agent = await agentFactory.getAgent({
+        const { events$ } = await chatService.converse({
           request,
           agentId: 'TODO',
           connectorId: 'azure-gpt4',
-          // connectorId: '31bc61b3-ab11-4780-a0a5-9d2dace40ead',
+          nextUserMessage: message,
+          conversationId: undefined, // TODO
         });
-
-        const { events$ } = await agent.run({ message });
 
         return res.ok({
           headers: {
@@ -62,12 +60,9 @@ export const registerChatRoutes = ({
             logger,
           }),
         });
-      } catch (error) {
-        logger.error(error);
-        return res.customError({
-          statusCode: 500,
-          body: { message: 'Internal server error' },
-        });
+      } catch (err) {
+        logger.error(err);
+        throw err;
       }
     }
   );

@@ -40,7 +40,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <EuiPanel paddingSize="none" hasShadow={false} color="transparent">
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiText size="s">
             <h4>
