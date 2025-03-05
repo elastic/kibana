@@ -245,7 +245,7 @@ export class APMPlugin
       },
     });
 
-    return { config$, config: currentConfig };
+    return { config$ };
   }
 
   public start(core: CoreStart, plugins: APMPluginStartDependencies) {
