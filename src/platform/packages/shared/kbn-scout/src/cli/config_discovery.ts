@@ -9,6 +9,8 @@
 
 import fs from 'fs';
 import { Command } from '@kbn/dev-cli-runner';
+import { SCOUT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { resolve } from 'path';
 import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
 
@@ -39,13 +41,16 @@ export const discoverPlaywrightConfigs: Command<void> = {
 
     const finalMessage =
       pluginsMap.size === 0
-        ? 'No playwright config files found'
-        : `Found playwright config files in '${pluginsMap.size}' plugins`;
+        ? 'No Playwright config files found'
+        : `Found Playwright config files in '${pluginsMap.size}' plugins`;
 
     if (pluginsMap.size > 0 && flagsReader.boolean('save')) {
-      const filename = 'scout_test_configs.json';
-      fs.writeFileSync(filename, JSON.stringify(Object.fromEntries(pluginsMap), null, 2));
-      log.info(`${finalMessage}. Saved to '${filename}'`);
+      const scoutConfigsFilePath = resolve(SCOUT_OUTPUT_ROOT, 'scout_playwright_configs.json');
+      fs.writeFileSync(
+        scoutConfigsFilePath,
+        JSON.stringify(Object.fromEntries(pluginsMap), null, 2)
+      );
+      log.info(`${finalMessage}. Saved to '${scoutConfigsFilePath}'`);
       return;
     }
 
