@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden, badRequest } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -163,7 +163,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(conversation._source!)) {
-      throw new Error('Deleting a conversation is only allowed for the owner of the conversation.');
+      throw forbidden('Deleting a conversation is only allowed for the owner of the conversation.');
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
@@ -643,6 +643,10 @@ export class ObservabilityAIAssistantClient {
     conversationId: string;
     access: ConversationAccess;
   }) => {
+    if (![ConversationAccess.SHARED, ConversationAccess.PRIVATE].includes(access)) {
+      throw badRequest('Invalid access value. Allowed values are SHARED and PRIVATE.');
+    }
+
     const document = await this.getConversationWithMetaFields(conversationId);
     if (!document) {
       throw notFound();
@@ -654,7 +658,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(conversation)) {
-      throw new Error('Conversation access can only be updated by the owner of the conversation.');
+      throw forbidden('Conversation access can only be updated by the owner of the conversation.');
     }
 
     const isPublic = access === ConversationAccess.SHARED;
