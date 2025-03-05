@@ -1227,7 +1227,6 @@
     "react": "~18.2.0",
     "react-diff-view": "^3.2.1",
     "react-dom": "~18.2.0",
-    "react-dom-18": "npm:react-dom@~18.2.0",
     "react-dropzone": "^11.7.1",
     "react-fast-compare": "^2.0.4",
     "react-hook-form": "^7.44.2",
