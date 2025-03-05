@@ -48,10 +48,9 @@ export class ApmDataAccessPlugin
   }
 
   public start(core: CoreStart, plugins: ApmDataAccessServerDependencies) {
-    const getApmIndicesWithInternalUserFn = async () => {
-      const apmSourcesAccess = await plugins.apmSourcesAccess;
+    const getApmIndicesWithInternalUserFn = () => {
       const soClient = core.savedObjects.createInternalRepository();
-      return apmSourcesAccess.getApmIndices(soClient);
+      return plugins.apmSourcesAccess.getApmIndices(soClient);
     };
 
     const startServices = {
@@ -63,7 +62,7 @@ export class ApmDataAccessPlugin
         }),
     };
 
-    return { ...startServices };
+    return startServices;
   }
 
   public stop() {}

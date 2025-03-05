@@ -59,18 +59,22 @@ export class ApmSourcesAccessPlugin
     };
   }
 
-  public async start(core: CoreStart) {
-    try {
-      const soClient = core.savedObjects.createInternalRepository();
-      const indices = await this.getApmIndices(soClient);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(new SavedObjectsClient(soClient));
-      await uiSettingsClient.set(
-        OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID,
-        JSON.stringify(indices, null, 2)
-      );
-    } catch (e) {
-      this.logger.error(e);
-    }
+  public start(core: CoreStart) {
+    const initSettings = async () => {
+      try {
+        const soClient = core.savedObjects.createInternalRepository();
+        const indices = await this.getApmIndices(soClient);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(new SavedObjectsClient(soClient));
+        await uiSettingsClient.set(
+          OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID,
+          JSON.stringify(indices, null, 2)
+        );
+      } catch (e) {
+        this.logger.error(e);
+      }
+    };
+
+    initSettings();
 
     return {
       getApmIndices: this.getApmIndices,
