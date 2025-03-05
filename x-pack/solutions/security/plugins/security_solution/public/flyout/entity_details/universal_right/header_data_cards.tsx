@@ -33,7 +33,7 @@ export const HeaderDataCards = ({
   category,
   type,
 }: {
-  criticality?: string;
+  criticality?: CriticalityLevelWithUnassigned;
   id: string;
   category: string;
   type: string;

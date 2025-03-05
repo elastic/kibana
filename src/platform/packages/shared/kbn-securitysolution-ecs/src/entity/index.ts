@@ -14,6 +14,6 @@ export interface EntityEcs {
   type: 'container' | 'user' | 'host' | 'service';
   tags: string[];
   labels: Record<string, string>;
-  criticality: string;
+  criticality: 'low_impact' | 'medium_impact' | 'high_impact' | 'extreme_impact' | 'unassigned';
   category: string;
 }
