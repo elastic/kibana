@@ -137,11 +137,6 @@ export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/rules_app';
 export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 
-export const getNotifyWhenOptions = async () => {
-  const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
-  return NOTIFY_WHEN_OPTIONS;
-};
-
 export { transformRule } from './application/lib/rule_api/common_transformations';
 
 export { validateActionFilterQuery } from './application/lib/value_validators';
