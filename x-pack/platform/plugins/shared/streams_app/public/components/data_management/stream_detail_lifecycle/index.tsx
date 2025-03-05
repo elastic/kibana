@@ -27,6 +27,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
+import { IlmSummary } from './ilm_summary';
 import { IngestionRate } from './ingestion_rate';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
 import { getFormattedError } from '../../../util/errors';
@@ -205,18 +206,34 @@ export function StreamDetailLifecycle({
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
-      <EuiFlexGroup>
-        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-          <IngestionRate
-            definition={definition}
-            refreshStats={refreshStats}
-            isLoadingStats={isLoadingStats}
-            stats={stats}
-          />
-        </EuiPanel>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={2}>
+            <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
+              <IngestionRate
+                definition={definition}
+                refreshStats={refreshStats}
+                isLoadingStats={isLoadingStats}
+                stats={stats}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+
+          {isIlmLifecycle(definition.effective_lifecycle) ? (
+            <EuiFlexItem grow={3}>
+              <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
+                <IlmSummary
+                  definition={definition}
+                  lifecycle={definition.effective_lifecycle}
+                  ilmLocator={ilmLocator}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </>
   );
 }
