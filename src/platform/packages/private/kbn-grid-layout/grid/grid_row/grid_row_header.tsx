@@ -26,13 +26,13 @@ import { DeleteGridRowModal } from './delete_grid_row_modal';
 import { GridRowTitle } from './grid_row_title';
 
 export interface GridRowHeaderProps {
-  rowIndex: number;
+  rowId: string;
   toggleIsCollapsed: () => void;
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
 export const GridRowHeader = React.memo(
-  ({ rowIndex, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
+  ({ rowId, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
 
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -41,7 +41,7 @@ export const GridRowHeader = React.memo(
       gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
     );
     const [panelCount, setPanelCount] = useState<number>(
-      Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
+      Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels).length
     );
 
     useEffect(() => {
@@ -60,7 +60,7 @@ export const GridRowHeader = React.memo(
        */
       const panelCountSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
-          map((layout) => Object.keys(layout[rowIndex]?.panels ?? {}).length),
+          map((layout) => Object.keys(layout[rowId]?.panels ?? {}).length),
           distinctUntilChanged()
         )
         .subscribe((count) => {
@@ -71,23 +71,21 @@ export const GridRowHeader = React.memo(
         accessModeSubscription.unsubscribe();
         panelCountSubscription.unsubscribe();
       };
-    }, [gridLayoutStateManager, rowIndex]);
+    }, [gridLayoutStateManager, rowId]);
 
     const confirmDeleteRow = useCallback(() => {
       /**
        * Memoization of this callback does not need to be dependant on the React panel count
        * state, so just grab the panel count via gridLayoutStateManager instead
        */
-      const count = Object.keys(
-        gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-      ).length;
+      const count = Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels).length;
       if (!Boolean(count)) {
-        const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
+        const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowId);
         gridLayoutStateManager.gridLayout$.next(newLayout);
       } else {
         setDeleteModalVisible(true);
       }
-    }, [gridLayoutStateManager.gridLayout$, rowIndex]);
+    }, [gridLayoutStateManager.gridLayout$, rowId]);
 
     return (
       <>
@@ -97,10 +95,10 @@ export const GridRowHeader = React.memo(
           alignItems="center"
           css={styles.headerStyles}
           className="kbnGridRowHeader"
-          data-test-subj={`kbnGridRowHeader-${rowIndex}`}
+          data-test-subj={`kbnGridRowHeader-${rowId}`}
         >
           <GridRowTitle
-            rowIndex={rowIndex}
+            rowId={rowId}
             readOnly={readOnly}
             toggleIsCollapsed={toggleIsCollapsed}
             editTitleOpen={editTitleOpen}
@@ -118,7 +116,7 @@ export const GridRowHeader = React.memo(
                   <EuiText
                     color="subdued"
                     size="s"
-                    data-test-subj={`kbnGridRowHeader-${rowIndex}--panelCount`}
+                    data-test-subj={`kbnGridRowHeader-${rowId}--panelCount`}
                     className={'kbnGridLayout--panelCount'}
                   >
                     {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
@@ -166,7 +164,7 @@ export const GridRowHeader = React.memo(
           }
         </EuiFlexGroup>
         {deleteModalVisible && (
-          <DeleteGridRowModal rowIndex={rowIndex} setDeleteModalVisible={setDeleteModalVisible} />
+          <DeleteGridRowModal rowId={rowId} setDeleteModalVisible={setDeleteModalVisible} />
         )}
       </>
     );

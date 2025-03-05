@@ -22300,6 +22300,14 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "in": "query",
+            "name": "withPackagePoliciesCount",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -22619,10 +22627,6 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": [
-                                  "name",
-                                  "started_at"
-                                ],
                                 "type": "object"
                               },
                               "latest_install_failed_attempts": {
@@ -24278,10 +24282,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "name",
-                                "started_at"
-                              ],
                               "type": "object"
                             },
                             "latest_install_failed_attempts": {
@@ -25205,10 +25205,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "name",
-                                "started_at"
-                              ],
                               "type": "object"
                             },
                             "latest_install_failed_attempts": {
