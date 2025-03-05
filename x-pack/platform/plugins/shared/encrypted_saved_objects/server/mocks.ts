@@ -18,6 +18,7 @@ function createEncryptedSavedObjectsSetupMock(
 ) {
   return {
     registerType: jest.fn(),
+    registerType2: jest.fn(),
     __legacyCompat: { registerLegacyAPI: jest.fn() },
     canEncrypt,
     createMigration: jest.fn(),
