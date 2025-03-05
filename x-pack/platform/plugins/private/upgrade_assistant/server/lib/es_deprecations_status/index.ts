@@ -6,20 +6,37 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  ESUpgradeStatus,
+  FeatureSet,
+  DataStreamExclusions,
+  DataStreamsAction,
+} from '../../../common/types';
 import { getEnrichedDeprecations } from './migrations';
 import { getHealthIndicators } from './health_indicators';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient,
-  featureSet: FeatureSet
+  {
+    featureSet,
+    dataStreamExclusions,
+  }: { featureSet: FeatureSet; dataStreamExclusions: DataStreamExclusions }
 ): Promise<ESUpgradeStatus> {
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
     const enrichedDeprecations = await getEnrichedDeprecations(dataClient);
 
-    const toggledMigrationsDeprecations = enrichedDeprecations.filter(
-      ({ type, correctiveAction }) => {
+    const toggledMigrationsDeprecations = enrichedDeprecations
+      .map((deprecation) => {
+        if (deprecation.type === 'data_streams') {
+          const excludedActions = dataStreamExclusions[deprecation.index!];
+          (deprecation.correctiveAction as DataStreamsAction).metadata.excludedActions =
+            excludedActions;
+        }
+        return deprecation;
+      })
+      .filter(({ type, correctiveAction }) => {
         /**
          * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
          * is set to `false`.
@@ -49,8 +66,7 @@ export async function getESUpgradeStatus(
         }
 
         return true;
-      }
-    );
+      });
 
     const enrichedHealthIndicators = healthIndicators.filter(({ status }) => {
       return status !== 'green';

@@ -6,6 +6,7 @@
  */
 
 export interface DataStreamsActionMetadata {
+  excludedActions?: Array<'readOnly' | 'reindex'>;
   totalBackingIndices: number;
   indicesRequiringUpgradeCount: number;
   indicesRequiringUpgrade: string[];

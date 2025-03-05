@@ -21,6 +21,22 @@ const configSchema = schema.object({
     serverless: schema.boolean({ defaultValue: true }),
   }),
 
+  /**
+   * Exlcude certain data streams or backing indices from getting certain correctiveActions.
+   * The key is the data stream pattern and the value is an array of corrective actions to exclude.
+   *
+   * Exclude readOnly data streams from getting read-only corrective actions.
+   * This is needed to avoid breaking certain built-in/system functionality that might rely on writing to these data streams.
+   * Example (excludes read-only corrective actions for 7_17_data_stream):
+   * xpack.upgrade_assistant.dataStreamExclusions:
+   *    7_17_data_stream: ["readOnly"]
+   */
+  dataStreamExclusions: schema.recordOf(
+    schema.string(),
+    schema.arrayOf(schema.oneOf([schema.literal('readOnly'), schema.literal('reindex')])),
+    { defaultValue: {} }
+  ),
+
   featureSet: schema.object({
     /**
      * Ml Snapshot should only be enabled for major version upgrades. Currently this

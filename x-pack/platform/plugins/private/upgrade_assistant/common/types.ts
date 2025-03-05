@@ -329,3 +329,5 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
+
+export type DataStreamExclusions = Record<string, Array<'readOnly' | 'reindex'>>;

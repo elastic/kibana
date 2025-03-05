@@ -298,9 +298,9 @@ export const dataStreamMigrationServiceFactory = ({
             throw error.cannotGrabMetadata(`Index ${index} does not exist in this cluster.`);
           }
 
-          indicesRequiringUpgradeDocsSize += (indexStats[1] as any).total.store
+          indicesRequiringUpgradeDocsSize += (indexStats[1] as any).primaries.store
             .total_data_set_size_in_bytes;
-          indicesRequiringUpgradeDocsCount += (indexStats[1] as any).total.docs.count;
+          indicesRequiringUpgradeDocsCount += (indexStats[1] as any).primaries.docs.count;
 
           const body = await esClient.indices.getSettings({
             index,

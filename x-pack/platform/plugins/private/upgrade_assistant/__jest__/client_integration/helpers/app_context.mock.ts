@@ -77,6 +77,7 @@ shareMock.url.locators.get = (id: IdKey) => ({
 });
 
 export const getAppContextMock = (kibanaVersion: SemVer) => ({
+  dataStreamExclusions: {},
   featureSet: {
     mlSnapshots: true,
     migrateSystemIndices: true,
