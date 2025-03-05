@@ -24,7 +24,7 @@ export const logParallelFixture = base.extend<
 >({
   log: [
     ({}, use, workerInfo) => {
-      const loggerContext = `scout-worker-${workerInfo.workerIndex + 1}`;
+      const loggerContext = `scout-worker-${workerInfo.parallelIndex + 1}`;
       use(getLogger(loggerContext));
     },
     { scope: 'worker' },

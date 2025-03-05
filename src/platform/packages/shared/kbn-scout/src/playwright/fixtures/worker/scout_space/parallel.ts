@@ -96,10 +96,10 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const setDefaultTime = async ({ from, to }: { from: string; to: string }) => {
         return measurePerformanceAsync(log, `${spaceId}: 'uiSettings.setDefaultTime'`, async () => {
           const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
-          const untcTo = isValidUTCDate(to) ? to : formatTime(to);
+          const utcTo = isValidUTCDate(to) ? to : formatTime(to);
           return kbnClient.uiSettings.update(
             {
-              'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${untcTo}"}`,
+              'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${utcTo}"}`,
             },
             { space: spaceId }
           );

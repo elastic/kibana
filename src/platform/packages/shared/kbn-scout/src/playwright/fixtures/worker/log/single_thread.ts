@@ -23,7 +23,7 @@ export const logFixture = base.extend<
 >({
   log: [
     ({}, use) => {
-      use(getLogger('scout'));
+      use(getLogger('scout-worker'));
     },
     { scope: 'worker' },
   ],

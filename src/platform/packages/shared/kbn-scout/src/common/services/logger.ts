@@ -20,7 +20,14 @@ export class ScoutLogger extends ToolingLog {
    * @param name unique name of the service
    */
   public serviceLoaded(name: string) {
-    this.debug(`[service] ${name}`);
+    this.debug(`[${name}] loaded`);
+  }
+
+  /**
+   * Used to log a message for a service/fixture
+   */
+  public serviceMessage(name: string, message) {
+    this.debug(`[${name}] ${name}`);
   }
 }
 
