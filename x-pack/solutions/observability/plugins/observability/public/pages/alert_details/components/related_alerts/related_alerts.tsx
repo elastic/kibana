@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { AlertsGrouping } from '@kbn/alerts-grouping';
+import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
   ALERT_END,
@@ -25,41 +17,39 @@ import {
   ALERT_UUID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { BoolQuery, Filter, type Query } from '@kbn/es-query';
-import { AlertsGrouping } from '@kbn/alerts-grouping';
-import { GroupingToolbarControls } from '../../../components/alerts_table/grouping/grouping_toolbar_controls';
-import { ObservabilityFields } from '../../../../common/utils/alerting/types';
-
+import React, { useEffect, useRef, useState } from 'react';
+import { ObservabilityAlertsTable, TopAlert } from '../../../..';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
-} from '../../../../common/constants';
+} from '../../../../../common/constants';
 import {
   getRelatedAlertKuery,
   getSharedFields,
-} from '../../../../common/utils/alerting/get_related_alerts_query';
-import { ObservabilityAlertsTable, TopAlert } from '../../..';
+} from '../../../../../common/utils/alerting/get_related_alerts_query';
+import { ObservabilityFields } from '../../../../../common/utils/alerting/types';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../../../components/alert_search_bar/alert_search_bar_with_url_sync';
+import { ALERT_STATUS_FILTER } from '../../../../components/alert_search_bar/constants';
+import {
+  Provider,
+  alertSearchBarStateContainer,
+  useAlertSearchBarStateContainer,
+} from '../../../../components/alert_search_bar/containers';
 import {
   AlertSearchBarContainerState,
   DEFAULT_STATE,
-} from '../../../components/alert_search_bar/containers/state_container';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
-import { renderGroupPanel } from '../../../components/alerts_table/grouping/render_group_panel';
-import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';
-import { getAggregationsByGroupingField } from '../../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
-import { DEFAULT_GROUPING_OPTIONS } from '../../../components/alerts_table/grouping/constants';
-import { ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
-import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
-import {
-  alertSearchBarStateContainer,
-  Provider,
-  useAlertSearchBarStateContainer,
-} from '../../../components/alert_search_bar/containers';
-import { RELATED_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
-import { useKibana } from '../../../utils/kibana_react';
-import { buildEsQuery } from '../../../utils/build_es_query';
-import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
-import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
+} from '../../../../components/alert_search_bar/containers/state_container';
+import { DEFAULT_GROUPING_OPTIONS } from '../../../../components/alerts_table/grouping/constants';
+import { getAggregationsByGroupingField } from '../../../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
+import { getGroupStats } from '../../../../components/alerts_table/grouping/get_group_stats';
+import { GroupingToolbarControls } from '../../../../components/alerts_table/grouping/grouping_toolbar_controls';
+import { renderGroupPanel } from '../../../../components/alerts_table/grouping/render_group_panel';
+import { AlertsByGroupingAgg } from '../../../../components/alerts_table/types';
+import { RELATED_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../../constants';
+import { buildEsQuery } from '../../../../utils/build_es_query';
+import { useKibana } from '../../../../utils/kibana_react';
+import { mergeBoolQueries } from '../../../alerts/helpers/merge_bool_queries';
+import { EmptyState } from './empty_state';
 
 const ALERTS_PER_PAGE = 50;
 const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
@@ -165,50 +155,6 @@ export function InternalRelatedAlerts({ alert }: Props) {
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-}
-
-const heights = {
-  tall: 490,
-  short: 250,
-};
-const panelStyle = {
-  maxWidth: 500,
-};
-
-function EmptyState() {
-  return (
-    <EuiPanel color="subdued" data-test-subj="relatedAlertsTabEmptyState">
-      <EuiFlexGroup style={{ height: heights.tall }} alignItems="center" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={true} style={panelStyle}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <EuiTitle>
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.observability.pages.alertDetails.relatedAlerts.empty.title"
-                        defaultMessage="Problem loading related alerts"
-                      />
-                    </h3>
-                  </EuiTitle>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.observability.pages.alertDetails.relatedAlerts.empty.description"
-                      defaultMessage="Due to an unexpected error, no related alerts can be found."
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
   );
 }
 

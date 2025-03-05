@@ -35,7 +35,7 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
-import { RelatedAlerts } from './components/related_alerts';
+import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
