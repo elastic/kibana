@@ -96,7 +96,6 @@ describe('TableActionsPopover', () => {
     expect(screen.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(screen.getByTestId('table-actions-archive')).toBeInTheDocument();
     expect(screen.getByTestId('table-actions-delete')).toBeInTheDocument();
-
   });
 
   test('it shows the correct actions when a maintenance window is finished', () => {
