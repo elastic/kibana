@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-type Truthy<T> = T extends null | undefined | false | '' | 0 | 0n ? never : T;
-export const truthy = <T>(value: T): value is Truthy<T> => !!value;
+import { RuleCreateProps } from './create_detection_rule';
+
+export interface RuleResponse extends RuleCreateProps {
+  id: string;
+}
