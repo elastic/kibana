@@ -815,8 +815,8 @@ paths:
                   * The event's destination IP address *and* port number matches
                   destination IP *and* port values in the `threat_index` index. 
 
-                  * Jacek The event's source IP address matches a host IP
-                  address value in the `threat_index` index.
+                  * The event's source IP address matches a host IP address
+                  value in the `threat_index` index.
                 summary: Indicator match rule
                 value:
                   actions: []

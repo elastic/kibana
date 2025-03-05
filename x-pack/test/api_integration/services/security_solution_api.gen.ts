@@ -385,6 +385,7 @@ If a record already exists for the specified entity, that record is overwritten 
 
 > warn
 > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
 You can create the following types of rules:
@@ -395,7 +396,7 @@ You can create the following types of rules:
   For example, if the threshold `field` is `source.ip` and its `value` is `10`, an alert is generated for every source IP address that appears in at least 10 of the rule's search results. If you're interested, see [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) for more information.
 * **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/{ecs_version}/ecs-reference.html).
 * **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
-* **[Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)**: Uses ES|QL to find events and aggregate search results.
+* **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
 * **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
 
 > info
@@ -1197,6 +1198,7 @@ finalize it.
 
 > warn
 > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
 > info
@@ -1337,19 +1339,14 @@ providing you with the most current and effective threat detection capabilities.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
+      * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
 
 The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
 
 > warn
-> When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-You can use `PUT` or `PATCH` methods to update rules, where:
-
-* `PUT` replaces the original rule and deletes fields that are not specified.
-* `PATCH` updates the specified fields.
 
 > info
 > You cannot modify the `id` or `rule_id` values.
@@ -1701,14 +1698,9 @@ The `id` is a unique identifier for each data item, while `rule_id` is a unique 
 The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
 
 > warn
-> When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-You can use `PUT` or `PATCH` methods to update rules, where:
-
-* `PUT` replaces the original rule and deletes fields that are not specified.
-* `PATCH` updates the specified fields.
 
 > info
 > You cannot modify the `id` or `rule_id` values.
