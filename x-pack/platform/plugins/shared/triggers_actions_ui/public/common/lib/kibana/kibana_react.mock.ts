@@ -20,6 +20,7 @@ import type { TriggersAndActionsUiServices } from '../../../application/rules_ap
 import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -68,6 +69,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     isServerless: false,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
+    fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   } as TriggersAndActionsUiServices;
 };
 

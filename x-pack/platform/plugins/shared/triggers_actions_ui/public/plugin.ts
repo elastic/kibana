@@ -35,46 +35,62 @@ import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
+import type { RuleUiAction } from './types';
 
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import { getActionFormLazy } from './common/get_action_form';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
-import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
-import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
-import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
-import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
-import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
+import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
+import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
+import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
+import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
+import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
+import { TriggersActionsUiConfigType } from '../common/types';
+import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
+import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
+import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
+import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
+import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
+import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
+import { getRuleDefinitionLazy } from './common/get_rule_definition';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
+import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 
 import type {
   ActionTypeModel,
-  RuleAddProps,
-  RuleEditProps,
-  RuleTypeModel,
-  RuleTypeParams,
-  RuleTypeMetaData,
-  RuleStatusDropdownProps,
-  RuleTagFilterProps,
-  RuleStatusFilterProps,
-  RuleTagBadgeProps,
-  RuleTagBadgeOptions,
-  RuleEventLogListProps,
-  RuleEventLogListOptions,
-  GlobalRuleEventLogListProps,
-  RulesListProps,
-  RulesListNotifyBadgePropsWithApi,
+  ConnectorServices,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
-  ConnectorServices,
+  GlobalRuleEventLogListProps,
   RuleDefinitionProps,
+  RuleEventLogListOptions,
+  RuleEventLogListProps,
+  RuleStatusDropdownProps,
+  RuleStatusFilterProps,
+  RuleTagBadgeOptions,
+  RuleTagBadgeProps,
+  RuleTagFilterProps,
+  RuleTypeModel,
+  RulesListNotifyBadgePropsWithApi,
+  RulesListProps,
 } from './types';
+
 import type { TriggersActionsUiConfigType } from '../common/types';
 import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PAGE_ID } from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -108,18 +124,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddRuleFlyout: <
-    Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
-  >(
-    props: Omit<RuleAddProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleAddProps<Params, MetaData>>;
-  getEditRuleFlyout: <
-    Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
-  >(
-    props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleEditProps<Params, MetaData>>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
@@ -167,6 +171,7 @@ interface PluginsStart {
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class Plugin
@@ -304,6 +309,7 @@ export class Plugin
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
           lens: pluginsStart.lens,
+          fieldsMetadata: pluginsStart.fieldsMetadata,
         });
       },
     });
@@ -400,6 +406,7 @@ export class Plugin
             isServerless: !!pluginsStart.serverless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
           });
         },
       });
@@ -451,22 +458,6 @@ export class Plugin
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
-          connectorServices: this.connectorServices!,
-        });
-      },
-      getAddRuleFlyout: (props) => {
-        return getAddRuleFlyoutLazy({
-          ...props,
-          actionTypeRegistry: this.actionTypeRegistry,
-          ruleTypeRegistry: this.ruleTypeRegistry,
-          connectorServices: this.connectorServices!,
-        });
-      },
-      getEditRuleFlyout: (props) => {
-        return getEditRuleFlyoutLazy({
-          ...props,
-          actionTypeRegistry: this.actionTypeRegistry,
-          ruleTypeRegistry: this.ruleTypeRegistry,
           connectorServices: this.connectorServices!,
         });
       },
