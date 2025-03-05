@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    it(`does NOT import customized prebuilt rules when feature flag is disabled`, async () => {
+    it(`does NOT import customized prebuilt rules when rule customization is disabled`, async () => {
       const ruleId = 'prebuilt-rule-to-be-customized';
       const ruleParams = getCustomQueryRuleParams({
         rule_id: ruleId,

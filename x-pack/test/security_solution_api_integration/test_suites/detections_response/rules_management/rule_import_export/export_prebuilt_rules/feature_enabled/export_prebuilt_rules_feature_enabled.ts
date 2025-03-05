@@ -7,15 +7,15 @@
 
 import expect from 'expect';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   binaryToString,
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
-} from '../../../utils';
-import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+} from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('Bulk actions export API - exports prebuilt rules if the feature flag is enabled', async () => {
+    it('Bulk actions export API - exports prebuilt rules', async () => {
       const ruleAsset = createRuleAssetSavedObject({ rule_id: 'prebuilt-rule-1', version: 1 });
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
       await installPrebuiltRules(es, supertest);

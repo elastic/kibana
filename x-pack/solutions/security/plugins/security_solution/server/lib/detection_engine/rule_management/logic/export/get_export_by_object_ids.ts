@@ -29,7 +29,8 @@ export const getExportByObjectIds = async (
   ruleIds: string[],
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
-  actionsClient: ActionsClient
+  actionsClient: ActionsClient,
+  isPrebuiltRulesExportAllowed?: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -37,7 +38,11 @@ export const getExportByObjectIds = async (
   actionConnectors: string;
 }> =>
   withSecuritySpan('getExportByObjectIds', async () => {
-    const rulesAndErrors = await fetchRulesByIds(rulesClient, ruleIds);
+    const rulesAndErrors = await fetchRulesByIds(
+      rulesClient,
+      ruleIds,
+      isPrebuiltRulesExportAllowed
+    );
     const { rules, missingRuleIds } = rulesAndErrors;
 
     // Retrieve exceptions
@@ -76,7 +81,8 @@ interface FetchRulesResult {
 
 const fetchRulesByIds = async (
   rulesClient: RulesClient,
-  ruleIds: string[]
+  ruleIds: string[],
+  isPrebuiltRulesExportAllowed?: boolean
 ): Promise<FetchRulesResult> => {
   // It's important to avoid too many clauses in the request otherwise ES will fail to process the request
   // with `too_many_clauses` error (see https://github.com/elastic/kibana/issues/170015). The clauses limit
@@ -108,7 +114,9 @@ const fetchRulesByIds = async (
       const rulesAndErrors = ids.map((ruleId) => {
         const matchingRule = rulesMap.get(ruleId);
 
-        return matchingRule != null && hasValidRuleType(matchingRule)
+        return matchingRule != null &&
+          hasValidRuleType(matchingRule) &&
+          (isPrebuiltRulesExportAllowed || matchingRule.params.immutable !== true)
           ? {
               rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
             }

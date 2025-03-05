@@ -11,7 +11,7 @@ import type { ISavedObjectsExporter, KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { getRules } from '../search/get_existing_prepackaged_rules';
+import { getNonPackagedRules, getRules } from '../search/get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
@@ -23,14 +23,17 @@ export const getExportAll = async (
   exceptionsClient: ExceptionListClient | undefined,
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
-  actionsClient: ActionsClient
+  actionsClient: ActionsClient,
+  isPrebuiltRulesExportAllowed?: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
   exceptionLists: string | null;
   actionConnectors: string;
 }> => {
-  const ruleAlertTypes = await getRules({ rulesClient, filter: '' });
+  const ruleAlertTypes = isPrebuiltRulesExportAllowed
+    ? await getRules({ rulesClient, filter: '' })
+    : await getNonPackagedRules({ rulesClient });
   const rules = transformAlertsToRules(ruleAlertTypes);
 
   const exportRules = rules.map((r) => transformRuleToExportableFormat(r));

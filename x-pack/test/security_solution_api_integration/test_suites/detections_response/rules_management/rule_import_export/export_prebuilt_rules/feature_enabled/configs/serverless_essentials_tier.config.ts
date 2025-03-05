@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../config/serverless/config.base.essentials';
+import { createTestConfig } from '../../../../../../../config/serverless/config.base.essentials';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
