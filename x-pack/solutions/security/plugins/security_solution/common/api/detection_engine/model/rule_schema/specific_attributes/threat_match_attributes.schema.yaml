@@ -19,7 +19,7 @@ components:
         - type: must be mapping
         - value: field from the Elasticsearch threat index
           
-        You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See below for an example that uses both and and or logic.
+        You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
       minItems: 1
       items:
         type: object

@@ -1206,8 +1206,13 @@ The `id` is a unique identifier for each data item, while `rule_id` is a unique 
     * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
 - Exception lists
+
 > info
-> You cannot export prebuilt rules.
+> Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/8.17/managing-saved-objects.html#managing-saved-objects-export-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-export.html) and [import](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-import.html) any necessary connectors before importing detection rules.
+
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async exportRules(props: ExportRulesProps) {
@@ -1692,6 +1697,20 @@ finalize it.
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
 
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+> info
+> To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
+
+> info
+> Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/8.17/managing-saved-objects.html#managing-saved-objects-export-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-export.html) and [import](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-import.html) any necessary connectors before importing detection rules.
+
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.DO
+
     */
   async importRules(props: ImportRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ImportRules`);
@@ -1781,8 +1800,19 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Install and update all Elastic prebuilt detection rules and Timelines.
-   */
+    * Install and update all Elastic prebuilt detection rules and Timelines.
+
+This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+When you call this endpoint, it will:
+- Install any new prebuilt detection rules that are not currently installed in your system.
+- Update any existing prebuilt detection rules that have been modified or improved by Elastic.
+- Install any new prebuilt Timelines that are not currently installed in your system.
+- Update any existing prebuilt Timelines that have been modified or improved by Elastic.
+
+This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+providing you with the most current and effective threat detection capabilities.
+
+    */
   async installPrebuiltRulesAndTimelines() {
     this.log.info(`${new Date().toISOString()} Calling API InstallPrebuiltRulesAndTimelines`);
     return this.kbnClient
@@ -1902,8 +1932,14 @@ You can use `PUT` or `PATCH` methods to update rules, where:
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
-   */
+    * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+
+> warn
+> When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async performRulesBulkAction(props: PerformRulesBulkActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API PerformRulesBulkAction`);
     return this.kbnClient
@@ -2012,8 +2048,11 @@ You can use `PUT` or `PATCH` methods to update rules, where:
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
-   */
+    * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+
+This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
+
+    */
   async readPrebuiltRulesAndTimelinesStatus() {
     this.log.info(`${new Date().toISOString()} Calling API ReadPrebuiltRulesAndTimelinesStatus`);
     return this.kbnClient
