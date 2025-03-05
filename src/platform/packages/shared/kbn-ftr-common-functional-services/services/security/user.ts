@@ -32,11 +32,12 @@ export class User {
     this.log.debug(`created user ${username}`);
   }
 
-  public async delete(username: string) {
+  public async delete(username: string, options?: { retries?: number }) {
     this.log.debug(`deleting user ${username}`);
     const { data, status, statusText } = await this.kbnClient.request({
       path: `/internal/security/users/${username}`,
       method: 'DELETE',
+      retries: options?.retries,
     });
     if (status !== 204) {
       throw new Error(

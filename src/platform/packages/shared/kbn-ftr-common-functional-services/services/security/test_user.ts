@@ -10,8 +10,6 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 
-import type { Browser } from '../browser';
-import type { TestSubjects } from '../test_subjects';
 import { Role } from './role';
 import { User } from './user';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
@@ -23,15 +21,13 @@ export class TestUser extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
 
-  private readonly browser: Browser | void =
+  private readonly browser =
     // browser service is not normally available in common.
-    this.ctx.hasService('browser') ? (this.ctx.getService('browser' as any) as Browser) : undefined;
+    this.ctx.hasService('browser') ? this.ctx.getService('browser' as any) : undefined;
 
-  private readonly testSubjects: TestSubjects | undefined =
+  private readonly testSubjects =
     // testSubject service is not normally available in common.
-    this.ctx.hasService('testSubjects')
-      ? (this.ctx.getService('testSubjects' as any) as TestSubjects)
-      : undefined;
+    this.ctx.hasService('testSubjects') ? this.ctx.getService('testSubjects' as any) : undefined;
 
   constructor(
     ctx: FtrProviderContext,
@@ -129,7 +125,7 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
 
     // delete the test_user if present (will it error if the user doesn't exist?)
     try {
-      await user.delete(TEST_USER_NAME);
+      await user.delete(TEST_USER_NAME, { retries: 1 });
     } catch (exception) {
       log.debug('no test user to delete');
     }
