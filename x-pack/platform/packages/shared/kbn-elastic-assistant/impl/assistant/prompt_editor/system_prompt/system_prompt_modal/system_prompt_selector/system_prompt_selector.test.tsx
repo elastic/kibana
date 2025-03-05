@@ -8,15 +8,15 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { SystemPromptSelector } from './system_prompt_selector';
-import { mockSystemPrompts } from '../../../../../mock/system_prompt';
+import { mockSystemPromptSettings } from '../../../../../mock/system_prompt';
 
 const onSystemPromptSelectionChange = jest.fn();
 const onSystemPromptDeleted = jest.fn();
 const testProps = {
-  systemPrompts: mockSystemPrompts,
+  systemPrompts: mockSystemPromptSettings,
   onSystemPromptSelectionChange,
   onSystemPromptDeleted,
-  selectedSystemPrompt: mockSystemPrompts[0],
+  selectedSystemPrompt: mockSystemPromptSettings[0],
 };
 
 describe('SystemPromptSelector', () => {
@@ -25,17 +25,17 @@ describe('SystemPromptSelector', () => {
   });
   it('Selects an existing system prompt', () => {
     const { getByTestId } = render(<SystemPromptSelector {...testProps} />);
-    expect(getByTestId('comboBoxSearchInput')).toHaveValue(mockSystemPrompts[0].name);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(mockSystemPromptSettings[0].name);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    fireEvent.click(getByTestId(`systemPromptSelector-${mockSystemPrompts[1].id}`));
-    expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(mockSystemPrompts[1]);
+    fireEvent.click(getByTestId(`systemPromptSelector-${mockSystemPromptSettings[1].id}`));
+    expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(mockSystemPromptSettings[1]);
   });
   it('Deletes a system prompt that is not selected', () => {
     const { getByTestId, getAllByTestId } = render(<SystemPromptSelector {...testProps} />);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete system prompt because there is only one custom option
     fireEvent.click(getAllByTestId('delete-prompt')[1]);
-    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPrompts[1].id);
+    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPromptSettings[1].id);
     expect(onSystemPromptSelectionChange).not.toHaveBeenCalled();
   });
   it('Deletes a system prompt that is selected', () => {
@@ -43,20 +43,20 @@ describe('SystemPromptSelector', () => {
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete system prompt because there is only one custom option
     fireEvent.click(getAllByTestId('delete-prompt')[0]);
-    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPrompts[0].id);
+    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPromptSettings[0].id);
     expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(undefined);
   });
   it('Selects existing system prompt from the search input', () => {
     const { getByTestId } = render(<SystemPromptSelector {...testProps} />);
     fireEvent.change(getByTestId('comboBoxSearchInput'), {
-      target: { value: mockSystemPrompts[1].name },
+      target: { value: mockSystemPromptSettings[1].name },
     });
     fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
       key: 'Enter',
       code: 'Enter',
       charCode: 13,
     });
-    expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(mockSystemPrompts[1]);
+    expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(mockSystemPromptSettings[1]);
   });
   it('Reset settings every time before selecting an system prompt from the input if resetSettings is provided', () => {
     const mockResetSettings = jest.fn();
@@ -65,7 +65,7 @@ describe('SystemPromptSelector', () => {
     );
     // changing the selection
     fireEvent.change(getByTestId('comboBoxSearchInput'), {
-      target: { value: mockSystemPrompts[1].name },
+      target: { value: mockSystemPromptSettings[1].name },
     });
     fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
       key: 'Enter',
