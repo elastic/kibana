@@ -12,15 +12,22 @@ import type {
   AuditLogger,
   IScopedClusterClient,
   AnalyticsServiceSetup,
+  AuditEvent,
 } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  EngineComponentResourceEnum,
+  type EngineComponentResource,
+} from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indices';
 import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from './constants';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { PrivilegeMonitoringEngineActions } from './auditing/actions';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -64,6 +71,12 @@ export class PrivilegeMonitoringDataClient {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
+
+    this.audit(
+      PrivilegeMonitoringEngineActions.INIT,
+      EngineComponentResourceEnum.privmon_engine,
+      'Initializing privilege monitoring engine'
+    );
 
     await this.createOrUpdateIndex().catch((e) => {
       if (e.meta.body.error.type === 'resource_already_exists_exception') {
@@ -121,5 +134,38 @@ export class PrivilegeMonitoringDataClient {
     this.opts.logger[level](
       `[Privileged Monitoring Engine][namespace: ${this.opts.namespace}] ${msg}`
     );
+  }
+
+  private audit(
+    action: PrivilegeMonitoringEngineActions,
+    resource: EngineComponentResource,
+    msg: string,
+    error?: Error
+  ) {
+    // NOTE: Excluding errors, all auditing events are currently WRITE events, meaning the outcome is always UNKNOWN.
+    // This may change in the future, depending on the audit action.
+    const outcome = error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.UNKNOWN;
+
+    const type =
+      action === PrivilegeMonitoringEngineActions.CREATE
+        ? AUDIT_TYPE.CREATION
+        : PrivilegeMonitoringEngineActions.DELETE
+        ? AUDIT_TYPE.DELETION
+        : AUDIT_TYPE.CHANGE;
+
+    const category = AUDIT_CATEGORY.DATABASE;
+
+    const message = error ? `${msg}: ${error.message}` : msg;
+    const event: AuditEvent = {
+      message: `[Privilege Monitoring] ${message}`,
+      event: {
+        action: `${action}_${resource}`,
+        category,
+        outcome,
+        type,
+      },
+    };
+
+    return this.opts.auditLogger?.log(event);
   }
 }
