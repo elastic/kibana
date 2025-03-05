@@ -27,6 +27,7 @@ export const TEST_SUBJ_PAGE_TITLE = 'asset-inventory-test-subj-page-title';
 export const TEST_SUBJ_EMPTY_STATE = 'asset-inventory-empty-state';
 export const TEST_SUBJ_GROUPING = 'asset-inventory-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'asset-inventory-grouping-loading';
+export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
 
 export const DOCS_URL = 'https://ela.st/asset-inventory';
 
