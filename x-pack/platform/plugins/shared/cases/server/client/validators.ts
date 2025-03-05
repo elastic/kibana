@@ -133,9 +133,12 @@ export const validateObservableValue = (
   observableTypeKey: string | undefined,
   observableValue: unknown
 ) => {
-  const validationError = getValidatorForObservableType(observableTypeKey)(observableValue);
+  const validator = getValidatorForObservableType(observableTypeKey);
+  const validationError = validator(observableValue);
 
   if (validationError) {
-    throw Boom.badRequest('Observable value is not valid for selected observable type.');
+    throw Boom.badRequest(
+      `Observable value "${observableValue}" is not valid for selected observable type ${observableTypeKey}.`
+    );
   }
 };
