@@ -341,13 +341,11 @@ export const buildExceptionFilter = async <
   });
 
   agent.setCustomContext({
-    exceptions: {
-      [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]:
-        unprocessableValueListExceptions.length + unprocessableExceptionItems.length,
-      [SECURITY_NUM_REGULAR_EXCEPTIONS]: exceptionsWithoutValueLists.length,
-      [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]:
-        exceptionsWithValueLists.length - unprocessableExceptionItems.length,
-    },
+    [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]:
+      unprocessableValueListExceptions.length + unprocessableExceptionItems.length,
+    [SECURITY_NUM_REGULAR_EXCEPTIONS]: exceptionsWithoutValueLists.length,
+    [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]:
+      exceptionsWithValueLists.length - unprocessableExceptionItems.length,
   });
 
   const exceptionFilter: Filter = {
