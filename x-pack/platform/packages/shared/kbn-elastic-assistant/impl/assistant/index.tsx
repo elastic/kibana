@@ -338,6 +338,11 @@ const AssistantComponent: React.FC<Props> = ({
       anonymizationFields
     ) {
       setAutoPopulatedOnce(true);
+      console.log('promptContexts', {
+        promptContexts,
+        selectedPromptContexts,
+        promptContext,
+      });
 
       if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
         const addNewSelectedPromptContext = async () => {

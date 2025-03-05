@@ -17,8 +17,9 @@ export async function getNewSelectedPromptContext({
   anonymizationFields?: FindAnonymizationFieldsResponse;
   promptContext: PromptContext;
 }): Promise<SelectedPromptContext> {
+  console.log('promptContext', promptContext);
   const rawData = await promptContext.getPromptContext();
-
+  console.log('rawData', rawData);
   if (typeof rawData === 'string') {
     return {
       contextAnonymizationFields: undefined,
@@ -42,6 +43,8 @@ export async function getNewSelectedPromptContext({
       ],
       []
     );
+    console.log('anonymizationFields', anonymizationFields);
+    console.log('extendedAnonymizationData', extendedAnonymizationData);
     return {
       contextAnonymizationFields: {
         page: 1,

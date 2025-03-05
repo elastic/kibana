@@ -17,7 +17,8 @@ export const PanelFooter = () => (
   <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
     <EuiPanel color="transparent">
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false} />
+        <EuiFlexItem grow={false}>{'Add to case'}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{'Ask AI Assistant'}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   </EuiFlyoutFooter>
