@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiContextMenuItem, EuiTabs, EuiTab } from '@elastic/eui';
@@ -69,7 +70,11 @@ export class InspectorViewChooser extends Component<Props, State> {
           isSelected={true}
           data-test-subj={`inspectorViewChooser${this.props.selectedView.title}`}
         >
-          {this.props.selectedView.title}
+          <FormattedMessage
+            id="inspector.view"
+            defaultMessage="View: {viewName}"
+            values={{ viewName: this.props.selectedView.title }}
+          />
         </EuiTab>
       </EuiTabs>
     );
