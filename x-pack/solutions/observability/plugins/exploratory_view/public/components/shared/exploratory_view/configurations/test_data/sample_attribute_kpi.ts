@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  ATTR_PROCESSOR_EVENT,
+  ATTR_TIMESTAMP,
+  ATTR_TRANSACTION_TYPE,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { mockDataView } from '../../rtl_helpers';
 import { RECORDS_FIELD } from '../constants';
 
@@ -33,20 +39,20 @@ export const sampleAttributeKpi = {
               'x-axis-column-layer0': {
                 dataType: 'date',
                 isBucketed: true,
-                label: '@timestamp',
+                label: ATTR_TIMESTAMP,
                 operationType: 'date_histogram',
                 params: {
                   interval: 'auto',
                   includeEmptyRows: true,
                 },
                 scale: 'interval',
-                sourceField: '@timestamp',
+                sourceField: ATTR_TIMESTAMP,
               },
               'y-axis-column-layer0-0': {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'transaction.type: page-load and processor.event: transaction',
+                  query: `${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION}`,
                 },
                 isBucketed: false,
                 label: 'test-series',
@@ -64,7 +70,7 @@ export const sampleAttributeKpi = {
     filters: [],
     query: {
       language: 'kuery',
-      query: 'transaction.type: page-load and processor.event: transaction',
+      query: `${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION}`,
     },
     visualization: {
       axisTitlesVisibilitySettings: {

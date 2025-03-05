@@ -5,8 +5,15 @@
  * 2.0.
  */
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  ATTR_HOST_ID,
+  ATTR_PROFILING_AGENT_CONFIG_PROBABILISTIC_THRESHOLD,
+  ATTR_PROFILING_AGENT_START_TIME,
+  ATTR_PROFILING_HOST_NAME,
+  ATTR_PROFILING_PROJECT_ID,
+  ATTR_TIMESTAMP,
+} from '@kbn/observability-ui-semantic-conventions';
 import { keyBy } from 'lodash';
-import { ProfilingESField } from '@kbn/profiling-utils';
 import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 interface HostDetails {
@@ -37,10 +44,10 @@ export async function getProfilingHostsDetailsById({
     query: {
       bool: {
         filter: [
-          { terms: { [ProfilingESField.HostID]: hostIds } },
+          { terms: { [ATTR_HOST_ID]: hostIds } },
           {
             range: {
-              [ProfilingESField.Timestamp]: {
+              [ATTR_TIMESTAMP]: {
                 gte: String(timeFrom),
                 lt: String(timeTo),
                 format: 'epoch_second',
@@ -54,30 +61,30 @@ export async function getProfilingHostsDetailsById({
     aggs: {
       hostIds: {
         terms: {
-          field: ProfilingESField.HostID,
+          field: ATTR_HOST_ID,
         },
         aggs: {
           hostNames: {
             top_metrics: {
-              metrics: { field: 'profiling.host.name' },
+              metrics: { field: ATTR_PROFILING_HOST_NAME },
               sort: '_score',
             },
           },
           projectIds: {
             terms: {
-              field: 'profiling.project.id',
+              field: ATTR_PROFILING_PROJECT_ID,
             },
             aggs: {
               probabilisticValues: {
                 terms: {
-                  field: 'profiling.agent.config.probabilistic_threshold',
+                  field: ATTR_PROFILING_AGENT_CONFIG_PROBABILISTIC_THRESHOLD,
                   size: 5,
                   order: { agentFirstStartDate: 'desc' },
                 },
                 aggs: {
                   agentFirstStartDate: {
                     min: {
-                      field: 'profiling.agent.start_time',
+                      field: ATTR_PROFILING_AGENT_START_TIME,
                     },
                   },
                 },
@@ -92,7 +99,7 @@ export async function getProfilingHostsDetailsById({
   const hostsDetails =
     resp.aggregations?.hostIds.buckets.map((bucket): HostDetails => {
       const hostId = bucket.key as string;
-      const hostName = bucket.hostNames.top[0].metrics['profiling.host.name'] as string;
+      const hostName = bucket.hostNames.top[0].metrics[ATTR_PROFILING_HOST_NAME] as string;
 
       const probabilisticValuesPerProject = bucket.projectIds.buckets.map((projectIdBucket) => {
         const projectId = projectIdBucket.key as string;

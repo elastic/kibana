@@ -7,6 +7,10 @@
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '@kbn/profiling-utils';
+import {
+  ATTR_HOST_ID,
+  ATTR_PROFILING_PROJECT_ID,
+} from '@kbn/observability-ui-semantic-conventions';
 import type { StorageExplorerHostDetails } from '../../../common/storage_explorer';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -58,12 +62,12 @@ export async function getHostDetails({
       aggs: {
         hosts: {
           terms: {
-            field: ProfilingESField.HostID,
+            field: ATTR_HOST_ID,
           },
           aggs: {
             projectIds: {
               terms: {
-                field: 'profiling.project.id',
+                field: ATTR_PROFILING_PROJECT_ID,
               },
               aggs: {
                 indices: {

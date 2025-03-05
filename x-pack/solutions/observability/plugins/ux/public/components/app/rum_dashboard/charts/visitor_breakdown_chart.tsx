@@ -13,12 +13,17 @@ import {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import {
+  ATTR_PROCESSOR_EVENT,
+  ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
+  ATTR_TRANSACTION_TYPE,
+  ATTR_URL_FULL,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { EuiText } from '@elastic/eui';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { getEsFilter } from '../../../../services/data/get_es_filter';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { UxUIFilters } from '../../../../../typings/ui_filters';
@@ -202,15 +207,15 @@ export function getVisitorBreakdownLensAttributes({
           query: {
             bool: {
               filter: [
-                { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+                { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
                 {
                   terms: {
-                    [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
+                    [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_TRANSACTION],
                   },
                 },
                 {
                   exists: {
-                    field: 'transaction.marks.navigationTiming.fetchStart',
+                    field: ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
                   },
                 },
                 ...getEsFilter(uiFilters),
@@ -218,7 +223,7 @@ export function getVisitorBreakdownLensAttributes({
                   ? [
                       {
                         wildcard: {
-                          'url.full': `*${urlQuery}*`,
+                          [ATTR_URL_FULL]: `*${urlQuery}*`,
                         },
                       },
                     ]

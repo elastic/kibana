@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import {
+  ATTR_PROCESSOR_EVENT,
+  ATTR_SERVICE_NAME,
+  ATTR_TRANSACTION_DURATION_US,
+  ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
+  ATTR_TRANSACTION_TYPE,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
 
 export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
@@ -23,11 +29,11 @@ export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
     filterFields: [],
     seriesTypes: [],
     hasOperationType: true,
-    definitionFields: ['service.name'],
+    definitionFields: [ATTR_SERVICE_NAME],
     reportType: 'single-metric',
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
+      ...buildPhraseFilter(ATTR_TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, 'transaction', dataView),
     ],
     metricOptions: [
       {
@@ -37,17 +43,17 @@ export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
       },
       {
         id: 'page_load_time',
-        field: 'transaction.duration.us',
+        field: ATTR_TRANSACTION_DURATION_US,
         label: 'Page load time',
       },
       {
         id: 'backend_time',
-        field: 'transaction.marks.agent.timeToFirstByte',
+        field: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
         label: 'Backend time',
       },
       {
         id: 'frontend_time',
-        field: 'transaction.marks.agent.timeToFirstByte',
+        field: ATTR_TRANSACTION_MARKS_AGENT_TIME_TO_FIRST_BYTE,
         label: 'Frontend time',
       },
     ],

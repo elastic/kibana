@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  ATTR_STACKTRACE_COUNT,
+  ATTR_STACKTRACE_ID,
+} from '@kbn/observability-ui-semantic-conventions';
 import { UnionToIntersection, ValuesType } from 'utility-types';
 
 /**
@@ -16,13 +20,11 @@ export enum ProfilingESField {
   Timestamp = '@timestamp',
   ContainerName = 'container.name',
   ProcessThreadName = 'process.thread.name',
-  StacktraceCount = 'Stacktrace.count',
   HostID = 'host.id',
   HostName = 'host.name',
   HostIP = 'host.ip',
   OrchestratorResourceName = 'orchestrator.resource.name',
   ServiceName = 'service.name',
-  StacktraceID = 'Stacktrace.id',
   StacktraceFrameIDs = 'Stacktrace.frame.ids',
   StacktraceFrameTypes = 'Stacktrace.frame.types',
   StackframeFileName = 'Stackframe.file.name',
@@ -70,11 +72,11 @@ export type ProfilingESEvent = DedotObject<{
   [ProfilingESField.Timestamp]: string;
   [ProfilingESField.ContainerName]: string;
   [ProfilingESField.ProcessThreadName]: string;
-  [ProfilingESField.StacktraceCount]: number;
+  [ATTR_STACKTRACE_COUNT]: number;
   [ProfilingESField.HostID]: string;
   [ProfilingESField.OrchestratorResourceName]: string;
   [ProfilingESField.ServiceName]: string;
-  [ProfilingESField.StacktraceID]: string;
+  [ATTR_STACKTRACE_ID]: string;
 }>;
 
 export type ProfilingStackTrace = DedotObject<{

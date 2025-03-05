@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import {
+  ATTR_ERROR_EXCEPTION_MESSAGE,
+  ATTR_ERROR_EXCEPTION_TYPE,
+  ATTR_ERROR_GROUPING_KEY,
+  ATTR_TIMESTAMP,
+  ATTR_TRANSACTION_ID,
+  ATTR_TRANSACTION_TYPE,
+} from '@kbn/observability-ui-semantic-conventions';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
-import {
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_TYPE,
-  ERROR_GROUP_ID,
-  TRANSACTION_ID,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { getRumErrorsProjection } from './projections';
 
@@ -39,17 +40,17 @@ export function jsErrorsQuery(
     aggs: {
       totalErrorGroups: {
         cardinality: {
-          field: ERROR_GROUP_ID,
+          field: ATTR_ERROR_GROUPING_KEY,
         },
       },
       totalErrorPages: {
         cardinality: {
-          field: TRANSACTION_ID,
+          field: ATTR_TRANSACTION_ID,
         },
       },
       errors: {
         terms: {
-          field: ERROR_GROUP_ID,
+          field: ATTR_ERROR_GROUPING_KEY,
           size: 500,
         },
         aggs: {
@@ -62,21 +63,26 @@ export function jsErrorsQuery(
           impactedPages: {
             filter: {
               term: {
-                [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+                [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
               },
             },
             aggs: {
               pageCount: {
                 cardinality: {
-                  field: TRANSACTION_ID,
+                  field: ATTR_TRANSACTION_ID,
                 },
               },
             },
           },
           sample: {
             top_hits: {
-              _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE, ERROR_GROUP_ID, '@timestamp'],
-              sort: [{ '@timestamp': 'desc' as const }],
+              _source: [
+                ATTR_ERROR_EXCEPTION_MESSAGE,
+                ATTR_ERROR_EXCEPTION_TYPE,
+                ATTR_ERROR_GROUPING_KEY,
+                ATTR_TIMESTAMP,
+              ],
+              sort: [{ [ATTR_TIMESTAMP]: 'desc' as const }],
               size: 1,
             },
           },

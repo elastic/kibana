@@ -4,6 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  ATTR_PROCESSOR_EVENT,
+  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+  ATTR_TRANSACTION_TYPE,
+  ATTR_USER_AGENT_OS_NAME,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { mockDataView } from '../../rtl_helpers';
 import { RECORDS_FIELD } from '../constants';
 
@@ -51,15 +58,14 @@ export const sampleAttributeCoreWebVital = {
                   size: 10,
                 },
                 scale: 'ordinal',
-                sourceField: 'user_agent.os.name',
+                sourceField: ATTR_USER_AGENT_OS_NAME,
               },
               'y-axis-column-1': {
                 customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'transaction.marks.agent.largestContentfulPaint > 2500 and transaction.marks.agent.largestContentfulPaint < 4000',
+                  query: `${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} > 2500 and ${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} < 4000'`,
                 },
                 isBucketed: false,
                 label: 'Average',
@@ -72,7 +78,7 @@ export const sampleAttributeCoreWebVital = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'transaction.marks.agent.largestContentfulPaint > 4000',
+                  query: '${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} > 4000',
                 },
                 isBucketed: false,
                 label: 'Poor',
@@ -85,8 +91,7 @@ export const sampleAttributeCoreWebVital = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'transaction.type: (page-load or page-exit) and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
+                  query: `${ATTR_TRANSACTION_TYPE}: (page-load or page-exit) and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT} < 2500`,
                 },
                 isBucketed: false,
                 label: 'Good',
@@ -104,7 +109,7 @@ export const sampleAttributeCoreWebVital = {
     query: {
       language: 'kuery',
       query:
-        'transaction.type: (page-load or page-exit) and processor.event: transaction and transaction.type: ("page-load" or "page-exit")',
+        '${ATTR_TRANSACTION_TYPE}: (page-load or page-exit) and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE}: ("page-load" or "page-exit")',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

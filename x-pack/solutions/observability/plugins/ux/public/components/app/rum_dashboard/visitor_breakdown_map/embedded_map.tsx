@@ -7,8 +7,8 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
+import { ATTR_TRANSACTION_TYPE } from '@kbn/observability-ui-semantic-conventions';
 import { useLayerList } from './use_layer_list';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { MapToolTip } from './map_tooltip';
@@ -73,7 +73,7 @@ export function EmbeddedMapComponent() {
             filters: mapFilters,
             isLayerTOCOpen: false,
             query: {
-              query: 'transaction.type : "page-load"',
+              query: `${ATTR_TRANSACTION_TYPE} : "page-load"`,
               language: 'kuery',
             },
             ...(start && {

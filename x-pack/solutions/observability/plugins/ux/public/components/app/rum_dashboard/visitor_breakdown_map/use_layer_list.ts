@@ -22,16 +22,20 @@ import {
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common';
-
+import {
+  ATTR_CLIENT_GEO_COUNTRY_ISO_CODE,
+  ATTR_SERVICE_NAME,
+  ATTR_TRANSACTION_DURATION_US,
+  ATTR_TRANSACTION_TYPE,
+} from '@kbn/observability-ui-semantic-conventions';
 import { useMemo } from 'react';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
 const getWhereQuery = (serviceName: string) => {
   return {
-    query: `${TRANSACTION_TYPE} : "${TRANSACTION_PAGE_LOAD}" and ${SERVICE_NAME} : "${serviceName}"`,
+    query: `${ATTR_TRANSACTION_TYPE} : "${TRANSACTION_PAGE_LOAD}" and ${ATTR_SERVICE_NAME} : "${serviceName}"`,
     language: 'kuery',
   };
 };
@@ -39,11 +43,9 @@ const getWhereQuery = (serviceName: string) => {
 export const REGION_NAME = 'region_name';
 export const COUNTRY_NAME = 'name';
 
-export const TRANSACTION_DURATION_REGION =
-  '__kbnjoin__avg_of_transaction.duration.us__e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41';
+export const TRANSACTION_DURATION_REGION = `__kbnjoin__avg_of_${ATTR_TRANSACTION_DURATION_US}__e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41`;
 
-export const TRANSACTION_DURATION_COUNTRY =
-  '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c';
+export const TRANSACTION_DURATION_COUNTRY = `__kbnjoin__avg_of_${ATTR_TRANSACTION_DURATION_US}__3657625d-17b0-41ef-99ba-3a2b2938655c`;
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
@@ -57,11 +59,11 @@ export function useLayerList() {
     const _esTermSourceCountry: ESTermSourceDescriptor = {
       type: SOURCE_TYPES.ES_TERM_SOURCE,
       id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
-      term: 'client.geo.country_iso_code',
+      term: ATTR_CLIENT_GEO_COUNTRY_ISO_CODE,
       metrics: [
         {
           type: AGG_TYPE.AVG,
-          field: 'transaction.duration.us',
+          field: ATTR_TRANSACTION_DURATION_US,
           label: 'Page load duration',
         },
       ],
@@ -74,10 +76,10 @@ export function useLayerList() {
     const _esTermSourceRegion: ESTermSourceDescriptor = {
       type: SOURCE_TYPES.ES_TERM_SOURCE,
       id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
-      term: 'client.geo.region_iso_code',
-      metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
+      term: ATTR_CLIENT_GEO_REGION_ISO_CODE,
+      metrics: [{ type: AGG_TYPE.AVG, field: ATTR_TRANSACTION_DURATION_US }],
       whereQuery: {
-        query: 'transaction.type : "page-load"',
+        query: `${ATTR_TRANSACTION_TYPE} : "page-load"`,
         language: 'kuery',
       },
       indexPatternId: getStaticDataViewId(spaceId),

@@ -5,12 +5,15 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  AGENT_NAME,
-  PROCESSOR_EVENT,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+  ATTR_AGENT_NAME,
+  ATTR_PROCESSOR_EVENT,
+  ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
+  ATTR_TRANSACTION_TYPE,
+  ATTR_URL_FULL,
+  PROCESSOR_EVENT_VALUE_ERROR,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
@@ -34,15 +37,15 @@ export function getRumPageLoadTransactionsProjection({
   const bool = {
     filter: [
       ...rangeQuery(start, end),
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-      { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
+      { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+      { terms: { [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_TRANSACTION] } },
       ...(checkFetchStartFieldExists
         ? [
             {
               // Adding this filter to cater for some inconsistent rum data
               // not available on aggregated transactions
               exists: {
-                field: 'transaction.marks.navigationTiming.fetchStart',
+                field: ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
               },
             },
           ]
@@ -51,7 +54,7 @@ export function getRumPageLoadTransactionsProjection({
         ? [
             {
               wildcard: {
-                'url.full': `*${urlQuery}*`,
+                [ATTR_URL_FULL]: `*${urlQuery}*`,
               },
             },
           ]
@@ -84,13 +87,13 @@ export function getRumPageExitTransactionsProjection({
   const bool = {
     filter: [
       ...rangeQuery(start, end),
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_EXIT } },
-      { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
+      { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_PAGE_EXIT } },
+      { terms: { [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_TRANSACTION] } },
       ...(urlQuery
         ? [
             {
               wildcard: {
-                'url.full': `*${urlQuery}*`,
+                [ATTR_URL_FULL]: `*${urlQuery}*`,
               },
             },
           ]
@@ -132,10 +135,10 @@ export function getRumErrorsProjection({
       bool: {
         filter: [
           ...rangeQuery(start, end),
-          { term: { [AGENT_NAME]: 'rum-js' } },
+          { term: { [ATTR_AGENT_NAME]: 'rum-js' } },
           {
             terms: {
-              [PROCESSOR_EVENT]: [ProcessorEvent.error],
+              [ATTR_PROCESSOR_EVENT]: [PROCESSOR_EVENT_VALUE_ERROR],
             },
           },
           ...getEsFilter(setup.uiFilters),
@@ -143,7 +146,7 @@ export function getRumErrorsProjection({
             ? [
                 {
                   wildcard: {
-                    'url.full': `*${urlQuery}*`,
+                    ATTR_URL_FULL: `*${urlQuery}*`,
                   },
                 },
               ]

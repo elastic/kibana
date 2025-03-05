@@ -25,9 +25,7 @@ export const USER_AGENT_NAME = 'user_agent.name';
 export const SERVICE_LANGUAGE_NAME = 'service.language.name';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
-export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
-export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
@@ -38,7 +36,6 @@ export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 
-export const TRANSACTION_TIME_TO_FIRST_BYTE = 'transaction.marks.agent.timeToFirstByte';
 export const TRANSACTION_DOM_INTERACTIVE = 'transaction.marks.agent.domInteractive';
 
 export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';

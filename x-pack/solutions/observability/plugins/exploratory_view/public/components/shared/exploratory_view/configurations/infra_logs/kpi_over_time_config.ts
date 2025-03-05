@@ -6,6 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ATTR_AGENT_HOSTNAME,
+  ATTR_AGENT_TYPE,
+  ATTR_EVENT_DATASET,
+  ATTR_MESSAGE,
+  ATTR_SERVICE_TYPE,
+  ATTR_TIMESTAMP,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, RECORDS_FIELD, ReportTypes } from '../constants';
 import { LOG_RATE as LOG_RATE_FIELD } from '../constants/field_names/infra_logs';
@@ -22,7 +30,7 @@ export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
       }),
       dataType: 'date',
       operationType: 'date_histogram',
-      sourceField: '@timestamp',
+      sourceField: ATTR_TIMESTAMP,
       isBucketed: true,
       scale: 'interval',
     },
@@ -40,11 +48,11 @@ export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
       },
     ],
     hasOperationType: false,
-    filterFields: ['agent.type', 'service.type', 'event.dataset'],
-    breakdownFields: ['agent.hostname', 'service.type', 'event.dataset'],
+    filterFields: [ATTR_AGENT_TYPE, ATTR_SERVICE_TYPE, ATTR_EVENT_DATASET],
+    breakdownFields: [ATTR_AGENT_HOSTNAME, ATTR_SERVICE_TYPE, ATTR_EVENT_DATASET],
     baseFilters: [],
-    definitionFields: ['agent.hostname', 'service.type', 'event.dataset'],
-    textDefinitionFields: ['message'],
+    definitionFields: [ATTR_AGENT_HOSTNAME, ATTR_SERVICE_TYPE, ATTR_EVENT_DATASET],
+    textDefinitionFields: [ATTR_MESSAGE],
     metricOptions: [
       {
         label: LOG_RATE_LABEL,

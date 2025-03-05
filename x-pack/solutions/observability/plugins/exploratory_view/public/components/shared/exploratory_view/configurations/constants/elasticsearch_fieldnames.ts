@@ -44,9 +44,7 @@ export const PROCESSOR_EVENT = 'processor.event';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
-export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
-export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
@@ -85,8 +83,6 @@ export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
-export const METRIC_SYSTEM_MEMORY_USAGE = 'system.memory.usage';
-export const METRIC_SYSTEM_CPU_USAGE = 'system.cpu.usage';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
@@ -122,7 +118,6 @@ export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 export const USER_AGENT_OS_VERSION = 'user_agent.os.version';
 
-export const TRANSACTION_TIME_TO_FIRST_BYTE = 'transaction.marks.agent.timeToFirstByte';
 export const TRANSACTION_DOM_INTERACTIVE = 'transaction.marks.agent.domInteractive';
 
 export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
