@@ -29,7 +29,9 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
+  UseEuiTheme,
 } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 
 import {
   LinksLayoutType,
@@ -41,16 +43,13 @@ import {
 } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
+import { getOrderedLinkList } from '../../lib/resolve_links';
 import { coreServices } from '../../services/kibana_services';
+import { ResolvedLink } from '../../types';
 import { LinksStrings } from '../links_strings';
+import { TooltipWrapper } from '../tooltip_wrapper';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
 import { LinksEditorSingleLink } from './links_editor_single_link';
-
-import { TooltipWrapper } from '../tooltip_wrapper';
-
-import './links_editor.scss';
-import { ResolvedLink } from '../../types';
-import { getOrderedLinkList } from '../../lib/resolve_links';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -77,17 +76,7 @@ const toggleTextOverflowOptions = [
   },
 ];
 
-const LinksEditor = ({
-  onSaveToLibrary,
-  onAddToDashboard,
-  onClose,
-  initialLinks,
-  initialLayout,
-  initialTextOverflow,
-  parentDashboardId,
-  isByReference,
-  flyoutId,
-}: {
+export interface LinksEditorProps {
   onSaveToLibrary: (
     newLinks: ResolvedLink[],
     newLayout: LinksLayoutType,
@@ -105,7 +94,19 @@ const LinksEditor = ({
   parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
-}) => {
+}
+
+const LinksEditor = ({
+  onSaveToLibrary,
+  onAddToDashboard,
+  onClose,
+  initialLinks,
+  initialLayout,
+  initialTextOverflow,
+  parentDashboardId,
+  isByReference,
+  flyoutId,
+}: LinksEditorProps) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
   const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
@@ -121,6 +122,7 @@ const LinksEditor = ({
   );
 
   const isEditingExisting = initialLinks || isByReference;
+
   useEffect(() => {
     if (!initialLinks) {
       setOrderedLinks([]);
@@ -190,7 +192,7 @@ const LinksEditor = ({
 
   return (
     <>
-      <div ref={editLinkFlyoutRef} />
+      <div css={styles.flyoutStyles} ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -204,12 +206,7 @@ const LinksEditor = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
-        // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
-        // https://github.com/elastic/eui/pull/7855.
-        css={{ '.euiFlyoutBody__overflow': { transform: 'none' } }}
-      >
+      <EuiFlyoutBody css={styles.bodyStyles}>
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
@@ -242,7 +239,7 @@ const LinksEditor = ({
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable
-                      className="linksDroppableLinksArea"
+                      css={styles.droppableStyles}
                       droppableId="linksDroppableLinksArea"
                       data-test-subj="links--panelEditor--linksAreaDroppable"
                     >
@@ -359,3 +356,61 @@ const LinksEditor = ({
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
 export default LinksEditor;
+
+const styles = {
+  droppableStyles: ({ euiTheme }: UseEuiTheme) => css({ margin: `0 -${euiTheme.size.xs}` }),
+  bodyStyles: css({
+    // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+    // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+    // https://github.com/elastic/eui/pull/7855.
+    '& .euiFlyoutBody__overflow': {
+      transform: 'none',
+    },
+  }),
+  flyoutStyles: ({ euiTheme }: UseEuiTheme) => {
+    const euiFlyoutOpenAnimation = keyframes`
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  
+    100% {
+      opacity: 1;
+      transform: translateX(0%);
+    }
+  `;
+
+    const euiFlyoutCloseAnimation = keyframes`
+    0% {
+      opacity: 1;
+      transform: translateX(0%);
+    }
+  
+    100% {
+      opacity: 0;
+      transform: translateX(100%);
+    }`;
+
+    return css({
+      '.linkEditor': {
+        maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
+        height: 'calc(100vh - var(--euiFixedHeadersOffset, 0))',
+        position: 'fixed',
+        display: 'flex',
+        inlineSize: '50vw',
+        zIndex: euiTheme.levels.flyout,
+        alignItems: 'stretch',
+        flexDirection: 'column',
+        borderLeft: euiTheme.border.thin,
+        background: euiTheme.colors.backgroundBasePlain,
+        minWidth: `calc((${euiTheme.size.xl} * 13) + ${euiTheme.size.s})`, // 424px
+        '&.in': {
+          animation: `${euiFlyoutOpenAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        },
+        '&.out': {
+          animation: `${euiFlyoutCloseAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        },
+      },
+    });
+  },
+};

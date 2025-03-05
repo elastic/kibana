@@ -10,16 +10,17 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import { EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
-import {
-  DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from '@kbn/presentation-util-plugin/public';
+import { Query, isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+  DashboardDrilldownOptions,
+} from '@kbn/presentation-util-plugin/public';
 
-import { isFilterPinned, Query } from '@kbn/es-query';
 import {
   DASHBOARD_LINK_TYPE,
   LinksLayoutType,
@@ -27,20 +28,22 @@ import {
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
-import { DashboardLinkStrings } from './dashboard_link_strings';
 import { LinksParentApi, ResolvedLink } from '../../types';
+import { DashboardLinkStrings } from './dashboard_link_strings';
 
-export const DashboardLinkComponent = ({
-  link,
-  layout,
-  textOverflow,
-  parentApi,
-}: {
+export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
   textOverflow: LinksTextOverflowType;
   parentApi: LinksParentApi;
-}) => {
+}
+
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+  parentApi,
+  textOverflow,
+}: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
@@ -159,6 +162,7 @@ export const DashboardLinkComponent = ({
       color="text"
       {...onClickProps}
       id={id}
+      css={styles}
       showToolTip={true}
       toolTipProps={{
         title: tooltipTitle,
@@ -183,3 +187,46 @@ export const DashboardLinkComponent = ({
     />
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    // universal current dashboard link styles
+    '&.linkCurrent': {
+      borderRadius: 0,
+      cursor: 'default',
+      '& .euiListGroupItem__text': {
+        color: euiTheme.colors.textPrimary,
+      },
+    },
+
+    // vertical layout - current dashboard link styles
+    '.verticalLayoutWrapper &.linkCurrent::before': {
+      // add left border for current dashboard
+      content: "''",
+      position: 'absolute',
+      height: '75%',
+      width: `calc(.5 * ${euiTheme.size.xs})`,
+      backgroundColor: euiTheme.colors.primary,
+    },
+
+    // horizontal layout - current dashboard link styles
+    '.horizontalLayoutWrapper &.linkCurrent': {
+      padding: `0 ${euiTheme.size.s}`,
+      '& .euiListGroupItem__text': {
+        // add bottom border for current dashboard
+        boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
+        paddingInline: 0,
+      },
+    },
+
+    // dashboard not found error styles
+    '&.dashboardLinkError': {
+      '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
+        fontStyle: 'italic',
+      },
+
+      '.dashboardLinkIcon': {
+        marginRight: euiTheme.size.s,
+      },
+    },
+  });
