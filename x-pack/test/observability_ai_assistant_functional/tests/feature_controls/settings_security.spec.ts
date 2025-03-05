@@ -108,10 +108,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchConnectorIndexPatternInput.clearValue();
         await searchConnectorIndexPatternInput.type('test');
 
-        await interceptRequest({ driver: driver.driver, pattern: '*kibana\\/settings*' }, (responseFactory) => {
-          return responseFactory.fail();
-        }
-        await testSubjects.click(ui.pages.settings.saveButton);
+        await interceptRequest(
+          driver.driver,
+          '*kibana\\/settings*',
+          (responseFactory) => {
+            return responseFactory.fail();
+          },
+          async () => {
+            await testSubjects.click(ui.pages.settings.saveButton);
+          }
         );
 
         await retry.waitFor('Error saving settings toast', async () => {
