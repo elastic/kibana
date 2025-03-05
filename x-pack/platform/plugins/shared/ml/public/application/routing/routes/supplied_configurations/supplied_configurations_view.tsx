@@ -25,7 +25,7 @@ const SuppliedConfigurations = dynamic(async () => ({
 
 export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'supplied_configurations',
-  path: '',
+  path: '/',
   title: i18n.translate('xpack.ml.suppliedConfigurations.suppliedConfigurations.docTitle', {
     defaultMessage: 'Supplied configurations',
   }),

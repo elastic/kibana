@@ -20,8 +20,8 @@ const Page = dynamic(async () => ({
 }));
 
 export const analyticsJobsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
-  id: 'data_frame_analytics',
-  path: '',
+  id: 'analytics',
+  path: '/',
   title: i18n.translate('xpack.ml.dataFrameAnalytics.jobs.docTitle', {
     defaultMessage: 'Data Frame Analytics Jobs',
   }),

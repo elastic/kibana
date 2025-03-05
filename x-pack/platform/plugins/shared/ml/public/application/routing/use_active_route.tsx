@@ -50,7 +50,8 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     }
     // Remove trailing slash from the pathname
     const pathnameKey = pathname.replace(/\/$/, '');
-    return routesMap[pathnameKey];
+    // Treat empty pathname as root
+    return routesMap[pathnameKey === '' ? '/' : pathnameKey];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 

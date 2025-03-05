@@ -33,7 +33,7 @@ export const jobListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
     defaultMessage: 'Anomaly Detection Jobs',
   }),
-  path: '',
+  path: '/',
   render: () => <PageWrapper />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),

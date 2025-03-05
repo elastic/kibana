@@ -22,7 +22,7 @@ const Settings = dynamic(async () => ({
 
 export const settingsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'settings',
-  path: '',
+  path: '/',
   title: i18n.translate('xpack.ml.settings.docTitle', {
     defaultMessage: 'Settings',
   }),

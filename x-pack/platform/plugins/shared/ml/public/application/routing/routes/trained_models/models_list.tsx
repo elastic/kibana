@@ -24,7 +24,7 @@ const ModelsList = dynamic(async () => ({
 
 export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'trained_models',
-  path: '',
+  path: '/',
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
     defaultMessage: 'Trained Models',
   }),
