@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   binaryToString,
@@ -28,7 +29,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    it("exports prebuilt all rules if rule_id's are not specified", async () => {
+    it("Export API - exports prebuilt all rules if rule_id's are not specified", async () => {
       const ruleId = 'prebuilt-rule-1';
       const ruleAsset = createRuleAssetSavedObject({ rule_id: ruleId, version: 1 });
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
@@ -55,11 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('exports specified prebuilt rules', async () => {
-      // Make an installed prebuilt rule
-      // Make a request specifying the rule_id
-      // Verify the rule is exported
-
+    it('Export API - exports specified prebuilt rules', async () => {
       const ruleId = 'prebuilt-rule-1';
       const ruleAsset = createRuleAssetSavedObject({ rule_id: ruleId, version: 1 });
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
@@ -87,6 +84,37 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(JSON.parse(exportDetailsJson)).toMatchObject({
         exported_rules_count: 1,
+        missing_rules: [],
+      });
+    });
+
+    it('Bulk actions export API - exports prebuilt rules if the feature flag is enabled', async () => {
+      const ruleAsset = createRuleAssetSavedObject({ rule_id: 'prebuilt-rule-1', version: 1 });
+      await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+      await installPrebuiltRules(es, supertest);
+
+      const findResponse = await securitySolutionApi.findRules({ query: {} });
+      const installedRule = findResponse.body.data[0];
+
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          query: {},
+          body: { action: BulkActionTypeEnum.export, ids: [installedRule.id] },
+        })
+        .expect(200)
+        .parse(binaryToString);
+
+      const [ruleJson, exportDetailsJson] = body.toString().split(/\n/);
+
+      expect(JSON.parse(ruleJson)).toMatchObject({
+        id: installedRule.id,
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+        },
+      });
+
+      expect(JSON.parse(exportDetailsJson)).toMatchObject({
         missing_rules: [],
       });
     });
