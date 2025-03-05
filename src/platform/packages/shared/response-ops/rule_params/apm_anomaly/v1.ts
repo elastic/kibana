@@ -23,17 +23,40 @@ const detectorsSchema = schema.oneOf([
 ]);
 
 export const anomalyParamsSchema = schema.object({
+  /**
+   * The service name from APM.
+   */
   serviceName: schema.maybe(schema.string()),
+  /**
+   * The transaction type from APM.
+   */
   transactionType: schema.maybe(schema.string()),
+  /**
+   * The size of the time window (in `windowUnit` units), which determines how far back to search for documents.
+   * Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+   */
   windowSize: schema.number(),
+  /**
+   * The type of units for the time window: minutes, hours, or days.
+   */
   windowUnit: schema.string(),
+  /**
+   * The environment from APM.
+   */
   environment: schema.string(),
+  /**
+   * The severity of anomalies that result in an alert: critical, major, minor, or warning.
+   */
   anomalySeverityType: schema.oneOf([
     schema.literal(ML_ANOMALY_SEVERITY.CRITICAL),
     schema.literal(ML_ANOMALY_SEVERITY.MAJOR),
     schema.literal(ML_ANOMALY_SEVERITY.MINOR),
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
+  /**
+   * The types of anomalies that are detected.
+   * For example, detect abnormal latency, throughput, or failed transaction rates.
+   */
   anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1 })),
 });
 

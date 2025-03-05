@@ -29,7 +29,8 @@ properties:
     description: The environment from APM
   anomalySeverityType:
     type: string
-    description: The anomaly threshold value
+    description: >
+      The severity of anomalies that will generate alerts: critical, major, minor, or warning.
     enum:
       - critical
       - major
