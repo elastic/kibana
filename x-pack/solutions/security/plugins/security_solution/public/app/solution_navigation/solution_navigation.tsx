@@ -70,8 +70,13 @@ export interface SolutionNavigation {
 export const getSolutionNavigation = (core: CoreStart): SolutionNavigation => {
   const panelContent = getPanelContent(core, navLinks$);
   const panelContentProvider: PanelContentProvider = (id: string) => {
-    // Stack Management uses the default panel content
-    if (!id.endsWith('.stack_management')) {
+    // Selected nav nodes use the custom panel content
+    if (
+      id.endsWith('.rules-landing') ||
+      id.endsWith('.investigations') ||
+      id.endsWith('.explore') ||
+      id.endsWith('.machine_learning-landing')
+    ) {
       return { content: panelContent };
     }
   };
