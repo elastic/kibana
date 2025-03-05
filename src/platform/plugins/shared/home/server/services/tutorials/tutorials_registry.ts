@@ -156,6 +156,7 @@ export class TutorialsRegistry {
     if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
         const tutorial = provider(this.baseTutorialContext);
+        if (tutorial.omitServerless && this.isServerless) return;
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
     }
