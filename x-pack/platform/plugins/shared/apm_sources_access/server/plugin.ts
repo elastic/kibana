@@ -61,20 +61,16 @@ export class ApmSourcesAccessPlugin
 
   public start(core: CoreStart) {
     const initSettings = async () => {
-      try {
-        const soClient = core.savedObjects.createInternalRepository();
-        const indices = await this.getApmIndices(soClient);
-        const uiSettingsClient = core.uiSettings.asScopedToClient(new SavedObjectsClient(soClient));
-        await uiSettingsClient.set(
-          OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID,
-          JSON.stringify(indices, null, 2)
-        );
-      } catch (e) {
-        this.logger.error(e);
-      }
+      const soClient = core.savedObjects.createInternalRepository();
+      const indices = await this.getApmIndices(soClient);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(new SavedObjectsClient(soClient));
+      await uiSettingsClient.set(
+        OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID,
+        JSON.stringify(indices, null, 2)
+      );
     };
 
-    initSettings();
+    initSettings().catch((e) => this.logger.error(e));
 
     return {
       getApmIndices: this.getApmIndices,
