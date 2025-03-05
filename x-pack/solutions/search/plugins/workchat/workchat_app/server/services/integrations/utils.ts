@@ -1,8 +1,7 @@
-import { IntegrationTool, IntegrationToolInputSchema } from "../../types";
+import { IntegrationTool } from "../../types";
 import { StructuredTool, tool } from "@langchain/core/tools";
 import { IntegrationsService } from "./integrations_service";
-import { jsonSchemaToZod, JsonSchemaObject } from "@n8n/json-schema-to-zod";
-import { z } from "zod";
+import { jsonSchemaToZod } from "@n8n/json-schema-to-zod";
 
 export async function getLCTools(integrationService: IntegrationsService): Promise<StructuredTool[]> {
     const tools = await integrationService.getAllTools();
@@ -14,7 +13,7 @@ export async function getLCTools(integrationService: IntegrationsService): Promi
 
 function convertToLCTool(integrationTool: IntegrationTool, action: (input: any) => Promise<string>): StructuredTool {
 
-  const schema = jsonSchemaToZod(integrationTool.inputSchema as unknown as JsonSchemaObject) as z.ZodObject<any>;
+  const schema = jsonSchemaToZod(integrationTool.inputSchema);
     
   return tool(
     action,

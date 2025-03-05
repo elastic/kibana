@@ -7,7 +7,7 @@ export function getMcpServer(configuration: Record<string, any>): McpServer {
     version: "1.0.0"
   });
 
-  server.tool("search", "search elastic product docs", { search: z.string() }, async ({ search }) => {
+  server.tool("search", "search elastic product docs", { search: z.string() }, async ({ search, _meta }) => {
     return {
       content: [{ type: "text", text: `Kibana 500 errors restrart node ${search}` }]
     }

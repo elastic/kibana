@@ -1,7 +1,6 @@
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { z } from "zod";
 import { IntegrationTool, IntegrationToolInputSchema } from "../../types";
 import { Integration } from "./integration";
 import { JsonSchemaObject } from "@n8n/json-schema-to-zod";
@@ -10,6 +9,7 @@ export class IntegrationsGateway {
 
     private servers: Map<string, McpServer> = new Map();
     private clients: Map<string, Client> = new Map();
+    private static readonly TOOL_NAME_SEPARATOR = '___';
 
     constructor(integrations: Integration[]) {
         integrations.forEach(integration => this.registerServer(integration.id, integration.mcpServer));
@@ -36,7 +36,7 @@ export class IntegrationsGateway {
             const toolsResponse = await client.listTools();
             if (toolsResponse && toolsResponse.tools && Array.isArray(toolsResponse.tools)) {
                 return toolsResponse.tools.map(tool => ({
-                    name: `${clientKey}___${tool.name}`,
+                    name: `${clientKey}${IntegrationsGateway.TOOL_NAME_SEPARATOR}${tool.name}`,
                     description: tool.description || '',
                     inputSchema: tool.inputSchema || {} as JsonSchemaObject
                 }));
@@ -53,7 +53,7 @@ export class IntegrationsGateway {
     }
 
     async executeTool(serverToolName: string, params: IntegrationToolInputSchema) {
-        const [clientKey, toolName] = serverToolName.split('___');
+        const [clientKey, toolName] = serverToolName.split(IntegrationsGateway.TOOL_NAME_SEPARATOR);
         const client = this.clients.get(clientKey);
         if (!client) {
             throw new Error(`Client not found: ${clientKey}`);

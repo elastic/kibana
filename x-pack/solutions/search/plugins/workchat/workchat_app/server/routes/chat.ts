@@ -45,8 +45,8 @@ export const registerChatRoutes = ({
         const agent = await agentFactory.getAgent({
           request,
           agentId: 'TODO',
-          connectorId: 'azure-gpt4',
-          // connectorId: '31bc61b3-ab11-4780-a0a5-9d2dace40ead',
+          // connectorId: 'azure-gpt4',
+          connectorId: 'fc721a53-20cb-4aa2-ae67-3e31b379fca8',
         });
 
         const { events$ } = await agent.run({ message });

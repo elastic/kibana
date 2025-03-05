@@ -11,7 +11,6 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { basePrompt } from './prompts';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool } from '@langchain/core/tools';
-
 export const createAgentGraph = async ({
   agentId,
   chatModel,
