@@ -111,6 +111,10 @@ export const useGridLayoutRowEvents = ({
           gridLayoutStateManager.gridLayout$.next(cloneDeep(proposedGridLayoutValue));
         }
         gridLayoutStateManager.proposedGridLayout$.next(undefined);
+
+        // TODO: move this
+        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
 
       if (isMouseEvent(e)) {
@@ -130,7 +134,7 @@ export const useGridLayoutRowEvents = ({
         });
       }
     },
-    [gridLayoutStateManager, rowId, interactionType]
+    [gridLayoutStateManager, rowId]
   );
 
   return startInteraction;
