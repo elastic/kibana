@@ -12,7 +12,7 @@ import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { SearchIndicesAppMountParams } from '@kbn/index-management-shared-types';
+import { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { AppDependencies } from './app_context';
@@ -130,7 +130,7 @@ export async function mountManagementSection({
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
-  params: ManagementAppMountParams | SearchIndicesAppMountParams;
+  params: IndexManagementAppMountParams;
   extensionsService: ExtensionsService;
   isFleetEnabled: boolean;
   kibanaVersion: SemVer;

@@ -20,5 +20,6 @@
     "@kbn/utility-types",
     "@kbn/share-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/management-plugin"
   ]
 }
