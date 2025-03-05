@@ -60,7 +60,6 @@ RUNTIME_DEPS = [
   "@npm//react-router-dom-v5-compat",
   "@npm//react-router",
   "@npm//react",
-  "@npm//react-18",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//tslib",

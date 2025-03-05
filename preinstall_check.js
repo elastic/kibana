@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const execSync = require('child_process').execSync;
+
 (() => {
   const isUsingNpm = process.env.npm_config_git !== undefined;
 
@@ -23,6 +25,11 @@
 
   if (rawArgv === undefined) {
     return;
+  }
+
+  const o = execSync('yarn info react@18.2.0 -s --json | jq .data.dist', { stdio: 'inherit' });
+  if (o) {
+    console.log('XXX', o.toString());
   }
 
   try {
