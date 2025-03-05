@@ -18,6 +18,9 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
+const initialBadgeLimit = 3;
+const maxBadgeContainerHeight = 180;
+
 const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityEcs['labels'] }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -61,7 +64,13 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
 
   const allBadges = [...(tagBadges || []), ...(labelBadges || [])];
 
-  return <ExpandableBadgeGroup badges={allBadges} initialBadgeLimit={3} maxHeight={180} />;
+  return (
+    <ExpandableBadgeGroup
+      badges={allBadges}
+      initialBadgeLimit={initialBadgeLimit}
+      maxHeight={maxBadgeContainerHeight}
+    />
+  );
 };
 
 interface UniversalEntityFlyoutHeaderProps {
