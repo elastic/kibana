@@ -69,7 +69,7 @@ describe('validate unsnooze params', () => {
     );
   });
 
-  it('should throw bad request for when snooze schedule is empty is route is public', async () => {
+  it('should throw bad request for when snooze schedule is empty for public route', async () => {
     savedObjectsMock.get = jest.fn().mockReturnValue({
       attributes: {
         actions: [],
@@ -79,7 +79,7 @@ describe('validate unsnooze params', () => {
     });
     await expect(
       unsnoozeRule(context, { id: '123', scheduleIds: ['snooze_schedule_1'], isPublic: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule has no snooze schedules to unsnooze."`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule has no snooze schedules."`);
   });
 
   it('should throw bad request for invalid snooze schedule id for public route', async () => {

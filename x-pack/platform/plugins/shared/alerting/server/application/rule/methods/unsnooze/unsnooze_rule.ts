@@ -54,7 +54,7 @@ async function unsnoozeWithOCC(
 
   if (isPublic && scheduleIds?.length) {
     if (!attributes.snoozeSchedule?.length) {
-      throw Boom.badRequest('Rule has no snooze schedules to unsnooze.');
+      throw Boom.badRequest('Rule has no snooze schedules.');
     }
 
     const scheduleToUnsnooze = attributes.snoozeSchedule?.find(
