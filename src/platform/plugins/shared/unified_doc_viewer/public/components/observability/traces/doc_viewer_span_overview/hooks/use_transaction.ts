@@ -45,7 +45,7 @@ async function getTransactionData({
           size: 1,
           body: {
             timeout: '20s',
-            _source: [TRANSACTION_NAME_FIELD],
+            fields: [TRANSACTION_NAME_FIELD],
             query: {
               bool: {
                 must: [
@@ -90,7 +90,7 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
         setLoading(true);
         const result = await getTransactionData({ transactionId, indexPattern, data, signal });
 
-        const transactionName = result.rawResponse.hits.hits[0]?._source.transaction?.name;
+        const transactionName = result.rawResponse.hits.hits[0]?.fields?.[TRANSACTION_NAME_FIELD];
         setTransaction(transactionName ? { name: transactionName } : null);
       } catch (err) {
         if (!signal.aborted) {
