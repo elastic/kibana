@@ -38854,13 +38854,9 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
-                    type: boolean
-                  pipeline_exists:
                     type: boolean
                   product_documentation_status:
                     type: string
@@ -45256,7 +45252,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
