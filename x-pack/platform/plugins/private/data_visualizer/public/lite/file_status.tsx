@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -15,24 +15,46 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiProgress,
+  EuiHorizontalRule,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FileAnalysis } from './file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from './file_manager/file_manager';
 import { CLASH_TYPE } from './file_manager/merge_tools';
+import { AnalysisSummary } from '../application/file_data_visualizer/components/analysis_summary';
+import { FileContents } from '../application/file_data_visualizer/components/file_contents';
 
 interface Props {
   uploadStatus: UploadStatus;
   fileStatus: FileAnalysis;
   deleteFile: () => void;
   index: number;
+  showFileContentPreview?: boolean;
+  showFileSummary?: boolean;
 }
 
-export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, index }) => {
+enum TAB {
+  SUMMARY,
+  CONTENT,
+}
+
+export const FileStatus: FC<Props> = ({
+  fileStatus,
+  uploadStatus,
+  deleteFile,
+  index,
+  showFileContentPreview = false,
+  showFileSummary = false,
+}) => {
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
+
+  const [expanded, setExpanded] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<TAB>(showFileSummary ? TAB.SUMMARY : TAB.CONTENT);
 
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
@@ -59,29 +81,42 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
         ) : (
           <>
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={8}>
-                <EuiText size="xs">
-                  <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
-                  <span>{fileStatus.fileSize}</span>
-                </EuiText>
-              </EuiFlexItem>
+              {showFileContentPreview || showFileSummary ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType={expanded ? 'arrowDown' : 'arrowRight'}
+                    aria-label="expand"
+                    onClick={() => setExpanded(!expanded)}
+                  />
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  <EuiFlexItem grow={8}>
+                    <EuiText size="xs">
+                      <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
+                      <span>{fileStatus.fileSize}</span>
+                    </EuiText>
+                  </EuiFlexItem>
 
-              <EuiFlexItem grow={2}>
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={true} />
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      onClick={deleteFile}
-                      iconType="trash"
-                      size="xs"
-                      color="danger"
-                      aria-label={i18n.translate(
-                        'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                        {
-                          defaultMessage: 'Remove file',
-                        }
-                      )}
-                    />
+                  <EuiFlexItem grow={2}>
+                    <EuiFlexGroup gutterSize="none">
+                      <EuiFlexItem grow={true} />
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          onClick={deleteFile}
+                          iconType="trash"
+                          size="xs"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                            {
+                              defaultMessage: 'Remove file',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -123,6 +158,53 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                       />
                     </EuiText>
                   </>
+                ) : null}
+              </>
+            ) : null}
+
+            {expanded ? (
+              <>
+                <EuiHorizontalRule margin="s" />
+                <EuiTabs size="s">
+                  {showFileContentPreview && showFileSummary ? (
+                    <>
+                      <EuiTab
+                        isSelected={selectedTab === TAB.SUMMARY}
+                        onClick={() => setSelectedTab(TAB.SUMMARY)}
+                        data-test-subj="mlNodesOverviewPanelDetailsTab"
+                      >
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.fileStatus.summaryTabTitle"
+                          defaultMessage="Summary"
+                        />
+                      </EuiTab>
+
+                      <EuiTab
+                        isSelected={selectedTab === TAB.CONTENT}
+                        onClick={() => setSelectedTab(TAB.CONTENT)}
+                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                      >
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
+                          defaultMessage="Content"
+                        />
+                      </EuiTab>
+                    </>
+                  ) : null}
+                </EuiTabs>
+                <EuiSpacer size="s" />
+
+                {selectedTab === TAB.SUMMARY ? (
+                  <AnalysisSummary results={fileStatus.results!} showTitle={false} />
+                ) : null}
+
+                {selectedTab === TAB.CONTENT ? (
+                  <FileContents
+                    fileContents={fileStatus.fileContents}
+                    results={fileStatus.results!}
+                    showTitle={false}
+                    disableHighlighting={true}
+                  />
                 ) : null}
               </>
             ) : null}
