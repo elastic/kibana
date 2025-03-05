@@ -3,7 +3,6 @@
   "name": "@kbn/unified-doc-viewer-plugin",
   "namedInputs": {
     "src": [
-      "{workspaceRoot}/typings/**/*",
       "{projectRoot}/common/**/*",
       "{projectRoot}/public/**/*",
       "{projectRoot}/server/**/*",

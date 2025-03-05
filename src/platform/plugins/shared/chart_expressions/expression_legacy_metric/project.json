@@ -6,6 +6,7 @@
       "{projectRoot}/common/**/*",
       "{projectRoot}/public/**/*",
       "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/emotion.d.ts",
       "!{projectRoot}/target/**/*"
     ]
   },

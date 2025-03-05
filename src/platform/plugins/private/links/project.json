@@ -8,6 +8,7 @@
       "{projectRoot}/common/**/*",
       "{projectRoot}/server/**/*",
       "{projectRoot}/public/**/*.json",
+      "{workspaceRoot}/typings/emotion.d.ts",
       "!{projectRoot}/target/**/*"
     ]
   },
