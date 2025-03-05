@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { CoreStart } from '@kbn/core/public';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
@@ -20,14 +20,14 @@ export class PluginContract {
   public upsellingService: UpsellingService;
   public onboardingService: OnboardingService;
   public isSolutionNavigationEnabled$: BehaviorSubject<boolean>;
-  public productFeatureKeys$: BehaviorSubject<Set<ProductFeatureKeyType> | null>;
+  public productFeatureKeys$: Subject<Set<ProductFeatureKeyType> | null>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.onboardingService = new OnboardingService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false); // defaults to classic navigation
-    this.productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(null);
+    this.productFeatureKeys$ = new Subject<Set<ProductFeatureKeyType> | null>();
   }
 
   public getSetupContract(): PluginSetup {

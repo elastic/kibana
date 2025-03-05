@@ -16,7 +16,7 @@ import type {
   SecuritySolutionEssPluginStartDeps,
 } from './types';
 import { setOnboardingSettings } from './onboarding';
-import { DEFAULT_PRODUCT_FEATURES } from '../server/constants';
+import { DEFAULT_PRODUCT_FEATURES } from '../common/constants';
 
 export class SecuritySolutionEssPlugin
   implements

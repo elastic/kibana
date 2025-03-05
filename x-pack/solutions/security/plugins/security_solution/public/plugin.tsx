@@ -204,8 +204,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    productFeatureKeys$.pipe(withLatestFrom(plugins.licensing.license$)).subscribe(([productFeatureKeys, license]) => {
-
+    productFeatureKeys$.pipe(combineLatestWith(plugins.licensing.license$)).subscribe(([productFeatureKeys, license]) => {
       const isAssistantAvailable = productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) && license?.hasAtLeast('enterprise');
       const assistantManagementApp = management?.sections.section.kibana.getApp('securityAiAssistantManagement')
 
