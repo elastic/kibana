@@ -14,6 +14,7 @@ jest.mock('node:crypto', () => {
 });
 
 import crypto from 'node:crypto';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { mockDeprecationsFactory, mockDeprecationsRegistry } from '../mocks';
 import { registerNodeJsDeprecationsInfo } from './node_js_deprecations';
@@ -21,6 +22,7 @@ import { registerNodeJsDeprecationsInfo } from './node_js_deprecations';
 describe('#registerNodeJsDeprecationsInfo', () => {
   const deprecationsFactory = mockDeprecationsFactory.create();
   const deprecationsRegistry = mockDeprecationsRegistry.create();
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -33,7 +35,7 @@ describe('#registerNodeJsDeprecationsInfo', () => {
       'flyfish',
     ]);
 
-    registerNodeJsDeprecationsInfo({ deprecationsFactory });
+    registerNodeJsDeprecationsInfo({ deprecationsFactory, docLinks });
 
     expect(deprecationsFactory.getRegistry).toHaveBeenCalledTimes(1);
     expect(deprecationsFactory.getRegistry).toHaveBeenCalledWith('core.node_js_deprecations');
@@ -57,7 +59,7 @@ describe('#registerNodeJsDeprecationsInfo', () => {
   it('does not register NodeJS deprecations if not running legacy provider', () => {
     (crypto.getCiphers as jest.Mock).mockReturnValue(['foo', 'bar']);
 
-    registerNodeJsDeprecationsInfo({ deprecationsFactory });
+    registerNodeJsDeprecationsInfo({ deprecationsFactory, docLinks });
 
     expect(deprecationsFactory.getRegistry).toHaveBeenCalledTimes(0);
     expect(deprecationsRegistry.registerDeprecations).toHaveBeenCalledTimes(0);

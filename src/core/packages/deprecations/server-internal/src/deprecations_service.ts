@@ -116,7 +116,7 @@ export class DeprecationsService
       docLinks,
     });
 
-    registerNodeJsDeprecationsInfo({ deprecationsFactory: this.deprecationsFactory });
+    registerNodeJsDeprecationsInfo({ deprecationsFactory: this.deprecationsFactory, docLinks });
 
     const deprecationsFactory = this.deprecationsFactory;
     return {

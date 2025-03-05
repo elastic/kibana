@@ -9,10 +9,12 @@
 
 import crypto from 'node:crypto';
 import { i18n } from '@kbn/i18n';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { DeprecationsFactory } from '../deprecations_factory';
 
 interface RegisterNodeJsDeprecationsInfo {
   deprecationsFactory: DeprecationsFactory;
+  docLinks: DocLinksServiceSetup;
 }
 
 // The blowfish cipher is only available when node is running with the --openssl-legacy-provider flag
@@ -22,6 +24,7 @@ const isOpenSslLegacyProviderEnabled = () => {
 
 export const registerNodeJsDeprecationsInfo = ({
   deprecationsFactory,
+  docLinks,
 }: RegisterNodeJsDeprecationsInfo) => {
   /**
    * Note: this deprecation is being detected on a best effort basis. It is possible
@@ -42,18 +45,21 @@ export const registerNodeJsDeprecationsInfo = ({
             message: {
               type: 'markdown',
               content: i18n.translate('core.deprecations.openSSLDeprecation.message.markdown', {
-                defaultMessage: `Kibana is currently running with the legacy OpenSSL provider enabled, which is not recommended. For your security, these providers will be disabled by default in 9.0. [Learn more](https://docs.openssl.org/3.0/man7/OSSL_PROVIDER-legacy/) about the legacy OpenSSL provider.`,
+                defaultMessage: `Kibana is currently running with the legacy OpenSSL provider enabled, which is not recommended. For your security, these providers will be disabled by default in 9.0. [Learn more]({learnMore}) about the legacy OpenSSL provider.`,
+                values: {
+                  learnMore: docLinks.links.kibana.legacyOpenSslProvider,
+                },
               }),
             },
             correctiveActions: {
               manualSteps: [
                 i18n.translate('core.deprecations.openSSLDeprecation.step1Description', {
                   defaultMessage:
-                    'Remove the --openssl-legacy-provider flag from the config/node.options file where Kibana server is running',
+                    'Remove the --openssl-legacy-provider flag from the config/node.options file where Kibana server is running.',
                 }),
                 i18n.translate('core.deprecations.openSSLDeprecation.step2Description', {
                   defaultMessage:
-                    'Ensure the --openssl-legacy-provider flag is not being provided via the NODE_OPTIONS environment variable to Kibana.',
+                    'Ensure the --openssl-legacy-provider flag is not being provided via the NODE_OPTIONS environment variable to Kibana server.',
                 }),
                 i18n.translate('core.deprecations.openSSLDeprecation.step3Description', {
                   defaultMessage: 'Restart Kibana.',
