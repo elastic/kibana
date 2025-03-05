@@ -294,7 +294,7 @@ export function getWebpackConfig(
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$': 'react-dom/profiling',
-        'scheduler/tracing': 'scheduler/tracing-profiling'
+        'scheduler/tracing': 'scheduler/tracing-profiling',
       },
     },
 

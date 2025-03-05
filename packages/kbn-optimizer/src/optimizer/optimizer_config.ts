@@ -278,7 +278,7 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags,
+      options.themeTags
     );
   }
 
@@ -293,7 +293,7 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags,
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
