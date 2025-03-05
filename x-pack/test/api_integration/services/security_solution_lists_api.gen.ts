@@ -19,7 +19,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { BulkDeleteListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item_bulk/bulk_delete_list_items.gen';
+import { BulkDeleteListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/bulk_delete_list_items/bulk_delete_list_items.gen';
 import { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list/create_list.gen';
 import { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
 import { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';

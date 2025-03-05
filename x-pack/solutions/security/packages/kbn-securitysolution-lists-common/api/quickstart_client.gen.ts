@@ -19,6 +19,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
+import type {
+  BulkDeleteListItemsRequestQueryInput,
+  BulkDeleteListItemsResponse,
+} from './bulk_delete_list_items/bulk_delete_list_items.gen';
 import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
 import type {
   CreateListItemRequestBodyInput,
@@ -26,10 +30,6 @@ import type {
 } from './create_list_item/create_list_item.gen';
 import type { CreateListRequestBodyInput, CreateListResponse } from './create_list/create_list.gen';
 import type { DeleteListIndexResponse } from './delete_list_index/delete_list_index.gen';
-import type {
-  BulkDeleteListItemsRequestQueryInput,
-  BulkDeleteListItemsResponse,
-} from './delete_list_item_bulk/bulk_delete_list_items.gen';
 import type {
   DeleteListItemRequestQueryInput,
   DeleteListItemResponse,

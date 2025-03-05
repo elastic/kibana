@@ -56,7 +56,7 @@ paths:
                     id: pd1WRJQBs4HAK3VQeHFI
                     type: ip
                     list_id: ip_list
-                    value: 255.255.255.255
+                    value: 255.255.255.0
                     '@timestamp': 2025-01-08T05:15:05.159Z
                     _version: WzIwLDFd
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
