@@ -821,6 +821,7 @@
     "@kbn/search-shared-ui": "link:x-pack/solutions/search/packages/shared-ui",
     "@kbn/search-synonyms": "link:x-pack/solutions/search/plugins/search_synonyms",
     "@kbn/search-types": "link:src/platform/packages/shared/kbn-search-types",
+    "@kbn/search-ux-sandbox": "link:x-pack/solutions/search/plugins/search_ux_sandbox",
     "@kbn/searchprofiler-plugin": "link:x-pack/platform/plugins/shared/searchprofiler",
     "@kbn/security-ai-prompts": "link:x-pack/solutions/security/packages/security-ai-prompts",
     "@kbn/security-api-key-management": "link:x-pack/platform/packages/shared/security/api_key_management",

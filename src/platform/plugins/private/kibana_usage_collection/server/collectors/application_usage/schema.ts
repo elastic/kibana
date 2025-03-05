@@ -149,6 +149,7 @@ export const applicationUsageSchema = {
   enterpriseSearchElasticsearch: commonSchema,
   entity_manager: commonSchema,
   searchExperiences: commonSchema,
+  searchUxSandbox: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
