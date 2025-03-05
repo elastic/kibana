@@ -79,9 +79,9 @@ export const SearchIndexPipelines: React.FC = () => {
           pipelinesButton.focus();
         }
         setRevertPipeline(false);
+      } else if (buttonRef.current) {
+        buttonRef.current.focus();
       }
-    } else if (buttonRef.current) {
-      buttonRef.current.focus();
     }
   }, [isDeleteModalOpen]);
 
