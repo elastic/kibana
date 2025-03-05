@@ -36,7 +36,10 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
-    this.tutorialsRegistry = new TutorialsRegistry(this.initContext);
+    this.tutorialsRegistry = new TutorialsRegistry(
+      this.initContext,
+      this.initContext.env.packageInfo.buildFlavor === 'serverless'
+    );
     this.isDevMode = this.initContext.env.mode.dev;
   }
 

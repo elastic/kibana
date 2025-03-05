@@ -74,7 +74,10 @@ export class TutorialsRegistry {
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
   private staticAssets!: IStaticAssets;
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(
+    private readonly initContext: PluginInitializerContext,
+    private readonly isServerless = false
+  ) {}
 
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     this.staticAssets = core.http.staticAssets;
@@ -100,10 +103,13 @@ export class TutorialsRegistry {
           },
           initialContext
         );
+        const tutorials = this.tutorialProviders.map((tutorialProvider) => {
+          return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
+        });
         return res.ok({
-          body: this.tutorialProviders.map((tutorialProvider) => {
-            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
-          }),
+          body: this.isServerless
+            ? tutorials.filter(({ omitServerless }) => !omitServerless)
+            : tutorials,
         });
       }
     );
