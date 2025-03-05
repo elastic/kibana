@@ -11,7 +11,9 @@
     "server/**/*.ts",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -46,5 +48,6 @@
     "@kbn/logging",
     "@kbn/integration-assistant-plugin",
     "@kbn/cloud-security-posture-common",
+    "@kbn/dev-utils",
   ]
 }
