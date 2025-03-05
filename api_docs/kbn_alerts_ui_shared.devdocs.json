@@ -5308,10 +5308,10 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/esql-variables-types",
-            "scope": "public",
-            "docId": "kibKbnEsqlVariablesTypesPluginApi",
-            "section": "def-public.PublishesESQLVariables",
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.PublishesESQLVariables",
             "text": "PublishesESQLVariables"
           },
           " & ",
