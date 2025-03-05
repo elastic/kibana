@@ -16,6 +16,7 @@ import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './ty
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
+import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 const consoleInspector = createConsoleInspector();
 
@@ -49,7 +50,13 @@ export const useStreamEnrichmentEvents = () => {
         service.send({ type: 'simulation.viewDetectedFields' });
       },
       changePreviewDocsFilter: (filter: PreviewDocsFilterOption) => {
-        service.send({ type: 'simulation.changePreviewDocsFilter', filter });
+        service.send({ type: 'streamEnrichment.changePreviewDocsFilter', filter });
+      },
+      mapField: (field: SchemaField) => {
+        service.send({ type: 'streamEnrichment.fields.map', field: field as MappedSchemaField });
+      },
+      unmapField: (fieldName: string) => {
+        service.send({ type: 'streamEnrichment.fields.unmap', fieldName });
       },
     }),
     [service]

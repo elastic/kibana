@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
@@ -16,6 +16,7 @@ import {
   PreviewDocsFilterOption,
   SimulationActorRef,
 } from '../simulation_state_machine';
+import { MappedSchemaField } from '../../../schema_editor/types';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -33,7 +34,6 @@ export interface StreamEnrichmentContext {
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
   simulatorRef?: SimulationActorRef;
-  fields?: FieldDefinition;
 }
 
 export type StreamEnrichmentEvent =
@@ -44,6 +44,8 @@ export type StreamEnrichmentEvent =
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
-  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'streamEnrichment.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'streamEnrichment.fields.map'; field: MappedSchemaField }
+  | { type: 'streamEnrichment.fields.unmap'; fieldName: string }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] };

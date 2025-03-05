@@ -42,7 +42,10 @@ import {
   filterSimulationDocuments,
   composeSamplingCondition,
   getSchemaFieldsFromSimulation,
+  mapField,
+  unmapField,
 } from './utils';
+import { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -81,6 +84,9 @@ export const simulationMachine = setup({
           : context.samples,
       };
     }),
+    deriveSamplingCondition: assign(({ context }) => ({
+      samplingCondition: composeSamplingCondition(context.processors),
+    })),
     deriveDetectedSchemaFields: assign(({ context }) => ({
       detectedSchemaFields: context.simulation
         ? getSchemaFieldsFromSimulation(
@@ -90,10 +96,15 @@ export const simulationMachine = setup({
           )
         : context.detectedSchemaFields,
     })),
-    deriveSamplingCondition: assign(({ context }) => ({
-      samplingCondition: composeSamplingCondition(context.processors),
+    mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
+      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
     })),
-    emitSimulationChange: sendTo(({ context }) => context.parentRef, { type: 'simulation.change' }),
+    unmapField: assign(({ context }, params: { fieldName: string }) => ({
+      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
+    })),
+    notifySimulationChange: sendTo(({ context }) => context.parentRef, {
+      type: 'simulation.change',
+    }),
   },
   delays: {
     debounceTime: 800,
@@ -113,7 +124,7 @@ export const simulationMachine = setup({
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBGU5ej1HLWlOaXUveXVlUwsES0d5TnpHPV7DdVk3I07ff3Qw4NImJLy4WEIk2Gi4ug4eUWqUYLrETTtHR3V3fUlnWRl+q2VZenV5RoVpEcNO+TSBYgUJBCL0FDEU4oHBYFAAL0hUFI5WOgmhIkq9QeN3o8gmknk8kMhi0JNkLwQWnosl6sk4eimegUxL0wNB4RIEKhBFhCKRKMkFX46LOWKkjmUkg+7i8XhsjL08kpLiUCq8ei0LUkhnk7KWYK5EDAACNCBhiFEkQBhfYwWCrdZRTbbXaxeKHYVVUW1cUIemOehacZ6Nw6zjE5XmRAk6WSB662mSRmcWSOQz6wKcyLGs0Wq10W0eh1iWB4Sj0HAAM1KAApc+bLWAACroMAASlIHOC9Ab+ZtdrgqMqJzFoGxnHGYychm0yklKgZlK00payk+jncpJkQL8IIN2d7psbBagRYOJbLFerdb7TdbaA7XYPPbvp-P9vYQrRNUx46kHTvNoXxTJoUqyCY0YILO6j2No2iGGG6auLImbLOCWCEDgEBIgAyjgaBMFgcDkCQYDcqkhAANbkbABFEXABRgHgsRgEkACCUR4Nsw4ir+xDnFSi5wWmnA4i06aOMutj0Ko8jpl0bhrkqaGGpEmHYXh9HEQ6bHrEk9BEfgVbbGg9B0YROlMSxMRsZx3FlEcI4+n+4gxpOoy6pqzIuF0OjqNJdhyQpDKuJKKl7t24I4LAsBsQQdC4S+ERUGAACOGAoCkj7EHgDq8d6-GCYSrT0KSHTjDq0wkiqNgfH5DxKv80iSOoqmHjFcVJAlUBJVmwSpRlWVgDleWCl6o6+v+VLyaMtiSMo8j0qSi2tSqOhldMcjuD0qgPO1PZJBaUKJclJCkcQ5GQpRNHmWdxBUMddlcTxTl8RiAl+nIyg0l8tK3AyhjphSUEjIG+KqFu6jTD0kgHeCR3ECdvX3aQenbIZQQmUkZlRSQj1I89DkFZNrn1NtQYeGJSnaCGlLrtIQaLRGOjuMGvh7sQhDGvAlR45971jm5DS6EGaahmGhgRrqlLWOoeiyVMwy-C0k6aso8NcpC0J8oidA-h9xWSu8jheFti1PDcUYDJY0xqiGXy6K1XS7os-XgigEDEQbQv1C47yfICOpfKGhhSpSvyKBqO1Ko7oaazmx79oWg684LU3C5ogZyJ8UryFovRrVB8Y-V8K7i1oasZpF930BpOGJdpcA+xn2JJmVwzjAojTjEYssjHBtj0i0MxTESeo1+7XKdfFeH3YNmXZWAuVp4Vht+lqCvaBL0gklLbzSJS-yBtum5dJuLULRPbvoVyiPI31t8C2vvsAVLsm5-oYfyy41uIOuP0HipgqpOFqPQObeCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTJYPAAnMBw0AFFiMJQAYwALNDBiPHpk2hgABQiANxQwAHcAEUIE2AAxFCw2MK5eJBABISJiUQsEa3U9eiMnFzcPWS8TcURDeRt6R0ktPW1pdU5tX390bHx20lCIqNj45NT0+iYwirhYQjDYTKTsjh5RVpRg0QkEWUc7KeV5wxGZTSQyGaSmLrWPSOWacdzqMHyBTqdyydYgAJbYL0FDEN4oHBYFAAL1xUFIjRegnxIman0kjkc6no8j0mnk8lBWlBsghUlk9Fk6mUoz0hl6Ck5enRmKC7RxeIIhJJZIpkia-Gp7zpUkc-3oKOkXi8NjFenkfK+0iUpq8egWcymMs2cpIOIgWDAu3CkRicUSKTSGQAZkUsBA7mgcExKc1XtrQJ91LJJEpOKy1H9nJILeZEJoYWbOen1E5HObnYFtm6UB6vXtfYcAycQ2GI4xiFGY8841r2h9EPI4f0PPMJXDNFNLQX6EXDCWy2LK1j5RAwAAjQgYYgJMkAYQedDg3v2fqOgdO50usGut3uj1jmratMT+f1aiFoxzwvU8nUlssI0lEZP89E4RxVlkPQ3GXV1iHoNdN23Xc6APR5YFIMRQkoegcGDeoAApEK3HcwAAFXQMAAEpdhdat4OI5D90PGBYEfFo+xfCYEBsYd5GkSRdHkZQVhUFNLS0a0f3kH4dEZZRHFg+iEI3EiUKgNCjwwrC8BwvDCMY0iKNSGjZWUwz1M01j2HVKlnw6HUeNWa02QUCDs0MblLURG0GXZNwdBzJTsSwQgcAgMkAGUoiYT0MIgEgwAVfJCAAayS2AYriqowDwZIwDCABBBI8Budj437RyZFUextAghly0ZQxHAk2x+nTH4VjcaF9HkYL5VC8Koqy48CouMIziCYMbjQehMrQWK4ByvKkgK4rSoaHsnxpBzXwQecIPoKZ7UWFwVh0f88ycuxVBk8VOG6vUKz8DE6OxHAbwKgg6Eit72ioMAAEcMBQCIWww8rON27iczmI6bA8e1xVkUFLRTTgDXOhlzTBAT1H6t0PtgL6or+kgAeB0GwHBtUNQ4+yBx4mSMdsQSkVZ5RpkurptGUI7kzkdw-1UBkCfgsJtzxH6ybIBLiCS3EUvSuaZaoSW1pKsqtvpnbGbkPmFBFUsjTFWTLSHGFWVUdxxWTP9JDF+gJeIKWoF+qtglIMabkm-BprCWazOCNWXY1jbIYZxzBfoGR6u6uroMtETrTZ9MdHcLRFPRYhCDXeBmiDyrtoTbinpHOZJHHZZJCnK7LHug04Rt1k9Qe6RHdxfFlVJOg7N1qq9QFCCRJcTmUyZXNIWTG1y3NXR-lLOEO7rPuS8+FwBV-fia+E6DAUkS1pA5ex9CF81hP0aUXsLt0LOY9DV6L7iZzkX9-mmIUF4kwSWX+FNvntKMcshhHaDQij9Ea+di5P3pEKVMzUZKLGEojIwAEhy1VsKKZwYot59WvjLXCn0wjfTdqrIGIMwZBigTrNe-JoKCigtBEEoIvAuG8h4eGDJljgQzmzR2ztXbuxXFxCqXF6S2AxiJC+YoRKLCPknYUMcIKjA8Dw78vhfBAA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
     parentRef: input.parentRef,
@@ -134,13 +145,13 @@ export const simulationMachine = setup({
   initial: 'initializing',
   on: {
     'dateRange.update': '.loadingSamples',
-    'simulation.changePreviewDocsFilter': {
+    'streamEnrichment.changePreviewDocsFilter': {
       actions: [
         { type: 'storePreviewDocsFilter', params: ({ event }) => event },
         { type: 'derivePreviewDocuments' },
       ],
     },
-    'processors.change': {
+    'streamEnrichment.processors.change': {
       target: '.debouncingChanges',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
@@ -156,11 +167,20 @@ export const simulationMachine = setup({
       ],
     },
 
-    idle: {},
+    idle: {
+      on: {
+        'streamEnrichment.fields.map': {
+          actions: [{ type: 'mapField', params: ({ event }) => event }],
+        },
+        'streamEnrichment.fields.unmap': {
+          actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+      },
+    },
 
     debouncingChanges: {
       on: {
-        'processors.change': {
+        'streamEnrichment.processors.change': {
           target: 'debouncingChanges',
           actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
           description: 'Re-enter debouncing state and reinitialize the delayed processing.',
@@ -230,7 +250,7 @@ export const simulationMachine = setup({
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
             { type: 'derivePreviewDocuments' },
             { type: 'deriveDetectedSchemaFields' },
-            { type: 'emitSimulationChange' },
+            { type: 'notifySimulationChange' },
           ],
         },
         onError: {

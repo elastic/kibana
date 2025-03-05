@@ -16,7 +16,7 @@ import {
   DateRangeActorRef,
 } from '../../../../../state_management/date_range_state_machine';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { SchemaField } from '../../../schema_editor/types';
+import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
 export type DetectedField = Simulation['detected_fields'][number];
@@ -44,8 +44,13 @@ export interface SimulationInput {
 
 export type SimulationEvent =
   | DateRangeToParentEvent
-  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-  | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] };
+  | { type: 'streamEnrichment.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | {
+      type: 'streamEnrichment.processors.change';
+      processors: ProcessorDefinitionWithUIAttributes[];
+    }
+  | { type: 'streamEnrichment.fields.map'; field: MappedSchemaField }
+  | { type: 'streamEnrichment.fields.unmap'; fieldName: string };
 
 export interface SimulationContext {
   dateRangeRef: DateRangeActorRef;

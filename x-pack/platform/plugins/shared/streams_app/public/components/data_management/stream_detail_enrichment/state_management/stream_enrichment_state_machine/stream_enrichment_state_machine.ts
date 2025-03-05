@@ -7,18 +7,17 @@
 import {
   MachineImplementationsFrom,
   assign,
-  enqueueActions,
   not,
   setup,
   sendTo,
   stopChild,
   and,
   ActorRefFrom,
+  forwardTo,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   IngestStreamGetResponse,
-  WiredStreamGetResponse,
   isRootStreamDefinition,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
@@ -43,6 +42,7 @@ import {
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
+import { getConfiguredProcessors, getMappedFields, getStagedProcessors } from './utils';
 
 const createId = htmlIdGenerator();
 
@@ -96,9 +96,6 @@ export const streamEnrichmentMachine = setup({
         processorsRefs,
       };
     }),
-    setupFields: assign((_, params: { definition: WiredStreamGetResponse }) => ({
-      fields: params.definition.stream.ingest.wired.fields,
-    })),
     addProcessor: assign(
       (
         { context, spawn, self },
@@ -129,14 +126,14 @@ export const streamEnrichmentMachine = setup({
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),
-    sendProcessorChangeToSimulator: sendTo('simulator', ({ context }) => ({
-      type: 'processors.change',
+    sendProcessorsChangeToSimulator: sendTo('simulator', ({ context }) => ({
+      type: 'streamEnrichment.processors.change',
       processors: getStagedProcessors(context),
     })),
     sendFilterChangeToSimulator: sendTo(
       'simulator',
       (_, params: { filter: PreviewDocsFilterOption }) => ({
-        type: 'simulation.changePreviewDocsFilter',
+        type: 'streamEnrichment.changePreviewDocsFilter',
         filter: params.filter,
       })
     ),
@@ -167,7 +164,7 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATADYK3RYoAsy7soCcAVmVHV2gDQgAngpMUDqo1qOPtqgIynlAXx9XUTFxCYnIqGjpGFjYuD34kEBExOklpOQQlfQoPIwB2TUUDbgBmVWKDZStbBF0HCqNixQ9cwqdFVT8A9Gx8IlJKUIhrdlg+sOIsMAwAN0geeKFRcVSE9MViiia1A0UzIxzdRSqFRQdTDwvlbU0PblyDYs7wbuCxgdIhilHQygwIBjAIzeFGIsDABHm0iSyykqwUpQ0xWUOV2qhauV0qmOCC8TQoLUU3FU3BMRn07SegR6IX6II+1i+wL+AKBPwoAFdBBASAQwJCEtCUrDQOklCp8bkPMVXMo9ESDB5sR5DhRdA1DLcysqOv5nkFemzBgzvrTOdy6CgOBBJGBwtNhABrW2csFoAg08gAQSwBGEaH5i2SEmFsjsDXxxW4mgMGMcxW0RiV5Q22lyssluwuTlylJeBtpRsZbLNPJiYDQaD9FEEDB5ADM-ZQXeX3W9vb7-XwoUshWl4XoKHlVMoM1KyQZtJYbIgxwYKOU7o1cqoV0ZtLn9R73iRPlTcGRUAQKBAMLAayRrGwAAqVyawWB+2DsQS3uAPtCwCg7iABxI94N9hk6zKKq7S6PGRLIrkuTYqUuSgSUK5Sh46x3EYG7UsChZ7jgB4oEeJ5nrWl6Wjewh3u+T4vuRb6PnSfoQOWv6CgBcIZJO6gNCS5TaDopQKjB04IM4pzcB4xiEiUphNDqXSblh9IUDheEEae54kVAZEUY+z6vveVaMQCvLMf+Kwigo1weKqxIjlqyLuIJ1TxiB5h5MqCbcIcjy6jhW50juDLKYex5qcR156ZRuk0fpaAULgJCWnyXYCqZIaik03Cqq4JRkoYZQqNiIkaOJpLmOUabeXJmGGopQX4SFREXmweAYGQ7K1kKFDTBgYAAO4ACI8iQN5gN1fUjK17WlpIXU9QN4JgD6kAAGI9QwECwCZQZmaGGRGPYtyodwE4mOYlRCQYxigbc0pmCoxKKBhrw1QFSl5ipDXqc1k0dcGs19YNBDDcQY29RNbW-TN8WJSNoP9eRsCrQwvKdgsf7bWlJzxpsqHicUxQtMUUrYoUVkmPcUq7KYngGE9+bjLV73BYRX2Wi1EPTSg-3zbyS0QKtYDrU+Ygc51cNDbDc1bTCgHyGuIEKqohT3PjE6FEqRJWQTSLKPjnn3Amfi6igwiMfACS+W83YY7LtxqDjkZ4wT6xeNi8jKhsjjOLk+y5ETY7oT5eZ+dQ4hRKwlrWzLbHyDGpz3H7TjHWqkpu-tFDIiJ6yNNol3GHTflGlHvYx3HDtiQ8ztE8USoDq5+SqAqVNlLJerVQWikmuQxeseZGQPJl0GzrKUaN4qQleATDjQT7pgEp5lVt89HevV3vz-GAPc7aKw6e8Ol3EjsyJXEmpiqjPig+4cOZB-JL2fGvHJcqWkcpTbMfmHOko+w0ZUqC0Sp9pGFVBOKMyo0wH3XLfduDNXp1QIFvTG-dIzlydoTYmQlTDAOVG5RoahG7XEDlVZesDdxM3qizMKpEIqPkQbLTwwDeKOHuIfJEl9CpZFRISYkRNXD7QLgpOB5DVKNQ0uzKaJdAzRz7mKECWhHaV3QTXISPt4L6ApvtQwqZJQCPvoFYRn0qFQHEZDLm4sgaSz6nQmO0F1D43cqmKM-EsQXSurxG6+0lZqE0LoleZD9QfUoU1NmP1Obc36gtPmAshbWJkbKbQDh8auCJu0WUhhsSXUYRlW6XjiSt0tjVB8DBZgQAAErCGEK2H4sTdryGHGTEkmY9hrjEmndQ7hvYJlzgTB4OQjY+CAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAHZFAJgoBWAMzqVKxQBYAnNq2KANCACeC9YYqHu+ld24AOQ+8P7XrgL6+LVExcQmJyKho6RhY2LgBGfiQQETE6SWk5BCV1fQoANn1FV3047jjFN004i2sETTyKTRc8w0NFQwKVPPUC-0D0bHwiUkowiEt2WGHw4iwwDAA3SB5EoVFxdKTM3JVC-Sr9zVd1W111GoUKjW4Krw8uwxU4-T7wAZDp0dJxiimwygwEAYYEmnwoxFgYAIK2kKQ2Ui2iDirjUcROjgqmgM3BOrguCDiXXUFEKcSqemMZWUryCg1CI3B30svzBgOBoP+FAAroIICQCGAYUk4WkEaBMvIUYoSXlXMiVA5uCpXG58c8VMTNMY8nlFOpkQV1DT3kNOWNmX8GTy+XQUBwIJIwBEFsIANZOnmQtAEenkACCWAIwjQQrWqQkYtkCiMrhJDzJTg8+jyKjVWu4JP03DypS6miMKeNwVNDPNLM51v5sTAaDQwYoggY-IAZsHKJ6az7PgGgyG+LD1qKMgoiRQ9E1DDljKo4tUrEjtA1tA5lOV3MUjQE3sXfV8SD9abgyKgCBQIBhYI2SJY2AAFOtzWCwYOwdiCB9wZ9oWAUfcQUPJIOEbDlkriaGo3idPm2ZPMo+L1NK3jcPUOZVGBNybv0O5gmWh44MeKCnuel5Njedr3sIj5fq+76UZ+L6MsGEA1gBIrAYiWT6MmGhNFoXjFPUhjlPi6g+BQZSTiqyEanKeRFnSOFMhQeEEURF5XmRUAUVRL5vh+T71sxwICqxQGbOK0ZlDKSqKHk5LPLq8FOPk+jqIozyuY4yqaPJHxmkpKknme6mkXe+nUXpdEGWgFC4CQdqCv2wpmZGEpyhmrkONoSodEcqbzggomxhJOg9PsbQqD5W54bujL7sygWEcFJHXmweAYGQXJNqKFALBgYAAO4ACL8iQ95gH1g2TB1XVVpIvX9cNUJgIGkAAGL9QwECwKZ4bmVGnG2GOs7KscJw5nExj4q0qLFCUcSyooy6GL5JYzAFJqqc1GltTN3URgtg0jQQY3EJNA0ciMACin1BXFCXjeDQ2UbAG0MAKfarIBe2pZcT0UBURS6pO7mEucBXuJo9hovqlPuDqKivbVuGw01xE-Xa7Wdf981I8tq0QBtYBba+Yjc3NKCA8No2I4tu3wiB8ieeJl0+CcXEKjq+hqjixW2bYXiVZTcnVSazMfcWX3s6FnN-RLUtDfzAqC5t22Q+QMOW0Fzauz+ABU8tDhx8jgWOrirm4TxCR0+KuLK+StN0jxkvcJtbigwjMfASQ1Z8A444rbQNJBTjQSm5TmAV8hosVNxuDiT33eUTOspE9BMKwdr5wrwePMSuwlKoCoajk5O1PIKYUGiTjSaoPiVXELf+fV3dBxZWSPLGJeVVm5dwQVhIZoaBhue4JT6i8pvYcvPyWuQq-sevkp6jKcoooqyqqgfO-2JlhQqsmPUi8r4KRvhaVkQIwAP32hKHosYk5yjaEUJwJQ0y6EzDmDUk4dAuEvlhUBpYlJ33bLyKsXdkoF2DrYXIJR9jKHAlmLUY8kQnAgimTQWo1bgRaEvQh9VlKswINA3GoEVQkjjqXXesFK61BHlPVyc9jhtG4I8Xh71+GNTUi1TS2l6LfmEYrHMxJvAdHaHkFR4Fw4iSVBQY4spszITRNgtRe4DyCO+jbKAXNZpr2xj3J+KI4gExuHHdobkTrMIQI3KerRlC7EqrYB6Li6puK9mzEKrVbbix6kjGWYNFoGODrKKm+wuLgSqDccomhrqPCnndWcj1nrJJZmkrRHMvF2xyYtR2AoBZCxFoUp+ZI1DIW6CqMxblszVIKjdOpXEGnh2XIoZpcBhAMCWBAAASsIYQXZ-iDIOvIHo0pJxEnDnZMCep8QTxKY4ZE-EsQ5llP4fwQA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -188,22 +185,10 @@ export const streamEnrichmentMachine = setup({
     ready: {
       id: 'ready',
       type: 'parallel',
-      entry: enqueueActions(({ check, enqueue }) => {
-        enqueue({ type: 'stopProcessors' });
-        enqueue({
-          type: 'setupProcessors',
-          params: ({ context }) => ({ definition: context.definition }),
-        });
-        // Setup fields for wired stream only
-        if (check('isWiredStream')) {
-          enqueue({
-            type: 'setupFields',
-            params: ({ context }) => ({
-              definition: context.definition as WiredStreamGetResponse,
-            }),
-          });
-        }
-      }),
+      entry: [
+        { type: 'stopProcessors' },
+        { type: 'setupProcessors', params: ({ context }) => ({ definition: context.definition }) },
+      ],
       on: {
         'stream.received': {
           target: '#ready',
@@ -234,11 +219,8 @@ export const streamEnrichmentMachine = setup({
                 src: 'upsertStream',
                 input: ({ context }) => ({
                   definition: context.definition,
-                  processors: context.processorsRefs
-                    .map((proc) => proc.getSnapshot())
-                    .filter((proc) => proc.matches('configured'))
-                    .map((proc) => proc.context.processor),
-                  fields: context.fields,
+                  processors: getConfiguredProcessors(context),
+                  fields: getMappedFields(context),
                 }),
                 onDone: {
                   target: 'idle',
@@ -261,27 +243,27 @@ export const streamEnrichmentMachine = setup({
                   guard: '!hasPendingDraft',
                   actions: [
                     { type: 'addProcessor', params: ({ event }) => event },
-                    { type: 'sendProcessorChangeToSimulator' },
+                    { type: 'sendProcessorsChangeToSimulator' },
                   ],
                 },
                 'processors.reorder': {
                   guard: 'hasMultipleProcessors',
                   actions: [
                     { type: 'reorderProcessors', params: ({ event }) => event },
-                    { type: 'sendProcessorChangeToSimulator' },
+                    { type: 'sendProcessorsChangeToSimulator' },
                   ],
                 },
                 'processor.delete': {
                   actions: [
                     { type: 'stopProcessor', params: ({ event }) => event },
                     { type: 'deleteProcessor', params: ({ event }) => event },
-                    { type: 'sendProcessorChangeToSimulator' },
+                    { type: 'sendProcessorsChangeToSimulator' },
                   ],
                 },
                 'processor.change': {
                   actions: [
                     { type: 'reassignProcessors' },
-                    { type: 'sendProcessorChangeToSimulator' },
+                    { type: 'sendProcessorsChangeToSimulator' },
                   ],
                 },
               },
@@ -293,7 +275,7 @@ export const streamEnrichmentMachine = setup({
                 viewDataPreview: {
                   on: {
                     'simulation.viewDetectedFields': 'viewDetectedFields',
-                    'simulation.changePreviewDocsFilter': {
+                    'streamEnrichment.changePreviewDocsFilter': {
                       actions: [
                         { type: 'sendFilterChangeToSimulator', params: ({ event }) => event },
                       ],
@@ -303,6 +285,9 @@ export const streamEnrichmentMachine = setup({
                 viewDetectedFields: {
                   on: {
                     'simulation.viewDataPreview': 'viewDataPreview',
+                    'streamEnrichment.fields.*': {
+                      actions: forwardTo('simulator'),
+                    },
                   },
                 },
               },
@@ -346,10 +331,3 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
-
-function getStagedProcessors(context: StreamEnrichmentContext) {
-  return context.processorsRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.context.isNew)
-    .map((proc) => proc.context.processor);
-}

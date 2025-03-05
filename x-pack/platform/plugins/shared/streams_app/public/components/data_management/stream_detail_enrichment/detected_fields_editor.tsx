@@ -13,6 +13,7 @@ import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
 import { SchemaField } from '../schema_editor/types';
+import { useStreamEnrichmentEvents } from './state_management/stream_enrichment_state_machine';
 
 interface DetectedFieldsEditorProps {
   definition: WiredStreamGetResponse;
@@ -21,6 +22,8 @@ interface DetectedFieldsEditorProps {
 
 export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const { mapField, unmapField } = useStreamEnrichmentEvents();
 
   const hasFields = detectedFields.length > 0;
 
@@ -44,14 +47,6 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
     );
   }
 
-  const unmapField = (fieldName: string) => {};
-
-  const updateField = (field: SchemaField) => {
-    console.log(field);
-  };
-
-  const refreshFields = () => {};
-
   return (
     <>
       <EuiText
@@ -72,8 +67,7 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
         fields={detectedFields}
         stream={definition.stream}
         onFieldUnmap={unmapField}
-        onFieldUpdate={updateField}
-        onRefreshData={refreshFields}
+        onFieldUpdate={mapField}
         withTableActions
       />
     </>
