@@ -53,7 +53,7 @@ export function setupSavedObjects(
       getTitle(savedObject: SavedObject<RawAction>) {
         return `Connector: [${savedObject.attributes.name}]`;
       },
-      onExport<>(
+      onExport(
         context: SavedObjectsExportTransformContext,
         objects: Array<SavedObject<RawAction>>
       ) {
