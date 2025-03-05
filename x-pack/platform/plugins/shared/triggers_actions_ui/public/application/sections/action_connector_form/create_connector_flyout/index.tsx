@@ -23,7 +23,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 
-import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -86,60 +86,31 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const categoryOptions: EuiSelectableOption[] = [
     {
-      label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.alertingRules', {
-        defaultMessage: 'Alerting Rules',
-      }),
+      label: getConnectorFeatureName(AlertingConnectorFeatureId),
       key: AlertingConnectorFeatureId,
     },
     {
-      label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cases', {
-        defaultMessage: 'Cases',
-      }),
+      label: getConnectorFeatureName(CasesConnectorFeatureId),
       key: CasesConnectorFeatureId,
     },
     {
-      label: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionConnectorAdd.endpointSecurity',
-        {
-          defaultMessage: 'Endpoint Security',
-        }
-      ),
+      label: getConnectorFeatureName(EndpointSecurityConnectorFeatureId),
       key: EndpointSecurityConnectorFeatureId,
     },
     {
-      label: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAIObservability',
-        {
-          defaultMessage: 'Generative AI for Observability',
-        }
-      ),
+      label: getConnectorFeatureName(GenerativeAIForObservabilityConnectorFeatureId),
       key: GenerativeAIForObservabilityConnectorFeatureId,
     },
     {
-      label: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAISearch',
-        {
-          defaultMessage: 'Generative AI for Search',
-        }
-      ),
+      label: getConnectorFeatureName(GenerativeAIForSearchPlaygroundConnectorFeatureId),
       key: GenerativeAIForSearchPlaygroundConnectorFeatureId,
     },
     {
-      label: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeSecurity',
-        {
-          defaultMessage: 'Generative AI for Security',
-        }
-      ),
+      label: getConnectorFeatureName(GenerativeAIForSecurityConnectorFeatureId),
       key: GenerativeAIForSecurityConnectorFeatureId,
     },
     {
-      label: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionConnectorAdd.securitySolution',
-        {
-          defaultMessage: 'Security Solution',
-        }
-      ),
+      label: getConnectorFeatureName(SecurityConnectorFeatureId),
       key: SecurityConnectorFeatureId,
     },
   ].map(({ label, key }) => ({
