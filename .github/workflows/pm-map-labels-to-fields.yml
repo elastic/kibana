@@ -34,7 +34,7 @@ jobs:
           project-number: 1538
           owner: 'elastic'
 
-      - name: Update every issue in project 787 (https://github.com/elastic/projects/787)
+      - name: Update every issue in project 787 (https://github.com/orgs/elastic/projects/787)
         uses: ./actions/github-projects/map-labels
         with:
           github-token: ${{secrets.PM_GH_TOKEN}}
@@ -42,7 +42,7 @@ jobs:
           project-number: 787
           owner: 'elastic'
 
-      - name: Update every issue in project 859 (https://github.com/elastic/projects/859)
+      - name: Update every issue in project 859 (https://github.com/orgs/elastic/projects/859)
         uses: ./actions/github-projects/map-labels
         with:
           github-token: ${{secrets.PM_GH_TOKEN}}
@@ -50,7 +50,7 @@ jobs:
           project-number: 859
           owner: 'elastic'
 
-      - name: Update every issue in project 1326 (https://github.com/elastic/projects/1326)
+      - name: Update every issue in project 1326 (https://github.com/orgs/elastic/projects/1326)
         uses: ./actions/github-projects/map-labels
         with:
           github-token: ${{secrets.PM_GH_TOKEN}}
