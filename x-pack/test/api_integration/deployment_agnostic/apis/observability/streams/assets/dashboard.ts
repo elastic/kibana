@@ -24,13 +24,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ARCHIVES = [
     'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
     'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+    'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
   ];
 
   const SEARCH_DASHBOARD_ID = 'b70c7ae0-3224-11e8-a572-ffca06da1357';
   const BASIC_DASHBOARD_ID = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
   const BASIC_DASHBOARD_TITLE = 'Requests';
+  const TAG_ID = '00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d';
 
   async function loadDashboards() {
+    // clear out all lingering dashboards
+    const dashboards = await kibanaServer.savedObjects.find({
+      type: 'dashboard',
+    });
+    await kibanaServer.savedObjects.bulkDelete({
+      objects: dashboards.saved_objects.map((d) => ({ type: 'dashboard', id: d.id })),
+    });
+
     for (const archive of ARCHIVES) {
       await kibanaServer.importExport.load(archive, { space: SPACE_ID });
     }
@@ -43,25 +53,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function linkDashboard(id: string) {
-    const response = await apiClient.fetch('PUT /api/streams/{id}/dashboards/{dashboardId}', {
-      params: { path: { id: 'logs', dashboardId: id } },
+    const response = await apiClient.fetch('PUT /api/streams/{name}/dashboards/{dashboardId}', {
+      params: { path: { name: 'logs', dashboardId: id } },
     });
 
     expect(response.status).to.be(200);
   }
 
   async function unlinkDashboard(id: string) {
-    const response = await apiClient.fetch('DELETE /api/streams/{id}/dashboards/{dashboardId}', {
-      params: { path: { id: 'logs', dashboardId: id } },
+    const response = await apiClient.fetch('DELETE /api/streams/{name}/dashboards/{dashboardId}', {
+      params: { path: { name: 'logs', dashboardId: id } },
     });
 
     expect(response.status).to.be(200);
   }
 
   async function bulkLinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
       params: {
-        path: { id: 'logs' },
+        path: { name: 'logs' },
         body: {
           operations: ids.map((id) => {
             return {
@@ -78,9 +88,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function bulkUnlinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
       params: {
-        path: { id: 'logs' },
+        path: { name: 'logs' },
         body: {
           operations: ids.map((id) => {
             return {
@@ -124,8 +134,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}', {
-          params: { path: { id: 'logs' } },
+        const response = await apiClient.fetch('GET /api/streams/{name}', {
+          params: { path: { name: 'logs' } },
         });
 
         expect(response.status).to.eql(200);
@@ -134,8 +144,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the dashboards get response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-          params: { path: { id: 'logs' } },
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          params: { path: { name: 'logs' } },
         });
 
         expect(response.status).to.eql(200);
@@ -151,8 +161,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('dropped all dashboards', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.status).to.eql(200);
@@ -164,8 +174,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await unlinkDashboard(SEARCH_DASHBOARD_ID);
           await linkDashboard(SEARCH_DASHBOARD_ID);
 
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.status).to.eql(200);
@@ -180,8 +190,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('no longer lists the dashboard as a linked asset', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.status).to.eql(200);
@@ -204,8 +214,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('shows the linked dashboards', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-          params: { path: { id: 'logs' } },
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          params: { path: { name: 'logs' } },
         });
 
         expect(response.body.dashboards.length).to.eql(2);
@@ -217,8 +227,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('only shows the remaining linked dashboard', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.body.dashboards.length).to.eql(1);
@@ -241,28 +251,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('after creating multiple dashboards', () => {
-        // see details: https://github.com/elastic/kibana/issues/208016
-        this.tags(['failsOnMKI']);
         it('suggests dashboards to link', async () => {
-          const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_suggestions', {
-            params: { path: { id: 'logs' }, body: { tags: [] }, query: { query: '' } },
-          });
+          const response = await apiClient.fetch(
+            'POST /api/streams/{name}/dashboards/_suggestions',
+            {
+              params: { path: { name: 'logs' }, body: { tags: [] }, query: { query: '' } },
+            }
+          );
 
           expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(2);
+          expect(response.body.suggestions.length).to.eql(3);
         });
 
-        // TODO: needs a dataset with dashboards with tags
-        it.skip('filters suggested dashboards based on tags', () => {});
+        it('filters suggested dashboards based on tags', async () => {
+          const response = await apiClient.fetch(
+            'POST /api/streams/{name}/dashboards/_suggestions',
+            {
+              params: { path: { name: 'logs' }, body: { tags: [TAG_ID] }, query: { query: '' } },
+            }
+          );
+
+          expect(response.status).to.eql(200);
+          expect(response.body.suggestions.length).to.eql(1);
+        });
 
         it('filters suggested dashboards based on the query', async () => {
-          const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_suggestions', {
-            params: {
-              path: { id: 'logs' },
-              body: { tags: [] },
-              query: { query: BASIC_DASHBOARD_TITLE },
-            },
-          });
+          const response = await apiClient.fetch(
+            'POST /api/streams/{name}/dashboards/_suggestions',
+            {
+              params: {
+                path: { name: 'logs' },
+                body: { tags: [] },
+                query: { query: BASIC_DASHBOARD_TITLE },
+              },
+            }
+          );
 
           expect(response.status).to.eql(200);
           expect(response.body.suggestions.length).to.eql(1);

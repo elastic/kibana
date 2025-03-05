@@ -26,6 +26,7 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'original_rule.query_language': { type: 'keyword', required: true },
   'original_rule.annotations': { type: 'object', required: false },
   'original_rule.annotations.mitre_attack': { type: 'keyword', array: true, required: false },
+  'original_rule.severity': { type: 'keyword', required: false },
   elastic_rule: { type: 'object', required: false },
   'elastic_rule.title': { type: 'text', required: true, fields: { keyword: { type: 'keyword' } } },
   'elastic_rule.integration_ids': { type: 'keyword', required: false, array: true },

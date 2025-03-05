@@ -104,6 +104,20 @@
           },
           {
             "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
             "id": "def-common.InferenceChatModel.Unnamed",
             "type": "Function",
             "tags": [],
@@ -233,7 +247,15 @@
             "label": "_identifyingParams",
             "description": [],
             "signature": [
-              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; functionCalling?: ",
+              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; temperature?: number | undefined; functionCalling?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -273,7 +295,15 @@
             "label": "identifyingParams",
             "description": [],
             "signature": [
-              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; functionCalling?: ",
+              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; temperature?: number | undefined; functionCalling?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -908,7 +938,7 @@
             "text": "InferenceChatModelParams"
           },
           " extends ",
-          "BaseLanguageModelParams"
+          "BaseChatModelParams"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
         "deprecated": false,
@@ -1005,7 +1035,15 @@
                     "section": "def-common.FunctionCallingMode",
                     "text": "FunctionCallingMode"
                   },
-                  " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
+                  " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteMetadata",
+                    "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; } & TToolOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
                 "deprecated": false,
@@ -1077,6 +1115,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
             "deprecated": false,

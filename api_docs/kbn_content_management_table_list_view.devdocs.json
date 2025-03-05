@@ -79,7 +79,7 @@
             "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
-          "<T>, \"id\" | \"entityName\" | \"entityNamePlural\" | \"initialFilter\" | \"headingId\" | \"initialPageSize\" | \"listingLimit\" | \"urlStateEnabled\" | \"customTableColumn\" | \"emptyPrompt\" | \"findItems\" | \"createItem\" | \"editItem\" | \"deleteItems\" | \"getDetailViewLink\" | \"getOnClickTitle\" | \"rowItemActions\" | \"contentEditor\" | \"titleColumnName\" | \"withoutPageTemplateWrapper\" | \"createdByEnabled\" | \"recentlyAccessed\"> & { title: string; description?: string | undefined; additionalRightSideActions?: React.ReactNode[] | undefined; children?: React.ReactNode; }"
+          "<T>, \"id\" | \"initialPageSize\" | \"entityName\" | \"entityNamePlural\" | \"initialFilter\" | \"headingId\" | \"listingLimit\" | \"urlStateEnabled\" | \"customTableColumn\" | \"emptyPrompt\" | \"findItems\" | \"createItem\" | \"editItem\" | \"deleteItems\" | \"getDetailViewLink\" | \"getOnClickTitle\" | \"rowItemActions\" | \"contentEditor\" | \"titleColumnName\" | \"withoutPageTemplateWrapper\" | \"createdByEnabled\" | \"recentlyAccessed\"> & { title: string; description?: string | undefined; additionalRightSideActions?: React.ReactNode[] | undefined; children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/content-management/table_list_view/src/table_list_view.tsx",
         "deprecated": false,

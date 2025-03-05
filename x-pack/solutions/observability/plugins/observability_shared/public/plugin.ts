@@ -49,6 +49,10 @@ import {
   EntitiesInventoryLocatorDefinition,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
+import {
+  DependencyOverviewLocator,
+  DependencyOverviewLocatorDefinition,
+} from '../common/locators/apm/dependency_overview_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -80,6 +84,7 @@ interface ObservabilitySharedLocators {
   };
   apm: {
     serviceOverview: ServiceOverviewLocator;
+    dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
     serviceEntity: ServiceEntityLocator;
@@ -154,6 +159,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       },
       apm: {
         serviceOverview: urlService.locators.create(new ServiceOverviewLocatorDefinition()),
+        dependencyOverview: urlService.locators.create(new DependencyOverviewLocatorDefinition()),
         transactionDetailsByName: urlService.locators.create(
           new TransactionDetailsByNameLocatorDefinition()
         ),

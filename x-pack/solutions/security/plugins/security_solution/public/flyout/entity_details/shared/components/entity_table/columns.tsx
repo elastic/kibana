@@ -17,7 +17,6 @@ import { hasPreview, PreviewLink } from '../../../../shared/components/preview_l
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
-  isDraggable: boolean,
   data: T
 ): EntityTableColumns<T> => [
   {
@@ -61,7 +60,6 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             rowItems={values}
             attrName={field}
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
-            isDraggable={isDraggable}
             scopeId={scopeId}
             render={showPreviewLink ? renderPreviewLink : renderField}
             data-test-subj="entity-table-value"

@@ -8,12 +8,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
 import type { ESQLControlState } from '../types';
 import { ValueControlForm } from './value_control_form';
-import { FieldControlForm } from './field_control_form';
+import { IdentifierControlForm } from './identifier_control_form';
 import { updateQueryStringWithVariable } from './helpers';
 
 interface ESQLControlsFlyoutProps {
@@ -71,9 +71,12 @@ export function ESQLControlsFlyout({
         search={search}
       />
     );
-  } else if (variableType === ESQLVariableType.FIELDS) {
+  } else if (
+    variableType === ESQLVariableType.FIELDS ||
+    variableType === ESQLVariableType.FUNCTIONS
+  ) {
     return (
-      <FieldControlForm
+      <IdentifierControlForm
         variableType={variableType}
         esqlVariables={esqlVariables}
         queryString={queryString}

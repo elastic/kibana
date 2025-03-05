@@ -20,7 +20,7 @@ import {
   SupportingVisType,
 } from './dimension_editor';
 import { DatasourcePublicAPI } from '../..';
-import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
+import { createMockFramePublicAPI } from '../../mocks';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -71,21 +71,28 @@ describe('dimension editor', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
 
-  const nonNumericMetricFrame = createMockFramePublicAPI({
-    activeData: generateActiveData([
-      {
-        id: 'first',
-        rows: Array(3).fill({
-          'metric-col-id': faker.lorem.word(3),
-          'max-col-id': faker.number.int(),
-        }),
-      },
-    ]),
-  });
-
   let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
     paletteService: PaletteRegistry;
   };
+
+  const getNonNumericDatasource = () =>
+    ({
+      hasDefaultTimeField: jest.fn(() => true),
+      getOperationForColumnId: jest.fn(() => ({
+        hasReducedTimeRange: false,
+        dataType: 'keyword',
+      })),
+    } as unknown as DatasourcePublicAPI);
+
+  const getNumericDatasourceWithArraySupport = () =>
+    ({
+      hasDefaultTimeField: jest.fn(() => true),
+      getOperationForColumnId: jest.fn(() => ({
+        hasReducedTimeRange: false,
+        dataType: 'number',
+        hasArraySupport: true,
+      })),
+    } as unknown as DatasourcePublicAPI);
 
   beforeEach(() => {
     props = {
@@ -97,21 +104,12 @@ describe('dimension editor', () => {
         hasDefaultTimeField: jest.fn(() => true),
         getOperationForColumnId: jest.fn(() => ({
           hasReducedTimeRange: false,
+          dataType: 'number',
         })),
       } as unknown as DatasourcePublicAPI,
       removeLayer: jest.fn(),
       addLayer: jest.fn(),
-      frame: createMockFramePublicAPI({
-        activeData: generateActiveData([
-          {
-            id: 'first',
-            rows: Array(3).fill({
-              'metric-col-id': faker.number.int(),
-              'secondary-metric-col-id': faker.number.int(),
-            }),
-          },
-        ]),
-      }),
+      frame: createMockFramePublicAPI(),
       setState: jest.fn(),
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
       paletteService: chartPluginMock.createPaletteRegistry(),
@@ -177,7 +175,16 @@ describe('dimension editor', () => {
     });
 
     it('Color mode switch is not shown when the primary metric is non-numeric', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor({ frame: nonNumericMetricFrame });
+      const { colorModeGroup } = renderPrimaryMetricEditor({
+        datasource: getNonNumericDatasource(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
+      const { colorModeGroup } = renderPrimaryMetricEditor({
+        datasource: getNumericDatasourceWithArraySupport(),
+      });
       expect(colorModeGroup).not.toBeInTheDocument();
     });
 
@@ -196,7 +203,7 @@ describe('dimension editor', () => {
       });
       it('is visible when metric is non-numeric even if palette is set', () => {
         const { staticColorPicker } = renderPrimaryMetricEditor({
-          frame: nonNumericMetricFrame,
+          datasource: getNonNumericDatasource(),
           state: { ...metricAccessorState, palette },
         });
         expect(staticColorPicker).toBeInTheDocument();
@@ -571,6 +578,7 @@ describe('dimension editor', () => {
             ...props.datasource,
             getOperationForColumnId: (id: string) => ({
               hasReducedTimeRange: id === stateWOTrend.metricAccessor,
+              dataType: 'number',
             }),
           },
         });
@@ -579,7 +587,7 @@ describe('dimension editor', () => {
 
       it('should not show a trendline button group when primary metric dimension is non-numeric', () => {
         const { container } = renderAdditionalSectionEditor({
-          frame: nonNumericMetricFrame,
+          datasource: getNonNumericDatasource(),
         });
         expect(container).toBeEmptyDOMElement();
       });

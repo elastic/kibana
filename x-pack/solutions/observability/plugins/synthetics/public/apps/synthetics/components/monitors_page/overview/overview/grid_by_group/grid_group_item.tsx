@@ -25,7 +25,7 @@ import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 import { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
-import { MetricItem } from '../metric_item';
+import { MetricItem } from '../metric_item/metric_item';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;

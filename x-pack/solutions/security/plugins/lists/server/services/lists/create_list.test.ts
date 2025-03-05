@@ -62,7 +62,7 @@ describe('create_list', () => {
     await createList(options);
     const body = getIndexESListMock();
     const expected = {
-      body,
+      document: body,
       id: LIST_ID,
       index: LIST_INDEX,
       refresh: 'wait_for',

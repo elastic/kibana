@@ -399,6 +399,29 @@ describe('update', () => {
         Operations.updateCase,
       ]);
     });
+
+    it('should filter out empty user profiles', async () => {
+      const casesWithEmptyAssignee = {
+        cases: [
+          {
+            ...cases.cases[0],
+            assignees: [{ uid: '' }, { uid: '2' }],
+          },
+        ],
+      };
+      await bulkUpdate(casesWithEmptyAssignee, clientArgs, casesClientMock);
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: expect.arrayContaining([
+            expect.objectContaining({
+              updatedAttributes: expect.objectContaining({
+                assignees: [{ uid: '2' }],
+              }),
+            }),
+          ]),
+        })
+      );
+    });
   });
 
   describe('Category', () => {

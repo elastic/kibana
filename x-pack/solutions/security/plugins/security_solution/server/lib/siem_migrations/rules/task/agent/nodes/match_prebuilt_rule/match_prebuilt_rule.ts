@@ -7,17 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import {
-  DEFAULT_TRANSLATION_RISK_SCORE,
-  DEFAULT_TRANSLATION_SEVERITY,
-  RuleTranslationResult,
-} from '../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
+import {
+  DEFAULT_TRANSLATION_RISK_SCORE,
+  DEFAULT_TRANSLATION_SEVERITY,
+} from '../../../../constants';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
@@ -63,12 +63,14 @@ export const getMatchPrebuiltRuleNode = ({
       return {
         name: rule.name,
         description: rule.description,
+        query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
       };
     });
 
     const splunkRule = {
       title: state.original_rule.title,
       description: state.original_rule.description,
+      query: state.original_rule.query,
     };
 
     /*

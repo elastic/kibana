@@ -21,10 +21,4 @@ describe('PageTitle', () => {
 
     expect(attackDiscoveryPageTitle).toHaveTextContent(ATTACK_DISCOVERY_PAGE_TITLE);
   });
-
-  it('renders the beta badge icon', () => {
-    const betaBadge = screen.getByTestId('betaBadge');
-
-    expect(betaBadge).toBeInTheDocument();
-  });
 });

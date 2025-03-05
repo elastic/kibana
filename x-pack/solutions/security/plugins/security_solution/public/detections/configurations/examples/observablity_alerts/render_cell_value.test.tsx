@@ -43,7 +43,6 @@ describe('RenderCellValue', () => {
       eventId,
       header,
       isDetails: false,
-      isDraggable: true,
       isExpandable: false,
       isExpanded: false,
       linkValues,

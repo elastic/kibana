@@ -67,12 +67,14 @@ xpack.fleet.outputs:
 [Multipass](https://multipass.run/) is a lightweight virtualization tool for running Ubuntu VMs. Follow the instructions at https://multipass.run/install to install Multipass on your local machine.
 
 Advantages of running Elastic Agents on a VM include:
+
 - More realistic setup.
 - Ability to use the `elastic-agent` commands, e.g. `sudo elastic-agent status`, `sudo elastic-agent restart`...
 - Agents can be upgraded.
 - Elastic Defend can be installed.
 
 To run a Fleet Server and agents on VMs, make sure the default output host defined in your `kibana.dev.yml` uses your local IP address (NB: using `localhost` can cause connection issues). For Mac users using a WiFi connection, the local IP address can be retrieved with:
+
 ```sh
 ipconfig getifaddr en0
 ```
@@ -85,6 +87,7 @@ In Fleet UI, these host URLs should be reflected in the Settings page:
 ### Running a Fleet Server
 
 1\. Launch a Multipass instance for your Fleet Server:
+
 ```sh
 multipass launch --name fleet-server --disk 10G --network en0
 ```
@@ -94,11 +97,13 @@ Available options are detailed at https://multipass.run/docs/launch-command.
 It is generally recommended to provide additional disk space (default 5G) for running Elastic Agents.
 
 In addition, the `--network` option adds a network interface to the instance, in this case `en0`. This allows the Fleet Server instance to communicate with the enrolled agents via the wifi network interface. You can find out the IP address by running:
+
 ```sh
 multipass list
 ```
 
 Example output:
+
 ```sh
 Name                    State             IPv4             Image
 fleet-server            Running           192.168.1.1     Ubuntu 24.04 LTS
@@ -108,6 +113,7 @@ fleet-server            Running           192.168.1.1     Ubuntu 24.04 LTS
 Copy the second IP address into the host URLs of the Fleet Server host in your `kibana.dev.yml`. Wait for Kibana to restart.
 
 2\. Shell into the instance:
+
 ```sh
 multipass shell fleet-server
 ```
@@ -120,6 +126,7 @@ multipass shell fleet-server
 ![Fleet UI showing the Add Fleet Server flyout, step 2](./screenshots/vm_fleet_server_2.png)
 
 5\. Before copying the install instructions, amend the download URL to suit the desired version and your host architecture:
+
 - Because Multipass only supports the host's architecture, you may need to change `linux-x86_64` to `linux-arm64` (e.g. on M-series Macbooks).
 - By default, the proposed version is the latest release. You can explore available versions at https://artifacts-api.elastic.co/v1/versions and then check out `https://artifacts-api.elastic.co/v1/versions/<version>/builds/latest` to find the relevant download URL. An even easier way is to use the API: the following command will output the download URL for the `elastic-agent-8.15.0-SNAPSHOT-linux-arm64.tar.gz` version:
   ```sh
@@ -138,11 +145,13 @@ multipass shell fleet-server
 ![Fleet UI showing add agent on VM flow, step 1](./screenshots/vm_add_agent_1.png)
 
 2\. Launch a Multipass instance, e.g.:
+
 ```sh
 multipass launch --name agent1 --disk 10G
 ```
 
 3\. Shell into the instance:
+
 ```sh
 multipass shell agent1
 ```
@@ -155,6 +164,7 @@ multipass shell agent1
 ### Gotchas
 
 1\. The system clock within Multipass instances stops when the host computer is suspended (see https://askubuntu.com/questions/1486977/repeated-incorrect-time-in-multipass-clients-with-ubuntu-22-04). This can result in a running Elastic Agent being incorrectly "in the past" after your laptop was asleep for a while. The easiest fix is to restart all Multipass instances, which will reset their clocks:
+
 ```sh
 multipass restart --all
 ```
@@ -166,6 +176,7 @@ multipass restart --all
 Official documentation: https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html
 
 The main advantage of running Elastic Agents in a Docker container is a one command setup that can be easily be scripted (see [Using the `run_dockerized_agent.sh` script](#using-the-run_dockerized_agentsh-script) below). There are a few limitations, however, including:
+
 - Agents cannot be upgraded.
 - Elastic Defend cannot be installed.
 
@@ -177,6 +188,7 @@ In Fleet UI, these host URLs should be reflected in the Settings page:
 ### Running a Fleet Server
 
 With Docker running, launch your Fleet Server with:
+
 ```sh
 docker run \
   -e ELASTICSEARCH_HOST=http://host.docker.internal:9200 \
@@ -188,8 +200,9 @@ docker run \
   -e FLEET_SERVER_ENABLE=1 \
   -e FLEET_SERVER_POLICY_ID=fleet-server-policy \
   -p 8220:8220 \
-  --rm docker.elastic.co/beats/elastic-agent:<version>
+  --rm docker.elastic.co/elastic-agent/elastic-agent:<version>
 ```
+
 where the version can be e.g. `8.13.3` or `8.15.0-SNAPSHOT`. You can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
 
 You can also check the list of available environment variables for the `docker run` command in the [elastic-agent source code](https://github.com/elastic/elastic-agent/blob/main/internal/pkg/agent/cmd/container.go#L66-L134).
@@ -207,13 +220,14 @@ Once the container is running, it can be treated as a local process running on `
 2\. Scroll down to the enrollment CLI steps and copy the enrollment token from the end of the `sudo ./elastic-agent install` command.
 
 3\. Enroll the agent with:
+
 ```sh
 docker run \
   -e FLEET_URL=https://host.docker.internal:8220 \
   -e FLEET_ENROLL=1 \
   -e FLEET_ENROLLMENT_TOKEN=<enrollment_token> \
   -e FLEET_INSECURE=1 \
-  --rm docker.elastic.co/beats/elastic-agent:<version>
+  --rm docker.elastic.co/elastic-agent/elastic-agent:<version>
 ```
 
 After a short moment, the UI should confirm that the agent is enrolled and shipping data:
@@ -224,17 +238,21 @@ Tip: if the agent enrolls but there is no incoming data, check the host URL of t
 ### Using the `run_dockerized_agent.sh` script
 
 You can make either running a Fleet Server or enrolling an agent quicker by using the [run_dockerized_agent.sh](./run_dockerized_elastic_agent.sh) script:
+
 - Copy the script place it somewhere convenient.
 - Run `chmod +x` on it to make it executable.
 - Update the version and the Kibana base path within the script.
 
 Run a Fleet Server with:
+
 ```sh
 ./run_elastic_agent.sh fleet_server
 ```
 
 And enroll an Elastic Agent with:
+
 ```sh
 ./run agent -e <enrollment token> -v <version> -t <tags>
 ```
+
 where the version and tags are optional.

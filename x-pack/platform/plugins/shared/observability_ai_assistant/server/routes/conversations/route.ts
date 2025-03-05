@@ -6,9 +6,22 @@
  */
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
-import { Conversation } from '../../../common/types';
+import { Conversation, MessageRole } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
+
+// backwards compatibility for messages with system role
+const getConversationWithoutSystemMessages = (conversation: Conversation) => {
+  if (!conversation.systemMessage) {
+    conversation.systemMessage =
+      conversation.messages.find((message) => message.message.role === 'system')?.message
+        ?.content ?? '';
+  }
+  conversation.messages = conversation.messages.filter(
+    (message) => message.message.role !== MessageRole.System
+  );
+  return conversation;
+};
 
 const getConversationRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
@@ -31,7 +44,9 @@ const getConversationRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.get(params.path.conversationId);
+    const conversation = await client.get(params.path.conversationId);
+    // conversation without system messages
+    return getConversationWithoutSystemMessages(conversation);
   },
 });
 
@@ -56,7 +71,12 @@ const findConversationsRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.find({ query: params?.body?.query });
+    const conversations = await client.find({ query: params?.body?.query });
+
+    return {
+      // conversations without system messages
+      conversations: conversations.map(getConversationWithoutSystemMessages),
+    };
   },
 });
 
@@ -82,6 +102,31 @@ const createConversationRoute = createObservabilityAIAssistantServerRoute({
     }
 
     return client.create(params.body.conversation);
+  },
+});
+
+const duplicateConversationRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.duplicateConversation(params.path.conversationId);
   },
 });
 
@@ -178,4 +223,5 @@ export const conversationRoutes = {
   ...updateConversationRoute,
   ...updateConversationTitle,
   ...deleteConversationRoute,
+  ...duplicateConversationRoute,
 };

@@ -19,12 +19,10 @@ export interface DeprecatedRowRenderer {
   renderRow: ({
     contextId,
     data,
-    isDraggable,
     scopeId,
   }: {
     contextId?: string;
     data: Ecs;
-    isDraggable: boolean;
     scopeId: string;
   }) => React.ReactNode;
 }
