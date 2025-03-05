@@ -33,7 +33,7 @@ export class SecuritySolutionEssPlugin
   ): SecuritySolutionEssPluginSetup {
     const { securitySolution } = _setupDeps;
 
-    securitySolution.setProductFeatureKeys(new Set(DEFAULT_PRODUCT_FEATURES));
+    securitySolution.setProductFeatureKeys(DEFAULT_PRODUCT_FEATURES);
 
     return {};
   }

@@ -55,7 +55,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    securitySolution.setProductFeatureKeys(new Set(getProductProductFeatures(productTypes)));
+    securitySolution.setProductFeatureKeys(getProductProductFeatures(productTypes));
     return {};
   }
 

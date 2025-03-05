@@ -13,7 +13,7 @@ import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import { OnboardingService } from './onboarding/service';
-import { ProductFeatureKeyType } from '../../../packages/features/src/types';
+import { ProductFeatureKeyType, ProductFeatureKeys } from '../../../packages/features/src/types';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;

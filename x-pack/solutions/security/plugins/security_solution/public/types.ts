@@ -49,7 +49,6 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features/keys';
 
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -97,6 +96,7 @@ import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
+import { ProductFeatureKeys } from '../../../packages/features';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -214,7 +214,7 @@ export type StartRenderServices = Pick<
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;
-  setProductFeatureKeys: (productFeatureKeys: Set<ProductFeatureKeyType>) => void;
+  setProductFeatureKeys: (productFeatureKeys: ProductFeatureKeys) => void;
 }
 
 export interface PluginStart {

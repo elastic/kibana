@@ -185,31 +185,32 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: 'admin',
     });
 
+    management?.sections.section.kibana.registerApp({
+      id: 'securityAiAssistantManagement',
+      title: ASSISTANT_MANAGEMENT_TITLE,
+      hideFromSidebar: true,
+      order: 1,
+      mount: async (params) => {
+        const { renderApp, services, store } = await mountDependencies();
+        const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+
+        return renderApp({
+          ...params,
+          services,
+          store,
+          usageCollection,
+          children: <ManagementSettings />,
+        });
+      },
+    });
 
     productFeatureKeys$.pipe(withLatestFrom(plugins.licensing.license$)).subscribe(([productFeatureKeys, license]) => {
 
       const isAssistantAvailable = productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) && license?.hasAtLeast('enterprise');
       const assistantManagementApp = management?.sections.section.kibana.getApp('securityAiAssistantManagement')
 
-      if (isAssistantAvailable && !assistantManagementApp) {
-        management?.sections.section.kibana.registerApp({
-          id: 'securityAiAssistantManagement',
-          title: ASSISTANT_MANAGEMENT_TITLE,
-          hideFromSidebar: true,
-          order: 1,
-          mount: async (params) => {
-            const { renderApp, services, store } = await mountDependencies();
-            const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
-
-            return renderApp({
-              ...params,
-              services,
-              store,
-              usageCollection,
-              children: <ManagementSettings />,
-            });
-          },
-        });
+      if (!isAssistantAvailable) {
+        assistantManagementApp?.disable();
       }
     });
 
