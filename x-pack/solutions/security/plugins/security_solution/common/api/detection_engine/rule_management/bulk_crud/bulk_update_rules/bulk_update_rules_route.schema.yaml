@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: Bulk Update API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_bulk_update:
+    put:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      operationId: BulkUpdateRules
+      deprecated: true
+      summary: Update multiple detection rules
+      description: |
+        Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` or `rule_id` values.
+      tags:
+        - Bulk API
+      requestBody:
+        description: A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleUpdateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../response_schema.schema.yaml#/components/schemas/BulkCrudRulesResponse'
