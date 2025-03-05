@@ -229,12 +229,10 @@ export default function ({ getService }: FtrProviderContext) {
               await es.enrich.putPolicy(
                 {
                   name,
-                  body: {
-                    match: {
-                      indices: sourceIndices,
-                      match_field: matchField,
-                      enrich_fields: enrichFields,
-                    },
+                  match: {
+                    indices: sourceIndices,
+                    match_field: matchField,
+                    enrich_fields: enrichFields,
                   },
                 },
                 { ignore: [409] }

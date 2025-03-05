@@ -21,7 +21,7 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "//packages/kbn-peggy",
+  "//src/platform/packages/private/kbn-peggy",
   "@npm//peggy",
   "@npm//webpack",
 ]

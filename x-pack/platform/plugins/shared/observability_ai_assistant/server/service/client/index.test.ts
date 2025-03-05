@@ -69,21 +69,6 @@ function createLlmSimulator(subscriber: any) {
         toolCalls: msg.function_call ? [{ function: msg.function_call }] : [],
       });
     },
-    tokenCount: async ({
-      completion,
-      prompt,
-      total,
-    }: {
-      completion: number;
-      prompt: number;
-      total: number;
-    }) => {
-      subscriber.next({
-        type: InferenceChatCompletionEventType.ChatCompletionTokenCount,
-        tokens: { completion, prompt, total },
-      });
-      subscriber.complete();
-    },
     chunk: async (msg: ChunkDelta) => {
       subscriber.next({
         type: InferenceChatCompletionEventType.ChatCompletionChunk,
@@ -173,6 +158,12 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.hasAction.mockReturnValue(false);
     functionClientMock.getActions.mockReturnValue([]);
 
+    internalUserEsClientMock.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    } as any);
+
     currentUserEsClientMock.search.mockResolvedValue({
       hits: {
         hits: [],
@@ -252,11 +243,6 @@ describe('Observability AI Assistant client', () => {
                       },
                     },
                   ],
-                  tokens: {
-                    completion: 0,
-                    prompt: 0,
-                    total: 0,
-                  },
                 })
                 .catch((error) => titleLlmSimulator.error(error));
             };
@@ -388,7 +374,6 @@ describe('Observability AI Assistant client', () => {
           titleLlmPromiseReject(new Error('Failed generating title'));
 
           await nextTick();
-          await llmSimulator.tokenCount({ completion: 1, prompt: 33, total: 34 });
           await llmSimulator.complete();
 
           await finished(stream);
@@ -400,11 +385,6 @@ describe('Observability AI Assistant client', () => {
               title: 'New conversation',
               id: expect.any(String),
               last_updated: expect.any(String),
-              token_count: {
-                completion: 1,
-                prompt: 33,
-                total: 34,
-              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -418,7 +398,6 @@ describe('Observability AI Assistant client', () => {
           await llmSimulator.chunk({ content: ' again' });
 
           titleLlmPromiseResolve('An auto-generated title');
-          await llmSimulator.tokenCount({ completion: 6, prompt: 210, total: 216 });
           await llmSimulator.complete();
 
           await finished(stream);
@@ -457,11 +436,6 @@ describe('Observability AI Assistant client', () => {
               title: 'An auto-generated title',
               id: expect.any(String),
               last_updated: expect.any(String),
-              token_count: {
-                completion: 6,
-                prompt: 210,
-                total: 216,
-              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -475,11 +449,6 @@ describe('Observability AI Assistant client', () => {
                 id: expect.any(String),
                 last_updated: expect.any(String),
                 title: 'An auto-generated title',
-                token_count: {
-                  completion: 6,
-                  prompt: 210,
-                  total: 216,
-                },
               },
               labels: {},
               numeric_labels: {},
@@ -543,15 +512,13 @@ describe('Observability AI Assistant client', () => {
                     id: 'my-conversation-id',
                     title: 'My stored conversation',
                     last_updated: new Date().toISOString(),
-                    token_count: {
-                      completion: 1,
-                      prompt: 78,
-                      total: 79,
-                    },
                   },
                   labels: {},
                   numeric_labels: {},
                   public: false,
+                  user: {
+                    name: 'johndoe',
+                  },
                   messages: [user('How many alerts do I have?')],
                 },
               },
@@ -583,7 +550,6 @@ describe('Observability AI Assistant client', () => {
 
       await llmSimulator.chunk({ content: 'Hello' });
       await llmSimulator.next({ content: 'Hello' });
-      await llmSimulator.tokenCount({ completion: 1, prompt: 33, total: 34 });
       await llmSimulator.complete();
 
       await finished(stream);
@@ -595,11 +561,6 @@ describe('Observability AI Assistant client', () => {
           title: 'My stored conversation',
           id: expect.any(String),
           last_updated: expect.any(String),
-          token_count: {
-            completion: 2,
-            prompt: 111,
-            total: 113,
-          },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
       });
@@ -614,11 +575,6 @@ describe('Observability AI Assistant client', () => {
             id: expect.any(String),
             last_updated: expect.any(String),
             title: 'My stored conversation',
-            token_count: {
-              completion: 2,
-              prompt: 111,
-              total: 113,
-            },
           },
           labels: {},
           numeric_labels: {},
@@ -819,6 +775,7 @@ describe('Observability AI Assistant client', () => {
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
+          logger: expect.any(Object),
           connectorId: 'foo',
           messages: [
             {
@@ -900,7 +857,6 @@ describe('Observability AI Assistant client', () => {
         beforeEach(async () => {
           await llmSimulator.chunk({ content: 'I am done here' });
           await llmSimulator.next({ content: 'I am done here' });
-          await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
           await llmSimulator.complete();
           await waitForNextWrite(stream);
 
@@ -940,11 +896,6 @@ describe('Observability AI Assistant client', () => {
               id: expect.any(String),
               last_updated: expect.any(String),
               title: 'My predefined title',
-              token_count: {
-                completion: expect.any(Number),
-                prompt: expect.any(Number),
-                total: expect.any(Number),
-              },
             },
           });
 
@@ -1200,7 +1151,6 @@ describe('Observability AI Assistant client', () => {
 
       await llmSimulator.chunk({ content: 'Hello' });
       await llmSimulator.next({ content: 'Hello' });
-      await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
       await llmSimulator.complete();
 
       await finished(stream);
@@ -1492,7 +1442,6 @@ describe('Observability AI Assistant client', () => {
 
       await llmSimulator.chunk({ function_call: { name: 'get_top_alerts' } });
       await llmSimulator.next({ content: 'done' });
-      await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
       await llmSimulator.complete();
 
       await waitFor(() => functionResponsePromiseResolve !== undefined);
@@ -1612,7 +1561,6 @@ describe('Observability AI Assistant client', () => {
           function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
         });
         await llmSimulator.next({ content: 'content' });
-        await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
         await llmSimulator.complete();
       });
 
@@ -1643,7 +1591,6 @@ describe('Observability AI Assistant client', () => {
         await llmSimulator.next({
           content: 'Looks like the function call failed',
         });
-        await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
 
         await llmSimulator.complete();
       });

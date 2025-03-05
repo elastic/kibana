@@ -130,9 +130,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       repository: snapshotRepoName,
       snapshot: snapshotName,
       wait_for_completion: true,
-      body: {
-        indices: resourceNames.concreteIndexName.kb,
-      },
+      indices: resourceNames.concreteIndexName.kb,
     });
 
     await es.snapshot.deleteRepository({ name: snapshotRepoName });

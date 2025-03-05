@@ -13,7 +13,7 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
