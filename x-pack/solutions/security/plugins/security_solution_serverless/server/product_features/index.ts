@@ -14,14 +14,8 @@ import { getCasesProductFeaturesConfigurator } from './cases_product_features_co
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
 import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
-import {
-  getTimelineProductFeaturesConfigurator,
-  getNonTimelineProductFeaturesConfigurator,
-} from './timeline_product_features_config';
-import {
-  getNotesProductFeaturesConfigurator,
-  getNonNotesProductFeaturesConfigurator,
-} from './notes_product_features_config';
+import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
+import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
 import { getSiemMigrationsProductFeaturesConfigurator } from './siem_migrations_product_features_config';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
@@ -45,6 +39,7 @@ export const registerProductFeatures = (
   const productLines = Object.fromEntries(
     config.productTypes.map((productType) => [productType.product_line, true])
   );
+
   const productTiers = Object.fromEntries(
     config.productTypes.map((productType) => [productType.product_tier, true])
   );
@@ -53,27 +48,21 @@ export const registerProductFeatures = (
   // Cases are always enabled (both for security and AI-SOC)
   configurator.cases = getCasesProductFeaturesConfigurator(enabledProductFeatureKeys);
 
-  if (productLines[ProductLine.security]) {
-    // TODO: clarify what happens with siem migrations
+  if (productLines[ProductLine.security] && !productTiers[ProductTier.searchAiLake]) {
     if (!config.experimentalFeatures.siemMigrationsDisabled) {
       configurator.siemMigrations =
         getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys);
     }
+
     configurator.security = getSecurityProductFeaturesConfigurator(
       enabledProductFeatureKeys,
       config.experimentalFeatures
     );
-
-    // timeline and notes are not available for the searchAiLake tier within Security
-    configurator.timeline = productTiers[ProductTier.searchAiLake]
-      ? getNonTimelineProductFeaturesConfigurator(enabledProductFeatureKeys)
-      : getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys);
-    configurator.notes = productTiers[ProductTier.searchAiLake]
-      ? getNonNotesProductFeaturesConfigurator(enabledProductFeatureKeys)
-      : getNotesProductFeaturesConfigurator(enabledProductFeatureKeys);
+    configurator.timeline = getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys);
+    configurator.notes = getNotesProductFeaturesConfigurator(enabledProductFeatureKeys);
   }
 
-  if (productLines[ProductLine.aiSoc]) {
+  if (productLines[ProductLine.aiSoc] && productTiers[ProductTier.searchAiLake]) {
     configurator.attackDiscovery =
       getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys);
     configurator.securityAssistant =
