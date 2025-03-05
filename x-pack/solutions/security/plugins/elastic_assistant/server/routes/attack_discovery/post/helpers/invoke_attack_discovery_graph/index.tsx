@@ -126,6 +126,7 @@ export const invokeAttackDiscoveryGraph = async ({
       tags,
     }
   );
+
   const {
     attackDiscoveries,
     anonymizedAlerts,
