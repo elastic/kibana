@@ -28,13 +28,13 @@ const { bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as W
 async function start() {
   const logger = loggerProxy;
 
+  const streamManager = new StreamManager(logger);
+
   const { clients } = await bootstrap({
     ...runOptions,
     skipClientBootstrap: true,
     clean: false,
   });
-
-  const streamManager = new StreamManager(logger);
 
   await indexHistoricalData({
     bucketFrom,
