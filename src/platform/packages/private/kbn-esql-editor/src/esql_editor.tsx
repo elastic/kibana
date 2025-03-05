@@ -337,8 +337,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.lookup_index.create', async (...args) => {
     await uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
       onUploadComplete,
-      // autoAddInference,
-      autoCreateDataView: true,
+      autoCreateDataView: false,
       indexSettings: {
         'index.mode': 'lookup',
       } as IndicesIndexSettings,
