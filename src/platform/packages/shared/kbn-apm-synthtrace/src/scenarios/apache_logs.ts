@@ -54,7 +54,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             });
         });
 
-      // High traffic/attack simulation logs
+      // attack simulation logs
       const attackSimulationLogs = range
         .interval('1m')
         .rate(2)
