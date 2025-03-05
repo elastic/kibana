@@ -43,10 +43,6 @@ export const registerFunctions: RegistrationCallback = async ({
   const isObservabilityDeployment = scopes.includes('observability');
   const isGenericDeployment = scopes.length === 0 || (scopes.length === 1 && scopes[0] === 'all');
 
-  console.log('SQREN!!! isObservabilityDeployment', isObservabilityDeployment);
-  console.log('SQREN!!! isGenericDeployment', isGenericDeployment);
-  console.log('SQREN!!! scopes', scopes);
-
   if (isObservabilityDeployment || isGenericDeployment) {
     functions.registerInstruction(`
 ${
