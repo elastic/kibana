@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { firstValueFrom } from 'rxjs';
 import { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
@@ -73,13 +74,16 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
+    const managedServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((config) => {
+      return config.managedServiceUrl;
+    });
 
     return {
       apiEndpoint,
       elasticsearchUrl,
       scriptDownloadUrl,
       elasticAgentVersionInfo,
-      managedServiceUrl: plugins.apm.setup.config.managedServiceUrl,
+      managedServiceUrl,
     };
   },
 });
