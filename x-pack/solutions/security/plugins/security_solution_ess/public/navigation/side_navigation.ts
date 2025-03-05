@@ -23,7 +23,7 @@ export const initSideNavigation = async (services: Services) => {
     securitySolution.setIsSolutionNavigationEnabled(isSolutionNavigationEnabled);
   });
 
-  const { navigationTree$, panelContentProvider } = await securitySolution.getSolutionNavigation();
+  const { navigationTree$ } = await securitySolution.getSolutionNavigation();
 
   const essNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
@@ -49,7 +49,6 @@ export const initSideNavigation = async (services: Services) => {
     title: SOLUTION_NAME,
     icon: 'logoSecurity',
     navigationTree$: essNavigationTree$,
-    panelContentProvider,
     dataTestSubj: 'securitySolutionSideNav',
   });
 };
