@@ -117,6 +117,7 @@ export const getSecurityBaseKibanaFeature = ({
         'timeline_read',
         'notes_write',
         'notes_read',
+        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
@@ -158,6 +159,7 @@ export const getSecurityBaseKibanaFeature = ({
         'cloud-defend-read',
         'timeline_read',
         'notes_read',
+        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: [],

@@ -12,8 +12,7 @@ import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
 
-import { type ViewMode } from '@kbn/embeddable-plugin/public';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { ViewMode, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { uiActionsService } from '../../services/kibana_services';
