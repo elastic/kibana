@@ -33,6 +33,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { cloneDeep } from 'lodash';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { createEsqlDataSource, isEsqlSource } from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
@@ -180,6 +181,12 @@ interface DiscoverSessionViewProps {
   initializeMain: InitializeMain;
 }
 
+interface SessionInitializationState {
+  showNoDataPage: boolean;
+}
+
+type InitializeSession = (initialState?: DiscoverAppState) => Promise<SessionInitializationState>;
+
 const DiscoverSessionView = ({
   rootProfileState,
   mainInitializationState,
@@ -204,16 +211,18 @@ const DiscoverSessionView = ({
     () => getScopedHistory<MainHistoryLocationState>()?.location.state
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
-  const initialize = useLatest(async () => {
+  const initialize = useLatest<InitializeSession>(async (initialState = {}) => {
     const discoverSessionLoadTracker = ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
-      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
+      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? initialState,
       uiSettings
     );
-    const isEsqlQuery = isEsqlSource(urlState.dataSource);
     const discoverSession = discoverSessionId
       ? await savedSearch.get(discoverSessionId)
       : undefined;
+    const discoverSessionQuery = discoverSession?.searchSource.getField('query');
+    const isEsqlMode =
+      isEsqlSource(urlState.dataSource) || isOfAggregateQueryType(discoverSessionQuery);
     const discoverSessionDataView = discoverSession?.searchSource.getField('index');
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
@@ -222,7 +231,7 @@ const DiscoverSessionView = ({
     const profileDataViewsExist = profileDataViews.length > 0;
     const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
     const canAccessWithoutPersistedDataView =
-      isEsqlQuery ||
+      isEsqlMode ||
       discoverSessionHasAdHocDataView ||
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
@@ -251,8 +260,8 @@ const DiscoverSessionView = ({
 
     return { showNoDataPage: false };
   });
-  const [initializationState, initializeSession] = useAsyncFn(
-    () => initialize.current(),
+  const [initializationState, initializeSession] = useAsyncFn<InitializeSession>(
+    (...params) => initialize.current(...params),
     [initialize],
     {
       loading: true,
@@ -281,11 +290,9 @@ const DiscoverSessionView = ({
     history,
     savedSearchId: discoverSessionId,
     onNewUrl: useCallback(() => {
-      initializeMain({
-        hasESData: true,
-        hasUserDataView: true,
-      });
-    }, [initializeMain]),
+      const scopedHistory = getScopedHistory<{ initialState?: DiscoverAppState }>();
+      initializeSession(scopedHistory?.location.state?.initialState);
+    }, [getScopedHistory, initializeSession]),
   });
 
   if (initializeSessionState.loading) {
