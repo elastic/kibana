@@ -4,36 +4,70 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupingQuery } from '@kbn/grouping';
+import { type GroupOption, getGroupingQuery } from '@kbn/grouping';
 import {
-  GroupingAggregation,
-  GroupPanelRenderer,
-  GetGroupStats,
+  type GroupingAggregation,
+  type GroupPanelRenderer,
+  type GetGroupStats,
+  type NamedAggregation,
   isNoneGroup,
-  NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
+import { VULNERABILITIES_SEVERITY } from '@kbn/cloud-security-posture-common';
+import { buildEsQuery, type Filter } from '@kbn/es-query';
+import { useCloudSecurityGrouping } from '@kbn/cloud-security-posture-plugin/public/components/cloud_security_grouping';
+import { CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS } from '../../../common/constants';
+import { useDataViewContext } from '../../hooks/data_view_context';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
-  VULNERABILITIES_SEVERITY,
-} from '@kbn/cloud-security-posture-common';
-import { buildEsQuery, Filter } from '@kbn/es-query';
-import {
-  LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
-  VULNERABILITY_GROUPING_OPTIONS,
-  VULNERABILITY_FIELDS,
-  CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
-} from '../../../common/constants';
-import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import {
-  VulnerabilitiesGroupingAggregation,
-  VulnerabilitiesRootGroupingAggregation,
+  type VulnerabilitiesGroupingAggregation,
+  type VulnerabilitiesRootGroupingAggregation,
   useGroupedVulnerabilities,
 } from './use_grouped_vulnerabilities';
-import { defaultGroupingOptions, getDefaultQuery } from '../constants';
-import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
+import { ASSETS_UNIT, groupingTitle, ASSET_GROUPS_UNIT, GROUPING_LABELS } from './translations';
+import type { AssetsBaseURLQuery } from '../../hooks/use_asset_inventory_data_table';
+import {
+  ASSET_GROUPING_OPTIONS,
+  ASSET_FIELDS,
+  LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
+} from '../../constants';
+
+// TODO Move to other file?
+export const defaultGroupingOptions: GroupOption[] = [
+  {
+    label: GROUPING_LABELS.ASSET_TYPE,
+    key: ASSET_GROUPING_OPTIONS.ASSET_TYPE,
+  },
+  {
+    label: GROUPING_LABELS.ASSET_CATEGORY,
+    key: ASSET_GROUPING_OPTIONS.ASSET_CATEGORY,
+  },
+  {
+    label: GROUPING_LABELS.RISK,
+    key: ASSET_GROUPING_OPTIONS.RISK,
+  },
+  {
+    label: GROUPING_LABELS.CRITICALITY,
+    key: ASSET_GROUPING_OPTIONS.CRITICALITY,
+  },
+];
+
+// TODO Move to other file?
+export const getDefaultQuery = ({
+  query,
+  filters,
+}: AssetsBaseURLQuery): AssetsBaseURLQuery & {
+  sort: string[][];
+} => ({
+  query,
+  filters,
+  sort: [[]],
+  // TODO how to sort asset fields?
+  // sort: [
+  //   [ASSET_FIELDS.SEVERITY, 'asc'],
+  //   [ASSET_FIELDS.SCORE_BASE, 'desc'],
+  // ],
+});
 
 const getTermAggregation = (key: keyof VulnerabilitiesGroupingAggregation, field: string) => ({
   [key]: {
@@ -82,15 +116,12 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
-      return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
-      return [
-        ...aggMetrics,
-        getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
-      ];
-    case VULNERABILITY_GROUPING_OPTIONS.CVE:
-      return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
+    case ASSET_GROUPING_OPTIONS.RESOURCE_NAME:
+      return [...aggMetrics, getTermAggregation('resourceId', ASSET_FIELDS.RESOURCE_ID)];
+    case ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return [...aggMetrics, getTermAggregation('cloudProvider', ASSET_FIELDS.CLOUD_PROVIDER)];
+    case ASSET_GROUPING_OPTIONS.CVE:
+      return [...aggMetrics, getTermAggregation('description', ASSET_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
 };
@@ -127,10 +158,9 @@ export const isVulnerabilitiesRootGroupingAggregation = (
 };
 
 /**
- * Utility hook to get the latest vulnerabilities grouping data
- * for the vulnerabilities page
+ * Utility hook to get the latest assets grouping data for the assets page
  */
-export const useLatestVulnerabilitiesGrouping = ({
+export const useAssetInventoryGrouping = ({
   groupPanelRenderer,
   getGroupStats,
   groupingLevel = 0,
@@ -165,12 +195,12 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupingTitle,
     defaultGroupingOptions,
     getDefaultQuery,
-    unit: VULNERABILITIES_UNIT,
+    unit: ASSETS_UNIT,
     groupPanelRenderer,
     getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
     groupingLevel,
-    groupsUnit: VULNERABILITIES_GROUPS_UNIT,
+    groupsUnit: ASSET_GROUPS_UNIT,
   });
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
@@ -180,10 +210,6 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    timeRange: {
-      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-      to: 'now',
-    },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
