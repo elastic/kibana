@@ -188,10 +188,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     productFeatureKeys$.pipe(withLatestFrom(plugins.licensing.license$)).subscribe(([productFeatureKeys, license]) => {
 
-      const isInProductFeatureKeys = productFeatureKeys?.has(ProductFeatureAssistantKey.assistant);
-      const hasRegistered = management?.sections.section.kibana.getApp('securityAiAssistantManagement')
+      const isAssistantAvailable = productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) && license?.hasAtLeast('enterprise');
+      const assistantManagementApp = management?.sections.section.kibana.getApp('securityAiAssistantManagement')
 
-      if (isInProductFeatureKeys && license?.hasAtLeast('enterprise') && !hasRegistered) {
+      if (isAssistantAvailable && !assistantManagementApp) {
         management?.sections.section.kibana.registerApp({
           id: 'securityAiAssistantManagement',
           title: ASSISTANT_MANAGEMENT_TITLE,
