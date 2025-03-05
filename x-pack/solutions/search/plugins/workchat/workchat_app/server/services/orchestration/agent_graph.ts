@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, AIMessage, AIMessageChunk } from '@langchain/core/messages';
+import { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool } from '@langchain/core/tools';
@@ -31,7 +31,6 @@ export const createAgentGraph = async ({
       reducer: messagesStateReducer,
       default: () => [],
     }),
-    response: Annotation<AIMessageChunk>,
   });
 
   const tools = [...integrationTools];

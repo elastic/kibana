@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { filter, map, toArray, Observable } from 'rxjs';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { Message } from '../../../common/messages';
+import type { ChatEvent } from '../../../common/chat_events';
 import { Conversation, ConversationCreateRequest } from '../../../common/conversations';
-import { userMessageEvent } from '../../../common/utils/conversation';
+import { userMessageEvent, messageEvent } from '../../../common/utils/conversation';
+import { isMessageEvent } from '../../../common/utils/chat_events';
 import { AgentFactory } from '../orchestration';
 import { ConversationService } from '../conversations';
 
@@ -54,7 +57,7 @@ export class ChatService {
     } else {
       conversation = await conversationClient.create({
         agentId,
-        title: 'New conversation', // TODO: translate
+        title: 'New conversation', // TODO: translate default + TODO: generate title from conv
         events: [],
       });
     }
@@ -64,7 +67,17 @@ export class ChatService {
     const agent = await this.agentFactory.getAgent({ request, connectorId, agentId });
     const agentOutput = await agent.run({ conversation });
 
-    // TODO: update conversation with new messages
+    agentOutput.events$
+      .pipe(
+        filter(isMessageEvent),
+        map((event) => event.message),
+        toArray()
+      )
+      .subscribe((messages) => {
+        conversationClient.update(conversation.id, {
+          events: [...conversation.events, ...messages.map((message) => messageEvent(message))],
+        });
+      });
 
     return agentOutput;
   }

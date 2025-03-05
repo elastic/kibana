@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Message } from './messages';
+
 interface ChatEventBase {
   type: string;
 }
@@ -19,4 +21,9 @@ export interface CustomEvent extends ChatEventBase {
   content: Record<string, any>;
 }
 
-export type ChatEvent = ChunkEvent | CustomEvent;
+export interface MessageEvent extends ChatEventBase {
+  type: 'message';
+  message: Message;
+}
+
+export type ChatEvent = ChunkEvent | CustomEvent | MessageEvent;

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Observable, from, filter, shareReplay } from 'rxjs';
+import { Observable, from, filter, shareReplay, map } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
+import { BaseMessage } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ChatEvent } from '../../../common/chat_events';
 import type { Conversation } from '../../../common/conversations';
@@ -39,8 +40,6 @@ export const createAgent = async ({
   chatModel: InferenceChatModel;
   integrationsService: IntegrationsService;
 }): Promise<Agent> => {
-  // TODO: everything
-
   const integrationTools = await getLCTools(integrationsService);
 
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
@@ -49,11 +48,13 @@ export const createAgent = async ({
     run: async ({ conversation }): Promise<AgentRunResult> => {
       const initialMessages = conversationEventsToMessages(conversation.events);
 
+      const runName = 'defaultAgentGraph';
+
       const eventStream = agentGraph.streamEvents(
         { initialMessages },
         {
           version: 'v2',
-          runName: 'defaultAgentGraph',
+          runName,
           metadata: {
             agentId,
           },
@@ -61,13 +62,9 @@ export const createAgent = async ({
         }
       );
 
-      const isStreamEvent = (input: any): input is StreamEvent => {
-        return 'event' in input;
-      };
-
       const events$ = from(eventStream).pipe(
         filter(isStreamEvent),
-        langchainToChatEvents(),
+        langchainToChatEvents({ runName }),
         shareReplay()
       );
 
@@ -76,4 +73,8 @@ export const createAgent = async ({
       };
     },
   };
+};
+
+const isStreamEvent = (input: any): input is StreamEvent => {
+  return 'event' in input;
 };

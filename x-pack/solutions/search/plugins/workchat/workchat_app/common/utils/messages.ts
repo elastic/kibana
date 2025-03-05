@@ -14,6 +14,13 @@ export const userMessage = (content: string): UserMessage => {
   };
 };
 
+export const assistantMessage = (content: string): AssistantMessage => {
+  return {
+    type: 'assistant',
+    content,
+  };
+};
+
 export const isUserMessage = (message: Message): message is UserMessage => {
   return message.type === 'user';
 };

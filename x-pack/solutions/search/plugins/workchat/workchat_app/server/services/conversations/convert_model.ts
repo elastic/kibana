@@ -9,6 +9,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { Conversation, ConversationCreateRequest } from '../../../common/conversations';
 import type { ConversationAttributes } from '../../saved_objects/conversations';
 import type { ClientUser } from './types';
+import type { ConversationUpdatableFields } from './conversation_client';
 
 export const savedObjectToModel = ({
   attributes,
@@ -23,6 +24,17 @@ export const savedObjectToModel = ({
       name: attributes.user_name,
     },
     events: attributes.events,
+  };
+};
+
+export const updateToAttributes = ({
+  updatedFields,
+}: {
+  updatedFields: ConversationUpdatableFields;
+}): Partial<ConversationAttributes> => {
+  return {
+    title: updatedFields.title,
+    events: updatedFields.events,
   };
 };
 
