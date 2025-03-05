@@ -43,7 +43,7 @@ steps:
       - "x64"
       - "arm64"
 
-  - command: .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.mjs
+  - command: node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.js
     label: provided feedback to issue created to update puppeteer
     depends_on: "build_chromium"
     agents:

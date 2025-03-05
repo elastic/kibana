@@ -55,20 +55,18 @@ module.exports = function transformer(file, api, options) {
 
   const root = j(file.source);
 
-  const classDeclaration = root.find(j.ClassDeclaration, {
-    id: { name: 'ChromiumArchivePaths' },
-  });
+  const packagesPropertyDefinition = root
+    .find(j.ClassDeclaration, {
+      id: { name: 'ChromiumArchivePaths' },
+    })
+    .find(j.ClassProperty, {
+      key: { name: 'packages' },
+    });
 
   assert(
-    classDeclaration.size() === 1,
-    'Expected to find only one single declaration of the ChromiumArchivePaths class'
+    packagesPropertyDefinition.size() === 1,
+    'Expected to find a single packages definition on ChromiumArchivePaths'
   );
-
-  const packagesPropertyDefinition = classDeclaration.find(j.ClassProperty, {
-    key: { name: 'packages' },
-  });
-
-  assert(packagesPropertyDefinition.size() === 1, 'Expected to find a single packages definition');
 
   const packagesArray = packagesPropertyDefinition.find(j.ArrayExpression);
 
