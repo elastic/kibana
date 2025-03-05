@@ -19,8 +19,7 @@ const PROJECT_SETTINGS_TITLE = i18n.translate(
 export const initSideNavigation = async (services: Services) => {
   services.securitySolution.setIsSolutionNavigationEnabled(true);
 
-  const { navigationTree$, panelContentProvider } =
-    await services.securitySolution.getSolutionNavigation();
+  const { navigationTree$ } = await services.securitySolution.getSolutionNavigation();
 
   const serverlessNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
@@ -46,7 +45,6 @@ export const initSideNavigation = async (services: Services) => {
   );
 
   services.serverless.initNavigation('security', serverlessNavigationTree$, {
-    panelContentProvider,
     dataTestSubj: 'securitySolutionSideNav',
   });
 };

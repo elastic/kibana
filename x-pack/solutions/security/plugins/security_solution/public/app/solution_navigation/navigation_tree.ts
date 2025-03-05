@@ -21,6 +21,7 @@ import type { SolutionPageName, SolutionLinkCategory, SolutionNavLink } from '..
 import {
   getNavLinkIdFromSolutionPageName,
   isBreadcrumbHidden,
+  isSideNavItem,
   isSideNavStatusHidden,
 } from './util';
 import { SOLUTION_NAME } from '../../common/translations';
@@ -115,19 +116,21 @@ const formatNodesFromLinksWithoutCategory = (
 
 const createNodeFromSolutionNavLink = (
   solutionNavLink: SolutionNavLink,
-  ids: SolutionPageName[]
+  parentIds: SolutionPageName[]
 ): NodeDefinition => {
   const { id, title, links, categories, disabled } = solutionNavLink;
+  const ids = parentIds.concat(id);
   const link = getNavLinkIdFromSolutionPageName(id);
   const node: NodeDefinition = {
     id,
     link: link as AppDeepLinkId,
     title,
-    ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
     ...((isSideNavStatusHidden(ids) || disabled) && { sideNavStatus: 'hidden' }),
+    ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
+    ...(isSideNavItem(ids) && { renderAs: 'item' }),
   };
   if (links?.length) {
-    node.children = formatNodesFromLinks(links, categories ?? [], ids.concat(id));
+    node.children = formatNodesFromLinks(links, categories ?? [], ids);
   }
   return node;
 };
