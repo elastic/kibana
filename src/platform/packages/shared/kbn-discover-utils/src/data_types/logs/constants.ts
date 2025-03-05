@@ -47,7 +47,6 @@ export const DEFAULT_ROWS_PER_PAGE = 100;
 
 // List of prefixes which needs to be filtered out for Display in Content Column
 export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
-  '_', // Filter fields like '_id', '_score'
   '@timestamp',
   'agent.',
   'elastic_agent.',
@@ -60,6 +59,16 @@ export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
   'orchestrator.',
   'log.',
   'service.',
+  '_id',
+  '_index',
+  '_source',
+  '_size',
+  '_doc_count',
+  '_field_names',
+  '_ignored',
+  '_routing',
+  '_meta',
+  '_tier',
 ];
 
 export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
