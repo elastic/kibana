@@ -55,7 +55,7 @@ export const CoreQueryParamsSchemaProperties = {
    */
   termField: schema.maybe(schema.string({ minLength: 1 })),
   /**
-   * A Kiban Query Language (KQL) expression thats limits the scope of alerts.
+   * A Kibana Query Language (KQL) expression thats limits the scope of alerts.
    */
   filterKuery: schema.maybe(schema.string({ validate: validateKuery })),
   /**
