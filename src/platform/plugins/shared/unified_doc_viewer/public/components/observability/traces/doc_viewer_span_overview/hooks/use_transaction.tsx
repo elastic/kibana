@@ -84,10 +84,8 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
         setLoading(true);
         const result = await getTransactionData({ transactionId, indexPattern, data, signal });
 
-        if (!signal.aborted) {
-          const transactionName = result.rawResponse.hits.hits[0]?._source.transaction?.name;
-          setTransaction(transactionName ? { name: transactionName } : null);
-        }
+        const transactionName = result.rawResponse.hits.hits[0]?._source.transaction?.name;
+        setTransaction(transactionName ? { name: transactionName } : null);
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
@@ -100,9 +98,7 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
           setTransaction({ name: '' });
         }
       } finally {
-        if (!signal.aborted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
