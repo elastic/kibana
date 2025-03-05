@@ -35,8 +35,8 @@ export class PluginContract {
     return {
       resolver: lazyResolver,
       experimentalFeatures: { ...this.experimentalFeatures },
-      setProductFeatureKeys: (productFeatureKeys: Set<ProductFeatureKeyType>) => {
-        this.productFeatureKeys$.next(productFeatureKeys);
+      setProductFeatureKeys: (productFeatureKeys: ProductFeatureKeys) => {
+        this.productFeatureKeys$.next(new Set(productFeatureKeys));
       },
     };
   }
