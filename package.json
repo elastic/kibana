@@ -1800,7 +1800,7 @@
     "mochawesome-merge": "^4.3.0",
     "mock-fs": "^5.1.2",
     "ms-chromium-edge-driver": "^0.5.1",
-    "msw": "~2.7.2",
+    "msw": "~2.7.3",
     "mutation-observer": "^1.0.3",
     "native-hdr-histogram": "^1.0.0",
     "nock": "12.0.3",
