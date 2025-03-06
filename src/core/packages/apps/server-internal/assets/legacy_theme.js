@@ -28,7 +28,7 @@ function createInlineStyles(content) {
 // src/core/packages/rendering/server-internal/src/views/styles.tsx
 
 var lightStyles = [
-  'html { background-color: #F8FAFD; }',
+  'html { background-color: #F6F9FC; }',
   '.kbnWelcomeText { color: #69707D; }',
   '.kbnProgress { background-color: #F5F7FA; }',
   '.kbnProgress:before { background-color: #006DE4; }',

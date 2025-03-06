@@ -14,21 +14,16 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutProps,
   EuiTitle,
-  EuiLink,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiText,
-  EuiBadge,
-  EuiHeaderAlert,
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
-import { NewsfeedItem } from '../types';
-import { NewsEmptyPrompt } from './empty_news';
-import { NewsLoadingPrompt } from './loading_news';
+import { NewsfeedContent } from './newsfeed_content';
 
 export const NewsfeedFlyout = (
   props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean; isServerless: boolean }
@@ -57,29 +52,7 @@ export const NewsfeedFlyout = (
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
-          {!newsFetchResult ? (
-            <NewsLoadingPrompt showPlainSpinner={props.showPlainSpinner} />
-          ) : newsFetchResult.feedItems.length > 0 ? (
-            newsFetchResult.feedItems.map((item: NewsfeedItem) => {
-              return (
-                <EuiHeaderAlert
-                  key={item.hash}
-                  title={item.title}
-                  text={item.description}
-                  data-test-subj="newsHeadAlert"
-                  action={
-                    <EuiLink target="_blank" href={item.linkUrl} external>
-                      {item.linkText}
-                    </EuiLink>
-                  }
-                  date={item.publishOn.format('DD MMMM YYYY')}
-                  badge={item.badge ? <EuiBadge color="hollow">{item.badge}</EuiBadge> : undefined}
-                />
-              );
-            })
-          ) : (
-            <NewsEmptyPrompt />
-          )}
+          <NewsfeedContent {...{ showPlainSpinner }} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

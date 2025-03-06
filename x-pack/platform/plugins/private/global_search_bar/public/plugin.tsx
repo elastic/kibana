@@ -18,6 +18,8 @@ import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
@@ -44,28 +46,27 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
   }
 
   public start(core: CoreStart, startDeps: GlobalSearchBarPluginStartDeps) {
-    core.chrome.navControls.registerCenter(this.getNavControl({ core, ...startDeps }));
+    if (core.chrome.workspace.isEnabled()) {
+      const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
+      const control = this.getControl({ core, ...startDeps }, chromeStyle$);
+      core.chrome.workspace.toolbox.registerSearchControl(control);
+    } else {
+      core.chrome.navControls.registerCenter(this.getNavControl({ core, ...startDeps }));
+    }
     return {};
   }
 
-  private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
-    const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
-    const { application, http } = core;
-    const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
-
+  private getNavControl(
+    deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps,
+    chromeStyle$?: Observable<ChromeStyle>
+  ) {
+    const { core } = deps;
     const navControl: ChromeNavControl = {
       order: 1000,
       mount: (container) => {
         ReactDOM.render(
           <KibanaRenderContextProvider {...core}>
-            <SearchBar
-              globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
-              navigateToUrl={application.navigateToUrl}
-              taggingApi={savedObjectsTagging}
-              basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
-              chromeStyle$={core.chrome.getChromeStyle$()}
-              reportEvent={reportEvent}
-            />
+            {this.getControl(deps, chromeStyle$)}
           </KibanaRenderContextProvider>,
           container
         );
@@ -75,4 +76,24 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     };
     return navControl;
   }
+
+  private getControl = (
+    deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps,
+    chromeStyle$?: Observable<ChromeStyle>
+  ) => {
+    const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
+    const { application, http } = core;
+    const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
+
+    return (
+      <SearchBar
+        globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
+        navigateToUrl={application.navigateToUrl}
+        taggingApi={savedObjectsTagging}
+        basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
+        chromeStyle$={chromeStyle$ || core.chrome.getChromeStyle$()}
+        reportEvent={reportEvent}
+      />
+    );
+  };
 }

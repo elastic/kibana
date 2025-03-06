@@ -24,6 +24,8 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { WORKSPACE_TOOL_AI_ASSISTANT } from '@kbn/core-chrome-browser';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -61,6 +63,7 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
+import { KibanaContextProvider } from './common/lib/kibana/kibana_react';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -109,6 +112,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
       const services = await this.services.generateServices(coreStart, startPlugins, params);
+
       return { renderApp, subPlugins, store, services };
     };
 
@@ -207,6 +211,40 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     this.registerDiscoverSharedFeatures(core, plugins);
+
+    const LazyWorkspaceTool = React.lazy(() =>
+      import('./workspace_tool').then((module) => ({
+        default: module.AIAssistantWorkspaceTool,
+      }))
+    );
+
+    core.getStartServices().then(async ([coreStart]) => {
+      if (coreStart.chrome.workspace.isEnabled()) {
+        const { services, store } = await mountDependencies();
+        coreStart.chrome.workspace.toolbox.registerTool({
+          toolId: WORKSPACE_TOOL_AI_ASSISTANT,
+          size: 'wide',
+          button: {
+            iconType: AssistantIcon,
+            'aria-label': 'Elastic Assistant',
+          },
+          tool: {
+            title: 'Elastic Assistant',
+            color: 'plain',
+            isScrollable: false,
+            hasBorder: true,
+            containerPadding: 'none',
+            children: (
+              <KibanaContextProvider services={services}>
+                <React.Suspense>
+                  <LazyWorkspaceTool store={store} />
+                </React.Suspense>
+              </KibanaContextProvider>
+            ),
+          },
+        });
+      }
+    });
 
     return this.contract.getSetupContract();
   }
