@@ -278,7 +278,6 @@ export interface DocLinks {
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
-    readonly siemMigrations: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -325,6 +324,8 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
     readonly legacyRuleManagementBulkApiDeprecations: string;
+    readonly siemMigrations: string;
+    readonly llmPerformanceMatrix: string;
   };
   readonly query: {
     readonly eql: string;
