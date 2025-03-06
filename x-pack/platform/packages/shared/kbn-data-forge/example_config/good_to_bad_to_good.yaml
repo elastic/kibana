@@ -1,20 +1,28 @@
 ---
+# Define the connection to Elasticsearch
 elasticsearch:
+  host: 'http://localhost:9200'
+  username: 'elastic'
+  password: 'changeme'
   installKibanaUser: false
 
+# Define the connection to Kibana
 kibana:
+  host: 'http://localhost:5601/kibana'
+  username: 'elastic'
+  password: 'changeme'
   installAssets: true
 
 indexing:
-  dataset: "fake_stack"
+  dataset: 'fake_stack'
 
 schedule:
-  - template: "good"
-    start: "now-2h"
-    end: "now-1h"
-  - template: "bad"
-    start: "now-1h"
-    end: "now-15m"
-  - template: "good"
-    start: "now-15m"
+  - template: 'good'
+    start: 'now-2h'
+    end: 'now-1h'
+  - template: 'bad'
+    start: 'now-1h'
+    end: 'now-15m'
+  - template: 'good'
+    start: 'now-15m'
     end: false
