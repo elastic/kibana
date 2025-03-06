@@ -49,12 +49,6 @@ export const RULE_MIGRATION_TRANSLATING = i18n.translate(
   { defaultMessage: `Translating rules` }
 );
 
-export const RULE_MIGRATION_COMPLETE_TITLE = (number: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.result.title', {
-    defaultMessage: 'SIEM rules migration #{number} complete',
-    values: { number },
-  });
-
 export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.result.description', {
     defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',
