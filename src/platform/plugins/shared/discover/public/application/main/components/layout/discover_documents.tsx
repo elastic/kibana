@@ -51,6 +51,7 @@ import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useRecordCursorInCharts } from '../../../../hooks/use_record_cursor_in_charts';
 import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
@@ -202,11 +203,13 @@ function DiscoverDocumentsComponent({
     [onRemoveColumn, ebtManager, fieldsMetadata]
   );
 
+  const updateRecordCursorInCharts = useRecordCursorInCharts(dataView);
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
+      updateRecordCursorInCharts(doc);
     },
-    [stateContainer]
+    [stateContainer, updateRecordCursorInCharts]
   );
 
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
