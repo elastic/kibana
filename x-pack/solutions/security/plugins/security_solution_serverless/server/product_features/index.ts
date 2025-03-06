@@ -20,7 +20,7 @@ import { getSiemMigrationsProductFeaturesConfigurator } from './siem_migrations_
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
-import { ProductLine } from '../../common/product';
+import { ProductLine, ProductTier } from '../../common/product';
 
 export const registerProductFeatures = (
   pluginsSetup: SecuritySolutionServerlessPluginSetupDeps,
@@ -51,6 +51,7 @@ export const registerProductFeatures = (
     enabledProductFeatureKeys,
     config.experimentalFeatures
   );
+
   if (productLines[ProductLine.security]) {
     if (!config.experimentalFeatures.siemMigrationsDisabled) {
       configurator.siemMigrations =
