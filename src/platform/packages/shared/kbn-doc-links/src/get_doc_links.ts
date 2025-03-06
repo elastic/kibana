@@ -364,6 +364,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
       restApis: `${KIBANA_DOCS}api.html`,
       dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
+      legacyOpenSslProvider: `${KIBANA_DOCS}production.html#openssl-legacy-provider`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,

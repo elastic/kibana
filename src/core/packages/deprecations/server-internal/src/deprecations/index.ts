@@ -14,3 +14,4 @@ export {
   getIsRouteApiDeprecation,
 } from './api_deprecations';
 export { registerConfigDeprecationsInfo } from './config_deprecations';
+export { registerNodeJsDeprecationsInfo } from './node_js_deprecations';
