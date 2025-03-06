@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 

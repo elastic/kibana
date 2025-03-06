@@ -17,7 +17,7 @@ import { useRuleFormState, useRuleFormScreenContext } from '../hooks';
 import {
   ADD_ACTION_DESCRIPTION_TEXT,
   ADD_ACTION_HEADER,
-  ADD_ACTION_OPTIONAL_TEXT,
+  OPTIONAL_LABEL,
   ADD_ACTION_TEXT,
 } from '../translations';
 import { RuleActionsItem } from './rule_actions_item';
@@ -106,7 +106,7 @@ export const RuleActions = () => {
                 <h3>{ADD_ACTION_HEADER}</h3>
               </EuiText>
               <EuiText size="s" textAlign="center" color="subdued">
-                {ADD_ACTION_OPTIONAL_TEXT}
+                {OPTIONAL_LABEL}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

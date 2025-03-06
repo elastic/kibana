@@ -59,7 +59,6 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import {
@@ -76,7 +75,7 @@ import {
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
-} from './dashboard_container/panel_placement';
+} from './panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
@@ -119,7 +118,6 @@ export interface DashboardStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
-  visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;

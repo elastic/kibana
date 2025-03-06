@@ -52,6 +52,9 @@ describe('SettingsFlyout', () => {
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
+        uiSettings: {
+          get: jest.fn(),
+        },
         unifiedSearch: {
           ui: {
             SearchBar: () => <div data-test-subj="mockSearchBar" />,

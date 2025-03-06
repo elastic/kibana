@@ -38,9 +38,7 @@ export const buildAssetCriticalityQuery = ({
     track_total_hits: true,
     size: querySize,
     from: cursorStart,
-    body: {
-      query: { bool: { filter } },
-    },
+    query: { bool: { filter } },
   };
 
   return dslQuery;

@@ -193,7 +193,10 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
       expect(createDatastreamMock).toHaveBeenCalledWith(kibanaPackageJson.version);
 
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
 
       expect(createPipelineMock).toHaveBeenCalledTimes(1);
       expect(createPipelineMock).toHaveBeenCalledWith(esClient);
@@ -220,7 +223,10 @@ describe('SecurityWorkflowInsightsService', () => {
         throw new Error('test error');
       });
 
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenNthCalledWith(1, expect.stringContaining('test error'));
@@ -262,7 +268,10 @@ describe('SecurityWorkflowInsightsService', () => {
         _version: 1,
       };
       jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
         defendInsights,
         request
@@ -282,7 +291,10 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('create', () => {
     it('should index the doc correctly', async () => {
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
       const insight = getDefaultInsight();
       await securityWorkflowInsightsService.create(insight);
 
@@ -293,14 +305,17 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(esClient.index).toHaveBeenCalledWith({
         index: DATA_STREAM_NAME,
         id: generateInsightId(insight),
-        body: insight,
+        document: insight,
         refresh: 'wait_for',
         op_type: 'create',
       });
     });
 
     it('should not index the doc if remediation exists', async () => {
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
       const insight = getDefaultInsight();
 
       const remediationExistsMock = checkIfRemediationExists as jest.Mock;
@@ -325,7 +340,10 @@ describe('SecurityWorkflowInsightsService', () => {
       const updateSpy = jest
         .spyOn(securityWorkflowInsightsService, 'update')
         .mockResolvedValueOnce({} as UpdateResponse);
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
       const insight = getDefaultInsight();
       await securityWorkflowInsightsService.create(insight);
 
@@ -349,7 +367,10 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('update', () => {
     it('should update the doc correctly', async () => {
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
       const insightId = 'some-insight-id';
       const insight = getDefaultInsight();
       const indexName = 'backing-index-name';
@@ -362,7 +383,7 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(esClient.update).toHaveBeenCalledWith({
         index: indexName,
         id: insightId,
-        body: { doc: insight },
+        doc: insight,
         refresh: 'wait_for',
       });
     });
@@ -370,7 +391,10 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('fetch', () => {
     it('should fetch the docs with the correct params', async () => {
-      await securityWorkflowInsightsService.start({ esClient });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
       const searchParams: SearchParams = {
         size: 50,
         from: 50,
@@ -391,81 +415,79 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(esClient.search).toHaveBeenCalledWith({
         index: DATA_STREAM_NAME,
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  terms: {
-                    _id: ['id1', 'id2'],
-                  },
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  _id: ['id1', 'id2'],
                 },
-                {
-                  terms: {
-                    categories: ['endpoint'],
-                  },
+              },
+              {
+                terms: {
+                  categories: ['endpoint'],
                 },
-                {
-                  terms: {
-                    types: ['incompatible_antivirus'],
-                  },
+              },
+              {
+                terms: {
+                  types: ['incompatible_antivirus'],
                 },
-                {
-                  nested: {
-                    path: 'source',
-                    query: {
-                      terms: {
-                        'source.type': ['llm-connector'],
-                      },
+              },
+              {
+                nested: {
+                  path: 'source',
+                  query: {
+                    terms: {
+                      'source.type': ['llm-connector'],
                     },
                   },
                 },
-                {
-                  nested: {
-                    path: 'source',
-                    query: {
-                      terms: {
-                        'source.id': ['source-id1', 'source-id2'],
-                      },
+              },
+              {
+                nested: {
+                  path: 'source',
+                  query: {
+                    terms: {
+                      'source.id': ['source-id1', 'source-id2'],
                     },
                   },
                 },
-                {
-                  nested: {
-                    path: 'target',
-                    query: {
-                      terms: {
-                        'target.type': ['endpoint'],
-                      },
+              },
+              {
+                nested: {
+                  path: 'target',
+                  query: {
+                    terms: {
+                      'target.type': ['endpoint'],
                     },
                   },
                 },
-                {
-                  nested: {
-                    path: 'target',
-                    query: {
-                      terms: {
-                        'target.ids': ['target-id1', 'target-id2'],
-                      },
+              },
+              {
+                nested: {
+                  path: 'target',
+                  query: {
+                    terms: {
+                      'target.ids': ['target-id1', 'target-id2'],
                     },
                   },
                 },
-                {
-                  nested: {
-                    path: 'action',
-                    query: {
-                      terms: {
-                        'action.type': ['refreshed', 'remediated'],
-                      },
+              },
+              {
+                nested: {
+                  path: 'action',
+                  query: {
+                    terms: {
+                      'action.type': ['refreshed', 'remediated'],
                     },
                   },
                 },
-              ],
-            },
+              },
+            ],
           },
-          size: searchParams.size,
-          from: searchParams.from,
         },
+        size: searchParams.size,
+        from: searchParams.from,
       });
     });
   });

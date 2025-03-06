@@ -20,7 +20,7 @@ import type {
 import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME, Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useDarkMode } from '../../lib/kibana';
 

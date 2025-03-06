@@ -10,18 +10,19 @@ import React from 'react';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
+import { DragHandleApi } from './use_drag_handle_api';
 
 export const DefaultDragHandle = React.memo(
-  ({ onDragStart }: { onDragStart: (e: UserInteractionEvent) => void }) => {
+  ({ dragHandleApi }: { dragHandleApi: DragHandleApi }) => {
     return (
       <button
-        onMouseDown={onDragStart}
-        onTouchStart={onDragStart}
+        onMouseDown={dragHandleApi.startDrag}
+        onTouchStart={dragHandleApi.startDrag}
         aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
           defaultMessage: 'Drag to move',
         })}
         className="kbnGridPanel__dragHandle"
+        data-test-subj="kbnGridPanel--dragHandle"
         css={styles}
       >
         <EuiIcon type="grabOmnidirectional" />

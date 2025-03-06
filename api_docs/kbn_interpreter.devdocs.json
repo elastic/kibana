@@ -777,7 +777,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "path": "src/platform/packages/private/kbn-ambient-common-types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +792,7 @@
               "ParserOptions",
               " | undefined"
             ],
-            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "path": "src/platform/packages/private/kbn-ambient-common-types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

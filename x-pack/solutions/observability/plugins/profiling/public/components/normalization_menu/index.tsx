@@ -113,7 +113,7 @@ export function NormalizationMenu(props: Props) {
             style={{
               height: '100%',
               justifyContent: 'center',
-              backgroundColor: theme.euiTheme.colors.ghost,
+              backgroundColor: theme.euiTheme.colors.backgroundBasePlain,
               padding: '0 16px',
             }}
           >

@@ -7,7 +7,7 @@ xpack.infra.enabled: false
 xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.search.notebooks.enabled: false
+xpack.searchNotebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.inventory.enabled: false
@@ -142,6 +142,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Unsupported in serverless
     'cloud_defend',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
@@ -178,3 +181,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
   - siemMigrationsDisabled
+
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
+xpack.task_manager.capacity: 20

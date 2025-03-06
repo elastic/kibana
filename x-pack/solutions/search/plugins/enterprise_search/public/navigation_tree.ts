@@ -186,6 +186,12 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',
+                      sideNavStatus: collections?.some((collection) =>
+                        collection.items?.some((item) => item.isSelected)
+                      )
+                        ? 'visible'
+                        : 'hidden',
+
                       ...(collections
                         ? {
                             children: collections.map(euiItemTypeToNodeDefinition),
@@ -306,7 +312,6 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                  link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
