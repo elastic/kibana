@@ -1229,7 +1229,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
+                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
                               nullable: true
                               type: string
                           required:
@@ -2147,7 +2147,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
+                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
                               nullable: true
                               type: string
                           required:
@@ -3040,7 +3040,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
+                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
                               nullable: true
                               type: string
                           required:
@@ -4030,7 +4030,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
+                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
                               nullable: true
                               type: string
                           required:
@@ -9674,8 +9674,7 @@ paths:
         * `id` - `DELETE /api/detection_engine/rules?id=<id>`
         * `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
 
-        The `id` is a unique identifier for each specific instance of a rule, whereas `rule_id` is a unique identifier for the rule itself, shared across all instances of that rule.
-
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
       operationId: DeleteRule
       parameters:
         - description: The rule's `id` value.
@@ -9704,7 +9703,7 @@ paths:
         - lang: cURL
           source: |
             curl \
-              --request DELETE https://localhost:5601/api/detection_engine/rules?id=16947168-5405-453d-a8b5-aadad357af42 \
+              --request DELETE https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
               --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
     get:
       description: |
@@ -9715,8 +9714,7 @@ paths:
         * `id` - `GET /api/detection_engine/rules?id=<id>`
         * `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
 
-        The `id` is a unique identifier for each specific instance of a rule, whereas `rule_id` is a unique identifier for the rule itself, shared across all instances of that rule.
-
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
       operationId: ReadRule
       parameters:
         - description: The rule's `id` value.
@@ -9803,7 +9801,10 @@ paths:
                     version: 1
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_RuleResponse'
-          description: Indicates a successful call.
+          description: |
+            Indicates a successful call.
+            > info
+            > These fields are under development and their usage or schema may change: execution_summary.
       summary: Retrieve a detection rule
       tags:
         - Security Detections API
@@ -9811,35 +9812,25 @@ paths:
         - lang: cURL
           source: |
             curl \
-              --request GET https://localhost:5601/api/detection_engine/rules?id=16947168-5405-453d-a8b5-aadad357af42 \
+              --request GET https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
               --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
     patch:
       description: |
-        Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
+        Update specific fields of an existing detection rule using the `rule_id` or `id` field.
 
-        The `id` is a unique identifier for each specific instance of a rule, whereas `rule_id` is a unique identifier for the rule itself, shared across all instances of that rule.
-
-
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-        You can use `PUT` or `PATCH` methods to update rules, where:
-
-        * `PUT` replaces the original rule and deletes fields that are not specified.
-        * `PATCH` updates the specified fields.
-
-        > info
-        > You cannot modify the `id` or `rule_id` values.
       operationId: PatchRule
       requestBody:
         content:
           application/json:
             examples:
               example1:
-                description: Example request to update a rule using PATCH method
-                summary: Example using PATCH method
+                description: This is an example request to update the `threat` field of the rule with a signature id of `process_started_by_ms_office_program_possible_payload`. In the `threat` object, we specify mappings of this rule to some tactics and techniques of the MITRE ATT&CK threat framework.
+                summary: Update MITRE ATT&CK mappings
                 value:
                   rule_id: process_started_by_ms_office_program_possible_payload
                   threat:
@@ -9854,6 +9845,9 @@ paths:
                           reference: https://attack.mitre.org/techniques/T1193
             schema:
               $ref: '#/components/schemas/Security_Detections_API_RulePatchProps'
+        description: |
+          > info
+          > You cannot modify the `id` or `rule_id` values.
         required: true
       responses:
         '200':
@@ -9906,9 +9900,9 @@ paths:
     post:
       description: |
         Create a new detection rule.
-
         > warn
         > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
         You can create the following types of rules:
@@ -9917,11 +9911,10 @@ paths:
         * **Event correlation**: Searches the defined indices and creates an alert when results match an [Event Query Language (EQL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) query.
         * **Threshold**: Searches the defined indices and creates an alert when the number of times the specified field's value meets the threshold during a single execution. When there are multiple values that meet the threshold, an alert is generated for each value.
           For example, if the threshold `field` is `source.ip` and its `value` is `10`, an alert is generated for every source IP address that appears in at least 10 of the rule's search results. If you're interested, see [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) for more information.
-        * **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/{ecs_version}/ecs-reference.html).
+        * **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
         * **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
-        * **[Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)**: Uses ES|QL to find events and aggregate search results.
+        * **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
         * **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
-
         > info
         > To create machine learning rules, you must have the [appropriate license](https://www.elastic.co/subscriptions) or use a [cloud deployment](https://cloud.elastic.co/registration). Additionally, for the machine learning rule to function correctly, the associated machine learning job must be running.
 
@@ -9950,7 +9943,6 @@ paths:
         * IBM Resilient
         * Jira
         * ServiceNow ITSM
-
         > info
         > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
@@ -9958,8 +9950,8 @@ paths:
 
         For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-        * [Alerting](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting)
-        * [Actions](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions)
+        * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+        * [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
       operationId: CreateRule
       requestBody:
         content:
@@ -10041,7 +10033,7 @@ paths:
                     value: 20
                   type: threshold
               example3:
-                description: ml-cap rule that creates alerts, and sends Slack notifications, when the `linux_anomalous_network_activity_ecs` {ml} job discovers anomalies with a threshold of 70 or above
+                description: Machine learning rule that creates alerts, and sends Slack notifications, when the `linux_anomalous_network_activity_ecs` machine learning job discovers anomalies with a threshold of 70 or above.
                 summary: Machine learning rule
                 value:
                   actions:
@@ -10096,7 +10088,10 @@ paths:
                     - rundll32.exe
                   type: eql
               example5:
-                description: Indicator match rule that creates an alert when one of the following is true - The event's destination IP address *and* port number matches destination IP *and* port values in the `threat_index` index. The event's source IP address matches a host IP address value in the `threat_index` index.
+                description: |
+                  Indicator match rule that creates an alert when one of the following is true:
+                  * The event's destination IP address *and* port number matches destination IP *and* port values in the `threat_index` index. 
+                  * The event's source IP address matches a host IP address value in the `threat_index` index.
                 summary: Indicator match rule
                 value:
                   actions: []
@@ -10594,29 +10589,18 @@ paths:
       description: |
         Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
 
-        The `id` is a unique identifier for each specific instance of a rule, whereas `rule_id` is a unique identifier for the rule itself, shared across all instances of that rule.
-
-
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-        You can use `PUT` or `PATCH` methods to update rules, where:
-
-        * `PUT` replaces the original rule and deletes fields that are not specified.
-        * `PATCH` updates the specified fields.
-
-        > info
-        > You cannot modify the `id` or `rule_id` values.
       operationId: UpdateRule
       requestBody:
         content:
           application/json:
             examples:
               example1:
-                description: Example request to update a rule using PATCH method
-                summary: Example using PATCH method
+                summary: Update Rule example
                 value:
                   rule_id: process_started_by_ms_office_program_possible_payload
                   threat:
@@ -10631,6 +10615,9 @@ paths:
                           reference: https://attack.mitre.org/techniques/T1193
             schema:
               $ref: '#/components/schemas/Security_Detections_API_RuleUpdateProps'
+        description: |
+          > info
+          > All unspecified fields are deleted. You cannot modify the `id` or `rule_id` values.
         required: true
       responses:
         '200':
@@ -10682,10 +10669,22 @@ paths:
         - Security Detections API
   /api/detection_engine/rules/_bulk_action:
     post:
-      description: Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+      description: |
+        Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+        > warn
+        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PerformRulesBulkAction
       parameters:
-        - description: Enables dry run mode for the request call.
+        - description: |
+            Enables dry run mode for the request call.
+
+            Enable dry run mode to verify that bulk actions can be applied to specified rules. Certain rules, such as prebuilt Elastic rules, can’t be edited and will return errors in the request response. Error details will contain an explanation, the rule name and/or ID, and additional troubleshooting information.
+
+            To enable dry run mode on a request, add the query parameter dry_run=true to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.
+            > info
+            > Dry run mode is not supported for the export bulk action. A 400 error will be returned in the request response.
           in: query
           name: dry_run
           required: false
@@ -10694,6 +10693,39 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                description: The following request activates all rules with the test tag
+                summary: Activate all rules with the test tag
+                value:
+                  action: enable
+                  query: 'alert.attributes.tags: "test"'
+              example2:
+                description: The following request adds tags tag-1 and tag-2 to the rules that have the IDs sent in the payload
+                summary: Add tags to rules
+                value:
+                  action: edit
+                  edit:
+                    - type: add_tags
+                      value:
+                        - tag-1
+                        - tag-2
+                  ids:
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example3:
+                description: The following request will validate that the add_index_patterns bulk action can be successfully applied to three rules.
+                summary: Dry run - Validate add_index_patterns bulk action
+                value:
+                  action: edit
+                  edit:
+                    - type: add_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+                    - de8f5af0-0831-11ed-ac8b-05a222bd8d4a
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
@@ -10707,6 +10739,214 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  description: In this response one rule was updated and one was skipped. Objects returned in attributes.results.skipped will only include rules' id, name, and skip_reason.
+                  summary: Successful response
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: 51658332-a15e-4c9e-912a-67214e2e2359
+                            name: Skipped rule
+                            skip_reason: RULE_NOT_MODIFIED
+                        updated:
+                          - anomaly_threshold: 50
+                            author:
+                              - Elastic
+                            created_at: '2022-02-21T14:14:13.801Z'
+                            created_by: elastic
+                            description: A machine learning job detected unusually large numbers of DNS queries for a single top-level DNS domain, which is often used for DNS tunneling. DNS tunneling can be used for command-and-control, persistence, or data exfiltration activity. For example, dnscat tends to generate many DNS questions for a top-level domain as it uses the DNS protocol to tunnel data.
+                            enabled: true
+                            exceptions_list: []
+                            execution_summary:
+                              last_execution:
+                                date: '2022-03-23T16:06:12.787Z'
+                                message: This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.
+                                metrics:
+                                  execution_gap_duration_s: 0
+                                  total_indexing_duration_ms: 15
+                                  total_search_duration_ms: 135
+                                status: partial failure
+                                status_order: 20
+                            false_positives:
+                              - DNS domains that use large numbers of child domains, such as software or content distribution networks, can trigger this alert and such parent domains can be excluded.
+                            from: now-45m
+                            id: 8bc7dad0-9320-11ec-9265-8b772383a08d
+                            immutable: false
+                            interval: 15m
+                            license: Elastic License v2
+                            machine_learning_job_id:
+                              - packetbeat_dns_tunneling
+                            max_signals: 100
+                            name: DNS Tunneling [Duplicate]
+                            references:
+                              - https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                            related_integrations: []
+                            required_fields: []
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 7289bf08-4e91-4c70-bf01-e04c4c5d7756
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - Elastic
+                              - Network
+                              - Threat Detection
+                              - ML
+                            threat: []
+                            to: now
+                            type: machine_learning
+                            updated_at: '2022-02-21T17:05:50.883Z'
+                            updated_by: elastic
+                            version: 6
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 1
+                        total: 2
+                    rules_count: 1
+                    success: true
+                example2:
+                  description: If processing of any rule fails, a partial error outputs the ID and/or name of the affected rule and the corresponding error, as well as successfully processed rules (in the same format as a successful 200 request).
+                  summary: Partial failure
+                  value:
+                    value:
+                      attributes:
+                        errors:
+                          - message: Index patterns can't be added. Machine learning rule doesn't have index patterns property
+                            rules:
+                              - id: 8bc7dad0-9320-11ec-9265-8b772383a08d
+                                name: DNS Tunneling [Duplicate]
+                            status_code: 500
+                        results:
+                          created: []
+                          deleted: []
+                          skipped: []
+                          updated:
+                            - actions: []
+                              author:
+                                - Elastic
+                              created_at: '2022-02-21T14:14:17.883Z'
+                              created_by: elastic
+                              description: Generates a detection alert for each external alert written to the configured indices. Enabling this rule allows you to immediately begin investigating external alerts in the app.
+                              enabled: true
+                              exceptions_list: []
+                              execution_summary:
+                                last_execution:
+                                  date: '2022-03-23T16:06:12.787Z'
+                                  message: This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.
+                                  metrics:
+                                    execution_gap_duration_s: 0
+                                    total_indexing_duration_ms: 15
+                                    total_search_duration_ms: 135
+                                  status: partial failure
+                                  status_order: 20
+                              false_positives: []
+                              from: now-6m
+                              id: 8e5c1a40-9320-11ec-9265-8b772383a08d
+                              immutable: false
+                              index:
+                                - apm-*-transaction*
+                                - traces-apm*
+                                - auditbeat-*
+                                - filebeat-*
+                                - logs-*
+                                - packetbeat-*
+                                - winlogbeat-*
+                                - added-by-id-*
+                              interval: 5m
+                              language: kuery
+                              license: Elastic License v2
+                              max_signals: 10000
+                              name: External Alerts [Duplicate]
+                              query: |
+                                event.kind:alert and not event.module:(endgame or endpoint)
+                              references: []
+                              related_integrations: []
+                              required_fields: []
+                              risk_score: 47
+                              risk_score_mapping:
+                                - field: event.risk_score
+                                  operator: equals
+                                  value: ''
+                              rule_id: 941faf98-0cdc-4569-b16d-4af962914d61
+                              rule_name_override: message
+                              setup: ''
+                              severity: medium
+                              severity_mapping:
+                                - field: event.severity
+                                  operator: equals
+                                  severity: low
+                                  value: '21'
+                                - field: event.severity
+                                  operator: equals
+                                  severity: medium
+                                  value: '47'
+                                - field: event.severity
+                                  operator: equals
+                                  severity: high
+                                  value: '73'
+                                - field: event.severity
+                                  operator: equals
+                                  severity: critical
+                                  value: '99'
+                              tags:
+                                - Elastic
+                                - Network
+                                - Windows
+                                - APM
+                                - macOS
+                                - Linux
+                              threat: []
+                              timestamp_override: event.ingested
+                              to: now
+                              type: query
+                              updated_at: '2022-02-21T16:56:22.818Z'
+                              updated_by: elastic
+                              version: 5
+                        summary:
+                          failed: 1
+                          skipped: 0
+                          succeeded: 1
+                          total: 2
+                      message: Bulk edit partially failed
+                      rules_count: 2
+                      status_code: 500
+                      success: false
+                example3:
+                  description: The attributes.errors section of the response shows that two rules failed to update and one succeeded. The same results would be returned if you ran the request without dry run mode enabled. Notice that there are no arrays in attributes.results. In dry run mode, rule updates are not applied and saved to Elasticsearch, so the endpoint wouldn’t return results for rules that have been updated, created, or deleted.
+                  summary: Dry run
+                  value:
+                    attributes:
+                      errors:
+                        - err_code: IMMUTABLE
+                          message: Elastic rule can't be edited
+                          rules:
+                            - id: 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                              name: Unusual AWS Command for a User
+                          status_code: 500
+                        - err_code: MACHINE_LEARNING_INDEX_PATTERN
+                          message: Machine learning rule doesn't have index patterns
+                          rules:
+                            - id: dc015d10-0831-11ed-ac8b-05a222bd8d4a
+                              name: Suspicious Powershell Script [Duplicate]
+                          status_code: 500
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated: []
+                      summary:
+                        failed: 2
+                        skipped: 0
+                        succeeded: 1
+                        total: 3
+                    message: Bulk edit partially failed
+                    status_code: 500
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Detections_API_BulkEditActionResponse'
@@ -10893,7 +11133,11 @@ paths:
         - Actions
         - Exception lists
         > info
-        > You cannot export prebuilt rules.
+        > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
       parameters:
         - description: Determines whether a summary of the exported rules is returned.
@@ -10903,7 +11147,10 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: File name for saving the exported rules.
+        - description: |
+            File name for saving the exported rules.
+            > info
+            > When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.
           in: query
           name: file_name
           required: false
@@ -10935,13 +11182,30 @@ paths:
           content:
             application/ndjson:
               schema:
-                description: An `.ndjson` file containing the returned rules.
+                description: |
+                  An `.ndjson` file containing the returned rules.
+
+                  Each line in the file represents an object (a rule, exception list parent container, or exception list item), and the last line includes a summary of what was exported.
                 format: binary
                 type: string
           description: Indicates a successful call.
       summary: Export detection rules
       tags:
         - Security Detections API
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X POST "localhost:5601/api/detection_engine/rules/_export?exclude_export_details=true&file_name=exported_rules.ndjson" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
+            {
+              "objects": [
+                {
+                  "rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900"
+                },
+                {
+                  "rule_id":"2938c9fa-53eb-4c04-b79c-33cbf041b18d"
+                }
+              ]
+            }
   /api/detection_engine/rules/_find:
     get:
       description: Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
@@ -10954,7 +11218,18 @@ paths:
             items:
               type: string
             type: array
-        - description: Search query
+        - description: |
+            Search query
+
+            Filters the returned results according to the value of the specified field, using the alert.attributes.<field name>:<field value> syntax, where <field name> can be:
+            - name
+            - enabled
+            - tags
+            - createdBy
+            - interval
+            - updatedBy
+            > info
+            > Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
           in: query
           name: filter
           required: false
@@ -11004,6 +11279,73 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  value:
+                    data:
+                      - created_at: '2020-02-02T10:05:19.613Z'
+                        created_by: elastic
+                        description: Identifies a PowerShell process launched by either cscript.exe or wscript.exe. Observing Windows scripting processes executing a PowerShell script, may be indicative of malicious activity.
+                        enabled: false
+                        execution_summary:
+                          last_execution:
+                            date: '2022-03-23T16:06:12.787Z'
+                            message: This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.
+                            metrics:
+                              execution_gap_duration_s: 0
+                              total_indexing_duration_ms: 15
+                              total_search_duration_ms: 135
+                            status: partial failure
+                            status_order: 20
+                        false_positives: []
+                        from: now-6m
+                        id: 89761517-fdb0-4223-b67b-7621acc48f9e
+                        immutable: true
+                        index:
+                          - winlogbeat-*
+                        interval: 5m
+                        language: kuery
+                        max_signals: 33
+                        name: Windows Script Executing PowerShell
+                        query: 'event.action:"Process Create (rule: ProcessCreate)" and process.parent.name:("wscript.exe" or "cscript.exe") and process.name:"powershell.exe"'
+                        references: []
+                        related_integrations:
+                          - package: o365
+                            version: ^2.3.2
+                        required_fields:
+                          - ecs: true
+                            name: event.action
+                            type: keyword
+                          - ecs: true
+                            name: process.name
+                            type: keyword
+                          - ecs: true
+                            name: process.parent.name
+                            type: keyword
+                        risk_score: 21
+                        rule_id: f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc
+                        setup: ''
+                        severity: low
+                        tags:
+                          - Elastic
+                          - Windows
+                        threat:
+                          - framework: MITRE ATT&CK
+                            tactic:
+                              id: TA0002
+                              name: Execution
+                              reference: https://attack.mitre.org/tactics/TA0002/
+                            technique:
+                              - id: T1193
+                                name: Spearphishing Attachment
+                                reference: https://attack.mitre.org/techniques/T1193/
+                        to: now
+                        type: query
+                        updated_at: '2020-02-02T10:05:19.830Z'
+                        updated_by: elastic
+                    page: 1
+                    perPage: 5
+                    total: 4
               schema:
                 type: object
                 properties:
@@ -11022,16 +11364,37 @@ paths:
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: |
+            Successful response
+            > info
+            > These fields are under development and their usage or schema may change: execution_summary.
       summary: List all detection rules
       tags:
         - Security Detections API
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X GET "localhost:5601/api/detection_engine/rules/_find?page=1&per_page=5&sort_field=enabled&sort_order=asc&filter=alert.attributes.name:windows" -H 'kbn-xsrf: true'
   /api/detection_engine/rules/_import:
     post:
       description: |
         Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+        > info
+        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
+
+        > info
+        > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
         - description: Determines whether existing rules with the same `rule_id` are overwritten.
@@ -11041,7 +11404,7 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: Determines whether existing exception lists with the same `list_id` are overwritten.
+        - description: Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
           in: query
           name: overwrite_exceptions
           required: false
@@ -11077,6 +11440,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  summary: Import rules with success
+                  value:
+                    errors: []
+                    exceptions_errors: []
+                    exceptions_success: true
+                    exceptions_success_count: 0
+                    rules_count: 1
+                    success: true
+                    success_count: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -11131,6 +11505,13 @@ paths:
       summary: Import detection rules
       tags:
         - Security Detections API
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X POST "<KibanaURL>/api/detection_engine/rules/_import"
+            -u <username>:<password> -H 'kbn-xsrf: true'
+            -H 'Content-Type: multipart/form-data'
+            --form "file=@<link to file>"
   /api/detection_engine/rules/{id}/exceptions:
     post:
       description: Create exception items that apply to a single detection rule.
@@ -11279,12 +11660,30 @@ paths:
         - Security Exceptions API
   /api/detection_engine/rules/prepackaged:
     put:
-      description: Install and update all Elastic prebuilt detection rules and Timelines.
+      description: |
+        Install and update all Elastic prebuilt detection rules and Timelines.
+
+        This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+        When you call this endpoint, it will:
+        - Install any new prebuilt detection rules that are not currently installed in your system.
+        - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
+        - Install any new prebuilt Timelines that are not currently installed in your system.
+        - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
+
+        This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+        providing you with the most current and effective threat detection capabilities.
       operationId: InstallPrebuiltRulesAndTimelines
       responses:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  value:
+                    rules_installed: 112
+                    rules_updated: 0
+                    timelines_installed: 5
+                    timelines_updated: 2
               schema:
                 additionalProperties: false
                 type: object
@@ -11316,12 +11715,25 @@ paths:
         - Security Detections API
   /api/detection_engine/rules/prepackaged/_status:
     get:
-      description: Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+      description: |
+        Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+
+        This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
       operationId: ReadPrebuiltRulesAndTimelinesStatus
       responses:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  value:
+                    rules_custom_installed: 0
+                    rules_installed: 0
+                    rules_not_installed: 112
+                    rules_not_updated: 0
+                    timelines_installed: 0
+                    timelines_not_installed: 0
+                    timelines_not_updated: 0
               schema:
                 additionalProperties: false
                 type: object
@@ -12156,6 +12568,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                example1:
+                  value:
+                    - zeek
+                    - suricata
+                    - windows
+                    - linux
+                    - network
+                    - initial access
+                    - remote access
+                    - phishing
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_RuleTagArray'
           description: Indicates a successful call
@@ -13712,7 +14135,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -13830,7 +14253,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -14289,7 +14712,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
+                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -14589,7 +15012,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -14853,7 +15276,7 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                  message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -14980,7 +15403,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -15667,7 +16090,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -15792,7 +16215,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
                     statusCode: 400
               schema:
                 oneOf:
@@ -41302,7 +41725,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json:
@@ -41334,7 +41757,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json:
@@ -49638,7 +50061,7 @@ components:
           type: boolean
         scaling_factor:
           description: |
-            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value.
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
           type: integer
         type:
           description: Specifies the data type for the field.
@@ -54117,13 +54540,13 @@ components:
             - delete
           type: string
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -54135,13 +54558,13 @@ components:
             - disable
           type: string
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -54153,6 +54576,7 @@ components:
             - duplicate
           type: string
         duplicate:
+          description: Duplicate object that describes applying an update action.
           type: object
           properties:
             include_exceptions:
@@ -54165,13 +54589,13 @@ components:
             - include_exceptions
             - include_expired_exceptions
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -54227,6 +54651,7 @@ components:
         - deleted
         - skipped
     Security_Detections_API_BulkEditActionSummary:
+      description: A rule can only be skipped when the bulk action to be performed on it results in nothing being done. For example, if the edit action is used to add a tag to a rule that already has that tag, or to delete an index pattern that is not specified in a rule. Objects returned in attributes.results.skipped will only include rules' id, name, and skip_reason.
       type: object
       properties:
         failed:
@@ -54256,13 +54681,13 @@ components:
           minItems: 1
           type: array
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -54279,13 +54704,13 @@ components:
             - enable
           type: string
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -54299,13 +54724,13 @@ components:
             - export
           type: string
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
       required:
         - action
@@ -54317,15 +54742,16 @@ components:
             - run
           type: string
         ids:
-          description: Array of rule IDs
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
           type: array
         query:
-          description: Query to filter rules
+          description: Query to filter rules.
           type: string
         run:
+          description: Object that describes applying a manual rule run action.
           type: object
           properties:
             end_date:
@@ -54509,7 +54935,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -54665,7 +55090,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -54819,7 +55243,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -54955,7 +55378,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -55121,7 +55543,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -55277,7 +55698,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -55425,7 +55845,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -55583,7 +56002,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -55850,7 +56268,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -56006,7 +56423,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -56163,7 +56579,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -56315,7 +56730,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -56368,7 +56782,7 @@ components:
         Maximum number of alerts the rule can create during a single run. Defaults to 100.
 
         > info
-        > This setting can be superseded by the Kibana configuration setting xpack.alerting.rules.run.alerts.max, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, the rule can generate no more than 1000 alerts even if max_signals is set higher.
+        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) xpack.alerting.rules.run.alerts.max, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, the rule can generate no more than 1000 alerts even if max_signals is set higher.
       minimum: 1
       type: integer
     Security_Detections_API_MigrationCleanupResult:
@@ -56563,7 +56977,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -56720,7 +57133,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -56891,7 +57303,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -57052,7 +57463,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -57322,7 +57732,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -57479,7 +57888,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -57648,7 +58056,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -57803,7 +58210,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -58201,7 +58607,7 @@ components:
         - id
     Security_Detections_API_RuleExceptionList:
       description: |
-        Array of exception containers, which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
+        Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       type: object
       properties:
         id:
@@ -58273,6 +58679,10 @@ components:
     Security_Detections_API_RuleExecutionStatusOrder:
       type: integer
     Security_Detections_API_RuleExecutionSummary:
+      description: |
+        Summary of the last execution of a rule.
+        > info
+        > This field is under development and its usage or schema may change
       type: object
       properties:
         last_execution:
@@ -58552,7 +58962,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -58709,7 +59118,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -58878,7 +59286,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -59033,7 +59440,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -59224,7 +59630,7 @@ components:
         - type: must be mapping
         - value: field from the Elasticsearch threat index
           
-        You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See below for an example that uses both and and or logic.
+        You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
       items:
         type: object
         properties:
@@ -59336,7 +59742,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -59493,7 +59898,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -59678,7 +60082,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -59842,7 +60245,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -59894,7 +60296,11 @@ components:
       description: Query used to determine which fields in the Elasticsearch index are used for generating alerts.
       type: string
     Security_Detections_API_ThreatSubtechnique:
-      description: Array containing more specific information on the attack technique.
+      description: |
+        Array containing more specific information on the attack technique.
+
+        > info
+        > Only threats described using the MITRE ATT&CKTM framework are displayed in the UI (Rules → Detection rules (SIEM) → Rule name).
       type: object
       properties:
         id:
@@ -59941,7 +60347,6 @@ components:
           description: Technique reference
           type: string
         subtechnique:
-          description: Array containing more specific information on the attack technique
           items:
             $ref: '#/components/schemas/Security_Detections_API_ThreatSubtechnique'
           type: array
@@ -60079,7 +60484,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -60236,7 +60640,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -60407,7 +60810,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -60565,7 +60967,6 @@ components:
             required_fields:
               description: |
                 Elasticsearch fields and their types that need to be present for the rule to function.
-
                 > info
                 > The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
               items:
@@ -60618,7 +61019,7 @@ components:
       minimum: 1
       type: integer
     Security_Detections_API_ThrottleForBulkActions:
-      description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
+      description: 'The condition for throttling the notification: ''rule'', ''no_actions'', or time duration'
       enum:
         - rule
         - 1h
@@ -61757,7 +62158,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: "united.endpoint.host.os.name : 'Windows'"
+      example: 'united.endpoint.host.os.name : ''Windows'''
       type: string
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
@@ -65242,7 +65643,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: "Invalid value 'foo' supplied to: [...]"
+          example: 'Invalid value ''foo'' supplied to: [...]'
           type: string
         statusCode:
           example: 400
@@ -67420,7 +67821,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
