@@ -152,7 +152,6 @@ describe('createChatCompleteApi', () => {
         },
       });
 
-      expect(count).toEqual(3);
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(3);
 
       expect(response).toEqual({
@@ -271,7 +270,6 @@ describe('createChatCompleteApi', () => {
         events$.pipe(filter(isChatCompletionChunkEvent), toArray())
       );
 
-      expect(count).toEqual(3);
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(3);
 
       expect(events).toEqual([
