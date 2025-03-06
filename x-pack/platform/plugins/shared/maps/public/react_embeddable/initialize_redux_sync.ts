@@ -219,7 +219,16 @@ export function initializeReduxSync({
         (nextValue: MapCenterAndZoom) => {
           store.dispatch(setGotoWithCenter(nextValue));
         },
-        fastIsEqual,
+        (a, b) => {
+          if (a?.zoom === undefined || b?.zoom === undefined) {
+            return a === b;
+          }
+
+          if (a!.lat !== b!.lat) return false;
+          if (a!.lon !== b!.lon) return false;
+          // Map may not restore reset zoom exactly
+          return Math.abs(a!.zoom - b!.zoom) < 0.05
+        },
       ],
       openTOCDetails: [
         openTOCDetails$,
