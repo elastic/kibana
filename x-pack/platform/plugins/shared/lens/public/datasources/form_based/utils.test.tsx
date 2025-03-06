@@ -134,6 +134,21 @@ describe('indexpattern_datasource utils', () => {
         expect(setStateMock).toHaveBeenCalledTimes(1);
       });
 
+      test('should not render a fix link if no setState is provided', () => {
+        framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
+        const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks
+        );
+
+        render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
+        // Make sure the message is there before checking the absence of the link/button
+        expect(screen.getByText(/might be an approximation./)).toBeInTheDocument();
+        expect(screen.getByText('Enable accuracy mode')).not.toBeInTheDocument();
+      });
+
       test('should other suggestions if accuracy mode already enabled', async () => {
         framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
         (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = true;

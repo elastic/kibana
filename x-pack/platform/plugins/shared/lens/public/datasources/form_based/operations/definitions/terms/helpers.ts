@@ -150,12 +150,12 @@ export function getDisallowedTermsMessage(
             currentColumn.sourceField,
             ...(currentColumn.params?.secondaryFields ?? []),
           ];
+          const table = frame.activeData?.[layerId] || frame.activeData?.default;
           const activeDataFieldNameMatch =
-            frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
-            fieldNames[0];
+            table?.columns.find(({ id }) => id === columnId)?.meta.field === fieldNames[0];
 
           let currentTerms = uniq(
-            frame.activeData?.[layerId].rows
+            table?.rows
               .map((row) => row[columnId] as string | MultiFieldKeyFormat)
               .filter((term) =>
                 fieldNames.length > 1
