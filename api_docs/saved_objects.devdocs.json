@@ -68,11 +68,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
           },
           {
             "plugin": "discover",

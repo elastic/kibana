@@ -16,10 +16,16 @@
 
 import { z } from '@kbn/zod';
 
-import { FindLiveQueryRequestQuery } from './find_live_query.gen';
-import { DefaultSuccessResponse, Id } from '../model/schema/common_attributes.gen';
-import { CreateLiveQueryRequestBody } from './create_live_query.gen';
-import { GetLiveQueryResultsRequestQuery } from './get_live_query_results.gen';
+import {
+  KueryOrUndefined,
+  PageOrUndefined,
+  PageSizeOrUndefined,
+  SortOrUndefined,
+  SortOrderOrUndefined,
+} from '../model/schema/common_attributes.gen';
+import { FindLiveQueryResponse, FindLiveQueryDetailsResponse } from './find_live_query.gen';
+import { CreateLiveQueryRequestBody, CreateLiveQueryResponse } from './create_live_query.gen';
+import { GetLiveQueryResultsResponse } from './get_live_query_results.gen';
 
 export type OsqueryCreateLiveQueryRequestBody = z.infer<typeof OsqueryCreateLiveQueryRequestBody>;
 export const OsqueryCreateLiveQueryRequestBody = CreateLiveQueryRequestBody;
@@ -28,44 +34,43 @@ export type OsqueryCreateLiveQueryRequestBodyInput = z.input<
 >;
 
 export type OsqueryCreateLiveQueryResponse = z.infer<typeof OsqueryCreateLiveQueryResponse>;
-export const OsqueryCreateLiveQueryResponse = DefaultSuccessResponse;
+export const OsqueryCreateLiveQueryResponse = CreateLiveQueryResponse;
 export type OsqueryFindLiveQueriesRequestQuery = z.infer<typeof OsqueryFindLiveQueriesRequestQuery>;
 export const OsqueryFindLiveQueriesRequestQuery = z.object({
-  query: FindLiveQueryRequestQuery,
+  kuery: KueryOrUndefined.optional(),
+  page: PageOrUndefined.optional(),
+  pageSize: PageSizeOrUndefined.optional(),
+  sort: SortOrUndefined.optional(),
+  sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryFindLiveQueriesRequestQueryInput = z.input<
   typeof OsqueryFindLiveQueriesRequestQuery
 >;
 
 export type OsqueryFindLiveQueriesResponse = z.infer<typeof OsqueryFindLiveQueriesResponse>;
-export const OsqueryFindLiveQueriesResponse = DefaultSuccessResponse;
-export type OsqueryGetLiveQueryDetailsRequestQuery = z.infer<
-  typeof OsqueryGetLiveQueryDetailsRequestQuery
->;
-export const OsqueryGetLiveQueryDetailsRequestQuery = z.object({
-  query: z.object({}),
-});
-export type OsqueryGetLiveQueryDetailsRequestQueryInput = z.input<
-  typeof OsqueryGetLiveQueryDetailsRequestQuery
->;
+export const OsqueryFindLiveQueriesResponse = FindLiveQueryResponse;
 
 export type OsqueryGetLiveQueryDetailsRequestParams = z.infer<
   typeof OsqueryGetLiveQueryDetailsRequestParams
 >;
 export const OsqueryGetLiveQueryDetailsRequestParams = z.object({
-  id: Id,
+  id: z.string(),
 });
 export type OsqueryGetLiveQueryDetailsRequestParamsInput = z.input<
   typeof OsqueryGetLiveQueryDetailsRequestParams
 >;
 
 export type OsqueryGetLiveQueryDetailsResponse = z.infer<typeof OsqueryGetLiveQueryDetailsResponse>;
-export const OsqueryGetLiveQueryDetailsResponse = DefaultSuccessResponse;
+export const OsqueryGetLiveQueryDetailsResponse = FindLiveQueryDetailsResponse;
 export type OsqueryGetLiveQueryResultsRequestQuery = z.infer<
   typeof OsqueryGetLiveQueryResultsRequestQuery
 >;
 export const OsqueryGetLiveQueryResultsRequestQuery = z.object({
-  query: GetLiveQueryResultsRequestQuery,
+  kuery: KueryOrUndefined.optional(),
+  page: PageOrUndefined.optional(),
+  pageSize: PageSizeOrUndefined.optional(),
+  sort: SortOrUndefined.optional(),
+  sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryGetLiveQueryResultsRequestQueryInput = z.input<
   typeof OsqueryGetLiveQueryResultsRequestQuery
@@ -75,12 +80,12 @@ export type OsqueryGetLiveQueryResultsRequestParams = z.infer<
   typeof OsqueryGetLiveQueryResultsRequestParams
 >;
 export const OsqueryGetLiveQueryResultsRequestParams = z.object({
-  id: Id,
-  actionId: Id,
+  id: z.string(),
+  actionId: z.string(),
 });
 export type OsqueryGetLiveQueryResultsRequestParamsInput = z.input<
   typeof OsqueryGetLiveQueryResultsRequestParams
 >;
 
 export type OsqueryGetLiveQueryResultsResponse = z.infer<typeof OsqueryGetLiveQueryResultsResponse>;
-export const OsqueryGetLiveQueryResultsResponse = DefaultSuccessResponse;
+export const OsqueryGetLiveQueryResultsResponse = GetLiveQueryResultsResponse;

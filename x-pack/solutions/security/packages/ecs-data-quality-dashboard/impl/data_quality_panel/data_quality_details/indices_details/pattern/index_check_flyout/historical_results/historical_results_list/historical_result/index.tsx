@@ -19,9 +19,10 @@ import { LegacyHistoricalCheckFields } from './legacy_historical_check_fields';
 export interface Props {
   indexName: string;
   historicalResult: HistoricalResultType;
+  checkedAt: number;
 }
 
-const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResult }) => {
+const HistoricalResultComponent: React.FC<Props> = ({ checkedAt, indexName, historicalResult }) => {
   const {
     docsCount,
     sizeInBytes,
@@ -29,11 +30,11 @@ const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResul
     ecsFieldCount,
     totalFieldCount,
     customFieldCount,
-    checkedAt,
+    checkedAt: checkedAtNumeric,
   } = historicalResult;
 
   return (
-    <div data-test-subj={`historicalResult-${checkedAt}`}>
+    <div data-test-subj={`historicalResult-${checkedAtNumeric}`}>
       <EuiSpacer />
       <IndexStatsPanel
         docsCount={docsCount}
@@ -45,9 +46,17 @@ const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResul
       />
       <EuiSpacer />
       {isNonLegacyHistoricalResult(historicalResult) ? (
-        <HistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
+        <HistoricalCheckFields
+          checkedAt={checkedAt}
+          indexName={indexName}
+          historicalResult={historicalResult}
+        />
       ) : (
-        <LegacyHistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
+        <LegacyHistoricalCheckFields
+          checkedAt={checkedAt}
+          indexName={indexName}
+          historicalResult={historicalResult}
+        />
       )}
       <EuiSpacer size="m" />
     </div>

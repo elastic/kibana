@@ -1426,13 +1426,7 @@
                 "description": [],
                 "signature": [
                   "AttributeService",
-                  "<",
-                  "VisualizeSavedObjectAttributes",
-                  ", ",
-                  "VisualizeByValueInput",
-                  ", ",
-                  "VisualizeByReferenceInput",
-                  ", unknown> | undefined"
+                  " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
@@ -4087,7 +4081,9 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              "TimefilterHook",
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -5968,13 +5964,7 @@
             "text": "VisualizeInput"
           },
           " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          }
+          "EmbeddableInput"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
         "deprecated": false,
