@@ -11,7 +11,6 @@ import './field_list_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import classnames from 'classnames';
 import {
   EuiButton,
   EuiButtonProps,
@@ -318,7 +317,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   }
 
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
-    className: classnames('unifiedFieldListSidebar'), // TODO remove after migrating.unifiedFieldListSidebar .unifiedFieldListItemButton  &.kbnFieldButton {
+    className: 'unifiedFieldListSidebar', // unifiedFieldListSidebar class is used in other depending styles
     css: css`
       overflow: hidden;
       margin: 0 !important;
@@ -332,6 +331,12 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         width: 100%;
         padding: ${euiTheme.size.base};
         background-color: ${euiTheme.colors.backgroundBasePlain};
+      }
+
+      .unifiedFieldListItemButton.kbnFieldButton {
+        margin-bottom: calc(${euiTheme.size.xs} / 2);
+        background: none;
+        box-shadow: none;
       }
     `,
     'aria-label': i18n.translate('unifiedFieldList.fieldListSidebar.fieldsSidebarAriaLabel', {
@@ -382,11 +387,13 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   return (
     <EuiPageSidebar {...pageSidebarProps}>
       <EuiFlexGroup
-        className="unifiedFieldListSidebar__group"
         direction="column"
         alignItems="stretch"
         gutterSize="none"
         responsive={false}
+        css={css`
+          height: 100%;
+        `}
       >
         {Boolean(prepend) && (
           <EuiFlexItem
@@ -414,6 +421,23 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             className="unifiedFieldListSidebar__list"
             css={css`
               padding: ${`${euiTheme.size.s} ${euiTheme.size.xs} 0 ${euiTheme.size.xs}`};
+
+              > *,
+              .euiAccordion__triggerWrapper,
+              .euiAccordion__children,
+              .unifiedFieldListItemButton {
+                padding-inline: ${euiTheme.size.xs};
+              }
+
+              ${smallScreenBreakpoint} {
+                padding: ${euiTheme.size.s} 0 0 0;
+                > *,
+                .euiAccordion__triggerWrapper,
+                .unifiedFieldListSidebar__accordionContainer,
+                .unifiedFieldListItemButton {
+                  padding-inline: 0;
+                }
+              }
             `}
           >
             {showFieldList ? (
