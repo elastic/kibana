@@ -222,6 +222,12 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               });
 
+              // Perform a rollover so that a new backing index is created with the updated index mode
+              await supertest
+                .post(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}/rollover`)
+                .set('kbn-xsrf', 'xxx')
+                .expect(200);
+
               const { body: dataStream } = await supertest
                 .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
                 .set('kbn-xsrf', 'xxx')
