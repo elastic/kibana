@@ -35,12 +35,9 @@ describe('useFullDataView', () => {
     });
 
     it('should return DataView instance', () => {
-      const wrapper = renderHook(
-        () => useFullDataView({ dataViewManagerScope: DataViewManagerScopeName.default }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {
+        wrapper: TestProviders,
+      });
 
       expect(wrapper.result.current).toBeInstanceOf(DataView);
     });
@@ -58,12 +55,9 @@ describe('useFullDataView', () => {
     });
 
     it('should return undefined', () => {
-      const wrapper = renderHook(
-        () => useFullDataView({ dataViewManagerScope: DataViewManagerScopeName.default }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {
+        wrapper: TestProviders,
+      });
 
       expect(wrapper.result.current).toBeUndefined();
     });

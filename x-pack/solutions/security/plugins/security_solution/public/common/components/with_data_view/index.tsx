@@ -34,9 +34,7 @@ export const withDataView = <P extends WithDataViewArg>(
   fallback?: ReactElement
 ) => {
   const ComponentWithDataView = (props: OmitDataView<P>) => {
-    const experimentalDataView = useFullDataView({
-      dataViewManagerScope: DataViewManagerScopeName.timeline,
-    });
+    const experimentalDataView = useFullDataView(DataViewManagerScopeName.timeline);
 
     let dataView = useGetScopedSourcererDataView({
       sourcererScope: SourcererScopeName.timeline,

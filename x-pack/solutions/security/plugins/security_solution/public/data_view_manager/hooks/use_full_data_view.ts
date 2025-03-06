@@ -15,10 +15,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { type DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 
-export interface UseGetScopedSourcererDataViewArgs {
-  dataViewManagerScope: DataViewManagerScopeName;
-}
-
 /**
  * Creates a DataView from the provided DataViewSpec.
  *
@@ -45,9 +41,9 @@ const dataViewFromSpec: (
  * This hook should be used whenever we need the actual DataView and not just the spec for the
  * selected data view.
  */
-export const useFullDataView = ({
-  dataViewManagerScope,
-}: UseGetScopedSourcererDataViewArgs): DataView | undefined => {
+export const useFullDataView = (
+  dataViewManagerScope: DataViewManagerScopeName
+): DataView | undefined => {
   const {
     services: { fieldFormats },
   } = useKibana();
