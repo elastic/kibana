@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiCommentList, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
+import { css } from '@emotion/css';
+import {
+  EuiFlexItem,
+  EuiCommentList,
+  EuiPanel,
+  useEuiTheme,
+  euiScrollBarStyles,
+} from '@elastic/eui';
 import { ConversationCreatedEventPayload } from '../../../common/chat_events';
 import { useConversation } from '../hooks/use_conversation';
 import { ChatInputForm } from './chat_input_form';
@@ -17,6 +24,18 @@ interface ChatProps {
   onConversationUpdate: (changes: ConversationCreatedEventPayload) => void;
 }
 
+const fullHeightClassName = css`
+  height: 100%;
+`;
+
+const scrollContainerClassName = (scrollBarStyles: string) => css`
+  overflow-y: auto;
+  ${scrollBarStyles}
+`;
+
+const isAtBottom = (parent: HTMLElement) =>
+  parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
+
 export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate }) => {
   const { send, messages } = useConversation({
     conversationId,
@@ -24,8 +43,44 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate
     onConversationUpdate,
   });
 
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
+
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [stickToBottom, setStickToBottom] = useState(true);
+
+  useEffect(() => {
+    const parent = scrollContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    const onScroll = () => {
+      setStickToBottom(isAtBottom(parent!));
+    };
+
+    parent.addEventListener('scroll', onScroll);
+
+    return () => {
+      parent.removeEventListener('scroll', onScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollContainerRef.current]);
+
+  useEffect(() => {
+    const parent = scrollContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    if (stickToBottom) {
+      parent.scrollTop = parent.scrollHeight;
+    }
+  });
+
   const onSubmit = useCallback(
     (message: string) => {
+      setStickToBottom(true);
       send(message);
     },
     [send]
@@ -33,14 +88,16 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate
 
   return (
     <>
-      <EuiFlexItem grow css={{ overflow: 'auto' }}>
-        <EuiPanel hasBorder={false} hasShadow={false}>
-          <EuiCommentList>
-            {messages.map((message) => {
-              return <ChatMessage message={message} />;
-            })}
-          </EuiCommentList>
-        </EuiPanel>
+      <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
+        <div ref={scrollContainerRef} className={fullHeightClassName}>
+          <EuiPanel hasBorder={false} hasShadow={false}>
+            <EuiCommentList>
+              {messages.map((message) => {
+                return <ChatMessage message={message} />;
+              })}
+            </EuiCommentList>
+          </EuiPanel>
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ChatInputForm disabled={false} loading={false} onSubmit={onSubmit} />
