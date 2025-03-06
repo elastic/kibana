@@ -34,6 +34,13 @@ export const processorMachine = setup({
       isUpdated: true,
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
+    forwardChangeEventToParent: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'processor.change',
+        id: context.processor.id,
+      })
+    ),
     notifyProcessorDelete: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
@@ -77,7 +84,7 @@ export const processorMachine = setup({
             'processor.change': {
               actions: [
                 { type: 'changeProcessor', params: ({ event }) => event },
-                { type: 'forwardEventToParent' },
+                { type: 'forwardChangeEventToParent' },
               ],
             },
           },
@@ -99,7 +106,7 @@ export const processorMachine = setup({
                 'processor.update': {
                   guard: 'hasEditingChanges',
                   target: '#configured.idle',
-                  actions: [{ type: 'markAsUpdated' }],
+                  actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
                 },
                 'processor.cancel': {
                   target: '#configured.idle',
@@ -113,7 +120,7 @@ export const processorMachine = setup({
                 'processor.change': {
                   actions: [
                     { type: 'changeProcessor', params: ({ event }) => event },
-                    { type: 'forwardEventToParent' },
+                    { type: 'forwardChangeEventToParent' },
                   ],
                 },
               },

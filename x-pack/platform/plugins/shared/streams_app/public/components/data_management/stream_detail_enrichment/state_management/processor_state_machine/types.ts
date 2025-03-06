@@ -10,8 +10,9 @@ import { ActorRef, Snapshot } from 'xstate5';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
-  | { type: 'processor.stage' }
-  | { type: 'processor.delete'; id: string };
+  | { type: 'processor.change'; id: string }
+  | { type: 'processor.delete'; id: string }
+  | { type: 'processor.stage' };
 
 export interface ProcessorInput {
   parentRef: ProcessorParentActor;

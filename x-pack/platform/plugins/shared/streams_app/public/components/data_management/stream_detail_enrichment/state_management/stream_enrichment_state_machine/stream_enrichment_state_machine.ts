@@ -154,6 +154,14 @@ export const streamEnrichmentMachine = setup({
       Boolean(context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))),
     '!hasPendingDraft': not('hasPendingDraft'),
     canUpdateStream: and(['hasStagedChanges', '!hasPendingDraft']),
+    isStagedProcessor: ({ context }, params: { id: string }) => {
+      const processorRef = context.processorsRefs.find(
+        (p) => console.log(p.id, params.id) || p.id === params.id
+      );
+
+      if (!processorRef) return false;
+      return processorRef.getSnapshot().context.isNew;
+    },
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
@@ -258,18 +266,27 @@ export const streamEnrichmentMachine = setup({
                 'processor.stage': {
                   actions: [{ type: 'reassignProcessors' }],
                 },
+                'processor.update': {
+                  actions: [{ type: 'reassignProcessors' }],
+                },
               },
             },
             displayingSimulation: {
               entry: [{ type: 'spawnSimulationMachine' }],
               initial: 'viewDataPreview',
               on: {
-                'processors.*': {
+                'processor.change': {
+                  guard: { type: 'isStagedProcessor', params: ({ event }) => event },
                   actions: [
                     { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
                 'processor.*': {
+                  actions: [
+                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
+                },
+                'processors.*': {
                   actions: [
                     { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
