@@ -59,16 +59,6 @@ export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
   'orchestrator.',
   'log.',
   'service.',
-  '_id',
-  '_index',
-  '_source',
-  '_size',
-  '_doc_count',
-  '_field_names',
-  '_ignored',
-  '_routing',
-  '_meta',
-  '_tier',
 ];
 export const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
   '_id',
