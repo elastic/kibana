@@ -11,16 +11,6 @@ import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-const containerStyle = css`
-  position: relative;
-  width: 100%;
-  height: 100%;
-`;
-
-const accordionContainerStyle = css`
-  padding-inline: 0;
-`;
-
 /**
  * A top level wrapper props
  * @public
@@ -81,3 +71,13 @@ export const FieldList: FC<PropsWithChildren<FieldListProps>> = ({
     </EuiFlexGroup>
   );
 };
+
+const containerStyle = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
+
+const accordionContainerStyle = css`
+  padding-inline: 0;
+`;
