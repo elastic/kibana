@@ -21,6 +21,7 @@ import {
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -243,6 +244,10 @@ export async function fetchMoreDocuments(
 
     // Mark as loading
     sendLoadingMoreMsg(dataSubjects.documents$);
+    dataSubjects.totalHits$.next({
+      ...dataSubjects.totalHits$.getValue(),
+      fetchStatus: FetchStatus.PARTIAL,
+    });
 
     // Update the searchSource
     updateVolatileSearchSource(searchSource, {
@@ -253,12 +258,91 @@ export async function fetchMoreDocuments(
     });
 
     // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
+    const { records, totalHits, interceptedWarnings } = await fetchDocuments(searchSource, {
+      ...fetchDeps,
+      trackHits: true,
+    });
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
       moreRecords: records,
       interceptedWarnings,
+    });
+    dataSubjects.totalHits$.next({
+      ...dataSubjects.totalHits$.getValue(),
+      fetchStatus: FetchStatus.COMPLETE,
+      result: totalHits ?? dataSubjects.totalHits$.getValue().result,
+    });
+  } catch (error) {
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: [],
+      interceptedWarnings: undefined,
+    });
+    sendErrorTo(dataSubjects.main$)(error);
+  }
+}
+
+export async function fetchPreviousDocuments(
+  dataSubjects: SavedSearchData,
+  fetchDeps: FetchDeps
+): Promise<void> {
+  try {
+    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
+    const searchSource = savedSearch.searchSource.createChild();
+    const dataView = searchSource.getField('index')!;
+    const query = getAppState().query;
+    const isEsqlQuery = isOfAggregateQueryType(query);
+
+    if (isEsqlQuery) {
+      // not supported yet
+      return;
+    }
+
+    const lastDocuments = dataSubjects.documents$.getValue().result || [];
+    const firstDocumentSort = lastDocuments[0]?.raw?.sort;
+
+    if (!firstDocumentSort) {
+      return;
+    }
+
+    searchSource.setField('searchAfter', firstDocumentSort);
+
+    // Mark as loading
+    sendLoadingMoreMsg(dataSubjects.documents$);
+    dataSubjects.totalHits$.next({
+      ...dataSubjects.totalHits$.getValue(),
+      fetchStatus: FetchStatus.PARTIAL,
+    });
+
+    // Update the searchSource
+    updateVolatileSearchSource(searchSource, {
+      dataView,
+      services,
+      sort: (getAppState().sort ?? []).map(([field, direction]) => [
+        field,
+        direction === 'asc' ? 'desc' : 'asc',
+      ]) as SortOrder[],
+      defaultSortDir:
+        services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING) === 'asc' ? 'desc' : 'asc',
+      customFilters: getInternalState().customFilters,
+    });
+
+    // Fetch more documents
+    const { records, totalHits, interceptedWarnings } = await fetchDocuments(searchSource, {
+      ...fetchDeps,
+      trackHits: true,
+    });
+
+    // Update the state and finish the loading state
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: records.reverse(),
+      prepend: true,
+      interceptedWarnings,
+    });
+    dataSubjects.totalHits$.next({
+      ...dataSubjects.totalHits$.getValue(),
+      fetchStatus: FetchStatus.COMPLETE,
+      result: totalHits ?? dataSubjects.totalHits$.getValue().result,
     });
   } catch (error) {
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {

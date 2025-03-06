@@ -24,12 +24,14 @@ export function updateVolatileSearchSource(
     dataView,
     services,
     sort,
+    defaultSortDir,
     customFilters,
     inputTimeRange,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
+    defaultSortDir?: string;
     customFilters: Filter[];
     inputTimeRange?: TimeRange;
   }
@@ -39,7 +41,7 @@ export function updateVolatileSearchSource(
   const usedSort = getSortForSearchSource({
     sort,
     dataView,
-    defaultSortDir: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+    defaultSortDir: defaultSortDir ?? uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     includeTieBreaker: true,
   });
   searchSource.setField('sort', usedSort);

@@ -25,7 +25,7 @@ import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
-import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
+import { fetchAll, fetchMoreDocuments, fetchPreviousDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
@@ -43,7 +43,7 @@ export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
-export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
+export type DataRefetchMsg = 'reset' | 'fetch_more' | 'fetch_previous' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
@@ -82,7 +82,7 @@ export interface DiscoverDataStateContainer {
   /**
    * Fetch more data from ES
    */
-  fetchMore: () => void;
+  fetchMore: (direction?: 'next' | 'previous') => void;
   /**
    * Container of data observables (orchestration, data table, total hits, available fields)
    */
@@ -209,9 +209,11 @@ export function getDataStateContainer({
       options: {
         reset: val === 'reset',
         fetchMore: val === 'fetch_more',
+        fetchPrevious: val === 'fetch_previous',
       },
       searchSessionId:
-        (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
+        ((val === 'fetch_more' || val === 'fetch_previous') &&
+          searchSessionManager.getCurrentSearchSessionId()) ||
         searchSessionManager.getNextSearchSessionId(),
     })),
     share()
@@ -236,14 +238,21 @@ export function getDataStateContainer({
           abortController?.abort();
           abortControllerFetchMore?.abort();
 
-          if (options.fetchMore) {
+          if (options.fetchMore || options.fetchPrevious) {
             abortControllerFetchMore = new AbortController();
             const fetchMoreStartTime = window.performance.now();
 
-            await fetchMoreDocuments(dataSubjects, {
-              abortController: abortControllerFetchMore,
-              ...commonFetchDeps,
-            });
+            if (options.fetchMore) {
+              await fetchMoreDocuments(dataSubjects, {
+                abortController: abortControllerFetchMore,
+                ...commonFetchDeps,
+              });
+            } else {
+              await fetchPreviousDocuments(dataSubjects, {
+                abortController: abortControllerFetchMore,
+                ...commonFetchDeps,
+              });
+            }
 
             const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
             reportPerformanceMetricEvent(services.analytics, {
@@ -366,8 +375,8 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const fetchMore = () => {
-    refetch$.next('fetch_more');
+  const fetchMore = (direction: 'next' | 'previous' = 'next') => {
+    refetch$.next(direction === 'next' ? 'fetch_more' : 'fetch_previous');
     return refetch$;
   };
 
