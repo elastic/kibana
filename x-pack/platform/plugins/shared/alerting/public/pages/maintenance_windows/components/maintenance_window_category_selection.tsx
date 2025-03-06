@@ -22,22 +22,22 @@ import * as i18n from '../translations';
 const RADIO_OPTIONS = [
   {
     id: DEFAULT_APP_CATEGORIES.observability.id,
-    label: i18n.CREATE_FORM_CATEGORY_OBSERVABILITY_RULES,
+    label: i18n.CREATE_FORM_SOLUTION_OBSERVABILITY_RULES,
     ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.observability.id}`,
   },
   {
     id: DEFAULT_APP_CATEGORIES.security.id,
-    label: i18n.CREATE_FORM_CATEGORY_SECURITY_RULES,
+    label: i18n.CREATE_FORM_SOLUTION_SECURITY_RULES,
     ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.security.id}`,
   },
   {
     id: DEFAULT_APP_CATEGORIES.management.id,
-    label: i18n.CREATE_FORM_CATEGORY_STACK_RULES,
+    label: i18n.CREATE_FORM_SOLUTION_STACK_RULES,
     ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.management.id}`,
   },
 ].sort((a, b) => a.id.localeCompare(b.id));
 
-export interface MaintenanceWindowCategorySelectionProps {
+export interface MaintenanceWindowSolutionSelectionProps {
   selectedSolution: string;
   availableSolutions: string[];
   errors?: string[];
@@ -46,8 +46,8 @@ export interface MaintenanceWindowCategorySelectionProps {
   onChange: (solution: string) => void;
 }
 
-export const MaintenanceWindowCategorySelection = (
-  props: MaintenanceWindowCategorySelectionProps
+export const MaintenanceWindowSolutionSelection = (
+  props: MaintenanceWindowSolutionSelectionProps
 ) => {
   const {
     selectedSolution,
@@ -72,10 +72,10 @@ export const MaintenanceWindowCategorySelection = (
     [onChange]
   );
 
-  const categorySelection = useMemo(() => {
+  const solutionSelection = useMemo(() => {
     return (
       <EuiRadioGroup
-        data-test-subj="maintenanceWindowCategorySelectionRadioGroup"
+        data-test-subj="maintenanceWindowSolutionSelectionRadioGroup"
         options={options}
         idSelected={selectedSolution}
         onChange={onRadioChange}
@@ -87,7 +87,7 @@ export const MaintenanceWindowCategorySelection = (
     return (
       <EuiFlexGroup
         justifyContent="spaceAround"
-        data-test-subj="maintenanceWindowCategorySelectionLoading"
+        data-test-subj="maintenanceWindowSolutionSelectionLoading"
       >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="l" />
@@ -98,24 +98,24 @@ export const MaintenanceWindowCategorySelection = (
 
   return (
     isScopedQueryEnabled && (
-      <EuiFlexGroup data-test-subj="maintenanceWindowCategorySelection">
+      <EuiFlexGroup data-test-subj="maintenanceWindowSOLUTIONSelection">
         <EuiFlexItem>
           <EuiText size="s">
-            <h4>{i18n.CREATE_FORM_CATEGORY_SELECTION_TITLE}</h4>
+            <h4>{i18n.CREATE_FORM_SOLUTION_SELECTION_TITLE}</h4>
             <p>
               <EuiTextColor color="subdued">
-                {i18n.CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION}
+                {i18n.CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION}
               </EuiTextColor>
             </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE}
+            label={i18n.CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE}
             isInvalid={!!errors.length}
             error={errors[0]}
           >
-            {categorySelection}
+            {solutionSelection}
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
