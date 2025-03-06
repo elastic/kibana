@@ -15,27 +15,25 @@ import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutEvents } from '../use_grid_layout_events';
 
-export const ResizeHandle = React.memo(
-  ({ rowIndex, panelId }: { rowIndex: number; panelId: string }) => {
-    const startInteraction = useGridLayoutEvents({
-      interactionType: 'resize',
-      panelId,
-      rowIndex,
-    });
+export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
+  const startInteraction = useGridLayoutEvents({
+    interactionType: 'resize',
+    panelId,
+    rowId,
+  });
 
-    return (
-      <button
-        css={styles}
-        onMouseDown={startInteraction}
-        onTouchStart={startInteraction}
-        className="kbnGridPanel--resizeHandle"
-        aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
-          defaultMessage: 'Resize panel',
-        })}
-      />
-    );
-  }
-);
+  return (
+    <button
+      css={styles}
+      onMouseDown={startInteraction}
+      onTouchStart={startInteraction}
+      className="kbnGridPanel--resizeHandle"
+      aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
+        defaultMessage: 'Resize panel',
+      })}
+    />
+  );
+});
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
