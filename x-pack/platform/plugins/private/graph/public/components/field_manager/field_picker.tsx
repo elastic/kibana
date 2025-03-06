@@ -8,7 +8,6 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { FieldIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { WorkspaceField } from '../../types';
