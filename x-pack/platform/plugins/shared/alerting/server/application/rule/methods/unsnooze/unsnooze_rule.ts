@@ -21,24 +21,20 @@ import { unsnoozeRuleParamsSchema } from './schemas';
 export interface UnsnoozeParams {
   id: string;
   scheduleIds?: string[];
-  isPublic?: boolean;
 }
 
 export async function unsnoozeRule(
   context: RulesClientContext,
-  { id, scheduleIds, isPublic = false }: UnsnoozeParams
+  { id, scheduleIds }: UnsnoozeParams
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.unsnooze('${id}')`,
-    async () => await unsnoozeWithOCC(context, { id, scheduleIds, isPublic })
+    async () => await unsnoozeWithOCC(context, { id, scheduleIds })
   );
 }
 
-async function unsnoozeWithOCC(
-  context: RulesClientContext,
-  { id, scheduleIds, isPublic }: UnsnoozeParams
-) {
+async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }: UnsnoozeParams) {
   try {
     unsnoozeRuleParamsSchema.validate({ id, scheduleIds });
   } catch (error) {
@@ -51,20 +47,6 @@ async function unsnoozeWithOCC(
         ruleId: id,
       })
   );
-
-  if (isPublic && scheduleIds?.length) {
-    if (!attributes.snoozeSchedule?.length) {
-      throw Boom.badRequest('Rule has no snooze schedules.');
-    }
-
-    const scheduleToUnsnooze = attributes.snoozeSchedule?.find(
-      (schedule) => schedule.id === scheduleIds[0]
-    );
-
-    if (!scheduleToUnsnooze) {
-      throw Boom.badRequest(`Rule has no snooze schedule with id ${scheduleIds[0]}.`);
-    }
-  }
 
   try {
     await context.authorization.ensureAuthorized({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { IRouter } from '@kbn/core/server';
 import {
   unsnoozeParamsSchema,
@@ -54,7 +55,21 @@ export const unsnoozeRuleRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const { ruleId, scheduleId }: UnsnoozeParams = req.params;
         try {
-          await rulesClient.unsnooze({ id: ruleId, scheduleIds: [scheduleId], isPublic: true });
+          const cuurentRule = await rulesClient.get({ id: ruleId });
+
+          if (!cuurentRule.snoozeSchedule?.length) {
+            throw Boom.badRequest('Rule has no snooze schedules.');
+          }
+
+          const scheduleToUnsnooze = cuurentRule.snoozeSchedule?.find(
+            (schedule) => schedule.id === scheduleId
+          );
+
+          if (!scheduleToUnsnooze) {
+            throw Boom.badRequest(`Rule has no snooze schedule with id ${scheduleId}.`);
+          }
+
+          await rulesClient.unsnooze({ id: ruleId, scheduleIds: [scheduleId] });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleMutedError) {

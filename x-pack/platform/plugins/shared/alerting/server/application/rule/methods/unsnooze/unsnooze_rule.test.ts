@@ -68,48 +68,4 @@ describe('validate unsnooze params', () => {
       `"Error validating unsnooze params - [id]: expected value of type [string] but got [undefined]"`
     );
   });
-
-  it('should throw bad request for when snooze schedule is empty for public route', async () => {
-    savedObjectsMock.get = jest.fn().mockReturnValue({
-      attributes: {
-        actions: [],
-        snoozeSchedule: [],
-      },
-      version: '9.0.0',
-    });
-    await expect(
-      unsnoozeRule(context, { id: '123', scheduleIds: ['snooze_schedule_1'], isPublic: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule has no snooze schedules."`);
-  });
-
-  it('should throw bad request for invalid snooze schedule id for public route', async () => {
-    savedObjectsMock.get = jest.fn().mockReturnValue({
-      attributes: {
-        actions: [],
-        snoozeSchedule: [
-          {
-            duration: 600000,
-            rRule: {
-              interval: 1,
-              freq: 3,
-              dtstart: '2025-03-01T06:30:37.011Z',
-              tzid: 'UTC',
-            },
-            id: 'snooze_schedule_1',
-          },
-        ],
-      },
-      version: '9.0.0',
-    });
-
-    const invalidParams = {
-      id: '123',
-      scheduleIds: ['random_schedule_id'],
-      isPublic: true,
-    };
-
-    await expect(unsnoozeRule(context, invalidParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Rule has no snooze schedule with id random_schedule_id."`
-    );
-  });
 });
