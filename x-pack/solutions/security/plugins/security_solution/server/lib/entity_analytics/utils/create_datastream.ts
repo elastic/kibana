@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-// This file is a copy of x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts
+// This file is a copy of x-pack/platform/plugins/shared/alerting/server/alerts_service/lib/create_concrete_write_index.ts
 // The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
 import { get } from 'lodash';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -50,7 +50,7 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
         }),
       { logger }
     );
@@ -66,7 +66,7 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateUnderlyingMapping = async ({ logger, esClient, index }: UpdateIndexOpts) => {
+export const updateUnderlyingMapping = async ({ logger, esClient, index }: UpdateIndexOpts) => {
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
   try {
     simulatedIndexMapping = await retryTransientEsErrors(
@@ -89,6 +89,7 @@ const updateUnderlyingMapping = async ({ logger, esClient, index }: UpdateIndexO
 
   try {
     await retryTransientEsErrors(
+      // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
       () => esClient.indices.putMapping({ index, body: simulatedMapping }),
       { logger }
     );

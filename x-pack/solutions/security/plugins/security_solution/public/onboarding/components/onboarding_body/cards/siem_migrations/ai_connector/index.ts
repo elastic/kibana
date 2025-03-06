@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssistantAvatar } from '@kbn/elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { AI_CONNECTOR_CARD_TITLE } from './translations';
@@ -16,7 +16,7 @@ import type { AIConnectorCardMetadata } from './types';
 export const aiConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata> = {
   id: OnboardingCardId.siemMigrationsAiConnectors,
   title: AI_CONNECTOR_CARD_TITLE,
-  icon: AssistantAvatar,
+  icon: AssistantIcon,
   Component: React.lazy(
     () =>
       import(
@@ -25,5 +25,4 @@ export const aiConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata
       )
   ),
   checkComplete: checkAiConnectorsCardComplete,
-  licenseTypeRequired: 'enterprise',
 };

@@ -23,7 +23,10 @@ import {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { StatusRuleParams, TimeWindow } from '../../common/rules/status_rule';
+import {
+  SyntheticsMonitorStatusRuleParams as StatusRuleParams,
+  TimeWindow,
+} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import {

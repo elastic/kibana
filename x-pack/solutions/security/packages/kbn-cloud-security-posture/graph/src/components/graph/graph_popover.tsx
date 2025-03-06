@@ -22,13 +22,13 @@ export interface GraphPopoverProps
   closePopover: () => void;
 }
 
-export const GraphPopover: React.FC<GraphPopoverProps> = ({
+export const GraphPopover = ({
   isOpen,
   anchorElement,
   closePopover,
   children,
   ...rest
-}) => {
+}: GraphPopoverProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (!anchorElement) {
@@ -40,20 +40,8 @@ export const GraphPopover: React.FC<GraphPopoverProps> = ({
       {...rest}
       panelProps={{
         css: css`
-          .euiPopover__arrow[data-popover-arrow='left']:before {
-            border-inline-start-color: ${euiTheme.colors?.body};
-          }
-
-          .euiPopover__arrow[data-popover-arrow='right']:before {
-            border-inline-end-color: ${euiTheme.colors?.body};
-          }
-
-          .euiPopover__arrow[data-popover-arrow='bottom']:before {
-            border-block-end-color: ${euiTheme.colors?.body};
-          }
-
-          .euiPopover__arrow[data-popover-arrow='top']:before {
-            border-block-start-color: ${euiTheme.colors?.body};
+          .euiPopover__arrow {
+            --euiPopoverBackgroundColor: ${euiTheme.colors?.body};
           }
 
           background-color: ${euiTheme.colors?.body};

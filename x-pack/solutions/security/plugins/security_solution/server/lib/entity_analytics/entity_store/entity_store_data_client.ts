@@ -15,7 +15,7 @@ import type {
   AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
@@ -23,6 +23,9 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { merge } from '../../../../common/utils/objects/merge';
+import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
@@ -33,10 +36,7 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import {
-  EngineComponentResourceEnum,
-  EntityTypeEnum,
-} from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
@@ -46,17 +46,23 @@ import type {
   ListEntityEnginesResponse,
   EngineComponentStatus,
   EngineComponentResource,
-  EntityType,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
-import { getUnitedEntityDefinition } from './united_entity_definitions';
+import {
+  ENGINE_STATUS,
+  ENTITY_STORE_STATUS,
+  MAX_SEARCH_RESPONSE_SIZE,
+  defaultOptions,
+} from './constants';
+import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
-} from './task';
+  removeEntityStoreDataViewRefreshTask,
+  startEntityStoreDataViewRefreshTask,
+  getEntityStoreDataViewRefreshTaskState,
+} from './tasks';
 import {
   createEntityIndex,
   deleteEntityIndex,
@@ -88,6 +94,10 @@ import {
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
+import { createEngineDescription } from './installation/engine_description';
+import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+
+import type { ApiKeyManager } from './auth/api_key';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -115,6 +125,7 @@ interface EntityStoreClientOpts {
   config: EntityStoreConfig;
   experimentalFeatures: ExperimentalFeatures;
   telemetry?: AnalyticsServiceSetup;
+  apiKeyManager?: ApiKeyManager;
 }
 
 interface SearchEntitiesParams {
@@ -128,14 +139,24 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
-  private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
+  private assetCriticalityMigrationClient: AssetCriticalityMigrationClient;
   private entityClient: EntityClient;
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
+  private apiKeyGenerator?: ApiKeyManager;
 
   constructor(private readonly options: EntityStoreClientOpts) {
-    const { clusterClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    const {
+      clusterClient,
+      logger,
+      soClient,
+      auditLogger,
+      kibanaVersion,
+      namespace,
+      apiKeyManager,
+    } = options;
     this.esClient = clusterClient.asCurrentUser;
+    this.apiKeyGenerator = apiKeyManager;
 
     this.entityClient = new EntityClient({
       clusterClient,
@@ -148,7 +169,7 @@ export class EntityStoreDataClient {
       namespace,
     });
 
-    this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
+    this.assetCriticalityMigrationClient = new AssetCriticalityMigrationClient({
       esClient: this.esClient,
       logger,
       auditLogger,
@@ -174,8 +195,11 @@ export class EntityStoreDataClient {
           ...(taskManager
             ? [getEntityStoreFieldRetentionEnrichTaskStatus({ namespace, taskManager })]
             : []),
+          ...(taskManager
+            ? [getEntityStoreDataViewRefreshTaskState({ namespace, taskManager })]
+            : []),
           getPlatformPipelineStatus({
-            definition,
+            engineId: definition.id,
             esClient: this.esClient,
           }),
           getFieldRetentionEnrichPolicyStatus({
@@ -200,7 +224,7 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    requestBodyOverrides: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -212,14 +236,17 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? [EntityTypeEnum.host, EntityTypeEnum.user, EntityTypeEnum.service]
-      : [EntityTypeEnum.host, EntityTypeEnum.user];
+    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+
+    // When entityTypes param is defined it only enables the engines that are provided
+    const enginesTypes = requestBodyOverrides.entityTypes
+      ? (requestBodyOverrides.entityTypes as EntityType[]).filter((type) =>
+          enabledEntityTypes.includes(type)
+        )
+      : enabledEntityTypes;
 
     const promises = enginesTypes.map((entity) =>
-      run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
-      )
+      run(() => this.init(entity, requestBodyOverrides, { pipelineDebugMode }))
     );
 
     const engines = await Promise.all(promises);
@@ -246,21 +273,18 @@ export class EntityStoreDataClient {
     if (withComponents) {
       const enginesWithComponents = await Promise.all(
         engines.map(async (engine) => {
-          const entityDefinitionId = buildEntityDefinitionId(engine.type, namespace);
+          const id = buildEntityDefinitionId(engine.type, namespace);
           const {
             definitions: [definition],
           } = await this.entityClient.getEntityDefinitions({
-            id: entityDefinitionId,
+            id,
             includeState: withComponents,
           });
 
-          const definitionComponents = this.getComponentFromEntityDefinition(
-            entityDefinitionId,
-            definition
-          );
+          const definitionComponents = this.getComponentFromEntityDefinition(id, definition);
 
           const entityStoreComponents = await this.getEngineComponentsState(
-            engine.type,
+            EntityType[engine.type],
             definition
           );
 
@@ -279,7 +303,7 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     if (!this.options.taskManager) {
@@ -288,7 +312,7 @@ export class EntityStoreDataClient {
 
     const { config } = this.options;
 
-    await this.riskScoreDataClient.createRiskScoreLatestIndex().catch((e) => {
+    await this.riskScoreDataClient.createOrUpdateRiskScoreLatestIndex().catch((e) => {
       if (e.meta.body.error.type === 'resource_already_exists_exception') {
         this.options.logger.debug(
           `Risk score index for ${entityType} already exists, skipping creation.`
@@ -316,20 +340,14 @@ export class EntityStoreDataClient {
       'Initializing entity engine'
     );
 
-    const descriptor = await this.engineClient.init(entityType, {
-      filter,
-      fieldHistoryLength,
-      indexPattern,
-    });
+    const descriptor = await this.engineClient.init(entityType, requestBody);
     this.log('debug', entityType, `Initialized engine saved object`);
 
     this.asyncSetup(
       entityType,
-      fieldHistoryLength,
       this.options.taskManager,
-      indexPattern,
-      filter,
       config,
+      requestBody,
       pipelineDebugMode
     ).catch((e) =>
       this.log('error', entityType, `Error during async setup of entity store: ${e.message}`)
@@ -340,50 +358,47 @@ export class EntityStoreDataClient {
 
   private async asyncSetup(
     entityType: EntityType,
-    fieldHistoryLength: number,
     taskManager: TaskManagerStartContract,
-    indexPattern: string,
-    filter: string,
     config: EntityStoreConfig,
+    requestParams: InitEntityEngineRequestBody,
     pipelineDebugMode: boolean
   ) {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
-      const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const options = merge(defaultOptions, requestParams);
 
-      const unitedDefinition = getUnitedEntityDefinition({
-        indexPatterns,
+      const description = createEngineDescription({
         entityType,
         namespace,
-        fieldHistoryLength,
-        syncDelay: `${config.syncDelay.asSeconds()}s`,
-        frequency: `${config.frequency.asSeconds()}s`,
+        requestParams,
+        defaultIndexPatterns,
+        config,
       });
-      const { entityManagerDefinition } = unitedDefinition;
 
       // clean up any existing entity store
       await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 
+      if (this.apiKeyGenerator) {
+        await this.apiKeyGenerator.generate();
+      }
+
       // set up the entity manager definition
+      const definition = convertToEntityManagerDefinition(description, {
+        namespace,
+        filter: options.filter,
+      });
+
       await this.entityClient.createEntityDefinition({
-        definition: {
-          ...entityManagerDefinition,
-          filter,
-          indexPatterns: indexPattern
-            ? [...entityManagerDefinition.indexPatterns, ...indexPattern.split(',')]
-            : entityManagerDefinition.indexPatterns,
-        },
+        definition,
         installOnly: true,
       });
       this.log(`debug`, entityType, `Created entity definition`);
 
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
-      await createEntityIndexComponentTemplate({
-        unitedDefinition,
-        esClient: this.esClient,
-      });
+      await createEntityIndexComponentTemplate(description, this.esClient);
       this.log(`debug`, entityType, `Created entity index component template`);
       await createEntityIndex({
         entityType,
@@ -396,20 +411,24 @@ export class EntityStoreDataClient {
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist
       await createFieldRetentionEnrichPolicy({
-        unitedDefinition,
+        description,
+        options: { namespace },
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created field retention enrich policy`);
 
       await executeFieldRetentionEnrichPolicy({
-        unitedDefinition,
+        entityType,
+        version: description.version,
+        options: { namespace },
         esClient: this.esClient,
         logger,
       });
       this.log(`debug`, entityType, `Executed field retention enrich policy`);
       await createPlatformPipeline({
+        description,
+        options: { namespace },
         debugMode: pipelineDebugMode,
-        unitedDefinition,
         logger,
         esClient: this.esClient,
       });
@@ -420,6 +439,14 @@ export class EntityStoreDataClient {
 
       // the task will execute the enrich policy on a schedule
       await startEntityStoreFieldRetentionEnrichTask({
+        namespace,
+        logger,
+        taskManager,
+        interval: options.enrichPolicyExecutionInterval,
+      });
+
+      // this task will continuously refresh the Entity Store indices based on the Data View
+      await startEntityStoreDataViewRefreshTask({
         namespace,
         logger,
         taskManager,
@@ -465,7 +492,7 @@ export class EntityStoreDataClient {
 
   public getComponentFromEntityDefinition(
     id: string,
-    definition: EntityDefinitionWithState | EntityDefinition
+    definition: EntityDefinitionWithState | EntityDefinition | undefined
   ): EngineComponentStatus[] {
     if (!definition) {
       return [
@@ -478,16 +505,23 @@ export class EntityStoreDataClient {
     }
 
     if ('state' in definition) {
+      const transformHealthToComponentHealth = (
+        health: HealthStatus | undefined
+      ): EngineComponentStatus['health'] =>
+        health ? (health.toLowerCase() as Lowercase<HealthStatus>) : 'unknown';
+
       return [
         {
           id: definition.id,
           installed: definition.state.installed,
           resource: EngineComponentResourceEnum.entity_definition,
         },
-        ...definition.state.components.transforms.map(({ installed, running, stats }) => ({
-          id,
+        ...definition.state.components.transforms.map(({ installed, stats }) => ({
+          id: stats?.id || id,
           resource: EngineComponentResourceEnum.transform,
           installed,
+          health: transformHealthToComponentHealth(stats?.health?.status),
+          metadata: stats?.stats,
           errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
             title: issue,
             message: details,
@@ -497,8 +531,8 @@ export class EntityStoreDataClient {
           resource: EngineComponentResourceEnum.ingest_pipeline,
           ...pipeline,
         })),
-        ...definition.state.components.indexTemplates.map(({ installed }) => ({
-          id,
+        ...definition.state.components.indexTemplates.map(({ installed, id: templateId }) => ({
+          id: templateId,
           installed,
           resource: EngineComponentResourceEnum.index_template,
         })),
@@ -593,18 +627,18 @@ export class EntityStoreDataClient {
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
-    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+    const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
-    // TODO delete unitedDefinition from this method. we only need the id for deletion
-    const unitedDefinition = getUnitedEntityDefinition({
-      indexPatterns,
+    const description = createEngineDescription({
       entityType,
-      namespace: this.options.namespace,
-      fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
-      syncDelay: `${config.syncDelay.asSeconds()}s`,
-      frequency: `${config.frequency.asSeconds()}s`,
+      namespace,
+      defaultIndexPatterns,
+      config,
     });
-    const { entityManagerDefinition } = unitedDefinition;
+
+    if (!description.id) {
+      throw new Error(`Unable to find entity definition for ${entityType}`);
+    }
 
     this.log('info', entityType, `Deleting entity store`);
     this.audit(
@@ -617,7 +651,7 @@ export class EntityStoreDataClient {
     try {
       await this.entityClient
         .deleteEntityDefinition({
-          id: entityManagerDefinition.id,
+          id: description.id,
           deleteData,
         })
         // Swallowing the error as it is expected to fail if no entity definition exists
@@ -627,20 +661,21 @@ export class EntityStoreDataClient {
       this.log('debug', entityType, `Deleted entity definition`);
 
       await deleteEntityIndexComponentTemplate({
-        unitedDefinition,
+        id: description.id,
         esClient: this.esClient,
       });
       this.log('debug', entityType, `Deleted entity index component template`);
 
       await deletePlatformPipeline({
-        unitedDefinition,
+        description,
         logger,
         esClient: this.esClient,
       });
       this.log('debug', entityType, `Deleted platform pipeline`);
 
       await deleteFieldRetentionEnrichPolicy({
-        unitedDefinition,
+        description,
+        options: { namespace },
         esClient: this.esClient,
         logger,
       });
@@ -667,7 +702,16 @@ export class EntityStoreDataClient {
           logger,
           taskManager,
         });
-        this.log('debug', entityType, `Deleted entity store field retention enrich task`);
+        await removeEntityStoreDataViewRefreshTask({
+          namespace,
+          logger,
+          taskManager,
+        });
+        this.log(
+          'debug',
+          entityType,
+          `Deleted entity store field retention and data view refresh tasks`
+        );
       }
 
       logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
@@ -738,17 +782,17 @@ export class EntityStoreDataClient {
     errors: Error[];
   }> {
     const { logger } = this.options;
-    logger.info(
+    logger.debug(
       `In namespace ${this.options.namespace}: Applying data view indices to the entity store`
     );
 
     const { engines } = await this.engineClient.list();
 
-    const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = await engines.map(
+    const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
         const originalStatus = engine.status;
         const id = buildEntityDefinitionId(engine.type, this.options.namespace);
-        const definition = await this.getExistingEntityDefinition(engine.type);
+        const definition = await this.getExistingEntityDefinition(EntityType[engine.type]);
 
         if (
           originalStatus === ENGINE_STATUS.INSTALLING ||
@@ -767,7 +811,14 @@ export class EntityStoreDataClient {
 
         // Skip update if index patterns are the same
         if (isEqual(definition.indexPatterns, indexPatterns)) {
+          logger.debug(
+            `In namespace ${this.options.namespace}: No data view index changes detected.`
+          );
           return { type: engine.type, changes: {} };
+        } else {
+          logger.info(
+            `In namespace ${this.options.namespace}: Data view index changes detected, applying changes to entity definition.`
+          );
         }
 
         // Update savedObject status

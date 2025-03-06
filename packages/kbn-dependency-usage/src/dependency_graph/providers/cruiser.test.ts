@@ -14,7 +14,7 @@ import * as groupBy from '../../lib/group_by_owners.ts';
 import * as groupBySource from '../../lib/group_by_source.ts';
 
 const codeOwners: Record<string, string[]> = {
-  'plugins/security': ['team_security'],
+  'platform/plugins/shared/security': ['team_security'],
   'plugins/data_visualization': ['team_visualization'],
   'plugins/data_charts': ['team_visualization'],
   'plugins/analytics': ['team_analytics'],
@@ -45,7 +45,7 @@ const mockCruiseResult = {
     summary: {
       violations: [
         {
-          from: 'plugins/security',
+          from: 'platform/plugins/shared/security',
           to: 'node_modules/rxjs',
         },
         {
@@ -70,7 +70,7 @@ const mockCruiseResult = {
       {
         source: 'node_modules/rxjs',
         dependents: [
-          'plugins/security/server/index.ts',
+          'platform/plugins/shared/security/server/index.ts',
           'plugins/data_charts/public/charts.ts',
           'plugins/data_visualization/public/visualization.ts',
           'plugins/data_visualization/public/ingest.ts',
@@ -114,11 +114,11 @@ describe('identifyDependencyUsage', () => {
     const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
 
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)/([^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|x-pack/test_serverless|test)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|x-pack/test_serverless|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 
@@ -137,7 +137,7 @@ describe('identifyDependencyUsage', () => {
 
     expect(result).toEqual({
       team_security: {
-        modules: ['plugins/security'],
+        modules: ['platform/plugins/shared/security'],
         deps: ['rxjs'],
         teams: ['team_security'],
       },
@@ -167,7 +167,7 @@ describe('identifyDependencyUsage', () => {
     expect(groupFilesByOwnersSpy).toHaveBeenCalledWith(mockCruiseResult.output.summary.violations);
 
     expect(result).toEqual({
-      'plugins/security': ['rxjs'],
+      'platform/plugins/shared/security': ['rxjs'],
       'plugins/data_visualization': ['rxjs'],
       'plugins/data_charts': ['rxjs'],
       'plugins/analytics': ['rxjs', '@hapi/boom'],
@@ -185,14 +185,14 @@ describe('identifyDependencyUsage', () => {
 
     expect(result).toEqual({
       modules: [
-        'plugins/security',
+        'platform/plugins/shared/security',
         'plugins/data_visualization',
         'plugins/data_charts',
         'plugins/analytics',
       ],
       dependents: {
         rxjs: [
-          'plugins/security/server/index.ts',
+          'platform/plugins/shared/security/server/index.ts',
           'plugins/data_charts/public/charts.ts',
           'plugins/data_visualization/public/visualization.ts',
           'plugins/data_visualization/public/ingest.ts',
@@ -213,7 +213,7 @@ describe('identifyDependencyUsage', () => {
 
     expect(result).toEqual({
       modules: [
-        'plugins/security',
+        'platform/plugins/shared/security',
         'plugins/data_visualization',
         'plugins/data_charts',
         'plugins/analytics',
@@ -272,7 +272,7 @@ describe('identifyDependencyUsage', () => {
         summary: {
           violations: [
             { from: 'plugins/unknown_plugin', to: 'node_modules/some_module' },
-            { from: 'plugins/security', to: 'node_modules/rxjs' },
+            { from: 'platform/plugins/shared/security', to: 'node_modules/rxjs' },
           ],
         },
         modules: [],
@@ -294,7 +294,7 @@ describe('identifyDependencyUsage', () => {
         teams: ['unknown'],
       },
       team_security: {
-        modules: ['plugins/security'],
+        modules: ['platform/plugins/shared/security'],
         deps: ['rxjs'],
         teams: ['team_security'],
       },

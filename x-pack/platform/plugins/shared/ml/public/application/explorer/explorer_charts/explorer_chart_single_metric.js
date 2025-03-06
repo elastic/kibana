@@ -12,6 +12,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import d3 from 'd3';
 import moment from 'moment';
@@ -48,10 +49,15 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
 import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
+import { cssMlExplorerChart } from './explorer_chart_styles';
 
 const popoverMenuOffset = 0;
 const CONTENT_WRAPPER_HEIGHT = 215;
+// Not used for CSS, but with d3 to select elements.
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
+const mlExplorerChartContentWrapper = css({
+  height: `${CONTENT_WRAPPER_HEIGHT}px`,
+});
 
 export class ExplorerChartSingleMetric extends React.Component {
   static contextType = context;
@@ -721,9 +727,11 @@ export class ExplorerChartSingleMetric extends React.Component {
             </EuiPopover>
           </div>
         )}
-        <div className="ml-explorer-chart" ref={this.setRef.bind(this)}>
+        <div css={cssMlExplorerChart} ref={this.setRef.bind(this)}>
           {isLoading && <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />}
-          {!isLoading && <div className={CONTENT_WRAPPER_CLASS} />}
+          {!isLoading && (
+            <div className={CONTENT_WRAPPER_CLASS} css={mlExplorerChartContentWrapper} />
+          )}
         </div>
       </>
     );

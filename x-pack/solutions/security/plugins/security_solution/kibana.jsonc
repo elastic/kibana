@@ -32,7 +32,6 @@
       "features",
       "fieldFormats",
       "inspector",
-      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -59,7 +58,9 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "productDocBase",
+      "telemetry"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -71,12 +72,11 @@
       "lists",
       "home",
       "management",
-      "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant",
+      "automaticImport",
       "serverless"
     ],
     "requiredBundles": [
@@ -87,7 +87,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

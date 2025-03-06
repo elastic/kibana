@@ -21,7 +21,11 @@ export function RootCauseAnalysisPanel({
   const theme = useTheme();
 
   const panelClassName =
-    color && color !== 'transparent' && color !== 'plain' && color !== 'subdued'
+    color &&
+    color !== 'transparent' &&
+    color !== 'plain' &&
+    color !== 'subdued' &&
+    color !== 'highlighted'
       ? css`
           border: 1px solid;
           border-color: ${rgba(theme.colors[color], 0.25)};

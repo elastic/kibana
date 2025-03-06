@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiPopoverTitle } from '@elastic/eui';
-import { StatusRuleCondition } from '../../../../../../common/rules/status_rule';
+import { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { PopoverExpression } from './popover_expression';
 import { StatusRuleParamsProps } from '../status_rule_ui';
 

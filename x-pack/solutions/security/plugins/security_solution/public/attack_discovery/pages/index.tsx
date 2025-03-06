@@ -6,33 +6,51 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import {
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
+  END_LOCAL_STORAGE_KEY,
+  FILTERS_LOCAL_STORAGE_KEY,
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  QUERY_LOCAL_STORAGE_KEY,
+  START_LOCAL_STORAGE_KEY,
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
 import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
+import type { Filter, Query } from '@kbn/es-query';
 import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
-import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { useKibana } from '../../common/lib/kibana';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Header } from './header';
-import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getSize, showLoading } from './helpers';
+import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize, showLoading } from './helpers';
 import { LoadingCallout } from './loading_callout';
+import { deserializeQuery } from './local_storage/deserialize_query';
+import { deserializeFilters } from './local_storage/deserialize_filters';
 import { PageTitle } from './page_title';
 import { Results } from './results';
+import { SettingsFlyout } from './settings_flyout';
+import { parseFilterQuery } from './settings_flyout/parse_filter_query';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
 
+export const ID = 'attackDiscoveryQuery';
+
 const AttackDiscoveryPageComponent: React.FC = () => {
-  const spaceId = useSpaceId() ?? 'default';
+  const {
+    services: { uiSettings },
+  } = useKibana();
 
   const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
@@ -41,17 +59,54 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   // for showing / hiding anonymized data:
   const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+
+  // showing / hiding the flyout:
+  const [showFlyout, setShowFlyout] = useState<boolean>(false);
+  const openFlyout = useCallback(() => setShowFlyout(true), []);
+
+  // time selection:
+  const [start, setStart] = useLocalStorage<string>(
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${START_LOCAL_STORAGE_KEY}`,
+    DEFAULT_START
+  );
+  const [end, setEnd] = useLocalStorage<string>(
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${END_LOCAL_STORAGE_KEY}`,
+    DEFAULT_END
+  );
+
+  // search bar query:
+  const [query, setQuery] = useLocalStorage<Query>(
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${QUERY_LOCAL_STORAGE_KEY}`,
+    getDefaultQuery(),
+    {
+      raw: false,
+      serializer: (value: Query) => JSON.stringify(value),
+      deserializer: deserializeQuery,
+    }
+  );
+
+  // search bar filters:
+  const [filters, setFilters] = useLocalStorage<Filter[]>(
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${FILTERS_LOCAL_STORAGE_KEY}`,
+    [],
+    {
+      raw: false,
+      serializer: (value: Filter[]) => JSON.stringify(value),
+      deserializer: deserializeFilters,
+    }
+  );
+
   const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
 
   // get the last selected connector ID from local storage:
   const [localStorageAttackDiscoveryConnectorId, setLocalStorageAttackDiscoveryConnectorId] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
     );
 
   const [localStorageAttackDiscoveryMaxAlerts, setLocalStorageAttackDiscoveryMaxAlerts] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${MAX_ALERTS_LOCAL_STORAGE_KEY}`,
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${MAX_ALERTS_LOCAL_STORAGE_KEY}`,
       `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
     );
 
@@ -123,7 +178,41 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const onGenerate = useCallback(async () => fetchAttackDiscoveries(), [fetchAttackDiscoveries]);
+  const { sourcererDataView } = useSourcererDataView();
+
+  // filterQuery is the combined search bar query and filters in ES format:
+  const [filterQuery, kqlError] = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: getEsQueryConfig(uiSettings),
+        dataViewSpec: sourcererDataView,
+        queries: [query ?? getDefaultQuery()], // <-- search bar query
+        filters: filters ?? [], // <-- search bar filters
+      }),
+    [filters, query, sourcererDataView, uiSettings]
+  );
+
+  // renders a toast if the filter query is invalid:
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery,
+    kqlError,
+    query,
+    startDate: start,
+    endDate: end,
+  });
+
+  const onGenerate = useCallback(async () => {
+    const size = alertsContextCount ?? DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS;
+    const filter = parseFilterQuery({ filterQuery, kqlError });
+
+    return fetchAttackDiscoveries({
+      end,
+      filter, // <-- combined search bar query and filters
+      size,
+      start,
+    });
+  }, [alertsContextCount, end, fetchAttackDiscoveries, filterQuery, kqlError, start]);
 
   useEffect(() => {
     setSelectedConnectorReplacements(replacements);
@@ -147,6 +236,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
 
+  const onClose = useCallback(() => setShowFlyout(false), []);
+
   return (
     <div
       css={css`
@@ -161,13 +252,14 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           <Header
             connectorId={connectorId}
             connectorsAreConfigured={connectorsAreConfigured}
-            isLoading={isLoading}
             // disable header actions before post request has completed
             isDisabledActions={isLoadingPost}
+            isLoading={isLoading}
             localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+            onCancel={onCancel}
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
-            onCancel={onCancel}
+            openFlyout={openFlyout}
             setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
             stats={stats}
           />
@@ -185,9 +277,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             }) ? (
               <LoadingCallout
                 alertsContextCount={alertsContextCount}
-                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
                 approximateFutureTime={approximateFutureTime}
                 connectorIntervals={connectorIntervals}
+                end={end}
+                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+                start={start}
               />
             ) : (
               <Results
@@ -206,6 +300,21 @@ const AttackDiscoveryPageComponent: React.FC = () => {
                 selectedConnectorLastUpdated={selectedConnectorLastUpdated}
                 selectedConnectorReplacements={selectedConnectorReplacements}
                 showAnonymized={showAnonymized}
+              />
+            )}
+            {showFlyout && (
+              <SettingsFlyout
+                end={end}
+                filters={filters}
+                onClose={onClose}
+                query={query}
+                setEnd={setEnd}
+                setFilters={setFilters}
+                setQuery={setQuery}
+                setStart={setStart}
+                start={start}
+                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+                setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
               />
             )}
           </>

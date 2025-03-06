@@ -14,7 +14,7 @@
         "tags": [],
         "label": "analyticsServiceMock",
         "description": [],
-        "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+        "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<AnalyticsServiceContract>"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -43,16 +43,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              },
+              "AnalyticsServiceSetup",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -67,16 +61,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

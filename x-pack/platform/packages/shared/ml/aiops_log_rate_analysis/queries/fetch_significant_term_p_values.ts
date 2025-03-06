@@ -6,7 +6,7 @@
  */
 import { uniqBy } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -25,7 +25,7 @@ import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
-// `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
+// `x-pack/solutions/observability/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
 export const getSignificantTermRequest = (
   params: AiopsLogRateAnalysisSchema,
@@ -104,7 +104,7 @@ export const getSignificantTermRequest = (
 
   return {
     ...getRequestBase(params),
-    body,
+    ...body,
   };
 };
 

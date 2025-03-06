@@ -13,8 +13,7 @@ import {
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
 import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
-import type { EntityDefinition, EntityInstance, EntityMetadata } from '@kbn/entities-schema';
-import { castArray } from 'lodash';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityDefinitionWithState } from '../../server/lib/entities/types';
 import {
   DisableManagedEntityResponse,
@@ -106,12 +105,12 @@ export class EntityClient {
     }
   }
 
-  asKqlFilter(
-    entityInstance: {
-      entity: Pick<EntityInstance['entity'], 'identity_fields'>;
-    } & Required<EntityMetadata>
-  ) {
-    const identityFieldsValue = this.getIdentityFieldsValue(entityInstance);
+  asKqlFilter({
+    entity,
+  }: {
+    entity: { [key: string]: any } & { entityIdentityFields: { [key: string]: string[] } };
+  }) {
+    const identityFieldsValue = this.getIdentityFieldsValue({ entity });
 
     const nodes: KueryNode[] = Object.entries(identityFieldsValue).map(([identityField, value]) => {
       return nodeTypes.function.buildNode('is', identityField, `"${value}"`);
@@ -124,26 +123,22 @@ export class EntityClient {
     return toKqlExpression(kqlExpression);
   }
 
-  getIdentityFieldsValue(
-    entityInstance: {
-      entity: Pick<EntityInstance['entity'], 'identity_fields'>;
-    } & Required<EntityMetadata>
-  ) {
-    const { identity_fields: identityFields } = entityInstance.entity;
-
-    if (!identityFields) {
+  getIdentityFieldsValue({
+    entity,
+  }: {
+    entity: { [key: string]: any } & { entityIdentityFields: { [key: string]: string[] } };
+  }): Record<string, any> {
+    const { entityIdentityFields: identityFields } = entity;
+    if (!Object.keys(identityFields || {}).length) {
       throw new Error('Identity fields are missing');
     }
 
-    return castArray(identityFields).reduce((acc, field) => {
-      const value = field.split('.').reduce((obj: any, part: string) => {
-        return obj && typeof obj === 'object' ? (obj as Record<string, any>)[part] : undefined;
-      }, entityInstance);
-
-      if (value) {
-        acc[field] = value;
-      }
-
+    return Object.values(identityFields).reduce((acc: Record<string, any>, fields) => {
+      fields.forEach((field) => {
+        if (entity?.[field]) {
+          acc[field] = entity[field];
+        }
+      });
       return acc;
     }, {} as Record<string, string>);
   }

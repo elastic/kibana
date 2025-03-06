@@ -6,20 +6,31 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { AIAssistantAppService, useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
+import {
+  AIAssistantAppService,
+  useAIAssistantAppService,
+  ChatFlyout,
+  FlyoutPositionMode,
+} from '@kbn/ai-assistant';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useKibana } from '../../hooks/use_kibana';
-import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 import { useNavControlScope } from '../../hooks/use_nav_control_scope';
+import { useLocalStorage } from '../../hooks/use_local_storage';
 
 interface NavControlWithProviderDeps {
   appService: AIAssistantAppService;
@@ -62,10 +73,20 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     },
   } = useKibana();
 
-  const [hasBeenOpened, setHasBeenOpened] = useState(false);
-
   useNavControlScreenContext();
   useNavControlScope();
+
+  const [flyoutSettings, setFlyoutSettings] = useLocalStorage(
+    'observabilityAIAssistant.flyoutSettings',
+    {
+      mode: FlyoutPositionMode.OVERLAY,
+      isOpen: false,
+    }
+  );
+
+  const [isOpen, setIsOpen] = useState(flyoutSettings.isOpen);
+  const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
+  const keyRef = useRef(v4());
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -90,21 +111,18 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     [service, hasBeenOpened, notifications.toasts]
   );
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const keyRef = useRef(v4());
-
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       keyRef.current = v4();
       setHasBeenOpened(true);
+      setFlyoutSettings((prev) => ({ ...prev, isOpen: true }));
       setIsOpen(true);
     });
 
     return () => {
       conversationSubscription.unsubscribe();
     };
-  }, [service.conversations.predefinedConversation$]);
+  }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
@@ -113,16 +131,6 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     title: undefined,
     hideConversationList: false,
   };
-
-  const theme = useTheme();
-
-  const buttonCss = css`
-    padding: 0px 8px;
-
-    svg path {
-      fill: ${theme.colors.darkestShade};
-    }
-  `;
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -140,44 +148,45 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     };
   }, [service.conversations]);
 
+  const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
+
+  const buttonContent: React.ReactNode = (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <AssistantIcon size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
+          defaultMessage: 'AI Assistant',
+        })}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <>
-      <EuiToolTip content={buttonLabel}>
-        {isServerless ? (
-          <EuiButtonEmpty
-            aria-label={buttonLabel}
-            data-test-subj="observabilityAiAssistantAppNavControlButton"
-            css={css`
-              padding: 0px 8px;
-            `}
-            onClick={() => {
-              service.conversations.openNewConversation({
-                messages: [],
-              });
-            }}
-            color="primary"
-            size="s"
-          >
-            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
-          </EuiButtonEmpty>
-        ) : (
-          <EuiButton
-            aria-label={buttonLabel}
-            data-test-subj="observabilityAiAssistantAppNavControlButton"
-            css={buttonCss}
-            onClick={() => {
-              service.conversations.openNewConversation({
-                messages: [],
-              });
-            }}
-            color="primary"
-            size="s"
-            fullWidth={false}
-            minWidth={0}
-          >
-            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
-          </EuiButton>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
+          { defaultMessage: 'Keyboard shortcut Ctrl ;' }
         )}
+      >
+        <EuiButtonBasicOrEmpty
+          aria-label={i18n.translate(
+            'xpack.observabilityAiAssistant.navControl.assistantNavLinkAriaLabel',
+            { defaultMessage: 'Open the AI Assistant' }
+          )}
+          data-test-subj="observabilityAiAssistantAppNavControlButton"
+          onClick={() => {
+            service.conversations.openNewConversation({
+              messages: [],
+            });
+          }}
+          color="primary"
+          size="s"
+        >
+          {chatService.loading ? <EuiLoadingSpinner size="s" /> : buttonContent}
+        </EuiButtonBasicOrEmpty>
       </EuiToolTip>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
@@ -186,8 +195,13 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             isOpen={isOpen}
             initialMessages={messages}
             initialTitle={title ?? ''}
+            initialFlyoutPositionMode={flyoutSettings.mode}
             onClose={() => {
+              setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
               setIsOpen(false);
+            }}
+            onFlyoutPositionModeChange={(next) => {
+              setFlyoutSettings((prev) => ({ ...prev, mode: next }));
             }}
             navigateToConversation={(conversationId?: string) => {
               application.navigateToUrl(
@@ -203,8 +217,3 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     </>
   );
 }
-
-const buttonLabel = i18n.translate(
-  'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
-  { defaultMessage: 'Open the AI Assistant' }
-);

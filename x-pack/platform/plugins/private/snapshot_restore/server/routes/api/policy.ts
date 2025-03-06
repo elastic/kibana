@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
@@ -21,7 +20,16 @@ export function registerPolicyRoutes({
 }: RouteDependencies) {
   // GET all policies
   router.get(
-    { path: addBasePath('policies'), validate: false },
+    {
+      path: addBasePath('policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -38,7 +46,7 @@ export function registerPolicyRoutes({
           body: {
             policies: Object.entries(policiesByName).map(([name, policy]) => {
               // TODO: Figure out why our {@link SlmPolicyEs} is not compatible with:
-              // import type { SnapshotLifecyclePolicyMetadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+              // import type { SnapshotLifecyclePolicyMetadata } from '@elastic/elasticsearch/lib/api/types';
               return deserializePolicy(name, policy as SlmPolicyEs, managedPolicies);
             }),
           },
@@ -51,7 +59,16 @@ export function registerPolicyRoutes({
 
   // GET one policy
   router.get(
-    { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policy/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -101,9 +118,9 @@ export function registerPolicyRoutes({
       try {
         // Otherwise create new policy
         const response = await clusterClient.asCurrentUser.slm.putLifecycle({
+          // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest}
+          ...serializePolicy(policy),
           policy_id: name,
-          // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest['body']}
-          body: serializePolicy(policy) as unknown as estypes.SlmPutLifecycleRequest['body'],
         });
 
         return res.ok({ body: response });
@@ -131,9 +148,9 @@ export function registerPolicyRoutes({
 
         // Otherwise update policy
         const response = await clusterClient.asCurrentUser.slm.putLifecycle({
+          // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest}
+          ...serializePolicy(policy),
           policy_id: name,
-          // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest['body']}
-          body: serializePolicy(policy) as unknown as estypes.SlmPutLifecycleRequest['body'],
         });
 
         return res.ok({ body: response });
@@ -279,11 +296,9 @@ export function registerPolicyRoutes({
 
       try {
         const response = await clusterClient.asCurrentUser.cluster.putSettings({
-          body: {
-            persistent: {
-              slm: {
-                retention_schedule: retentionSchedule,
-              },
+          persistent: {
+            slm: {
+              retention_schedule: retentionSchedule,
             },
           },
         });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
+import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import { TOTAL_INDEX_PRIVILEGE_SET_EDITOR } from '@kbn/slo-plugin/server/services/get_diagnosis';
 import {
   CreateSLOInput,
@@ -110,7 +110,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
           .send()
           .expect(204);
       }
-      await waitForIndexToBeEmpty({ esClient, indexName: SLO_SUMMARY_DESTINATION_INDEX_NAME });
+      await waitForIndexToBeEmpty({ esClient, indexName: SUMMARY_DESTINATION_INDEX_NAME });
     },
     async fetchHistoricalSummary(
       params: FetchHistoricalSummaryParams

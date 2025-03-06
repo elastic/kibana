@@ -177,6 +177,9 @@ describe('Endpoint Authz service', () => {
       ['canReadBlocklist', 'readBlocklist'],
       ['canWriteEventFilters', 'writeEventFilters'],
       ['canReadEventFilters', 'readEventFilters'],
+      ['canReadWorkflowInsights', 'readWorkflowInsights'],
+      ['canWriteWorkflowInsights', 'writeWorkflowInsights'],
+      ['canManageGlobalArtifacts', 'writeGlobalArtifacts'],
     ])('%s should be true if `packagePrivilege.%s` is `true`', (auth) => {
       const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
       expect(authz[auth]).toBe(true);
@@ -216,6 +219,9 @@ describe('Endpoint Authz service', () => {
       ['canReadBlocklist', ['readBlocklist']],
       ['canWriteEventFilters', ['writeEventFilters']],
       ['canReadEventFilters', ['readEventFilters']],
+      ['canWriteWorkflowInsights', ['writeWorkflowInsights']],
+      ['canReadWorkflowInsights', ['readWorkflowInsights']],
+      ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
     ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
@@ -265,6 +271,9 @@ describe('Endpoint Authz service', () => {
       ['canReadBlocklist', ['readBlocklist']],
       ['canWriteEventFilters', ['writeEventFilters']],
       ['canReadEventFilters', ['readEventFilters']],
+      ['canWriteWorkflowInsights', ['writeWorkflowInsights']],
+      ['canReadWorkflowInsights', ['readWorkflowInsights']],
+      ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
     ])(
@@ -333,8 +342,11 @@ describe('Endpoint Authz service', () => {
         canWriteExecuteOperations: false,
         canWriteScanOperations: false,
         canWriteFileOperations: false,
+        canManageGlobalArtifacts: false,
         canWriteTrustedApplications: false,
+        canWriteWorkflowInsights: false,
         canReadTrustedApplications: false,
+        canReadWorkflowInsights: false,
         canWriteHostIsolationExceptions: false,
         canAccessHostIsolationExceptions: false,
         canReadHostIsolationExceptions: false,

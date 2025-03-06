@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { mockAttributes } from './mocks';
 import { DEFAULT_ACTIONS, useActions } from './use_actions';
@@ -51,7 +51,7 @@ jest.mock('../../lib/kibana/kibana_react', () => {
             addWarning: jest.fn(),
           },
         },
-        application: { capabilities: { visualize: { save: true } } },
+        application: { capabilities: { visualize_v2: { save: true } } },
       },
     }),
   };

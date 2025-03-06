@@ -6,6 +6,7 @@
  */
 
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -61,6 +62,7 @@ const mockKibana = () => {
         basePath: {
           prepend: jest.fn(),
         },
+        get: jest.fn().mockReturnValue({ alertContext: [] }),
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
@@ -82,7 +84,9 @@ jest.mock('../../hooks/use_fetch_rule', () => {
   };
 });
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/ebt-tools');
 
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useLocationMock = useLocation as jest.Mock;
@@ -90,8 +94,9 @@ const useHistoryMock = useHistory as jest.Mock;
 const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 
-const chance = new Chance();
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
+const chance = new Chance();
 const params = {
   alertId: chance.guid(),
 };

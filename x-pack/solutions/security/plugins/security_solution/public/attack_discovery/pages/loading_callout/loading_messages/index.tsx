@@ -8,32 +8,56 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
+
 import React from 'react';
 
-import { useKibana } from '../../../../common/lib/kibana';
+import { useDateFormat, useKibana } from '../../../../common/lib/kibana';
+import { getFormattedDate } from './get_formatted_time';
 import { getLoadingCalloutAlertsCount } from './get_loading_callout_alerts_count';
+import { getLoadingMessage } from './get_loading_message';
 import * as i18n from '../translations';
 
 const TEXT_COLOR = '#343741';
 
 interface Props {
   alertsContextCount: number | null;
+  end?: string | null;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  start?: string | null;
 }
 
 const LoadingMessagesComponent: React.FC<Props> = ({
   alertsContextCount,
+  end,
   localStorageAttackDiscoveryMaxAlerts,
+  start,
 }) => {
   const { theme } = useKibana().services;
+  const dateFormat = useDateFormat();
 
-  const isDarkMode = theme.getTheme().darkMode === true;
+  const formattedStart = getFormattedDate({
+    date: start,
+    dateFormat,
+  });
+
+  const formattedEnd = getFormattedDate({
+    date: end,
+    dateFormat,
+  });
 
   const alertsCount = getLoadingCalloutAlertsCount({
     alertsContextCount,
     defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
     localStorageAttackDiscoveryMaxAlerts,
   });
+
+  const loadingMessage = getLoadingMessage({
+    alertsCount,
+    end: formattedEnd,
+    start: formattedStart,
+  });
+
+  const isDarkMode = theme.getTheme().darkMode === true;
 
   return (
     <EuiFlexGroup data-test-subj="loadingMessages" direction="column" gutterSize="none">
@@ -59,7 +83,7 @@ const LoadingMessagesComponent: React.FC<Props> = ({
           data-test-subj="aisCurrentlyAnalyzing"
           size="s"
         >
-          {i18n.AI_IS_CURRENTLY_ANALYZING(alertsCount)}
+          {loadingMessage}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

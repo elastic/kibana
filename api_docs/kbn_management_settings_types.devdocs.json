@@ -32,13 +32,7 @@
                 "text": "FieldDefinition"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>[]; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/category.ts",
@@ -172,13 +166,7 @@
               "\nDeprecation information for the field"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.DeprecationSettings",
-                "text": "DeprecationSettings"
-              },
+              "DeprecationSettings",
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
@@ -412,6 +400,25 @@
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.solution",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "solution",
+            "description": [
+              "The solution where this setting is applicable.\nIf undefined, the setting must be displayed in all solutions."
+            ],
+            "signature": [
+              "UiSettingsSolution",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -536,13 +543,7 @@
                 "text": "FieldDefinition"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: ",
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -1719,21 +1720,9 @@
           "\nCreating this type based on {@link UiSettingsClientCommon} and exporting for ease."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.PublicUiSettingsParams",
-            "text": "PublicUiSettingsParams"
-          },
+          "PublicUiSettingsParams",
           " & ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UserProvidedValues",
-            "text": "UserProvidedValues"
-          },
+          "UserProvidedValues",
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
@@ -1847,13 +1836,7 @@
             "text": "UnsavedFieldChange"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">; }"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",

@@ -14,7 +14,6 @@ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
 import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { formatRiskScore } from '../../../../common';
@@ -26,19 +25,14 @@ import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributi
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
-import type { HostRiskScore, UserRiskScore } from '../../../../../../common/search_strategy';
-import {
-  buildHostNamesFilter,
-  buildUserNamesFilter,
-  isUserRiskScore,
-} from '../../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
+import type { EntityRiskScore, EntityType } from '../../../../../../common/search_strategy';
+import { buildEntityNameFilter } from '../../../../../../common/search_strategy';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
 
-export interface RiskInputsTabProps extends Record<string, unknown> {
-  entityType: RiskScoreEntity;
+export interface RiskInputsTabProps<T extends EntityType> {
+  entityType: T;
   entityName: string;
   scopeId: string;
 }
@@ -51,16 +45,16 @@ const FIRST_RECORD_PAGINATION = {
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
-export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTabProps) => {
+export const RiskInputsTab = <T extends EntityType>({
+  entityType,
+  entityName,
+  scopeId,
+}: RiskInputsTabProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
-    if (entityType === RiskScoreEntity.host) {
-      return buildHostNamesFilter([entityName]);
-    } else if (entityType === RiskScoreEntity.user) {
-      return buildUserNamesFilter([entityName]);
-    }
+    return buildEntityNameFilter(entityType, [entityName]);
   }, [entityName, entityType]);
 
   const {
@@ -69,7 +63,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
     loading: loadingRiskScore,
     inspect: inspectRiskScore,
     refetch,
-  } = useRiskScore({
+  } = useRiskScore<T>({
     riskEntity: entityType,
     filterQuery: nameFilterQuery,
     onlyLatest: false,
@@ -88,7 +82,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
 
-  const alerts = useRiskContributingAlerts({ riskScore });
+  const alerts = useRiskContributingAlerts<T>({ riskScore, entityType });
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -98,26 +92,20 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
     }),
     []
   );
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const inputColumns: Array<EuiBasicTableColumn<InputAlert>> = useMemo(
     () => [
-      ...(isPreviewEnabled
-        ? [
-            {
-              render: (data: InputAlert) => (
-                <AlertPreviewButton
-                  id={data._id}
-                  indexName={data.input.index}
-                  scopeId={scopeId}
-                  data-test-subj={EXPAND_ALERT_TEST_ID}
-                />
-              ),
-              width: '5%',
-            },
-          ]
-        : []),
-
+      {
+        render: (data: InputAlert) => (
+          <AlertPreviewButton
+            id={data._id}
+            indexName={data.input.index}
+            scopeId={scopeId}
+            data-test-subj={EXPAND_ALERT_TEST_ID}
+          />
+        ),
+        width: '5%',
+      },
       {
         name: (
           <FormattedMessage
@@ -172,7 +160,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
         render: formatContribution,
       },
     ],
-    [isPreviewEnabled, scopeId]
+    [scopeId]
   );
 
   if (riskScoreError) {
@@ -219,13 +207,17 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
         itemId="_id"
       />
       <EuiSpacer size="s" />
-      <ExtraAlertsMessage riskScore={riskScore} alerts={alerts} />
+      <ExtraAlertsMessage<T> riskScore={riskScore} alerts={alerts} entityType={entityType} />
     </>
   );
 
   return (
     <>
-      <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
+      <ContextsSection<T>
+        loading={loadingRiskScore}
+        riskScore={riskScore}
+        entityType={entityType}
+      />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
     </>
@@ -234,27 +226,27 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
 
 RiskInputsTab.displayName = 'RiskInputsTab';
 
-const ContextsSection: React.FC<{
-  riskScore?: UserRiskScore | HostRiskScore;
+interface ContextsSectionProps<T extends EntityType> {
+  riskScore?: EntityRiskScore<T>;
+  entityType: T;
   loading: boolean;
-}> = ({ riskScore, loading }) => {
+}
+
+const ContextsSection = <T extends EntityType>({
+  riskScore,
+  loading,
+  entityType,
+}: ContextsSectionProps<T>) => {
   const criticality = useMemo(() => {
     if (!riskScore) {
       return undefined;
     }
 
-    if (isUserRiskScore(riskScore)) {
-      return {
-        level: riskScore.user.risk.criticality_level,
-        contribution: riskScore.user.risk.category_2_score,
-      };
-    }
-
     return {
-      level: riskScore.host.risk.criticality_level,
-      contribution: riskScore.host.risk.category_2_score,
+      level: riskScore[entityType].risk.criticality_level,
+      contribution: riskScore[entityType].risk.category_2_score,
     };
-  }, [riskScore]);
+  }, [entityType, riskScore]);
 
   if (loading || criticality === undefined) {
     return null;
@@ -341,16 +333,23 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
   },
 ];
 
-interface ExtraAlertsMessageProps {
-  riskScore?: UserRiskScore | HostRiskScore;
+interface ExtraAlertsMessageProps<T extends EntityType> {
+  riskScore?: EntityRiskScore<T>;
   alerts: UseRiskContributingAlertsResult;
+  entityType: T;
 }
-const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, alerts }) => {
+
+const ExtraAlertsMessage = <T extends EntityType>({
+  riskScore,
+  alerts,
+  entityType,
+}: ExtraAlertsMessageProps<T>) => {
   const totals = !riskScore
     ? { count: 0, score: 0 }
-    : isUserRiskScore(riskScore)
-    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
-    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+    : {
+        count: riskScore[entityType].risk.category_1_count,
+        score: riskScore[entityType].risk.category_1_score,
+      };
 
   const displayed = {
     count: alerts.data?.length || 0,

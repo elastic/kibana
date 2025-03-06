@@ -33,6 +33,12 @@ export const registerUpdateRoute = ({
   router.put(
     {
       path: addBasePath('/auto_follow_patterns/{id}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
         body: bodySchema,
@@ -46,7 +52,7 @@ export const registerUpdateRoute = ({
       try {
         const responseBody = await client.asCurrentUser.ccr.putAutoFollowPattern({
           name: id,
-          body,
+          ...body,
         });
 
         return response.ok({

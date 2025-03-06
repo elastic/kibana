@@ -30,8 +30,8 @@ const checkPropertySpecifiesInvalidCSSColor = ([property, value]: string[]) => {
 
   const style = new CSSStyleDeclaration();
 
-  // @ts-ignore the types for this packages specifics an index signature of number, alongside other valid CSS properties
-  style[property] = value;
+  // @ts-ignore the types for this packages specifies an index signature of number, alongside other valid CSS properties
+  style[property.trim()] = typeof value === 'string' ? value.trim() : value;
 
   const anchor = propertiesSupportingCssColor.find((resolvedProperty) =>
     property.includes(resolvedProperty)
@@ -42,9 +42,9 @@ const checkPropertySpecifiesInvalidCSSColor = ([property, value]: string[]) => {
   // build the resolved color property to check if the value is a string after parsing the style declaration
   const resolvedColorProperty = anchor === 'color' ? 'color' : anchor + 'Color';
 
-  // in trying to keep this rule simple, it's enough if a string is used to define a color to mark it as invalid
+  // in trying to keep this rule simple, it's enough if we get a value back, because if it was an identifier we would have been able to set a value within this invocation
   // @ts-ignore the types for this packages specifics an index signature of number, alongside other valid CSS properties
-  return typeof style[resolvedColorProperty] === 'string';
+  return Boolean(style[resolvedColorProperty]);
 };
 
 const resolveMemberExpressionRoot = (node: TSESTree.MemberExpression): TSESTree.Identifier => {

@@ -32,7 +32,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         }
       );
     } catch (err) {
-      this.logger.error(`Cannot create summary transform for SLO [${slo.id}]`);
+      this.logger.debug(`Cannot create summary transform for SLO [${slo.id}]. ${err}`);
       if (err.meta?.body?.error?.type === 'security_exception') {
         throw new SecurityException(err.meta.body.error.reason);
       }
@@ -57,7 +57,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot preview SLO summary transform [${transformId}]`);
+      this.logger.debug(`Cannot preview SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -75,7 +75,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         }
       );
     } catch (err) {
-      this.logger.error(`Cannot start SLO summary transform [${transformId}]`);
+      this.logger.debug(`Cannot start SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -91,7 +91,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot stop SLO summary transform [${transformId}]`);
+      this.logger.debug(`Cannot stop SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -107,7 +107,24 @@ export class DefaultSummaryTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot delete SLO summary transform [${transformId}]`);
+      this.logger.debug(`Cannot delete SLO summary transform [${transformId}]. ${err}`);
+      throw err;
+    }
+  }
+
+  async getVersion(transformId: TransformId): Promise<number | undefined> {
+    try {
+      const response = await retryTransientEsErrors(
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
+            { transform_id: transformId },
+            { ignore: [404] }
+          ),
+        { logger: this.logger }
+      );
+      return response?.transforms[0]?._meta?.version;
+    } catch (err) {
+      this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }
   }

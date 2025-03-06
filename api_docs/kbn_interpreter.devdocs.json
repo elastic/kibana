@@ -35,7 +35,7 @@
           },
           "<ItemSpec, Item>"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,7 +63,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -81,7 +81,7 @@
             "signature": [
               "(obj: ItemSpec) => Item"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -95,7 +95,7 @@
                 "signature": [
                   "ItemSpec"
                 ],
-                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -113,7 +113,7 @@
             "signature": [
               "(fn: () => ItemSpec) => void"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -127,7 +127,7 @@
                 "signature": [
                   "() => ItemSpec"
                 ],
-                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -145,7 +145,7 @@
             "signature": [
               "() => { [key: string]: any; }"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -161,7 +161,7 @@
             "signature": [
               "() => Item[]"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -177,7 +177,7 @@
             "signature": [
               "(name: string) => Item"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -191,7 +191,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -209,7 +209,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -225,7 +225,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -248,7 +248,7 @@
         "signature": [
           "(registries: any, newRegistries: any) => any"
         ],
-        "path": "packages/kbn-interpreter/src/common/registries.js",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,7 +264,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -281,7 +281,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -300,7 +300,7 @@
         "signature": [
           "(types: any) => (node: any, toTypeNames: any) => any"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/cast.js",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/cast.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -314,7 +314,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/cast.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/cast.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -333,7 +333,7 @@
         "signature": [
           "(config: any) => void"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/fn.js",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/fn.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,7 +347,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/fn.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/fn.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -373,7 +373,7 @@
             "text": "Ast"
           }
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/from_expression.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -387,7 +387,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/from_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -402,7 +402,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/from_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -423,7 +423,7 @@
         "signature": [
           "(specs: any, name: any) => any"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/get_by_alias.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -437,7 +437,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/get_by_alias.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -452,7 +452,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/get_by_alias.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -471,7 +471,7 @@
         "signature": [
           "(node: any) => string"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/get_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -485,7 +485,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/get_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -504,7 +504,7 @@
         "signature": [
           "(value: any) => boolean"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -518,7 +518,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -537,7 +537,7 @@
         "signature": [
           "(value: any) => boolean"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -551,7 +551,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -572,7 +572,7 @@
         "signature": [
           "(registries: any, specs: any) => any"
         ],
-        "path": "packages/kbn-interpreter/src/common/registries.js",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -588,7 +588,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -605,7 +605,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -626,7 +626,7 @@
         "signature": [
           "(registries: any) => { registries(): any; register(specs: any): any; }"
         ],
-        "path": "packages/kbn-interpreter/src/common/registries.js",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -642,7 +642,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -668,7 +668,7 @@
             "text": "Ast"
           }
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -682,7 +682,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -709,7 +709,7 @@
           },
           ", options: string | Options) => string"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/to_expression.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -729,7 +729,7 @@
                 "text": "AstNode"
               }
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/to_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -744,7 +744,7 @@
             "signature": [
               "string | Options"
             ],
-            "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
+            "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/to_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -765,7 +765,7 @@
           "ParserOptions",
           " | undefined) => any"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/parse.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -777,7 +777,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "path": "src/platform/packages/private/kbn-ambient-common-types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +792,7 @@
               "ParserOptions",
               " | undefined"
             ],
-            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "path": "src/platform/packages/private/kbn-ambient-common-types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -821,7 +821,7 @@
           },
           "[]; }"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -843,7 +843,7 @@
             "text": "Ast"
           }
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -865,7 +865,7 @@
           },
           " | WithMeta<string> | WithMeta<number> | WithMeta<false> | WithMeta<true>"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -888,7 +888,7 @@
           },
           "[]>; }"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -919,7 +919,7 @@
           },
           "[]; }; }>>"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -948,7 +948,7 @@
             "text": "AstArgument"
           }
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -979,7 +979,7 @@
           },
           "[]; }>>"
         ],
-        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "path": "src/platform/packages/shared/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

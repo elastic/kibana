@@ -164,16 +164,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'ml:modelManagement',
       });
       // > Management
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'management',
-      });
+      await solutionNavigation.sidenav.clickLink({ navId: 'management' });
+      await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
@@ -206,9 +200,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate management', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management']);
-      await testSubjects.click('app-card-dataViews');
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
     });
 
@@ -256,7 +253,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Users and roles' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
 
@@ -281,7 +277,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'project_settings_project_nav',
         'ml:modelManagement',
         'management',
-        'cloudLinkUserAndRoles',
         'cloudLinkDeployment',
         'cloudLinkBilling',
       ]);

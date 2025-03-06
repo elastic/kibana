@@ -114,13 +114,13 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n-react',
           disallowedMessage: `import from @kbn/i18n-react instead`,
-          exclude: [/packages[\/\\]kbn-i18n-react[\/\\]/],
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-i18n-react/],
         },
         {
           from: 'zod',
           to: '@kbn/zod',
           disallowedMessage: `import from @kbn/zod instead`,
-          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
         },
         {
           from: 'styled-components',
@@ -322,6 +322,7 @@ module.exports = {
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_deprecated_authz_config': 'error',
+    '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',

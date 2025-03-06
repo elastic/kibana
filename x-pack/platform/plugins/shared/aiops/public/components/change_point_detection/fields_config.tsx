@@ -56,6 +56,7 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 
 const selectControlCss = { width: '350px' };
 
@@ -187,7 +188,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [isDashboardFormValid, setIsDashboardFormValid] = useState(true);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
     create: false,
     update: false,
@@ -215,11 +216,17 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
-  const openCasesModalCallback = useCasesModal(EMBEDDABLE_CHANGE_POINT_CHART_TYPE);
-
   const selectedPartitions = useMemo(() => {
     return (selectedChangePoints[panelIndex] ?? []).map((v) => v.group?.value as string);
   }, [selectedChangePoints, panelIndex]);
+
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    CASES_TOAST_MESSAGES_TITLES.CHANGE_POINT_DETECTION(
+      caseAttachment.viewType,
+      selectedPartitions.length
+    )
+  );
 
   const caseAttachmentButtonDisabled =
     isDefined(fieldConfig.splitField) && selectedPartitions.length === 0;
@@ -283,6 +290,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     defaultMessage: 'To dashboard',
                   }),
                   panel: 'attachToDashboardPanel',
+                  icon: 'dashboardApp',
                   'data-test-subj': 'aiopsChangePointDetectionAttachToDashboardButton',
                 },
               ]
@@ -307,6 +315,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     : {}),
                   'data-test-subj': 'aiopsChangePointDetectionAttachToCaseButton',
                   panel: 'attachToCasePanel',
+                  icon: 'casesApp',
                 },
               ]
             : []),
@@ -513,42 +522,37 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   return (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
-      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
+      <EuiFlexGroup alignItems={'flexStart'} justifyContent={'spaceBetween'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-                aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
-                  defaultMessage: 'Expand configuration',
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
-                <EuiFlexItem
-                  css={{ visibility: progress === null ? 'hidden' : 'visible' }}
-                  grow={true}
-                >
-                  <EuiProgress
-                    label={
-                      <FormattedMessage
-                        id="xpack.aiops.changePointDetection.progressBarLabel"
-                        defaultMessage="Fetching change points"
-                      />
-                    }
-                    value={progress ?? 0}
-                    max={100}
-                    valueText
-                    size="m"
+          <EuiButtonIcon
+            data-test-subj="aiopsChangePointDetectionExpandConfigButton"
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+            aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
+              defaultMessage: 'Expand configuration',
+            })}
+            size="s"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <FieldsControls fieldConfig={fieldConfig} onChange={onChange} data-test-subj="blablabla">
+            <EuiFlexItem {...(progress === null && { css: { display: 'none' } })} grow={true}>
+              <EuiProgress
+                label={
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.progressBarLabel"
+                    defaultMessage="Fetching change points"
                   />
-                  <EuiSpacer size="s" />
-                </EuiFlexItem>
-              </FieldsControls>
+                }
+                value={progress ?? 0}
+                max={100}
+                valueText
+                size="m"
+              />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </FieldsControls>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -565,8 +569,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         defaultMessage: 'Context menu',
                       }
                     )}
-                    iconType="boxesHorizontal"
                     color="text"
+                    display="base"
+                    size="s"
+                    isSelected={isActionMenuOpen}
+                    iconType="boxesHorizontal"
                     onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
                   />
                 }
@@ -638,7 +645,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
 }) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
-  const { data, uiSettings, fieldFormats, charts, fieldStats, theme } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
   const timefilter = useTimefilter();
   // required in order to trigger state updates
   useTimeRangeUpdates();
@@ -677,9 +684,8 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
             }
           : undefined
       }
-      theme={theme}
     >
-      <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
+      <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>

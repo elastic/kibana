@@ -21,12 +21,12 @@ import {
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
 } from '../../shared/constants/field_names';
-import { useSessionPreview } from '../../right/hooks/use_session_preview';
+import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../right/hooks/use_session_preview');
+jest.mock('../../shared/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../sourcerer/containers');
 
@@ -80,7 +80,7 @@ const renderSessionView = (contextValue: DocumentDetailsContext = mockContextVal
 
 describe('<SessionView />', () => {
   beforeEach(() => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
     jest.mocked(useSourcererDataView).mockReturnValue({
       browserFields: {},
@@ -120,7 +120,7 @@ describe('<SessionView />', () => {
 
   it('should render error message and text in header if no sessionConfig', () => {
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-    (useSessionPreview as jest.Mock).mockReturnValue(null);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(null);
 
     const { getByTestId } = renderSessionView();
     expect(getByTestId(SESSION_VIEW_NO_DATA_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);

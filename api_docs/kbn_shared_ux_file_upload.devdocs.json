@@ -21,7 +21,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
                 "text": "FileUploadProps"
               }
             ],
-            "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,7 +69,7 @@
           },
           "<Meta>"
         ],
-        "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,7 +80,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -91,7 +91,7 @@
             "tags": [],
             "label": "kind",
             "description": [],
-            "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,7 +112,7 @@
               },
               "<Meta>"
             ],
-            "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -133,7 +133,7 @@
           "Props",
           "<string> & { lazyLoadFallback?: React.ReactNode; }"
         ],
-        "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

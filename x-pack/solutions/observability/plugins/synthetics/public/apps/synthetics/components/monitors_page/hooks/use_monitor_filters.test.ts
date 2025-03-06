@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as redux from 'react-redux';

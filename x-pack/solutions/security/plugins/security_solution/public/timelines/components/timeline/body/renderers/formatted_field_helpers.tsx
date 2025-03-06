@@ -6,13 +6,12 @@
  */
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { isString, isEmpty } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { isEmpty, isString } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
-import React, { useCallback, useMemo, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -35,12 +34,7 @@ const EventModuleFlexItem = styled(EuiFlexItem)`
 interface RenderRuleNameProps {
   children?: React.ReactNode;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  contextId: string;
-  eventId: string;
   fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
   linkValue: string | null | undefined;
@@ -53,12 +47,7 @@ interface RenderRuleNameProps {
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   children,
   Component,
-  contextId,
-  eventId,
   fieldName,
-  fieldType,
-  isAggregatable,
-  isDraggable,
   isButton,
   onClick,
   linkValue,
@@ -111,7 +100,6 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       }),
     [getUrlForApp, ruleId, search]
   );
-  const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
   const link = useMemo(() => {
     const content = truncate ? (
       <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
@@ -178,37 +166,9 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   ]);
 
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
-    return isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        id={id}
-        isDraggable={isDraggable}
-        tooltipContent={value}
-        value={value}
-      >
-        {link}
-      </DefaultDraggable>
-    ) : (
-      link
-    );
+    return link;
   } else if (value != null) {
-    return isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        id={id}
-        isDraggable={isDraggable}
-        tooltipContent={value}
-        value={`${value}`}
-      >
-        {value}
-      </DefaultDraggable>
-    ) : (
-      <>{value}</>
-    );
+    return <>{value}</>;
   }
 
   return getEmptyTagValue();
@@ -222,22 +182,10 @@ const canYouAddEndpointLogo = (moduleName: string, endpointUrl: string | null | 
   endpointUrl.includes('/alerts/');
 
 export const renderEventModule = ({
-  contextId,
-  eventId,
-  fieldName,
-  fieldType,
-  isAggregatable,
-  isDraggable,
   linkValue,
   truncate,
   value,
 }: {
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
   value: string | number | null | undefined;
@@ -255,23 +203,7 @@ export const renderEventModule = ({
         endpointRefUrl != null && !isEmpty(endpointRefUrl) ? 'flexStart' : 'spaceBetween'
       }
     >
-      <EventModuleFlexItem>
-        {isDraggable ? (
-          <DefaultDraggable
-            field={fieldName}
-            id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
-            fieldType={fieldType}
-            isAggregatable={isAggregatable}
-            isDraggable={isDraggable}
-            tooltipContent={value}
-            value={value}
-          >
-            {content}
-          </DefaultDraggable>
-        ) : (
-          <>{content}</>
-        )}
-      </EventModuleFlexItem>
+      <EventModuleFlexItem>{content}</EventModuleFlexItem>
       {endpointRefUrl != null && canYouAddEndpointLogo(moduleName, endpointRefUrl) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -325,25 +257,13 @@ const GenericLinkComponent: React.FC<{
 const GenericLink = React.memo(GenericLinkComponent);
 
 export const renderUrl = ({
-  contextId,
   Component,
-  eventId,
-  fieldName,
-  fieldType,
-  isAggregatable,
-  isDraggable,
   truncate,
   title,
   value,
 }: {
-  contextId: string;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
@@ -364,23 +284,5 @@ export const renderUrl = ({
     <>{formattedValue}</>
   );
 
-  return isString(value) && urlName.length > 0 ? (
-    isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
-        isDraggable={isDraggable}
-        tooltipContent={value}
-        value={value}
-      >
-        {content}
-      </DefaultDraggable>
-    ) : (
-      content
-    )
-  ) : (
-    getEmptyTagValue()
-  );
+  return isString(value) && urlName.length > 0 ? content : getEmptyTagValue();
 };

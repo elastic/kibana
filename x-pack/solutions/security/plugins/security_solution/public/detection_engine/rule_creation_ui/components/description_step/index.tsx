@@ -55,7 +55,6 @@ import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
-import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
@@ -72,6 +71,15 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { THRESHOLD_VALUE_LABEL } from '../../../rule_creation/components/threshold_edit/translations';
+import { NEW_TERMS_FIELDS_LABEL } from '../../../rule_creation/components/new_terms_fields_edit/translations';
+import { HISTORY_WINDOW_START_LABEL } from '../../../rule_creation/components/history_window_start_edit/translations';
+import { MACHINE_LEARNING_JOB_ID_LABEL } from '../../../rule_creation/components/machine_learning_job_id_edit/translations';
+import { ANOMALY_THRESHOLD_LABEL } from '../../../rule_creation/components/anomaly_threshold_edit/translations';
+import { THREAT_MATCH_MAPPING_FIELD_LABEL } from '../../../rule_creation/components/threat_match_mapping_edit/translations';
+import { THREAT_MATCH_QUERY_FIELD_LABEL } from '../../../rule_creation/components/threat_match_query_edit/translations';
+import { THREAT_MATCH_INDEX_FIELD_LABEL } from '../../../rule_creation/components/threat_match_index_edit/translations';
+import { THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL } from '../../../rule_creation/components/threat_match_indicator_path_edit/translations';
 import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -106,10 +114,7 @@ export const StepRuleDescriptionComponent = <T,>({
     if (key === 'machineLearningJobId') {
       return [
         ...acc,
-        buildMlJobsDescription(
-          get(key, data) as string[],
-          (get(key, schema) as { label: string }).label
-        ),
+        buildMlJobsDescription(get(key, data) as string[], MACHINE_LEARNING_JOB_ID_LABEL),
       ];
     }
 
@@ -284,7 +289,7 @@ export const getDescriptionItem = (
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
   } else if (field === 'threshold') {
     const threshold = get(field, data);
-    return buildThresholdDescription(label, threshold);
+    return buildThresholdDescription(THRESHOLD_VALUE_LABEL, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);
@@ -325,22 +330,35 @@ export const getDescriptionItem = (
     return buildRuleTypeDescription(label, ruleType);
   } else if (field === 'kibanaSiemAppUrl') {
     return [];
+  } else if (field === 'threatIndex') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(THREAT_MATCH_INDEX_FIELD_LABEL, field, values);
   } else if (field === 'threatQueryBar') {
-    const filters = addFilterStateIfNotThere(get('threatQueryBar.filters', data) ?? []);
-    const query = get('threatQueryBar.query.query', data);
-    const savedId = get('threatQueryBar.saved_id', data);
+    const threatQueryBar = get('threatQueryBar', data) as FieldValueQueryBar;
+
     return buildQueryBarDescription({
       field,
-      filters,
+      filters: addFilterStateIfNotThere(threatQueryBar.filters ?? []),
       filterManager,
-      query,
-      savedId,
+      query: threatQueryBar.query.query as string,
+      queryLanguage: threatQueryBar.query.language,
+      savedId: threatQueryBar.saved_id ?? '',
       indexPatterns,
-      queryLabel: THREAT_QUERY_LABEL,
+      queryLabel: THREAT_MATCH_QUERY_FIELD_LABEL,
     });
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
-    return buildThreatMappingDescription(label, threatMap);
+    return buildThreatMappingDescription(THREAT_MATCH_MAPPING_FIELD_LABEL, threatMap);
+  } else if (field === 'threatIndicatorPath') {
+    return [
+      {
+        title: THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL,
+        description: get(field, data),
+      },
+    ];
+  } else if (field === 'newTermsFields') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(NEW_TERMS_FIELDS_LABEL, field, values);
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
@@ -357,6 +375,12 @@ export const getDescriptionItem = (
   } else if (field === 'maxSignals') {
     const value: number | undefined = get(field, data);
     return value ? [{ title: label, description: value }] : [];
+  } else if (field === 'anomalyThreshold') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: ANOMALY_THRESHOLD_LABEL, description: value }] : [];
+  } else if (field === 'historyWindowSize') {
+    const value: number = get(field, data);
+    return value ? [{ title: HISTORY_WINDOW_START_LABEL, description: value }] : [];
   }
 
   const description: string = get(field, data);

@@ -12,7 +12,7 @@ import { either } from 'fp-ts/lib/Either';
  * Checks whether a string is a valid ISO timestamp,
  * but doesn't convert it into a Date object when decoding.
  *
- * Copied from x-pack/plugins/observability_solution/apm/common/runtime_types/date_as_string_rt.ts.
+ * Copied from x-pack/solutions/observability/plugins/apm/common/runtime_types/date_as_string_rt.ts.
  */
 const dateAsStringRt = new t.Type<string, string, unknown>(
   'DateAsString',

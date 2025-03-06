@@ -6,11 +6,13 @@
  */
 
 import { journey, step, before, after } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanSettings } from './services/settings';
 
 journey('AlertingDefaults', async ({ page, params }) => {
+  recordVideo(page);
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   before(async () => {
@@ -39,6 +41,7 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.fill('input[type="text"]', 'Test slack');
     await page.press('input[type="text"]', 'Tab');
   });
+
   step(
     'Fill text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
     async () => {

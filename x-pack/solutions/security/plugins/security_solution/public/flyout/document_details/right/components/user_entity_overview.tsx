@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiLink,
   useEuiTheme,
   useEuiFontSize,
   EuiSkeletonText,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -33,7 +31,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { buildUserNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -61,8 +59,10 @@ import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 
 const USER_ICON = 'user';
+const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
 
 export interface UserEntityOverviewProps {
   /**
@@ -83,22 +83,7 @@ export const USER_PREVIEW_BANNER = {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
-
-  const goToEntitiesTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -127,8 +112,32 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     loading: isRiskScoreLoading,
   } = useRiskScore({
     filterQuery,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     timerange,
+  });
+  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    EntityIdentifierFields.userName,
+    userName
+  );
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: EntityIdentifierFields.userName,
+    value: userName,
+    to,
+    from,
+    queryId: USER_ENTITY_OVERVIEW_ID,
+  });
+
+  const { openDetailsPanel } = useNavigateToUserDetails({
+    userName,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true, // setting to true to always open a new user flyout
+    contextID: 'UserEntityOverview',
   });
 
   const userDomainValue = useMemo(
@@ -171,10 +180,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const [userRiskLevel] = useMemo(() => {
-    const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-
-    return [
+  const [userRiskLevel] = useMemo(
+    () => [
       {
         title: (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
@@ -194,8 +201,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           </>
         ),
       },
-    ];
-  }, [userRisk]);
+    ],
+    [userRiskData]
+  );
 
   return (
     <EuiFlexGroup
@@ -210,34 +218,21 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isPreviewEnabled ? (
-              <PreviewLink
-                field={USER_NAME_FIELD_NAME}
-                value={userName}
-                scopeId={scopeId}
-                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-              >
-                <EuiText
-                  css={css`
-                    font-size: ${xsFontSize};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {userName}
-                </EuiText>
-              </PreviewLink>
-            ) : (
-              <EuiLink
-                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+            <PreviewLink
+              field={USER_NAME_FIELD_NAME}
+              value={userName}
+              scopeId={scopeId}
+              data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+            >
+              <EuiText
                 css={css`
                   font-size: ${xsFontSize};
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
-                onClick={goToEntitiesTab}
               >
                 {userName}
-              </EuiLink>
-            )}
+              </EuiText>
+            </PreviewLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -277,13 +272,15 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       <AlertCountInsight
         fieldName={'user.name'}
         name={userName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
         fieldName={'user.name'}
         name={userName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
-        telemetrySuffix={'user-entity-overview'}
+        telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}
       />
     </EuiFlexGroup>
   );

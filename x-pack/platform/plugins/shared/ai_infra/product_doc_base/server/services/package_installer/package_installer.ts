@@ -14,8 +14,14 @@ import {
   type ProductName,
 } from '@kbn/product-doc-common';
 import type { ProductDocInstallClient } from '../doc_install_status';
-import type { InferenceEndpointManager } from '../inference_endpoint';
-import { downloadToDisk, openZipArchive, loadMappingFile, type ZipArchive } from './utils';
+import {
+  downloadToDisk,
+  openZipArchive,
+  loadMappingFile,
+  loadManifestFile,
+  ensureDefaultElserDeployed,
+  type ZipArchive,
+} from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
@@ -29,7 +35,6 @@ interface PackageInstallerOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   productDocClient: ProductDocInstallClient;
-  endpointManager: InferenceEndpointManager;
   artifactRepositoryUrl: string;
   kibanaVersion: string;
 }
@@ -39,7 +44,6 @@ export class PackageInstaller {
   private readonly artifactsFolder: string;
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
-  private readonly endpointManager: InferenceEndpointManager;
   private readonly artifactRepositoryUrl: string;
   private readonly currentVersion: string;
 
@@ -48,14 +52,12 @@ export class PackageInstaller {
     logger,
     esClient,
     productDocClient,
-    endpointManager,
     artifactRepositoryUrl,
     kibanaVersion,
   }: PackageInstallerOpts) {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
-    this.endpointManager = endpointManager;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
@@ -144,7 +146,7 @@ export class PackageInstaller {
         productVersion,
       });
 
-      await this.endpointManager.ensureInternalElserInstalled();
+      await ensureDefaultElserDeployed({ client: this.esClient });
 
       const artifactFileName = getArtifactName({ productName, productVersion });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
@@ -157,19 +159,25 @@ export class PackageInstaller {
 
       validateArtifactArchive(zipArchive);
 
-      const mappings = await loadMappingFile(zipArchive);
+      const [manifest, mappings] = await Promise.all([
+        loadManifestFile(zipArchive),
+        loadMappingFile(zipArchive),
+      ]);
 
+      const manifestVersion = manifest.formatVersion;
       const indexName = getProductDocIndexName(productName);
 
       await createIndex({
         indexName,
         mappings,
+        manifestVersion,
         esClient: this.esClient,
         log: this.log,
       });
 
       await populateIndex({
         indexName,
+        manifestVersion,
         archive: zipArchive,
         esClient: this.esClient,
         log: this.log,

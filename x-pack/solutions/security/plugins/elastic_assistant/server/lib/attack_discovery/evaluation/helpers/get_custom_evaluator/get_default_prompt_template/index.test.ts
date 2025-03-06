@@ -14,11 +14,11 @@ describe('getDefaultPromptTemplate', () => {
 [BEGIN rubric]
 1. Is the submission non-empty and not null?
 2. Is the submission well-formed JSON?
-3. Evaluate the value of the "detailsMarkdown" field of all the "attackDiscoveries" in the submission json. Do the values of "detailsMarkdown" in the submission capture the essence of the "expected response", regardless of the order in which they appear, and highlight the same incident(s)?
-4. Evaluate the value of the "entitySummaryMarkdown" field of all the "attackDiscoveries" in the submission json. Does the value of "entitySummaryMarkdown" in the submission mention at least 50% the same entities as in the "expected response"?
-5. Evaluate the value of the "summaryMarkdown" field of all the "attackDiscoveries" in the submission json. Do the values of "summaryMarkdown" in the submission at least partially similar to that of the "expected response", regardless of the order in which they appear, and summarize the same incident(s)?
-6. Evaluate the value of the "title" field of all the "attackDiscoveries" in the submission json. Are the "title" values in the submission at least partially similar to the tile(s) of the "expected response", regardless of the order in which they appear, and mention the same incident(s)?
-7. Evaluate the value of the "alertIds" field of all the "attackDiscoveries" in the submission json. Do they match at least 100% of the "alertIds" in the submission?
+3. Evaluate the "detailsMarkdown" field of all "attackDiscoveries" in the submission JSON. Do the values of "detailsMarkdown" in the submission capture the overall essence of the "expected response", regardless of the order in which they appear? Slight differences in details are acceptable as long as the overall intent and meaning remain consistent, and no key incidents are omitted or misrepresented.
+4. Evaluate the value of the "entitySummaryMarkdown" field of all the "attackDiscoveries" in the submission JSON. Does the submission mention at least half of the same entities (i.e. either host or user) as in the "expected response"?
+5. Evaluate the value of the "summaryMarkdown" field of all the "attackDiscoveries" in the submission JSON. Are the values of "summaryMarkdown" in the "submission" at least partially similar to that of the "expected response", regardless of the order in which they appear, and summarize the same incident(s)? Summarize each summary, and explain your answer with lettered steps.
+6. Evaluate the value of the "title" field of all the "attackDiscoveries" in the submission json. Are the "title" values in the submission at least partially similar to the title(s) of the "expected response", regardless of the order in which they appear, and mention the same incident(s)?
+7. Compare the submission json and the expected response json. Do over half of "alertIds" field in the "attackDiscoveries" in the submission .json overlap with the "alertsIds" field in the expected responses .json? Respond with yes or no.
 [END rubric]
 
 [BEGIN DATA]

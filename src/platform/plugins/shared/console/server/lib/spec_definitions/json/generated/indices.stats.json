@@ -34,7 +34,7 @@
       "{index}/_stats",
       "{index}/_stats/{metric}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-stats.html",
     "availability": {
       "stack": true,
       "serverless": false

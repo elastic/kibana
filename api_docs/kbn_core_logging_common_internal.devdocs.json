@@ -31,7 +31,7 @@
         "signature": [
           "(contextParts: string[]) => string"
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+            "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +70,7 @@
         "signature": [
           "(context: string) => string"
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +86,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+            "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
         "tags": [],
         "label": "BrowserLoggerConfig",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/browser_config.ts",
+        "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,7 +117,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/core/logging/core-logging-common-internal/src/browser_config.ts",
+            "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -131,7 +131,7 @@
             "signature": [
               "\"error\" | \"info\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/browser_config.ts",
+            "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -145,7 +145,7 @@
         "tags": [],
         "label": "Conversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,7 +159,7 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,7 +175,7 @@
               "LogRecord",
               ", highlight: boolean) => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -189,7 +189,7 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -204,7 +204,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -222,7 +222,7 @@
             "signature": [
               "((input: string) => void) | undefined"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -236,7 +236,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -262,7 +262,7 @@
         "signature": [
           "\".\""
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -279,7 +279,7 @@
         "signature": [
           "\"default\""
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -296,7 +296,7 @@
         "signature": [
           "\"root\""
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -310,7 +310,7 @@
         "tags": [],
         "label": "DateConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -324,7 +324,7 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,7 +340,7 @@
               "LogRecord",
               ", highlight: boolean, ...matched: any[]) => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -354,7 +354,7 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -369,7 +369,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -384,7 +384,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -402,7 +402,7 @@
             "signature": [
               "(rawString: string) => void"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -414,7 +414,7 @@
                 "tags": [],
                 "label": "rawString",
                 "description": [],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -430,7 +430,7 @@
         "tags": [],
         "label": "LevelConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -444,7 +444,7 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,7 +460,7 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -474,7 +474,7 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -492,7 +492,7 @@
         "tags": [],
         "label": "LoggerConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +506,7 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -522,7 +522,7 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -536,7 +536,7 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -554,7 +554,7 @@
         "tags": [],
         "label": "MessageConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -568,7 +568,7 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -584,7 +584,7 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -598,7 +598,7 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -616,7 +616,7 @@
         "tags": [],
         "label": "MetaConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -630,7 +630,7 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -646,7 +646,7 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -660,7 +660,7 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

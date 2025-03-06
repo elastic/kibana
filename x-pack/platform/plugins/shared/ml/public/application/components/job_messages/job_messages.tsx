@@ -66,7 +66,8 @@ export const JobMessages: FC<JobMessagesProps> = ({
           ''
         ),
         render: (message: JobMessage) => <JobIcon message={message} />,
-        width: `${euiTheme.size.l}`,
+        width: `${euiTheme.size.xl}`,
+        align: 'center',
       },
       {
         field: 'timestamp',
@@ -74,7 +75,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
           defaultMessage: 'Time',
         }),
         render: timeFormatter,
-        width: '120px',
+        width: '25%',
         sortable: true,
       },
       {
@@ -82,7 +83,6 @@ export const JobMessages: FC<JobMessagesProps> = ({
         name: i18n.translate('xpack.ml.jobMessages.messageLabel', {
           defaultMessage: 'Message',
         }),
-        width: '50%',
       },
     ];
 
@@ -92,7 +92,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
         name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
           defaultMessage: 'Node',
         }),
-        width: '150px',
+        width: '15%',
       });
     }
 
@@ -101,7 +101,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
         name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        width: '10%',
+        width: '15%',
         actions: [
           {
             render: (message: JobMessage) => {
@@ -131,7 +131,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
     }
 
     return cols;
-  }, [showNodeInfo, refreshMessage, actionHandler, euiTheme]);
+  }, [refreshMessage, euiTheme.size.xl, showNodeInfo, actionHandler]);
 
   const defaultSorting = {
     sort: {

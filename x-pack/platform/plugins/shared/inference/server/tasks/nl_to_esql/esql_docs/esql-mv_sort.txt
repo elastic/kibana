@@ -22,14 +22,20 @@ Without order parameter
 
 ```esql
 ROW names = ["Alice", "Bob", "Charlie"]
-| EVAL sorted_names = mv_sort(names)
+| EVAL sorted_names = MV_SORT(names)
 ```
 
 With order parameter
 
 ```esql
 ROW a = [4, 2, -3, 2]
-| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
+| EVAL sd = MV_SORT(a, "DESC")
+```
+
+**Sorting a multivalued field**
+```esql
+FROM bag_of_numbers
+| EVAL sorted = MV_SORT(numbers)
 ```
 
 

@@ -107,7 +107,7 @@ export const getIsRulePreviewDisabled = ({
   threatMapping,
   machineLearningJobId,
   queryBar,
-  newTermsFields,
+  newTermsFields = [],
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
@@ -117,7 +117,7 @@ export const getIsRulePreviewDisabled = ({
   dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
-  machineLearningJobId: string[];
+  machineLearningJobId: string[] | undefined;
   queryBar: FieldValueQueryBar;
   newTermsFields: string[];
 }) => {
@@ -125,7 +125,7 @@ export const getIsRulePreviewDisabled = ({
     return isEsqlPreviewDisabled({ isQueryBarValid, queryBar });
   }
   if (ruleType === 'machine_learning') {
-    return machineLearningJobId.length === 0;
+    return !machineLearningJobId ?? machineLearningJobId?.length === 0;
   }
   if (
     !isQueryBarValid ||
@@ -141,7 +141,10 @@ export const getIsRulePreviewDisabled = ({
       isThreatQueryBarValid,
     });
   }
-  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
+  if (ruleType === 'eql') {
+    return isEmpty(queryBar.query.query);
+  }
+  if (ruleType === 'query' || ruleType === 'threshold') {
     return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {

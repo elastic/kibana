@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import { benchmarksNavigation } from '@kbn/cloud-security-posture';
 import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
 import type { BenchmarkScore, Benchmark } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
@@ -31,7 +32,6 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { benchmarksNavigation } from '../../common/navigation/constants';
 import {
   GetBenchmarkDynamicValues,
   useBenchmarkDynamicValues,
@@ -145,14 +145,12 @@ const getBenchmarkTableColumns = (
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.APPLICABLE_TO,
     render: (benchmarkId: BenchmarksCisId) => {
       return (
-        <>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <CISBenchmarkIcon type={benchmarkId} size={'l'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
+        </EuiFlexGroup>
       );
     },
   },
@@ -189,8 +187,8 @@ const getBenchmarkTableColumns = (
 
       const isKspmBenchmark = ['cis_k8s', 'cis_eks'].includes(benchmark.id);
       const groupByField = isKspmBenchmark
-        ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME
-        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME;
+        ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID
+        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID;
 
       return (
         <EuiButtonEmpty

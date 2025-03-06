@@ -11,9 +11,8 @@ import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
-import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import type {
   ApplicationStart,
@@ -56,6 +55,7 @@ function DevToolsWrapper({
   location,
   startServices,
 }: DevToolsWrapperProps) {
+  const { euiTheme } = useEuiTheme();
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
@@ -75,7 +75,7 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <EuiTabs css={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
+      <EuiTabs css={{ paddingLeft: euiTheme.size.s }} size="l">
         {devTools.map((currentDevTool) => (
           <EuiTab
             key={currentDevTool.id}

@@ -9,10 +9,6 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useCreateFormattedExample } from './format_category';
 import { renderHook } from '@testing-library/react';
 
-jest.mock('../../hooks/use_eui_theme', () => ({
-  useIsDarkTheme: () => false,
-}));
-
 const categoryData: Array<{
   category: Category;
   elementCount: number;

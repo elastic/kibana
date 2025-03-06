@@ -28,7 +28,6 @@ import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
 } from '../../../common/api/entity_analytics';
-import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_PREVIEW_URL,
@@ -38,7 +37,6 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
-  RISK_SCORE_INDEX_STATUS_API_URL,
   RISK_ENGINE_SETTINGS_URL,
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
@@ -91,7 +89,7 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: {
-          entities_types: params.entitiesTypes,
+          entity_types: params.entityTypes,
           sort_field: params.sortField,
           sort_order: params.sortOrder,
           page: params.page,
@@ -259,27 +257,6 @@ export const useEntityAnalyticsRoutes = () => {
       );
     };
 
-    const getRiskScoreIndexStatus = ({
-      query,
-      signal,
-    }: {
-      query: {
-        indexName: string;
-        entity: RiskScoreEntity;
-      };
-      signal?: AbortSignal;
-    }): Promise<{
-      isDeprecated: boolean;
-      isEnabled: boolean;
-    }> =>
-      http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(RISK_SCORE_INDEX_STATUS_API_URL, {
-        version: '1',
-        method: 'GET',
-        query,
-        asSystemRequest: true,
-        signal,
-      });
-
     /**
      * Fetches risk engine settings
      */
@@ -321,7 +298,6 @@ export const useEntityAnalyticsRoutes = () => {
       deleteAssetCriticality,
       fetchAssetCriticality,
       uploadAssetCriticalityFile,
-      getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { useDispatch } from 'react-redux';
@@ -200,12 +200,17 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     }
   }, [skip, refetchQuery]);
 
-  useQueryInspector({
-    deleteQuery,
-    inspect: {
+  const inspect = useMemo(
+    () => ({
       dsl: [request],
       response: [response],
-    },
+    }),
+    [request, response]
+  );
+
+  useQueryInspector({
+    deleteQuery,
+    inspect,
     refetch,
     setQuery,
     queryId,

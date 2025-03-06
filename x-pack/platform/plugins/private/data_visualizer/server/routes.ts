@@ -122,8 +122,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .post({
       path: '/internal/data_visualizer/inference/{inferenceId}',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -145,10 +147,13 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           const inferenceId = request.params.inferenceId;
           const input = request.body.input;
           const esClient = (await context.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.inference.inference({
-            inference_id: inferenceId,
-            input,
-          });
+          const body = await esClient.asCurrentUser.inference.inference(
+            {
+              inference_id: inferenceId,
+              input,
+            },
+            { maxRetries: 0, requestTimeout: 10 * 60 * 1000 }
+          );
 
           return response.ok({ body });
         } catch (e) {

@@ -12,12 +12,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiButtonIcon, EuiIconTip, EuiInMemoryTable, EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiButtonIcon, EuiIconTip, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useCurrentThemeVars } from '../../../contexts/kibana';
 
 function getColumns(viewForecast) {
   return [
@@ -77,7 +76,7 @@ function getColumns(viewForecast) {
 }
 
 export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
 
   const getRowProps = (item) => {
     return {
@@ -85,7 +84,7 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
       ...(item.forecast_id === selectedForecastId
         ? {
             style: {
-              backgroundColor: `${euiTheme.euiPanelBackgroundColorModifiers.primary}`,
+              backgroundColor: `${euiTheme.colors.backgroundBasePrimary}`,
             },
           }
         : {}),

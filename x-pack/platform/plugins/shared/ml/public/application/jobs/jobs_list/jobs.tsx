@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -44,9 +45,11 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
   const {
     services: { docLinks },
   } = useMlKibana();
+  const { euiTheme } = useEuiTheme();
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
+
   return (
     <>
       <MlPageHeader>
@@ -56,6 +59,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
         <JobsActionMenu />
       </HeaderMenuPortal>
       <JobsListView
+        euiTheme={euiTheme}
         isMlEnabledInSpace={isMlEnabledInSpace}
         lastRefresh={lastRefresh}
         jobsViewState={pageState}

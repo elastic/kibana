@@ -20,13 +20,7 @@
             "text": "FieldDefinition"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>[]) => ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -56,13 +50,7 @@
                 "text": "FieldDefinition"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/categorize_fields.ts",
@@ -93,13 +81,7 @@
             "text": "FieldDefinition"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>[]) => ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -131,13 +113,7 @@
                 "text": "FieldDefinition"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_counts.ts",
@@ -797,13 +773,7 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">(field: Pick<",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -969,13 +939,7 @@
             "text": "UiSettingMetadata"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>, userValue?: ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -1008,13 +972,7 @@
                 "text": "UiSettingMetadata"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
@@ -1070,13 +1028,7 @@
             "text": "UiSettingMetadata"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/normalize_settings.ts",
@@ -1117,13 +1069,7 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">(params: ",
           {
             "pluginId": "@kbn/management-settings-utilities",

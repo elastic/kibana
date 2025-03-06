@@ -16,6 +16,9 @@ const assetCriticalityMapping = {
   required: false,
 };
 
+// Upgrade this value to force a mappings update on the next Kibana startup
+export const ASSET_CRITICALITY_MAPPINGS_VERSIONS = 3;
+
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -55,6 +58,17 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
   'user.asset.criticality': assetCriticalityMapping,
+  'event.ingested': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'service.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.asset.criticality': assetCriticalityMapping,
 } as const;
 
 export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {

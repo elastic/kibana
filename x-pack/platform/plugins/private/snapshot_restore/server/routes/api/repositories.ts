@@ -9,7 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   PluginStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import {
   ON_PREM_REPOSITORY_TYPES,
@@ -40,7 +40,16 @@ export function registerRepositoriesRoutes({
 }: RouteDependencies) {
   // GET all repositories
   router.get(
-    { path: addBasePath('repositories'), validate: false },
+    {
+      path: addBasePath('repositories'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const managedRepositoryName = await getManagedRepositoryName(clusterClient.asCurrentUser);
@@ -99,7 +108,16 @@ export function registerRepositoriesRoutes({
 
   // GET one repository
   router.get(
-    { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('repositories/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -290,7 +308,7 @@ export function registerRepositoriesRoutes({
       try {
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
           name,
-          body: {
+          repository: {
             // @ts-expect-error upgrade to @elastic/elasticsearch v8.13.0: can't be string, only valid "source"
             type,
             // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}

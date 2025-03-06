@@ -18,8 +18,6 @@ import type {
   ESQLAstExpression,
   ESQLAstItem,
   ESQLAstJoinCommand,
-  ESQLAstNodeWithArgs,
-  ESQLAstNodeWithChildren,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
@@ -46,14 +44,7 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
-
-const isNodeWithArgs = (x: unknown): x is ESQLAstNodeWithArgs =>
-  !!x && typeof x === 'object' && Array.isArray((x as any).args);
-
-const isNodeWithChildren = (x: unknown): x is ESQLAstNodeWithChildren =>
-  !!x &&
-  typeof x === 'object' &&
-  (Array.isArray((x as any).args) || Array.isArray((x as any).values));
+import { isProperNode } from '../ast/helpers';
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -85,13 +76,8 @@ export class VisitorContext<
   ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
     this.ctx.assertMethodExists('visitExpression');
 
-    const node = this.node;
-
-    if (!isNodeWithArgs(node)) {
-      return;
-    }
-
-    for (const arg of singleItems(node.args)) {
+    for (const arg of this.arguments()) {
+      if (!arg) continue;
       if (arg.type === 'option' && arg.name !== 'as') {
         continue;
       }
@@ -107,7 +93,7 @@ export class VisitorContext<
   public arguments(): ESQLAstExpressionNode[] {
     const node = this.node;
 
-    if (!isNodeWithChildren(node)) {
+    if (!isProperNode(node)) {
       return [];
     }
 
@@ -128,12 +114,12 @@ export class VisitorContext<
 
     const node = this.node;
 
-    if (!isNodeWithArgs(node)) {
+    if (!isProperNode(node)) {
       throw new Error('Node does not have arguments');
     }
 
     let i = 0;
-    for (const arg of singleItems(node.args)) {
+    for (const arg of this.arguments()) {
       if (i === index) {
         return this.visitExpression(arg, input as any);
       }
@@ -193,7 +179,7 @@ export class CommandVisitorContext<
 
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
-      if (Array.isArray(arg)) {
+      if (!arg || Array.isArray(arg)) {
         continue;
       }
       if (arg.type === 'option') {
@@ -222,6 +208,9 @@ export class CommandVisitorContext<
 
     if (!option) {
       for (const arg of this.node.args) {
+        if (!arg) {
+          continue;
+        }
         if (Array.isArray(arg)) {
           yield arg;
           continue;
@@ -236,7 +225,7 @@ export class CommandVisitorContext<
     }
 
     const optionNode = this.node.args.find(
-      (arg) => !Array.isArray(arg) && arg.type === 'option' && arg.name === option
+      (arg) => !Array.isArray(arg) && arg && arg.type === 'option' && arg.name === option
     );
 
     if (optionNode) {

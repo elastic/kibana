@@ -18,8 +18,6 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiButtonEmpty,
-  EuiBetaBadge,
-  EuiToolTip,
   EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
@@ -27,7 +25,6 @@ import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useContractComponents } from '../../../../common/hooks/use_contract_component';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
@@ -48,14 +45,28 @@ interface EntityStoreEnablementModalProps {
   toggle: (visible: boolean) => void;
   enableStore: (enablements: Enablements) => () => void;
   riskScore: {
-    disabled?: boolean;
+    canToggle?: boolean;
     checked?: boolean;
   };
   entityStore: {
-    disabled?: boolean;
+    canToggle?: boolean;
     checked?: boolean;
   };
 }
+
+const shouldAllowEnablement = (
+  riskScoreEnabled: boolean,
+  entityStoreEnabled: boolean,
+  userHasEnabled: Enablements
+) => {
+  if (riskScoreEnabled) {
+    return userHasEnabled.entityStore;
+  }
+  if (entityStoreEnabled) {
+    return userHasEnabled.riskScore;
+  }
+  return userHasEnabled.riskScore || userHasEnabled.entityStore;
+};
 
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
   visible,
@@ -72,8 +83,13 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-  const enablementOptions = enablements.riskScore || enablements.entityStore;
-  const { EnablementModalCallout } = useContractComponents();
+
+  const enablementOptions = shouldAllowEnablement(
+    !riskScore.canToggle,
+    !entityStore.canToggle,
+    enablements
+  );
+  const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
     return null;
@@ -102,7 +118,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>{EnablementModalCallout && <EnablementModalCallout />}</EuiFlexItem>
+          <EuiFlexItem>{AdditionalChargesMessage && <AdditionalChargesMessage />}</EuiFlexItem>
           <EuiFlexItem>
             <EuiSwitch
               label={
@@ -113,7 +129,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
               }
               checked={enablements.riskScore}
               disabled={
-                riskScore.disabled ||
+                !riskScore.canToggle ||
                 (!riskEnginePrivileges.isLoading && !riskEnginePrivileges?.hasAllRequiredPrivileges)
               }
               onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
@@ -140,7 +156,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                 }
                 checked={enablements.entityStore}
                 disabled={
-                  entityStore.disabled ||
+                  !entityStore.canToggle ||
                   (!isLoadingEntityEnginePrivileges && !entityEnginePrivileges?.has_all_required)
                 }
                 onChange={() =>
@@ -148,9 +164,6 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                 }
                 data-test-subj="enablementEntityStoreSwitch"
               />
-              <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
-                <EuiBetaBadge label={TECHNICAL_PREVIEW} />
-              </EuiToolTip>
             </EuiFlexGroup>
           </EuiFlexItem>
           {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (

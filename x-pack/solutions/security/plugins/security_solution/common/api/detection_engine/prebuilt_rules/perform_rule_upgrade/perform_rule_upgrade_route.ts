@@ -10,6 +10,7 @@ import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
+import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
 export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
@@ -26,7 +27,6 @@ export const PickVersionValuesEnum = PickVersionValues.enum;
 export const FIELDS_TO_UPGRADE_TO_CURRENT_VERSION = [
   'enabled',
   'exceptions_list',
-  'alert_suppression',
   'actions',
   'throttle',
   'response_actions',
@@ -112,21 +112,31 @@ export const RuleUpgradeSpecifier = z.object({
   fields: RuleFieldsToUpgrade.optional(),
 });
 
+export type UpgradeConflictResolution = z.infer<typeof UpgradeConflictResolution>;
+export const UpgradeConflictResolution = z.enum(['SKIP', 'OVERWRITE']);
+export type UpgradeConflictResolutionEnum = typeof UpgradeConflictResolution.enum;
+export const UpgradeConflictResolutionEnum = UpgradeConflictResolution.enum;
+
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = z.object({
   mode: z.literal('SPECIFIC_RULES'),
   rules: z.array(RuleUpgradeSpecifier).min(1),
   pick_version: PickVersionValues.optional(),
+  on_conflict: UpgradeConflictResolution.optional(),
+  dry_run: z.boolean().optional(),
 });
 
 export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
 export const UpgradeAllRulesRequest = z.object({
   mode: z.literal('ALL_RULES'),
   pick_version: PickVersionValues.optional(),
+  filter: PrebuiltRulesFilter.optional(),
+  on_conflict: UpgradeConflictResolution.optional(),
+  dry_run: z.boolean().optional(),
 });
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
-export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE']);
+export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE', 'CONFLICT']);
 export type SkipRuleUpgradeReasonEnum = typeof SkipRuleUpgradeReason.enum;
 export const SkipRuleUpgradeReasonEnum = SkipRuleUpgradeReason.enum;
 

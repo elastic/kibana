@@ -13,22 +13,20 @@ const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestViewerWithCookieCredentials: SupertestWithRoleScope;
+  let supertestDeveloperWithCookieCredentials: SupertestWithRoleScope;
 
   describe('Connectors routes', function () {
     describe('GET connectors', function () {
       before(async () => {
-        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
-          'viewer',
-          {
+        supertestDeveloperWithCookieCredentials =
+          await roleScopedSupertest.getSupertestWithRoleScope('developer', {
             useCookieHeader: true,
             withInternalHeaders: true,
-          }
-        );
+          });
       });
 
       it('returns list of connectors', async () => {
-        const { body } = await supertestViewerWithCookieCredentials
+        const { body } = await supertestDeveloperWithCookieCredentials
           .get(`${API_BASE_PATH}/connectors`)
           .expect(200);
 

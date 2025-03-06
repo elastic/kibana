@@ -16,7 +16,7 @@
         "description": [
           "\nMocks for the Feature Flags service (browser-side)"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+        "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,16 +39,10 @@
                 "text": "PublicMethodsOf"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserInternalPluginApi",
-                "section": "def-public.FeatureFlagsService",
-                "text": "FeatureFlagsService"
-              },
+              "FeatureFlagsService",
               ">>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+            "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -65,16 +59,10 @@
             ],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                "section": "def-public.FeatureFlagsSetup",
-                "text": "FeatureFlagsSetup"
-              },
+              "FeatureFlagsSetup",
               ">"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+            "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -91,16 +79,10 @@
             ],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                "section": "def-public.FeatureFlagsStart",
-                "text": "FeatureFlagsStart"
-              },
+              "FeatureFlagsStart",
               ">"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+            "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

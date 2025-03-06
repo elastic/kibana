@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
@@ -17,7 +16,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -50,14 +50,14 @@ import { MissingGroupsRecord } from './lib/check_missing_group';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }
 
 export const createCustomThresholdExecutor = ({
   basePath,
   logger,
   config,
-  locators: { logsExplorerLocator },
+  locators: { logsLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
@@ -126,6 +126,7 @@ export const createCustomThresholdExecutor = ({
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
+    const runtimeMappings = dataView.getRuntimeMappings();
     const dataViewIndexPattern = dataView.getIndexPattern();
     const dataViewName = dataView.getName();
     if (!dataViewIndexPattern) {
@@ -147,6 +148,7 @@ export const createCustomThresholdExecutor = ({
       logger,
       { end: dateEnd, start: dateStart },
       esQueryConfig,
+      runtimeMappings,
       state.lastRunTimestamp,
       previousMissingGroups
     );
@@ -281,7 +283,7 @@ export const createCustomThresholdExecutor = ({
             viewInAppUrl: getViewInAppUrl({
               dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
               groups,
-              logsExplorerLocator,
+              logsLocator,
               metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
@@ -317,11 +319,12 @@ export const createCustomThresholdExecutor = ({
         viewInAppUrl: getViewInAppUrl({
           dataViewId,
           groups: group,
-          logsExplorerLocator,
+          logsLocator,
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
         }),
+        reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
       };
 

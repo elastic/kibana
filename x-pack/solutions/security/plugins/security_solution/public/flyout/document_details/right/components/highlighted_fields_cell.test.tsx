@@ -14,11 +14,7 @@ import {
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { DocumentDetailsContext } from '../../shared/context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -47,9 +43,6 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-
 const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',
@@ -68,7 +61,6 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
 describe('<HighlightedFieldsCell />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render a basic cell', () => {
@@ -83,23 +75,7 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should open left panel when clicking on the link within a a link cell when preview is disabled', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'user.name');
-
-    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
-    expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
-      params: {
-        id: panelContextValue.eventId,
-        indexName: panelContextValue.indexName,
-        scopeId: panelContextValue.scopeId,
-      },
-    });
-  });
-
-  it('should open host preview when click on host when preview is not disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('should open host preview when click on host', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name');
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
@@ -114,8 +90,7 @@ describe('<HighlightedFieldsCell />', () => {
     });
   });
 
-  it('should open user preview when click on user when preview is not disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('should open user preview when click on user', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name');
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
@@ -130,8 +105,7 @@ describe('<HighlightedFieldsCell />', () => {
     });
   });
 
-  it('should open ip preview when click on ip when preview is not disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('should open ip preview when click on ip', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['100:XXX:XXX'], 'source.ip');
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
@@ -204,6 +178,7 @@ describe('<HighlightedFieldsCell />', () => {
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
   });
+
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>

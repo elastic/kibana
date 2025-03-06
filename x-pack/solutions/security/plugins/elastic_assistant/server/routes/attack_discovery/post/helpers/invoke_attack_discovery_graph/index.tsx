@@ -7,7 +7,7 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { ActionsClientLlm } from '@kbn/langchain/server';
@@ -23,6 +23,7 @@ import {
 import { GraphState } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/types';
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { getLlmType } from '../../../../utils';
+import { getAttackDiscoveryPrompts } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 
 export const invokeAttackDiscoveryGraph = async ({
   actionsClient,
@@ -30,25 +31,33 @@ export const invokeAttackDiscoveryGraph = async ({
   anonymizationFields,
   apiConfig,
   connectorTimeout,
+  end,
   esClient,
+  filter,
   langSmithProject,
   langSmithApiKey,
   latestReplacements,
   logger,
   onNewReplacements,
+  savedObjectsClient,
   size,
+  start,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsIndexPattern: string;
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
   connectorTimeout: number;
+  end?: string;
   esClient: ElasticsearchClient;
+  filter?: Record<string, unknown>;
   langSmithProject?: string;
   langSmithApiKey?: string;
   latestReplacements: Replacements;
   logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
+  savedObjectsClient: SavedObjectsClientContract;
+  start?: string;
   size: number;
 }): Promise<{
   anonymizedAlerts: Document[];
@@ -83,15 +92,28 @@ export const invokeAttackDiscoveryGraph = async ({
     throw new Error('LLM is required for attack discoveries');
   }
 
+  const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    // if in future oss has different prompt, add it as model here
+    model,
+    provider: llmType,
+    savedObjectsClient,
+  });
+
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
+    end,
     esClient,
+    filter,
     llm,
     logger,
     onNewReplacements,
+    prompts: attackDiscoveryPrompts,
     replacements: latestReplacements,
     size,
+    start,
   });
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');
@@ -104,6 +126,7 @@ export const invokeAttackDiscoveryGraph = async ({
       tags,
     }
   );
+
   const {
     attackDiscoveries,
     anonymizedAlerts,

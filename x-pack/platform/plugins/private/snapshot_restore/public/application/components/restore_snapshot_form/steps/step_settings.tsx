@@ -76,7 +76,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle>
+          <EuiTitle data-test-subj="indexSettingsTitle">
             <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepSettingsTitle"

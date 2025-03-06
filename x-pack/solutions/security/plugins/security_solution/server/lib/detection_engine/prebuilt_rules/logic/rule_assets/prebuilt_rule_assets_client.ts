@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import type { AggregationsTopHitsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  AggregationsMultiBucketAggregateBase,
+  AggregationsTopHitsAggregate,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';

@@ -13,7 +13,7 @@ import {
   DEFEND_INSIGHTS,
   DefendInsightsGetResponse,
   DefendInsightsGetRequestQuery,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -28,13 +28,13 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
       path: DEFEND_INSIGHTS,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: ['securitySolution-readWorkflowInsights'],
         },
       },
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(DefendInsightsGetRequestQuery),
@@ -48,8 +48,12 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
       },
       async (context, request, response): Promise<IKibanaResponse<DefendInsightsGetResponse>> => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
+
+        const ctx = await context.resolve(['licensing', 'elasticAssistant']);
+
+        const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
+
         try {
           const isEnabled = isDefendInsightsEnabled({
             request,
@@ -60,9 +64,18 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
             return response.notFound();
           }
 
+          if (!ctx.licensing.license.hasAtLeast('enterprise')) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Your license does not support Defend Workflows. Please upgrade your license.',
+              },
+            });
+          }
+
           const dataClient = await assistantContext.getDefendInsightsDataClient();
 
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,

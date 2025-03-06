@@ -10,13 +10,13 @@ import { mergeWith, uniqWith, isEqual } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   DashboardApi,
   DashboardLocatorParams,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
@@ -226,7 +226,7 @@ export class QuickJobCreatorBase {
   }
 
   private async createDashboardLink(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
-    const savedObjectId = dashboard.savedObjectId?.value;
+    const savedObjectId = dashboard.savedObjectId$?.value;
     if (!savedObjectId) {
       return null;
     }
@@ -254,7 +254,7 @@ export class QuickJobCreatorBase {
     const url = `${location.app}${location.path}`;
     const urlName = i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
       defaultMessage: 'Open {dashboardTitle}',
-      values: { dashboardTitle: getPanelTitle(dashboard) ?? 'dashboard' },
+      values: { dashboardTitle: getTitle(dashboard) ?? 'dashboard' },
     });
 
     return { url_name: urlName, url_value: url, time_range: 'auto' };

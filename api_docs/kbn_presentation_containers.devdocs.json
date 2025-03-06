@@ -22,7 +22,7 @@
             "text": "CanAddNewPanel"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
             "text": "CanDuplicatePanels"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +76,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,7 +102,7 @@
             "text": "CanExpandPanels"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,7 +116,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -129,7 +129,9 @@
         "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiHasRuntimeChildState",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "apiHasRuntimeChildState",
         "description": [],
         "signature": [
@@ -143,9 +145,19 @@
           },
           "<RuntimeState>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
-        "deprecated": false,
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
@@ -157,7 +169,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,7 +195,7 @@
             "text": "HasSaveNotification"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/has_save_notification.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -197,48 +209,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/has_save_notification.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.apiHasSerializableState",
-        "type": "Function",
-        "tags": [],
-        "label": "apiHasSerializableState",
-        "description": [],
-        "signature": [
-          "(api: unknown) => api is ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSerializableState",
-            "text": "HasSerializableState"
-          },
-          "<object>"
-        ],
-        "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.apiHasSerializableState.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -265,7 +236,7 @@
           },
           "<SerializedState>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,7 +250,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -305,7 +276,7 @@
             "text": "PresentationContainer"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -319,7 +290,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -345,7 +316,7 @@
             "text": "PublishesSettings"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,7 +330,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,7 +356,7 @@
             "text": "TrackContentfulRender"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -399,7 +370,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -430,7 +401,7 @@
           "Observable",
           "<{ [key: string]: object; } | undefined>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -451,7 +422,7 @@
               },
               "<{ [key: string]: unknown; }>"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -472,7 +443,7 @@
           "Observable",
           "<PublishingSubjectType>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -486,7 +457,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -501,7 +472,7 @@
             "signature": [
               "keyof ApiType"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -516,7 +487,7 @@
             "signature": [
               "(api: unknown) => api is ApiType"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -531,7 +502,7 @@
             "signature": [
               "PublishingSubjectType"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -546,7 +517,7 @@
             "signature": [
               "((array: PublishingSubjectType[]) => PublishingSubjectType) | undefined"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -573,7 +544,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -587,7 +558,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -622,15 +593,15 @@
           },
           "<RuntimeState> & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSnapshottableState",
             "text": "HasSnapshottableState"
           },
           "<RuntimeState>; cleanup: () => void; }"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -644,7 +615,7 @@
             "signature": [
               "RuntimeState"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -659,7 +630,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -681,7 +652,7 @@
               },
               "<RuntimeState>"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -700,7 +671,7 @@
         "signature": [
           "<ApiType extends unknown>(parent: unknown, isCompatible: (api: unknown) => api is ApiType, apiFound: (api: ApiType | undefined) => void | (() => void)) => () => void"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -714,7 +685,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -729,7 +700,7 @@
             "signature": [
               "(api: unknown) => api is ApiType"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -744,7 +715,7 @@
             "signature": [
               "(api: ApiType | undefined) => void | (() => void)"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -770,7 +741,7 @@
             "text": "TracksOverlays"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -784,7 +755,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -804,7 +775,7 @@
         "description": [
           "\nThis API can add a new panel as a child."
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -824,9 +795,9 @@
                 "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
-              "<SerializedState>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
+              "<SerializedState, object>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -845,9 +816,9 @@
                     "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  "<SerializedState>"
+                  "<SerializedState, object>"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -862,7 +833,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -880,7 +851,7 @@
         "tags": [],
         "label": "CanDuplicatePanels",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -894,7 +865,7 @@
             "signature": [
               "(panelId: string) => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -908,7 +879,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -926,7 +897,7 @@
         "tags": [],
         "label": "CanExpandPanels",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -940,7 +911,7 @@
             "signature": [
               "(panelId: string) => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -954,7 +925,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -964,10 +935,10 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.CanExpandPanels.expandedPanelId",
+            "id": "def-public.CanExpandPanels.expandedPanelId$",
             "type": "Object",
             "tags": [],
-            "label": "expandedPanelId",
+            "label": "expandedPanelId$",
             "description": [],
             "signature": [
               "{ source: ",
@@ -1122,7 +1093,7 @@
               "Observable",
               "<string | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1133,7 +1104,9 @@
         "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.HasRuntimeChildState",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "HasRuntimeChildState",
         "description": [],
         "signature": [
@@ -1146,9 +1119,19 @@
           },
           "<RuntimeState>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
-        "deprecated": false,
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
@@ -1160,7 +1143,7 @@
             "signature": [
               "(childId: string) => Partial<RuntimeState> | undefined"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1174,7 +1157,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1192,7 +1175,7 @@
         "tags": [],
         "label": "HasSaveNotification",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/has_save_notification.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1207,59 +1190,9 @@
               "Subject",
               "<void>"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/has_save_notification.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.HasSerializableState",
-        "type": "Interface",
-        "tags": [],
-        "label": "HasSerializableState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSerializableState",
-            "text": "HasSerializableState"
-          },
-          "<State>"
-        ],
-        "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasSerializableState.serializeState",
-            "type": "Function",
-            "tags": [],
-            "label": "serializeState",
-            "description": [
-              "\nSerializes all state into a format that can be saved into\nsome external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}"
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<State>"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1281,7 +1214,7 @@
           },
           "<SerializedState>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1295,15 +1228,15 @@
             "signature": [
               "(childId: string) => ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
               "<SerializedState> | undefined"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1317,54 +1250,12 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.HasSnapshottableState",
-        "type": "Interface",
-        "tags": [],
-        "label": "HasSnapshottableState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSnapshottableState",
-            "text": "HasSnapshottableState"
-          },
-          "<RuntimeState>"
-        ],
-        "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasSnapshottableState.snapshotRuntimeState",
-            "type": "Function",
-            "tags": [],
-            "label": "snapshotRuntimeState",
-            "description": [
-              "\nSerializes all runtime state exactly as it appears. This can be used\nto rehydrate a component's state without needing to serialize then deserialize it."
-            ],
-            "signature": [
-              "() => RuntimeState"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -1385,9 +1276,9 @@
             "section": "def-public.PanelPackage",
             "text": "PanelPackage"
           },
-          "<SerializedState>"
+          "<SerializedStateType, RuntimeStateType>"
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1398,7 +1289,30 @@
             "tags": [],
             "label": "panelType",
             "description": [],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PanelPackage.serializedState",
+            "type": "Object",
+            "tags": [],
+            "label": "serializedState",
+            "description": [
+              "\nThe serialized state of this panel."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.SerializedPanelState",
+                "text": "SerializedPanelState"
+              },
+              "<SerializedStateType> | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1408,11 +1322,13 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "initialState",
-            "description": [],
-            "signature": [
-              "SerializedState | undefined"
+            "description": [
+              "\nThe runtime state of this panel. @deprecated Use `serializedState` instead."
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "signature": [
+              "RuntimeStateType | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1443,7 +1359,7 @@
             "text": "CanAddNewPanel"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1459,7 +1375,7 @@
             "signature": [
               "(panelId: string) => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1473,7 +1389,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1493,7 +1409,7 @@
             "signature": [
               "(() => boolean) | undefined"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1517,9 +1433,9 @@
                 "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
-              "<SerializedState>) => Promise<string>"
+              "<SerializedState, object>) => Promise<string>"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1533,7 +1449,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1553,9 +1469,9 @@
                     "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  "<SerializedState>"
+                  "<SerializedState, object>"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1575,7 +1491,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1743,7 +1659,7 @@
               "Observable",
               "<{ [key: string]: unknown; }>; }"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1757,7 +1673,7 @@
         "tags": [],
         "label": "PublishesSettings",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1779,68 +1695,7 @@
               },
               "<boolean | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.SerializedPanelState",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedPanelState",
-        "description": [
-          "\nA package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any\nstrategy, this is the format that should be used."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<RawStateType>"
-        ],
-        "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.SerializedPanelState.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "server",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-server.Reference",
-                "text": "Reference"
-              },
-              "[] | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.SerializedPanelState.rawState",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "rawState",
-            "description": [],
-            "signature": [
-              "RawStateType"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1854,7 +1709,7 @@
         "tags": [],
         "label": "TrackContentfulRender",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1870,7 +1725,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1886,7 +1741,7 @@
         "tags": [],
         "label": "TracksOverlays",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1899,18 +1754,12 @@
             "description": [],
             "signature": [
               "(ref: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               ", options?: ",
               "TracksOverlaysOptions",
               " | undefined) => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1922,15 +1771,9 @@
                 "label": "ref",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.OverlayRef",
-                    "text": "OverlayRef"
-                  }
+                  "OverlayRef"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1946,7 +1789,7 @@
                   "TracksOverlaysOptions",
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1964,7 +1807,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

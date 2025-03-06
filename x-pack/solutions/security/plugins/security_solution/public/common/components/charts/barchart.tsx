@@ -13,12 +13,11 @@ import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import { v4 as uuidv4 } from 'uuid';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import deepEqual from 'fast-deep-equal';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
-import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
 import { hasValueToDisplay } from '../../utils/validators';
 import { EMPTY_VALUE_LABEL } from './translation';
@@ -192,8 +191,8 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   const legendItems: LegendItem[] = useMemo(
     () =>
       barChart != null && stackByField != null
-        ? barChart.map((d, i) => ({
-            color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
+        ? barChart.map((d) => ({
+            color: d.color,
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuidv4()}-${stackByField}-${d.key}`
             ),

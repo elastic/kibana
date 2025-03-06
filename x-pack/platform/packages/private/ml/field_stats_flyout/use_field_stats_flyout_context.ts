@@ -7,7 +7,6 @@
 
 import { createContext, useContext } from 'react';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 /**
  * Represents the properties for the MLJobWizardFieldStatsFlyout component.
@@ -22,7 +21,6 @@ interface MLJobWizardFieldStatsFlyoutProps {
   fieldValue?: string | number;
   timeRangeMs?: TimeRangeMs;
   populatedFields?: Set<string>;
-  theme?: ThemeServiceStart;
 }
 
 /**
@@ -36,7 +34,6 @@ export const MLFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyo
   setFieldValue: () => {},
   timeRangeMs: undefined,
   populatedFields: undefined,
-  theme: undefined,
 });
 
 /**
@@ -51,18 +48,4 @@ export function useFieldStatsFlyoutContext() {
   }
 
   return fieldStatsFlyoutContext;
-}
-
-/**
- * Retrieves the theme vars from the field stats flyout context.
- * @returns The theme vars.
- */
-export function useFieldStatsFlyoutThemeVars() {
-  const { theme } = useFieldStatsFlyoutContext();
-
-  if (!theme) {
-    throw new Error('theme must be provided in the MLFieldStatsFlyoutContext');
-  }
-
-  return theme;
 }

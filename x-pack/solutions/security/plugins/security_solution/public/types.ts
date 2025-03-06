@@ -21,6 +21,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { PluginStart as ListsPluginStart } from '@kbn/lists-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -29,7 +30,6 @@ import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/publi
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
-import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -59,15 +59,14 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
-import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
-import type { Kubernetes } from './kubernetes';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -77,6 +76,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
+import type { AssetInventory } from './asset_inventory';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
@@ -129,7 +129,6 @@ export interface StartPlugins {
   inspector: InspectorStart;
   fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -158,8 +157,9 @@ export interface StartPlugins {
   savedSearch: SavedSearchPublicPluginStart;
   alerting: PluginStartContract;
   core: CoreStart;
-  integrationAssistant?: IntegrationAssistantPluginStart;
+  automaticImport?: AutomaticImportPluginStart;
   serverless?: ServerlessPluginStart;
+  productDocBase: ProductDocBasePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -197,6 +197,7 @@ export type StartServices = CoreStart &
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
+    productDocBase: ProductDocBasePluginStart;
   };
 
 export type StartRenderServices = Pick<
@@ -231,13 +232,13 @@ export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;
+  assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
   exceptions: Exceptions;
   explore: Explore;
-  kubernetes: Kubernetes;
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
@@ -255,13 +256,13 @@ export interface SubPlugins {
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   alerts: Awaited<ReturnType<Detections['start']>>;
+  assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
-  kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;

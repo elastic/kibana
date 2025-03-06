@@ -9,29 +9,31 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type {
+import {
   AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
   CustomRequestHandlerContext,
+  ElasticsearchClient,
   IRouter,
   KibanaRequest,
   Logger,
   AuditLogger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
+import { StructuredToolInterface } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
+  ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
@@ -50,13 +52,18 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
-import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
+import {
+  AIAssistantConversationsDataClient,
+  GetAIAssistantConversationsDataClientParams,
+} from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
+import { CallbackIds } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
-import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
+import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
+export { CallbackIds };
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -103,6 +110,12 @@ export interface ElasticAssistantPluginStart {
    * @param pluginName Name of the plugin to get the tools for
    */
   getRegisteredTools: GetRegisteredTools;
+  /**
+   * Register a callback to be used by the elastic assistant.
+   * @param callbackId
+   * @param callback
+   */
+  registerCallback: (callbackId: CallbackIds, callback: Function) => void;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {
@@ -129,8 +142,10 @@ export interface ElasticAssistantApiRequestHandlerContext {
   logger: Logger;
   getServerBasePath: () => string;
   getSpaceId: () => string;
-  getCurrentUser: () => AuthenticatedUser | null;
-  getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getCurrentUser: () => Promise<AuthenticatedUser | null>;
+  getAIAssistantConversationsDataClient: (
+    params?: GetAIAssistantConversationsDataClientParams
+  ) => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
     params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
@@ -140,6 +155,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
 }
 /**
@@ -216,7 +232,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
+  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
 }
 
 export type AssistantToolLlm =
@@ -231,6 +247,8 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
+  contentReferencesStore: ContentReferencesStore | undefined;
+  description?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;

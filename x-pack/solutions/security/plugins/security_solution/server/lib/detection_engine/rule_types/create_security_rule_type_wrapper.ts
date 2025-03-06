@@ -8,7 +8,8 @@
 import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -257,16 +258,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
-              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
+              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
+              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
 
-              const readIndexWarningMessage = await hasReadIndexPrivileges({
-                privileges,
-                ruleExecutionLogger,
-                uiSettingsClient,
-              });
+              if (existingIndices.length > 0) {
+                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
+                const readIndexWarningMessage = await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
 
-              if (readIndexWarningMessage != null) {
-                wrapperWarnings.push(readIndexWarningMessage);
+                if (readIndexWarningMessage != null) {
+                  wrapperWarnings.push(readIndexWarningMessage);
+                }
               }
 
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
@@ -308,6 +313,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             tuples,
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
+            gap,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -329,7 +335,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: gapErrorMessage,
-              metrics: { executionGap: remainingGap },
+              metrics: {
+                executionGap: remainingGap,
+                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+              },
             });
           }
 
@@ -508,6 +517,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
+                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });

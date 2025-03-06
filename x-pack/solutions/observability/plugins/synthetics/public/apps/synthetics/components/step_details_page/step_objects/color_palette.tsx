@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSkeletonRectangle,
   EuiIcon,
+  EuiSkeletonRectangle,
+  EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { colourPalette } from '../common/network_data/data_formatting';
 
 export const ColorPalette = ({
@@ -116,7 +116,7 @@ export const ColorPaletteFlexItem = ({
   percent: number;
   loading: boolean;
 }) => {
-  const { eui } = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const [value, setVal] = useState(0);
 
@@ -142,11 +142,11 @@ export const ColorPaletteFlexItem = ({
     <EuiFlexGroup
       gutterSize="none"
       style={{
-        borderRadius: 8,
+        borderRadius: euiTheme.border.radius.medium,
         overflow: 'hidden',
       }}
     >
-      <EuiFlexItem grow={true} style={{ backgroundColor: eui.euiColorLightShade }}>
+      <EuiFlexItem grow={true} style={{ backgroundColor: euiTheme.colors.lightShade }}>
         <span
           style={{
             backgroundColor: (colourPalette as Record<string, string>)[mimeType],

@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-
+import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-
-import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
-import { useMonitorFilters } from '../../hooks/use_monitor_filters';
-import { useRefreshedRange } from '../../../../hooks';
+import React, { useMemo } from 'react';
 import { ClientPluginsStart } from '../../../../../../plugin';
+import { useRefreshedRange } from '../../../../hooks';
+import { useMonitorFilters } from '../../hooks/use_monitor_filters';
+import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
 import * as labels from '../labels';
 
 export const MonitorTestRunsSparkline = () => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
-
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { from, to } = useRefreshedRange(30, 'days');
   const filters = useMonitorFilters({});
@@ -39,12 +36,12 @@ export const MonitorTestRunsSparkline = () => {
         selectedMetricField: 'total_test_runs',
         filters,
         name: labels.TEST_RUNS_LABEL,
-        color: theme.eui.euiColorVis1,
+        color: euiTheme.colors.vis.euiColorVis0,
         operationType: 'count',
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, theme.eui.euiColorVis1, to]);
+  }, [from, euiTheme.colors.vis.euiColorVis0, to]);
 
   return (
     <ExploratoryViewEmbeddable

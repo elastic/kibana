@@ -265,13 +265,13 @@ export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
     }
   );
 
-export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionConfirmationPartlyTitle',
     {
-      values: { customRulesCount },
+      values: { rulesCount },
       defaultMessage:
-        'This action can only be applied to {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+        'This action can only be applied to {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
@@ -289,32 +289,30 @@ export const BULK_ACTION_CONFIRMATION_CLOSE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_EDIT_CONFIRMATION_CONFIRM = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
     {
-      values: { customRulesCount },
-      defaultMessage: 'Edit {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+      values: { rulesCount },
+      defaultMessage: 'Edit {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
-export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_EXPORT_CONFIRMATION_CONFIRM = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkExportConfirmation.confirmButtonLabel',
     {
-      values: { customRulesCount },
-      defaultMessage:
-        'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+      values: { rulesCount },
+      defaultMessage: 'Export {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
-export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkManualRuleRunConfirmation.confirmButtonLabel',
     {
-      values: { customRulesCount },
-      defaultMessage:
-        'Schedule {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+      values: { rulesCount },
+      defaultMessage: 'Schedule {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
@@ -833,7 +831,7 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
 export const RULE_SOURCE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleSourceLabel',
   {
-    defaultMessage: 'Modifications',
+    defaultMessage: 'Modified/Unmodified',
   }
 );
 
@@ -858,7 +856,7 @@ export const MODIFIED_TOOLTIP = i18n.translate(
   }
 );
 
-export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
@@ -1090,6 +1088,28 @@ export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
     defaultMessage: 'Clear filters',
+  }
+);
+
+export const HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
+  {
+    defaultMessage: 'Review the update to see the latest improvements, then update your rule.',
+  }
+);
+
+export const HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
+  {
+    defaultMessage:
+      'Before editing this rule, we strongly recommend that you update it to ensure you get the latest improvements.',
+  }
+);
+
+export const HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton',
+  {
+    defaultMessage: 'Return to details',
   }
 );
 
@@ -1435,10 +1455,17 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
   }
 );
 
+export const REVIEW_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.reviewRuleButton',
+  {
+    defaultMessage: 'Review rule',
+  }
+);
+
 export const UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.button.conflicts',
   {
-    defaultMessage: 'Rule has conflicts. Resolve them manually.',
+    defaultMessage: 'This rule has conflicts that must be manually resolved.',
   }
 );
 
@@ -1453,5 +1480,12 @@ export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
   'xpack.securitySolution.ruleUpdates.documentationLink',
   {
     defaultMessage: "See what's new in Prebuilt Security Detection Rules",
+  }
+);
+
+export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDuration',
+  {
+    defaultMessage: 'Unfilled gaps duration',
   }
 );

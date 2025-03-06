@@ -110,14 +110,14 @@ export const allowedExperimentalValues = Object.freeze({
   securitySolutionNotesDisabled: false,
 
   /**
-   * Disables entity and alert previews
-   */
-  entityAlertPreviewDisabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
+
+  /**
+   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
+   */
+  assistantAttackDiscoverySchedulingEnabled: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -184,23 +184,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
-  /*
-   * Disables date pickers and sourcerer in analyzer if needed.
-   *
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
-
-  /**
-   * Enables graph visualization in alerts flyout
-   */
-  graphVisualizationInFlyoutEnabled: false,
-
   /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
@@ -228,6 +211,11 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
+   * Enables the storing of gaps in the event log
+   */
+  storeGapsInEventLogEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -246,32 +234,39 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
-  serviceEntityStoreEnabled: false,
+  serviceEntityStoreEnabled: true,
 
   /**
-   * Enables the siem migrations feature
+   * Disables the siem migrations feature
    */
-  siemMigrationsEnabled: false,
+  siemMigrationsDisabled: false,
 
   /**
    * Enables the Defend Insights feature
    */
-  defendInsights: false,
+  defendInsights: true,
 
   /**
-   * Enables flyout history and new preview navigation
+   * Disables flyout history and new preview navigation
    */
-  newExpandableFlyoutNavigationEnabled: false,
+  newExpandableFlyoutNavigationDisabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
+   * Release: 8.18/9.0
    */
-  crowdstrikeRunScriptEnabled: false,
+  crowdstrikeRunScriptEnabled: true,
 
   /**
-   * Enables the Asset Inventory feature
+   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
+   * Release: 8.18/9.0
    */
-  assetInventoryStoreEnabled: false,
+  responseActionsMSDefenderEndpointEnabled: true,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

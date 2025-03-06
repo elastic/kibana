@@ -38,15 +38,14 @@
     "@kbn/fleet-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
-    "@kbn/cloud-defend-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/discover-plugin",
     "@kbn/logging",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/dev-utils"
+    "@kbn/dev-utils",
   ]
 }

@@ -19,6 +19,7 @@ import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { createRuleImportErrorObject } from '../../import/errors';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 interface ImportRuleOptions {
   actionsClient: ActionsClient;
@@ -26,7 +27,7 @@ interface ImportRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 export const importRule = async ({
@@ -35,7 +36,7 @@ export const importRule = async ({
   importRulePayload,
   prebuiltRuleAssetClient,
   mlAuthz,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: ImportRuleOptions): Promise<RuleResponse> => {
   const { ruleToImport, overwriteRules, overrideFields, allowMissingConnectorSecrets } =
     importRulePayload;
@@ -62,7 +63,7 @@ export const importRule = async ({
       prebuiltRuleAssetClient,
       existingRule,
       ruleUpdate: rule,
-      isRuleCustomizationEnabled,
+      ruleCustomizationStatus,
     });
     // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
     ruleWithUpdates = { ...ruleWithUpdates, ...overrideFields };

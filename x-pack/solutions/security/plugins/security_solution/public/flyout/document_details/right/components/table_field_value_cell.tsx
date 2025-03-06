@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getFieldFormat } from '../utils/get_field_format';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { OverflowField } from '../../../../common/components/tables/helpers';
@@ -66,7 +65,6 @@ export const TableFieldValueCell = memo(
     values,
     isPreview,
   }: FieldValueCellProps) => {
-    const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
     if (values == null) {
       return null;
     }
@@ -92,7 +90,7 @@ export const TableFieldValueCell = memo(
             <EuiFlexItem grow={false} key={`${i}-${value}`}>
               {data.field === MESSAGE_FIELD_NAME ? (
                 <OverflowField value={value} />
-              ) : isPreviewEnabled && hasPreview(data.field) ? (
+              ) : hasPreview(data.field) ? (
                 <PreviewLink
                   field={data.field}
                   value={value}
@@ -110,7 +108,6 @@ export const TableFieldValueCell = memo(
                   fieldFromBrowserField={fieldFromBrowserField}
                   fieldType={data.type}
                   isAggregatable={fieldFromBrowserField.aggregatable}
-                  isDraggable={false}
                   isObjectArray={data.isObjectArray}
                   value={value}
                   linkValue={getLinkValue && getLinkValue(data.field)}

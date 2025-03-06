@@ -52,11 +52,18 @@ components:
           $ref: '#/components/schemas/EntityAfterKey'
         user:
           $ref: '#/components/schemas/EntityAfterKey'
+        service:
+          $ref: '#/components/schemas/EntityAfterKey'
+        universal:
+          $ref: '#/components/schemas/EntityAfterKey'
       example:
         host:
           'host.name': 'example.host'
         user:
           'user.name': 'example_user_name'
+        service:
+          'service.name': 'example_service_name'
+
 
     DataViewId:
       description: The identifier of the Kibana data view to be used when generating risk scores.
@@ -94,6 +101,8 @@ components:
       enum:
         - host
         - user
+        - service
+        - universal
 
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
@@ -247,6 +256,10 @@ components:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
                 user:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                service:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                universal:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
 
         - allOf:
             - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
@@ -258,7 +271,24 @@ components:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
                 user:
                   $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
-
+                service:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                universal:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+        - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - type: object
+              required:
+                - service
+              properties:
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                service:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                universal:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
     RiskScoreWeights:
       description: 'A list of weights to be applied to the scoring calculation.'
       type: array
@@ -268,6 +298,7 @@ components:
         - type: 'global_identifier'
           host: 0.5
           user: 0.1
+          service: 0.4
 
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable

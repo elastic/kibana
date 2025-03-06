@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
@@ -21,6 +21,7 @@ export interface TransformManager {
   start(transformId: TransformId): Promise<void>;
   stop(transformId: TransformId): Promise<void>;
   uninstall(transformId: TransformId): Promise<void>;
+  getVersion(transformId: TransformId): Promise<number | undefined>;
 }
 
 export class DefaultTransformManager implements TransformManager {
@@ -33,7 +34,7 @@ export class DefaultTransformManager implements TransformManager {
   async install(slo: SLODefinition): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      this.logger.debug(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
@@ -46,7 +47,9 @@ export class DefaultTransformManager implements TransformManager {
         }
       );
     } catch (err) {
-      this.logger.error(`Cannot create SLO transform for indicator type [${slo.indicator.type}]`);
+      this.logger.debug(
+        `Cannot create SLO transform for indicator type [${slo.indicator.type}]. ${err}`
+      );
       if (err.meta?.body?.error?.type === 'security_exception') {
         throw new SecurityException(err.meta.body.error.reason);
       }
@@ -60,7 +63,7 @@ export class DefaultTransformManager implements TransformManager {
   async inspect(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      this.logger.debug(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
@@ -77,7 +80,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot preview SLO transform [${transformId}]`);
+      this.logger.debug(`Cannot preview SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -94,7 +97,7 @@ export class DefaultTransformManager implements TransformManager {
       );
       await this.scheduleNowTransform(transformId);
     } catch (err) {
-      this.logger.error(`Cannot start SLO transform [${transformId}]`);
+      this.logger.debug(`Cannot start SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -110,7 +113,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot stop SLO transform [${transformId}]`);
+      this.logger.debug(`Cannot stop SLO transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -126,7 +129,24 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot delete SLO transform [${transformId}]`);
+      this.logger.debug(`Cannot delete SLO transform [${transformId}]. ${err}`);
+      throw err;
+    }
+  }
+
+  async getVersion(transformId: TransformId): Promise<number | undefined> {
+    try {
+      const response = await retryTransientEsErrors(
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
+            { transform_id: transformId },
+            { ignore: [404] }
+          ),
+        { logger: this.logger }
+      );
+      return response?.transforms[0]?._meta?.version;
+    } catch (err) {
+      this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -138,8 +158,7 @@ export class DefaultTransformManager implements TransformManager {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
       })
       .catch((e) => {
-        this.logger.error(`Cannot schedule now SLO transform [${transformId}]`);
-        this.logger.error(e);
+        this.logger.debug(`Cannot schedule now SLO transform [${transformId}]. ${e}`);
       });
   }
 }

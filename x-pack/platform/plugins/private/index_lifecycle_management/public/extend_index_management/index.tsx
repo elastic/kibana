@@ -186,6 +186,7 @@ export const ilmFilterExtension = (indices: Index[]) => {
           defaultMessage: 'Lifecycle phase',
         }),
         multiSelect: 'or',
+        autoSortOptions: false,
         options: [
           {
             value: 'hot',

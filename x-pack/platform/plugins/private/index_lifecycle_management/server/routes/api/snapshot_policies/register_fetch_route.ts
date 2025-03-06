@@ -10,7 +10,16 @@ import { addBasePath } from '../../../services';
 
 export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/snapshot_policies'), validate: false },
+    {
+      path: addBasePath('/snapshot_policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;

@@ -9,11 +9,11 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type {
-  ElasticRule,
+  ElasticRulePartial,
   OriginalRule,
   RuleMigration,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { Integration } from '../../../../types';
+import type { RuleMigrationIntegration } from '../../../../types';
 import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
@@ -22,11 +22,11 @@ export const translateRuleState = Annotation.Root({
     default: () => [],
   }),
   original_rule: Annotation<OriginalRule>(),
-  integration: Annotation<Integration>({
+  integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
-    default: () => ({} as Integration),
+    default: () => ({} as RuleMigrationIntegration),
   }),
-  translation_finalized: Annotation<boolean>({
+  includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
   }),
@@ -38,9 +38,9 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  elastic_rule: Annotation<ElasticRule>({
+  elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
-    default: () => ({} as ElasticRule),
+    default: () => ({} as ElasticRulePartial),
   }),
   validation_errors: Annotation<TranslateRuleValidationErrors>({
     reducer: (current, value) => value ?? current,

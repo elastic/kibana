@@ -43,17 +43,6 @@ import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/rou
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
 import { registerWorkflowInsightsRoutes } from '../endpoint/routes/workflow_insights';
-import {
-  createEsIndexRoute,
-  createPrebuiltSavedObjectsRoute,
-  createStoredScriptRoute,
-  deleteEsIndicesRoute,
-  deletePrebuiltSavedObjectsRoute,
-  deleteStoredScriptRoute,
-  getRiskScoreIndexStatusRoute,
-  installRiskScoresRoute,
-  readPrebuiltDevToolContentRoute,
-} from '../lib/risk_score/routes';
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
@@ -64,6 +53,7 @@ import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
+import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -86,7 +76,7 @@ export const initRoutes = (
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, config);
+  registerPrebuiltRulesRoutes(router);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -131,17 +121,6 @@ export const initRoutes = (
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
 
-  // risky score module
-  createEsIndexRoute(router, logger);
-  deleteEsIndicesRoute(router);
-  createStoredScriptRoute(router, logger);
-  deleteStoredScriptRoute(router);
-  readPrebuiltDevToolContentRoute(router);
-  createPrebuiltSavedObjectsRoute(router, logger);
-  deletePrebuiltSavedObjectsRoute(router);
-  getRiskScoreIndexStatusRoute(router);
-  installRiskScoresRoute(router, logger);
-
   // Dashboards
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
@@ -160,4 +139,6 @@ export const initRoutes = (
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
+
+  registerAssetInventoryRoutes({ router, config, logger, getStartServices });
 };

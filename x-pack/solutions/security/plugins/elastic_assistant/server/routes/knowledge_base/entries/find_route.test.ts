@@ -26,7 +26,7 @@ describe('Find Knowledge Base Entries route', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindKnowledgeBaseEntriesResultWithSingleHit())
     );

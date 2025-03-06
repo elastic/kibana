@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';
 import { useWhichFlyout } from './use_which_flyout';

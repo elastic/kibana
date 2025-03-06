@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useCasesFromAlerts } from './use_cases_from_alerts';
 import * as api from './api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -25,14 +25,13 @@ describe('useCasesFromAlerts hook', () => {
 
   it('returns an array of caseIds', async () => {
     const spyOnCases = jest.spyOn(api, 'getCaseIdsFromAlertId');
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useCasesFromAlerts({ alertId: 'anAlertId' })
-    );
-    await waitForNextUpdate();
-    expect(spyOnCases).toHaveBeenCalledTimes(1);
-    expect(result.current).toEqual({
-      loading: false,
-      casesInfo: mockCaseIdsFromAlertId,
+    const { result } = renderHook(() => useCasesFromAlerts({ alertId: 'anAlertId' }));
+    await waitFor(() => {
+      expect(spyOnCases).toHaveBeenCalledTimes(1);
+      expect(result.current).toEqual({
+        loading: false,
+        casesInfo: mockCaseIdsFromAlertId,
+      });
     });
   });
 });

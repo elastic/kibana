@@ -15,7 +15,7 @@
           "NoDataPageProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/no_data/impl/src/no_data_page.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/impl/src/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "NoDataPageProps"
             ],
-            "path": "packages/shared-ux/page/no_data/impl/src/no_data_page.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/impl/src/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,7 +52,7 @@
           "NoDataCardKibanaDependencies",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,7 +68,7 @@
               "NoDataCardKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
           "NoDataCardServices",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,7 +107,7 @@
               "NoDataCardServices",
               ">"
             ],
-            "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +132,7 @@
           ",",
           "ActionCardProps"
         ],
-        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,7 +145,7 @@
             "description": [
               "\nSingle name for the current solution, used to auto-generate the title, logo, description, and button label"
             ],
-            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,7 +161,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,7 +177,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,7 +193,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,7 +209,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -233,7 +233,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -252,7 +252,7 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

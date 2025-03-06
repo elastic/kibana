@@ -7,10 +7,10 @@ actions:
   # Add some alerting API examples
   - target: "$.paths['/api/alerting/rule/{id}']['post']"
     description: "Add examples to create rule API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               createEsQueryEsqlRuleRequest:
                 $ref: "../examples/create_es_query_esql_rule_request.yaml"
@@ -25,7 +25,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 createEsQueryEsqlRuleResponse:
                   $ref: "../examples/create_es_query_esql_rule_response.yaml"
@@ -39,17 +39,17 @@ actions:
                   $ref: "../examples/create_tracking_containment_rule_response.yaml"
   - target: "$.paths['/api/alerting/rule/{id}']['put']"
     description: "Add examples to update rule API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31:
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               updateRuleRequest:
                 $ref: '../examples/update_rule_request.yaml'
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 updateRuleResponse:
                   $ref: '../examples/update_rule_response.yaml'
@@ -59,7 +59,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 findRulesResponse:
                   $ref: '../examples/find_rules_response.yaml'
@@ -77,10 +77,10 @@ actions:
   # Add some alerting rule parameters
   - target: "$.paths['/api/alerting/rule/{id}']['post']"
     description: "Add params to create rule API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31:
+    update:
+      requestBody:
+        content:
+          application/json:
             schema:
               properties:
                 params:
@@ -89,27 +89,27 @@ actions:
                   description: The parameters for the rule.
                   anyOf:
                     # APM anomaly rule (apm.anomaly)
-                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml'
                     # APM error count rule (apm.error_rate)
-                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_error_count.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/apm/server/routes/alerts/rule_types/docs/params_property_apm_error_count.yaml'
                     # APM transaction duration rule (apm.transaction_duration)
-                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
                     # APM transaction error rate rule (apm.transaction_error_rate)
-                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_error_rate.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_error_rate.yaml'
                     # Elasticsearch DSL query rule (.es-query)
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_dsl_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_es_query_dsl_rule.yaml'
                     # Elasticsearch ES|QL query rule (.es-query)
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_esql_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_es_query_esql_rule.yaml'
                     # Elasticsearch KQL query rule (.es-query)
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_kql_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_es_query_kql_rule.yaml'
                     # Index threshold rule ()
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
                     # Infra inventory rule (metrics.alert.inventory.threshold)
-                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
                     # Log threshold rule (logs.alert.document.count)
-                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
                     # Infra metric threshold rule (metrics.alert.threshold)
-                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
                     # SLO burn rate (slo.rules.burnRate)
                     - $ref:  '../../x-pack/solutions/observability/plugins/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
                     # Synthetics uptime TLS rule (xpack.uptime.alerts.tls)
@@ -147,4 +147,3 @@ actions:
                     # Threshold rule (siem.thresholdRule)
                     # TLS certificate rule (xpack.uptime.alerts.tlsCertificate)
                     # Transform health (transform_health)
-  

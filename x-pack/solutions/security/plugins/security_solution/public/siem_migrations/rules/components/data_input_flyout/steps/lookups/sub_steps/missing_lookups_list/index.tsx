@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { EMPTY_RESOURCE_PLACEHOLDER } from '../../../../../../../../../common/siem_migrations/constants';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { UploadedLookups, AddUploadedLookups } from '../../lookups_data_input';
@@ -32,11 +31,11 @@ export const useMissingLookupsListStep = ({
 }: MissingLookupsListStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
 
-  const clearLookup = useCallback(
+  const omitLookup = useCallback(
     (lookupName: string) => {
-      upsertResources(migrationStats.id, [
-        { type: 'list', name: lookupName, content: EMPTY_RESOURCE_PLACEHOLDER },
-      ]);
+      // Saving the lookup with an empty content to omit it.
+      // The translation will ignore this lookup and will not cause partial translations.
+      upsertResources(migrationStats.id, [{ type: 'lookup', name: lookupName, content: '' }]);
     },
     [upsertResources, migrationStats]
   );
@@ -59,7 +58,7 @@ export const useMissingLookupsListStep = ({
         onCopied={onCopied}
         missingLookups={missingLookups}
         uploadedLookups={uploadedLookups}
-        clearLookup={clearLookup}
+        omitLookup={omitLookup}
       />
     ),
   };

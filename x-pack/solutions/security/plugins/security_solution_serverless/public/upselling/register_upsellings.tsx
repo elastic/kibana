@@ -73,10 +73,10 @@ const registerSecuritySolutionUpsellings = (
  * Configures the upsellings for other plugins.
  */
 const configurePluginsUpsellings = (upsellingService: UpsellingService, services: Services) => {
-  const { integrationAssistant } = services;
+  const { automaticImport } = services;
 
   upsellingService.sections$.subscribe((sections) => {
     // @ts-expect-error Type 'FunctionComponent<{}>' is not assignable to type 'ReactNode'.
-    integrationAssistant?.renderUpselling(sections.get('integration_assistant'));
+    automaticImport?.renderUpselling(sections.get('automatic_import'));
   });
 };

@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { find } from 'lodash';
+import _ from 'lodash';
 
 import {
   API_VERSIONS,
@@ -16,9 +16,10 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
+  KnowledgeBaseResource,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
@@ -31,7 +32,7 @@ import { SECURITY_LABS_RESOURCE } from '../constants';
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
       security: {
         authz: {
@@ -41,7 +42,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindKnowledgeBaseEntriesRequestQuery),
@@ -59,7 +60,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -80,7 +81,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: `${userFilter}${systemFilter}${additionalFilter}`,
-            fields: query.fields,
+            fields: query.fields?.map((f) => _.snakeCase(f)),
             aggs: {
               global_aggs: {
                 global: {},
@@ -107,13 +108,13 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           const systemEntries = [
             {
               bucketId: 'securityLabsId',
-              kbResource: SECURITY_LABS_RESOURCE,
+              kbResource: SECURITY_LABS_RESOURCE as KnowledgeBaseResource,
               name: 'Security Labs',
               required: true,
             },
           ]
             .map(({ bucketId, kbResource, name, required }) => {
-              const bucket = find(
+              const bucket = _.find(
                 (
                   (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
                     ?.kb_resource_aggregation as {
@@ -138,6 +139,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                         createdBy: entry.created_by,
                         updatedAt: entry.updated_at,
                         updatedBy: entry.updated_by,
+                        global: true,
                         users: [],
                         name,
                         namespace: entry.namespace,

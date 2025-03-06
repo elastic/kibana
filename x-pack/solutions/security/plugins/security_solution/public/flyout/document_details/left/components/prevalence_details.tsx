@@ -22,7 +22,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
@@ -40,6 +39,8 @@ import {
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID,
 } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
@@ -50,6 +51,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
 import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
@@ -82,13 +84,13 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    */
   isPlatinumPlus: boolean;
   /**
-   * If enabled, clicking host or user should open an entity preview
-   */
-  isPreviewEnabled: boolean;
-  /**
    * Scope id to pass to the preview link
    */
   scopeId: string;
+  /**
+   * True if user have the correct timeline read privilege
+   */
+  canUseTimeline: boolean;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
@@ -115,7 +117,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
         {data.values.map((value) => {
-          if (data.isPreviewEnabled && hasPreview(data.field)) {
+          if (hasPreview(data.field)) {
             return (
               <EuiFlexItem key={value}>
                 <CellActions field={data.field} value={value}>
@@ -174,17 +176,29 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       const dataProviders = data.values.map((value) =>
         getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value)
       );
-      return data.alertCount > 0 ? (
+
+      if (data.alertCount === 0) {
+        return getEmptyTagValue();
+      }
+
+      const alertCount = <FormattedCount count={data.alertCount} />;
+      if (!data.canUseTimeline) {
+        return (
+          <EuiText size="xs" data-test-subj={PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID}>
+            {alertCount}
+          </EuiText>
+        );
+      }
+      return (
         <InvestigateInTimelineButton
           asEmptyButton={true}
           dataProviders={dataProviders}
           filters={[]}
           timeRange={{ kind: 'absolute', from: data.from, to: data.to }}
+          data-test-subj={PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
         >
-          <FormattedCount count={data.alertCount} />
+          {alertCount}
         </InvestigateInTimelineButton>
-      ) : (
-        getEmptyTagValue()
       );
     },
     width: '10%',
@@ -229,18 +243,30 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
           ),
         ],
       }));
-      return data.docCount > 0 ? (
+
+      if (data.docCount === 0) {
+        return getEmptyTagValue();
+      }
+
+      const docCount = <FormattedCount count={data.docCount} />;
+      if (!data.canUseTimeline) {
+        return (
+          <EuiText size="xs" data-test-subj={PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID}>
+            {docCount}
+          </EuiText>
+        );
+      }
+      return (
         <InvestigateInTimelineButton
           asEmptyButton={true}
           dataProviders={dataProviders}
           filters={[]}
           timeRange={{ kind: 'absolute', from: data.from, to: data.to }}
           keepDataView // changing dataview from only detections to include non-alerts docs
+          data-test-subj={PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
         >
-          <FormattedCount count={data.docCount} />
+          {docCount}
         </InvestigateInTimelineButton>
-      ) : (
-        getEmptyTagValue()
       );
     },
     width: '10%',
@@ -330,8 +356,11 @@ export const PrevalenceDetails: React.FC = () => {
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
 
+  const {
+    timelinePrivileges: { read: canUseTimeline },
+  } = useUserPrivileges();
+
   const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   // these two are used by the usePrevalence hook to fetch the data
   const [start, setStart] = useState(DEFAULT_FROM);
@@ -382,10 +411,10 @@ export const PrevalenceDetails: React.FC = () => {
         from: absoluteStart,
         to: absoluteEnd,
         isPlatinumPlus,
-        isPreviewEnabled,
         scopeId,
+        canUseTimeline,
       })),
-    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId]
+    [data, absoluteStart, absoluteEnd, canUseTimeline, isPlatinumPlus, scopeId]
   );
 
   const upsell = (

@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.show',
-  {
-    defaultMessage: 'Show hosts',
-  }
-);
-
-export const HIDE_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.hide',
-  {
-    defaultMessage: 'Hide hosts',
-  }
-);
-
 export const SHOW_USERS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.users.show',
   {
@@ -35,21 +21,21 @@ export const HIDE_USERS_RISK_SCORE = i18n.translate(
   }
 );
 
-export const RISK_SCORE_MODULE_STATUS = i18n.translate(
+export const RISK_ENGINE_STATUS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.status',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const RISK_SCORE_MODULE_STATUS_ON = i18n.translate(
+export const RISK_ENGINE_STATUS_ON = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
   {
     defaultMessage: 'On',
   }
 );
 
-export const RISK_SCORE_MODULE_STATUS_OFF = i18n.translate(
+export const RISK_ENGINE_STATUS_OFF = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.statusOff',
   {
     defaultMessage: 'Off',
@@ -74,20 +60,6 @@ export const EA_DASHBOARD_LINK = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
   {
     defaultMessage: 'Entity Analytics dashboard',
-  }
-);
-
-export const EA_DOCS_RISK_HOSTS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsHosts',
-  {
-    defaultMessage: 'Host risk score',
-  }
-);
-
-export const EA_DOCS_RISK_USERS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsUsers',
-  {
-    defaultMessage: 'User risk score',
   }
 );
 
@@ -145,71 +117,6 @@ export const PREVIEW_QUERY_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const UPDATE_AVAILABLE = i18n.translate('xpack.securitySolution.riskScore.updateAvailable', {
-  defaultMessage: 'Update available',
-});
-
-export const START_UPDATE = i18n.translate('xpack.securitySolution.riskScore.startUpdate', {
-  defaultMessage: 'Start update',
-});
-
-export const UPDATING_RISK_ENGINE = i18n.translate(
-  'xpack.securitySolution.riskScore.updatingRiskEngine',
-  {
-    defaultMessage: 'Updating risk engine...',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModa.title',
-  {
-    defaultMessage: 'Do you want to update the entity risk engine?',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_1 = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModal.existingUserHost_1',
-  {
-    defaultMessage: 'Existing user and host risk score transforms will be deleted',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2 = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModal.existingUserHost_2',
-  {
-    defaultMessage: ', as they are no longer required.',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_1 = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModal.existingData_1',
-  {
-    defaultMessage: 'Legacy risk score data will not be deleted',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_2 = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModal.existingData_2',
-  {
-    defaultMessage:
-      ', it will still exist in the index but will no longer be available in the user interface. You will need to remove legacy risk score data manually.',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_BUTTON_NO = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModal.buttonNo',
-  {
-    defaultMessage: 'No, not yet',
-  }
-);
-
-export const UPDATE_RISK_ENGINE_MODAL_BUTTON_YES = i18n.translate(
-  'xpack.securitySolution.riskScore.updateRiskEngineModal.buttonYes',
-  {
-    defaultMessage: 'Yes, update now!',
-  }
-);
-
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
@@ -231,50 +138,6 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   }
 );
 
-export const UPDATE_PANEL_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.updatePanel.title',
-  {
-    defaultMessage: 'New entity risk scoring engine available',
-  }
-);
-
-export const UPDATE_PANEL_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.updatePanel.message',
-  {
-    defaultMessage:
-      'A new entity risk scoring engine is available. Update now to get the latest features.',
-  }
-);
-
-export const UPDATE_PANEL_GO_TO_MANAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.updatePanel.goToManage',
-  {
-    defaultMessage: 'Manage',
-  }
-);
-
-export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
-  'xpack.securitySolution.riskScore.updatePanel.Dismiss',
-  {
-    defaultMessage: 'Dismiss',
-  }
-);
-
-export const getMaxSpaceTitle = (maxSpaces: number) =>
-  i18n.translate('xpack.securitySolution.riskScore.maxSpacePanel.title', {
-    defaultMessage:
-      'You cannot enable entity risk scoring in more than {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}.',
-    values: { maxSpaces },
-  });
-
-export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.maxSpacePanel.message',
-  {
-    defaultMessage:
-      'You can disable entity risk scoring in the space it is currently enabled before enabling it in this space',
-  }
-);
-
 export const CHECK_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.riskScore.errors.privileges.check',
   {
@@ -289,14 +152,14 @@ export const NEED_TO_HAVE = i18n.translate(
   }
 );
 
-export const RISK_SCORE_MODULE_TURNED_ON = i18n.translate(
+export const RISK_ENGINE_TURNED_ON = i18n.translate(
   'xpack.securitySolution.riskScore.moduleTurnedOn',
   {
     defaultMessage: 'Entity risk score has been turned on',
   }
 );
 
-export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
+export const RISK_ENGINE_TURNED_OFF = i18n.translate(
   'xpack.securitySolution.riskScore.moduleTurnedOff',
   {
     defaultMessage: 'Entity risk score has been turned off',
@@ -313,7 +176,7 @@ export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
 export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
-    defaultMessage: 'Risk engine Saved Object configuration updated successfully',
+    defaultMessage: 'Your configuration was updated.',
   }
 );
 
@@ -338,6 +201,13 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     defaultMessage: `Next engine run in {timeInMinutes}`,
     values: { timeInMinutes },
   });
+
+export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.riskEngineStatus',
+  {
+    defaultMessage: 'Risk engine status',
+  }
+);
 
 export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
   defaultMessage: 'Run Engine',

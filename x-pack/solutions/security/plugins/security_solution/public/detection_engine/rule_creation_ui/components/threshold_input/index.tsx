@@ -7,14 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
-
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
-
-const FIELD_COMBO_BOX_WIDTH = 410;
+import * as styles from './styles';
+import { FieldSectionGroup } from './styles';
 
 export interface FieldValueThreshold {
   field: string[];
@@ -32,10 +30,6 @@ interface ThresholdInputProps {
   thresholdCardinalityValue: FieldHook;
   browserFields: DataViewFieldBase[];
 }
-
-const OperatorWrapper = styled(EuiFlexItem)`
-  align-self: center;
-`;
 
 const fieldDescribedByIds = ['detectionEngineStepDefineRuleThresholdField'];
 const valueDescribedByIds = ['detectionEngineStepDefineRuleThresholdValue'];
@@ -56,7 +50,6 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
       options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
     }),
     [browserFields]
   );
@@ -67,16 +60,15 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
       options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
       singleSelection: { asPlainText: true },
     }),
     [browserFields]
   );
 
   return (
-    <EuiFlexGroup direction="column" style={{ marginLeft: 0 }}>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column" className={styles.mainContainer}>
+      <FieldSectionGroup>
+        <EuiFlexItem className={styles.dropdownContainer}>
           <Field
             field={thresholdField}
             idAria={fieldDescribedByIds[0]}
@@ -86,8 +78,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             euiFieldProps={fieldEuiFieldProps}
           />
         </EuiFlexItem>
-        <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={styles.operatorContainer}>{'>='}</EuiFlexItem>
+        <EuiFlexItem className={styles.input}>
           <Field
             field={thresholdValue}
             idAria={valueDescribedByIds[0]}
@@ -96,9 +88,9 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdValue.type}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+      </FieldSectionGroup>
+      <FieldSectionGroup>
+        <EuiFlexItem className={styles.dropdownContainer}>
           <Field
             field={thresholdCardinalityField}
             idAria={cardinalityFieldDescribedByIds[0]}
@@ -108,8 +100,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             euiFieldProps={cardinalityFieldEuiProps}
           />
         </EuiFlexItem>
-        <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={styles.operatorContainer}>{'>='}</EuiFlexItem>
+        <EuiFlexItem className={styles.input}>
           <Field
             field={thresholdCardinalityValue}
             idAria={cardinalityValueDescribedByIds[0]}
@@ -118,7 +110,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdCardinalityValue.type}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </FieldSectionGroup>
     </EuiFlexGroup>
   );
 };

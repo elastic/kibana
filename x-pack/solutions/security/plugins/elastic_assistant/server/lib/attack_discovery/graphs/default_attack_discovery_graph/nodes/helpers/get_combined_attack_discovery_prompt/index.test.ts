@@ -6,12 +6,14 @@
  */
 
 import { getCombinedAttackDiscoveryPrompt } from '.';
+import { ATTACK_DISCOVERY_CONTINUE } from '../../../../../../prompt/prompts';
 
 describe('getCombinedAttackDiscoveryPrompt', () => {
   it('returns the initial query when there are no partial results', () => {
     const result = getCombinedAttackDiscoveryPrompt({
       anonymizedAlerts: ['alert1', 'alert2'],
       attackDiscoveryPrompt: 'attackDiscoveryPrompt',
+      continuePrompt: ATTACK_DISCOVERY_CONTINUE,
       combinedMaybePartialResults: '',
     });
 
@@ -31,6 +33,7 @@ alert2
     const result = getCombinedAttackDiscoveryPrompt({
       anonymizedAlerts: ['alert1', 'alert2'],
       attackDiscoveryPrompt: 'attackDiscoveryPrompt',
+      continuePrompt: ATTACK_DISCOVERY_CONTINUE,
       combinedMaybePartialResults: 'partialResults',
     });
 

@@ -13,12 +13,18 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { AssistantAnimatedIcon } from '../assistant_animated_icon';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
 import { Conversation } from '../../..';
@@ -29,7 +35,7 @@ interface Props {
   comments: JSX.Element;
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
-  handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
@@ -53,6 +59,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
   isWelcomeSetup,
   setIsSettingsModalVisible,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const isEmptyConversation = useMemo(
     () => currentConversation?.messages.length === 0,
     [currentConversation?.messages.length]
@@ -64,16 +72,16 @@ export const AssistantBody: FunctionComponent<Props> = ({
         <EuiText
           data-test-subj="assistant-disclaimer"
           textAlign="center"
-          color={euiThemeVars.euiColorMediumShade}
+          color={euiTheme.colors.textDisabled}
           size="xs"
           css={css`
-            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+            margin: 0 ${euiTheme.size.l} ${euiTheme.size.m} ${euiTheme.size.l};
           `}
         >
           {i18n.DISCLAIMER}
         </EuiText>
       ),
-    [isEmptyConversation]
+    [euiTheme, isEmptyConversation]
   );
 
   // Start Scrolling
@@ -91,7 +99,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
     (
       commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
     ).lastElementChild?.scrollIntoView();
-  });
+    // currentConversation is required in the dependency array to keep the scroll at the bottom.
+  }, [currentConversation]);
   //  End Scrolling
 
   if (!isAssistantEnabled) {
@@ -102,7 +111,10 @@ export const AssistantBody: FunctionComponent<Props> = ({
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         {isLoading ? (
-          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={<AssistantAnimatedIcon />} />
+          <EuiEmptyPrompt
+            data-test-subj="animatedLogo"
+            icon={<AssistantBeacon backgroundColor="emptyShade" />}
+          />
         ) : isWelcomeSetup ? (
           <WelcomeSetup
             currentConversation={currentConversation}

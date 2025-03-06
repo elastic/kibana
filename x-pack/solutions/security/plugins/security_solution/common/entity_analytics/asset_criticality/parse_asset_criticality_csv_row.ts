@@ -7,13 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
-import type { AssetCriticalityUpsert, CriticalityLevel } from './types';
+import { type AssetCriticalityUpsertForBulkUpload, type CriticalityLevel } from './types';
+import { EntityTypeToIdentifierField, type EntityType } from '../types';
+import { getAssetCriticalityEntityTypes } from './utils';
+import type { ExperimentalFeatures } from '../../experimental_features';
 
 const MAX_COLUMN_CHARS = 1000;
 
 interface ValidRecord {
   valid: true;
-  record: AssetCriticalityUpsert;
+  record: AssetCriticalityUpsertForBulkUpload;
 }
 interface InvalidRecord {
   valid: false;
@@ -37,7 +40,10 @@ const trimColumn = (column: string): string => {
   return column.length > MAX_COLUMN_CHARS ? `${column.substring(0, MAX_COLUMN_CHARS)}...` : column;
 };
 
-export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
+export const parseAssetCriticalityCsvRow = (
+  row: string[],
+  experimentalFeatures: ExperimentalFeatures
+): ReturnType => {
   if (row.length !== 3) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError', {
@@ -98,16 +104,20 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     );
   }
 
-  if (entityType !== 'host' && entityType !== 'user') {
+  const enabledEntityTypes = getAssetCriticalityEntityTypes(experimentalFeatures);
+  if (!enabledEntityTypes.includes(entityType as EntityType)) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError', {
-        defaultMessage: 'Invalid entity type "{entityType}", expected host or user',
-        values: { entityType: trimColumn(entityType) },
+        defaultMessage: 'Invalid entity type "{entityType}", expected to be one of: {validTypes}',
+        values: {
+          entityType: trimColumn(entityType),
+          validTypes: enabledEntityTypes.join(', '),
+        },
       })
     );
   }
 
-  const idField = entityType === 'host' ? 'host.name' : 'user.name';
+  const idField = EntityTypeToIdentifierField[entityType as EntityType];
 
   return {
     valid: true,

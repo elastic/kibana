@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { createAddToTimelineLensAction, getInvestigatedValue } from './add_to_timeline';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -15,7 +14,7 @@ import type { DataProvider } from '../../../../../common/types';
 import { TimelineId, EXISTS_OPERATOR } from '../../../../../common/types';
 import { addProvider } from '../../../../timelines/store/actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 
@@ -46,16 +45,6 @@ const getMockLensApi = (
     saveToLibrary: jest.fn(async () => 'saved-id'),
   });
 
-const getMockEmbeddable = (type: string): IEmbeddable =>
-  ({
-    type,
-    filters$: new BehaviorSubject<Filter[] | undefined>([]),
-    query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-      query: 'test',
-      language: 'kuery',
-    }),
-  } as unknown as IEmbeddable);
-
 const lensEmbeddable = getMockLensApi();
 
 const columnMeta = {
@@ -82,7 +71,7 @@ describe('createAddToTimelineLensAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to timeline');
+    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to Timeline');
   });
 
   it('should return icon type', () => {
@@ -90,11 +79,14 @@ describe('createAddToTimelineLensAction', () => {
   });
 
   describe('isCompatible', () => {
-    it('should return false if error embeddable', async () => {
+    it('should return false if lens embeddable has blocking error', async () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          embeddable: new ErrorEmbeddable('some error', {} as EmbeddableInput),
+          embeddable: {
+            ...getMockLensApi(),
+            blockingError$: new BehaviorSubject(new Error('some error')),
+          },
         })
       ).toEqual(false);
     });
@@ -103,7 +95,9 @@ describe('createAddToTimelineLensAction', () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          embeddable: getMockEmbeddable('not_lens') as unknown as IEmbeddable,
+          embeddable: {
+            type: 'not_lens',
+          },
         })
       ).toEqual(false);
     });
@@ -169,8 +163,26 @@ describe('createAddToTimelineLensAction', () => {
       expect(await addToTimelineAction.isCompatible(context)).toEqual(false);
     });
 
-    it('should return true if everything is okay', async () => {
-      expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
+    it('should return false when the user does not have access to timeline', async () => {
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = false;
+      const _action = createAddToTimelineLensAction({ store, order: 1 });
+      expect(await _action.isCompatible(context)).toEqual(false);
+    });
+
+    it('should return true when the user has read access to timeline', async () => {
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = true;
+      const _action = createAddToTimelineLensAction({ store, order: 1 });
+      expect(await _action.isCompatible(context)).toEqual(false);
     });
   });
 

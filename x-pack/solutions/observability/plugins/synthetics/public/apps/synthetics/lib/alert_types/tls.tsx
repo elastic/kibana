@@ -10,9 +10,9 @@ import { ALERT_REASON, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils'
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { TlsTranslations } from '../../../../../common/rules/synthetics/translations';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
-import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
 
 import type { AlertTypeInitializer } from './types';
 
@@ -30,7 +30,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.syntheticsAlerting}`;
   },
-  ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSParams>) => (
+  ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSRuleParams>) => (
     <TLSAlert
       coreStart={core}
       plugins={plugins}
@@ -50,7 +50,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
     link: `/app/synthetics${CERTIFICATES_ROUTE}`,

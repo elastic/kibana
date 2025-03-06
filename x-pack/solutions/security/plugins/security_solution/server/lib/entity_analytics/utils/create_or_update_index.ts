@@ -13,7 +13,7 @@ import type {
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 /**
- * It's check for index existatnce, and create index
+ * It's check for index existence, and create index
  * or update existing index mappings
  */
 export const createOrUpdateIndex = async ({
@@ -40,6 +40,7 @@ export const createOrUpdateIndex = async ({
           indices.map(async (index) => {
             try {
               await retryTransientEsErrors(
+                // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
                 () => esClient.indices.putMapping({ index, body: options.mappings }),
                 { logger }
               );

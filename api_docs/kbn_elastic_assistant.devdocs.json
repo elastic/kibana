@@ -128,179 +128,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.AssistantAvatar",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "AssistantAvatar",
-        "description": [
-          "\nDefault Elastic AI Assistant logo\n"
-        ],
-        "signature": [
-          "({ className, size }: ",
-          "AssistantAvatarProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "integrationAssistant",
-            "path": "x-pack/platform/plugins/shared/integration_assistant/public/components/create_integration/create_integration_landing/integration_assistant_card.tsx"
-          },
-          {
-            "plugin": "integrationAssistant",
-            "path": "x-pack/platform/plugins/shared/integration_assistant/public/components/create_integration/create_integration_landing/integration_assistant_card.tsx"
-          },
-          {
-            "plugin": "integrationAssistant",
-            "path": "x-pack/platform/plugins/shared/integration_assistant/public/components/create_integration/create_integration_assistant/header/header.tsx"
-          },
-          {
-            "plugin": "integrationAssistant",
-            "path": "x-pack/platform/plugins/shared/integration_assistant/public/components/create_integration/create_integration_assistant/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/ecs-data-quality-dashboard",
-            "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/actions/chat/index.tsx"
-          },
-          {
-            "plugin": "@kbn/ecs-data-quality-dashboard",
-            "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/actions/chat/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/header_link.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/header_link.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/title/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/title/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/empty_prompt/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/empty_prompt/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/no_alerts/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/no_alerts/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/welcome/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/welcome/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/assistant/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/assistant/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/components/ai_assistant/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/components/ai_assistant/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/components/rule_details_flyout/tabs/summary/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/components/rule_details_flyout/tabs/summary/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.AssistantAvatar.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ className, size = 's' }",
-            "description": [],
-            "signature": [
-              "AssistantAvatarProps"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.AssistantOverlay",
         "type": "Function",
         "tags": [],
@@ -339,7 +166,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, baseConversations, navigateToApp, nameSpace, title, toasts, currentAppId, userProfileService, }: ",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, title, toasts, currentAppId, userProfileService, chrome, }: ",
           "AssistantProviderProps",
           ") => React.JSX.Element"
         ],
@@ -352,7 +179,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  baseConversations,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
             "description": [],
             "signature": [
               "AssistantProviderProps"
@@ -375,13 +202,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", conversationsActions: ",
           {
             "pluginId": "@kbn/elastic-assistant",
@@ -391,13 +212,7 @@
             "text": "ConversationsBulkActions"
           },
           ", toasts?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           " | undefined) => Promise<",
           {
             "pluginId": "@kbn/elastic-assistant",
@@ -420,13 +235,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/bulk_update_actions_conversations.ts",
             "deprecated": false,
@@ -462,13 +271,7 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/bulk_update_actions_conversations.ts",
@@ -489,21 +292,9 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", prompts: { create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; content?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { ids?: string[] | undefined; query?: string | undefined; } | undefined; }, toasts?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           " | undefined) => Promise<{ attributes: { results: { created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
@@ -518,13 +309,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
             "deprecated": false,
@@ -554,13 +339,7 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
@@ -674,21 +453,9 @@
         "description": [],
         "signature": [
           "({ http, signal, toasts, }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; toasts: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           "; signal?: AbortSignal | undefined; }) => Promise<{ page: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; perPage: number; total: number; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
@@ -714,13 +481,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
                 "deprecated": false,
@@ -734,13 +495,7 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  }
+                  "IToasts"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
                 "deprecated": false,
@@ -768,33 +523,19 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.getUserConversations",
+        "id": "def-public.getUserConversationsExist",
         "type": "Function",
         "tags": [],
-        "label": "getUserConversations",
+        "label": "getUserConversationsExist",
         "description": [
-          "\nAPI call for getting all user conversations.\n"
+          "\nAPI call for determining whether any user conversations exist\n"
         ],
         "signature": [
           "({ http, signal, toasts, }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; toasts?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
-          " | undefined; signal?: AbortSignal | undefined; }) => Promise<",
-          "FetchConversationsResponse",
-          ">"
+          "IToasts",
+          " | undefined; signal?: AbortSignal | undefined; }) => Promise<boolean>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
         "deprecated": false,
@@ -802,7 +543,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.getUserConversations.$1",
+            "id": "def-public.getUserConversationsExist.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  http,\n  signal,\n  toasts,\n}",
@@ -813,19 +554,13 @@
             "children": [
               {
                 "parentPluginId": "@kbn/elastic-assistant",
-                "id": "def-public.getUserConversations.$1.http",
+                "id": "def-public.getUserConversationsExist.$1.http",
                 "type": "Object",
                 "tags": [],
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
                 "deprecated": false,
@@ -833,19 +568,13 @@
               },
               {
                 "parentPluginId": "@kbn/elastic-assistant",
-                "id": "def-public.getUserConversations.$1.toasts",
+                "id": "def-public.getUserConversationsExist.$1.toasts",
                 "type": "Object",
                 "tags": [],
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  },
+                  "IToasts",
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
@@ -854,7 +583,7 @@
               },
               {
                 "parentPluginId": "@kbn/elastic-assistant",
-                "id": "def-public.getUserConversations.$1.signal",
+                "id": "def-public.getUserConversationsExist.$1.signal",
                 "type": "Object",
                 "tags": [],
                 "label": "signal",
@@ -867,80 +596,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.mergeBaseWithPersistedConversations",
-        "type": "Function",
-        "tags": [],
-        "label": "mergeBaseWithPersistedConversations",
-        "description": [],
-        "signature": [
-          "(baseConversations: Record<string, ",
-          {
-            "pluginId": "@kbn/elastic-assistant",
-            "scope": "public",
-            "docId": "kibKbnElasticAssistantPluginApi",
-            "section": "def-public.Conversation",
-            "text": "Conversation"
-          },
-          ">, conversationsData: ",
-          "FetchConversationsResponse",
-          ") => Record<string, ",
-          {
-            "pluginId": "@kbn/elastic-assistant",
-            "scope": "public",
-            "docId": "kibKbnElasticAssistantPluginApi",
-            "section": "def-public.Conversation",
-            "text": "Conversation"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.mergeBaseWithPersistedConversations.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "baseConversations",
-            "description": [],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "@kbn/elastic-assistant",
-                "scope": "public",
-                "docId": "kibKbnElasticAssistantPluginApi",
-                "section": "def-public.Conversation",
-                "text": "Conversation"
-              },
-              ">"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.mergeBaseWithPersistedConversations.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "conversationsData",
-            "description": [],
-            "signature": [
-              "FetchConversationsResponse"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1229,21 +884,14 @@
         "type": "Function",
         "tags": [],
         "label": "useFetchCurrentUserConversations",
-        "description": [],
+        "description": [
+          "\nAPI call for fetching assistant conversations for the current user"
+        ],
         "signature": [
-          "({ http, onFetch, signal, refetchOnWindowFocus, isAssistantEnabled, }: ",
+          "({ http, fields, filter, page, perPage, signal, sortField, sortOrder, refetchOnWindowFocus, isAssistantEnabled, setTotalItemCount, }: ",
           "UseFetchCurrentUserConversationsParams",
           ") => ",
-          "DefinedUseQueryResult",
-          "<Record<string, ",
-          {
-            "pluginId": "@kbn/elastic-assistant",
-            "scope": "public",
-            "docId": "kibKbnElasticAssistantPluginApi",
-            "section": "def-public.Conversation",
-            "text": "Conversation"
-          },
-          ">, unknown>"
+          "FetchCurrentUserConversations"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/use_fetch_current_user_conversations.ts",
         "deprecated": false,
@@ -1254,7 +902,7 @@
             "id": "def-public.useFetchCurrentUserConversations.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  onFetch,\n  signal,\n  refetchOnWindowFocus = true,\n  isAssistantEnabled,\n}",
+            "label": "{\n  http,\n  fields = query.fields,\n  filter,\n  page = query.page,\n  perPage = query.perPage,\n  signal,\n  sortField = 'updated_at',\n  sortOrder = 'desc',\n  refetchOnWindowFocus = true,\n  isAssistantEnabled,\n  setTotalItemCount,\n}",
             "description": [],
             "signature": [
               "UseFetchCurrentUserConversationsParams"
@@ -1276,20 +924,14 @@
         "label": "useLoadConnectors",
         "description": [],
         "signature": [
-          "({ http, toasts, }: ",
+          "({ http, toasts, inferenceEnabled, }: ",
           "Props",
           ") => ",
           "UseQueryResult",
           "<",
           "AIConnector",
           "[], ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_connectors/index.tsx",
@@ -1301,7 +943,7 @@
             "id": "def-public.useLoadConnectors.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n}",
+            "label": "{\n  http,\n  toasts,\n  inferenceEnabled = false,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -1416,7 +1058,7 @@
             "label": "reportAssistantInvoked",
             "description": [],
             "signature": [
-              "(params: { invokedBy: string; conversationId: string; }) => void"
+              "(params: { invokedBy: string; }) => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1443,17 +1085,6 @@
                     "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
                     "deprecated": false,
                     "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/elastic-assistant",
-                    "id": "def-public.AssistantTelemetry.reportAssistantInvoked.$1.conversationId",
-                    "type": "string",
-                    "tags": [],
-                    "label": "conversationId",
-                    "description": [],
-                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
                   }
                 ]
               }
@@ -1468,7 +1099,7 @@
             "label": "reportAssistantMessageSent",
             "description": [],
             "signature": [
-              "(params: { conversationId: string; role: string; actionTypeId: string; model?: string | undefined; provider?: string | undefined; isEnabledKnowledgeBase: boolean; }) => void"
+              "(params: { role: string; actionTypeId: string; model?: string | undefined; provider?: string | undefined; isEnabledKnowledgeBase: boolean; }) => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1485,17 +1116,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
-                  {
-                    "parentPluginId": "@kbn/elastic-assistant",
-                    "id": "def-public.AssistantTelemetry.reportAssistantMessageSent.$1.conversationId",
-                    "type": "string",
-                    "tags": [],
-                    "label": "conversationId",
-                    "description": [],
-                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
                   {
                     "parentPluginId": "@kbn/elastic-assistant",
                     "id": "def-public.AssistantTelemetry.reportAssistantMessageSent.$1.role",
@@ -1570,7 +1190,7 @@
             "label": "reportAssistantQuickPrompt",
             "description": [],
             "signature": [
-              "(params: { conversationId: string; promptTitle: string; }) => void"
+              "(params: { promptTitle: string; }) => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1587,17 +1207,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
-                  {
-                    "parentPluginId": "@kbn/elastic-assistant",
-                    "id": "def-public.AssistantTelemetry.reportAssistantQuickPrompt.$1.conversationId",
-                    "type": "string",
-                    "tags": [],
-                    "label": "conversationId",
-                    "description": [],
-                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
                   {
                     "parentPluginId": "@kbn/elastic-assistant",
                     "id": "def-public.AssistantTelemetry.reportAssistantQuickPrompt.$1.promptTitle",
@@ -1622,7 +1231,7 @@
             "label": "reportAssistantSettingToggled",
             "description": [],
             "signature": [
-              "(params: { assistantStreamingEnabled?: boolean | undefined; }) => void"
+              "(params: { assistantStreamingEnabled?: boolean | undefined; alertsCountUpdated?: boolean | undefined; }) => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1645,6 +1254,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "assistantStreamingEnabled",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantSettingToggled.$1.alertsCountUpdated",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "alertsCountUpdated",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -2061,7 +1684,7 @@
             "section": "def-public.ClientMessage",
             "text": "ClientMessage"
           },
-          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, \"content\" | \"reader\">"
+          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; metadata?: { contentReferences?: Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; timerange: Zod.ZodOptional<Zod.ZodObject<{ from: Zod.ZodString; to: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { from: string; to: string; }, { from: string; to: string; }>>; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>]>, \"strip\"> | undefined; } | undefined; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, \"content\" | \"reader\">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
         "deprecated": false,
@@ -2316,12 +1939,12 @@
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Conversation.updatedAt",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "updatedAt",
             "description": [],
             "signature": [
-              "Date | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2330,12 +1953,12 @@
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Conversation.createdAt",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "createdAt",
             "description": [],
             "signature": [
-              "Date | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2350,20 +1973,6 @@
             "description": [],
             "signature": [
               "{} & { [k: string]: string; }"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Conversation.isDefault",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDefault",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2740,12 +2349,30 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.ELASTIC_AI_ASSISTANT_TITLE",
+        "id": "def-public.END_LOCAL_STORAGE_KEY",
         "type": "string",
         "tags": [],
-        "label": "ELASTIC_AI_ASSISTANT_TITLE",
+        "label": "END_LOCAL_STORAGE_KEY",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts",
+        "signature": [
+          "\"end\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.FILTERS_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "FILTERS_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"filters\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2768,7 +2395,7 @@
           },
           " | undefined; isFetchingResponse: boolean; refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean | undefined; }) => void; regenerateMessage: (conversationId: string) => void; showAnonymizedValues: boolean; currentUserAvatar?: ",
           "UserAvatar",
-          " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; }) => ",
+          " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; contentReferencesVisible: boolean; }) => ",
           "EuiCommentProps",
           "[]"
         ],
@@ -2795,7 +2422,7 @@
               },
               " | undefined; isFetchingResponse: boolean; refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean | undefined; }) => void; regenerateMessage: (conversationId: string) => void; showAnonymizedValues: boolean; currentUserAvatar?: ",
               "UserAvatar",
-              " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; }"
+              " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; contentReferencesVisible: boolean; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2847,6 +2474,21 @@
           "{ description: string; category: string; tooltip: React.ReactNode; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; suggestedUserPrompt?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.QUERY_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"query\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2910,12 +2552,15 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.WELCOME_CONVERSATION_TITLE",
+        "id": "def-public.START_LOCAL_STORAGE_KEY",
         "type": "string",
         "tags": [],
-        "label": "WELCOME_CONVERSATION_TITLE",
+        "label": "START_LOCAL_STORAGE_KEY",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts",
+        "signature": [
+          "\"start\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

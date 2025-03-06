@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';

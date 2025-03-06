@@ -9,7 +9,7 @@
         "tags": [],
         "label": "UrlForwardingPlugin",
         "description": [],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,13 +22,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -39,7 +33,7 @@
               },
               "[]; }>) => { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
             ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,13 +45,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
                   {
                     "pluginId": "urlForwarding",
@@ -68,7 +56,7 @@
                   },
                   "[]; }>"
                 ],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
+                "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -85,13 +73,7 @@
             "description": [],
             "signature": [
               "({ application, http: { basePath } }: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -102,7 +84,7 @@
               },
               "[]; }"
             ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -114,15 +96,9 @@
                 "label": "{ application, http: { basePath } }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
+                "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -143,7 +119,7 @@
         "tags": [],
         "label": "ForwardDefinition",
         "description": [],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,7 +130,7 @@
             "tags": [],
             "label": "legacyAppId",
             "description": [],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -165,7 +141,7 @@
             "tags": [],
             "label": "newAppId",
             "description": [],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,7 +155,7 @@
             "signature": [
               "(legacyPath: string) => string"
             ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -193,7 +169,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
+                "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -217,7 +193,7 @@
         "signature": [
           "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
         ],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,7 +216,7 @@
           },
           "[]; }"
         ],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

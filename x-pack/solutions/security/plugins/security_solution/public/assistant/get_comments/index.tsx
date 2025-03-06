@@ -9,7 +9,7 @@ import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
@@ -61,6 +61,7 @@ export const getComments: GetAssistantMessages = ({
   currentUserAvatar,
   setIsStreaming,
   systemPromptContent,
+  contentReferencesVisible,
 }) => {
   if (!currentConversation) return [];
 
@@ -85,7 +86,9 @@ export const getComments: GetAssistantMessages = ({
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
               setIsStreaming={setIsStreaming}
+              contentReferencesVisible={contentReferencesVisible}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              contentReferences={null}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}
@@ -117,9 +120,7 @@ export const getComments: GetAssistantMessages = ({
       ? [
           {
             username: i18n.SYSTEM,
-            timelineAvatar: (
-              <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
-            ),
+            timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
             timestamp:
               currentConversation.messages[0].timestamp.length === 0
                 ? new Date().toLocaleString()
@@ -131,6 +132,8 @@ export const getComments: GetAssistantMessages = ({
                 refetchCurrentConversation={refetchCurrentConversation}
                 regenerateMessage={regenerateMessageOfConversation}
                 setIsStreaming={setIsStreaming}
+                contentReferences={null}
+                contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                 // we never need to append to a code block in the system comment, which is what this index is used for
                 index={999}
@@ -148,7 +151,7 @@ export const getComments: GetAssistantMessages = ({
         timelineAvatar: isUser ? (
           <UserAvatar />
         ) : (
-          <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
+          <AssistantAvatar name="machine" size="l" color="subdued" />
         ),
         timestamp: i18n.AT(
           message.timestamp.length === 0
@@ -176,6 +179,8 @@ export const getComments: GetAssistantMessages = ({
           children: (
             <StreamComment
               abortStream={abortStream}
+              contentReferences={null}
+              contentReferencesVisible={contentReferencesVisible}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
@@ -199,6 +204,8 @@ export const getComments: GetAssistantMessages = ({
           <StreamComment
             abortStream={abortStream}
             content={transformedMessage.content}
+            contentReferences={message.metadata?.contentReferences}
+            contentReferencesVisible={contentReferencesVisible}
             index={index}
             isControlsEnabled={isControlsEnabled}
             isError={message.isError}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   buildMutedRulesFilter,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
@@ -73,12 +73,11 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query }: UseCspOptions,
+  { query, sort }: UseCspOptions,
   rulesStates: CspBenchmarkRulesStates,
   isPreview = false
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
-
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: isPreview ? 0 : 500,
@@ -86,6 +85,7 @@ export const buildMisconfigurationsFindingsQuery = (
     ignore_unavailable: true,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
     _source: MISCONFIGURATIONS_SOURCE_FIELDS,
+    sort,
   };
 };
 
@@ -163,12 +163,13 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
   },
 });
 
-export const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
+export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPreview = false) => ({
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   size: isPreview ? 0 : 500,
   aggs: getFindingsCountAggQueryVulnerabilities(),
   ignore_unavailable: true,
   query: buildVulnerabilityFindingsQueryWithFilters(query),
+  sort,
 });
 
 const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {

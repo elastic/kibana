@@ -72,6 +72,7 @@ export const ChangePointDetectionPage: FC = () => {
               'uiSettings',
               'unifiedSearch',
               'usageCollection',
+              'userProfile',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

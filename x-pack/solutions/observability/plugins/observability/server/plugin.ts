@@ -19,7 +19,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -51,6 +51,7 @@ import { uiSettings } from './ui_settings';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../common/constants';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
+import { getCasesFeatureV3 } from './features/cases_v3';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -78,7 +79,9 @@ const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_T
   })
 );
 
-export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
+export class ObservabilityPlugin
+  implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
+{
   private logger: Logger;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -86,7 +89,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
+  public setup(core: CoreSetup<PluginStart, void>, plugins: PluginSetup) {
     const casesCapabilities = createCasesUICapabilities();
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
@@ -94,13 +97,14 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const logsExplorerLocator =
-      plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
+    const logsLocator =
+      plugins.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
     plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -177,7 +181,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
       alertsLocator,
-      logsExplorerLocator,
+      logsLocator,
     });
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
@@ -198,6 +202,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
+        isDev: this.initContext.env.mode.dev,
       });
     });
     /**

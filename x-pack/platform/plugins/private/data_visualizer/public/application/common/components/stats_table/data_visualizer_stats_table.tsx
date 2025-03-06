@@ -41,7 +41,6 @@ import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
-import './_index.scss';
 import type { FieldStatisticTableEmbeddableProps } from '../../../index_data_visualizer/embeddables/grid_embeddable/types';
 import type { DataVisualizerTableItem } from './types';
 

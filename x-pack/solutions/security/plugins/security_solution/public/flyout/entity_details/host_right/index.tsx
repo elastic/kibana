@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -18,14 +17,12 @@ import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_ref
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
@@ -33,15 +30,15 @@ import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHost } from './hooks/use_observed_host';
-import { HostDetailsPanelKey } from '../host_details_left';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
-import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isDraggable?: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -50,7 +47,6 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: HostPanelProps;
 }
 
-export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
 export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';
@@ -60,15 +56,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
-  contextID,
-  scopeId,
-  hostName,
-  isDraggable,
-  isPreviewMode,
-}: HostPanelProps) => {
-  const { telemetry } = useKibana().services;
-  const { openLeftPanel } = useExpandableFlyoutApi();
+export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostPanelProps) => {
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -76,7 +64,7 @@ export const HostPanel = ({
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: EntityType.host,
     filterQuery: hostNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -93,7 +81,7 @@ export const HostPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.host,
+    EntityType.host,
     hostName,
     { onSuccess: refetchRiskScore }
   );
@@ -103,7 +91,7 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'host.name',
+    field: EntityIdentifierFields.hostName,
     value: hostName,
     to,
     from,
@@ -119,45 +107,25 @@ export const HostPanel = ({
     setQuery,
   });
 
-  const openTabPanel = useCallback(
-    (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-        entity: 'host',
-      });
-
-      openLeftPanel({
-        id: HostDetailsPanelKey,
-        params: {
-          name: hostName,
-          scopeId,
-          isRiskScoreExist,
-          path: tab ? { tab } : undefined,
-          hasMisconfigurationFindings,
-          hasVulnerabilitiesFindings,
-          hasNonClosedAlerts,
-        },
-      });
-    },
-    [
-      telemetry,
-      openLeftPanel,
-      hostName,
-      scopeId,
-      isRiskScoreExist,
-      hasMisconfigurationFindings,
-      hasVulnerabilitiesFindings,
-      hasNonClosedAlerts,
-    ]
-  );
+  const { openDetailsPanel, isLinkEnabled } = useNavigateToHostDetails({
+    hostName,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    isPreviewMode,
+    contextID,
+  });
 
   const openDefaultPanel = useCallback(
     () =>
-      openTabPanel(
-        isRiskScoreExist
+      openDetailsPanel({
+        tab: isRiskScoreExist
           ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
-      ),
-    [isRiskScoreExist, openTabPanel]
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+      }),
+    [isRiskScoreExist, openDetailsPanel]
   );
 
   const observedHost = useObservedHost(hostName, scopeId);
@@ -203,19 +171,14 @@ export const HostPanel = ({
               riskScoreState={riskScoreState}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
-              openDetailsPanel={!isPreviewMode ? openTabPanel : undefined}
+              openDetailsPanel={openDetailsPanel}
+              isLinkEnabled={isLinkEnabled}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
-              <HostPreviewPanelFooter
-                hostName={hostName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

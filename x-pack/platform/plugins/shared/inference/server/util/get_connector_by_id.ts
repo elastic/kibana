@@ -6,8 +6,11 @@
  */
 
 import type { ActionsClient, ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
-import { createInferenceRequestError } from '@kbn/inference-common';
-import { isSupportedConnectorType, type InferenceConnector } from '../../common/connectors';
+import {
+  createInferenceRequestError,
+  connectorToInference,
+  type InferenceConnector,
+} from '@kbn/inference-common';
 
 /**
  * Retrieves a connector given the provided `connectorId` and asserts it's an inference connector
@@ -29,18 +32,5 @@ export const getConnectorById = async ({
     throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
   }
 
-  const actionTypeId = connector.actionTypeId;
-
-  if (!isSupportedConnectorType(actionTypeId)) {
-    throw createInferenceRequestError(
-      `Type '${actionTypeId}' not recognized as a supported connector type`,
-      400
-    );
-  }
-
-  return {
-    connectorId: connector.id,
-    name: connector.name,
-    type: actionTypeId,
-  };
+  return connectorToInference(connector);
 };

@@ -98,7 +98,7 @@ useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
 jest.mock('../../entity_analytics/api/hooks/use_risk_score');
 const useRiskScoreMock = useRiskScore as jest.Mock;
-useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
+useRiskScoreMock.mockReturnValue({ loading: false, data: [], hasEngineBeenInstalled: false });
 
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

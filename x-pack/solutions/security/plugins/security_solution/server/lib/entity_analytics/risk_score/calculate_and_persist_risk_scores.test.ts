@@ -14,8 +14,11 @@ import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 import { riskScoreDataClientMock } from './risk_score_data_client.mock';
 import type { RiskScoreDataClient } from './risk_score_data_client';
+import type { ExperimentalFeatures } from '../../../../common';
+import { EntityType } from '../../../../common/search_strategy';
 
 jest.mock('./calculate_risk_scores');
+const mockExperimentalFeatures = {} as ExperimentalFeatures;
 
 const calculateAndPersistRecentHostRiskScores = (
   esClient: ElasticsearchClient,
@@ -24,7 +27,7 @@ const calculateAndPersistRecentHostRiskScores = (
 ) => {
   return calculateAndPersistRiskScores({
     afterKeys: {},
-    identifierType: 'host',
+    identifierType: EntityType.host,
     esClient,
     logger,
     index: 'index',
@@ -34,6 +37,7 @@ const calculateAndPersistRecentHostRiskScores = (
     riskScoreDataClient,
     assetCriticalityService: assetCriticalityServiceMock.create(),
     runtimeMappings: {},
+    experimentalFeatures: mockExperimentalFeatures,
   });
 };
 

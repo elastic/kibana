@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
-import type { OnboardingCardId } from '../../../constants';
 import { useExpandedCard } from './use_expanded_card';
+import type { OnboardingCardId } from '../../../constants';
+import { waitFor, renderHook, act } from '@testing-library/react';
 
-const mockSetCardDetail = jest.fn();
+const mockSetCard = jest.fn();
 jest.mock('../../hooks/use_url_detail', () => ({
   ...jest.requireActual('../../hooks/use_url_detail'),
-  useUrlDetail: () => ({ setCardDetail: mockSetCardDetail }),
+  useUrlDetail: () => ({ setCard: mockSetCard }),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -68,7 +67,7 @@ describe('useExpandedCard Hook', () => {
       });
 
       it('should set the expanded card id', () => {
-        expect(mockSetCardDetail).toHaveBeenCalledWith(mockCardId);
+        expect(mockSetCard).toHaveBeenCalledWith(mockCardId);
       });
 
       it('should not scroll', async () => {
@@ -89,7 +88,7 @@ describe('useExpandedCard Hook', () => {
       });
 
       it('should set the expanded card id', () => {
-        expect(mockSetCardDetail).toHaveBeenCalledWith(mockCardId);
+        expect(mockSetCard).toHaveBeenCalledWith(mockCardId);
       });
 
       it('should scroll', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import {

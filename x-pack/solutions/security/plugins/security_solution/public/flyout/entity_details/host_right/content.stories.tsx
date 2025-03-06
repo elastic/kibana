@@ -32,11 +32,11 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('no observed data', () => (
@@ -57,11 +57,11 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('loading', () => (
@@ -82,10 +82,10 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ));

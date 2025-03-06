@@ -42,10 +42,10 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logsExplorer",
       "logsShared",
       "licensing",
-      "navigation"
+      "navigation",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "discover",
@@ -61,6 +61,7 @@
     ],
     "requiredBundles": [
       "data",
+      "discover",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

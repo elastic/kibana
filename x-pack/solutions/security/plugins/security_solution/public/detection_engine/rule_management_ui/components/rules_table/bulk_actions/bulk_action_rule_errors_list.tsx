@@ -9,10 +9,14 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionsDryRunErrCode } from '../../../../../../common/api/detection_engine/rule_management';
+import {
+  BulkActionTypeEnum,
+  BulkActionsDryRunErrCodeEnum,
+} from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 
 interface BulkActionRuleErrorItemProps {
   errorCode: BulkActionsDryRunErrCode | undefined;
@@ -25,8 +29,12 @@ const BulkEditRuleErrorItem = ({
   message,
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
+  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization'
+  );
+
   switch (errorCode) {
-    case BulkActionsDryRunErrCode.IMMUTABLE:
+    case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -36,17 +44,27 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
+    case BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.prebuiltRulesLicenseDescription"
+            defaultMessage="{rulesCount, plural, =1 {# prebuilt rule} other {# prebuilt rules}} ({upsellingMessage})"
+            values={{ rulesCount, upsellingMessage }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN:
       return (
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesIndexEditDescription"
-            defaultMessage="{rulesCount, plural, =1 {# custom machine learning rule} other {# custom machine learning rules}} (these rules don't have index patterns)"
+            defaultMessage="{rulesCount, plural, =1 {# machine learning rule} other {# machine learning rules}} (these rules don't have index patterns)"
             values={{ rulesCount }}
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
+    case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH:
       return (
         <li key={message}>
           <FormattedMessage
@@ -56,12 +74,12 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+    case BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN:
       return (
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
-            defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
+            defaultMessage="{rulesCount, plural, =1 {# ES|QL rule} other {# ES|QL rules}} (these rules don't have index patterns)"
             values={{ rulesCount }}
           />
         </li>
@@ -85,7 +103,7 @@ const BulkExportRuleErrorItem = ({
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
   switch (errorCode) {
-    case BulkActionsDryRunErrCode.IMMUTABLE:
+    case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -114,7 +132,7 @@ const BulkManualRuleRunErrorItem = ({
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
   switch (errorCode) {
-    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE:
+    case BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_FEATURE:
       return (
         <li key={message}>
           <FormattedMessage
@@ -124,7 +142,7 @@ const BulkManualRuleRunErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE:
+    case BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE:
       return (
         <li key={message}>
           <FormattedMessage

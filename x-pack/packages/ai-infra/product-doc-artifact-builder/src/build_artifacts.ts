@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
 import {
@@ -14,7 +14,6 @@ import {
   createTargetIndex,
   extractDocumentation,
   indexDocuments,
-  installElser,
   createChunkFiles,
   createArtifact,
   cleanupFolders,
@@ -32,6 +31,8 @@ const getSourceClient = (config: TaskConfig) => {
       username: config.sourceClusterUsername,
       password: config.sourceClusterPassword,
     },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 };
 
@@ -45,6 +46,7 @@ const getEmbeddingClient = (config: TaskConfig) => {
     },
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
+    Connection: HttpConnection,
   });
 };
 
@@ -67,9 +69,6 @@ export const buildArtifacts = async (config: TaskConfig) => {
   // await checkConnectivity({ sourceClient, embeddingClient });
 
   await cleanupFolders({ folders: [config.buildFolder] });
-
-  log.info('Ensuring ELSER is installed on the embedding cluster');
-  await installElser({ client: embeddingClient });
 
   for (const productName of config.productNames) {
     await buildArtifact({

@@ -72,6 +72,7 @@ Array [
     "type": "field_value_selection",
   },
   Object {
+    "autoSortOptions": false,
     "field": "ilm.phase",
     "multiSelect": "or",
     "name": "Lifecycle phase",
@@ -178,7 +179,7 @@ exports[`extend index management ilm summary extension should render a phase def
         >
           <span
             class="euiBadge emotion-euiBadge"
-            style="--euiBadgeBackgroundColor: #e7664c; --euiBadgeTextColor: #000;"
+            style="--euiBadgeBackgroundColor: #F6726A; --euiBadgeTextColor: #07101F;"
             title="Hot"
           >
             <span
@@ -348,7 +349,7 @@ exports[`extend index management ilm summary extension should render a step info
         >
           <span
             class="euiBadge emotion-euiBadge"
-            style="--euiBadgeBackgroundColor: #e7664c; --euiBadgeTextColor: #000;"
+            style="--euiBadgeBackgroundColor: #F6726A; --euiBadgeTextColor: #07101F;"
             title="Hot"
           >
             <span
@@ -514,7 +515,7 @@ exports[`extend index management ilm summary extension should render an error pa
         >
           <span
             class="euiBadge emotion-euiBadge"
-            style="--euiBadgeBackgroundColor: #e7664c; --euiBadgeTextColor: #000;"
+            style="--euiBadgeBackgroundColor: #F6726A; --euiBadgeTextColor: #07101F;"
             title="Hot"
           >
             <span

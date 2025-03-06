@@ -38,8 +38,8 @@
       "triggersActionsUi",
       "usageCollection",
       "unifiedSearch",
-      "bfetch",
-      "charts"
+      "charts",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cloud",

@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+
 import type {
   BrushEndListener,
   ElementClickListener,
@@ -15,12 +16,13 @@ import type {
   XYBrushEvent,
 } from '@elastic/charts';
 import { Axis, HistogramBarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
-import moment from 'moment';
+import { useEuiTheme, EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 
-import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 interface Props {
@@ -50,6 +52,7 @@ export const DocumentCountChart: FC<Props> = ({
   interval,
   loading,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();
@@ -154,6 +157,7 @@ export const DocumentCountChart: FC<Props> = ({
             yAccessors={['value']}
             data={adjustedChartPoints}
             timeZone={timeZone}
+            color={euiTheme.colors.vis.euiColorVis0}
             yNice
           />
         </Chart>

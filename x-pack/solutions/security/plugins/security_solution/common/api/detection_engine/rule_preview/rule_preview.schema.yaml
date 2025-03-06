@@ -110,8 +110,8 @@ components:
           $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         duration:
           type: integer
-      required:
-        - request
+        request_type:
+          $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     RulePreviewLogs:
       type: object

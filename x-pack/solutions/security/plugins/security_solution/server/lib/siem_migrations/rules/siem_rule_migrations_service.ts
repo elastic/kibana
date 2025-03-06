@@ -18,6 +18,7 @@ import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
 import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
 import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
+import type { SiemRuleMigrationsClientDependencies } from './types';
 
 export interface SiemRulesMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -29,6 +30,7 @@ export interface SiemRuleMigrationsCreateClientParams {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;
+  dependencies: SiemRuleMigrationsClientDependencies;
 }
 
 export interface SiemRuleMigrationsClient {
@@ -58,16 +60,22 @@ export class SiemRuleMigrationsService {
   }
 
   createClient({
-    spaceId,
-    currentUser,
     request,
+    currentUser,
+    spaceId,
+    dependencies,
   }: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
-    const esClient = this.esClusterClient.asInternalUser;
-    const dataClient = this.dataService.createClient({ spaceId, currentUser, esClient });
-    const taskClient = this.taskService.createClient({ currentUser, dataClient });
+    const esScopedClient = this.esClusterClient.asScoped(request);
+    const dataClient = this.dataService.createClient({
+      spaceId,
+      currentUser,
+      esScopedClient,
+      dependencies,
+    });
+    const taskClient = this.taskService.createClient({ currentUser, dataClient, dependencies });
 
     return { data: dataClient, task: taskClient };
   }

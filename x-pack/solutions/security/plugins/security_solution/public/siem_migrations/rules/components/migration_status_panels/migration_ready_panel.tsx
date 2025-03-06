@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPanel } from '@elastic/eui';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import type { RuleMigrationResourceData } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
@@ -21,7 +22,8 @@ export interface MigrationReadyPanelProps {
 }
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout } = useRuleMigrationDataInputContext();
-  const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceData[]>([]);
+  const { telemetry } = useKibana().services.siemMigrations.rules;
+  const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceBase[]>([]);
   const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
   useEffect(() => {
@@ -30,7 +32,11 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
-  }, [openFlyout, migrationStats]);
+    telemetry.reportSetupMigrationOpenResources({
+      migrationId: migrationStats.id,
+      missingResourcesCount: missingResources.length,
+    });
+  }, [openFlyout, migrationStats, telemetry, missingResources.length]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">

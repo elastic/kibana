@@ -14,7 +14,7 @@ import {
   useReplaceUrlParams,
   createHistoryEntry,
 } from './helpers';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';

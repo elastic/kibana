@@ -47,7 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
         'max_script_fields',
         'query',
         'format',
-        'frozen',
         'sort',
         'priority',
         'codec',

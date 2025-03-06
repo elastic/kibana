@@ -22,16 +22,10 @@
           "\nDefinition of a feature flag"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.FeatureFlagDefinition",
-            "text": "FeatureFlagDefinition"
-          },
+          "FeatureFlagDefinition",
           "<ValueType>"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+        "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +38,7 @@
             "description": [
               "\nThe ID of the feature flag. Used to reference it when evaluating the flag."
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+            "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -57,7 +51,7 @@
             "description": [
               "\nHuman friendly name."
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+            "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,7 +67,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+            "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,7 +83,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+            "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +99,7 @@
             "signature": [
               "ValueType"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+            "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +115,7 @@
             "signature": [
               "{ name: string; description?: string | undefined; value: ValueType extends \"string\" ? string : ValueType extends \"boolean\" ? boolean : number; }[]"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+            "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -137,7 +131,7 @@
         "description": [
           "\nSetup contract of the Feature Flags Service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+        "path": "src/core/packages/feature-flags/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -155,7 +149,7 @@
               "Provider",
               ") => void"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -171,7 +165,7 @@
                 "signature": [
                   "Provider"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -190,16 +184,10 @@
             ],
             "signature": [
               "(contextToAppend: ",
-              {
-                "pluginId": "@kbn/core-feature-flags-server",
-                "scope": "server",
-                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-                "section": "def-server.EvaluationContext",
-                "text": "EvaluationContext"
-              },
+              "EvaluationContext",
               ") => void"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -213,15 +201,9 @@
                   "The additional keys that should be appended/modified in the evaluation context."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-feature-flags-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-                    "section": "def-server.EvaluationContext",
-                    "text": "EvaluationContext"
-                  }
+                  "EvaluationContext"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -241,7 +223,7 @@
         "description": [
           "\nSetup contract of the Feature Flags Service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+        "path": "src/core/packages/feature-flags/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -256,16 +238,10 @@
             ],
             "signature": [
               "(contextToAppend: ",
-              {
-                "pluginId": "@kbn/core-feature-flags-server",
-                "scope": "server",
-                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-                "section": "def-server.EvaluationContext",
-                "text": "EvaluationContext"
-              },
+              "EvaluationContext",
               ") => void"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -279,15 +255,9 @@
                   "The additional keys that should be appended/modified in the evaluation context."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-feature-flags-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-                    "section": "def-server.EvaluationContext",
-                    "text": "EvaluationContext"
-                  }
+                  "EvaluationContext"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -307,7 +277,7 @@
             "signature": [
               "(flagName: string, fallbackValue: boolean) => Promise<boolean>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -323,7 +293,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -340,7 +310,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -360,7 +330,7 @@
             "signature": [
               "<Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -376,7 +346,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -393,7 +363,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -413,7 +383,7 @@
             "signature": [
               "<Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -429,7 +399,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -446,7 +416,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -468,7 +438,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -484,7 +454,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -501,7 +471,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -523,7 +493,7 @@
               "Observable",
               "<Value>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -539,7 +509,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -556,7 +526,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -578,7 +548,7 @@
               "Observable",
               "<Value>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+            "path": "src/core/packages/feature-flags/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -594,7 +564,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -611,7 +581,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+                "path": "src/core/packages/feature-flags/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -635,23 +605,11 @@
           "\nThe evaluation context to use when retrieving the flags.\n\nWe use multi-context so that we can apply segmentation rules at different levels (`organization`/`kibana`).\n* `organization` includes any information that is common to all the projects/deployments in an organization. An example is the in_trial status.\n* The `kibana` context includes all the information that identifies a project/deployment. Examples are version, offering, and has_data.\nKind helps us specify which sub-context should receive the new attributes.\nIf no `kind` is provided, it defaults to `kibana`.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.MultiContextEvaluationContext",
-            "text": "MultiContextEvaluationContext"
-          },
+          "MultiContextEvaluationContext",
           " | ",
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.SingleContextEvaluationContext",
-            "text": "SingleContextEvaluationContext"
-          }
+          "SingleContextEvaluationContext"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+        "path": "src/core/packages/feature-flags/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -667,32 +625,14 @@
         ],
         "signature": [
           "(",
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.FeatureFlagDefinition",
-            "text": "FeatureFlagDefinition"
-          },
+          "FeatureFlagDefinition",
           "<\"boolean\"> | ",
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.FeatureFlagDefinition",
-            "text": "FeatureFlagDefinition"
-          },
+          "FeatureFlagDefinition",
           "<\"string\"> | ",
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.FeatureFlagDefinition",
-            "text": "FeatureFlagDefinition"
-          },
+          "FeatureFlagDefinition",
           "<\"number\">)[]"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/feature_flag_definition.ts",
+        "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -709,7 +649,7 @@
         "signature": [
           "{ getBooleanValue: (flagName: string, fallbackValue: boolean) => Promise<boolean>; getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>; getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>; }"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/request_handler_context.ts",
+        "path": "src/core/packages/feature-flags/server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -732,7 +672,7 @@
           "EvaluationContext",
           " | undefined; }"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+        "path": "src/core/packages/feature-flags/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -751,7 +691,7 @@
           "EvaluationContextValue",
           "> & { kind?: \"kibana\" | \"organization\" | undefined; }"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server/src/contracts.ts",
+        "path": "src/core/packages/feature-flags/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

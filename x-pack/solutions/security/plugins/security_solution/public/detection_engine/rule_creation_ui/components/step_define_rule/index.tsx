@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
-
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -39,11 +38,8 @@ import { StepRuleDescription } from '../description_step';
 import type { QueryBarFieldProps } from '../query_bar_field';
 import { QueryBarField } from '../query_bar_field';
 import { SelectRuleType } from '../select_rule_type';
-import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
-import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
-import { ThresholdInput } from '../threshold_input';
 import {
   Field,
   Form,
@@ -51,11 +47,9 @@ import {
   HiddenField,
   UseField,
   useFormData,
-  UseMultiFields,
 } from '../../../../shared_imports';
-import type { FormHook, FieldHook } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
-import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
@@ -70,10 +64,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
-import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFields } from '../new_terms_fields';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -84,14 +75,27 @@ import { useAlertSuppression } from '../../../rule_management/logic/use_alert_su
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
+import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
 import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   AlertSuppressionEdit,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
-import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { MachineLearningJobIdEdit } from '../../../rule_creation/components/machine_learning_job_id_edit';
+import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit';
+import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold_edit/anomaly_threshold_edit';
+import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
+import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
+import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
+import { ThreatMatchEdit } from '../threat_match_edit';
+import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
+import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { usePersistentQuery } from './use_persistent_query';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
+import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -100,14 +104,12 @@ const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
 `;
 export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
-  threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
-  setIsThreatQueryBarValid: (valid: boolean) => void;
   index: string[];
   threatIndex: string[];
   alertSuppressionFields?: string[];
@@ -115,7 +117,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
-  thresholdFields: string[] | undefined;
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -160,20 +161,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   queryBarSavedId,
   queryBarTitle,
   setIsQueryBarValid,
-  setIsThreatQueryBarValid,
   shouldLoadQueryDynamically,
   threatIndex,
-  threatIndicesConfig,
-  thresholdFields,
 }) => {
-  const [{ ruleType, queryBar, machineLearningJobId }] = useFormData<DefineStepRule>({
+  const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
     form,
-    watch: ['ruleType', 'queryBar', 'machineLearningJobId'],
+    watch: ['ruleType', 'queryBar', 'machineLearningJobId', 'threshold.field'],
   });
 
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
   const {
@@ -185,13 +182,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   } = useMLRuleConfig({ machineLearningJobId });
 
   const isMlSuppressionIncomplete =
-    isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
+    isMlRule(ruleType) &&
+    machineLearningJobId &&
+    machineLearningJobId?.length > 0 &&
+    !allJobsStarted;
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const { getFields, reset, setFieldValue } = form;
+  const {
+    timelinePrivileges: { read: canAttachTimelineTemplates },
+  } = useUserPrivileges();
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -207,22 +210,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const aggFields = useMemo(
-    () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
-    [indexPattern.fields]
-  );
-  const termsAggregationFields = useMemo(
-    /**
-     * Typecasting to FieldSpec because fields is
-     * typed as DataViewFieldBase[] which does not have
-     * the 'aggregatable' property, however the type is incorrect
-     *
-     * fields does contain elements with the aggregatable property.
-     * We will need to determine where these types are defined and
-     * figure out where the discrepency is.
-     */
-    () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
-    [indexPattern.fields]
+  const termsAggregationFields = useTermsAggregationFields(indexPattern.fields);
+  const termsAggregationFieldNames = useMemo(
+    () => termsAggregationFields.map((field) => field.name),
+    [termsAggregationFields]
   );
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
@@ -237,14 +228,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
 
-  useEffect(() => {
-    setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
-  }, [threatIndex, threatIndicesConfig]);
-
   const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({
     form,
   });
   usePersistentAlertSuppressionState({ form });
+  usePersistentThresholdState({ form, ruleTypePath: 'ruleType', thresholdPath: 'threshold' });
+  usePersistentMachineLearningState({
+    form,
+    ruleTypePath: 'ruleType',
+    machineLearningJobIdPath: 'machineLearningJobId',
+    anomalyThresholdPath: 'anomalyThreshold',
+  });
+  usePersistentNewTermsState({
+    form,
+    ruleTypePath: 'ruleType',
+    newTermsFieldsPath: 'newTermsFields',
+    historyWindowStartPath: 'historyWindowSize',
+  });
+  usePersistentThreatMatchState({ form });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
@@ -291,11 +292,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     indexField.setValue(indicesConfig);
   }, [getFields, indicesConfig]);
 
-  const handleResetThreatIndices = useCallback(() => {
-    const threatIndexField = getFields().threatIndex;
-    threatIndexField.setValue(threatIndicesConfig);
-  }, [getFields, threatIndicesConfig]);
-
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -303,46 +299,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
-
-  const ThresholdInputChildren = useCallback(
-    ({
-      thresholdField,
-      thresholdValue,
-      thresholdCardinalityField,
-      thresholdCardinalityValue,
-    }: Record<string, FieldHook>) => (
-      <ThresholdInput
-        browserFields={aggFields}
-        thresholdField={thresholdField}
-        thresholdValue={thresholdValue}
-        thresholdCardinalityField={thresholdCardinalityField}
-        thresholdCardinalityValue={thresholdCardinalityValue}
-      />
-    ),
-    [aggFields]
-  );
-
-  const ThreatMatchInputChildren = useCallback(
-    ({ threatMapping }: Record<string, FieldHook>) => (
-      <ThreatMatchInput
-        handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPattern}
-        threatIndexModified={threatIndexModified}
-        threatIndexPatterns={threatIndexPatterns}
-        threatIndexPatternsLoading={threatIndexPatternsLoading}
-        threatMapping={threatMapping}
-        onValidityChange={setIsThreatQueryBarValid}
-      />
-    ),
-    [
-      handleResetThreatIndices,
-      indexPattern,
-      setIsThreatQueryBarValid,
-      threatIndexModified,
-      threatIndexPatterns,
-      threatIndexPatternsLoading,
-    ]
-  );
 
   const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
     useAllEsqlRuleFields({
@@ -549,6 +505,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
             onOpenTimeline,
+            bubbleSubmitEvent: true,
           } as QueryBarFieldProps
         }
       />
@@ -669,97 +626,52 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-          <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
-            <>
-              <UseField
-                path="machineLearningJobId"
-                component={MlJobSelect}
-                componentProps={{
-                  describedByIds: ['detectionEngineStepDefineRulemachineLearningJobId'],
-                }}
-              />
-              <UseField
-                path="anomalyThreshold"
-                component={AnomalyThresholdSlider}
-                componentProps={{
-                  describedByIds: ['detectionEngineStepDefineRuleAnomalyThreshold'],
-                }}
-              />
-            </>
-          </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThresholdRule}
-            data-test-subj="thresholdInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  thresholdField: {
-                    path: 'threshold.field',
-                  },
-                  thresholdValue: {
-                    path: 'threshold.value',
-                  },
-                  thresholdCardinalityField: {
-                    path: 'threshold.cardinality.field',
-                  },
-                  thresholdCardinalityValue: {
-                    path: 'threshold.cardinality.value',
-                  },
-                }}
-              >
-                {ThresholdInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThreatMatchRule(ruleType)}
-            data-test-subj="threatMatchInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  threatMapping: {
-                    path: 'threatMapping',
-                  },
-                }}
-              >
-                {ThreatMatchInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isNewTermsRule(ruleType)}
-            data-test-subj="newTermsInput"
-            fullWidth
-          >
-            <>
-              <UseField
-                path="newTermsFields"
-                component={NewTermsFields}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                }}
-              />
-              <UseField
-                path="historyWindowSize"
-                component={ScheduleItem}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  dataTestSubj: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  timeTypes: ['m', 'h', 'd'],
-                }}
-              />
-            </>
-          </RuleTypeEuiFormRow>
+          {isMlRule(ruleType) && (
+            <EuiFormRow fullWidth>
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <MachineLearningJobIdEdit path="machineLearningJobId" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSpacer size="xs" />
+                    <EuiSpacer size="m" />
+                    <CreateCustomMlJobButton />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <AnomalyThresholdEdit path="anomalyThreshold" />
+              </>
+            </EuiFormRow>
+          )}
+          {isThresholdRule && (
+            <EuiFormRow data-test-subj="thresholdInput" fullWidth>
+              <ThresholdEdit esFields={indexPattern.fields as FieldSpec[]} path="threshold" />
+            </EuiFormRow>
+          )}
+          {isThreatMatchRule(ruleType) && (
+            <ThreatMatchEdit
+              indexPatternPath="threatIndex"
+              queryPath="threatQueryBar"
+              mappingPath="threatMapping"
+              indexPatterns={indexPattern}
+              threatIndexPatterns={threatIndexPatterns}
+              loading={threatIndexPatternsLoading}
+            />
+          )}
+          {isNewTermsRule(ruleType) && (
+            <EuiFormRow data-test-subj="newTermsInput" fullWidth>
+              <>
+                <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
+                <HistoryWindowStartEdit path="historyWindowSize" />
+              </>
+            </EuiFormRow>
+          )}
           <EuiSpacer size="m" />
 
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
             {isThresholdRule ? (
               <ThresholdAlertSuppressionEdit
-                suppressionFieldNames={thresholdFields}
+                suppressionFieldNames={threshold?.field}
                 disabled={!isAlertSuppressionLicenseValid}
                 disabledText={alertSuppressionUpsellingMessage}
               />
@@ -793,7 +705,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={PickTimeline}
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleTimeline',
-              isDisabled: isLoading,
+              isDisabled: isLoading || !canAttachTimelineTemplates,
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />

@@ -15,7 +15,7 @@ import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/ap
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { SLOConfig } from '../../types';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
@@ -67,7 +67,7 @@ export class SloOrphanSummaryCleanupTask {
             },
 
             cancel: async () => {
-              this.abortController.abort('[SLO] Definitions clean up Task timed out');
+              this.abortController.abort('orphan-slo-summary-cleanup task timed out');
             },
           };
         },
@@ -100,13 +100,13 @@ export class SloOrphanSummaryCleanupTask {
         );
 
         if (sloSummaryIdsToDelete.length > 0) {
-          this.logger.info(
-            `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summaries from the summary index`
+          this.logger.debug(
+            `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
           );
 
           await this.esClient.deleteByQuery({
             wait_for_completion: false,
-            index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+            index: SUMMARY_DESTINATION_INDEX_PATTERN,
             query: {
               bool: {
                 should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
@@ -124,7 +124,7 @@ export class SloOrphanSummaryCleanupTask {
     searchAfter?: AggregationsCompositeAggregateKey;
     sloSummaryIds: Array<{ id: string; revision: number }>;
   }> => {
-    this.logger.debug(`[SLO] Fetching SLO Summaries ids after ${searchAfter}`);
+    this.logger.debug(`[TASK] Fetching SLO Summary ids after ${searchAfter}`);
     if (!this.esClient) {
       return {
         searchAfter: undefined,
@@ -149,7 +149,7 @@ export class SloOrphanSummaryCleanupTask {
       }
     >({
       size: 0,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       aggs: {
         slos: {
           composite: {
@@ -227,7 +227,9 @@ export class SloOrphanSummaryCleanupTask {
     this.esClient = esClient;
 
     if (!taskManager) {
-      this.logger.info('[SLO] Missing required service during startup, skipping task.');
+      this.logger.debug(
+        'Missing required service during startup, skipping orphan-slo-summary-cleanup task.'
+      );
       return;
     }
 

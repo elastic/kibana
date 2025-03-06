@@ -13,7 +13,7 @@
         "signature": [
           "() => (inspectionEvent: InspectionEvent) => void"
         ],
-        "path": "packages/kbn-xstate-utils/src/console_inspector.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/console_inspector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -40,7 +40,7 @@
           },
           "<TContext, TEvent, TSentEvent>"
         ],
-        "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,7 +54,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,7 +73,7 @@
         "signature": [
           "() => boolean | object"
         ],
-        "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -90,7 +90,7 @@
         "signature": [
           "() => boolean"
         ],
-        "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -121,7 +121,7 @@
           "PureAction",
           "<TContext, TEvent, TEvent>"
         ],
-        "path": "packages/kbn-xstate-utils/src/actions.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,7 +137,7 @@
               "ActorRef",
               "<TSentEvent, any>"
             ],
-            "path": "packages/kbn-xstate-utils/src/actions.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,7 +165,7 @@
           },
           "<TContext, TEvent, TSentEvent>"
         ],
-        "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,7 +181,7 @@
               "Subscribable",
               "<TSentEvent>"
             ],
-            "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -203,7 +203,7 @@
               "BaseActionObject",
               ">) => void"
             ],
-            "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -218,7 +218,7 @@
                   "Expr",
                   "<TContext, TEvent, TSentEvent | undefined>"
                 ],
-                "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+                "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -252,7 +252,7 @@
           "State",
           "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
         ],
-        "path": "packages/kbn-xstate-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -278,7 +278,7 @@
           "State",
           "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
         ],
-        "path": "packages/kbn-xstate-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -293,7 +293,7 @@
         "signature": [
           "{ [P in Exclude<keyof T, \"state\">]: T[P]; }"
         ],
-        "path": "packages/kbn-xstate-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

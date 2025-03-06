@@ -12,13 +12,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -29,7 +23,7 @@
           },
           "<any>"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/debug_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,15 +35,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/debug_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,13 +55,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -86,7 +68,7 @@
           "ErrorRendererConfig",
           ">"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/error_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,15 +80,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/error_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,13 +100,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -141,7 +111,7 @@
           },
           "<any>"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/debug_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,15 +123,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/debug_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -179,13 +143,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -198,7 +156,7 @@
           "ErrorRendererConfig",
           ">"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/error_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,15 +168,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_error/public/expression_renderers/error_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -237,7 +189,7 @@
         "signature": [
           "React.LazyExoticComponent<({ payload }: { payload: unknown; }) => React.JSX.Element>"
         ],
-        "path": "src/plugins/expression_error/public/components/index.ts",
+        "path": "src/platform/plugins/shared/expression_error/public/components/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -271,7 +223,7 @@
           "Props",
           ">>"
         ],
-        "path": "src/plugins/expression_error/public/components/index.ts",
+        "path": "src/platform/plugins/shared/expression_error/public/components/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -308,7 +260,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_error/public/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_error/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -339,7 +291,7 @@
         "signature": [
           "\"JSON\""
         ],
-        "path": "src/plugins/expression_error/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_error/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -354,7 +306,7 @@
         "signature": [
           "\"expressionError\""
         ],
-        "path": "src/plugins/expression_error/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_error/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -369,7 +321,7 @@
         "signature": [
           "\"expressionError\""
         ],
-        "path": "src/plugins/expression_error/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_error/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

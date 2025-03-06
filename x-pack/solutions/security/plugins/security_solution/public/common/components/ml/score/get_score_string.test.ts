@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getScoreString } from './score_health';
+import { getScoreString } from './get_score_string';
 
 describe('create_influencers', () => {
   test('it rounds up to 1 from 0.3', () => {

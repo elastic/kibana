@@ -5,7 +5,9 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "ecs_compatibility": ""
+      "ecs_compatibility": [
+        "disabled"
+      ]
     },
     "methods": [
       "GET",

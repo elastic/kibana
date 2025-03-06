@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import {
   ReactFlow,
@@ -17,43 +17,59 @@ import {
   useEdgesState,
   type BuiltInNode,
   type NodeProps,
+  type Node as xyNode,
+  type Edge as xyEdge,
 } from '@xyflow/react';
+import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
 import { Story } from '@storybook/react';
-import { SvgDefsMarker } from './styles';
 import { DefaultEdge } from '.';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
+import { LabelNode } from '../node';
+import type { EdgeViewModel } from '../types';
+import { SvgDefsMarker } from './markers';
 
 import '@xyflow/react/dist/style.css';
-import { LabelNode } from '../node';
-import type { NodeViewModel } from '../types';
+import { HandleStyleOverride } from '../node/styles';
 
 export default {
-  title: 'Components/Graph Components/Default Edge',
+  title: 'Components/Graph Components',
   description: 'CDR - Graph visualization',
   argTypes: {
     color: {
       options: ['primary', 'danger', 'warning'],
       control: { type: 'radio' },
     },
+    type: {
+      options: ['solid', 'dashed'],
+      control: { type: 'radio' },
+    },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {
-  default: ((props: NodeProps<BuiltInNode>) => {
-    const handleStyle = {
-      width: 0,
-      height: 0,
-      'min-width': 0,
-      'min-height': 0,
-      border: 'none',
-    };
+  // eslint-disable-next-line react/display-name
+  default: memo<NodeProps<BuiltInNode>>((props: NodeProps<BuiltInNode>) => {
     return (
       <div>
-        <Handle type="source" position={Position.Right} style={handleStyle} />
-        <Handle type="target" position={Position.Left} style={handleStyle} />
+        <Handle
+          type="target"
+          isConnectable={false}
+          position={Position.Left}
+          id="in"
+          style={HandleStyleOverride}
+        />
+        <Handle
+          type="source"
+          isConnectable={false}
+          position={Position.Right}
+          id="out"
+          style={HandleStyleOverride}
+        />
         {props.data.label}
       </div>
     );
-  }) as React.FC<NodeProps<BuiltInNode>>,
+  }),
   label: LabelNode,
 };
 
@@ -61,66 +77,87 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
-const Template: Story<NodeViewModel> = (args: NodeViewModel) => {
-  const initialNodes = [
-    {
-      id: 'source',
-      type: 'default',
-      data: { label: 'source' },
-      position: { x: 0, y: 0 },
-      draggable: true,
-    },
-    {
-      id: 'target',
-      type: 'default',
-      data: { label: 'target' },
-      position: { x: 320, y: 100 },
-      draggable: true,
-    },
-    {
-      id: args.id,
-      type: 'label',
-      data: args,
-      position: { x: 160, y: 50 },
-      draggable: true,
-    },
-  ];
+const Template: Story<EdgeViewModel> = (args: EdgeViewModel) => {
+  const nodes = useMemo(
+    () => [
+      {
+        id: 'source',
+        type: 'default',
+        data: {
+          label: 'source',
+        },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'target',
+        type: 'default',
+        data: {
+          label: 'target',
+        },
+        position: { x: 420, y: 0 },
+      },
+      {
+        id: args.id,
+        type: 'label',
+        data: pick(args, ['id', 'label', 'interactive', 'source', 'target', 'color', 'type']),
+        position: { x: 230, y: 6 },
+      },
+    ],
+    [args]
+  );
 
-  const initialEdges = [
-    {
-      id: `source-${args.id}`,
-      source: 'source',
-      target: args.id,
-      data: {
+  const edges = useMemo(
+    () => [
+      {
         id: `source-${args.id}`,
         source: 'source',
-        sourceShape: 'rectangle',
         target: args.id,
-        targetShape: 'label',
-        color: args.color,
-        interactive: true,
+        data: {
+          id: `source-${args.id}`,
+          source: 'source',
+          sourceShape: 'custom',
+          target: args.id,
+          targetShape: 'label',
+          color: args.color,
+          type: args.type,
+        },
+        type: 'default',
       },
-      type: 'default',
-    },
-    {
-      id: `${args.id}-target`,
-      source: args.id,
-      target: 'target',
-      data: {
+      {
         id: `${args.id}-target`,
         source: args.id,
-        sourceShape: 'label',
         target: 'target',
-        targetShape: 'rectangle',
-        color: args.color,
-        interactive: true,
+        data: {
+          id: `${args.id}-target`,
+          source: args.id,
+          sourceShape: 'label',
+          target: 'target',
+          targetShape: 'custom',
+          color: args.color,
+          type: args.type,
+        },
+        type: 'default',
       },
-      type: 'default',
-    },
-  ];
+    ],
+    [args]
+  );
 
-  const [nodes, _setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodesState, setNodes, onNodesChange] = useNodesState<xyNode>(nodes);
+  const [edgesState, setEdges, onEdgesChange] = useEdgesState<xyEdge<EdgeViewModel>>(edges);
+  const currNodesRef = useRef(nodes);
+  const currEdgesRef = useRef(edges);
+
+  useEffect(() => {
+    if (
+      !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
+      !isArrayOfObjectsEqual(edges, currEdgesRef.current)
+    ) {
+      setNodes(nodes);
+      setEdges(edges);
+      currNodesRef.current = nodes;
+      currEdgesRef.current = edges;
+    }
+  }, [setNodes, setEdges, nodes, edges]);
 
   return (
     <ThemeProvider theme={{ darkMode: false }}>
@@ -128,12 +165,13 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => {
       <ReactFlow
         fitView
         attributionPosition={undefined}
+        nodesDraggable={true}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        nodes={nodes}
-        edges={edges}
+        nodes={nodesState}
+        edges={edgesState}
       >
         <Controls />
         <Background />
@@ -148,6 +186,9 @@ Edge.args = {
   id: 'siem-windows',
   label: 'User login to OKTA',
   color: 'primary',
-  icon: 'okta',
   interactive: true,
+  type: 'solid',
 };
+
+const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
+  size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));

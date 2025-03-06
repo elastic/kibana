@@ -13,26 +13,7 @@ export const BASE_FOLDER = process.cwd() + '/';
 export const BASE_FOLDER_DEPTH = process.cwd().split('/').length;
 export const KIBANA_FOLDER = process.cwd().split('/').pop()!;
 export const EXCLUDED_MODULES = ['@kbn/core'];
-export const TARGET_FOLDERS: Record<string, string[]> = {
-  'platform:private': [
-    'src/platform/packages/private/',
-    'src/platform/plugins/private/',
-    'x-pack/platform/packages/private/',
-    'x-pack/platform/plugins/private/',
-  ],
-  'platform:shared': [
-    'src/platform/packages/shared/',
-    'src/platform/plugins/shared/',
-    'x-pack/platform/packages/shared/',
-    'x-pack/platform/plugins/shared/',
-  ],
-  'observability:private': [
-    'x-pack/solutions/observability/packages/',
-    'x-pack/solutions/observability/plugins/',
-  ],
-  'search:private': ['x-pack/solutions/search/packages/', 'x-pack/solutions/search/plugins/'],
-  'security:private': ['x-pack/solutions/security/packages/', 'x-pack/solutions/security/plugins/'],
-};
+
 export const EXTENSIONS = [
   'eslintignore',
   'gitignore',
@@ -43,7 +24,7 @@ export const EXTENSIONS = [
   'lock',
   'bazel',
   'md',
-  'mdz',
+  'mdx',
   'asciidoc',
   'sh',
   'snap',
@@ -61,6 +42,10 @@ export const EXCLUDED_FOLDERS = [
   './.es',
   './.git',
   // './.github',
+  './bazel-bin',
+  './bazel-kibana',
+  './bazel-out',
+  './bazel-testlogs',
   './.native_modules',
   './.node_binaries',
   './.vscode',
@@ -74,6 +59,8 @@ export const EXCLUDED_FOLDERS = [
   './test2.codeql',
   './trash',
 ];
+
+export const EXCLUDED_FOLDER_NAMES = ['target'];
 
 export const NO_GREP = EXCLUDED_FOLDERS.map((f) => `--exclude-dir "${f}"`).join(' ');
 

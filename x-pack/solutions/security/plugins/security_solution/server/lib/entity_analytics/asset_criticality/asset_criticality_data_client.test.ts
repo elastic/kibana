@@ -42,6 +42,9 @@ describe('AssetCriticalityDataClient', () => {
         options: {
           index: '.asset-criticality.asset-criticality-default',
           mappings: {
+            _meta: {
+              version: 3,
+            },
             dynamic: 'strict',
             properties: {
               id_field: {
@@ -52,6 +55,13 @@ describe('AssetCriticalityDataClient', () => {
               },
               criticality_level: {
                 type: 'keyword',
+              },
+              event: {
+                properties: {
+                  ingested: {
+                    type: 'date',
+                  },
+                },
               },
               '@timestamp': {
                 type: 'date',
@@ -81,6 +91,20 @@ describe('AssetCriticalityDataClient', () => {
                   },
                 },
               },
+              service: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
+              },
               user: {
                 properties: {
                   asset: {
@@ -96,6 +120,9 @@ describe('AssetCriticalityDataClient', () => {
                 },
               },
             },
+          },
+          settings: {
+            default_pipeline: 'entity_analytics_create_eventIngest_from_timestamp-pipeline-default',
           },
         },
       });
@@ -209,24 +236,22 @@ describe('AssetCriticalityDataClient', () => {
         expect.objectContaining({
           id: 'host.name:host1',
           index: '.asset-criticality.asset-criticality-default',
-          body: {
-            doc: {
-              id_field: 'host.name',
-              id_value: 'host1',
-              criticality_level: 'high_impact',
-              '@timestamp': expect.any(String),
+          doc: {
+            id_field: 'host.name',
+            id_value: 'host1',
+            criticality_level: 'high_impact',
+            '@timestamp': expect.any(String),
+            asset: {
+              criticality: 'high_impact',
+            },
+            host: {
+              name: 'host1',
               asset: {
                 criticality: 'high_impact',
               },
-              host: {
-                name: 'host1',
-                asset: {
-                  criticality: 'high_impact',
-                },
-              },
             },
-            doc_as_upsert: true,
           },
+          doc_as_upsert: true,
         })
       );
     });
@@ -244,24 +269,22 @@ describe('AssetCriticalityDataClient', () => {
         expect.objectContaining({
           id: 'user.name:user1',
           index: '.asset-criticality.asset-criticality-default',
-          body: {
-            doc: {
-              id_field: 'user.name',
-              id_value: 'user1',
-              criticality_level: 'medium_impact',
-              '@timestamp': expect.any(String),
+          doc: {
+            id_field: 'user.name',
+            id_value: 'user1',
+            criticality_level: 'medium_impact',
+            '@timestamp': expect.any(String),
+            asset: {
+              criticality: 'medium_impact',
+            },
+            user: {
+              name: 'user1',
               asset: {
                 criticality: 'medium_impact',
               },
-              user: {
-                name: 'user1',
-                asset: {
-                  criticality: 'medium_impact',
-                },
-              },
             },
-            doc_as_upsert: true,
           },
+          doc_as_upsert: true,
         })
       );
     });
@@ -330,6 +353,27 @@ describe('AssetCriticalityDataClient', () => {
           failed: 1,
           successful: 1,
           total: 2,
+        },
+      });
+    });
+
+    it('returns valid stats for unassigned', async () => {
+      const recordsStream = [
+        { idField: 'host.name', idValue: 'host1', criticalityLevel: 'unassigned' },
+      ];
+
+      const result = await subject.bulkUpsertFromStream({
+        recordsStream: Readable.from(recordsStream),
+        retries: 3,
+        flushBytes: 1_000,
+      });
+
+      expect(result).toEqual({
+        errors: [],
+        stats: {
+          failed: 0,
+          successful: 1,
+          total: 1,
         },
       });
     });

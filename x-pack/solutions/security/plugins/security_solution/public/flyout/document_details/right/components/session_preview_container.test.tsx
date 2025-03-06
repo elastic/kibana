@@ -10,7 +10,7 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { SessionPreviewContainer } from './session_preview_container';
-import { useSessionPreview } from '../hooks/use_session_preview';
+import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
@@ -24,7 +24,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
-jest.mock('../hooks/use_session_preview');
+jest.mock('../../shared/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock(
@@ -77,14 +77,14 @@ const renderSessionPreview = (context = mockContextValue) =>
 describe('SessionPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineAlertClick: jest.fn(),
     });
   });
 
   it('should render component and link in header', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId } = renderSessionPreview();
@@ -115,7 +115,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should render error message and text in header if no sessionConfig', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(null);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(null);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview();
@@ -133,7 +133,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should render upsell message in header if no correct license', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => false });
 
     const { getByTestId, queryByTestId } = renderSessionPreview();
@@ -152,7 +152,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should not render link to session viewer if flyout is open in preview', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -179,7 +179,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should not render link to session viewer if flyout is open in preview mode', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -199,7 +199,7 @@ describe('SessionPreviewContainer', () => {
   describe('when visualization in flyout flag is enabled', () => {
     it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
       mockUseUiSetting.mockReturnValue([true]);
-      (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+      (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
       (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
       const { getByTestId } = renderSessionPreview();
@@ -212,7 +212,7 @@ describe('SessionPreviewContainer', () => {
     });
 
     it('should not render link to session viewer if flyout is open in rule preview', () => {
-      (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+      (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
       (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -230,7 +230,7 @@ describe('SessionPreviewContainer', () => {
     });
 
     it('should not render link to session viewer if flyout is open in preview mode', () => {
-      (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+      (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
       (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -248,14 +248,14 @@ describe('SessionPreviewContainer', () => {
     });
   });
 
-  describe('when new navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     describe('when visualization in flyout flag is enabled', () => {
       beforeEach(() => {
         jest.clearAllMocks();
         mockUseUiSetting.mockReturnValue([true]);
-        (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+        (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
         (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       });
 
       it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
@@ -304,9 +304,9 @@ describe('SessionPreviewContainer', () => {
       beforeEach(() => {
         jest.clearAllMocks();
         mockUseUiSetting.mockReturnValue([false]);
-        (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+        (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
         (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       });
 
       it('should open session viewer in timeline', () => {

@@ -83,8 +83,8 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
 
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
-  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
+  const { notesPrivileges } = useUserPrivileges();
+  const canCreateNotes = notesPrivileges.crud;
 
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'

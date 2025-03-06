@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useEntitiesListFilters } from './use_entities_list_filters';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { CriticalityLevels } from '../../../../../common/constants';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceTag } from '../types';
+import { mockGlobalState } from '../../../../common/mock';
 
+const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useEnableExperimental: () => ({ ...mockedExperimentalFeatures }),
+}));
 jest.mock('../../../../common/hooks/use_global_filter_query');
 
 describe('useEntitiesListFilters', () => {
@@ -47,10 +52,21 @@ describe('useEntitiesListFilters', () => {
       {
         bool: {
           should: [
-            { term: { 'host.risk.calculated_level': RiskSeverity.Low } },
-            { term: { 'user.risk.calculated_level': RiskSeverity.Low } },
-            { term: { 'host.risk.calculated_level': RiskSeverity.High } },
-            { term: { 'user.risk.calculated_level': RiskSeverity.High } },
+            {
+              terms: {
+                'user.risk.calculated_level': ['Low', 'High'],
+              },
+            },
+            {
+              terms: {
+                'host.risk.calculated_level': ['Low', 'High'],
+              },
+            },
+            {
+              terms: {
+                'service.risk.calculated_level': ['Low', 'High'],
+              },
+            },
           ],
         },
       },
@@ -173,8 +189,21 @@ describe('useEntitiesListFilters', () => {
       {
         bool: {
           should: [
-            { term: { 'host.risk.calculated_level': RiskSeverity.Low } },
-            { term: { 'user.risk.calculated_level': RiskSeverity.Low } },
+            {
+              terms: {
+                'user.risk.calculated_level': ['Low'],
+              },
+            },
+            {
+              terms: {
+                'host.risk.calculated_level': ['Low'],
+              },
+            },
+            {
+              terms: {
+                'service.risk.calculated_level': ['Low'],
+              },
+            },
           ],
         },
       },

@@ -12,11 +12,20 @@ import * as i18n from './translations';
 
 export const useResultVisColors = () => {
   const { euiTheme } = useEuiTheme();
+  if (euiTheme.themeName === 'EUI_THEME_AMSTERDAM') {
+    return {
+      [RuleTranslationResult.FULL]: euiTheme.colors.vis.euiColorVis0,
+      [RuleTranslationResult.PARTIAL]: euiTheme.colors.vis.euiColorVis5,
+      [RuleTranslationResult.UNTRANSLATABLE]: euiTheme.colors.vis.euiColorVis7,
+      error: euiTheme.colors.vis.euiColorVis9,
+    };
+  }
+  // Borealis
   return {
-    [RuleTranslationResult.FULL]: euiTheme.colors.vis.euiColorVis0,
-    [RuleTranslationResult.PARTIAL]: euiTheme.colors.vis.euiColorVis5,
-    [RuleTranslationResult.UNTRANSLATABLE]: euiTheme.colors.vis.euiColorVis7,
-    error: euiTheme.colors.vis.euiColorVis9,
+    [RuleTranslationResult.FULL]: euiTheme.colors.vis.euiColorVisSuccess0,
+    [RuleTranslationResult.PARTIAL]: euiTheme.colors.vis.euiColorSeverity7,
+    [RuleTranslationResult.UNTRANSLATABLE]: euiTheme.colors.vis.euiColorSeverity10,
+    error: euiTheme.colors.vis.euiColorSeverity14,
   };
 };
 

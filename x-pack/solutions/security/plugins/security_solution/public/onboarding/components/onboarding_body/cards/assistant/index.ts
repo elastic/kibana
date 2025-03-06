@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ASSISTANT_CARD_TITLE } from './translations';
@@ -16,7 +16,7 @@ import type { AssistantCardMetadata } from './types';
 export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
   id: OnboardingCardId.assistant,
   title: ASSISTANT_CARD_TITLE,
-  icon: AssistantAvatar,
+  icon: AssistantIcon,
   Component: React.lazy(
     () =>
       import(

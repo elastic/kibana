@@ -42,12 +42,14 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z', // fallback prior 8.14
     groupBy: summaryDoc.slo.groupBy,
     version: 1,
+    createdBy: summaryDoc.slo.createdBy,
+    updatedBy: summaryDoc.slo.updatedBy,
   });
 
   if (isLeft(res)) {
     const errors = formatErrors(res.left);
-    logger.error(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
-    logger.error(errors.join('|'));
+    logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
+    logger.debug(errors.join('|'));
 
     return undefined;
   }
@@ -63,10 +65,10 @@ function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator 
 
   if (isLeft(res)) {
     const errors = formatErrors(res.left);
-    logger.info(
+    logger.debug(
       `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
-    logger.info(errors.join('|'));
+    logger.debug(errors.join('|'));
 
     return getDummyIndicator(summaryDoc);
   }

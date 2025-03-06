@@ -8,8 +8,9 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
-import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
+import { getConditionType } from '../../../common/rules/status_rule';
 import { AND_LABEL, getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
 import { MonitorSummaryStatusRule } from './types';

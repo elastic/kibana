@@ -8,6 +8,8 @@
  */
 
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { sanitazeESQLInput } from './sanitaze_input';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
 // in these cases a base query such as "from index // comment" will result in errors or wrong data if we don't append in a new line
@@ -43,7 +45,7 @@ export function appendWhereClauseToESQLQuery(
   let filterValue =
     typeof value === 'string' ? `"${value.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')}"` : value;
   // Adding the backticks here are they are needed for special char fields
-  let fieldName = `\`${field}\``;
+  let fieldName = sanitazeESQLInput(field);
 
   // casting to string
   // there are some field types such as the ip that need
@@ -98,3 +100,16 @@ export function appendWhereClauseToESQLQuery(
   const whereClause = `| WHERE ${fieldName}${operator}${filterValue}`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }
+
+export const appendStatsByToQuery = (queryString: string, column: string) => {
+  const { root } = parse(queryString);
+  const lastCommand = root.commands[root.commands.length - 1];
+  if (lastCommand.name === 'stats') {
+    const statsCommand = lastCommand;
+    mutate.generic.commands.remove(root, statsCommand);
+    const queryWithoutStats = BasicPrettyPrinter.print(root);
+    return `${queryWithoutStats}\n| STATS BY ${column}`;
+  } else {
+    return `${queryString}\n| STATS BY ${column}`;
+  }
+};

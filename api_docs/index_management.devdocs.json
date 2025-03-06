@@ -13,7 +13,7 @@
         "signature": [
           "(filter?: string | undefined, includeHiddenIndices?: boolean | undefined) => string"
         ],
-        "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -42,7 +42,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -61,7 +61,7 @@
         "signature": [
           "(name: string, isLegacy?: boolean | undefined) => string"
         ],
-        "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,7 +75,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,7 +90,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -423,7 +423,7 @@
         "signature": [
           "\"INDEX_MANAGEMENT_LOCATOR_ID\""
         ],
-        "path": "x-pack/plugins/index_management/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -568,13 +568,7 @@
           "description": [],
           "signature": [
             "(deps: { history: ",
-            {
-              "pluginId": "@kbn/core-application-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreApplicationBrowserPluginApi",
-              "section": "def-public.ScopedHistory",
-              "text": "ScopedHistory"
-            },
+            "ScopedHistory",
             "<unknown>; }) => React.FC<",
             {
               "pluginId": "@kbn/index-management-shared-types",
@@ -608,13 +602,7 @@
                   "label": "history",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "@kbn/core-application-browser",
-                      "scope": "public",
-                      "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                      "section": "def-public.ScopedHistory",
-                      "text": "ScopedHistory"
-                    },
+                    "ScopedHistory",
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
@@ -635,13 +623,7 @@
           "description": [],
           "signature": [
             "(deps: { history: ",
-            {
-              "pluginId": "@kbn/core-application-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreApplicationBrowserPluginApi",
-              "section": "def-public.ScopedHistory",
-              "text": "ScopedHistory"
-            },
+            "ScopedHistory",
             "<unknown>; }) => React.FC<",
             {
               "pluginId": "@kbn/index-management-shared-types",
@@ -675,13 +657,7 @@
                   "label": "history",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "@kbn/core-application-browser",
-                      "scope": "public",
-                      "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                      "section": "def-public.ScopedHistory",
-                      "text": "ScopedHistory"
-                    },
+                    "ScopedHistory",
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
@@ -709,7 +685,7 @@
         "tags": [],
         "label": "Dependencies",
         "description": [],
-        "path": "x-pack/plugins/index_management/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -729,7 +705,7 @@
                 "text": "SecurityPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/index_management/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -749,7 +725,7 @@
                 "text": "LicensingPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/index_management/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -769,7 +745,7 @@
                 "text": "FeaturesPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/index_management/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1031,7 +1007,7 @@
         "description": [
           "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
         ],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1045,7 +1021,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1059,7 +1035,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1080,7 +1056,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1101,7 +1077,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1115,7 +1091,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1136,7 +1112,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1150,7 +1126,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1170,7 +1146,7 @@
         "signature": [
           "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
         ],
-        "path": "x-pack/plugins/index_management/server/config.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1184,7 +1160,7 @@
       "tags": [],
       "label": "IndexManagementPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/index_management/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/index_management/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1200,7 +1176,7 @@
             "Enricher",
             ") => void; }"
           ],
-          "path": "x-pack/plugins/index_management/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/index_management/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1246,7 +1222,7 @@
           },
           " | undefined"
         ],
-        "path": "x-pack/plugins/index_management/common/lib/utils.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/lib/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1274,7 +1250,7 @@
                 "text": "TemplateSerialized"
               }
             ],
-            "path": "x-pack/plugins/index_management/common/lib/utils.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/lib/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1289,7 +1265,7 @@
             "signature": [
               "\"settings\" | \"mappings\" | \"aliases\""
             ],
-            "path": "x-pack/plugins/index_management/common/lib/utils.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/lib/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1308,7 +1284,7 @@
         "signature": [
           "(field: string) => { size: string; unit: string; }"
         ],
-        "path": "x-pack/plugins/index_management/common/lib/data_stream_utils.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/lib/data_stream_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1322,7 +1298,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/index_management/common/lib/data_stream_utils.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/lib/data_stream_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1340,7 +1316,7 @@
         "tags": [],
         "label": "Aliases",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/aliases.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/aliases.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1354,7 +1330,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "x-pack/plugins/index_management/common/types/aliases.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/aliases.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1368,7 +1344,7 @@
         "tags": [],
         "label": "ComponentTemplateDatastreams",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1382,7 +1358,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1413,7 +1389,7 @@
             "text": "ComponentTemplateSerialized"
           }
         ],
-        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1424,7 +1400,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1438,7 +1414,7 @@
             "signature": [
               "{ usedBy: string[]; isManaged: boolean; }"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1452,7 +1428,7 @@
         "tags": [],
         "label": "ComponentTemplateFromEs",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1463,7 +1439,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1483,7 +1459,7 @@
                 "text": "ComponentTemplateSerialized"
               }
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1497,7 +1473,7 @@
         "tags": [],
         "label": "ComponentTemplateListItem",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1508,7 +1484,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1522,7 +1498,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1533,7 +1509,7 @@
             "tags": [],
             "label": "hasMappings",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1544,7 +1520,7 @@
             "tags": [],
             "label": "hasAliases",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1555,7 +1531,7 @@
             "tags": [],
             "label": "hasSettings",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1566,7 +1542,7 @@
             "tags": [],
             "label": "isManaged",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1580,7 +1556,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1594,7 +1570,7 @@
         "tags": [],
         "label": "ComponentTemplateMeta",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1605,7 +1581,7 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1616,7 +1592,7 @@
             "tags": [],
             "label": "managed_by",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1630,7 +1606,7 @@
             "signature": [
               "{ name: string; }"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1644,7 +1620,7 @@
         "tags": [],
         "label": "ComponentTemplateSerialized",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1684,7 +1660,7 @@
               "IndicesDataStreamLifecycleWithRollover",
               " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined; }"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1698,7 +1674,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1712,7 +1688,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,7 +1702,7 @@
             "signature": [
               "{ [key: string]: any; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,7 +1723,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1761,7 +1737,7 @@
         "tags": [],
         "label": "DataRetention",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1772,7 +1748,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1786,7 +1762,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1800,7 +1776,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1814,7 +1790,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1828,7 +1804,7 @@
         "tags": [],
         "label": "DataStream",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1839,7 +1815,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1853,7 +1829,7 @@
             "signature": [
               "TimestampFieldFromEs"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1874,7 +1850,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1885,7 +1861,7 @@
             "tags": [],
             "label": "generation",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1899,7 +1875,7 @@
             "signature": [
               "\"green\" | \"yellow\" | \"red\""
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1910,7 +1886,7 @@
             "tags": [],
             "label": "indexTemplateName",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1924,7 +1900,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1939,7 +1915,7 @@
               "ByteSize",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1953,7 +1929,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,7 +1943,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1981,7 +1957,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1995,7 +1971,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2009,7 +1985,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,7 +2000,7 @@
               "Metadata",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2038,7 +2014,7 @@
             "signature": [
               "PrivilegesFromEs"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2049,7 +2025,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2060,7 +2036,7 @@
             "tags": [],
             "label": "nextGenerationManagedBy",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2076,7 +2052,7 @@
               "IndicesDataStreamLifecycleWithRollover",
               " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2088,9 +2064,9 @@
             "label": "indexMode",
             "description": [],
             "signature": [
-              "\"standard\" | \"time_series\" | \"logsdb\""
+              "\"standard\" | \"time_series\" | \"lookup\" | \"logsdb\""
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2104,7 +2080,7 @@
         "tags": [],
         "label": "DataStreamIndex",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2115,7 +2091,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2126,7 +2102,7 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2137,7 +2113,7 @@
             "tags": [],
             "label": "preferILM",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2151,7 +2127,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2176,7 +2152,7 @@
           " extends ",
           "IndicesDataStream"
         ],
-        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2190,7 +2166,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2205,7 +2181,7 @@
               "ByteSize",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2219,7 +2195,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2233,7 +2209,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2247,7 +2223,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2261,7 +2237,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2276,7 +2252,7 @@
               "IndicesDataStreamIndex",
               "[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2290,7 +2266,7 @@
             "signature": [
               "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; }"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2304,7 +2280,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2318,7 +2294,7 @@
         "tags": [],
         "label": "FieldFromIndicesRequest",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2339,7 +2315,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2360,7 +2336,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2374,7 +2350,7 @@
         "tags": [],
         "label": "FieldItem",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2385,7 +2361,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2396,7 +2372,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2407,7 +2383,7 @@
             "tags": [],
             "label": "normalizedType",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2667,7 +2643,7 @@
         "tags": [],
         "label": "IndexSettings",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2682,7 +2658,7 @@
               "IndicesIndexSettingsKeys",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2696,7 +2672,7 @@
             "signature": [
               "AnalysisModule | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2710,7 +2686,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2724,7 +2700,7 @@
         "tags": [],
         "label": "IndexSettingsResponse",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2744,7 +2720,7 @@
                 "text": "IndexSettings"
               }
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2764,7 +2740,7 @@
                 "text": "IndexSettings"
               }
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/indices.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2778,7 +2754,7 @@
         "tags": [],
         "label": "IndexWithFields",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2789,7 +2765,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2810,7 +2786,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2826,7 +2802,7 @@
         "description": [
           "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
         ],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2840,7 +2816,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2854,7 +2830,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2875,7 +2851,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2896,7 +2872,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2910,7 +2886,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2931,7 +2907,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2945,7 +2921,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2959,7 +2935,7 @@
         "tags": [],
         "label": "Mappings",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/mappings.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2973,7 +2949,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "x-pack/plugins/index_management/common/types/mappings.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2989,7 +2965,7 @@
         "description": [
           "\nTemplateDeserialized is the format the UI will be working with,\nregardless if we are loading the new format (composable) index template,\nor the legacy one. Serialization is done server side."
         ],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3000,7 +2976,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3014,7 +2990,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3052,7 +3028,7 @@
               },
               " | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3073,7 +3049,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3087,7 +3063,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3101,7 +3077,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3115,7 +3091,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3129,7 +3105,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3140,7 +3116,7 @@
             "tags": [],
             "label": "allowAutoCreate",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3154,7 +3130,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3175,7 +3151,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3189,7 +3165,7 @@
             "signature": [
               "{ name: string; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3203,7 +3179,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3217,7 +3193,7 @@
             "signature": [
               "{ [key: string]: any; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3231,7 +3207,7 @@
             "signature": [
               "{ [key: string]: any; hidden?: boolean | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3253,7 +3229,7 @@
               },
               "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3267,7 +3243,7 @@
         "tags": [],
         "label": "TemplateFromEs",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3278,7 +3254,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3298,7 +3274,7 @@
                 "text": "TemplateSerialized"
               }
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3314,7 +3290,7 @@
         "description": [
           "\nInterface for the template list in our UI table\nwe don't include the mappings, settings and aliases\nto reduce the payload size sent back to the client."
         ],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3325,7 +3301,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3339,7 +3315,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3353,7 +3329,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3367,7 +3343,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3381,7 +3357,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3392,7 +3368,7 @@
             "tags": [],
             "label": "hasSettings",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3403,7 +3379,7 @@
             "tags": [],
             "label": "hasAliases",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3414,7 +3390,7 @@
             "tags": [],
             "label": "hasMappings",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3428,7 +3404,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3442,7 +3418,7 @@
             "signature": [
               "{ name: string; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3456,7 +3432,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3478,7 +3454,7 @@
               },
               "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3494,7 +3470,7 @@
         "description": [
           "\nIndex template format from Elasticsearch"
         ],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3508,7 +3484,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3548,7 +3524,7 @@
               "IndicesDataStreamLifecycleWithRollover",
               " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3562,7 +3538,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3576,7 +3552,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3590,7 +3566,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3604,7 +3580,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3618,7 +3594,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3632,7 +3608,7 @@
             "signature": [
               "{ [key: string]: any; } | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3646,7 +3622,7 @@
             "signature": [
               "{} | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3660,7 +3636,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3680,7 +3656,7 @@
         "signature": [
           "\"/api/index_management\""
         ],
-        "path": "x-pack/plugins/index_management/common/constants/api_base_path.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/constants/api_base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3695,7 +3671,7 @@
         "signature": [
           "\"/management/data/index_management/\""
         ],
-        "path": "x-pack/plugins/index_management/common/constants/base_path.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/constants/base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3710,7 +3686,7 @@
         "signature": [
           "\"green\" | \"yellow\" | \"red\""
         ],
-        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3723,9 +3699,9 @@
         "label": "IndexMode",
         "description": [],
         "signature": [
-          "\"standard\" | \"time_series\" | \"logsdb\""
+          "\"standard\" | \"time_series\" | \"lookup\" | \"logsdb\""
         ],
-        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3740,7 +3716,7 @@
         "signature": [
           "\"/internal/index_management\""
         ],
-        "path": "x-pack/plugins/index_management/common/constants/api_base_path.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/constants/api_base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3755,7 +3731,7 @@
         "signature": [
           "\"8.5.0\""
         ],
-        "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/constants/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3770,7 +3746,7 @@
         "signature": [
           "\"default\" | \"managed\" | \"system\" | \"cloudManaged\""
         ],
-        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

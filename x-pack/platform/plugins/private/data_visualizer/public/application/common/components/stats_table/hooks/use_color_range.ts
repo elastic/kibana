@@ -7,8 +7,7 @@
 
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
-import { useCurrentEuiTheme } from '../../../hooks/use_current_eui_theme';
-
+import { useEuiTheme } from '@elastic/eui';
 /**
  * Custom color scale factory that takes the amount of feature influencers
  * into account to adjust the contrast of the color range. This is used for
@@ -155,16 +154,24 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
-      d3.rgb(euiTheme.euiColorEmptyShade).toString(),
-      d3.rgb(euiTheme.euiColorVis1).toString(),
+      d3.rgb(euiTheme.colors.emptyShade).toString(),
+      d3
+        .rgb(
+          // Amsterdam: euiTheme.colors.vis.euiColorVis1
+          // Borealis:  euiTheme.colors.vis.euiColorVis2
+          euiTheme.flags.hasVisColorAdjustment
+            ? euiTheme.colors.vis.euiColorVis1
+            : euiTheme.colors.vis.euiColorVis2
+        )
+        .toString(),
     ],
     [COLOR_RANGE.RED]: [
-      d3.rgb(euiTheme.euiColorEmptyShade).toString(),
-      d3.rgb(euiTheme.euiColorDanger).toString(),
+      d3.rgb(euiTheme.colors.emptyShade).toString(),
+      d3.rgb(euiTheme.colors.danger).toString(),
     ],
     [COLOR_RANGE.RED_GREEN]: ['red', 'green'],
     [COLOR_RANGE.GREEN_RED]: ['green', 'red'],

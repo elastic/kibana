@@ -61,11 +61,14 @@ export interface AddPrebuiltRulesTableState {
    * package in background
    */
   isUpgradingSecurityPackages: boolean;
-
   /**
    * Is true when performing Install All Rules mutation
    */
   isInstallingAllRules: boolean;
+  /**
+   * Is true when any rule is currently being installed
+   */
+  isAnyRuleInstalling: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -141,9 +144,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
     enabled: isUpgradeReviewRequestEnabled({
       canUserCRUD,
       isUpgradingSecurityPackages,
-      prebuiltRulesStatus,
+      prebuiltRulesStatus: prebuiltRulesStatus?.stats,
     }),
   });
+
+  const isAnyRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
@@ -161,6 +166,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
           rules: [{ rule_id: ruleId, version: rule.version }],
           enable,
         });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
       }
@@ -177,6 +184,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
       try {
         await installSpecificRulesRequest({ rules: rulesToUpgrade, enable });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         setLoadingRules((prev) =>
           prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id))
@@ -192,6 +201,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
     try {
       await installAllRulesRequest();
+    } catch {
+      // Error is handled by the mutation's onError callback, so no need to do anything here
     } finally {
       setLoadingRules([]);
       setSelectedRules([]);
@@ -281,6 +292,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isRefetching,
         isUpgradingSecurityPackages,
         isInstallingAllRules,
+        isAnyRuleInstalling,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -297,6 +309,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isRefetching,
     isUpgradingSecurityPackages,
     isInstallingAllRules,
+    isAnyRuleInstalling,
     selectedRules,
     dataUpdatedAt,
     actions,

@@ -23,7 +23,7 @@ import {
   type ExperimentalFeatures,
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
-import { getEnablementModalCallout } from './components/enablement_modal_callout';
+import { getAdditionalChargesMessage } from './components/additional_charges_message';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -53,8 +53,6 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupDeps.discover.showInlineTopNav();
-
     return {};
   }
 
@@ -70,7 +68,7 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setComponents({
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
-      EnablementModalCallout: getEnablementModalCallout(services),
+      AdditionalChargesMessage: getAdditionalChargesMessage(services),
     });
 
     setOnboardingSettings(services);

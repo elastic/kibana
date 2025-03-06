@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useObservedHostFields } from './use_observed_host_fields';
 import { mockObservedHostData } from '../../mocks';
 import { TestProviders } from '../../../../common/mock';

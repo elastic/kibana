@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { get } from 'lodash/fp';
 import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
 import type {
   AssetCriticalityUpsert,
   CriticalityLevel,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import { RISK_SCORING_NORMALIZATION_MAX } from '../risk_score/constants';
-import type { CriticalityValues } from './constants';
+import { type CriticalityValues } from './constants';
 
 /**
  * Retrieves the criticality modifier for a given criticality level.
@@ -76,12 +78,34 @@ type AssetCriticalityUpsertWithDeleted = {
     : AssetCriticalityUpsert[K];
 };
 
+const entityTypeByIdField = {
+  'host.name': 'host',
+  'user.name': 'user',
+  'service.name': 'service',
+} as const;
+
 export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {
-  const entityType = record.idField === 'host.name' ? 'host' : 'user';
+  const entityType = entityTypeByIdField[record.idField];
   return {
     [entityType]: {
-      asset: { criticality: record.criticalityLevel },
+      asset: {
+        criticality: record.criticalityLevel,
+      },
       name: record.idValue,
     },
   };
 };
+
+/**
+ * Finds the mapping for a flatten field name
+ *
+ * @example
+ *  const field = `user.asset.criticality`
+ *  const mapping = {user: {properties: {asset: {properties: {criticality: {type: 'keyword'}}}}}};
+ *  getMappingForFlattenedField(field, mapping) // returns {type: 'keyword'}
+ *
+ */
+export const getMappingForFlattenedField = (
+  field: string,
+  mapping: Record<string, MappingProperty>
+) => get(field.replaceAll('.', '.properties.'), mapping);

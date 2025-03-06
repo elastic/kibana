@@ -10,8 +10,8 @@ import type {
   ChatCompleteAPI,
   BoundOutputAPI,
   OutputAPI,
+  InferenceConnector,
 } from '@kbn/inference-common';
-import type { InferenceConnector } from '../../common/connectors';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.

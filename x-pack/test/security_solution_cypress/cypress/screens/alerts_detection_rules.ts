@@ -110,6 +110,8 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
+export const RULE_ROW_MODIFIED_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
+
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
@@ -194,6 +196,10 @@ export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
 };
 
+export const getReviewSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="reviewSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
 export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
 export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE =
@@ -269,8 +275,8 @@ export const TIMELINE_TEMPLATE_VALUE = '[data-test-subj="timelineTemplatePropert
 export const INTERVAL_TITLE = '[data-test-subj="intervalPropertyTitle"]';
 export const INTERVAL_VALUE = '[data-test-subj="intervalPropertyValue"]';
 
-export const FROM_TITLE = '[data-test-subj="fromPropertyTitle"]';
-export const FROM_VALUE = '[data-test-subj^="fromPropertyValue"]';
+export const LOOK_BACK_TITLE = '[data-test-subj="lookBackPropertyTitle"]';
+export const LOOK_BACK_VALUE = '[data-test-subj^="lookBackPropertyValue"]';
 
 export const INDEX_TITLE = '[data-test-subj="indexPropertyTitle"]';
 export const INDEX_VALUE_ITEM = '[data-test-subj="indexPropertyValueItem"]';
@@ -351,3 +357,5 @@ export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffW
 export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';
+
+export const RULES_TABLE_MODIFIED_RULE_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';

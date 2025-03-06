@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceConnector } from '../../common/connectors';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceExecutor } from '../chat_complete/utils';
 import { createInferenceConnectorMock } from './inference_connector';
 

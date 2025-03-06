@@ -61,10 +61,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
     scheduleRiskEngineMutation();
   }, [scheduleRiskEngineMutation]);
 
-  if (
-    !riskEngineStatus?.isNewRiskScoreModuleInstalled ||
-    riskEngineStatus?.risk_engine_status !== RiskEngineStatusEnum.ENABLED
-  ) {
+  if (riskEngineStatus?.risk_engine_status !== RiskEngineStatusEnum.ENABLED) {
     return null;
   }
 

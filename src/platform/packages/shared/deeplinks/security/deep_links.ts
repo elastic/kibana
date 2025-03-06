@@ -11,11 +11,12 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   assets = 'assets',
+  assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
+   * All Cases page names must match `CasesDeepLinkId` in x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts
    */
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
@@ -28,11 +29,6 @@ export enum SecurityPageName {
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts
-   */
-  cloudDefend = 'cloud_defend',
   cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
   dataQuality = 'data_quality',

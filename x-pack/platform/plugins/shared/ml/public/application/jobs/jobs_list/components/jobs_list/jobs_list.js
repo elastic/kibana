@@ -32,6 +32,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 import { isManagedJob } from '../../../jobs_utils';
+import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -327,6 +329,35 @@ export class JobsListUI extends Component {
         render: (item) => <ResultLinks jobs={[item]} />,
         width: '64px',
       },
+      ...(this.props.kibana.services.spaces
+        ? [
+            {
+              name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
+                defaultMessage: 'Spaces',
+              }),
+              'data-test-subj': 'mlTableColumnSpaces',
+              truncateText: true,
+              align: 'right',
+              width: '10%',
+              render: (item) => {
+                return (
+                  <MLSavedObjectsSpacesList
+                    disabled={
+                      !this.props.kibana.services.application?.capabilities?.savedObjectsManagement
+                        ?.shareIntoSpace
+                    }
+                    spacesApi={this.props.kibana.services.spaces}
+                    spaceIds={item.spaces}
+                    id={item.id}
+                    mlSavedObjectType={ANOMALY_DETECTOR_SAVED_OBJECT_TYPE}
+                    refresh={this.props.refreshJobs}
+                  />
+                );
+              },
+            },
+          ]
+        : []),
+
       {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
@@ -375,33 +406,35 @@ export class JobsListUI extends Component {
     const selectedJobsClass = this.props.selectedJobsCount ? 'jobs-selected' : '';
 
     return (
-      <EuiBasicTable
-        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
-        loading={loading === true}
-        noItemsMessage={
-          loading
-            ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
-                defaultMessage: 'Loading jobs…',
-              })
-            : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
-                defaultMessage: 'No jobs found',
-              })
-        }
-        itemId="id"
-        className={`jobs-list-table ${selectedJobsClass}`}
-        items={pageOfItems}
-        columns={columns}
-        pagination={pagination}
-        onChange={this.onTableChange}
-        selection={selectionControls}
-        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        sorting={sorting}
-        rowProps={(item) => ({
-          'data-test-subj': `mlJobListRow row-${item.id}`,
-        })}
-        css={{ '.euiTableRow-isExpandedRow .euiTableCellContent': { animation: 'none' } }}
-        rowHeader="id"
-      />
+      <>
+        <EuiBasicTable
+          data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+          loading={loading === true}
+          noItemsMessage={
+            loading
+              ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
+                  defaultMessage: 'Loading jobs…',
+                })
+              : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
+                  defaultMessage: 'No jobs found',
+                })
+          }
+          itemId="id"
+          className={`jobs-list-table ${selectedJobsClass}`}
+          items={pageOfItems}
+          columns={columns}
+          pagination={pagination}
+          onChange={this.onTableChange}
+          selection={selectionControls}
+          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+          sorting={sorting}
+          rowProps={(item) => ({
+            'data-test-subj': `mlJobListRow row-${item.id}`,
+          })}
+          css={{ '.euiTableRow-isExpandedRow .euiTableCellContent': { animation: 'none' } }}
+          rowHeader="id"
+        />
+      </>
     );
   }
 }

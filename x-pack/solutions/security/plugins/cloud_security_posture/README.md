@@ -47,6 +47,10 @@ node scripts/i18n_check.js
 > i18n should run on project scope as it checks translations files outside of our plugin.
 >
 > Fixes can be applied using the --fix flag
+> 1. We shouldn't manually add/update/delete the localization files, nor change the translated strings.
+> 2. The script will remove unused labels.
+> 3. Regarding adding labels - this happens regularly and automated for the whole Kibana repository outside of our flows.
+
 
 Run [**Unit Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing):
 
@@ -145,3 +149,20 @@ yarn cypress:cloud_security_posture:run:serverless
 ```
 
 Unlike FTR where we have to set server and runner separately, Cypress handles everything in 1 go, so just running the above the script is enough to get it running
+
+### Troubleshooting
+
+If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/test/functional/config.base.js` file.
+
+Example:
+```javascript
+module.exports = {
+  esTestCluster: {
+    // ...existing configuration...
+    serverArgs: [
+      // ...existing arguments...
+      'xpack.ml.enabled=false', // Add this line to disable ML
+    ],
+  },
+  // ...other configurations...
+};

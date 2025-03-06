@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`kpiUniqueIpsAreaLensAttributes should render 1`] = `
+exports[`getKpiUniqueIpsAreaLensAttributes should render 1`] = `
 Object {
   "description": "",
   "references": Array [
@@ -55,20 +55,11 @@ Object {
           },
           "ca05ecdb-0fa4-49a8-9305-b23d91012a46": Object {
             "columnOrder": Array [
-              "f95e74e6-99dd-4b11-8faf-439b4d959df9",
+              "95e74e6-99dd-4b11-8faf-439b4d959df9",
               "e7052671-fb9e-481f-8df3-7724c98cfc6f",
             ],
             "columns": Object {
-              "e7052671-fb9e-481f-8df3-7724c98cfc6f": Object {
-                "customLabel": true,
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Dest.",
-                "operationType": "unique_count",
-                "scale": "ratio",
-                "sourceField": "destination.ip",
-              },
-              "f95e74e6-99dd-4b11-8faf-439b4d959df9": Object {
+              "95e74e6-99dd-4b11-8faf-439b4d959df9": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -78,6 +69,15 @@ Object {
                 },
                 "scale": "interval",
                 "sourceField": "@timestamp",
+              },
+              "e7052671-fb9e-481f-8df3-7724c98cfc6f": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Dest.",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "destination.ip",
               },
             },
             "incompleteColumns": Object {},
@@ -199,7 +199,7 @@ Object {
           "xAccessor": "a0cb6400-f708-46c3-ad96-24788f12dae4",
           "yConfig": Array [
             Object {
-              "color": "#d36186",
+              "color": "#EE72A6",
               "forAccessor": "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
             },
           ],
@@ -211,10 +211,10 @@ Object {
           "layerId": "ca05ecdb-0fa4-49a8-9305-b23d91012a46",
           "layerType": "data",
           "seriesType": "area",
-          "xAccessor": "f95e74e6-99dd-4b11-8faf-439b4d959df9",
+          "xAccessor": "95e74e6-99dd-4b11-8faf-439b4d959df9",
           "yConfig": Array [
             Object {
-              "color": "#9170b8",
+              "color": "#61A2FF",
               "forAccessor": "e7052671-fb9e-481f-8df3-7724c98cfc6f",
             },
           ],

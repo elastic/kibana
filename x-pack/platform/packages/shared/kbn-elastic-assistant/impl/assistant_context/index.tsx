@@ -14,7 +14,8 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -33,27 +34,37 @@ import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
+  CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
+  SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
-import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
-import { SettingsTabs } from '../assistant/settings/types';
+import { ModalSettingsTabs } from '../assistant/settings/types';
+import { AssistantNavLink } from './assistant_nav_link';
+
+export type SelectedConversation = { id: string } | { title: string };
+export interface LastConversation {
+  id: string;
+  title?: string;
+}
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
   promptContextId?: string;
-  conversationTitle?: string;
+  // id if the conversation exists in the data stream, title if it's a new conversation
+  selectedConversation?: SelectedConversation;
 }
 
 type ShowAssistantOverlay = ({
   showOverlay,
   promptContextId,
-  conversationTitle,
+  selectedConversation,
 }: ShowAssistantOverlayProps) => void;
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -70,13 +81,15 @@ export interface AssistantProviderProps {
   children: React.ReactNode;
   getComments: GetAssistantMessages;
   http: HttpSetup;
-  baseConversations: Record<string, Conversation>;
+  inferenceEnabled?: boolean;
   nameSpace?: string;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
+  chrome: ChromeStart;
 }
 
 export interface UserAvatar {
@@ -98,21 +111,25 @@ export interface UseAssistantContext {
   ) => CodeBlockDetails[][];
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
-  baseConversations: Record<string, Conversation>;
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
   http: HttpSetup;
+  inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
-  getLastConversationId: (conversationTitle?: string) => string;
+  getLastConversation: (selectedConversation?: SelectedConversation) => LastConversation;
   promptContexts: Record<string, PromptContext>;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
-  selectedSettingsTab: SettingsTabs | null;
+  selectedSettingsTab: ModalSettingsTabs | null;
+  contentReferencesVisible: boolean;
+  showAnonymizedValues: boolean;
+  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
+  setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
-  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
+  setLastConversation: React.Dispatch<React.SetStateAction<LastConversation | undefined>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   setTraceOptions: (traceOptions: {
@@ -127,7 +144,9 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
+  chrome: ChromeStart;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -144,13 +163,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   children,
   getComments,
   http,
-  baseConversations,
+  inferenceEnabled = false,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  productDocBase,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
   userProfileService,
+  chrome,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -166,8 +187,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       defaultTraceOptions
     );
 
-  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
-    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
+  // Legacy fallback: used only if the new storage value is not yet set
+  const [localStorageLastConversationId] = useLocalStorage<string>(
+    `${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`
+  );
+
+  const [localStorageLastConversation, setLocalStorageLastConversation] =
+    useLocalStorage<LastConversation>(
+      `${nameSpace}.${LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY}`
+    );
 
   /**
    * Local storage for knowledge base configuration, prefixed by assistant nameSpace
@@ -184,6 +212,24 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [localStorageStreaming, setLocalStorageStreaming] = useLocalStorage<boolean>(
     `${nameSpace}.${STREAMING_LOCAL_STORAGE_KEY}`,
     true
+  );
+
+  /**
+   * Local storage for content references configuration, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to true
+  const [contentReferencesVisible, setContentReferencesVisible] = useLocalStorage<boolean>(
+    `${nameSpace}.${CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY}`,
+    true
+  );
+
+  /**
+   * Local storage for anonymized values, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to false
+  const [showAnonymizedValues, setShowAnonymizedValues] = useLocalStorage<boolean>(
+    `${nameSpace}.${SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY}`,
+    false
   );
 
   /**
@@ -243,26 +289,62 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Settings State
    */
-  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<ModalSettingsTabs | null>(null);
 
   /**
    * Setting code block ref that can be used to store callback from parent components
    */
   const codeBlockRef = useRef(() => {});
 
-  const getLastConversationId = useCallback(
-    // if a conversationId has been provided, use that
-    // if not, check local storage
-    // last resort, go to welcome conversation
-    (conversationId?: string) =>
-      conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
-    [localStorageLastConversationId]
+  const getLastConversation = useCallback(
+    (selectedConversation?: SelectedConversation): LastConversation => {
+      let nextConversation: LastConversation = { id: '' };
+      // Type guard to check if selectedConversation has a 'title'
+      if (selectedConversation && 'title' in selectedConversation) {
+        nextConversation = {
+          id: '',
+          title: selectedConversation.title,
+        };
+        return nextConversation;
+      }
+
+      // If selectedConversation exists and has an 'id', return it with no 'title'
+      if (selectedConversation && 'id' in selectedConversation) {
+        nextConversation = { id: selectedConversation.id };
+        return nextConversation;
+      }
+
+      // Check if localStorageLastConversation has a 'title'
+      if (localStorageLastConversation && 'title' in localStorageLastConversation) {
+        nextConversation = {
+          id: '',
+          title: localStorageLastConversation.title,
+        };
+        return nextConversation;
+      }
+
+      // If localStorageLastConversation, return it
+      if (localStorageLastConversation && 'id' in localStorageLastConversation) {
+        nextConversation = localStorageLastConversation;
+        return nextConversation;
+      }
+
+      // If localStorageLastConversationId exists, use it as 'id'
+      if (localStorageLastConversationId) {
+        nextConversation = { id: localStorageLastConversationId };
+        return nextConversation;
+      }
+
+      // Default to an empty 'id'
+      return nextConversation;
+    },
+    [localStorageLastConversation, localStorageLastConversationId]
   );
 
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });
 
-  const value = useMemo(
+  const value: UseAssistantContext = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
@@ -276,6 +358,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      inferenceEnabled,
       knowledgeBase: {
         ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
         ...localStorageKnowledgeBase,
@@ -283,12 +366,21 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
+      contentReferencesVisible: contentReferencesVisible ?? true,
+      setContentReferencesVisible: setContentReferencesVisible as React.Dispatch<
+        React.SetStateAction<boolean>
+      >,
+      showAnonymizedValues: showAnonymizedValues ?? false,
+      setShowAnonymizedValues: setShowAnonymizedValues as React.Dispatch<
+        React.SetStateAction<boolean>
+      >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
@@ -297,12 +389,12 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       traceOptions: sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversationId,
-      setLastConversationId: setLocalStorageLastConversationId,
-      baseConversations,
+      getLastConversation,
+      setLastConversation: setLocalStorageLastConversation,
       currentAppId,
       codeBlockRef,
       userProfileService,
+      chrome,
     }),
     [
       actionTypeRegistry,
@@ -317,31 +409,42 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      inferenceEnabled,
       localStorageKnowledgeBase,
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       localStorageStreaming,
       setLocalStorageStreaming,
       setLocalStorageKnowledgeBase,
+      showAnonymizedValues,
+      setShowAnonymizedValues,
+      contentReferencesVisible,
+      setContentReferencesVisible,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
       toasts,
       sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversationId,
-      setLocalStorageLastConversationId,
-      baseConversations,
+      getLastConversation,
+      setLocalStorageLastConversation,
       currentAppId,
       codeBlockRef,
       userProfileService,
+      chrome,
     ]
   );
 
-  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
+  return (
+    <AssistantContext.Provider value={value}>
+      <AssistantNavLink />
+      {children}
+    </AssistantContext.Provider>
+  );
 };
 
 export const useAssistantContext = () => {

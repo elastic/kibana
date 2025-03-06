@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { transformError } from '@kbn/securitysolution-es-utils';

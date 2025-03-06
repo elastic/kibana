@@ -353,8 +353,6 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
     },
   ];
 
-  const expectedColors = ['#1EA593', '#2B70F7', '#CE0060'];
-
   const stackByField = 'process.name';
 
   beforeAll(() => {
@@ -367,12 +365,6 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
 
   it('it renders a draggable legend', () => {
     expect(wrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(true);
-  });
-
-  expectedColors.forEach((color, i) => {
-    test(`it renders the expected legend color ${color} for legend item ${i}`, () => {
-      expect(wrapper.find(`div [color="${color}"]`).exists()).toBe(true);
-    });
   });
 
   data.forEach((datum) => {

@@ -217,6 +217,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp', 'bytes']);
     });
 
+    it('should recover from an error and reset columns correctly when a transformational query is used', async () => {
+      await monacoEditor.setCodeEditorValue('from not_an_index');
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await discover.showsErrorCallout();
+      await browser.refresh();
+      await header.waitUntilLoadingHasFinished();
+      await discover.showsErrorCallout();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | keep ip, @timestamp, bytes | limit 10'
+      );
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp', 'bytes']);
+    });
+
     it('should restore columns correctly when switching between saved searches', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS);
       await header.waitUntilLoadingHasFinished();

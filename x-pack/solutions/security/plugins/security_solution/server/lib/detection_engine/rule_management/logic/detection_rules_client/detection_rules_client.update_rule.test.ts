@@ -22,6 +22,9 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -50,7 +53,9 @@ describe('DetectionRulesClient.updateRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
-      isRuleCustomizationEnabled: true,
+      license: licenseMock.createLicenseMock(),
+      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
+      productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
 

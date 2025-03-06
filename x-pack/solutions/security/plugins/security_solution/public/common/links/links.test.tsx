@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
+import { CASES_FEATURE_ID, SecurityPageName, SECURITY_FEATURE_ID } from '../../../common/constants';
 import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { AppLinkItems, LinkItem, LinksPermissions } from './types';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import {
   useAppLinks,
   getAncestorLinksInfo,
@@ -53,7 +53,7 @@ const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 
 const mockCapabilities = {
   [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
-  [SERVER_APP_ID]: { show: true },
+  [SECURITY_FEATURE_ID]: { show: true },
 } as unknown as Capabilities;
 
 const fakePageId = 'fakePage';
@@ -83,10 +83,9 @@ const mockLicense = {
 
 const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 
-const renderUseAppLinks = () =>
-  renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
+const renderUseAppLinks = () => renderHook(() => useAppLinks(), { wrapper: TestProviders });
 const renderUseLinkExists = (id: SecurityPageName) =>
-  renderHook<React.PropsWithChildren<SecurityPageName>, boolean>(() => useLinkExists(id), {
+  renderHook(() => useLinkExists(id), {
     wrapper: TestProviders,
   });
 
@@ -110,13 +109,13 @@ describe('Security links', () => {
     });
 
     it('should filter not allowed links', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       // this link should not be excluded, the test checks all conditions are passed
       const networkLinkItem = {
         id: SecurityPageName.network,
         title: 'Network',
         path: '/network',
-        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SERVER_APP_ID}.show`],
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SECURITY_FEATURE_ID}.show`],
         experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
         hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
         licenseType: 'basic' as const,
@@ -182,17 +181,16 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
 
-      expect(result.current).toStrictEqual([networkLinkItem]);
+      await waitFor(() => expect(result.current).toStrictEqual([networkLinkItem]));
     });
 
     it('should return unauthorized page when page has upselling (serverless)', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
 
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const networkLinkItem = {
         id: SecurityPageName.network,
         title: 'Network',
@@ -249,16 +247,17 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
 
-      expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
+      await waitFor(() =>
+        expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }])
+      );
     });
 
     it('should return unauthorized page when page has upselling (ESS)', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
         title: 'Hosts',
@@ -278,9 +277,11 @@ describe('Security links', () => {
           upselling: mockUpselling,
           uiSettingsClient: mockUiSettingsClient,
         });
-        await waitForNextUpdate();
       });
-      expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
+
+      await waitFor(() =>
+        expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }])
+      );
 
       // cleanup
       mockUpselling.setPages({});
@@ -289,7 +290,7 @@ describe('Security links', () => {
     it('should filter out experimental page even if it has upselling', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
         title: 'Hosts',
@@ -310,9 +311,9 @@ describe('Security links', () => {
           upselling: mockUpselling,
           uiSettingsClient: mockUiSettingsClient,
         });
-        await waitForNextUpdate();
       });
-      expect(result.current).toStrictEqual([]);
+
+      await waitFor(() => expect(result.current).toStrictEqual([]));
 
       // cleanup
       mockUpselling.setPages({});
@@ -331,7 +332,7 @@ describe('Security links', () => {
     });
 
     it('should update if the links are removed', async () => {
-      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
       expect(result.current).toBe(true);
       await act(async () => {
         updateAppLinks(
@@ -350,13 +351,13 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
-      expect(result.current).toBe(false);
+
+      await waitFor(() => expect(result.current).toBe(false));
     });
 
     it('should update if the links are added', async () => {
-      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.rules);
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
       expect(result.current).toBe(false);
       await act(async () => {
         updateAppLinks(
@@ -382,9 +383,9 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
-      expect(result.current).toBe(true);
+
+      await waitFor(() => expect(result.current).toBe(true));
     });
   });
 
@@ -431,7 +432,7 @@ describe('Security links', () => {
   });
 
   describe('hasCapabilities', () => {
-    const siemShow = 'siem.show';
+    const siemShow = 'siemV2.show';
     const createCases = 'securitySolutionCasesV2.create_cases';
     const readCases = 'securitySolutionCasesV2.read_cases';
     const pushCases = 'securitySolutionCasesV2.push_cases';
@@ -441,18 +442,20 @@ describe('Security links', () => {
     });
 
     it('returns true when the capability requested is specified as a single value', () => {
-      expect(hasCapabilities(createCapabilities({ siem: { show: true } }), siemShow)).toBeTruthy();
+      expect(
+        hasCapabilities(createCapabilities({ siemV2: { show: true } }), siemShow)
+      ).toBeTruthy();
     });
 
     it('returns true when the capability requested is a single entry in an array', () => {
       expect(
-        hasCapabilities(createCapabilities({ siem: { show: true } }), [siemShow])
+        hasCapabilities(createCapabilities({ siemV2: { show: true } }), [siemShow])
       ).toBeTruthy();
     });
 
     it("returns true when the capability requested is a single entry in an AND'd array format", () => {
       expect(
-        hasCapabilities(createCapabilities({ siem: { show: true } }), [[siemShow]])
+        hasCapabilities(createCapabilities({ siemV2: { show: true } }), [[siemShow]])
       ).toBeTruthy();
     });
 
@@ -460,7 +463,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { create_cases: false },
           }),
           [siemShow, createCases]
@@ -472,7 +475,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: false },
+            siemV2: { show: false },
             securitySolutionCasesV2: { create_cases: true },
           }),
           [siemShow, createCases]
@@ -484,7 +487,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { create_cases: false },
           }),
           [readCases, createCases]
@@ -496,7 +499,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { read_cases: true, create_cases: true },
           }),
           [[readCases, createCases]]
@@ -508,7 +511,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: false },
+            siemV2: { show: false },
             securitySolutionCasesV2: { read_cases: false, create_cases: true },
           }),
           [siemShow, [readCases, createCases]]
@@ -520,7 +523,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { read_cases: false, create_cases: true },
           }),
           [siemShow, [readCases, createCases]]
@@ -532,7 +535,7 @@ describe('Security links', () => {
       expect(
         hasCapabilities(
           createCapabilities({
-            siem: { show: true },
+            siemV2: { show: true },
             securitySolutionCasesV2: { read_cases: false, create_cases: true, push_cases: false },
           }),
           [

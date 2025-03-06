@@ -14,6 +14,7 @@ import { UnsupportedResponseActionsAgentTypeError } from './errors';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { CrowdstrikeActionsClientOptions } from './crowdstrike/crowdstrike_actions_client';
 import { CrowdstrikeActionsClient } from './crowdstrike/crowdstrike_actions_client';
+import { MicrosoftDefenderEndpointActionsClient } from './microsoft/defender/endpoint/ms_defender_endpoint_actions_client';
 
 export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOptions &
   SentinelOneActionsClientOptions &
@@ -37,6 +38,8 @@ export const getResponseActionsClient = (
       return new SentinelOneActionsClient(constructorOptions);
     case 'crowdstrike':
       return new CrowdstrikeActionsClient(constructorOptions);
+    case 'microsoft_defender_endpoint':
+      return new MicrosoftDefenderEndpointActionsClient(constructorOptions);
     default:
       throw new UnsupportedResponseActionsAgentTypeError(
         `Agent type [${agentType}] does not support response actions`

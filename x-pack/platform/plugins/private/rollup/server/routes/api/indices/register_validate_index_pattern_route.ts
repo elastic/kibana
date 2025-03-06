@@ -60,6 +60,12 @@ export const registerValidateIndexPatternRoute = ({
   router.get(
     {
       path: addBasePath('/index_pattern_validity/{indexPattern}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexPattern: schema.string(),

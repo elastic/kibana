@@ -14,6 +14,8 @@ import { TestProviders } from '../mock/test_providers/test_providers';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { mockSystemPrompts } from '../mock/system_prompt';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 
 const mockUseAssistantContext = {
   allSystemPrompts: mockSystemPrompts,
@@ -28,6 +30,11 @@ const mockUseAssistantContext = {
   setConversations: jest.fn(),
   assistantAvailability: {
     isAssistantEnabled: true,
+    hasAssistantPrivilege: true,
+  },
+  chrome: {
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
   },
 };
 
@@ -63,8 +70,6 @@ jest.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => ({
     return {
       data: {
         elser_exists: true,
-        index_exists: true,
-        pipeline_exists: true,
       },
       isLoading: false,
       isFetching: false,
@@ -81,8 +86,6 @@ describe('Knowledge base settings', () => {
       return {
         data: {
           elser_exists: true,
-          index_exists: false,
-          pipeline_exists: false,
           is_setup_available: true,
         },
         isLoading: false,
@@ -104,8 +107,6 @@ describe('Knowledge base settings', () => {
       return {
         data: {
           elser_exists: false,
-          index_exists: false,
-          pipeline_exists: false,
         },
         isLoading: false,
         isFetching: false,

@@ -9,8 +9,9 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { ThemeProvider, css } from '@emotion/react';
 import { Story } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
-import type { EntityNodeViewModel, NodeProps } from '..';
+import type { EntityNodeViewModel, LabelNodeViewModel, NodeProps } from '..';
 import { Graph } from '..';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { GraphPopover } from './graph_popover';
 import { ExpandButtonClickCallback } from '../types';
 import { useGraphPopover } from './use_graph_popover';
@@ -20,6 +21,7 @@ export default {
   title: 'Components/Graph Components/Graph Popovers',
   description: 'CDR - Graph visualization',
   argTypes: {},
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const useExpandButtonPopover = () => {
@@ -36,22 +38,17 @@ const useExpandButtonPopover = () => {
 
   const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
-      if (selectedNode.current?.id === node.id) {
-        // If the same node is clicked again, close the popover
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
-        closePopover();
-      } else {
-        // Close the current popover if open
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
+      const lastExpandedNode = selectedNode.current?.id;
 
+      // If the same node is clicked again, close the popover
+      selectedNode.current = null;
+      unToggleCallbackRef.current?.();
+      unToggleCallbackRef.current = null;
+      closePopover();
+
+      if (lastExpandedNode !== node.id) {
         // Set the pending open state
         setPendingOpen({ node, el: e.currentTarget, unToggleCallback });
-
-        closePopover();
       }
     },
     [closePopover]
@@ -179,9 +176,11 @@ const Template: Story = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodeClickHandler = (...args: any[]) => popoverOpenWrapper(nodePopover.onNodeClick, ...args);
 
-  const nodes: EntityNodeViewModel[] = useMemo(
-    () =>
-      (['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const).map((shape, idx) => ({
+  const nodes: Array<EntityNodeViewModel | LabelNodeViewModel> = useMemo(
+    () => [
+      ...(
+        ['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const
+      ).map<EntityNodeViewModel>((shape, idx) => ({
         id: `${idx}`,
         label: `Node ${idx}`,
         color: 'primary',
@@ -191,6 +190,16 @@ const Template: Story = () => {
         expandButtonClick: expandButtonClickHandler,
         nodeClick: nodeClickHandler,
       })),
+      {
+        id: 'label',
+        label: 'Node 5',
+        color: 'primary',
+        interactive: true,
+        shape: 'label',
+        expandButtonClick: expandButtonClickHandler,
+        nodeClick: nodeClickHandler,
+      } as LabelNodeViewModel,
+    ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

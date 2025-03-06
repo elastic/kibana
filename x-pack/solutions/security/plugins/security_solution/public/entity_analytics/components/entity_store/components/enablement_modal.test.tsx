@@ -35,8 +35,8 @@ const defaultProps = {
   visible: true,
   toggle: mockToggle,
   enableStore: mockEnableStore,
-  riskScore: { disabled: false, checked: false },
-  entityStore: { disabled: false, checked: false },
+  riskScore: { canToggle: false, checked: false },
+  entityStore: { canToggle: false, checked: false },
 };
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
@@ -146,6 +146,24 @@ describe('EntityStoreEnablementModal', () => {
       expect(enableButton).toBeDisabled();
     });
 
+    it('should show proceed warning when riskScore is enabled but entityStore is disabled and unchecked', () => {
+      renderComponent({
+        ...defaultProps,
+        riskScore: { canToggle: false, checked: false }, // Enabled & Checked
+        entityStore: { canToggle: true, checked: false }, // Disabled & Unchecked
+      });
+      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+    });
+
+    it('should show proceed warning when entityStore is enabled but riskScore is disabled and unchecked', () => {
+      renderComponent({
+        ...defaultProps,
+        entityStore: { canToggle: false, checked: false }, // Enabled & Checked
+        riskScore: { canToggle: true, checked: false }, // Disabled & Unchecked
+      });
+      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+    });
+
     it('should not show entity engine missing privileges warning when no missing privileges', () => {
       renderComponent();
       expect(
@@ -182,9 +200,9 @@ describe('EntityStoreEnablementModal', () => {
     });
 
     it('should render additional charges message when available', async () => {
-      const EnablementModalCalloutMock = () => <span data-test-subj="enablement-modal-test" />;
+      const AdditionalChargesMessageMock = () => <span data-test-subj="enablement-modal-test" />;
       mockUseContractComponents.mockReturnValue({
-        EnablementModalCallout: EnablementModalCalloutMock,
+        AdditionalChargesMessage: AdditionalChargesMessageMock,
       });
 
       await renderComponent();

@@ -6,7 +6,10 @@
  */
 import { type TypeOf } from '@kbn/config-schema';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import type {
+  CspFinding,
+  MisconfigurationEvaluationStatus,
+} from '@kbn/cloud-security-posture-common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
@@ -36,7 +39,7 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_username_and_password'
   | 'managed_identity';
 
-export type Evaluation = 'passed' | 'failed' | 'NA';
+export type Evaluation = MisconfigurationEvaluationStatus;
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
@@ -100,8 +103,6 @@ export interface ComplianceDashboardDataV2 {
   benchmarks: BenchmarkData[];
 }
 
-export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types

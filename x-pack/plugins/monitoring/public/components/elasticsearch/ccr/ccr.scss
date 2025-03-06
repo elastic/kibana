@@ -1,7 +1,0 @@
-/**
- * [1] - We want the collapsed table (that shows the shard data) to be inline
- *       with the columns from the main table so we need to remove the padding
- */
-.monitoringElasticsearchCcrListingTable .euiTableRow-isExpandedRow > .euiTableRowCell > .euiTableCellContent {
-  padding: 0; /* [1] */
-}

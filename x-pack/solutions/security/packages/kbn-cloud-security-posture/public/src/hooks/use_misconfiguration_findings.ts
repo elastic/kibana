@@ -23,6 +23,18 @@ import {
   getMisconfigurationAggregationCount,
 } from '../utils/hooks_utils';
 
+export enum MISCONFIGURATION {
+  RESULT_EVALUATION = 'result.evaluation',
+  RULE_NAME = 'rule.name',
+}
+export interface MisconfigurationFindingTableDetailsFields {
+  [MISCONFIGURATION.RESULT_EVALUATION]: string;
+  [MISCONFIGURATION.RULE_NAME]: string;
+}
+
+export type MisconfigurationFindingDetailFields = Pick<CspFinding, 'rule' | 'resource'> &
+  MisconfigurationFindingTableDetailsFields;
+
 export const useMisconfigurationFindings = (options: UseCspOptions) => {
   const {
     data,
@@ -37,8 +49,11 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
+          params: buildMisconfigurationsFindingsQuery(
+            options,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            rulesStates!
+          ) as LatestFindingsRequest['params'],
         })
       );
       if (!aggregations && options.ignore_unavailable === false)
@@ -47,10 +62,11 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
       return {
         count: getMisconfigurationAggregationCount(aggregations?.count.buckets),
         rows: hits.hits.map((finding) => ({
-          result: finding._source?.result,
           rule: finding?._source?.rule,
           resource: finding?._source?.resource,
-        })) as Array<Pick<CspFinding, 'result' | 'rule' | 'resource'>>,
+          [MISCONFIGURATION.RULE_NAME]: finding?._source?.rule?.name,
+          [MISCONFIGURATION.RESULT_EVALUATION]: finding._source?.result?.evaluation,
+        })) as MisconfigurationFindingDetailFields[],
       };
     },
     {

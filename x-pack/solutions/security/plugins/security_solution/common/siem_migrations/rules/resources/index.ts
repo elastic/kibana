@@ -9,8 +9,9 @@ import type {
   OriginalRule,
   OriginalRuleVendor,
   RuleMigrationResourceData,
+  RuleMigrationResourceBase,
 } from '../../model/rule_migration.gen';
-import type { ResourceIdentifiers, RuleResource } from './types';
+import type { ResourceIdentifiers } from './types';
 import { splResourceIdentifiers } from './splunk';
 
 const ruleResourceIdentifiers: Record<OriginalRuleVendor, ResourceIdentifiers> = {
@@ -29,48 +30,48 @@ export class ResourceIdentifier {
     this.identifiers = ruleResourceIdentifiers[vendor];
   }
 
-  public fromOriginalRule(originalRule: OriginalRule): RuleResource[] {
+  public fromOriginalRule(originalRule: OriginalRule): RuleMigrationResourceBase[] {
     return this.identifiers.fromOriginalRule(originalRule);
   }
 
-  public fromResource(resource: RuleMigrationResourceData): RuleResource[] {
+  public fromResource(resource: RuleMigrationResourceData): RuleMigrationResourceBase[] {
     return this.identifiers.fromResource(resource);
   }
 
-  public fromOriginalRules(originalRules: OriginalRule[]): RuleResource[] {
-    const lists = new Set<string>();
+  public fromOriginalRules(originalRules: OriginalRule[]): RuleMigrationResourceBase[] {
+    const lookups = new Set<string>();
     const macros = new Set<string>();
     originalRules.forEach((rule) => {
       const resources = this.identifiers.fromOriginalRule(rule);
       resources.forEach((resource) => {
         if (resource.type === 'macro') {
           macros.add(resource.name);
-        } else if (resource.type === 'list') {
-          lists.add(resource.name);
+        } else if (resource.type === 'lookup') {
+          lookups.add(resource.name);
         }
       });
     });
     return [
-      ...Array.from(macros).map<RuleResource>((name) => ({ type: 'macro', name })),
-      ...Array.from(lists).map<RuleResource>((name) => ({ type: 'list', name })),
+      ...Array.from(macros).map<RuleMigrationResourceBase>((name) => ({ type: 'macro', name })),
+      ...Array.from(lookups).map<RuleMigrationResourceBase>((name) => ({ type: 'lookup', name })),
     ];
   }
 
-  public fromResources(resources: RuleMigrationResourceData[]): RuleResource[] {
-    const lists = new Set<string>();
+  public fromResources(resources: RuleMigrationResourceData[]): RuleMigrationResourceBase[] {
+    const lookups = new Set<string>();
     const macros = new Set<string>();
     resources.forEach((resource) => {
       this.identifiers.fromResource(resource).forEach((identifiedResource) => {
         if (identifiedResource.type === 'macro') {
           macros.add(identifiedResource.name);
-        } else if (identifiedResource.type === 'list') {
-          lists.add(identifiedResource.name);
+        } else if (identifiedResource.type === 'lookup') {
+          lookups.add(identifiedResource.name);
         }
       });
     });
     return [
-      ...Array.from(macros).map<RuleResource>((name) => ({ type: 'macro', name })),
-      ...Array.from(lists).map<RuleResource>((name) => ({ type: 'list', name })),
+      ...Array.from(macros).map<RuleMigrationResourceBase>((name) => ({ type: 'macro', name })),
+      ...Array.from(lookups).map<RuleMigrationResourceBase>((name) => ({ type: 'lookup', name })),
     ];
   }
 }

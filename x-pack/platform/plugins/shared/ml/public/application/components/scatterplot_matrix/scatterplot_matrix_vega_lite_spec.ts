@@ -9,9 +9,12 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
-import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
-
-import { euiPaletteColorBlind, euiPaletteRed, euiPaletteGreen } from '@elastic/eui';
+import {
+  euiPaletteColorBlind,
+  euiPaletteRed,
+  euiPaletteGreen,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -34,7 +37,6 @@ const CUSTOM_VIS_FIELDS_PATH = 'fields';
 
 export const getColorSpec = (
   forCustomVisLink: boolean,
-  euiTheme: typeof euiThemeLight,
   escapedOutlierScoreField?: string,
   color?: string,
   legendType?: LegendType
@@ -280,7 +282,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
   values: VegaValue[],
   backgroundValues: VegaValue[],
   columns: string[],
-  euiTheme: typeof euiThemeLight,
+  euiTheme: EuiThemeComputed,
   resultsField?: string,
   color?: string,
   legendType?: LegendType,
@@ -296,7 +298,6 @@ export const getScatterplotMatrixVegaLiteSpec = (
 
   const colorSpec = getColorSpec(
     forCustomVisLink,
-    euiTheme,
     resultsField && escapedOutlierScoreField,
     color,
     legendType
@@ -309,20 +310,20 @@ export const getScatterplotMatrixVegaLiteSpec = (
     // for repeated charts, it seems to be fixed for facets but not repeat.
     // This causes #ddd lines to stand out in dark mode.
     // See: https://github.com/vega/vega-lite/issues/5908
-    view: { fill: 'transparent', stroke: euiTheme.euiColorLightestShade },
+    view: { fill: 'transparent', stroke: euiTheme.colors.lightestShade },
     padding: 10,
     config: {
       axis: {
-        domainColor: euiTheme.euiColorLightShade,
-        gridColor: euiTheme.euiColorLightestShade,
-        tickColor: euiTheme.euiColorLightestShade,
-        labelColor: euiTheme.euiTextSubduedColor,
-        titleColor: euiTheme.euiTextSubduedColor,
+        domainColor: euiTheme.colors.lightShade,
+        gridColor: euiTheme.colors.lightestShade,
+        tickColor: euiTheme.colors.lightestShade,
+        labelColor: euiTheme.colors.textSubdued,
+        titleColor: euiTheme.colors.textSubdued,
       },
       legend: {
         orient: 'right',
-        labelColor: euiTheme.euiTextSubduedColor,
-        titleColor: euiTheme.euiTextSubduedColor,
+        labelColor: euiTheme.colors.textSubdued,
+        titleColor: euiTheme.colors.textSubdued,
       },
     },
     repeat: {

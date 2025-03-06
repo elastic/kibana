@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexItem, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   Chart,
   Axis,
@@ -14,10 +14,9 @@ import {
   Settings,
   ScaleType,
   niceTimeFormatter,
-  DARK_THEME,
-  LIGHT_THEME,
   LineSeries,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
 import { type MetricTypes, type MetricSeries } from '../../../common/rest_types';
@@ -49,7 +48,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   popoverOpen,
   togglePopover,
 }) => {
-  const theme = useEuiTheme();
+  const baseTheme = useElasticChartsTheme();
 
   const chartTimestamps = series.flatMap((stream) => stream.data.map((d) => d.x));
 
@@ -97,7 +96,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
         </EuiTitle>
         <Chart size={{ height: 200 }}>
           <Settings
-            theme={theme.colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
+            baseTheme={baseTheme}
             showLegend={true}
             legendPosition="right"
             xDomain={{ min: minTimestamp, max: maxTimestamp }}

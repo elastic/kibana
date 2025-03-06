@@ -16,7 +16,7 @@
         "signature": [
           "void"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/public/types.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -31,7 +31,7 @@
         "signature": [
           "void"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/public/types.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,7 +48,7 @@
         "signature": [
           "{ readonly NONE: \"None\"; readonly ZERO: \"Zero\"; readonly LINEAR: \"Linear\"; readonly CARRY: \"Carry\"; readonly LOOKAHEAD: \"Lookahead\"; readonly AVERAGE: \"Average\"; readonly NEAREST: \"Nearest\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,7 +63,7 @@
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,7 +78,7 @@
         "signature": [
           "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -102,7 +102,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/chart_expressions/expression_xy/server/types.ts",
+      "path": "src/platform/plugins/shared/chart_expressions/expression_xy/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -120,7 +120,7 @@
         "tags": [],
         "label": "AnnotationLayerArgs",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,7 +131,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,7 +152,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,7 +166,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -180,7 +180,7 @@
         "tags": [],
         "label": "AxesSettingsConfig",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,7 +191,7 @@
             "tags": [],
             "label": "yLeft",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,7 +202,7 @@
             "tags": [],
             "label": "yRight",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -216,7 +216,7 @@
         "tags": [],
         "label": "AxisConfig",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,7 +230,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,7 +244,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -258,7 +258,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +273,7 @@
               "Position",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,7 +287,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,7 +301,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +315,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -329,7 +329,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -343,7 +343,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,7 +357,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,7 +371,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,7 +385,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +406,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -420,7 +420,7 @@
         "tags": [],
         "label": "AxisExtentConfig",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -432,9 +432,9 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -448,7 +448,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -462,7 +462,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -476,7 +476,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -490,7 +490,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -504,7 +504,7 @@
         "tags": [],
         "label": "DataDecorationConfig",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -515,7 +515,7 @@
             "tags": [],
             "label": "forAccessor",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -529,7 +529,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,7 +543,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -557,7 +557,7 @@
         "tags": [],
         "label": "DataLayerArgs",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -579,7 +579,7 @@
               },
               ")[]"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -591,9 +591,9 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"line\" | \"area\" | \"bar\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -615,7 +615,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -629,7 +629,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,7 +651,7 @@
               },
               ")[] | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,7 +673,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -687,7 +687,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -701,7 +701,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -715,7 +715,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -729,7 +729,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -743,7 +743,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -757,7 +757,7 @@
             "signature": [
               "\"time\" | \"linear\" | \"ordinal\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -768,7 +768,7 @@
             "tags": [],
             "label": "isHistogram",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,7 +779,7 @@
             "tags": [],
             "label": "isPercentage",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -790,7 +790,7 @@
             "tags": [],
             "label": "isStacked",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -801,7 +801,7 @@
             "tags": [],
             "label": "isHorizontal",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -822,7 +822,7 @@
               },
               "<{ [key: string]: unknown; }>"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -836,7 +836,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -857,7 +857,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -878,7 +878,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -892,7 +892,7 @@
         "tags": [],
         "label": "LegendConfig",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -905,7 +905,7 @@
             "description": [
               "\nFlag whether the legend should be shown. If there is just a single series, it will be hidden"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -921,7 +921,7 @@
             "signature": [
               "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -937,7 +937,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -953,7 +953,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -969,7 +969,7 @@
             "signature": [
               "\"right\" | \"left\" | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -985,7 +985,7 @@
             "signature": [
               "\"top\" | \"bottom\" | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1001,7 +1001,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1017,7 +1017,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1033,7 +1033,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1056,7 +1056,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1079,7 +1079,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1100,7 +1100,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1114,7 +1114,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1128,7 +1128,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1160,7 +1160,7 @@
           },
           ", \"icon\">"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1171,7 +1171,7 @@
             "tags": [],
             "label": "timebucket",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1185,7 +1185,7 @@
             "signature": [
               "\"bottom\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1199,7 +1199,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1217,7 +1217,7 @@
               "RectAnnotationDatum",
               "; }> | null"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1228,7 +1228,7 @@
             "tags": [],
             "label": "isGrouped",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1259,7 +1259,7 @@
             "text": "DataDecorationConfig"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1280,7 +1280,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1294,7 +1294,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1315,7 +1315,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1336,7 +1336,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1357,7 +1357,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1371,7 +1371,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1386,7 +1386,7 @@
               "Position",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1400,7 +1400,7 @@
         "tags": [],
         "label": "ReferenceLineLayerArgs",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1414,7 +1414,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1428,7 +1428,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1442,7 +1442,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1463,7 +1463,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1484,7 +1484,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1515,7 +1515,7 @@
             "text": "DataLayerConfigResult"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1536,7 +1536,7 @@
                 "text": "ExpressionValueVisDimension"
               }
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1567,7 +1567,7 @@
             "text": "DataLayerArgs"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1588,7 +1588,7 @@
               },
               " & { type: \"legendConfig\"; }"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1609,7 +1609,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1623,7 +1623,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1637,7 +1637,7 @@
             "signature": [
               "\"hide\" | \"show\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,7 +1652,7 @@
               "ReferenceLineConfigResult",
               "[]"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1673,7 +1673,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1687,7 +1687,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1701,7 +1701,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1715,7 +1715,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1736,7 +1736,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1757,7 +1757,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1771,7 +1771,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1785,7 +1785,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1799,7 +1799,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1813,7 +1813,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1835,7 +1835,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1857,7 +1857,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1871,7 +1871,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1885,7 +1885,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1896,7 +1896,7 @@
             "tags": [],
             "label": "showTooltip",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1910,7 +1910,7 @@
         "tags": [],
         "label": "XYChartProps",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1924,7 +1924,7 @@
             "signature": [
               "XYProps"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1935,7 +1935,7 @@
             "tags": [],
             "label": "syncTooltips",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1946,7 +1946,7 @@
             "tags": [],
             "label": "syncCursor",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1957,7 +1957,7 @@
             "tags": [],
             "label": "syncColors",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1971,7 +1971,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2057,7 +2057,7 @@
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2071,7 +2071,7 @@
         "tags": [],
         "label": "XYRender",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2085,7 +2085,7 @@
             "signature": [
               "\"render\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2099,7 +2099,7 @@
             "signature": [
               "\"xyVis\""
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2119,7 +2119,7 @@
                 "text": "XYChartProps"
               }
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2150,7 +2150,7 @@
             "text": "AxisConfig"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2171,7 +2171,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2185,7 +2185,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2206,7 +2206,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2328,7 +2328,7 @@
           "YDomainRange",
           " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2343,7 +2343,7 @@
         "signature": [
           "\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2365,7 +2365,7 @@
           },
           " & { type: \"axisExtentConfig\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2378,9 +2378,9 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"full\" | \"custom\" | \"dataBounds\""
+          "\"custom\" | \"full\" | \"dataBounds\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2395,7 +2395,7 @@
         "signature": [
           "\"normal\" | \"percentage\" | \"wiggle\" | \"silhouette\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2412,7 +2412,7 @@
           " | ",
           "ExtendedAnnotationLayerConfig"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2435,7 +2435,7 @@
           " | ",
           "ExtendedDataLayerConfig"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2464,7 +2464,7 @@
             "text": "ExtendedDataLayerConfigResult"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2501,7 +2501,7 @@
           " | ",
           "ExtendedAnnotationLayerConfig"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2524,7 +2524,7 @@
             "text": "ReferenceLineLayerConfig"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2547,7 +2547,7 @@
             "text": "ReferenceLineLayerConfigResult"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2601,7 +2601,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2623,7 +2623,7 @@
           },
           " & { type: \"dataDecorationConfig\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2663,7 +2663,7 @@
           "; } & ",
           "WithLayerId"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2702,7 +2702,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2717,7 +2717,7 @@
         "signature": [
           "\"None\" | \"Zero\" | \"Nearest\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2759,7 +2759,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2781,7 +2781,7 @@
           },
           " & { layerId: string; } & { type: \"extendedAnnotationLayer\"; layerType: \"annotations\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2829,7 +2829,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2862,7 +2862,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2918,7 +2918,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2933,7 +2933,7 @@
         "signature": [
           "\"none\" | \"above\" | \"below\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2948,7 +2948,7 @@
         "signature": [
           "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2961,9 +2961,9 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"auto\" | \"above\" | \"below\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3019,7 +3019,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3034,7 +3034,7 @@
         "signature": [
           "\"data\" | \"annotations\" | \"referenceLine\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3088,7 +3088,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3110,7 +3110,7 @@
           },
           " & { type: \"legendConfig\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3125,7 +3125,7 @@
         "signature": [
           "\"dashed\" | \"solid\" | \"dotted\" | \"dot-dashed\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3140,7 +3140,7 @@
         "signature": [
           "\"expressionXy\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/index.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3155,7 +3155,7 @@
         "signature": [
           "\"expressionXy\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/index.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3209,7 +3209,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3231,7 +3231,7 @@
           },
           " & { type: \"referenceLineDecorationConfig\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3262,7 +3262,7 @@
           "; } & ",
           "WithLayerId"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3292,7 +3292,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3354,7 +3354,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3367,9 +3367,9 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\""
+          "\"line\" | \"area\" | \"bar\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3384,7 +3384,7 @@
         "signature": [
           "\"hide\" | \"show\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3438,7 +3438,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3460,7 +3460,7 @@
           },
           " & { type: \"xAxisConfig\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3475,7 +3475,7 @@
         "signature": [
           "\"time\" | \"linear\" | \"ordinal\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3490,7 +3490,7 @@
         "signature": [
           "\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3521,7 +3521,7 @@
             "text": "ReferenceLineLayerConfigResult"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3552,7 +3552,7 @@
             "text": "AnnotationLayerArgs"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3606,7 +3606,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3628,7 +3628,7 @@
           },
           " & { type: \"yAxisConfig\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3641,9 +3641,9 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"sqrt\" | \"time\" | \"linear\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3660,7 +3660,7 @@
         "signature": [
           "{ readonly NONE: \"None\"; readonly ZERO: \"Zero\"; readonly LINEAR: \"Linear\"; readonly CARRY: \"Carry\"; readonly LOOKAHEAD: \"Lookahead\"; readonly AVERAGE: \"Average\"; readonly NEAREST: \"Nearest\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3675,7 +3675,7 @@
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3690,7 +3690,7 @@
         "signature": [
           "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

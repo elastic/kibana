@@ -13,7 +13,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
-import { useSessionPreview } from '../hooks/use_session_preview';
+import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -48,12 +48,12 @@ export const SessionPreviewContainer: FC = () => {
   );
 
   // decide whether to show the session view or not
-  const sessionViewConfig = useSessionPreview({ getFieldsData, dataFormattedForFieldBrowser });
+  const sessionViewConfig = useSessionViewConfig({ getFieldsData, dataFormattedForFieldBrowser });
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const dispatch = useDispatch();

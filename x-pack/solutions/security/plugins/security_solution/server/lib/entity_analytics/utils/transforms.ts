@@ -7,76 +7,20 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
-  TransformGetTransformResponse,
   TransformStartTransformResponse,
   TransformPutTransformResponse,
   TransformGetTransformTransformSummary,
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
+  AcknowledgedResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
-import {
-  getRiskScorePivotTransformId,
-  getRiskScoreLatestTransformId,
-} from '../../../../common/utils/risk_score_modules';
 import type { TransformOptions } from '../risk_score/configurations';
 import { getTransformOptions } from '../risk_score/configurations';
-
-export const getLegacyTransforms = async ({
-  namespace,
-  esClient,
-}: {
-  namespace: string;
-  esClient: ElasticsearchClient;
-}) => {
-  const getTransformStatsRequests: Array<Promise<TransformGetTransformResponse>> = [];
-  [RiskScoreEntity.host, RiskScoreEntity.user].forEach((entity) => {
-    getTransformStatsRequests.push(
-      esClient.transform.getTransform({
-        transform_id: getRiskScorePivotTransformId(entity, namespace),
-      })
-    );
-    getTransformStatsRequests.push(
-      esClient.transform.getTransform({
-        transform_id: getRiskScoreLatestTransformId(entity, namespace),
-      })
-    );
-  });
-
-  const results = await Promise.allSettled(getTransformStatsRequests);
-
-  const transforms = results.reduce((acc, result) => {
-    if (result.status === 'fulfilled' && result.value?.transforms?.length > 0) {
-      acc.push(...result.value.transforms);
-    }
-    return acc;
-  }, [] as TransformGetTransformTransformSummary[]);
-
-  return transforms;
-};
-
-export const removeLegacyTransforms = async ({
-  namespace,
-  esClient,
-}: {
-  namespace: string;
-  esClient: ElasticsearchClient;
-}): Promise<void> => {
-  const transforms = await getLegacyTransforms({ namespace, esClient });
-
-  const stopTransformRequests = transforms.map((t) =>
-    esClient.transform.deleteTransform({
-      transform_id: t.id,
-      force: true,
-    })
-  );
-
-  await Promise.allSettled(stopTransformRequests);
-};
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export const createTransform = async ({
   esClient,
@@ -104,6 +48,72 @@ export const createTransform = async ({
       throw existErr;
     }
   }
+};
+
+export const stopTransform = async ({
+  esClient,
+  logger,
+  transformId,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  transformId: string;
+}): Promise<AcknowledgedResponseBase> =>
+  retryTransientEsErrors(
+    () =>
+      esClient.transform.stopTransform(
+        {
+          transform_id: transformId,
+          wait_for_completion: true,
+          force: true,
+        },
+        { ignore: [409, 404] }
+      ),
+    { logger }
+  );
+
+export const deleteTransform = ({
+  esClient,
+  logger,
+  transformId,
+  deleteData = false,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  transformId: string;
+  deleteData?: boolean;
+}): Promise<AcknowledgedResponseBase> =>
+  retryTransientEsErrors(
+    () =>
+      esClient.transform.deleteTransform(
+        {
+          transform_id: transformId,
+          force: true,
+          delete_dest_index: deleteData,
+        },
+        { ignore: [404] }
+      ),
+    { logger }
+  );
+
+export const reinstallTransform = async ({
+  esClient,
+  logger,
+  config,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  config: TransformPutTransformRequest;
+}): Promise<void> => {
+  const transformId = config.transform_id;
+
+  await stopTransform({ esClient, logger, transformId });
+  await deleteTransform({ esClient, logger, transformId });
+  await createTransform({
+    esClient,
+    logger,
+    transform: config,
+  });
 };
 
 export const getLatestTransformId = (namespace: string): string =>
@@ -141,9 +151,10 @@ export const scheduleTransformNow = async ({
 };
 
 /**
- * Whenever we change the latest transform configuration, we must ensure we update the transform in environments where it has already been installed.
+ * This method updates the transform configuration if it is outdated.
+ * If the 'latest' property of the transform changes it will reinstall the transform.
  */
-const upgradeLatestTransformIfNeeded = async ({
+export const upgradeLatestTransformIfNeeded = async ({
   esClient,
   namespace,
   logger,
@@ -166,14 +177,22 @@ const upgradeLatestTransformIfNeeded = async ({
   });
 
   if (isTransformOutdated(response.transforms[0], newConfig)) {
-    logger.info(`Upgrading transform ${transformId}`);
+    if (doesTransformRequireReinstall(response.transforms[0], newConfig)) {
+      logger.info(`Reinstalling transform ${transformId}`);
+      await reinstallTransform({
+        esClient,
+        logger,
+        config: { ...newConfig, transform_id: transformId },
+      });
+    } else {
+      logger.info(`Upgrading transform ${transformId}`);
+      const { latest: _unused, ...changes } = newConfig;
 
-    const { latest: _unused, ...changes } = newConfig;
-
-    await esClient.transform.updateTransform({
-      transform_id: transformId,
-      ...changes,
-    });
+      await esClient.transform.updateTransform({
+        transform_id: transformId,
+        ...changes,
+      });
+    }
   }
 };
 
@@ -199,11 +218,12 @@ export const scheduleLatestTransformNow = async ({
   await scheduleTransformNow({ esClient, transformId });
 };
 
-/**
- * Whitelist the transform fields that we can update.
- */
-
 const isTransformOutdated = (
   transform: TransformGetTransformTransformSummary,
   newConfig: TransformOptions
 ): boolean => transform._meta?.version !== newConfig._meta?.version;
+
+const doesTransformRequireReinstall = (
+  transform: TransformGetTransformTransformSummary,
+  newConfig: TransformOptions
+): boolean => JSON.stringify(transform.latest) !== JSON.stringify(newConfig.latest);

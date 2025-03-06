@@ -10,8 +10,6 @@ import { render, waitFor, screen } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
-
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 
 import { ScatterplotMatrix } from './scatterplot_matrix';
@@ -21,8 +19,6 @@ const mockFilterManager = createFilterManagerMock();
 const mockEsSearch = jest.fn((body) => ({
   hits: { hits: [{ fields: { x: [1], y: [2] } }, { fields: { x: [2], y: [3] } }] },
 }));
-
-const mockEuiTheme = euiThemeLight;
 
 jest.mock('../../contexts/kibana', () => ({
   useMlApi: () => ({
@@ -47,9 +43,6 @@ jest.mock('../../contexts/kibana', () => ({
         },
       },
     },
-  }),
-  useCurrentThemeVars: () => ({
-    euiTheme: mockEuiTheme,
   }),
 }));
 

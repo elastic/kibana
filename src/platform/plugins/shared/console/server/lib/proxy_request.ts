@@ -55,12 +55,13 @@ export const proxyRequest = ({
     finalUserHeaders.host = hostname;
   }
 
+  const parsedPort = port === '' ? undefined : parseInt(port, 10);
   const req = client.request({
     method: method.toUpperCase(),
     // We support overriding this on a per request basis to support legacy proxy config. See ./proxy_config.
     rejectUnauthorized: typeof rejectUnauthorized === 'boolean' ? rejectUnauthorized : undefined,
     host: sanitizeHostname(hostname),
-    port: port === '' ? undefined : parseInt(port, 10),
+    port: parsedPort,
     protocol,
     path: `${pathname}${search || ''}`,
     headers: {
@@ -96,7 +97,12 @@ export const proxyRequest = ({
         req.destroy();
       }
       if (!resolved) {
-        timeoutReject(Boom.gatewayTimeout('Client request timeout'));
+        const request = `${req.method} ${req.path}`;
+        const requestPath = `${req.protocol}//${req.host}${parsedPort ? `:${parsedPort}` : ''}`;
+
+        timeoutReject(
+          Boom.gatewayTimeout(`Client request timeout for: ${requestPath} with request ${request}`)
+        );
       } else {
         timeoutResolve(undefined);
       }

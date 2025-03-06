@@ -26,7 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { JobDetails, Detectors, Datafeed } from './tabs';
+import { EditJobDetailsTab, EditDetectorsTab, EditDatafeedTab } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
@@ -340,7 +340,8 @@ export class EditJobFlyoutUI extends Component {
             defaultMessage: 'Job details',
           }),
           content: (
-            <JobDetails
+            <EditJobDetailsTab
+              euiTheme={this.props.euiTheme}
               jobClosed={jobClosed}
               datafeedRunning={datafeedRunning}
               jobDescription={jobDescription}
@@ -361,7 +362,7 @@ export class EditJobFlyoutUI extends Component {
             defaultMessage: 'Detectors',
           }),
           content: (
-            <Detectors
+            <EditDetectorsTab
               jobDetectors={jobDetectors}
               jobDetectorDescriptions={jobDetectorDescriptions}
               setDetectorDescriptions={this.setDetectorDescriptions}
@@ -375,7 +376,7 @@ export class EditJobFlyoutUI extends Component {
             defaultMessage: 'Datafeed',
           }),
           content: (
-            <Datafeed
+            <EditDatafeedTab
               datafeedQuery={datafeedQuery}
               datafeedQueryDelay={datafeedQueryDelay}
               datafeedFrequency={datafeedFrequency}
@@ -515,6 +516,7 @@ export class EditJobFlyoutUI extends Component {
 }
 
 EditJobFlyoutUI.propTypes = {
+  euiTheme: PropTypes.object.isRequired,
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,

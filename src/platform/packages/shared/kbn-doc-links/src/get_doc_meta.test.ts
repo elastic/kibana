@@ -12,7 +12,7 @@ import { getDocLinksMeta } from './get_doc_meta';
 describe('getDocLinksMeta', () => {
   it('returns the correct version for the `main` branch', () => {
     expect(getDocLinksMeta({ kibanaBranch: 'main', buildFlavor: 'traditional' }).version).toEqual(
-      'master'
+      'current'
     );
   });
 

@@ -52,7 +52,6 @@
     "@kbn/ml-in-memory-table",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
-    "@kbn/ml-kibana-theme",
     "@kbn/ml-local-storage",
     "@kbn/ml-nested-property",
     "@kbn/ml-number-utils",
@@ -68,7 +67,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/esql",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-theme",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
@@ -85,7 +83,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-mount",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/file-upload-common"
   ],
   "exclude": [
     "target/**/*",

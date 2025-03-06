@@ -52,6 +52,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -99,9 +100,12 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     [setIsMenuOpen]
   );
 
-  const openCasesModal = useCasesModal(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE);
+  const openCasesModal = useCasesModal(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    CASES_TOAST_MESSAGES_TITLES.ANOMALY_CHARTS(maxSeriesToPlot)
+  );
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
   const casesPrivileges = cases?.helpers.canUseCases();
 
   const { anomalyExplorerCommonStateService, chartsStateService } = useAnomalyExplorerContext();
@@ -266,6 +270,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           />
         ),
         panel: 'addToDashboardPanel',
+        icon: 'dashboardApp',
         'data-test-subj': 'mlAnomalyAddChartsToDashboardButton',
       });
 
@@ -286,6 +291,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         name: (
           <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
         ),
+        icon: 'casesApp',
         panel: 'addToCasePanel',
         'data-test-subj': 'mlAnomalyAttachChartsToCasesButton',
       });
@@ -329,6 +335,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                   defaultMessage: 'Actions',
                 })}
                 color="text"
+                display="base"
                 iconType="boxesHorizontal"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"

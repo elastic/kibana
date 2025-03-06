@@ -13,6 +13,12 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
   router.post(
     {
       path: `${API_BASE_PATH}/profile`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           query: schema.object({}, { unknowns: 'allow' }),
@@ -36,11 +42,9 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
 
       const body = {
         index,
-        body: {
-          // Activate profiler mode for this query.
-          profile: true,
-          ...query,
-        },
+        // Activate profiler mode for this query.
+        profile: true,
+        ...query,
       };
 
       try {
@@ -72,6 +76,12 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
   router.get(
     {
       path: `${API_BASE_PATH}/has_indices`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     async (ctx, _request, response) => {
@@ -86,9 +96,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
 
       try {
         const client = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const resp = await client.cat.indices({ format: 'json' });
-
-        const hasIndices = resp.length > 0;
+        const hasIndices = await client.indices.exists({ index: '*,*:*' });
 
         return response.ok({
           body: {
