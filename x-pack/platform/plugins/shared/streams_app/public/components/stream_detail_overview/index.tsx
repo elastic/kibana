@@ -312,12 +312,14 @@ function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse 
           >
             <EuiFlexGroup direction="column" gutterSize="s">
               <AssetImage type="welcome" />
-              <EuiText size="m" textAlign="center">
-                {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
-                  defaultMessage: 'Create streams for your logs',
-                })}
+              <EuiText size="s" textAlign="center">
+                <h2>
+                  {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
+                    defaultMessage: 'Create streams for your logs',
+                  })}
+                </h2>
               </EuiText>
-              <EuiText size="xs" textAlign="center">
+              <EuiText size="s" textAlign="center">
                 {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
                   defaultMessage:
                     'Create sub streams to split out data with different retention policies, schemas, and more.',

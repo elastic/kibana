@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../../asset_image';
 
 export const RootStreamEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
-      titleSize="xs"
-      icon={<AssetImage type="noResults" />}
+      titleSize="s"
+      icon={<AssetImage type="noProcessingForRootStreams" />}
       title={
         <h2>
           {i18n.translate(
@@ -24,7 +24,7 @@ export const RootStreamEmptyPrompt = () => {
         </h2>
       }
       body={
-        <p>
+        <EuiText size="s">
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.body',
             {
@@ -32,7 +32,7 @@ export const RootStreamEmptyPrompt = () => {
                 'Root streams are selectively immutable and cannot be enriched with processors. To enrich data, reroute a new child stream and add processors to it.',
             }
           )}
-        </p>
+        </EuiText>
       }
     />
   );

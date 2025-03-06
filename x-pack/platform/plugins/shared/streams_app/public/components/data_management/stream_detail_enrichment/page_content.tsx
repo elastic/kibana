@@ -14,8 +14,6 @@ import {
   EuiText,
   EuiTitle,
   euiDragDropReorder,
-  useEuiShadow,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
@@ -120,7 +118,7 @@ export function StreamDetailEnrichmentContent({
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
-                  initialSize={40}
+                  initialSize={35}
                   minSize="480px"
                   tabIndex={0}
                   paddingSize="none"
@@ -139,7 +137,7 @@ export function StreamDetailEnrichmentContent({
                 </EuiResizablePanel>
                 <EuiResizableButton indicator="border" accountForScrollbars="both" />
                 <EuiResizablePanel
-                  initialSize={60}
+                  initialSize={65}
                   minSize="300px"
                   tabIndex={0}
                   paddingSize="s"
@@ -196,8 +194,6 @@ const ProcessorsEditor = React.memo(
     onWatchProcessor,
     simulation,
   }: ProcessorsEditorProps) => {
-    const { euiTheme } = useEuiTheme();
-
     const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
       if (source && destination) {
         const items = euiDragDropReorder(processors, source.index, destination.index);
@@ -209,16 +205,7 @@ const ProcessorsEditor = React.memo(
 
     return (
       <>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          borderRadius="none"
-          grow={false}
-          css={css`
-            z-index: ${euiTheme.levels.maskBelowHeader};
-            ${useEuiShadow('xs')};
-          `}
-        >
+        <EuiPanel paddingSize="m" hasShadow={false} grow={false} color="transparent">
           <EuiTitle size="xxs">
             <h2>
               {i18n.translate(

@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiProgress,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -193,7 +194,7 @@ const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) =
           </h2>
         }
         body={
-          <p>
+          <EuiText size="s">
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
               {
@@ -201,7 +202,7 @@ const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) =
                   "There are no sample documents to test the processors. Try updating the time range or ingesting more data, it might be possible we could not find any matching documents with the processors' source fields.",
               }
             )}
-          </p>
+          </EuiText>
         }
       />
     );

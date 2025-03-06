@@ -19,7 +19,7 @@ export function PreviewPanelIllustration({ children }: { children: React.ReactNo
           max-width: 350px;
         `}
       >
-        <AssetImage />
+        <AssetImage type="noResults" />
         {children}
       </EuiFlexItem>
     </EuiFlexGroup>

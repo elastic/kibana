@@ -45,7 +45,7 @@ export function ControlBar({
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiButton disabled data-test-subj="streamsAppStreamDetailRoutingSaveButton">
           {i18n.translate('xpack.streams.streamDetailRouting.save', {
-            defaultMessage: 'Save',
+            defaultMessage: 'Create stream',
           })}
         </EuiButton>
       </EuiFlexGroup>
@@ -201,13 +201,14 @@ export function ControlBar({
         })}
       </EuiButtonEmpty>
       <EuiButton
+        fill
         isLoading={routingAppState.saveInProgress}
         onClick={saveOrUpdateChildren}
         data-test-subj="streamsAppStreamDetailRoutingSaveButton"
       >
         {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
           ? i18n.translate('xpack.streams.streamDetailRouting.add', {
-              defaultMessage: 'Save',
+              defaultMessage: 'Create stream',
             })
           : i18n.translate('xpack.streams.streamDetailRouting.change', {
               defaultMessage: 'Change routing',

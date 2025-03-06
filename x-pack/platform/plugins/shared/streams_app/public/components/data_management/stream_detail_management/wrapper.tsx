@@ -39,6 +39,7 @@ export function Wrapper({
       {Object.keys(tabs).length > 1 && (
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
+            color="primary"
             legend="Management tabs"
             idSelected={subtab}
             onChange={(optionId) => {
