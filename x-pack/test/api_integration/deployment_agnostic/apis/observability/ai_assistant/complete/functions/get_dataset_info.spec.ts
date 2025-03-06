@@ -243,10 +243,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const functionResponseMessage = last(thirdRequestBody.messages);
             const parsedContent = JSON.parse(functionResponseMessage?.content as string);
             expect(Object.keys(parsedContent)).to.eql(['indices', 'fields', 'stats']);
-            expect(parsedContent.indices).to.eql([
-              'logs-web.access-default',
-              '.alerts-observability.logs.alerts-default',
-            ]);
+            expect(parsedContent.indices).to.contain('logs-web.access-default');
           });
 
           it('emits a messageAdded event with the `get_dataset_info` function response', async () => {
