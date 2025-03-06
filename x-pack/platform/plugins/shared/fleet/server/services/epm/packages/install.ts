@@ -492,17 +492,16 @@ async function installPackageFromRegistry({
     }
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, assetsMap, archiveIterator, verificationResult }] =
+    const [latestPackage, { paths, packageInfo, archiveIterator, verificationResult }] =
       await Promise.all([
         latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
         Registry.getPackage(pkgName, pkgVersion, {
           ignoreUnverified: force && !neverIgnoreVerificationError,
-          useStreaming,
+          useStreaming: true,
         }),
       ]);
     const packageInstallContext: PackageInstallContext = {
       packageInfo,
-      assetsMap,
       paths,
       archiveIterator,
     };
@@ -831,7 +830,7 @@ async function installPackageByUpload({
       packageInfo,
     });
 
-    const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,
       contentType,
       useStreaming,
@@ -839,7 +838,6 @@ async function installPackageByUpload({
 
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
-      assetsMap,
       paths,
       archiveIterator,
     };
@@ -1036,7 +1034,6 @@ export async function installCustomPackage(
   const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
   const packageInstallContext: PackageInstallContext = {
-    assetsMap,
     paths,
     packageInfo,
     archiveIterator,
@@ -1374,7 +1371,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
       const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
       packageInstallContext = {
-        assetsMap: pkg.assetsMap,
         packageInfo: pkg.packageInfo,
         paths: pkg.paths,
         archiveIterator,
@@ -1382,7 +1378,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
     } else {
       const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
       packageInstallContext = {
-        assetsMap: installedPkgWithAssets.assetsMap,
         packageInfo: installedPkgWithAssets.packageInfo,
         paths: installedPkgWithAssets.paths,
         archiveIterator,
