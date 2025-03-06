@@ -422,6 +422,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
+            id: 'package@custom',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs@custom',
             type: 'component_template',
           },

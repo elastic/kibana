@@ -443,6 +443,15 @@ export function buildComponentTemplates(params: {
       _meta,
     };
   }
+  if (packageName) {
+    const customTemplateName = `${packageName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+    templatesMap[customTemplateName] = {
+      template: {
+        settings: {},
+      },
+      _meta,
+    };
+  }
 
   // return empty/stub template
   templatesMap[userSettingsTemplateName] = {
