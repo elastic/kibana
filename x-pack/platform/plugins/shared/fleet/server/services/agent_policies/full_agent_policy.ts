@@ -28,6 +28,8 @@ import type {
   AgentPolicy,
 } from '../../types';
 import type {
+  DownloadSource,
+  FullAgentPolicyDownload,
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
@@ -45,7 +47,11 @@ import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
-import { getFleetServerHostsSecretReferences, getOutputSecretReferences } from '../secrets';
+import {
+  getFleetServerHostsSecretReferences,
+  getOutputSecretReferences,
+  getDownloadSourceSecretReferences,
+} from '../secrets';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -90,7 +96,7 @@ export async function getFullAgentPolicy(
     dataOutput,
     fleetServerHost,
     monitoringOutput,
-    downloadSourceUri,
+    downloadSource,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
   // Build up an in-memory object for looking up Package Info, so we don't have
@@ -159,7 +165,9 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-
+  const downloadSourceSecretReferences = downloadSource
+    ? getDownloadSourceSecretReferences(downloadSource)
+    : [];
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
@@ -181,14 +189,12 @@ export async function getFullAgentPolicy(
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
+      ...downloadSourceSecretReferences,
       ...packagePolicySecretReferences,
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: {
-        sourceURI: downloadSourceUri,
-        ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
-      },
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxyUri),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -794,3 +800,39 @@ function buildShipperQueueData(shipper: ShipperOutput) {
   };
 }
 /* eslint-enable @typescript-eslint/naming-convention */
+
+export function getBinarySourceSettings(
+  downloadSource: DownloadSource,
+  downloadSourceProxyUri: string | null
+) {
+  const config: FullAgentPolicyDownload = {
+    sourceURI: downloadSource.host,
+    ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
+  };
+  if (downloadSource?.ssl) {
+    config.ssl = {
+      ...(downloadSource.ssl?.certificate_authorities && {
+        certificate_authorities: downloadSource.ssl.certificate_authorities,
+      }),
+      ...(downloadSource.ssl?.certificate && {
+        certificate: downloadSource.ssl.certificate,
+      }),
+      ...(downloadSource.ssl?.key &&
+        !downloadSource?.secrets?.ssl?.key && {
+          key: downloadSource.ssl.key,
+        }),
+    };
+  }
+
+  if (downloadSource?.secrets) {
+    config.secrets = {
+      ssl: {
+        ...(downloadSource.secrets?.ssl?.key &&
+          !downloadSource?.ssl?.key && {
+            key: downloadSource.secrets.ssl.key,
+          }),
+      },
+    };
+  }
+  return config;
+}

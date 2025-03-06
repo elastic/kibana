@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DownloadSourceBase, DownloadSource, SOSecret } from '../models';
+import type { DownloadSourceBase, DownloadSource, BaseSSLSecrets } from '../models';
 
 import type { ListResult } from './common';
 
@@ -36,11 +36,7 @@ export interface PutDownloadSourceRequest {
       certificate?: string;
       key?: string;
     };
-    secrets?: {
-      ssl?: {
-        key?: SOSecret;
-      };
-    };
+    secrets?: BaseSSLSecrets;
   };
 }
 
@@ -56,11 +52,7 @@ export interface PostDownloadSourceRequest {
       certificate?: string;
       key?: string;
     };
-    secrets?: {
-      ssl?: {
-        key?: SOSecret;
-      };
-    };
+    secrets?: BaseSSLSecrets;
   };
 }
 
