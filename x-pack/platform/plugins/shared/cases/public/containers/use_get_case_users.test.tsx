@@ -14,7 +14,6 @@ import { TestProviders } from '../common/mock';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/208380
 describe('useGetCaseUsers', () => {
   beforeEach(() => {
     jest.clearAllMocks();

@@ -18,7 +18,6 @@ import userEvent from '@testing-library/user-event';
 import { Title } from './title';
 import { schema } from '../create/schema';
 
-// FLAKY: https://github.com/elastic/kibana/issues/208310
 describe('Title', () => {
   let globalForm: FormHook;
 

@@ -12,7 +12,6 @@ import { screen } from '@testing-library/react';
 import { TableSearch } from './search';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/206366
 describe('TableSearch', () => {
   const onFilterOptionsChange = jest.fn();
 

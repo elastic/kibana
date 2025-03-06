@@ -12,7 +12,6 @@ import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../common/mock';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 
-// FLAKY: https://github.com/elastic/kibana/issues/197304
 describe('CancelCreationConfirmationModal', () => {
   const props = {
     title: 'My title',

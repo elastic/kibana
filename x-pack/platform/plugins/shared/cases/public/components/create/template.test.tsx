@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-// FLAKY: https://github.com/elastic/kibana/issues/202761
 describe('TemplateSelector', () => {
   const onTemplateChange = jest.fn();
 

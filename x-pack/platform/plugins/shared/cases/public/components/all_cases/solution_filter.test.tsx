@@ -15,7 +15,6 @@ import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/co
 import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';
 
-// FLAKY: https://github.com/elastic/kibana/issues/207427
 describe('SolutionFilter ', () => {
   const onChange = jest.fn();
   const solutions = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER];
@@ -37,7 +36,6 @@ describe('SolutionFilter ', () => {
       jest.clearAllMocks();
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/175239
     it('renders options correctly', async () => {
       renderWithTestingProviders(
         <SolutionFilter
@@ -127,7 +125,6 @@ describe('SolutionFilter ', () => {
       expect(screen.getByTestId(`options-filter-popover-item-${solutions[1]}`)).toBeInTheDocument();
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/175240
     it('should call onChange with selected solution id when no option selected yet', async () => {
       renderWithTestingProviders(
         <SolutionFilter

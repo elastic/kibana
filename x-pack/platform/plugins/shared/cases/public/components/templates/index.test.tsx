@@ -15,7 +15,6 @@ import * as i18n from './translations';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/196628
 describe('Templates', () => {
   const props = {
     disabled: false,

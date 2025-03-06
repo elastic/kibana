@@ -15,7 +15,6 @@ import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174661
 describe('FileAttachmentEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();

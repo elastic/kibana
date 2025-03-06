@@ -45,7 +45,6 @@ describe('Configure ', () => {
     });
   });
 
-  // Flaky: https://github.com/elastic/kibana/issues/178001
   it('updates field options with default value correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>

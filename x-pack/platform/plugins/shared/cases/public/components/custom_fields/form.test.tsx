@@ -17,7 +17,6 @@ import { customFieldsConfigurationMock } from '../../containers/mock';
 import type { FormState } from '../configure_cases/flyout';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/208415
 describe('CustomFieldsForm ', () => {
   const onChange = jest.fn();
 

@@ -15,7 +15,6 @@ import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/182364
 describe('FilePreview', () => {
   let user: UserEvent;
 

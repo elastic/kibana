@@ -13,7 +13,6 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import { UserActionPropertyActions } from './property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/206056
 describe('UserActionPropertyActions', () => {
   const onClick = jest.fn();
 

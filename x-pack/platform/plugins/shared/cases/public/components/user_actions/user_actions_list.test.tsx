@@ -32,7 +32,6 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/176524
 describe(`UserActionsList`, () => {
   beforeEach(() => {
     jest.clearAllMocks();

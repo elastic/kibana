@@ -17,7 +17,6 @@ import { FormTestComponent } from '../../common/test_utils';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/187526
 describe('Description', () => {
   const onSubmit = jest.fn();
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;

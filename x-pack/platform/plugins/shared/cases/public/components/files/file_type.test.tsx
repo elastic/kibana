@@ -29,7 +29,6 @@ describe('getFileType', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/175841
   describe('getFileAttachmentViewObject', () => {
     const attachmentViewProps: ExternalReferenceAttachmentViewProps = {
       externalReferenceId: basicFileMock.id,

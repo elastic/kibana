@@ -19,7 +19,6 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/176335
 describe('useBulkGetUserProfiles', () => {
   const props = {
     uids: userProfilesIds,

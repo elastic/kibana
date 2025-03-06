@@ -13,7 +13,6 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { TemplateFields } from './template_fields';
 
-// FLAKY: https://github.com/elastic/kibana/issues/194703
 describe('Template fields', () => {
   let user: UserEvent;
 

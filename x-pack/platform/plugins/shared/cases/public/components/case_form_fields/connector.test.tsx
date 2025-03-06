@@ -50,7 +50,6 @@ const defaultProps = {
   isLoadingConnectors: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/208443
 describe('Connector', () => {
   beforeEach(() => {
     jest.clearAllMocks();

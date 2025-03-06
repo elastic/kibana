@@ -24,7 +24,6 @@ jest.mock('../timeline_context/use_timeline_context');
 const useFormMock = useForm as jest.Mock;
 const useTimelineContextMock = useTimelineContext as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/207907
 describe('InsertTimeline ', () => {
   const formHookMock = getFormMock({ comment: 'someValue' });
   const mockTimelineIntegration = { ...timelineIntegrationMock };

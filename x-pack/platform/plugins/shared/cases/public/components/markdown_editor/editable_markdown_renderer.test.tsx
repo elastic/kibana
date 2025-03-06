@@ -60,7 +60,6 @@ const defaultProps = {
   editorRef,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171177
 describe('EditableMarkdown', () => {
   beforeEach(() => {
     jest.clearAllMocks();

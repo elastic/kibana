@@ -36,7 +36,6 @@ describe('FileDownloadButton', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/201611
   describe('not isIcon', () => {
     beforeEach(() => {
       jest.clearAllMocks();

@@ -18,7 +18,6 @@ import { TestProviders, createTestQueryClient } from '../common/mock';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/207444
 describe('useUpdateCase', () => {
   const updateKey: UpdateKey = 'description';
 

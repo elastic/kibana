@@ -13,7 +13,6 @@ import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import userEvent from '@testing-library/user-event';
 
-// FLAKY: https://github.com/elastic/kibana/issues/207249
 describe('Case Owner Selection', () => {
   const onOwnerChange = jest.fn();
   const selectedOwner = SECURITY_SOLUTION_OWNER;

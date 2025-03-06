@@ -10,7 +10,6 @@ import userEvent from '@testing-library/user-event';
 import { DeleteAttachmentConfirmationModal } from './delete_attachment_confirmation_modal';
 import { render, screen } from '@testing-library/react';
 
-// FLAKY: https://github.com/elastic/kibana/issues/205953
 describe('DeleteAttachmentConfirmationModal', () => {
   const props = {
     title: 'My title',

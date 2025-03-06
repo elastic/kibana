@@ -18,7 +18,6 @@ import {
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/207328
 describe('RegisteredAttachmentsPropertyActions', () => {
   const props = {
     isLoading: false,

@@ -13,7 +13,6 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { renderWithTestingProviders } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174682
 describe('ColumnsPopover', () => {
   beforeEach(() => {
     jest.clearAllMocks();

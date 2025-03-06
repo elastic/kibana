@@ -19,7 +19,6 @@ import { TestProviders, createTestQueryClient } from '../common/mock';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/207248
 describe('usePostPushToService', () => {
   const connector = {
     id: '123',

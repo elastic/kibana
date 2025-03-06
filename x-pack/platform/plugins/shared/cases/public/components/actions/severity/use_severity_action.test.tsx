@@ -17,7 +17,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../containers/api');
 
-// FLAKY: https://github.com/elastic/kibana/issues/207712
 describe('useSeverityAction', () => {
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
