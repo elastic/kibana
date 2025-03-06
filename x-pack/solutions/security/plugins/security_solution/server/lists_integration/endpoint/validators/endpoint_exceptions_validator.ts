@@ -11,10 +11,6 @@ import type {
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  FindExceptionListItemOptions,
-  FindExceptionListsItemOptions,
-} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
@@ -79,18 +75,16 @@ export class EndpointExceptionsValidator extends BaseValidator {
     await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
-  async validatePreMultiListFind(findOptions: FindExceptionListsItemOptions): Promise<void> {
+  async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.setFindFilterScopeToActiveSpace(findOptions);
   }
 
   async validatePreExport(): Promise<void> {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreSingleListFind(findOptions: FindExceptionListItemOptions): Promise<void> {
+  async validatePreSingleListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.setFindFilterScopeToActiveSpace(findOptions);
   }
 
   async validatePreGetListSummary(): Promise<void> {

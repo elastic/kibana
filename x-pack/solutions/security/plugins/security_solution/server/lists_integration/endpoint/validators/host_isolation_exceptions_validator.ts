@@ -13,10 +13,6 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  FindExceptionListItemOptions,
-  FindExceptionListsItemOptions,
-} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
@@ -128,14 +124,12 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreSingleListFind(findOptions: FindExceptionListItemOptions): Promise<void> {
+  async validatePreSingleListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.setFindFilterScopeToActiveSpace(findOptions);
   }
 
-  async validatePreMultiListFind(findOptions: FindExceptionListsItemOptions): Promise<void> {
+  async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-    await this.setFindFilterScopeToActiveSpace(findOptions);
   }
 
   async validatePreImport(): Promise<void> {

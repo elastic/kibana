@@ -6,6 +6,7 @@
  */
 
 import type { ExceptionsListPreMultiListFindServerExtension } from '@kbn/lists-plugin/server';
+import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   BlocklistValidator,
@@ -14,6 +15,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
 } from '../validators';
+import { setFindRequestFilterScopeToActiveSpace } from '../utils';
 
 export const getExceptionsPreMultiListFindHandler = (
   endpointAppContextService: EndpointAppContextService
@@ -23,50 +25,48 @@ export const getExceptionsPreMultiListFindHandler = (
       return data;
     }
 
-    // validate Trusted application
-    if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
-      await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind(
-        data
-      );
-      return data;
-    }
+    let isEndpointArtifact = false;
 
-    // Validate Host Isolation Exceptions
-    if (
+    if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
+      // validate Trusted application
+      isEndpointArtifact = true;
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
+    } else if (
       data.listId.some((listId) =>
         HostIsolationExceptionsValidator.isHostIsolationException({ listId })
       )
     ) {
+      // Validate Host Isolation Exceptions
+      isEndpointArtifact = true;
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreMultiListFind(data);
-      return data;
-    }
-
-    // Event Filters Exceptions
-    if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
-      await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind(
-        data
-      );
-      return data;
-    }
-
-    // validate Blocklist
-    if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
-      await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind(
-        data
-      );
-      return data;
-    }
-
-    // Validate Endpoint Exceptions
-    if (data.listId.some((id) => EndpointExceptionsValidator.isEndpointException({ listId: id }))) {
+      ).validatePreMultiListFind();
+    } else if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
+      // Event Filters Exceptions
+      isEndpointArtifact = true;
+      await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind();
+    } else if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
+      // validate Blocklist
+      isEndpointArtifact = true;
+      await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind();
+    } else if (
+      data.listId.some((id) => EndpointExceptionsValidator.isEndpointException({ listId: id }))
+    ) {
+      // Validate Endpoint Exceptions
+      isEndpointArtifact = true;
       await new EndpointExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreMultiListFind(data);
-      return data;
+      ).validatePreMultiListFind();
+    }
+
+    if (isEndpointArtifact) {
+      if (!request) {
+        throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
+      }
+
+      await setFindRequestFilterScopeToActiveSpace(endpointAppContextService, request, data);
     }
 
     return data;
