@@ -21,7 +21,7 @@ export class RuleMigrationsDataLookupsClient {
   ) {}
 
   async create(lookupName: string, data: LookupData): Promise<string> {
-    const indexName = `${LOOKUPS_INDEX_PREFIX}-${this.spaceId}-${lookupName}`;
+    const indexName = `${LOOKUPS_INDEX_PREFIX}${this.spaceId}_${lookupName}`;
     try {
       await this.executeEs(() =>
         this.esScopedClient.asCurrentUser.indices.create({

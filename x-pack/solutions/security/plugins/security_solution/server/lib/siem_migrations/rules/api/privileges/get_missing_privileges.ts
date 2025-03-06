@@ -45,7 +45,7 @@ export const registerSiemRuleMigrationsGetMissingPrivilegesRoute = (
               return response.notFound();
             }
 
-            const lookupsIndexPattern = `${LOOKUPS_INDEX_PREFIX}-${spaceId}*`;
+            const lookupsIndexPattern = `${LOOKUPS_INDEX_PREFIX}${spaceId}*`;
             const privileges = await readIndexPrivileges(esClient, lookupsIndexPattern);
 
             const missingPrivileges = [];
