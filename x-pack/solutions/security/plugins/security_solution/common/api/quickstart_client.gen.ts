@@ -692,7 +692,6 @@ If a record already exists for the specified entity, that record is overwritten 
   }
   /**
     * Create a new detection rule.
-
 > warn
 > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
@@ -708,7 +707,6 @@ You can create the following types of rules:
 * **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
 * **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
 * **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
-
 > info
 > To create machine learning rules, you must have the [appropriate license](https://www.elastic.co/subscriptions) or use a [cloud deployment](https://cloud.elastic.co/registration). Additionally, for the machine learning rule to function correctly, the associated machine learning job must be running.
 
@@ -737,7 +735,6 @@ Additionally, you can set up notifications for when rules create alerts. The not
 * IBM Resilient
 * Jira
 * ServiceNow ITSM
-
 > info
 > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
@@ -877,7 +874,7 @@ The URL query must include one of the following:
 * `id` - `DELETE /api/detection_engine/rules?id=<id>`
 * `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
 
-The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 
     */
   async deleteRule(props: DeleteRuleProps) {
@@ -1207,7 +1204,6 @@ The `id` is a unique identifier for each data item, while `rule_id` is a unique 
     * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
 - Exception lists
-
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
@@ -1697,7 +1693,6 @@ finalize it.
     * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
-
 > warn
 > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
@@ -1888,15 +1883,11 @@ providing you with the most current and effective threat detection capabilities.
   /**
     * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
 
-The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
-
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
 > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-> info
-> You cannot modify the `id` or `rule_id` values.
 
     */
   async patchRule(props: PatchRuleProps) {
@@ -1930,7 +1921,6 @@ The `id` is a unique identifier for each data item, while `rule_id` is a unique 
   }
   /**
     * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
-
 > warn
 > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
@@ -2101,7 +2091,7 @@ The URL query must include one of the following:
 * `id` - `GET /api/detection_engine/rules?id=<id>`
 * `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
 
-The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 
     */
   async readRule(props: ReadRuleProps) {
@@ -2365,15 +2355,11 @@ The `id` is a unique identifier for each data item, while `rule_id` is a unique 
   /**
     * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
 
-The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
-
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
 > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
-
-> info
-> You cannot modify the `id` or `rule_id` values.
 
     */
   async updateRule(props: UpdateRuleProps) {

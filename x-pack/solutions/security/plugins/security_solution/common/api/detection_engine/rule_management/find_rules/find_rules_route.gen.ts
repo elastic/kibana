@@ -53,7 +53,6 @@ Filters the returned results according to the value of the specified field, usin
 - createdBy
 - interval
 - updatedBy
-
 > info
 > Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
  
