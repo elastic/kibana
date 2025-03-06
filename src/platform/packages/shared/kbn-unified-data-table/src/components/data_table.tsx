@@ -1151,7 +1151,7 @@ export const UnifiedDataTable = ({
   });
 
   const handleOnScroll = useCallback(
-    (event) => {
+    (event: { scrollTop: number }) => {
       setHasScrolledToBottom((prevHasScrolledToBottom) => {
         // We need to manually query the react-window wrapper since EUI doesn't
         // expose outerRef in virtualizationOptions, but we should request it

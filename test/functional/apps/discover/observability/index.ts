@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./embeddable/saved_search_embeddable'));
+    loadTestFile(require.resolve('./embeddable/_saved_search_embeddable'));
+    loadTestFile(require.resolve('./logs/_get_pagination_config'));
   });
 }
