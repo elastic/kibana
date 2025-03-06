@@ -113,7 +113,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   const fields = useMemo(
     () =>
       props.dataView
-        ? Object.values(props.dataView.fields || {})
+        ? Object.values(props.dataView.fields.map((f) => f.spec) || {})
         : Object.values(sourcererDataView.fields || {}),
     [props.dataView, sourcererDataView]
   );

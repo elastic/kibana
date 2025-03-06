@@ -7,6 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TIMESTAMP_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.timeStamp',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
+export const RELATION_INTEGRATION_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.relatedIntegrationName',
+  {
+    defaultMessage: 'Source',
+  }
+);
 export const SEVERITY_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.severity',
   {

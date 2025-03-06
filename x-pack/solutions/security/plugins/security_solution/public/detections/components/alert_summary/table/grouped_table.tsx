@@ -9,29 +9,32 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataLoadingState } from '@kbn/unified-data-table';
-import { inputsSelectors } from '../../../../common/store';
+import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
+import { useDispatch } from 'react-redux';
+import { RELATED_INTEGRATION, RULE_NAME, SEVERITY, TIMESTAMP } from '../constants/fields';
 import { Table } from './table';
+import { updateGroups } from '../../../../common/store/grouping/actions';
+import { groupIdSelector } from '../../../../common/store/grouping/selectors';
+import { inputsSelectors } from '../../../../common/store';
 import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useTimelineEvents } from '../../../../timelines/containers';
 
 /**
  * The max size of the documents returned by Elasticsearch
  */
 export const SAMPLE_SIZE = 500;
 
+const globalFilters: Filter[] = [];
+const hasIndexMaintenance = true;
+const hasIndexWrite = true;
+const runtimeMappings: RunTimeMappings = {};
+
 /**
  *
  */
-export const COLUMN_IDS = [
-  '@timestamp',
-  'source',
-  'kibana.alert.severity',
-  'kibana.alert.rule.name',
-];
+export const COLUMN_IDS = [TIMESTAMP, RELATED_INTEGRATION, SEVERITY, RULE_NAME];
 
 export interface TableProps {
   /**
@@ -44,47 +47,58 @@ export interface TableProps {
  *
  */
 export const GroupedTable = memo(({ dataView }: TableProps) => {
+  const dispatch = useDispatch();
   const indexNames = dataView.getIndexPattern();
   const { to, from } = useGlobalTime();
 
-  const [loadingState, { events }] = useTimelineEvents({
-    dataViewId: dataView.id as string,
-    endDate: to,
-    fields: COLUMN_IDS,
-    id: 'alert-summary',
-    indexNames: [indexNames],
-    limit: SAMPLE_SIZE,
-    runtimeMappings: undefined,
-    startDate: from,
-  });
-
-  const globalFilters: Filter[] = [];
-  const hasIndexMaintenance = false;
-  const hasIndexWrite = false;
   const renderChildComponent = useCallback(
-    () => <Table dataView={dataView} events={events} loadingState={loadingState} />,
-    [dataView, events, loadingState]
+    (groupingFilters: Filter[]) => <Table dataView={dataView} groupingFilters={groupingFilters} />,
+    [dataView]
   );
-  const runtimeMappings: RunTimeMappings = undefined;
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
 
+  const onGroupChange = useCallback(
+    (selectedGroups: string[]) => {
+      dispatch(
+        updateGroups({ activeGroups: selectedGroups, tableId: TableId.alertsOnAlertSummaryPage })
+      );
+    },
+    [dispatch]
+  );
+  const groupId = useMemo(() => groupIdSelector(), []);
+  const { options: defaultGroupingOptions } = useDeepEqualSelector((state) =>
+    groupId(state, TableId.alertsOnAlertSummaryPage)
+  ) ?? {
+    options: [],
+  };
+  const groupSelector = useGetGroupSelectorStateless({
+    groupingId: TableId.alertsOnAlertSummaryPage,
+    onGroupChange,
+    fields: dataView.fields,
+    defaultGroupingOptions,
+    maxGroupingLevels: 3,
+  });
+
   return (
-    <GroupedAlertsTable
-      dataView={dataView}
-      from={from}
-      globalFilters={globalFilters}
-      globalQuery={globalQuery}
-      hasIndexMaintenance={hasIndexMaintenance}
-      hasIndexWrite={hasIndexWrite}
-      loading={loadingState === DataLoadingState.loading}
-      renderChildComponent={renderChildComponent}
-      runtimeMappings={runtimeMappings}
-      signalIndexName={indexNames}
-      tableId={TableId.alertsOnAlertSummaryPage}
-      to={to}
-    />
+    <>
+      {groupSelector}
+      <GroupedAlertsTable
+        dataView={dataView}
+        from={from}
+        globalFilters={globalFilters}
+        globalQuery={globalQuery}
+        hasIndexMaintenance={hasIndexMaintenance}
+        hasIndexWrite={hasIndexWrite}
+        loading={false}
+        renderChildComponent={renderChildComponent}
+        runtimeMappings={runtimeMappings}
+        signalIndexName={indexNames}
+        tableId={TableId.alertsOnAlertSummaryPage}
+        to={to}
+      />
+    </>
   );
 });
 

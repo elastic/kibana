@@ -13,6 +13,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { KPIsSection } from '../../components/alert_summary/kpis/kpis_section';
 import { SearchBarSection } from '../../components/alert_summary/search_bar/search_bar_section';
 import { TableSection } from '../../components/alert_summary/table/table_section';
+import { IntegrationSection } from '../../components/alert_summary/integrations/integration_section';
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
@@ -49,7 +50,7 @@ export const AlertSummaryPage = () => {
 
   return (
     <>
-      {/* <IntegrationSection />*/}
+      <IntegrationSection />
       <EuiHorizontalRule />
       <SearchBarSection dataView={dataView} />
       <EuiSpacer />

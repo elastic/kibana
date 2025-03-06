@@ -24,9 +24,7 @@ export interface MoreActionsRowControlColumnProps {
 export const MoreActionsRowControlColumn = memo(({ ecs }: MoreActionsRowControlColumnProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((value) => !value);
-  }, []);
+  const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
   const button = useMemo(
     () => <EuiButtonIcon iconType="boxesHorizontal" onClick={togglePopover} />,

@@ -119,12 +119,17 @@ export interface Alert {
   _index: string;
   '@timestamp': string;
   signal: Signal;
+
   [key: string]: unknown;
 }
 
 // generates default grouping option for alerts table
 export const getDefaultGroupingOptions = (tableId: TableId): GroupOption[] => {
-  if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsRiskInputs) {
+  if (
+    tableId === TableId.alertsOnAlertsPage ||
+    tableId === TableId.alertsRiskInputs ||
+    tableId === TableId.alertsOnAlertSummaryPage
+  ) {
     return [
       {
         label: i18n.ruleName,

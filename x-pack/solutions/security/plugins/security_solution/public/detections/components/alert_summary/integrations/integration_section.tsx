@@ -9,11 +9,11 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   installationStatuses,
-  useAuthz,
   useGetPackagesQuery,
   useGetSettingsQuery,
 } from '@kbn/fleet-plugin/public';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { AddIntegration } from './add_integration';
 import { IntegrationBadge } from './integration_badge';
 
@@ -21,8 +21,8 @@ import { IntegrationBadge } from './integration_badge';
  *
  */
 export const IntegrationSection = memo(() => {
-  const authz = useAuthz();
-  const isAuthorizedToFetchSettings = authz.fleet.readSettings;
+  const { fleet } = useKibana().services;
+  const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
     enabled: isAuthorizedToFetchSettings,
   });
@@ -56,7 +56,7 @@ export const IntegrationSection = memo(() => {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {installedPackages.map((installedPackage) => (
             <EuiFlexItem grow={false}>
-              <IntegrationBadge integration={installedPackage.integration} />
+              <IntegrationBadge integration={installedPackage} />
             </EuiFlexItem>
           ))}
           <EuiFlexItem grow={false}>

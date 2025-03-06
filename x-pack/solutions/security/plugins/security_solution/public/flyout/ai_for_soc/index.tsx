@@ -20,10 +20,11 @@ import { FlyoutHeader } from '../shared/components/flyout_header';
  */
 export const AIForSOCPanel: FC<Partial<AIForSOCDetailsProps>> = memo(() => {
   const { doc } = useAIForSOCDetailsContext();
+  console.log('AIForSOCPanel - doc', doc);
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <FlyoutHeader>{'AI for SOC'}</FlyoutHeader>;
+      <FlyoutHeader>{'AI for SOC'}</FlyoutHeader>
       <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{'hello'}</FlyoutBody>
       <PanelFooter />
     </>

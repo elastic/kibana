@@ -10,11 +10,9 @@ import type {
   CustomCellRenderer,
   CustomGridColumnProps,
   CustomGridColumnsConfiguration,
-  DataLoadingState,
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type {
   DataTableRecord,
   RowControlColumn,
@@ -22,10 +20,21 @@ import type {
   RowControlRowProps,
 } from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { Filter } from '@kbn/es-query';
+import { KibanaAlertRelatedIntegrationCellRenderer } from '../cell_renderers/kibana_alert_related_integration';
+import { RELATED_INTEGRATION, RULE_NAME, SEVERITY, TIMESTAMP } from '../constants/fields';
+import type { ESQuery } from '../../../../../common/typed_json';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useTimelineEvents } from '../../../../timelines/containers';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { MoreActionsRowControlColumn } from '../leading_controls/more_actions';
 import { AssistantRowControlColumn } from '../leading_controls/assistant';
-import { RULE_NAME_COLUMN, SEVERITY_COLUMN } from './translations';
+import {
+  RELATION_INTEGRATION_COLUMN,
+  RULE_NAME_COLUMN,
+  SEVERITY_COLUMN,
+  TIMESTAMP_COLUMN,
+} from './translations';
 import { KibanaAlertSeverityCellRenderer } from '../cell_renderers/kibana_alert_severity';
 import { COLUMN_IDS, SAMPLE_SIZE } from './grouped_table';
 import { transformTimelineItemToUnifiedRows } from '../../../../timelines/components/timeline/unified_components/utils';
@@ -41,11 +50,21 @@ const rowsPerPageOptions = [10, 25, 50, 100];
  *
  */
 const customGridColumnsConfiguration: CustomGridColumnsConfiguration = {
-  'kibana.alert.severity': (props: CustomGridColumnProps) => ({
+  [TIMESTAMP]: (props: CustomGridColumnProps) => ({
+    ...props.column,
+    displayAsText: TIMESTAMP_COLUMN,
+    initialWidth: 225,
+  }),
+  [RELATED_INTEGRATION]: (props: CustomGridColumnProps) => ({
+    ...props.column,
+    displayAsText: RELATION_INTEGRATION_COLUMN,
+  }),
+  [SEVERITY]: (props: CustomGridColumnProps) => ({
     ...props.column,
     displayAsText: SEVERITY_COLUMN,
+    initialWidth: 125,
   }),
-  'kibana.alert.rule.name': (props: CustomGridColumnProps) => ({
+  [RULE_NAME]: (props: CustomGridColumnProps) => ({
     ...props.column,
     displayAsText: RULE_NAME_COLUMN,
   }),
@@ -59,17 +78,33 @@ export interface TableProps {
   /**
    *
    */
-  events: TimelineItem[];
-  /**
-   *
-   */
-  loadingState: DataLoadingState;
+  groupingFilters: Filter[];
 }
 
 /**
  *
  */
-export const Table = memo(({ dataView, loadingState, events }: TableProps) => {
+export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
+  const indexNames = dataView.getIndexPattern();
+  const { to, from } = useGlobalTime();
+
+  const filterQuery: ESQuery | string = useMemo(
+    () => (groupingFilters.length === 0 ? '' : groupingFilters[groupingFilters.length - 1].query),
+    [groupingFilters]
+  );
+
+  const [loadingState, { events, totalCount }] = useTimelineEvents({
+    dataViewId: dataView.id as string,
+    endDate: to,
+    fields: COLUMN_IDS,
+    filterQuery,
+    id: 'alert-summary',
+    indexNames: [indexNames],
+    limit: SAMPLE_SIZE,
+    runtimeMappings: undefined,
+    startDate: from,
+  });
+
   const onSetColumns = useCallback(() => window.alert('onSetColumns'), []);
   const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(rowsPerPageOptions[1]);
@@ -115,9 +150,10 @@ export const Table = memo(({ dataView, loadingState, events }: TableProps) => {
   );
 
   const externalCustomRenderers: CustomCellRenderer = {
-    'kibana.alert.severity': (e) => (
-      <KibanaAlertSeverityCellRenderer value={e.row.flattened[e.columnId]} />
+    [RELATED_INTEGRATION]: (e) => (
+      <KibanaAlertRelatedIntegrationCellRenderer value={e.row.flattened[e.columnId]} />
     ),
+    [SEVERITY]: (e) => <KibanaAlertSeverityCellRenderer value={e.row.flattened[e.columnId]} />,
   };
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
@@ -164,6 +200,7 @@ export const Table = memo(({ dataView, loadingState, events }: TableProps) => {
     <UnifiedDataTable
       ariaLabelledBy=""
       columns={COLUMN_IDS}
+      configRowHeight={2}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
       dataView={dataView}
       expandedDoc={expandedDoc}
@@ -184,6 +221,7 @@ export const Table = memo(({ dataView, loadingState, events }: TableProps) => {
       setExpandedDoc={onSetExpandedDoc}
       showFullScreenButton={false}
       showKeyboardShortcuts={false}
+      totalHits={totalCount}
     />
   );
 });
