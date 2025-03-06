@@ -19,7 +19,6 @@ import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
   getArtifactOwnerSpaceIds,
   isArtifactGlobal,
-  setArtifactOwnerSpaceId,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { FeatureKeys } from '../../../endpoint/services';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -310,19 +309,6 @@ export class BaseValidator {
     }
 
     return (await this.endpointAppContext.getActiveSpace(this.request)).id;
-  }
-
-  /**
-   * Update the artifact item (if necessary) with a `ownerSpaceId` tag using the HTTP request's active space
-   * @param item
-   * @protected
-   */
-  protected async setOwnerSpaceId(
-    item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
-  ): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      setArtifactOwnerSpaceId(item, await this.getActiveSpaceId());
-    }
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {

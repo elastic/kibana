@@ -16,7 +16,6 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
@@ -211,8 +210,6 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateCreateOwnerSpaceIds(item);
     await this.validateCanCreateGlobalArtifacts(item);
 
-    await this.setOwnerSpaceId(item);
-
     return item;
   }
 
@@ -265,10 +262,6 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateByPolicyItem(updatedItem);
     await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
     await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
-
-    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
-      await this.setOwnerSpaceId(_updatedItem);
-    }
 
     return _updatedItem;
   }

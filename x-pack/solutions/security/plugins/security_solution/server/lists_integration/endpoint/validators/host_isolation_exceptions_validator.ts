@@ -13,7 +13,6 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -82,8 +81,6 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateByPolicyItem(item);
     await this.validateCreateOwnerSpaceIds(item);
 
-    await this.setOwnerSpaceId(item);
-
     return item;
   }
 
@@ -98,10 +95,6 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateByPolicyItem(updatedItem);
     await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
     await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
-
-    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
-      await this.setOwnerSpaceId(_updatedItem);
-    }
 
     return _updatedItem;
   }
