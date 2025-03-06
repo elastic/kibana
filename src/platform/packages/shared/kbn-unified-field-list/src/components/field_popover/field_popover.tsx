@@ -76,6 +76,11 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
         css: css`
           min-width: ${euiTheme.size.xxl} * 6.5 !important;
           max-width: ${euiTheme.size.xxl} * 10 !important;
+
+          .unifiedFieldListItemButton {
+            box-shadow: none;
+            background: none;
+          }
         `,
       }}
       {...otherPopoverProps}
