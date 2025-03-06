@@ -94,7 +94,7 @@ export const FileStatus: FC<Props> = ({
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiFlexItem grow={8}>
                     <EuiText size="xs">
-                      <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
+                      <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>
                       <span>{fileStatus.fileSize}</span>
                     </EuiText>
                   </EuiFlexItem>
