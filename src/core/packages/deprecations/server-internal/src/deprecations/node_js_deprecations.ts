@@ -48,7 +48,7 @@ export const registerNodeJsDeprecationsInfo = ({
             message: {
               type: 'markdown',
               content: i18n.translate('core.deprecations.openSSLDeprecation.message.markdown', {
-                defaultMessage: `Kibana is currently running with the legacy OpenSSL provider enabled, which is not recommended. For your security, these providers will be disabled by default in 9.0. [Learn more]({learnMore}) about the legacy OpenSSL provider.`,
+                defaultMessage: `Kibana is currently running with the [legacy OpenSSL provider]({learnMore}) enabled, which is not recommended. For your security, legacy providers will be disabled by default in 9.0.`,
                 values: {
                   learnMore: docLinks.links.kibana.legacyOpenSslProvider,
                 },
@@ -58,11 +58,11 @@ export const registerNodeJsDeprecationsInfo = ({
               manualSteps: [
                 i18n.translate('core.deprecations.openSSLDeprecation.step1Description', {
                   defaultMessage:
-                    'Remove the --openssl-legacy-provider flag from the config/node.options file where Kibana server is running.',
+                    'Remove the --openssl-legacy-provider flag from the config/node.options file where the Kibana server is running.',
                 }),
                 i18n.translate('core.deprecations.openSSLDeprecation.step2Description', {
                   defaultMessage:
-                    'Ensure the --openssl-legacy-provider flag is not being provided via the NODE_OPTIONS environment variable to Kibana server.',
+                    'Ensure the --openssl-legacy-provider flag is not being provided via the NODE_OPTIONS environment variable to the Kibana server.',
                 }),
                 i18n.translate('core.deprecations.openSSLDeprecation.step3Description', {
                   defaultMessage: 'Restart Kibana.',
