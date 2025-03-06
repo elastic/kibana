@@ -69,8 +69,7 @@ const handleIntercepts = () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/198066
-describe.skip(
+describe(
   'Discover Timeline State Integration',
   {
     tags: ['@ess', '@skipInServerless'],
@@ -93,7 +92,7 @@ describe.skip(
         goToEsqlTab();
         cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
       });
-      it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
+      it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/restoring timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
@@ -190,7 +189,7 @@ describe.skip(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved search for timeline - ${timelineName}`
+          `Saved Discover session timeline - ${timelineName}`
         );
       });
 
@@ -214,7 +213,7 @@ describe.skip(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved search for timeline - ${renamedTimelineName}`
+          `Saved Discover session for timeline - ${renamedTimelineName}`
         );
       });
     });
