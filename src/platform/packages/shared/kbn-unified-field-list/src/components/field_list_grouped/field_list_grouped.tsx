@@ -16,8 +16,8 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   useEuiOverflowScroll,
-  useEuiTheme,
   useEuiScrollBar,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
@@ -60,7 +60,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
-  const { euiTheme } = useEuiTheme();
+  const euiScrollBar = useEuiScrollBar();
+  const euiOverflow = useEuiOverflowScroll('y', true);
+
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
 
@@ -133,14 +135,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   const hasSpecialFields = Boolean(fieldGroupsToCollapse[0]?.[1]?.fields?.length);
   return (
     <div
-      css={css`
-        margin-left: -${euiTheme.size.base};
-        position: relative;
-        flex-grow: 1;
-        overflow: auto;
-        ${useEuiOverflowScroll('y', true)}
-        ${useEuiScrollBar()}
-      `}
+      css={({ euiTheme }) => fieldListGroupedContainer({ euiTheme, euiOverflow, euiScrollBar })}
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
         if (el && !el.dataset.dynamicScroll) {
@@ -150,15 +145,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div
-        css={css`
-          padding-top: ${euiTheme.size.s};
-          position: absolute;
-          top: 0;
-          left: ${euiTheme.size.base};
-          right: ${euiTheme.size.xs};
-        `}
-      >
+      <div css={fieldListGroupedInnerContainer}>
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
@@ -343,3 +330,28 @@ function shouldIncludeGroupDescriptionInAria<T extends FieldListItem>(
   // has some fields or an empty list should be still shown
   return group.fields?.length > 0 || !group.hideIfEmpty;
 }
+
+const fieldListGroupedContainer = ({
+  euiTheme,
+  euiOverflow,
+  euiScrollBar,
+}: {
+  euiTheme: UseEuiTheme['euiTheme'];
+  euiOverflow: ReturnType<typeof useEuiOverflowScroll>;
+  euiScrollBar: ReturnType<typeof useEuiScrollBar>;
+}) => css`
+  margin-left: -${euiTheme.size.base};
+  position: relative;
+  flex-grow: 1;
+  overflow: auto;
+  ${euiOverflow};
+  ${euiScrollBar}
+`;
+
+const fieldListGroupedInnerContainer = ({ euiTheme }: UseEuiTheme) => css`
+  padding-top: ${euiTheme.size.s};
+  position: absolute;
+  top: 0;
+  left: ${euiTheme.size.base};
+  right: ${euiTheme.size.xs};
+`;
