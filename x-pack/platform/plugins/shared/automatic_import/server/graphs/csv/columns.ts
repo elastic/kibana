@@ -30,22 +30,58 @@ export function toSafeColumnName(columnName: unknown): string | undefined {
   const safeName = columnName.replace(/[^a-zA-Z0-9_]/g, '_');
   return /^[0-9]/.test(safeName) ? `Column${safeName}` : safeName;
 }
-// Returns the column list from a header row. We skip values that are not strings.
 
+/**
+ * Extracts column names from the provided header doc by truncating unnecessary columns
+ * and converting each name into a normalized format.
+ *
+ * @param tempColumnNames - The list of temporary column names (integer-based).
+ * @param headerObject - The processed first document (corresponding to the header row).
+ * @returns A filtered array of valid column names in a safe format or undefined where the value was neither string nor numbers.
+ */
 export function columnsFromHeader(
   tempColumnNames: string[],
   headerObject: { [key: string]: unknown }
 ): Array<string | undefined> {
+  return valuesFromHeader(tempColumnNames, headerObject).map(toSafeColumnName);
+}
+
+/**
+ * Extracts values from a header object based on column names, converting non-string/numeric values to undefined.
+ * The function processes the array up to the last non-undefined value in the header object.
+ *
+ * @param tempColumnNames - Array of column names to look up in the header object
+ * @param headerObject - Object containing header values indexed by column names
+ * @returns Array of string/number values or undefined for non-string/number values, truncated at the last non-undefined entry
+ *
+ * @example
+ * const columns = ['col1', 'col2', 'col3', 'col4'];
+ * const header = { col1: 'value1', col2: 123, col3: 'value3', 'col4': null };
+ * valuesFromHeader(columns, header); // ['value1', 123, 'value3', undefined]
+ */
+export function valuesFromHeader(
+  tempColumnNames: string[],
+  headerObject: { [key: string]: unknown }
+): Array<string | number | undefined> {
   const maxIndex = tempColumnNames.findLastIndex(
     (columnName) => headerObject[columnName] !== undefined
   );
   return tempColumnNames
     .slice(0, maxIndex + 1)
     .map((columnName) => headerObject[columnName])
-    .map(toSafeColumnName);
+    .map((value) => (typeof value === 'string' || typeof value === 'number' ? value : undefined));
 }
-// Count the number of columns actually present in the rows.
 
+/**
+ * Calculates the total number of columns in a CSV by going through the processed
+ * documents to find the last defined value across all rows.
+ *
+ * @param tempColumnNames - An array of column names used to reference CSV row properties.
+ * @param csvRows - An array of row objects representing CSV data, where each key
+ * corresponds to a column name from `tempColumnNames`.
+ * @returns The total number of columns, determined by the position of the last
+ * defined value across all rows.
+ */
 export function totalColumnCount(
   tempColumnNames: string[],
   csvRows: Array<{ [key: string]: unknown }>

@@ -8,6 +8,7 @@
  */
 
 import path from 'path';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
@@ -15,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     services,
     rootTags: ['runOutsideOfCiGroups'],
     esTestCluster: functionalConfig.get('esTestCluster'),

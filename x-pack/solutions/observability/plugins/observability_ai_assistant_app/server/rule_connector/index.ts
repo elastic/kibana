@@ -34,7 +34,6 @@ import {
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
-import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
@@ -315,18 +314,6 @@ If available, include the link of the conversation at the end of your answer.`
       kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
       instructions: [backgroundInstruction],
       messages: [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.System,
-            content: getSystemMessageFromInstructions({
-              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              applicationInstructions: functionClient.getInstructions(),
-              userInstructions: [],
-              adHocInstructions: functionClient.getAdhocInstructions(),
-            }),
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {

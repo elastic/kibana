@@ -26,6 +26,20 @@ describe('Reranker Tech preview badge', () => {
     expect(isProviderTechPreview(mockProvider)).toEqual(true);
   });
 
+  it('return true for rainbow-sprinkles', () => {
+    const elasticProviderServiceSettings = {
+      ...mockProvider.service_settings,
+      model_id: 'rainbow-sprinkles',
+    };
+    const elasticProvider = {
+      ...mockProvider,
+      task_type: 'chat_completion',
+      service: 'elastic',
+      service_settings: elasticProviderServiceSettings,
+    } as any;
+    expect(isProviderTechPreview(elasticProvider)).toEqual(true);
+  });
+
   it('return false for other provider', () => {
     const otherProviderServiceSettings = {
       ...mockProvider.service_settings,

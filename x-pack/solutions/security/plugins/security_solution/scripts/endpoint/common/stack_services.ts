@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
@@ -261,6 +261,8 @@ export const createEsClient = ({
   const isHttps = new URL(url).protocol.startsWith('https');
   const clientOptions: ClientOptions = {
     node: buildUrlWithCredentials(url, apiKey ? '' : username, apiKey ? '' : password),
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   };
 
   if (isHttps && useCertForSsl) {

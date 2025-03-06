@@ -6,8 +6,6 @@
  */
 
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
-import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
-import type { RunnableConfig } from '@langchain/core/runnables';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
@@ -17,26 +15,14 @@ import type { RuleMigrationFilters } from '../../../../../common/siem_migrations
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
-import { getRuleMigrationAgent } from './agent';
-import type { MigrateRuleState } from './agent/types';
-import { RuleMigrationsRetriever } from './retrievers';
-import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type {
-  MigrationAgent,
-  RuleMigrationTaskCreateAgentParams,
-  RuleMigrationTaskRunParams,
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
-import type { ChatModel } from './util/actions_client_chat';
-import { ActionsClientChat } from './util/actions_client_chat';
-import { generateAssistantComment } from './util/comments';
+import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 
-const ITERATION_BATCH_SIZE = 15 as const;
-const ITERATION_SLEEP_SECONDS = 10 as const;
-
-type MigrationsRunning = Map<string, { user: string; abortController: AbortController }>;
+export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
 export class RuleMigrationsTaskClient {
   constructor(
@@ -49,7 +35,7 @@ export class RuleMigrationsTaskClient {
 
   /** Starts a rule migration task */
   async start(params: RuleMigrationTaskStartParams): Promise<RuleMigrationTaskStartResult> {
-    const { migrationId, connectorId } = params;
+    const { migrationId, connectorId, invocationConfig } = params;
     if (this.migrationsRunning.has(migrationId)) {
       return { exists: true, started: false };
     }
@@ -68,157 +54,40 @@ export class RuleMigrationsTaskClient {
     if (rules.pending === 0) {
       return { exists: true, started: false };
     }
-    const abortController = new AbortController();
-    const model = await this.createModel(connectorId, abortController);
 
-    // run the migration without awaiting it to execute it in the background
-    this.run({ ...params, model, abortController }).catch((error) => {
-      this.logger.error(`Error executing migration ID:${migrationId}`, error);
-    });
+    const migrationLogger = this.logger.get(migrationId);
+    const abortController = new AbortController();
+    const migrationTaskRunner = new RuleMigrationTaskRunner(
+      migrationId,
+      this.currentUser,
+      abortController,
+      this.data,
+      migrationLogger,
+      this.dependencies
+    );
+
+    await migrationTaskRunner.setup(connectorId);
+
+    if (this.migrationsRunning.has(migrationId)) {
+      // Just to prevent a race condition in the setup
+      throw new Error('Task already running for this migration');
+    }
+    this.migrationsRunning.set(migrationId, migrationTaskRunner);
+
+    migrationLogger.info('Starting migration');
+
+    // run the migration in the background without awaiting and resolve the `start` promise
+    migrationTaskRunner
+      .run(invocationConfig)
+      .catch((error) => {
+        // no need to throw, the `start` promise is long gone. Just log the error
+        migrationLogger.error('Error executing migration', error);
+      })
+      .finally(() => {
+        this.migrationsRunning.delete(migrationId);
+      });
 
     return { exists: true, started: true };
-  }
-
-  private async run(params: RuleMigrationTaskRunParams): Promise<void> {
-    const { migrationId, invocationConfig, abortController, model } = params;
-    if (this.migrationsRunning.has(migrationId)) {
-      // This should never happen, but just in case
-      throw new Error(`Task already running for migration ID:${migrationId} `);
-    }
-    this.logger.info(`Starting migration ID:${migrationId}`);
-
-    this.migrationsRunning.set(migrationId, { user: this.currentUser.username, abortController });
-
-    const abortPromise = abortSignalToPromise(abortController.signal);
-    const withAbortRace = async <T>(task: Promise<T>) => Promise.race([task, abortPromise.promise]);
-
-    const sleep = async (seconds: number) => {
-      this.logger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
-      await withAbortRace(new Promise((resolve) => setTimeout(resolve, seconds * 1000)));
-    };
-
-    const stats = { completed: 0, failed: 0 };
-    const telemetryClient = new SiemMigrationTelemetryClient(
-      this.dependencies.telemetry,
-      this.logger,
-      migrationId,
-      model.model
-    );
-    const endSiemMigration = telemetryClient.startSiemMigration();
-    try {
-      this.logger.debug(`Creating agent for migration ID:${migrationId}`);
-
-      const agent = await withAbortRace(this.createAgent({ ...params, model, telemetryClient }));
-
-      const config: RunnableConfig = {
-        ...invocationConfig,
-        // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
-      };
-      let isDone: boolean = false;
-      do {
-        const ruleMigrations = await this.data.rules.takePending(migrationId, ITERATION_BATCH_SIZE);
-        this.logger.debug(
-          `Processing ${ruleMigrations.length} rules for migration ID:${migrationId}`
-        );
-
-        await Promise.all(
-          ruleMigrations.map(async (ruleMigration) => {
-            this.logger.debug(`Starting migration of rule "${ruleMigration.original_rule.title}"`);
-            if (ruleMigration.elastic_rule?.id) {
-              await this.data.rules.saveCompleted(ruleMigration);
-              return; // skip already installed rules
-            }
-            const endRuleTranslation = telemetryClient.startRuleTranslation();
-            try {
-              const invocationData = {
-                original_rule: ruleMigration.original_rule,
-              };
-
-              // using withAbortRace is a workaround for the issue with the langGraph signal not working properly
-              const migrationResult = await withAbortRace<MigrateRuleState>(
-                agent.invoke(invocationData, config)
-              );
-
-              this.logger.debug(
-                `Migration of rule "${ruleMigration.original_rule.title}" finished`
-              );
-              endRuleTranslation({ migrationResult });
-              await this.data.rules.saveCompleted({
-                ...ruleMigration,
-                elastic_rule: migrationResult.elastic_rule,
-                translation_result: migrationResult.translation_result,
-                comments: migrationResult.comments,
-              });
-              stats.completed++;
-            } catch (error) {
-              stats.failed++;
-              if (error instanceof AbortError) {
-                throw error;
-              }
-              endRuleTranslation({ error });
-              this.logger.error(
-                `Error migrating rule "${ruleMigration.original_rule.title} with error: ${error.message}"`
-              );
-              await this.data.rules.saveError({
-                ...ruleMigration,
-                comments: [generateAssistantComment(`Error migrating rule: ${error.message}`)],
-              });
-            }
-          })
-        );
-
-        this.logger.debug(`Batch processed successfully for migration ID:${migrationId}`);
-
-        const { rules } = await this.data.rules.getStats(migrationId);
-        isDone = rules.pending === 0;
-        if (!isDone) {
-          await sleep(ITERATION_SLEEP_SECONDS);
-        }
-      } while (!isDone);
-
-      this.logger.info(`Finished migration ID:${migrationId}`);
-
-      endSiemMigration({ stats });
-    } catch (error) {
-      await this.data.rules.releaseProcessing(migrationId);
-
-      if (error instanceof AbortError) {
-        this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
-        return;
-      } else {
-        endSiemMigration({ error, stats });
-        this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
-      }
-    } finally {
-      this.migrationsRunning.delete(migrationId);
-      abortPromise.cleanup();
-    }
-  }
-
-  private async createAgent({
-    connectorId,
-    migrationId,
-    model,
-    telemetryClient,
-  }: RuleMigrationTaskCreateAgentParams): Promise<MigrationAgent> {
-    const { inferenceClient, rulesClient, savedObjectsClient } = this.dependencies;
-
-    const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
-      data: this.data,
-      rules: rulesClient,
-      savedObjects: savedObjectsClient,
-    });
-
-    await ruleMigrationsRetriever.initialize();
-
-    return getRuleMigrationAgent({
-      connectorId,
-      model,
-      inferenceClient,
-      ruleMigrationsRetriever,
-      telemetryClient,
-      logger: this.logger,
-    });
   }
 
   /** Updates all the rules in a migration to be re-executed */
@@ -227,9 +96,10 @@ export class RuleMigrationsTaskClient {
     filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
     if (this.migrationsRunning.has(migrationId)) {
+      // not update migrations that are currently running
       return { updated: false };
     }
-
+    filter.installed = false; // only retry rules that are not installed
     await this.data.rules.updateStatus(migrationId, filter, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
@@ -279,25 +149,12 @@ export class RuleMigrationsTaskClient {
 
       const { rules } = await this.data.rules.getStats(migrationId);
       if (rules.total > 0) {
-        return { exists: true, stopped: false };
+        return { exists: true, stopped: true };
       }
-      return { exists: false, stopped: false };
+      return { exists: false, stopped: true };
     } catch (err) {
       this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };
     }
-  }
-
-  private async createModel(
-    connectorId: string,
-    abortController: AbortController
-  ): Promise<ChatModel> {
-    const { actionsClient } = this.dependencies;
-    const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
-    const model = await actionsClientChat.createModel({
-      signal: abortController.signal,
-      temperature: 0.05,
-    });
-    return model;
   }
 }

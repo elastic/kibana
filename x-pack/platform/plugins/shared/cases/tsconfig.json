@@ -76,6 +76,8 @@
     "@kbn/securitysolution-rules",
     "@kbn/alerts-ui-shared",
     "@kbn/cloud-plugin",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/field-formats-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/code-editor-mock",

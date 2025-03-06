@@ -27,9 +27,9 @@ export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
 export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
 
-export const ALERT_RISK_SCORE = '[data-test-subj="render-content-kibana.alert.risk_score"]';
+export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
 
-export const ALERT_SEVERITY = '[data-test-subj="render-content-kibana.alert.severity"]';
+export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
@@ -43,7 +43,7 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
-export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
+export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsTableEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 

@@ -8,19 +8,15 @@
 import type { EsqlContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
-import type { ContentReferenceNode } from '../content_reference_parser';
+import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface Props {
-  contentReferenceNode: ContentReferenceNode;
-  esqlContentReference: EsqlContentReference;
+  contentReferenceNode: ResolvedContentReferenceNode<EsqlContentReference>;
 }
 
-export const EsqlQueryReference: React.FC<Props> = ({
-  contentReferenceNode,
-  esqlContentReference,
-}) => {
+export const EsqlQueryReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const {
     discover: { locator },
     application: { navigateToApp },
@@ -34,8 +30,9 @@ export const EsqlQueryReference: React.FC<Props> = ({
       }
       const url = await locator.getLocation({
         query: {
-          esql: esqlContentReference.query,
+          esql: contentReferenceNode.contentReference.query,
         },
+        timeRange: contentReferenceNode.contentReference.timerange,
       });
 
       navigateToApp(url.app, {
@@ -43,7 +40,7 @@ export const EsqlQueryReference: React.FC<Props> = ({
         openInNewTab: true,
       });
     },
-    [locator, esqlContentReference.query, navigateToApp]
+    [locator, contentReferenceNode, navigateToApp]
   );
 
   return (
@@ -51,7 +48,7 @@ export const EsqlQueryReference: React.FC<Props> = ({
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="EsqlQueryReference"
     >
-      <EuiLink onClick={onClick}>{esqlContentReference.label}</EuiLink>
+      <EuiLink onClick={onClick}>{contentReferenceNode.contentReference.label}</EuiLink>
     </PopoverReference>
   );
 };

@@ -24,13 +24,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ARCHIVES = [
     'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
     'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+    'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
   ];
 
   const SEARCH_DASHBOARD_ID = 'b70c7ae0-3224-11e8-a572-ffca06da1357';
   const BASIC_DASHBOARD_ID = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
   const BASIC_DASHBOARD_TITLE = 'Requests';
+  const TAG_ID = '00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d';
 
   async function loadDashboards() {
+    // clear out all lingering dashboards
+    const dashboards = await kibanaServer.savedObjects.find({
+      type: 'dashboard',
+    });
+    await kibanaServer.savedObjects.bulkDelete({
+      objects: dashboards.saved_objects.map((d) => ({ type: 'dashboard', id: d.id })),
+    });
+
     for (const archive of ARCHIVES) {
       await kibanaServer.importExport.load(archive, { space: SPACE_ID });
     }
@@ -241,8 +251,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('after creating multiple dashboards', () => {
-        // see details: https://github.com/elastic/kibana/issues/208016
-        this.tags(['failsOnMKI']);
         it('suggests dashboards to link', async () => {
           const response = await apiClient.fetch(
             'POST /api/streams/{name}/dashboards/_suggestions',
@@ -252,11 +260,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(2);
+          expect(response.body.suggestions.length).to.eql(3);
         });
 
-        // TODO: needs a dataset with dashboards with tags
-        it.skip('filters suggested dashboards based on tags', () => {});
+        it('filters suggested dashboards based on tags', async () => {
+          const response = await apiClient.fetch(
+            'POST /api/streams/{name}/dashboards/_suggestions',
+            {
+              params: { path: { name: 'logs' }, body: { tags: [TAG_ID] }, query: { query: '' } },
+            }
+          );
+
+          expect(response.status).to.eql(200);
+          expect(response.body.suggestions.length).to.eql(1);
+        });
 
         it('filters suggested dashboards based on the query', async () => {
           const response = await apiClient.fetch(
