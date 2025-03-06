@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
@@ -42,16 +42,18 @@ interface Props {
   fileUploadManager: FileUploadManager;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
-  setUploadResults?: (results: FileUploadResults) => void;
+  props: OpenFileUploadLiteContext;
   onClose?: () => void;
 }
 
-export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResults, onClose }) => {
+export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClose }) => {
   const {
     services: {
       application: { navigateToApp },
     },
   } = useDataVisualizerKibana();
+
+  const { flyoutContent, onUploadComplete, initialIndexName } = props;
 
   const [indexName, setIndexName] = useState<string>(
     fileUploadManager.getExistingIndexName() ?? ''
@@ -93,11 +95,11 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
 
   const onImportClick = useCallback(() => {
     fileUploadManager.import(indexName).then((res) => {
-      if (setUploadResults && res) {
-        setUploadResults(res);
+      if (onUploadComplete && res) {
+        onUploadComplete(res);
       }
     });
-  }, [fileUploadManager, indexName, setUploadResults]);
+  }, [fileUploadManager, indexName, onUploadComplete]);
 
   const canImport = useMemo(() => {
     return (
@@ -112,16 +114,18 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h3>
-            {existingIndexName ? (
+            {flyoutContent?.title ? (
+              flyoutContent.title
+            ) : existingIndexName ? (
               <FormattedMessage
                 id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
-                defaultMessage="Upload a file to {indexName}"
+                defaultMessage="Upload files to {indexName}"
                 values={{ indexName: existingIndexName }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
-                defaultMessage="Upload a file"
+                defaultMessage="Upload files"
               />
             )}
           </h3>
@@ -134,31 +138,37 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
             <>
               <EuiText>
                 <p>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                    defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
-                  />
-
-                  {existingIndexName === null ? (
+                  {flyoutContent?.description ? (
+                    flyoutContent.description
+                  ) : (
                     <>
-                      <br />
-
                       <FormattedMessage
-                        id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
-                        defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
-                        values={{
-                          fullToolLink: (
-                            <EuiLink onClick={fullFileUpload}>
-                              <FormattedMessage
-                                id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
-                                defaultMessage="here"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
+                        id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                        defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
                       />
+
+                      {existingIndexName === null ? (
+                        <>
+                          <br />
+
+                          <FormattedMessage
+                            id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
+                            defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
+                            values={{
+                              fullToolLink: (
+                                <EuiLink onClick={fullFileUpload}>
+                                  <FormattedMessage
+                                    id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
+                                    defaultMessage="here"
+                                  />
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </>
+                      ) : null}
                     </>
-                  ) : null}
+                  )}
                 </p>
               </EuiText>
 
@@ -180,6 +190,8 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
                   deleteFile={() => deleteFile(i)}
                   index={i}
                   lite={true}
+                  showFileContentPreview={flyoutContent?.showFileContentPreview}
+                  showFileSummary={flyoutContent?.showFileSummary}
                 />
               ))}
 
@@ -202,6 +214,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, setUploadResu
                 <IndexInput
                   setIndexName={setIndexName}
                   setIndexValidationStatus={setIndexValidationStatus}
+                  initialIndexName={initialIndexName}
                 />
               ) : null}
             </>

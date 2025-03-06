@@ -18,14 +18,19 @@ import { useDataVisualizerKibana } from '../application/kibana_context';
 interface Props {
   setIndexName: (name: string) => void;
   setIndexValidationStatus: (status: STATUS) => void;
+  initialIndexName?: string;
 }
 
-export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus }) => {
+export const IndexInput: FC<Props> = ({
+  setIndexName,
+  setIndexValidationStatus,
+  initialIndexName,
+}) => {
   const {
     services: { fileUpload },
   } = useDataVisualizerKibana();
 
-  const [indexNameLocal, setIndexNameLocal] = useState('');
+  const [indexNameLocal, setIndexNameLocal] = useState(initialIndexName ?? '');
   const [indexNameError, setIndexNameError] = useState('');
   const isMounted = useMountedState();
 

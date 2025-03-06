@@ -30,6 +30,7 @@ interface Props {
   fileContents: string;
   results: FindFileStructureResponse;
   showTitle?: boolean;
+  disableHighlighting?: boolean;
 }
 
 interface SemiStructureTextData {
@@ -50,7 +51,12 @@ function semiStructureTextDataGuard(
   );
 }
 
-export const FileContents: FC<Props> = ({ fileContents, results, showTitle = true }) => {
+export const FileContents: FC<Props> = ({
+  fileContents,
+  results,
+  showTitle = true,
+  disableHighlighting = false,
+}) => {
   let mode = EDITOR_MODE.TEXT;
   const format = results.format;
   const numberOfLines = results.num_lines_analyzed;
@@ -77,7 +83,7 @@ export const FileContents: FC<Props> = ({ fileContents, results, showTitle = tru
   );
 
   const [isSemiStructureTextData, setIsSemiStructureTextData] = useState(
-    semiStructureTextDataGuard(semiStructureTextData)
+    disableHighlighting === false && semiStructureTextDataGuard(semiStructureTextData)
   );
   const formattedData = useMemo(
     () => limitByNumberOfLines(fileContents, numberOfLines),

@@ -20,4 +20,13 @@ export interface OpenFileUploadLiteContext {
   autoAddInference?: string;
   autoCreateDataView?: boolean;
   existingIndex?: string;
+  initialIndexName?: string;
+  flyoutContent?: FlyoutContent;
+}
+
+export interface FlyoutContent {
+  title?: string;
+  description?: string;
+  showFileContentPreview: boolean;
+  showFileSummary?: boolean;
 }

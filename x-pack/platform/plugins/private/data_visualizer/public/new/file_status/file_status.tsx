@@ -17,11 +17,21 @@ interface FileStatusProps {
   fileStatus: FileAnalysis;
   deleteFile: () => void;
   index: number;
+  showFileContentPreview?: boolean;
+  showFileSummary?: boolean;
 }
 
 type Props = FileStatusProps & { lite: boolean };
 
-export const FileStatus: FC<Props> = ({ lite, uploadStatus, fileStatus, deleteFile, index }) => {
+export const FileStatus: FC<Props> = ({
+  lite,
+  uploadStatus,
+  fileStatus,
+  deleteFile,
+  index,
+  showFileContentPreview,
+  showFileSummary,
+}) => {
   const FileStatusComp = lite ? FileStatusLite : FileStatusFull;
   return (
     <FileStatusComp
@@ -29,6 +39,8 @@ export const FileStatus: FC<Props> = ({ lite, uploadStatus, fileStatus, deleteFi
       fileStatus={fileStatus}
       deleteFile={deleteFile}
       index={index}
+      showFileContentPreview={showFileContentPreview}
+      showFileSummary={showFileSummary}
     />
   );
 };

@@ -36,6 +36,8 @@ interface Props {
   fileStatus: FileAnalysis;
   deleteFile: () => void;
   index: number;
+  showFileContentPreview?: boolean;
+  showFileSummary?: boolean;
 }
 
 enum TAB {

@@ -8,47 +8,38 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
+import type { CoreStart } from '@kbn/core/public';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
-import { getCoreStart, getPluginsStart } from '../kibana_services';
 import { FileUploadLiteView } from './file_upload_lite_view';
 import { FileUploadManager } from './file_manager/file_manager';
+import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
 
 export interface Props {
+  coreStart: CoreStart;
+  plugins: DataVisualizerStartDependencies;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
-  setUploadResults?: (results: FileUploadResults) => void;
-  existingIndex?: string;
-  autoAddInference?: string;
-  autoCreateDataView?: boolean;
-  indexSettings?: IndicesIndexSettings;
+  props: OpenFileUploadLiteContext;
   onClose?: () => void;
 }
 
 export const FileDataVisualizerLite: FC<Props> = ({
+  coreStart,
+  plugins,
   getAdditionalLinks,
   resultLinks,
-  setUploadResults,
-  existingIndex,
-  autoAddInference,
-  autoCreateDataView,
-  indexSettings,
+  props,
   onClose,
 }) => {
-  const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, fileUpload, cloud, fieldFormats } = getPluginsStart();
   const services = {
     ...coreStart,
-    data,
-    maps,
-    embeddable,
-    share,
-    fileUpload,
-    fieldFormats,
+    ...plugins,
   };
+  const { data, fileUpload, cloud } = services;
 
+  const { existingIndex, autoAddInference, autoCreateDataView, indexSettings } = props;
   const fileUploadManager = useMemo(
     () =>
       new FileUploadManager(
@@ -83,7 +74,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
             fileUploadManager={fileUploadManager}
             getAdditionalLinks={getAdditionalLinks}
             resultLinks={resultLinks}
-            setUploadResults={setUploadResults}
+            props={props}
             onClose={onClose}
           />
         </CloudContext>
