@@ -54,6 +54,15 @@ describe('validateSchedule', () => {
     ).toEqual('Recurrence every 1y must be longer than the duration 8761h.');
   });
 
+  it('throws error when duration in days and greater than interval', () => {
+    expect(
+      validateSchedule({
+        duration: '2d',
+        recurring: { every: '1d' },
+      })
+    ).toEqual('Recurrence every 1d must be longer than the duration 2d.');
+  });
+
   it('throws error when recurring schedule provided with indefinite duration', () => {
     expect(
       validateSchedule({

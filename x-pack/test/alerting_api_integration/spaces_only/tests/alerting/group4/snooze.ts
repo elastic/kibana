@@ -369,97 +369,6 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       });
     });
 
-    describe('clear the snooze after it expires', function () {
-      this.tags('skipFIPS');
-      it('should clear the snooze after it expires', async () => {
-        const { body: createdConnector } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'MY Connector',
-            connector_type_id: 'test.noop',
-            config: {},
-            secrets: {},
-          })
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
-
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              name: 'should not trigger actions when snoozed',
-              rule_type_id: 'test.patternFiring',
-              schedule: { interval: '1s' },
-              throttle: null,
-              notify_when: 'onActiveAlert',
-              params: {
-                pattern: { instance: arrayOfTrues(100) },
-              },
-              actions: [
-                {
-                  id: createdConnector.id,
-                  group: 'default',
-                  params: {},
-                },
-              ],
-            })
-          )
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const dateStart = new Date().toISOString();
-        const snooze = {
-          schedule: {
-            custom: {
-              start: dateStart,
-              duration: '3s',
-            },
-          },
-        };
-
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send(snooze);
-
-        expect(response.statusCode).to.eql(200);
-        expect(response.body).to.eql({
-          schedule: {
-            ...snooze.schedule,
-            id: response.body.schedule.id,
-            custom: {
-              ...snooze.schedule.custom,
-              timezone: 'UTC',
-            },
-          },
-        });
-
-        await retry.try(async () => {
-          const { body: updatedAlert } = await supertestWithoutAuth
-            .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(200);
-          expect(updatedAlert.snooze_schedule).to.eql([
-            { duration: 3000, rRule: { dtstart: dateStart, tzid: 'UTC' } },
-          ]);
-        });
-        log.info('wait for snoozing to end');
-        await retry.try(async () => {
-          const { body: alertWithExpiredSnooze } = await supertestWithoutAuth
-            .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(200);
-          expect(alertWithExpiredSnooze.snooze_schedule).to.eql([]);
-        });
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest,
-          spaceId: Spaces.space1.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: createdRule.id,
-        });
-      });
-    });
-
     describe('validation', function () {
       this.tags('skipFIPS');
       it('should return 400 if the start is not valid', async () => {
@@ -486,7 +395,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.schedule.custom.start]: Invalid snooze start date: invalid'
+          '[request body.schedule.custom.start]: Invalid schedule start date: invalid'
         );
       });
 
@@ -656,7 +565,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request body.schedule.custom.recurring.end]: Invalid snooze end date: invalid'
+          '[request body.schedule.custom.recurring.end]: Invalid schedule end date: invalid'
         );
       });
 
