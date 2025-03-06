@@ -253,7 +253,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
             requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
           }`
       );
-      const result = (await originalEqlSearch.call(opts.esClient, params, {
+      const result = (await originalEqlSearch.call(opts.esClient.eql, params, {
         ...searchOptions,
         ...(requestTimeout
           ? {
