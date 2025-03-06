@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useMlKibana } from '../contexts/kibana';
@@ -43,10 +43,10 @@ export function dashboardServiceProvider(
     /**
      * Generates dashboard url
      */
-    async getDashboardUrl(dashboardId: string, viewMode: ViewMode = ViewMode.EDIT) {
+    async getDashboardUrl(dashboardId: string, viewMode: ViewMode = 'edit') {
       return await share.url.locators.get(DASHBOARD_APP_LOCATOR)?.getUrl({
         dashboardId,
-        viewMode: ViewMode.EDIT,
+        viewMode: 'edit',
         useHash: false,
       });
     },
