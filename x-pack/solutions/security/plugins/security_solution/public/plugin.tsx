@@ -24,6 +24,7 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -99,6 +100,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.setup(core, plugins);
 
     const { home, usageCollection, management, cases } = plugins;
+    const { productFeatureKeys$ } = this.contract;
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
@@ -202,6 +204,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
       },
     });
+
+    productFeatureKeys$
+      .pipe(combineLatestWith(plugins.licensing.license$))
+      .subscribe(([productFeatureKeys, license]) => {
+        if (!productFeatureKeys || !license) {
+          return;
+        }
+
+        const isAssistantAvailable =
+          productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          license?.hasAtLeast('enterprise');
+        const assistantManagementApp = management?.sections.section.kibana.getApp(
+          'securityAiAssistantManagement'
+        );
+
+        if (!isAssistantAvailable) {
+          assistantManagementApp?.disable();
+        }
+      });
 
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
