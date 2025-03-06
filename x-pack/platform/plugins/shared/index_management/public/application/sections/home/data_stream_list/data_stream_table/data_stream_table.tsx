@@ -192,16 +192,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   });
 
   columns.push({
-    field: 'indexMode',
-    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
-      defaultMessage: 'Index mode',
-    }),
-    truncateText: true,
-    sortable: true,
-    render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
-  });
-
-  columns.push({
     field: 'lifecycle',
     name: (
       <EuiToolTip
