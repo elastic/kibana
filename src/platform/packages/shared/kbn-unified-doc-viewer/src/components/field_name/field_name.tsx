@@ -68,7 +68,7 @@ export function FieldName({
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
           <EuiFlexItem
-            className="kbnDocViewer__fieldName eui-textBreakAll"
+            className="kbnDocViewer__fieldName eui-textBreakAll" // kbnDocViewer__fieldName is used in tests
             css={fieldNameCss}
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
