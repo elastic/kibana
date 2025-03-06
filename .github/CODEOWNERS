@@ -949,7 +949,6 @@ x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-te
 x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
