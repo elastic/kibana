@@ -451,10 +451,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
   private parseRequestIdFromSAMLResponse(samlResponse: string): string | null {
     const samlResponseBuffer = Buffer.from(samlResponse, 'base64');
-
-    const inResponseToRequestIdMatch = samlResponseBuffer
-      .toString()
-      .match(/InResponseTo="([a-z0-9_]*)"/);
+    const samlResponseString = samlResponseBuffer.toString('utf-8');
+    const inResponseToRequestIdMatch = samlResponseString.match(/InResponseTo="([a-z0-9_]*)"/);
 
     return inResponseToRequestIdMatch ? inResponseToRequestIdMatch[1] : null;
   }
@@ -549,7 +547,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
     this.logger.debug('Trying to authenticate via state.');
-
     if (!accessToken) {
       this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
