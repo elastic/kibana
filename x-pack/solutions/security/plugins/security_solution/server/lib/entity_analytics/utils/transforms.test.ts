@@ -19,6 +19,7 @@ import {
   scheduleLatestTransformNow,
   scheduleTransformNow,
   upgradeLatestTransformIfNeeded,
+  getLatestTransformId,
 } from './transforms';
 
 const transformId = 'test_transform_id';
@@ -204,6 +205,17 @@ describe('transforms utils', () => {
       expect(esClient.transform.stopTransform).toHaveBeenCalled();
       expect(esClient.transform.deleteTransform).toHaveBeenCalled();
       expect(esClient.transform.putTransform).toHaveBeenCalled();
+    });
+  });
+
+  describe('checkTransformNameLength', () => {
+    it('should throw an error when the transform name is longer than 36 chars', async () => {
+      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransform.mockResolvedValueOnce(outdatedTransformsMock);
+
+      const longTransformId = 'a'.repeat(50);
+      const response = await getLatestTransformId(longTransformId);
+      expect(response.length).toEqual(36);
     });
   });
 });

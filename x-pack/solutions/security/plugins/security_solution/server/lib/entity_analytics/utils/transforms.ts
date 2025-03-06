@@ -14,6 +14,7 @@ import type {
   TransformGetTransformStatsTransformStats,
   AcknowledgedResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
+import murmurhash from 'murmurhash';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
@@ -116,8 +117,18 @@ export const reinstallTransform = async ({
   });
 };
 
-export const getLatestTransformId = (namespace: string): string =>
-  `risk_score_latest_transform_${namespace}`;
+export const getLatestTransformId = (namespace: string): string => {
+  const maxNamespaceLength = 36;
+  const prefix = `risk_score_latest_transform_`;
+  const fullName = `${prefix}${namespace}`;
+  const maxAllowedNamespaceLength = maxNamespaceLength - prefix.length;
+
+  const processedNamespace =
+    fullName.length > maxNamespaceLength
+      ? murmurhash.v3(namespace).toString().slice(0, maxAllowedNamespaceLength)
+      : namespace.slice(0, maxAllowedNamespaceLength);
+  return `${prefix}${processedNamespace}`;
+};
 
 const hasTransformStarted = (transformStats: TransformGetTransformStatsTransformStats): boolean => {
   return transformStats.state === 'indexing' || transformStats.state === 'started';
