@@ -30,22 +30,30 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Core Functionality](#core-functionality)
+  - [Importing single prebuilt rules](#importing-single-prebuilt-rules)
     - [Scenario: Importing a non-customized prebuilt rule with a matching `rule_id` and `version`](#scenario-importing-a-non-customized-prebuilt-rule-with-a-matching-rule_id-and-version)
     - [Scenario: Importing a customized prebuilt rule with a matching `rule_id` and `version`](#scenario-importing-a-customized-prebuilt-rule-with-a-matching-rule_id-and-version)
-    - [Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`](#scenario-importing-a-custom-rule-with-a-matching-prebuilt-rule_id-and-version)
+  - [Importing single custom rules](#importing-single-custom-rules)
     - [Scenario: Importing a custom rule with a matching custom `rule_id` and `version`](#scenario-importing-a-custom-rule-with-a-matching-custom-rule_id-and-version)
-    - [Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-no-matching-version)
+  - [Importing multiple rules in bulk](#importing-multiple-rules-in-bulk)
+    - [Scenario: Importing both custom and prebuilt rules](#scenario-importing-both-custom-and-prebuilt-rules)
+  - [Importing prebuilt rules when the package is not installed](#importing-prebuilt-rules-when-the-package-is-not-installed)
+    - [Scenario: Importing a prebuilt rule when the rules package is not installed](#scenario-importing-a-prebuilt-rule-when-the-rules-package-is-not-installed)
+  - [Converting between prebuilt and custom rules](#converting-between-prebuilt-and-custom-rules)
+    - [Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`](#scenario-importing-a-custom-rule-with-a-matching-prebuilt-rule_id-and-version)
     - [Scenario: Importing a prebuilt rule with a non-existent `rule_id`](#scenario-importing-a-prebuilt-rule-with-a-non-existent-rule_id)
+    - [Scenario: Importing a custom rule before a prebuilt rule asset is created with the same `rule_id`](#scenario-importing-a-custom-rule-before-a-prebuilt-rule-asset-is-created-with-the-same-rule_id)
+  - [Handling missing base versions](#handling-missing-base-versions)
+    - [Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-no-matching-version)
+  - [Handling missing fields in the import request payload](#handling-missing-fields-in-the-import-request-payload)
     - [Scenario: Importing a prebuilt rule without a `rule_id` field](#scenario-importing-a-prebuilt-rule-without-a-rule_id-field)
     - [Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
     - [Scenario: Importing an existing custom rule missing a `version` field](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
     - [Scenario: Importing a new custom rule missing a `version` field](#scenario-importing-a-new-custom-rule-missing-a-version-field)
+  - [Handling request parameters: `overwrite` flag](#handling-request-parameters-overwrite-flag)
     - [Scenario: Importing a rule with `overwrite` flag set to true](#scenario-importing-a-rule-with-overwrite-flag-set-to-true)
     - [Scenario: Importing a rule with `overwrite` flag set to false](#scenario-importing-a-rule-with-overwrite-flag-set-to-false)
-    - [Scenario: Importing both custom and prebuilt rules](#scenario-importing-both-custom-and-prebuilt-rules)
-    - [Scenario: Importing a prebuilt rule when the rules package is not installed](#scenario-importing-a-prebuilt-rule-when-the-rules-package-is-not-installed)
-    - [Scenario: Importing a custom rule before a prebuilt rule asset is created with the same `rule_id`](#scenario-importing-a-custom-rule-before-a-prebuilt-rule-asset-is-created-with-the-same-rule_id)
+  - [Licensing](#licensing)
 
 ## Useful information
 
@@ -91,7 +99,7 @@ User stories:
 
 ## Scenarios
 
-### Core Functionality
+### Importing single prebuilt rules
 
 #### Scenario: Importing a non-customized prebuilt rule with a matching `rule_id` and `version`
 
@@ -119,18 +127,7 @@ And the ruleSource type should be "external"
 And isCustomized should be true
 ```
 
-#### Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`
-
-**Automation**: 1 cypress test and 1 integration test.
-
-```Gherkin
-Given the import payload contains a custom rule
-And its rule_id and version match a rule asset from the installed package
-When the user imports the rule
-Then the rule should be created or updated
-And the ruleSource type should be "external"
-And isCustomized should be true
-```
+### Importing single custom rules
 
 #### Scenario: Importing a custom rule with a matching custom `rule_id` and `version`
 
@@ -145,14 +142,45 @@ Then the rule should be created or updated
 And the ruleSource type should be "internal"
 ```
 
-#### Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`
+### Importing multiple rules in bulk
+
+#### Scenario: Importing both custom and prebuilt rules
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
+When the user imports these rules
+Then custom rules should be created or updated, with versions defaulted to 1
+And prebuilt rules should be created or updated,
+And prebuilt rules missing versions should be rejected
+```
+
+### Importing prebuilt rules when the package is not installed
+
+#### Scenario: Importing a prebuilt rule when the rules package is not installed
 
 **Automation**: 1 integration test.
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And its rule_id matches one or a few rule assets from the installed package
-And its version does NOT match any of those rule assets
+And its rule_id matches one or a few rule assets from the latest package
+And the package hasn't been installed yet
+When the user imports the rule
+Then the latest package should get installed automatically
+And the rule should be created or updated
+And the ruleSource type should be "external"
+```
+
+### Converting between prebuilt and custom rules
+
+#### Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`
+
+**Automation**: 1 cypress test and 1 integration test.
+
+```Gherkin
+Given the import payload contains a custom rule
+And its rule_id and version match a rule asset from the installed package
 When the user imports the rule
 Then the rule should be created or updated
 And the ruleSource type should be "external"
@@ -170,6 +198,35 @@ When the user imports the rule
 Then the rule should be created
 And the ruleSource type should be "internal"
 ```
+
+#### Scenario: Importing a custom rule before a prebuilt rule asset is created with the same `rule_id`
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the environment contains an imported custom rule
+And this rule has a rule_id of X
+When a prebuilt rule asset is added with a rule_id of X
+Then the imported custom rule should be upgradeable as if it were a prebuilt rule
+```
+
+### Handling missing base versions
+
+#### Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And its rule_id matches one or a few rule assets from the installed package
+And its version does NOT match any of those rule assets
+When the user imports the rule
+Then the rule should be created or updated
+And the ruleSource type should be "external"
+And isCustomized should be true
+```
+
+### Handling missing fields in the import request payload
 
 #### Scenario: Importing a prebuilt rule without a `rule_id` field
 
@@ -220,6 +277,8 @@ And the ruleSource type should be "internal"
 And the "version" field should be set to 1
 ```
 
+### Handling request parameters: `overwrite` flag
+
 #### Scenario: Importing a rule with `overwrite` flag set to true
 
 **Automation**: 1 integration test.
@@ -247,39 +306,6 @@ Then the import should be rejected with a message "rule_id already exists"
 CASE: should have the same outcome for all rule types
 ```
 
-#### Scenario: Importing both custom and prebuilt rules
+### Licensing
 
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
-When the user imports these rules
-Then custom rules should be created or updated, with versions defaulted to 1
-And prebuilt rules should be created or updated,
-And prebuilt rules missing versions should be rejected
-```
-
-#### Scenario: Importing a prebuilt rule when the rules package is not installed
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the import payload contains a prebuilt rule
-And its rule_id matches one or a few rule assets from the latest package
-And the package hasn't been installed yet
-When the user imports the rule
-Then the latest package should get installed automatically
-And the rule should be created or updated
-And the ruleSource type should be "external"
-```
-
-#### Scenario: Importing a custom rule before a prebuilt rule asset is created with the same `rule_id`
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the environment contains an imported custom rule
-And this rule has a rule_id of X
-When a prebuilt rule asset is added with a rule_id of X
-Then the imported custom rule should be upgradeable as if it were a prebuilt rule
-```
+TODO: describe licensing restrictions that apply to rule import.
