@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
-import { MonitoringStartServices } from '../../../types';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 

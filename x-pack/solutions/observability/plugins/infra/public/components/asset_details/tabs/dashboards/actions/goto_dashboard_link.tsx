@@ -7,9 +7,9 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardItemWithTitle } from '../../../../../../common/custom_dashboards';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 export function GotoDashboardLink({
   currentDashboard,
@@ -17,9 +17,7 @@ export function GotoDashboardLink({
   currentDashboard: DashboardItemWithTitle;
 }) {
   const {
-    services: {
-      share,
-    },
+    services: { share },
   } = useKibanaContextForPlugin();
 
   const url = share?.url.locators.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
