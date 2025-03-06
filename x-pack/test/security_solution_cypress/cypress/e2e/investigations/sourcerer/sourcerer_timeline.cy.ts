@@ -41,7 +41,7 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
 // FLAKY: https://github.com/elastic/kibana/issues/198944
-describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     waitForRulesBootstrap();
   });
