@@ -13,10 +13,15 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-, "scripts/generate_patterns.js"  ],
+    , "scripts/generate_patterns.js"  ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/monaco",
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-info",
+    "@kbn/code-editor",
+    "@kbn/i18n",
+  ]
 }
- 
