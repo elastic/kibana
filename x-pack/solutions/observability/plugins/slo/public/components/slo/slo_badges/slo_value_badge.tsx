@@ -25,7 +25,7 @@ export function SloValueBadge({ slo, isLoading }: SloStatusProps) {
 
   const badgeDisplayText = useMemo(() => {
     return i18n.translate('xpack.slo.sloStatusBadge.sloObjectiveValue', {
-      defaultMessage: 'Observed SLI: {value} / {objective}',
+      defaultMessage: '{value} / {objective} (Objective)',
       values: {
         value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
         objective: numeral(slo.objective.target).format(percentFormat),
