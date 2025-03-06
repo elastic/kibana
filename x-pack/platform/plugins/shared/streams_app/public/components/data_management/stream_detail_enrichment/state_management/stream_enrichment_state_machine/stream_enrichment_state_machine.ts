@@ -17,7 +17,6 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   IngestStreamGetResponse,
-  WiredStreamGetResponse,
   isRootStreamDefinition,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
@@ -59,13 +58,12 @@ export const streamEnrichmentMachine = setup({
     simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
   actions: {
-    spawnSimulationMachine: assign(({ context, self, spawn }) => ({
+    spawnSimulationMachine: assign(({ context, spawn }) => ({
       simulatorRef:
         context.simulatorRef ||
         spawn('simulationMachine', {
           id: 'simulator',
           input: {
-            parentRef: self,
             processors: getStagedProcessors(context),
             streamName: context.definition.stream.name,
           },
@@ -125,10 +123,13 @@ export const streamEnrichmentMachine = setup({
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),
-    sendProcessorChangeToSimulator: sendTo('simulator', ({ context }) => ({
-      type: 'processors.change',
-      processors: getStagedProcessors(context),
-    })),
+    forwardEventToSimulator: sendTo(
+      'simulator',
+      ({ context }, params: { type: StreamEnrichmentEvent['type'] }) => ({
+        type: params.type,
+        processors: getStagedProcessors(context),
+      })
+    ),
     sendFilterChangeToSimulator: sendTo(
       'simulator',
       (_, params: { filter: PreviewDocsFilterOption }) => ({
@@ -163,7 +164,7 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATADYK3RYoAsy7soCcAVmVHV2gDQgAngpMUDqo1qOPtqgIynlAXx9XUTFxCYnIqGjpGFjYuD34kEBExOklpOQQlfQoPIwB2TUUDbgBmVWKDZStbBF0HCqNixQ9cwqdFVT8A9Gx8IlJKUIhrdlg+sOIsMAwAN0geeKFRcVSE9I9tB3zNE3zHPINcqrsjCibVVTVuT2Lm1SvO8G7gsYHSIYpR0MoMCAYwEZeFGIsDABHm0iSyykqwUpQ0xWUOUUZhauV0qiOCC8TQoLUUV24JiM+naD0CPRC-SBb2sH0BPz+AK+FAAroIICQCGBwQlISloaB0koVLjch5iq5lHorgYPJj1spFBRdA1DB4rjd3GSnr1mYNaZ8qWyOXQUBwIJIwOFpsIANZWtkgtAESnkACCWAIwjQPMWyQkAtkx2KuOK3E0B20jmK2iM8vKIe0uSlYuRHg8Tly2qCuqp+rpzONnJiYDQaG9FEEDE5ADNvZRHaWXS8PV6fXwIUt+WlYXoKHkLqnxcSDNpLDZEMODBRytxco1cucnNpsxTAfnybgyKgCBQIBhYFWSNY2AAFcuTWCwb2wdiCC9wa9oWAUEgQCC+xJdgM9jKKBHKu0ugxlciK5IcE4IKUuSASU5zih4-5zkYq7PHqNIUJuODbigu77oe1Ynma57CJeT63vepGPje1LehApafnyP4whkY7qA0hLlNoOilLKEHVM4SrcB4xj4iUphnKhubjBhWE4XhB5HkRUAkWRN53g+V4VvRfxcox34rIKCjaMJyp3Moi43Ii7j8YgMbKBQ5h5OssbcLo-5Sa6rxvrSck7nuimEWemnkRpVFaWgFC4CQZrch2vIGYGQpNNwyquCUxKGGUKiYoJGgiUS5jlMmxSeeusk6vJAUEcebB4BgZAstW-IUNMGBgAA7gAIpyJDnmAbWdSMDVNcWkite13WgmAnqQAAYu1DAQLA+n+oZQYZEY9jqkh3CjiY5iVJBBjGIB6oSmYKh3IoZXoT5mGVf5+FKXVI3NQGE2dT1BB9cQg0dcNjXveN0Wxf1-1daRsALQwXLtgsX5rUlCj-hsWhhiJxTFC0NzFJihQeP2Fmyo0hUibdeYVTmVXPUFZr1UDY0oJ9U1crNEALWAS23mIjMtRDvXg5Nq1Qr+8hGLUsqqIUuQGFjo6FPKVyE9jCLKFjbmy7Gfj+CAKDCPR8AJFhXmdkjYvqmopxIZj2P-l4mLyOsIZ7IouR5PiTTihTYTUOIUSsGaZuiyx8gHEqsvzk4e0qmKjtbRQiKCf+jRRidKG6yb5U+cH3ah+H1sY3Ldu45io6ObGqiOHoEqmBUPvee8hrkLnzFGRkcupeBU5SuGVdypBXjY5s4HhnLo4mSumc6l51L3c33y-GArfrUKFwuxcJ13AYKheOO1TiqYyrgaiEuKlm085rP+YL6y7LFkHCXm6H5jTmK7sNEVKgtPKW0nFGJlhJJkMG4Buc93h+VwivZGHcwyF2EsXHG4pMSmBOOsZyCJEJbwRGAjcj1cLVResREKN5oFi08P-Vostt4IjdrlLIyJpYEhuK4LauCqY9BpoFWq9M3pMzIaHLQDl0YIKxkgvGkF3YwX0LLJo5R2jmAvl0K+2cIH4IUjVZSDNRr80mt9X6A1JoCPbvIcC6gsYuSTOGXiGJjqnW4udLa0tLg3UvmuO6ajqZPW4VovhuivrTXZpzbmxiNryClBsYurgbjtClIYMu9iUoXWcXcDobi0KU2vAwWYEAABKwhhDNi+KEteiJ+yEjTGYLaJkB7VHFuodwzg0QSzlrLFhOsfBAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATAE4K3AGzdlizQBYAjPoCsi7voA0IAJ4KAzIoomT3cwHYdixfferFAL4B1qiYuITE5FQ0dIwsbFyG-EggImJ0ktJyCErGzpqGqoaa7u7KmkWG1nYIyiYUytwmFX7mjZqK+kEh6Nj4RKSUkRA27LADUcRYYBgAbpA8yUKi4pkp2fJ13BSObib6Ksr6+o3u1QrHFO6Kqi6q+h0PBcrd4L3hE0OkIxTjkZQYCAMMBjT4UYiwMAERbSNKrKTrRDKPL6biqVTKTE6AyKExnWyIQz2PImZH7Y76Rz2VSvUJ9CKDcHfGy-MGA4Gg-4UACugggJAIYBhKThGQRoA23mUV3cRJMGMaWiK5wQxl0FBOJnsakMWmJD1p736XOGLL+jN5-LoKA4EEkYGis2EAGsHbzIWgCAzyABBLAEYRoYXLdIScWyBQuexXezcNyqdz6VSaeymFVE1TR-RlZSy3GGYp4w1hY2M02srmWgUJMBoNCBiiCBgCgBmgco7trXs+foDQb4sJWYqyDgLFEzufs2k0zWuePTqM044O2nMqh01y6wTeJe9XxIPzpuDIqAIFAgGFgTZINjYAAV69NYLBA7B2IJH3AX2hYBQDxBg1SIcwxHHJOm2bhSn2TxjmUex7BMFUp3cDVzCnApiR8SCTGLekwXLI8cBPFAzwvK9m1vG0H2EJ9vzfD8aK-V8mUDCBa0A0UQMRHJjiXLUmmpA5KQqQx8RqMwnG4QozDjbUzGKXCPhNZkKEI4jSMva9KKgajaNfd9P2fBs2OBQUOOAtYJQcfYdmg1wkzjbhqSQmzZOudxmiaAxDBw7dCL3JkDxZNTT3PTSKPvQy6IMxijLQVkSBgczQ0siMcmubZ-F8DzikaSlFBVeVo2gjpCk8dzAj8o0AoIo11LC8ibzYPAMDIblmzFGK9J-CgACpkvhUDUSueUigqfY0SkzQVXRPjvFlPF-BMYwtx6Xd8JUkKSIarTmta9rq0kLqmPi-qBxFCzw2yYaPPRYpblRdciRVTpoxW1c-EMNQ0UU0tJk2urQrI3abRatqOrDChZgwMAAHcABEBRIB8wGhuGxn2iHJChmGEahMB-UgAAxGGGAgWABuHbj5BcaVdSwtFTHKE4ZtuVDdQQ5oVFXX6aoBkt6uBiLQcxw6UBxuHEYIZHiDR2GMfBsWKFwEgbTAFG5fhmjYBJhhBX7JYgJSq6FB8fQKG8WNCng65iXsF6imcXMikcUlmkKXmNqC1TAe2oWmpFxWxQlvHBUJiASbAMm3zEIPIc1pGNdxymuKsnJ9mlMabj8eD7hudMtEMHZ3G1ODY2ze5fO3FBhDY+AUn8z5B2N0D5F1NQrgqOCvrlRRjBVNvtQaG5mljdcEPsT2uWocQ4lYG1m8G6n-CL9wu+JZEEL7+2CR47ZzDcRmNzqeDfLWvDlKCxeqbT+QEycS2pMzXwfGe3fdSXNyXALOpF0nqr1qXx+Oacg19U5pTvrGGUcoFRxhEumOCKEEylGxK0MwU8ywqRAQCIEYAwGpQ2JoOC44iGzTRCoL6Vh35yQ1KUdyGdFDuAwf9b22CeR8mrAvC6LdqYGHULKDyWoDCOFzAVd+Lh6hJlRFJbMahkyrR3BfTB3stoEHwSbHImZ95YWti-O2Kpyh8ScmvNe64mb-3PkpZRh5fYaUatpXSJ164hiXrfAokibglGTGibUjDCo6AtlzLQTkfK3DPooqxLCbECyBuFAOUAwYHRvkbVxECpQWx0c-W2b8ageRQhuPwiYiidANAApRUTgq2J2sLBJotg4J2lknOG6jW6lCXPBFa2ZZIVGmrvdEHiOYuA6OUNwzD9zRL6ILOJ2lElY3FprfG4dI7RxadTTE5tn5FUMHoTEahWYDKckM7mWgxlMhfAweYEAABKwhhDdn+KstxRxaGlFEo8PQLNd7yBOBoVwfh3ZTgsH4IIQQgA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -246,36 +247,34 @@ export const streamEnrichmentMachine = setup({
               on: {
                 'processors.add': {
                   guard: '!hasPendingDraft',
-                  actions: [
-                    { type: 'addProcessor', params: ({ event }) => event },
-                    { type: 'sendProcessorChangeToSimulator' },
-                  ],
+                  actions: [{ type: 'addProcessor', params: ({ event }) => event }],
                 },
                 'processors.reorder': {
                   guard: 'hasMultipleProcessors',
-                  actions: [
-                    { type: 'reorderProcessors', params: ({ event }) => event },
-                    { type: 'sendProcessorChangeToSimulator' },
-                  ],
+                  actions: [{ type: 'reorderProcessors', params: ({ event }) => event }],
                 },
                 'processor.delete': {
                   actions: [
                     { type: 'stopProcessor', params: ({ event }) => event },
                     { type: 'deleteProcessor', params: ({ event }) => event },
-                    { type: 'sendProcessorChangeToSimulator' },
                   ],
                 },
-                'processor.change': {
-                  actions: [
-                    { type: 'reassignProcessors' },
-                    { type: 'sendProcessorChangeToSimulator' },
-                  ],
+                'processor.stage': {
+                  actions: [{ type: 'reassignProcessors' }],
                 },
               },
             },
             displayingSimulation: {
               entry: [{ type: 'spawnSimulationMachine' }],
               initial: 'viewDataPreview',
+              on: {
+                'processors.*': {
+                  actions: [{ type: 'forwardEventToSimulator', params: ({ event }) => event }],
+                },
+                'processor.*': {
+                  actions: [{ type: 'forwardEventToSimulator', params: ({ event }) => event }],
+                },
+              },
               states: {
                 viewDataPreview: {
                   on: {

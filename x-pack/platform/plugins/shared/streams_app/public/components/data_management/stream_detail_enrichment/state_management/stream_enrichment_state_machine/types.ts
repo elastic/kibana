@@ -11,11 +11,7 @@ import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
-import {
-  SimulationToParentEvent,
-  PreviewDocsFilterOption,
-  SimulationActorRef,
-} from '../simulation_state_machine';
+import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -37,7 +33,6 @@ export interface StreamEnrichmentContext {
 
 export type StreamEnrichmentEvent =
   | ProcessorToParentEvent
-  | SimulationToParentEvent
   | { type: 'stream.received'; definition: IngestStreamGetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }

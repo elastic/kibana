@@ -6,7 +6,6 @@
  */
 
 import { Condition, FlattenRecord } from '@kbn/streams-schema';
-import { ActorRef, Snapshot } from 'xstate5';
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -25,17 +24,10 @@ export interface SimulationMachineDeps {
   toasts: IToasts;
 }
 
-export interface SimulationToParentEvent {
-  type: 'simulation.change';
-}
-
-export type SimulationParentActor = ActorRef<Snapshot<unknown>, SimulationToParentEvent>;
-
 export type ProcessorMetrics =
   Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
 export interface SimulationInput {
-  parentRef: SimulationParentActor;
   processors: ProcessorDefinitionWithUIAttributes[];
   streamName: string;
 }
@@ -43,11 +35,13 @@ export interface SimulationInput {
 export type SimulationEvent =
   | DateRangeToParentEvent
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-  | { type: 'processors.change'; processors: ProcessorDefinitionWithUIAttributes[] };
+  | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] };
 
 export interface SimulationContext {
   dateRangeRef: DateRangeActorRef;
-  parentRef: SimulationParentActor;
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];

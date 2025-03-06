@@ -202,7 +202,7 @@ const ProcessorsEditor = React.memo(() => {
             ))}
           </SortableList>
         )}
-        <AddProcessorPanel key={processorsRefs.length} />
+        <AddProcessorPanel />
       </EuiPanel>
     </>
   );

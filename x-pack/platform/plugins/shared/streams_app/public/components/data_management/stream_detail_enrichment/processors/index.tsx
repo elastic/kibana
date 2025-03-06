@@ -228,11 +228,11 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
 
   useEffect(() => {
     const subscription = processorRef.on('processor.changesDiscarded', () => {
-      methods.reset();
+      methods.reset(defaultValues);
     });
 
     return () => subscription.unsubscribe();
-  }, [methods, processorRef]);
+  }, [defaultValues, methods, processorRef]);
 
   const handleCancel = useDiscardConfirm(
     () => processorRef?.send({ type: 'processor.cancel' }),
