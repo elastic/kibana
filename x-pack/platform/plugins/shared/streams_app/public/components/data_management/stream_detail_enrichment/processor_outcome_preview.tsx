@@ -67,6 +67,11 @@ export const ProcessorOutcomePreview = ({
     }
   }, [columns, selectedDocsFilter]);
 
+  const simulationFailureRate = simulation
+    ? simulation?.failure_rate + simulation?.skipped_rate
+    : undefined;
+  const simulationSuccessRate = simulation?.success_rate;
+
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -76,8 +81,8 @@ export const ProcessorOutcomePreview = ({
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
           onTimeRangeRefresh={onRefreshSamples}
-          simulationFailureRate={simulation?.failure_rate}
-          simulationSuccessRate={simulation?.success_rate}
+          simulationFailureRate={simulationFailureRate}
+          simulationSuccessRate={simulationSuccessRate}
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
