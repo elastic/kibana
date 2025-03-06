@@ -98,6 +98,8 @@ export function FieldButton({
     line-height: normal;
   `;
 
+  const euiFocusRing = useEuiFocusRing();
+
   const innerContent = (
     <>
       {fieldIcon && (
@@ -154,8 +156,9 @@ export function FieldButton({
           background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 
         &:focus-within {
-          ${useEuiFocusRing()}
+          ${euiFocusRing}
         }
+        ${isActive && euiFocusRing}
       `}
       {...rest}
     >
