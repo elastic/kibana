@@ -8,9 +8,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getDashboard } from './api';
 import * as i18n from './translations';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 interface Props {
   connectorId: string;

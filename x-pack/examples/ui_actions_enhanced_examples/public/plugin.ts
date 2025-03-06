@@ -21,6 +21,7 @@ import {
   UiActionsEnhancedDynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
@@ -36,7 +37,6 @@ import {
 import { mount } from './mount';
 import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
 import { registerButtonEmbeddable } from './embeddables/register_button_embeddable';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;
