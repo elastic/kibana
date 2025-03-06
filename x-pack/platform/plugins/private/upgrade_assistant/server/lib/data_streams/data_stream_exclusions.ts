@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DataStreamExclusions } from '../../../common/types';
+
 /**
  * These are the default exclusions for data streams.
  *
@@ -17,7 +19,7 @@
  * xpack.upgrade_assistant.dataStreamExclusions:
  *    '.siem-signals*': []
  */
-export const defaultExclusions = {
+export const defaultExclusions: DataStreamExclusions = {
   '.siem-signals*': ['readOnly'],
   '.alerts*': ['readOnly'],
   '.internal.alerts*': ['readOnly'],
@@ -40,4 +42,26 @@ export const defaultExclusions = {
   'elastic-analytics-collections': ['readOnly'],
   '.elastic-connectors*': ['readOnly'],
   'logs-elastic_analytics.events-*': ['readOnly'],
+};
+
+/**
+ * Matches the data stream name against the exclusion pattern and returns the actions that should be excluded.
+ * If the exclusion ends with a `*` it will match any data stream that starts with the excluded pattern.
+ * Otherwise it will match the data stream name exactly.
+ */
+export const matchExclusionPattern = (dataStreamName: string, exclusions: DataStreamExclusions) => {
+  const result = Object.entries(exclusions).find(([excludedPattern]) => {
+    const isPattern = /.+\*$/.test(excludedPattern);
+    if (isPattern) {
+      const matcher = excludedPattern.slice(0, -1);
+      return dataStreamName.startsWith(matcher);
+    }
+    return dataStreamName === excludedPattern;
+  });
+
+  if (!result) {
+    return [];
+  }
+
+  return result[1];
 };

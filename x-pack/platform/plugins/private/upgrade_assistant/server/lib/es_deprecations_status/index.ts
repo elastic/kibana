@@ -15,6 +15,7 @@ import {
 } from '../../../common/types';
 import { getEnrichedDeprecations } from './migrations';
 import { getHealthIndicators } from './health_indicators';
+import { matchExclusionPattern } from '../data_streams/data_stream_exclusions';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient,
@@ -30,7 +31,7 @@ export async function getESUpgradeStatus(
     const toggledMigrationsDeprecations = enrichedDeprecations
       .map((deprecation) => {
         if (deprecation.type === 'data_streams') {
-          const excludedActions = dataStreamExclusions[deprecation.index!];
+          const excludedActions = matchExclusionPattern(deprecation.index!, dataStreamExclusions);
           (deprecation.correctiveAction as DataStreamsAction).metadata.excludedActions =
             excludedActions;
         }

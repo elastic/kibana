@@ -39,7 +39,7 @@ import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import type { DataStreamExclusions, FeatureSet } from '../common/types';
 import { getEntepriseSearchRegisteredDeprecations } from './lib/enterprise_search/enterprise_search_deprecations';
-import { defaultExclusions } from './lib/data_streams/default_exclusions';
+import { defaultExclusions } from './lib/data_streams/data_stream_exclusions';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
