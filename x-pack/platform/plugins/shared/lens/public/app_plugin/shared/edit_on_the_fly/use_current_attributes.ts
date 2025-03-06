@@ -24,18 +24,19 @@ export const useCurrentAttributes = ({
   textBasedMode?: boolean;
 }) => {
   const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
-  // last resort in case there are no attributes: datatable
-  const activeVisualization =
-    visualizationMap[
-      visualization.activeId ?? (initialAttributes?.visualizationType || 'lnsDatatable')
-    ];
 
   const [currentAttributes, setCurrentAttributes] = useState<
     TypedLensSerializedState['attributes'] | undefined
   >(initialAttributes);
 
+  // use the latest activeId, but fallback to attributes
+  const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
+  const activeVisualization = visualizationType ? visualizationMap[visualizationType] : undefined;
+
   useEffect(() => {
+    if (!activeVisualization) {
+      return;
+    }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
         const dsState = ds.state;
