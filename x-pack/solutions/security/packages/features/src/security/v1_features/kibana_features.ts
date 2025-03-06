@@ -26,8 +26,6 @@ import {
   CLOUD_POSTURE_APP_ID,
   CLOUD_DEFEND_APP_ID,
   SECURITY_FEATURE_ID_V2,
-  TIMELINE_FEATURE_ID,
-  NOTES_FEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -92,13 +90,15 @@ export const getSecurityBaseKibanaFeature = ({
     all: {
       replacedBy: {
         default: [
-          { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
-          { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+          // TODO: FOR DEV PURPOSES - REVERT after we have a workaround to ignoreMissing
+          // { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
+          // { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
         ],
         minimal: [
-          { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
-          { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+          // TODO: FOR DEV PURPOSES - REVERT after we have a workaround to ignoreMissing
+          // { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
+          // { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_all'] },
         ],
       },
@@ -126,13 +126,15 @@ export const getSecurityBaseKibanaFeature = ({
     read: {
       replacedBy: {
         default: [
-          { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
-          { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+          // TODO: FOR DEV PURPOSES - REVERT after we have a workaround to ignoreMissing
+          // { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
+          // { feature: NOTES_FEATURE_ID, privileges: ['read'] },
           { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
         ],
         minimal: [
-          { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
-          { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+          // TODO: FOR DEV PURPOSES - REVERT after we have a workaround to ignoreMissing
+          // { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
+          // { feature: NOTES_FEATURE_ID, privileges: ['read'] },
           { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_read'] },
         ],
       },
