@@ -8,15 +8,15 @@
 import React, { useMemo } from 'react';
 import { EuiComment, EuiPanel, EuiAvatar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Message } from '../../../common/messages';
 import { ChatMessageText } from './chat_message_text';
+import type { ConversationItem } from '../utils/get_chart_conversation_items';
 
 interface ChatMessageProps {
-  message: Message;
+  message: ConversationItem;
 }
 
-const getUserLabel = (message: Message) => {
-  if (message.type === 'user') {
+const getUserLabel = (message: ConversationItem) => {
+  if (message.user === 'user') {
     return i18n.translate('xpack.workchatApp.chat.messages.userLabel', {
       defaultMessage: 'You',
     });
@@ -28,7 +28,7 @@ const getUserLabel = (message: Message) => {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isUserMessage = useMemo(() => {
-    return message.type === 'user';
+    return message.user === 'user';
   }, [message]);
 
   return (

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo, useEffect } from 'react';
-import { useAbortableAsync, AbortableAsyncState } from '@kbn/react-hooks';
-import type { Conversation } from '../../../common/conversations';
+import { useCallback } from 'react';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import type { ConversationCreatedEventPayload } from '../../../common/chat_events';
-import { getMessages } from '../../../common/utils/conversation';
 import { useChat } from './use_chat';
 import { useWorkChatServices } from './use_workchat_service';
 
@@ -23,11 +21,6 @@ export const useConversation = ({
   onConversationUpdate: (update: ConversationCreatedEventPayload) => void;
 }) => {
   const { conversationService } = useWorkChatServices();
-  // const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
-
-  // useEffect(() => {
-  //   setConversationId(initialConversationId);
-  // }, [initialConversationId]);
 
   const onConversationUpdateInternal = useCallback(
     (update: ConversationCreatedEventPayload) => {
@@ -36,7 +29,7 @@ export const useConversation = ({
     [onConversationUpdate]
   );
 
-  const { messages, send, setMessages } = useChat({
+  const { conversationEvents, setConversationEvents, sendMessage } = useChat({
     agentId,
     conversationId,
     onConversationUpdate: onConversationUpdateInternal,
@@ -46,11 +39,11 @@ export const useConversation = ({
     // TODO: better init / state management
     if (conversationId) {
       const conversation = await conversationService.get(conversationId);
-      setMessages(getMessages(conversation.events));
+      setConversationEvents(conversation.events);
     } else {
-      setMessages([]);
+      setConversationEvents([]);
     }
   }, [conversationId, conversationService]);
 
-  return { messages, send };
+  return { conversationEvents, sendMessage };
 };
