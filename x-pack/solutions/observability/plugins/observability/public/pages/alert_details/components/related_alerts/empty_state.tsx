@@ -6,9 +6,9 @@
  */
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiImage } from '@elastic/eui';
-import { icon } from '@elastic/eui/src/components/icon/assets';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
 
 export function EmptyState() {
   const heights = {
@@ -44,7 +44,12 @@ export function EmptyState() {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
+                <EuiImage
+                  style={{ width: 200, height: 148 }}
+                  size="200"
+                  alt="empty state"
+                  url={icon}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

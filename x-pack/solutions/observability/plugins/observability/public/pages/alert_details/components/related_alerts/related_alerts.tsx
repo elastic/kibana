@@ -5,120 +5,136 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
-import { BoolQuery, Filter, type Query } from '@kbn/es-query';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import {
-  ALERT_END,
-  ALERT_GROUP,
-  ALERT_RULE_UUID,
-  ALERT_START,
-  ALERT_UUID,
-  TAGS,
-} from '@kbn/rule-data-utils';
-import React, { useEffect, useRef, useState } from 'react';
+import { BoolQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { ALERT_GROUP, ALERT_RULE_UUID, ALERT_UUID, TAGS } from '@kbn/rule-data-utils';
+import React, { useEffect, useState } from 'react';
 import { ObservabilityAlertsTable, TopAlert } from '../../../..';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../../../common/constants';
+import { AlertStatus } from '../../../../../common/typings';
 import {
   getRelatedAlertKuery,
   getSharedFields,
 } from '../../../../../common/utils/alerting/get_related_alerts_query';
 import { ObservabilityFields } from '../../../../../common/utils/alerting/types';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../../../components/alert_search_bar/alert_search_bar_with_url_sync';
-import { ALERT_STATUS_FILTER } from '../../../../components/alert_search_bar/constants';
-import {
-  Provider,
-  alertSearchBarStateContainer,
-  useAlertSearchBarStateContainer,
-} from '../../../../components/alert_search_bar/containers';
-import {
-  AlertSearchBarContainerState,
-  DEFAULT_STATE,
-} from '../../../../components/alert_search_bar/containers/state_container';
+import { AlertsStatusFilter } from '../../../../components/alert_search_bar/components';
+import { ALERT_STATUS_FILTER, ALL_ALERTS } from '../../../../components/alert_search_bar/constants';
 import { DEFAULT_GROUPING_OPTIONS } from '../../../../components/alerts_table/grouping/constants';
 import { getAggregationsByGroupingField } from '../../../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
 import { getGroupStats } from '../../../../components/alerts_table/grouping/get_group_stats';
 import { GroupingToolbarControls } from '../../../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { renderGroupPanel } from '../../../../components/alerts_table/grouping/render_group_panel';
 import { AlertsByGroupingAgg } from '../../../../components/alerts_table/types';
-import { RELATED_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../../constants';
+import { RELATED_ALERTS_TABLE_CONFIG_ID } from '../../../../constants';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { useKibana } from '../../../../utils/kibana_react';
 import { mergeBoolQueries } from '../../../alerts/helpers/merge_bool_queries';
 import { EmptyState } from './empty_state';
 
 const ALERTS_PER_PAGE = 50;
-const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
+
 const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
 
 interface Props {
   alert?: TopAlert<ObservabilityFields>;
 }
 
-const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
-const DEFAULT_FILTERS: Filter[] = [];
+export function RelatedAlerts({ alert }: Props) {
+  const { http, notifications, dataViews } = useKibana().services;
 
-export function InternalRelatedAlerts({ alert }: Props) {
-  const kibanaServices = useKibana().services;
-  const { http, notifications, dataViews } = kibanaServices;
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(SEARCH_BAR_URL_STORAGE_KEY, {
-    replace: false,
+  const tagsCheckboxId = useGeneratedHtmlId({ prefix: 'tags' });
+  const groupsCheckboxId = useGeneratedHtmlId({ prefix: 'groups' });
+  const ruleCheckboxId = useGeneratedHtmlId({ prefix: 'rule' });
+
+  const [tagsChecked, setTagsChecked] = useState(false);
+  const [groupsChecked, setGroupsChecked] = useState(false);
+  const [ruleChecked, setRuleChecked] = useState(false);
+
+  const [range, setRange] = useState({ from: 'now-24', to: 'now' });
+  const [status, setStatus] = useState(ALL_ALERTS.status);
+  const [kuery, setKuery] = useState('');
+  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>({
+    bool: {
+      must: [],
+      must_not: [],
+      filter: [],
+      should: [],
+    },
   });
 
-  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const alertStart = alert?.fields[ALERT_START];
-  const alertEnd = alert?.fields[ALERT_END];
-  const alertId = alert?.fields[ALERT_UUID];
-  const tags = alert?.fields[TAGS];
-  const groups = alert?.fields[ALERT_GROUP];
-  const ruleId = alert?.fields[ALERT_RULE_UUID];
-  const sharedFields = getSharedFields(alert?.fields);
-  const kuery = getRelatedAlertKuery({ tags, groups, ruleId, sharedFields });
-
-  const defaultQuery = useRef<Query[]>([
-    { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
-  ]);
-
   useEffect(() => {
-    if (alertStart) {
-      const defaultTimeRange = getPaddedAlertTimeRange(alertStart, alertEnd);
-      alertSearchBarStateProps.onRangeFromChange(defaultTimeRange.from);
-      alertSearchBarStateProps.onRangeToChange(defaultTimeRange.to);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertStart, alertEnd]);
+    if (alert) {
+      const ku = getKuery({ alert, tagsChecked, groupsChecked, ruleChecked });
 
-  if (!kuery || !alert) return <EmptyState />;
+      const esQ = buildEsQuery({
+        timeRange: range,
+        kuery: ku,
+        filters: ALERT_STATUS_FILTER[status],
+      });
+
+      setKuery(ku);
+      setEsQuery(esQ);
+
+      console.dir({ ku, esQ });
+    }
+  }, [tagsChecked, groupsChecked, ruleChecked, status, alert, range]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiCheckbox
+            id={tagsCheckboxId}
+            label={i18n.translate('xpack.observability.relatedAlerts.useTagsLabel', {
+              defaultMessage: 'Use tags',
+            })}
+            checked={tagsChecked}
+            onChange={(e) => setTagsChecked(e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCheckbox
+            id={groupsCheckboxId}
+            label={i18n.translate('xpack.observability.relatedAlerts.useGroupsLabel', {
+              defaultMessage: 'Use groups',
+            })}
+            checked={groupsChecked}
+            onChange={(e) => setGroupsChecked(e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCheckbox
+            id={ruleCheckboxId}
+            label={i18n.translate('xpack.observability.relatedAlerts.useRuleLabel', {
+              defaultMessage: 'Use rule',
+            })}
+            checked={ruleChecked}
+            onChange={(e) => setRuleChecked(e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AlertsStatusFilter
+            status={status}
+            onChange={(newStatus: AlertStatus) => setStatus(newStatus)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexItem>
-        <EuiSpacer size="l" />
-        <ObservabilityAlertSearchbarWithUrlSync
-          appName={RELATED_ALERTS_SEARCH_BAR_ID}
-          onEsQueryChange={setEsQuery}
-          urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
-          defaultSearchQueries={defaultQuery.current}
-          defaultState={{
-            ...defaultState,
-            kuery,
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {esQuery && (
+        {!kuery && <EmptyState />}
+        {kuery && (
           <AlertsGrouping<AlertsByGroupingAgg>
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
-            defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
-            from={alertSearchBarStateProps.rangeFrom}
-            to={alertSearchBarStateProps.rangeTo}
-            globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
-            globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
+            from={range.from}
+            to={range.to}
+            defaultFilters={ALERT_STATUS_FILTER[status]}
+            globalFilters={ALERT_STATUS_FILTER[status]}
+            globalQuery={{ query: '', language: 'kuery' }}
             groupingId={RELATED_ALERTS_TABLE_CONFIG_ID}
             defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
             getAggregationsByGroupingField={getAggregationsByGroupingField}
@@ -158,10 +174,22 @@ export function InternalRelatedAlerts({ alert }: Props) {
   );
 }
 
-export function RelatedAlerts(props: Props) {
-  return (
-    <Provider value={alertSearchBarStateContainer}>
-      <InternalRelatedAlerts {...props} />
-    </Provider>
-  );
+function getKuery({
+  alert,
+  tagsChecked,
+  groupsChecked,
+  ruleChecked,
+}: {
+  alert: TopAlert<ObservabilityFields>;
+  tagsChecked: boolean;
+  groupsChecked: boolean;
+  ruleChecked: boolean;
+}): string {
+  const alertId = alert.fields[ALERT_UUID];
+  const tags = tagsChecked ? alert.fields[TAGS] : [];
+  const groups = groupsChecked ? alert.fields[ALERT_GROUP] : [];
+  const ruleId = ruleChecked ? alert.fields[ALERT_RULE_UUID] : undefined;
+  const sharedFields = getSharedFields(alert.fields);
+
+  return getRelatedAlertKuery({ tags, groups, ruleId, sharedFields });
 }

@@ -55,42 +55,43 @@ interface AlertFields {
   [key: string]: any;
 }
 
-export const getSharedFields = (alertFields: AlertFields = {}) => {
-  const matchedFields: Field[] = [];
-  ALL_SHARED_FIELDS.forEach((source) => {
-    Object.keys(alertFields).forEach((field) => {
-      if (source === field) {
-        const fieldValue = alertFields[field];
-        matchedFields.push({
-          name: source,
-          value: Array.isArray(fieldValue) ? fieldValue[0] : fieldValue,
-        });
-      }
-    });
-  });
+export const getSharedFields = (alertFields: AlertFields = {}): Field[] => {
+  return Object.keys(alertFields).reduce((acc, currKey) => {
+    if (ALL_SHARED_FIELDS.includes(currKey)) {
+      const value = alertFields[currKey];
+      acc.push({ name: currKey, value: Array.isArray(value) ? value[0] : value });
+    }
 
-  return matchedFields;
+    return acc;
+  }, [] as Field[]);
 };
 
 const EXCLUDE_TAGS = ['apm'];
 
-export const getRelatedAlertKuery = ({ tags, groups, ruleId, sharedFields }: Props = {}):
-  | string
-  | undefined => {
+export const getRelatedAlertKuery = ({
+  tags,
+  groups,
+  ruleId,
+  sharedFields,
+}: Props = {}): string => {
   const tagKueries =
     tags
       ?.filter((tag) => !EXCLUDE_TAGS.includes(tag))
       .map((tag) => {
         return `tags: "${tag}"`;
       }) ?? [];
+
   const groupKueries =
     (groups &&
       groups.map(({ field, value }) => {
         return `(${field}: "${value}" or kibana.alert.group.value: "${value}")`;
       })) ??
     [];
+
   const ruleKueries = (ruleId && [`(${ALERT_RULE_UUID}: "${ruleId}")`]) ?? [];
+
   const groupFields = groups?.map((group) => group.field) ?? [];
+
   const sharedFieldsKueries =
     sharedFields
       ?.filter((field) => !groupFields.includes(field.name))
@@ -102,5 +103,5 @@ export const getRelatedAlertKuery = ({ tags, groups, ruleId, sharedFields }: Pro
   const groupKueriesStr = groupKueries.length > 0 ? [`${groupKueries.join(' or ')}`] : [];
   const kueries = [...tagKueriesStr, ...groupKueriesStr, ...sharedFieldsKueries, ...ruleKueries];
 
-  return kueries.length ? kueries.join(' or ') : undefined;
+  return kueries.length ? kueries.join(' or ') : '';
 };
