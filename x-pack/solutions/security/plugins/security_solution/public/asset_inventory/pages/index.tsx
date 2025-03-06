@@ -6,15 +6,23 @@
  */
 
 import React from 'react';
-import { AssetInventoryOnboarding } from '../components/onboarding/asset_inventory_onboarding';
+// import { AssetInventoryOnboarding } from '../components/onboarding/asset_inventory_onboarding';
+import { useDataViewContext } from '../hooks/data_view_context';
 import { AllAssets } from './all_assets';
 
 const AssetInventoryPage = () => {
-  return (
-    <AssetInventoryOnboarding>
-      <AllAssets />
-    </AssetInventoryOnboarding>
-  );
+  const { dataView } = useDataViewContext();
+
+  if (!dataView) {
+    return null;
+  }
+
+  return <AllAssets />;
+  // return (
+  //   <AssetInventoryOnboarding>
+  //     <AllAssets />
+  //   </AssetInventoryOnboarding>
+  // );
 };
 
 AssetInventoryPage.displayName = 'AssetInventoryPage';
