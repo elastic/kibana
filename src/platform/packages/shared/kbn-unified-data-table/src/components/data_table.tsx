@@ -1150,23 +1150,34 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
-  const handleItemsRendered = useCallback(
-    ({ visibleRowStopIndex }: { visibleRowStopIndex: number }) => {
-      // visibleRowStopIndex is 0-based, rowCount is 1-based
-      if (visibleRowStopIndex === rowCount - 1) {
-        setHasScrolledToBottom(true);
-      } else {
-        setHasScrolledToBottom(false);
-      }
+  const handleOnScroll = useCallback(
+    (event) => {
+      setHasScrolledToBottom((prevHasScrolledToBottom) => {
+        // We need to manually query the react-window wrapper since EUI doesn't
+        // expose outerRef in virtualizationOptions, but we should request it
+        const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+        if (!outerRef) {
+          return prevHasScrolledToBottom;
+        }
+
+        // Account for footer height when it's visible to avoid flickering
+        const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+        const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+        const isScrolledToBottom =
+          event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
+
+        return isScrollable && isScrolledToBottom;
+      });
     },
-    [rowCount]
+    [dataGridWrapper]
   );
 
-  const { run: throttledHandleItemsRendered } = useThrottleFn(handleItemsRendered, { wait: 200 });
+  const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
 
   const virtualizationOptions = useMemo(() => {
     const options = {
-      onItemsRendered: paginationMode === 'multiPage' ? undefined : throttledHandleItemsRendered,
+      onScroll: paginationMode === 'multiPage' ? undefined : throttledHandleOnScroll,
     };
 
     // Don't use row "overscan" when showing Summary column since
@@ -1179,7 +1190,7 @@ export const UnifiedDataTable = ({
       ...VIRTUALIZATION_OPTIONS,
       ...options,
     };
-  }, [defaultColumns, paginationMode, throttledHandleItemsRendered]);
+  }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
