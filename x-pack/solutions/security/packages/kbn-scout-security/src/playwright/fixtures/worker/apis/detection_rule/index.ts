@@ -6,7 +6,6 @@
  */
 
 import { KbnClient } from '@kbn/scout';
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -20,7 +19,7 @@ export interface DetectionRuleFixture {
 
 export const createDetectionRuleFixture = async ({ kbnClient }: { kbnClient: KbnClient }) => {
   const detectionRuleHelper: DetectionRuleFixture = {
-    createCustomQueryRule: async (body: QueryRuleCreateProps = CUSTOM_QUERY_RULE) => {
+    createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
       await kbnClient.request({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_URL,
