@@ -19,8 +19,8 @@ export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
   'settings/calendars_list/new_calendar': 'ad_settings/calendars_list/new_calendar',
   'settings/calendars_dst_list': 'ad_settings/calendars_dst_list',
   'settings/calendars_dst_list/new_calendar': 'ad_settings/calendars_dst_list/new_calendar',
-  filter_lists: 'ad_settings/filter_lists',
-  'filter_lists/new_filter_list': 'ad_settings/filter_lists/new_filter_list',
+  'settings/filter_lists': 'ad_settings/filter_lists',
+  'settings/filter_lists/new_filter_list': 'ad_settings/filter_lists/new_filter_list',
 };
 
 export const ML_PAGES = {
