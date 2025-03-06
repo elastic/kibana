@@ -11,7 +11,6 @@ import {
   Walker,
   type ESQLAstItem,
   type ESQLColumn,
-  type ESQLCommandMode,
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLLiteral,
@@ -20,6 +19,7 @@ import {
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import {
+  ESQLCommandMode,
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLParamLiteral,
@@ -66,6 +66,7 @@ export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
+/** @deprecated — a "setting" is a concept we will be getting rid of soon */
 export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
   return isSingleItem(arg) && arg.type === 'mode';
 }
@@ -269,18 +270,26 @@ export function getColumnForASTNode(
 }
 
 /**
+ * Take a column name like "`my``column`"" and return "my`column"
+ */
+export function unescapeColumnName(columnName: string) {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  }
+  return columnName;
+}
+
+/**
  * This function returns the variable or field matching a column
  */
 export function getColumnByName(
   columnName: string,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
-  // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    columnName = columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
-  }
-  return fields.get(columnName) || variables.get(columnName)?.[0];
+  const unescaped = unescapeColumnName(columnName);
+  return fields.get(unescaped) || variables.get(unescaped)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
