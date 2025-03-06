@@ -198,6 +198,9 @@ export const AgentResponseSchema = schema.object({
       }),
     ])
   ),
+  upgrade_attempts: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string())])
+  ),
   access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),
   default_api_key_id: schema.maybe(schema.string()),
