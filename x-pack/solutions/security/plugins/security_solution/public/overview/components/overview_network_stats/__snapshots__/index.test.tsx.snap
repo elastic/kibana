@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview Network Stat Data rendering it renders the default OverviewNetworkStats 1`] = `
-<styled.div
+<overview_network_stats--NetworkStatsContainer
   data-test-subj="overview-network-stats"
 >
   <EuiHorizontalRule
@@ -39,7 +39,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     buttonContentClassName="accordion-button"
     id="network-stat-accordion-groupauditbeat"
   >
-    <styled.div>
+    <overview_network_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -52,29 +52,29 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Socket"
                 id="xpack.securitySolution.overview.auditBeatSocketTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-auditbeatSocket"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={12}
               isGroupStat={false}
               isLoading={false}
               max={12}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_network_stats--AccordionContent>
   </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
@@ -111,7 +111,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     buttonContentClassName="accordion-button"
     id="network-stat-accordion-groupfilebeat"
   >
-    <styled.div>
+    <overview_network_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -124,27 +124,27 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Cisco"
                 id="xpack.securitySolution.overview.filebeatCiscoTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-filebeatCisco"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={999}
               isGroupStat={false}
               isLoading={false}
               max={70860}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -158,27 +158,27 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Netflow"
                 id="xpack.securitySolution.overview.filebeatNetflowTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-filebeatNetflow"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={7777}
               isGroupStat={false}
               isLoading={false}
               max={70860}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -192,27 +192,27 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Palo Alto Networks"
                 id="xpack.securitySolution.overview.filebeatPanwTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-filebeatPanw"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={66}
               isGroupStat={false}
               isLoading={false}
               max={70860}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -226,27 +226,27 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Suricata"
                 id="xpack.securitySolution.overview.fileBeatSuricataTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-filebeatSuricata"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={60015}
               isGroupStat={false}
               isLoading={false}
               max={70860}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -260,29 +260,29 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Zeek"
                 id="xpack.securitySolution.overview.fileBeatZeekTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-filebeatZeek"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={2003}
               isGroupStat={false}
               isLoading={false}
               max={70860}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_network_stats--AccordionContent>
   </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
@@ -319,7 +319,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     buttonContentClassName="accordion-button"
     id="network-stat-accordion-grouppacketbeat"
   >
-    <styled.div>
+    <overview_network_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -332,27 +332,27 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="DNS"
                 id="xpack.securitySolution.overview.packetBeatDnsTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-packetbeatDNS"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={10277307}
               isGroupStat={false}
               isLoading={false}
               max={13677323}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -366,27 +366,27 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Flow"
                 id="xpack.securitySolution.overview.packetBeatFlowTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-packetbeatFlow"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={16}
               isGroupStat={false}
               isLoading={false}
               max={13677323}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -400,29 +400,29 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_network_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="TLS"
                 id="xpack.securitySolution.overview.packetbeatTLSTitle"
               />
-            </styled.div>
+            </overview_network_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_network_stats--NoMarginTopFlexItem
           data-test-subj="network-stat-packetbeatTLS"
           grow={false}
         >
-          <styled.div>
+          <overview_network_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={3400000}
               isGroupStat={false}
               isLoading={false}
               max={13677323}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_network_stats--MoveItLeft>
+        </overview_network_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_network_stats--AccordionContent>
   </EuiAccordionClass>
-</styled.div>
+</overview_network_stats--NetworkStatsContainer>
 `;

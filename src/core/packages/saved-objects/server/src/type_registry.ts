@@ -89,4 +89,10 @@ export interface ISavedObjectTypeRegistry {
    * `false` if the type is not registered or does not define a management section.
    */
   isImportableAndExportable(type: string): boolean;
+
+  /**
+   * Returns the `nameAttribute` property for given type, or `unknown` if
+   * the property/type is not registered.
+   */
+  getNameAttribute(type: string): string;
 }

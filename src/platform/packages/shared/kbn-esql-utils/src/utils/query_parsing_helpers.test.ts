@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
@@ -19,6 +19,7 @@ import {
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
+  getValuesFromQueryField,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -537,6 +538,20 @@ describe('esql query helpers', () => {
       const expectedColumns = columns;
       expectedColumns[1].variable = 'field';
       expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(expectedColumns);
+    });
+  });
+
+  describe('getValuesFromQueryField', () => {
+    it('should return the values from the query field', () => {
+      const queryString = 'FROM my_index | WHERE my_field ==';
+      const values = getValuesFromQueryField(queryString);
+      expect(values).toEqual('my_field');
+    });
+
+    it('should return the values from the query field with new lines', () => {
+      const queryString = 'FROM my_index \n| WHERE my_field >=';
+      const values = getValuesFromQueryField(queryString);
+      expect(values).toEqual('my_field');
     });
   });
 });

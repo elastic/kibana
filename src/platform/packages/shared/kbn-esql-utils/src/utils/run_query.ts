@@ -15,7 +15,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
@@ -25,7 +26,7 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      end: endNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+      end: endNamedParams ? dateMath.parse(time.to, { roundUp: true })?.toISOString() : undefined,
     };
     const namedParams = [];
     if (timeParams?.start) {
@@ -47,7 +48,7 @@ export const getNamedParams = (
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
     variables?.forEach(({ key, value, type }) => {
-      if (type === ESQLVariableType.FIELDS) {
+      if (type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS) {
         namedParams.push({ [key]: { identifier: value } });
       } else {
         namedParams.push({ [key]: value });

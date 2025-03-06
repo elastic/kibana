@@ -321,6 +321,7 @@
     "filter",
     "indexPattern",
     "status",
+    "timestampField",
     "type"
   ],
   "epm-packages": [
@@ -499,6 +500,7 @@
     "name",
     "namespace",
     "overrides",
+    "required_versions",
     "revision",
     "schema_version",
     "status",
@@ -623,6 +625,7 @@
     "name",
     "namespace",
     "overrides",
+    "required_versions",
     "revision",
     "schema_version",
     "status",
@@ -914,6 +917,15 @@
     "username"
   ],
   "search-telemetry": [],
+  "security-ai-prompt": [
+    "description",
+    "model",
+    "prompt",
+    "prompt.default",
+    "promptGroupId",
+    "promptId",
+    "provider"
+  ],
   "security-rule": [
     "rule_id",
     "version"

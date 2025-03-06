@@ -12,8 +12,6 @@ import {
   getQueryForFields,
   areValuesIntervalsValid,
   getRecurrentVariableName,
-  getValuesFromQueryField,
-  appendStatsByToQuery,
   validateVariableName,
 } from './helpers';
 
@@ -77,46 +75,16 @@ describe('helpers', () => {
   describe('getRecurrentVariableName', () => {
     it('should return a new name if the name already exists', () => {
       const name = 'field';
-      const existingNames = ['field', 'field1', 'field2'];
+      const existingNames = new Set(['field', 'field1', 'field2']);
       const newName = getRecurrentVariableName(name, existingNames);
       expect(newName).toBe('field3');
     });
 
     it('should return the same name if the name does not exist', () => {
       const name = 'field';
-      const existingNames = ['field1', 'field2'];
+      const existingNames = new Set(['field1', 'field2']);
       const newName = getRecurrentVariableName(name, existingNames);
       expect(newName).toBe('field');
-    });
-  });
-
-  describe('getValuesFromQueryField', () => {
-    it('should return the values from the query field', () => {
-      const queryString = 'FROM my_index | WHERE my_field ==';
-      const values = getValuesFromQueryField(queryString);
-      expect(values).toEqual('my_field');
-    });
-
-    it('should return the values from the query field with new lines', () => {
-      const queryString = 'FROM my_index \n| WHERE my_field >=';
-      const values = getValuesFromQueryField(queryString);
-      expect(values).toEqual('my_field');
-    });
-  });
-
-  describe('appendStatsByToQuery', () => {
-    it('should append the stats by clause to the query', () => {
-      const queryString = 'FROM my_index';
-      const statsBy = 'my_field';
-      const updatedQueryString = appendStatsByToQuery(queryString, statsBy);
-      expect(updatedQueryString).toBe('FROM my_index\n| STATS BY my_field');
-    });
-
-    it('should append the stats by clause to the query with existing clauses', () => {
-      const queryString = 'FROM my_index | LIMIT 10 | STATS BY meow';
-      const statsBy = 'my_field';
-      const updatedQueryString = appendStatsByToQuery(queryString, statsBy);
-      expect(updatedQueryString).toBe('FROM my_index | LIMIT 10\n| STATS BY my_field');
     });
   });
 

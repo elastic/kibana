@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
@@ -21,9 +22,15 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import ESQLEditor from '@kbn/esql-editor';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLControlVariable } from '@kbn/esql-types';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLResults,
+  appendStatsByToQuery,
+  getValuesFromQueryField,
+} from '@kbn/esql-utils';
+import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
   Header,
@@ -35,11 +42,10 @@ import {
 } from './shared_form_components';
 import {
   getRecurrentVariableName,
-  getValuesFromQueryField,
   getFlyoutStyling,
-  appendStatsByToQuery,
   areValuesIntervalsValid,
   validateVariableName,
+  getVariablePrefix,
 } from './helpers';
 import { EsqlControlType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -69,6 +75,7 @@ export function ValueControlForm({
   onCreateControl,
   onEditControl,
 }: ValueControlFormProps) {
+  const isMounted = useMountedState();
   const valuesField = useMemo(() => {
     if (variableType === ESQLVariableType.VALUES) {
       return getValuesFromQueryField(queryString);
@@ -76,31 +83,25 @@ export function ValueControlForm({
     return null;
   }, [variableType, queryString]);
   const suggestedVariableName = useMemo(() => {
-    const existingVariables = esqlVariables.filter((variable) => variable.type === variableType);
+    const existingVariables = new Set(
+      esqlVariables
+        .filter((variable) => variable.type === variableType)
+        .map((variable) => variable.key)
+    );
 
     if (initialState) {
       return initialState.variableName;
     }
 
+    let variablePrefix = getVariablePrefix(variableType);
+
     if (valuesField && variableType === ESQLVariableType.VALUES) {
       // variables names can't have special characters, only underscore
       const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
-      return getRecurrentVariableName(
-        fieldVariableName,
-        existingVariables.map((variable) => variable.key)
-      );
+      variablePrefix = fieldVariableName;
     }
 
-    if (variableType === ESQLVariableType.TIME_LITERAL) {
-      return getRecurrentVariableName(
-        'interval',
-        existingVariables.map((variable) => variable.key)
-      );
-    }
-    return getRecurrentVariableName(
-      'variable',
-      existingVariables.map((variable) => variable.key)
-    );
+    return getRecurrentVariableName(variablePrefix, existingVariables);
   }, [esqlVariables, initialState, valuesField, variableType]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
@@ -240,6 +241,9 @@ export function ValueControlForm({
           filter: undefined,
           dropNullColumns: true,
         }).then((results) => {
+          if (!isMounted()) {
+            return;
+          }
           const columns = results.response.columns.map((col) => col.name);
           setQueryColumns(columns);
 
@@ -264,7 +268,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [search]
+    [isMounted, search]
   );
 
   useEffect(() => {
@@ -366,7 +370,7 @@ export function ValueControlForm({
               })}
               fullWidth
             >
-              <ESQLEditor
+              <ESQLLangEditor
                 query={{ esql: valuesQuery }}
                 onTextLangQueryChange={(q) => {
                   setValuesQuery(q.esql);

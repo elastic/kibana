@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';

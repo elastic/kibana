@@ -84,6 +84,7 @@ export const WorkflowInsightsScanSection = ({
     const button = (
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="workflowInsightsScanButton"
           size="s"
           isLoading={isScanButtonDisabled}
           isDisabled={!canWriteWorkflowInsights}

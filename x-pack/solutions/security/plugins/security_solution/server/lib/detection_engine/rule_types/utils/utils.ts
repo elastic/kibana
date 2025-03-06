@@ -11,8 +11,7 @@ import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -1110,6 +1109,20 @@ export type SequenceSuppressionTermsAndFieldsFactory = (
   buildReasonMessage: BuildReasonMessage
 ) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
   subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+};
+
+/**
+ * converts ES after_key object into string
+ * for example: { "agent.name": "test" } would become `agent.name: test`
+ */
+export const stringifyAfterKey = (afterKey: Record<string, string | number | null> | undefined) => {
+  if (!afterKey) {
+    return;
+  }
+
+  return Object.entries(afterKey)
+    .map((entry) => entry.join(': '))
+    .join(', ');
 };
 
 export const buildShellAlertSuppressionTermsAndFields = ({

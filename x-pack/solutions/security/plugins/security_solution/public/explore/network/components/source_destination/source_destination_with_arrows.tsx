@@ -32,7 +32,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
     destinationPackets,
     destinationPort,
     eventId,
-    isDraggable,
     sourceBytes,
     sourceGeoContinentName,
     sourceGeoCountryName,
@@ -55,7 +54,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
           destinationIp={destinationIp}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}
           sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
@@ -72,7 +70,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
         destinationBytes={destinationBytes}
         destinationPackets={destinationPackets}
         eventId={eventId}
-        isDraggable={isDraggable}
         sourceBytes={sourceBytes}
         sourcePackets={sourcePackets}
       />
@@ -88,7 +85,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
           destinationIp={destinationIp}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}
           sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}

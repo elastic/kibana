@@ -7,7 +7,8 @@
 
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
+import { isAgentlessEnabled } from '../../utils/agentless';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerConfigDataRoute({
@@ -15,20 +16,22 @@ export function registerConfigDataRoute({
   config,
   log,
   globalConfigService,
+  getStartServices,
 }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/config_data',
       validate: false,
     },
-    elasticsearchErrorHandler(log, async (_context, _request, response) => {
+    elasticsearchErrorHandler(log, async (context, _request, response) => {
+      const [_core, start] = await getStartServices();
       const data = {
         features: {
           hasConnectors: config.hasConnectors,
           hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
           hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
           hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
-          hasNativeConnectors: config.hasNativeConnectors,
+          hasNativeConnectors: isAgentlessEnabled(start),
           // 9.x Does not have ent search node, and therefore does not have support for the following
           hasWebCrawler: false,
         },

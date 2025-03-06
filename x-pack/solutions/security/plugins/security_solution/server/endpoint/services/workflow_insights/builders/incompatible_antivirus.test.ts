@@ -25,9 +25,13 @@ import type { EndpointMetadataService } from '../../metadata';
 import { groupEndpointIdsByOS } from '../helpers';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
-jest.mock('../helpers', () => ({
-  groupEndpointIdsByOS: jest.fn(),
-}));
+jest.mock('../helpers', () => {
+  const actualHelpers = jest.requireActual('../helpers');
+  return {
+    ...actualHelpers,
+    groupEndpointIdsByOS: jest.fn(),
+  };
+});
 
 describe('buildIncompatibleAntivirusWorkflowInsights', () => {
   const mockEndpointAppContextService = createMockEndpointAppContext().service;
@@ -162,6 +166,45 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
             _source: {
               process: {
                 Ext: {
+                  code_signature: [
+                    {
+                      trusted: true,
+                      subject_name: 'test.com',
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await buildIncompatibleAntivirusWorkflowInsights(params);
+
+    expect(result).toEqual([
+      buildExpectedInsight('windows', 'process.Ext.code_signature', 'test.com'),
+    ]);
+    expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
+      ['endpoint-1'],
+      params.endpointMetadataService
+    );
+  });
+
+  it('should correctly build workflow insights for Windows with signerId provided as object', async () => {
+    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+      windows: ['endpoint-1'],
+    });
+    const params = generateParams('test.com');
+
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
+            _source: {
+              process: {
+                Ext: {
                   code_signature: {
                     trusted: true,
                     subject_name: 'test.com',
@@ -183,6 +226,68 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       ['endpoint-1'],
       params.endpointMetadataService
     );
+  });
+
+  it('should fallback to createRemediation without signer field when no valid signatures exist for Windows', async () => {
+    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+      windows: ['endpoint-1'],
+    });
+
+    const params = generateParams('test.com');
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
+            _source: {
+              process: {
+                Ext: {
+                  code_signature: [{ trusted: false, subject_name: 'Untrusted Publisher' }],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await buildIncompatibleAntivirusWorkflowInsights(params);
+    expect(result).toEqual([buildExpectedInsight('windows')]);
+  });
+
+  it('should skip Microsoft Windows Hardware Compatibility Publisher and use the next trusted signature for Windows', async () => {
+    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+      windows: ['endpoint-1'],
+    });
+
+    const params = generateParams();
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
+            _source: {
+              process: {
+                Ext: {
+                  code_signature: [
+                    {
+                      trusted: true,
+                      subject_name: 'Microsoft Windows Hardware Compatibility Publisher',
+                    },
+                    { trusted: true, subject_name: 'Next Trusted Publisher' },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await buildIncompatibleAntivirusWorkflowInsights(params);
+    expect(result).toEqual([
+      buildExpectedInsight('windows', 'process.Ext.code_signature', 'Next Trusted Publisher'),
+    ]);
   });
 
   it('should correctly build workflow insights for MacOS with signerId provided', async () => {
@@ -217,5 +322,28 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       ['endpoint-1'],
       params.endpointMetadataService
     );
+  });
+
+  it('should fallback to createRemediation without signer field for macOS when no code_signature exists', async () => {
+    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+      macos: ['endpoint-1'],
+    });
+
+    const params = generateParams();
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
+            _source: {
+              process: {},
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await buildIncompatibleAntivirusWorkflowInsights(params);
+    expect(result).toEqual([buildExpectedInsight('macos')]);
   });
 });

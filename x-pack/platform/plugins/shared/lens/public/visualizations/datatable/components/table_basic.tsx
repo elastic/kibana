@@ -38,7 +38,7 @@ import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   getColorCategories,
   getLegacyColorCategories,
-} from '@kbn/chart-expressions-common/color_categories';
+} from '@kbn/chart-expressions-common';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';

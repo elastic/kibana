@@ -49,6 +49,16 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       border-right: ${euiTheme.border.thin};
       padding: ${euiTheme.size.xs} ${euiTheme.size.m} ${euiTheme.size.xs} 0;
     `;
+    const referenceLinksContainerStyles = css`
+      div {
+        color: ${euiTheme.colors.textPrimary};
+        padding: ${euiTheme.size.s};
+
+        &:not(:last-child) {
+          border-bottom: ${euiTheme.border.thin};
+        }
+      }
+    `;
     const isExpired = useMemo(
       () => (item.expire_time ? new Date(item.expire_time) <= new Date() : false),
       [item]
@@ -91,11 +101,18 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
           >
-            <EuiContextMenuPanel size="s" items={itemActions} />
+            <EuiContextMenuPanel size="s" css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       );
-    }, [listAndReferences, metaInfoItemStyles, dataTestSubj, isRulesPopoverOpen, itemActions]);
+    }, [
+      listAndReferences,
+      metaInfoItemStyles,
+      dataTestSubj,
+      isRulesPopoverOpen,
+      referenceLinksContainerStyles,
+      itemActions,
+    ]);
 
     const listsAffected = useMemo((): JSX.Element => {
       if (listAndReferences == null) return <></>;
@@ -121,6 +138,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             >
               <EuiContextMenuPanel
                 size="s"
+                css={referenceLinksContainerStyles}
                 items={[
                   <EuiContextMenuItem
                     data-test-subj={`${dataTestSubj}-listsAffected-${listAndReferences.id}`}
@@ -143,7 +161,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       } else {
         return <></>;
       }
-    }, [listAndReferences, dataTestSubj, isListsPopoverOpen]);
+    }, [listAndReferences, dataTestSubj, isListsPopoverOpen, referenceLinksContainerStyles]);
 
     return (
       <EuiFlexGroup

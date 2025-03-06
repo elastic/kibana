@@ -110,9 +110,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListItemRemove('message');
         await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
-        await dataGrid.changeRowHeightValue('Single');
+        await dataGrid.changeRowHeightValue('Auto');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
-        expect(rowHeightValue).to.be('Single');
+        expect(rowHeightValue).to.be('Auto');
         await testSubjects.click('discoverNewButton');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
@@ -192,9 +192,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListItemRemove('message');
         await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
-        await dataGrid.changeRowHeightValue('Single');
+        await dataGrid.changeRowHeightValue('Auto');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
-        expect(rowHeightValue).to.be('Single');
+        expect(rowHeightValue).to.be('Auto');
         await testSubjects.click('discoverNewButton');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();

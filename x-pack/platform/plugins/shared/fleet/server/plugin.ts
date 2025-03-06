@@ -147,6 +147,9 @@ import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/mana
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
+import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
+import { SyncIntegrationsTask } from './tasks/sync_integrations_task';
+import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -198,8 +201,11 @@ export interface FleetAppContext {
   uninstallTokenService: UninstallTokenServiceInterface;
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
+  updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
+  automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  syncIntegrationsTask: SyncIntegrationsTask;
 }
 
 export type FleetSetupContract = void;
@@ -229,6 +235,9 @@ export interface FleetStartContract {
    * services
    */
   fleetSetupCompleted: () => Promise<void>;
+  agentless: {
+    enabled: boolean;
+  };
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
   };
@@ -298,6 +307,9 @@ export class FleetPlugin
   private fleetMetricsTask?: FleetMetricsTask;
   private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
   private deleteUnenrolledAgentsTask?: DeleteUnenrolledAgentsTask;
+  private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
+  private syncIntegrationsTask?: SyncIntegrationsTask;
+  private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -623,7 +635,7 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
-    // Register task
+    // Register tasks
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
     registerBumpAgentPoliciesTask(deps.taskManager);
@@ -640,6 +652,21 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
     });
     this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+    this.updateAgentlessDeploymentsTask = new UpgradeAgentlessDeploymentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+    this.syncIntegrationsTask = new SyncIntegrationsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+    this.automaticAgentUpgradeTask = new AutomaticAgentUpgradeTask({
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
@@ -691,8 +718,11 @@ export class FleetPlugin
       uninstallTokenService,
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
       deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
+      updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
+      automaticAgentUpgradeTask: this.automaticAgentUpgradeTask!,
       taskManagerStart: plugins.taskManager,
       fetchUsage: this.fetchUsage,
+      syncIntegrationsTask: this.syncIntegrationsTask!,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -701,10 +731,16 @@ export class FleetPlugin
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.deleteUnenrolledAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.updateAgentlessDeploymentsTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
+    this.automaticAgentUpgradeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
       .catch(() => {});
+    this.syncIntegrationsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -805,6 +841,9 @@ export class FleetPlugin
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
+      },
+      agentless: {
+        enabled: this.configInitialValue.agentless?.enabled ?? false,
       },
       fleetSetupCompleted: () => fleetSetupPromise,
       packageService: this.setupPackageService(

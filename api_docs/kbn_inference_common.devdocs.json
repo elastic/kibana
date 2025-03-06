@@ -105,6 +105,20 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.InferenceTaskError.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.InferenceTaskError.toJSON",
             "type": "Function",
             "tags": [],
@@ -131,6 +145,50 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.connectorToInference",
+        "type": "Function",
+        "tags": [],
+        "label": "connectorToInference",
+        "description": [
+          "\nConverts an action connector to the internal inference connector format.\n\nThe function will throw if the provided connector is not compatible"
+        ],
+        "signature": [
+          "(connector: ",
+          "RawConnector",
+          ") => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connector_to_inference.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.connectorToInference.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              "RawConnector"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connector_to_inference.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/inference-common",
         "id": "def-common.createInferenceInternalError",
@@ -257,6 +315,121 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.generateFakeToolCallId",
+        "type": "Function",
+        "tags": [],
+        "label": "generateFakeToolCallId",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tool_calls.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.getConnectorDefaultModel",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorDefaultModel",
+        "description": [
+          "\nReturns the default model as defined in the connector's config, if available.\n\nNote: preconfigured connectors only expose their config if their `exposeConfig` flag\nis set to true."
+        ],
+        "signature": [
+          "(connector: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          ") => string | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connector_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.getConnectorDefaultModel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connector_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.getConnectorProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorProvider",
+        "description": [
+          "\nReturns the provider used for the given connector\n\nInferred from the type for \"legacy\" connectors,\nand from the provider config field for inference connectors."
+        ],
+        "signature": [
+          "(connector: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connector_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.getConnectorProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connector_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -777,14 +950,14 @@
         "tags": [],
         "label": "isSupportedConnector",
         "description": [
-          "\nChecks if a given connector is compatible for inference.\n\nA connector is compatible if:\n1. its type is in the list of allowed types\n2. for inference connectors, if its taskType is \"completion\""
+          "\nChecks if a given connector is compatible for inference.\n\nA connector is compatible if:\n1. its type is in the list of allowed types\n2. for inference connectors, if its taskType is \"chat_completion\""
         ],
         "signature": [
           "(connector: ",
           "RawConnector",
           ") => boolean"
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/is_supported_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -798,7 +971,7 @@
             "signature": [
               "RawConnector"
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/is_supported_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -819,7 +992,7 @@
         "signature": [
           "(id: string) => boolean"
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/is_supported_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -833,7 +1006,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/is_supported_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1086,6 +1259,43 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ChatCompleteMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChatCompleteMetadata",
+        "description": [
+          "\nSet of metadata that can be used then calling the inference APIs\n"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteMetadata.connectorTelemetry",
+            "type": "Object",
+            "tags": [],
+            "label": "connectorTelemetry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ConnectorTelemetryMetadata",
+                "text": "ConnectorTelemetryMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.ChatCompleteResponse",
         "type": "Interface",
         "tags": [],
@@ -1282,6 +1492,50 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ConnectorTelemetryMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorTelemetryMetadata",
+        "description": [
+          "\nPass through for the connector telemetry"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ConnectorTelemetryMetadata.pluginId",
+            "type": "string",
+            "tags": [],
+            "label": "pluginId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ConnectorTelemetryMetadata.aggregateBy",
+            "type": "string",
+            "tags": [],
+            "label": "aggregateBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.InferenceConnector",
         "type": "Interface",
         "tags": [],
@@ -1289,7 +1543,7 @@
         "description": [
           "\nRepresents a stack connector that can be used for inference."
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1311,7 +1565,7 @@
                 "text": "InferenceConnectorType"
               }
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1324,7 +1578,7 @@
             "description": [
               "the name of the connector"
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1337,7 +1591,7 @@
             "description": [
               "the id of the connector"
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1351,9 +1605,9 @@
               "\nconfiguration (without secrets) of the connector.\nthe list of properties depends on the connector type (and subtype for inference)"
             ],
             "signature": [
-              "{ [x: string]: string; }"
+              "{ [x: string]: any; }"
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1689,6 +1943,29 @@
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.OutputOptions.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "\nOptional metadata related to call execution."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2016,7 +2293,21 @@
         "description": [
           "\nThe list of connector types that can be used with the inference APIs"
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceEndpointProvider",
+        "type": "Enum",
+        "tags": [],
+        "label": "InferenceEndpointProvider",
+        "description": [
+          "\nConstants for relevant inference providers"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2202,7 +2493,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ [P in \"abortSignal\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+              "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2297,7 +2588,15 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
+              "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2412,7 +2711,15 @@
                 "section": "def-common.FunctionCallingMode",
                 "text": "FunctionCallingMode"
               },
-              " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; } & TToolOptions"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
             "deprecated": false,
@@ -2480,7 +2787,15 @@
             "section": "def-common.FunctionCallingMode",
             "text": "FunctionCallingMode"
           },
-          " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
+          " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteMetadata",
+            "text": "ChatCompleteMetadata"
+          },
+          " | undefined; } & TToolOptions"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
         "deprecated": false,
@@ -3495,7 +3810,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ [P in \"abortSignal\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+          "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3520,7 +3835,15 @@
           "\nOptions used to call the {@link BoundOutputAPI}"
         ],
         "signature": [
-          "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
+          "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteMetadata",
+            "text": "ChatCompleteMetadata"
+          },
+          " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3579,33 +3902,76 @@
         "description": [
           "\nConstants for all default (preconfigured) inference endpoints."
         ],
+        "signature": [
+          "{ readonly ELSER: \".elser-2-elasticsearch\"; readonly MULTILINGUAL_E5_SMALL: \".multilingual-e5-small-elasticsearch\"; }"
+        ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.elasticModelDictionary",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticModelDictionary",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.defaultInferenceEndpoints.ELSER",
-            "type": "string",
+            "id": "def-common.elasticModelDictionary.rainbowsprinkles",
+            "type": "Object",
             "tags": [],
-            "label": "ELSER",
+            "label": "'rainbow-sprinkles'",
             "description": [],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL",
-            "type": "string",
-            "tags": [],
-            "label": "MULTILINGUAL_E5_SMALL",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.elasticModelDictionary.rainbowsprinkles.provider",
+                "type": "string",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.elasticModelDictionary.rainbowsprinkles.model",
+                "type": "string",
+                "tags": [],
+                "label": "model",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.elasticModelIds",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticModelIds",
+        "description": [],
+        "signature": [
+          "{ readonly RainbowSprinkles: \"rainbow-sprinkles\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

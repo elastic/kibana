@@ -14,7 +14,7 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   NUM_ALERTING_RULE_TYPES,
@@ -22,6 +22,7 @@ import {
 } from '../alerting_usage_collector';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import { parseAndLogError } from './parse_and_log_error';
 
 const Millis2Nanos = 1000 * 1000;
 const percentileFieldNameMapping: Record<string, string> = {
@@ -136,21 +137,19 @@ export async function getExecutionsPerDayCount({
     const query = {
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute'),
-        aggs: {
-          ...eventLogAggs,
-          by_rule_type_id: {
-            terms: {
-              field: 'rule.category',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
-            aggs: eventLogAggs,
+      query: getProviderAndActionFilterForTimeRange('execute'),
+      aggs: {
+        ...eventLogAggs,
+        by_rule_type_id: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
           },
-          by_execution_status: {
-            terms: {
-              field: 'event.outcome',
-            },
+          aggs: eventLogAggs,
+        },
+        by_execution_status: {
+          terms: {
+            field: 'event.outcome',
           },
         },
       },
@@ -189,14 +188,8 @@ export async function getExecutionsPerDayCount({
       ),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getExecutionsPerDayCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,
@@ -229,14 +222,12 @@ export async function getExecutionTimeoutsPerDayCount({
     const query = {
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute-timeout'),
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'rule.category',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+      query: getProviderAndActionFilterForTimeRange('execute-timeout'),
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
           },
         },
       },
@@ -262,17 +253,8 @@ export async function getExecutionTimeoutsPerDayCount({
       countExecutionTimeoutsByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getExecutionsTimeoutsPerDayCount`, logger);
 
-    logger.warn(
-      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
     return {
       hasErrors: true,
       errorMessage,

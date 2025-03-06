@@ -17,6 +17,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -35,6 +36,7 @@ import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensi
 import {
   type ISavedObjectsSecurityExtension,
   SavedObjectsErrorHelpers,
+  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 
 const SPACES = ['default', 'another-space'];
@@ -99,6 +101,7 @@ describe('collectMultiNamespaceReferences', () => {
   function mockMgetResults(
     ...results: Array<{
       found: boolean;
+      type?: string;
       originId?: string;
       references?: Array<{ type: string; id: string }>;
     }>
@@ -115,6 +118,7 @@ describe('collectMultiNamespaceReferences', () => {
                 namespaces: SPACES,
                 originId: x.originId,
                 references,
+                ...(x.type && { [x.type]: { name: `${x.type}_name` } }),
               },
               ...VERSION_PROPS,
               found: true,
@@ -523,8 +527,11 @@ describe('collectMultiNamespaceReferences', () => {
 
     beforeEach(() => {
       params = setup(objects, {}, mockSecurityExt);
-      mockMgetResults({ found: true, references: [obj3] }, { found: true, references: [] }); // results for obj1 and obj2
-      mockMgetResults({ found: true, references: [] }); // results for obj3
+      mockMgetResults(
+        { found: true, references: [obj3], type: 'type-a' },
+        { found: true, references: [], type: 'type-a' }
+      ); // results for obj1 and obj2
+      mockMgetResults({ found: true, references: [], type: 'type-a' }); // results for obj3
       mockFindLegacyUrlAliases.mockResolvedValue(
         new Map([
           [`${obj1.type}:${obj1.id}`, new Set(obj1LegacySpaces)],
@@ -549,6 +556,11 @@ describe('collectMultiNamespaceReferences', () => {
     });
 
     describe('calls authorizeAndRedactMultiNamespaceReferences of the security extension', () => {
+      const injectNameValue = (
+        entries: SavedObjectReferenceWithContext[]
+      ): Array<WithAuditName<SavedObjectReferenceWithContext>> =>
+        entries.map((entry) => ({ name: 'type-a_name', ...entry }));
+
       beforeEach(() => {
         setupAuthorizeAndRedactMultiNamespaceReferenencesFailure(mockSecurityExt);
       });
@@ -560,7 +572,7 @@ describe('collectMultiNamespaceReferences', () => {
         const { namespace: actualNamespace, objects: actualObjects } =
           mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mock.calls[0][0];
         expect(actualNamespace).toEqual('default');
-        expect(actualObjects).toEqual(expectedObjects);
+        expect(actualObjects).toEqual(injectNameValue(expectedObjects));
       });
 
       test(`in a non-default space`, async () => {
@@ -573,7 +585,7 @@ describe('collectMultiNamespaceReferences', () => {
         const { namespace: actualNamespace, objects: actualObjects } =
           mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mock.calls[0][0];
         expect(actualNamespace).toEqual(namespace);
-        expect(actualObjects).toEqual(expectedObjects);
+        expect(actualObjects).toEqual(injectNameValue(expectedObjects));
       });
 
       test(`with purpose 'collectMultiNamespaceReferences'`, async () => {
@@ -617,6 +629,27 @@ describe('collectMultiNamespaceReferences', () => {
       // I am not sure what else can be done at this level now that the extension handles everything
       test(`returns a result when successful`, async () => {
         const result = await collectMultiNamespaceReferences(params);
+
+        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledWith(
+          expect.objectContaining({
+            namespace: 'default',
+            objects: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'id-1',
+                name: 'type-a_name',
+              }),
+              expect.objectContaining({
+                id: 'id-2',
+                name: 'type-a_name',
+              }),
+              expect.objectContaining({
+                id: 'id-3',
+                name: 'type-a_name',
+              }),
+            ]),
+          })
+        );
+
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
         expect(result.objects).toEqual(expectedObjects);
       });

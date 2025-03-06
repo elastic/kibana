@@ -36,7 +36,7 @@ export const useDatasetQualityTable = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const { service, isServerless } = useDatasetQualityContext();
+  const { service, isFailureStoreEnabled } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
@@ -115,7 +115,7 @@ export const useDatasetQualityTable = () => {
         isActiveDataset: isActive,
         timeRange,
         urlService: url,
-        failureStoreEnabled: !isServerless,
+        isFailureStoreEnabled,
       }),
     [
       fieldFormats,
@@ -129,7 +129,7 @@ export const useDatasetQualityTable = () => {
       isActive,
       timeRange,
       url,
-      isServerless,
+      isFailureStoreEnabled,
     ]
   );
 

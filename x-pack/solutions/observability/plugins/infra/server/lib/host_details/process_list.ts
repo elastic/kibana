@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
+import { TIMESTAMP_FIELD, PROCESS_COMMANDLINE_FIELD } from '../../../common/constants';
 import type {
   ProcessListAPIRequest,
   ProcessListAPIQueryAggregation,
@@ -72,7 +72,7 @@ export const getProcessList = async (
         aggs: {
           filteredProcs: {
             terms: {
-              field: SYSTEM_PROCESS_CMDLINE_FIELD,
+              field: PROCESS_COMMANDLINE_FIELD,
               size: TOP_N,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
@@ -104,7 +104,12 @@ export const getProcessList = async (
                       },
                     },
                   ],
-                  _source: ['system.process.state', 'user.name', 'process.pid'],
+                  _source: [
+                    'system.process.state',
+                    'user.name',
+                    'process.pid',
+                    'process.command_line',
+                  ],
                 },
               },
             },

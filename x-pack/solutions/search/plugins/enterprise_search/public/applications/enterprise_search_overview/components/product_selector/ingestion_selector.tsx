@@ -13,6 +13,7 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -29,26 +30,28 @@ import crawlerLogo from '../../../../assets/images/search_crawler.svg';
 import languageClientsLogo from '../../../../assets/images/search_language_clients.svg';
 
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
-import {
-  NEW_API_PATH,
-  NEW_CRAWLER_PATH,
-  NEW_INDEX_SELECT_CONNECTOR_PATH,
-} from '../../../enterprise_search_content/routes';
-import { HttpLogic } from '../../../shared/http/http_logic';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../../enterprise_search_content/routes';
 
 import { ConnectorIcon } from '../../../shared/icons/connector';
-import { CrawlerIcon } from '../../../shared/icons/crawler';
+
 import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const IngestionSelector: React.FC = () => {
   const {
     application: { navigateToApp },
-    config,
     productFeatures,
+    uiActions,
   } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const crawlerDisabled = Boolean(errorConnectingMessage || !config.host);
+
+  const showFileUploadFlyout = React.useCallback(() => {
+    if (uiActions !== null) {
+      uiActions.getTrigger(OPEN_FILE_UPLOAD_LITE_TRIGGER).exec({
+        autoAddInference: '.elser-2-elasticsearch',
+      });
+    }
+  }, [uiActions]);
+
   return (
     <>
       <EuiFlexGroup>
@@ -65,7 +68,7 @@ export const IngestionSelector: React.FC = () => {
                   'Add documents programmatically by connecting with the API using your preferred language client.',
               }
             )}
-            href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_API_PATH)}
+            href="/app/elasticsearch/indices/create"
             buttonIcon="console"
             buttonLabel={i18n.translate(
               'xpack.enterpriseSearch.ingestSelector.method.apiButtonLabel',
@@ -75,45 +78,30 @@ export const IngestionSelector: React.FC = () => {
             )}
           />
         </EuiFlexItem>
-        {productFeatures.hasWebCrawler && (
-          <EuiFlexItem>
-            <IngestionCard
-              buttonLabel={
-                crawlerDisabled
-                  ? i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
-                      {
-                        defaultMessage: 'Source code',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                      {
-                        defaultMessage: 'Crawl URL',
-                      }
-                    )
+        <EuiFlexItem>
+          <IngestionCard
+            buttonLabel={i18n.translate(
+              'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
+              {
+                defaultMessage: 'Source code',
               }
-              buttonIcon={crawlerDisabled ? GithubIcon : CrawlerIcon}
-              description={i18n.translate(
-                'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                {
-                  defaultMessage:
-                    'Discover, extract, and index searchable content from websites and knowledge bases.',
-                }
-              )}
-              href={
-                crawlerDisabled
-                  ? CRAWLER.github_repo
-                  : generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)
+            )}
+            buttonIcon={GithubIcon}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
+              {
+                defaultMessage:
+                  'Discover, extract, and index searchable content from websites and knowledge bases.',
               }
-              isBeta={crawlerDisabled}
-              logo={crawlerLogo}
-              title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
-                defaultMessage: 'Web Crawler',
-              })}
-            />
-          </EuiFlexItem>
-        )}
+            )}
+            href={CRAWLER.github_repo}
+            isBeta
+            logo={crawlerLogo}
+            title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
+              defaultMessage: 'Web Crawler',
+            })}
+          />
+        </EuiFlexItem>
         {productFeatures.hasConnectors && (
           <EuiFlexItem>
             <IngestionCard
@@ -187,7 +175,7 @@ export const IngestionSelector: React.FC = () => {
                 defaultMessage: 'Choose a file',
               }
             )}
-            onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
+            onClick={() => showFileUploadFlyout()}
           />
         </EuiFlexItem>
         <EuiFlexItem>

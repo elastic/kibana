@@ -25,7 +25,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';

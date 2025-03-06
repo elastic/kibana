@@ -28,6 +28,12 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+
+jest.mock('../../../../lib/rule_gaps/update/update_gaps', () => ({
+  updateGaps: jest.fn(),
+}));
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -159,12 +165,44 @@ describe('deleteBackfill()', () => {
     });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenLastCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      '1'
+      '1',
+      {
+        refresh: 'wait_for',
+      }
     );
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('1');
     expect(logger.error).not.toHaveBeenCalled();
 
     expect(result).toEqual({});
+  });
+
+  test('should call updateGaps with correct parameters when deleting backfill', async () => {
+    const eventLogClient = eventLogClientMock.create();
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+    await rulesClient.deleteBackfill('1');
+
+    const updateGapsCall = (updateGaps as jest.Mock).mock.calls[0][0];
+    expect(updateGapsCall.ruleId).toBe('abc');
+    expect(updateGapsCall.start).toEqual(new Date('2023-10-19T15:07:40.011Z'));
+    expect(updateGapsCall.end).toBeInstanceOf(Date);
+    expect(updateGapsCall.backfillSchedule).toEqual([
+      {
+        interval: '12h',
+        status: adHocRunStatus.PENDING,
+        runAt: '2023-10-20T03:07:40.011Z',
+      },
+      {
+        interval: '12h',
+        status: adHocRunStatus.PENDING,
+        runAt: '2023-10-20T15:07:40.011Z',
+      },
+    ]);
+    expect(updateGapsCall.savedObjectsRepository).toBe(internalSavedObjectsRepository);
+    expect(updateGapsCall.logger).toBe(logger);
+    expect(updateGapsCall.eventLogClient).toBe(eventLogClient);
+    expect(updateGapsCall.shouldRefetchAllBackfills).toBe(true);
+    expect(updateGapsCall.backfillClient).toBe(backfillClient);
   });
 
   describe('error handling', () => {

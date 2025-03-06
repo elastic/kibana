@@ -11,6 +11,7 @@ export enum SYNTHETICS_API_URLS {
   GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
+  LATEST_TEST_RUN = '/api/synthetics/latest_test_run',
 
   // Service end points
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
@@ -53,4 +54,6 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
+
+  INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
 }

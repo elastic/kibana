@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';

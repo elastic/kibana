@@ -30,7 +30,7 @@ export const renderApp = ({
 }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
 
-  if (!capabilities.discover.save) {
+  if (!capabilities.discover_v2.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
         defaultMessage: 'Read only',

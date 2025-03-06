@@ -6,33 +6,24 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import type { Message, Conversation } from '../../../common';
+import type { Conversation } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
-import { messageSchema } from './common';
 
 export interface ChatFeedback {
-  messageWithFeedback: {
-    message: Message;
-    feedback: Feedback;
+  feedback: Feedback;
+  conversation: Omit<Omit<Conversation, 'messages' | 'systemMessage'>, 'conversation'> & {
+    conversation: Omit<Conversation['conversation'], 'title'>;
   };
-  conversation: Conversation;
 }
 
 export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
   eventType: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
   schema: {
-    messageWithFeedback: {
-      properties: {
-        message: {
-          properties: messageSchema,
-        },
-        feedback: {
-          type: 'text',
-          _meta: {
-            description: 'Whether the user has deemed this response useful or not',
-          },
-        },
+    feedback: {
+      type: 'text',
+      _meta: {
+        description: 'Whether the user has deemed this response useful or not',
       },
     },
     conversation: {
@@ -68,49 +59,12 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
                 description: 'The id of the conversation.',
               },
             },
-            title: {
-              type: 'text',
-              _meta: {
-                description: 'The title of the conversation.',
-              },
-            },
             last_updated: {
               type: 'text',
               _meta: {
                 description: 'The timestamp of the last message in the conversation.',
               },
             },
-            token_count: {
-              properties: {
-                completion: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The number of tokens in the completion.',
-                  },
-                },
-                prompt: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The number of tokens in the prompt.',
-                  },
-                },
-                total: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The total number of tokens in the conversation.',
-                  },
-                },
-              },
-            },
-          },
-        },
-        messages: {
-          type: 'array',
-          items: {
-            properties: messageSchema,
-          },
-          _meta: {
-            description: 'The messages in the conversation.',
           },
         },
         labels: {

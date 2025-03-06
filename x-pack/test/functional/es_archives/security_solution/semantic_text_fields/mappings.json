@@ -10,7 +10,7 @@
         },
         "content": {
           "type": "semantic_text",
-          "inference_id": "elastic-security-ai-assistant-elser2",
+          "inference_id": ".elser-2-elasticsearch",
           "model_settings": {
             "task_type": "sparse_embedding"
           }

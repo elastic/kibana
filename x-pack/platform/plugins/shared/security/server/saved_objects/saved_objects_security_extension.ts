@@ -40,6 +40,7 @@ import type {
   ISavedObjectsSecurityExtension,
   RedactNamespacesParams,
   SavedObject,
+  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
@@ -106,6 +107,15 @@ export enum AuditAction {
 }
 
 /**
+ * Saved object information
+ */
+export interface SavedObjectAudit {
+  type: string;
+  id: string;
+  name?: string;
+}
+
+/**
  * The AddAuditEventParams interface contains settings for adding
  * audit events via the ISavedObjectsSecurityExtension. This is
  * used only for the private addAuditEvent method.
@@ -122,7 +132,7 @@ export interface AddAuditEventParams {
    * Relevant saved object information
    * object containing type & id strings
    */
-  savedObject?: { type: string; id: string; name?: string };
+  savedObject?: SavedObjectAudit;
   /**
    * Array of spaces being added. For
    * UPDATE_OBJECTS_SPACES action only
@@ -218,7 +228,7 @@ interface AuditHelperParams {
   /** The audit action to log */
   action: AuditAction;
   /** The objects applicable to the action */
-  objects?: Array<{ type: string; id: string }>;
+  objects?: SavedObjectAudit[];
   /** Whether or not to use success as the non-failure outcome. Default is 'unknown' */
   useSuccessOutcome?: boolean;
   /**
@@ -257,7 +267,7 @@ interface AuditOptions {
    * An array of applicable objects for the authorization action
    * If undefined or empty, general auditing will occur (one log/action)
    */
-  objects?: Array<{ type: string; id: string }>;
+  objects?: SavedObjectAudit[];
   /**
    * Whether or not to bypass audit logging on authz success, authz failure, always, or never. Default never.
    */
@@ -289,6 +299,8 @@ interface CheckAuthorizationParams<A extends string> {
     allowGlobalResource: boolean;
   };
 }
+
+type SavedObjectWithName<T = unknown> = SavedObject<T> & Pick<SavedObjectAudit, 'name'>;
 
 export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExtension {
   private readonly actions: Actions;
@@ -515,7 +527,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     for (const obj of toAudit) {
       this.addAuditEvent({
         action,
-        ...(!!obj && { savedObject: { type: obj.type, id: obj.id } }),
+        ...(!!obj && { savedObject: { type: obj.type, id: obj.id, name: obj.name } }),
         error,
         // By default, if authorization was a success the outcome is 'unknown' because the operation has not occurred yet
         // The GET action is one of the few exceptions to this, and hence it passes true to useSuccessOutcome
@@ -634,9 +646,24 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return checkResult;
   }
 
+  private maybeRedactSavedObject(
+    savedObject: SavedObjectAudit | undefined
+  ): SavedObjectAudit | undefined {
+    if (savedObject && savedObject.name && !this.auditLogger.includeSavedObjectNames) {
+      return { id: savedObject.id, type: savedObject.type };
+    }
+
+    return savedObject;
+  }
+
   private addAuditEvent(params: AddAuditEventParams): void {
     if (this.auditLogger.enabled) {
-      const auditEvent = savedObjectEvent(params);
+      const { savedObject, ...rest } = params;
+
+      const auditEvent = savedObjectEvent({
+        savedObject: this.maybeRedactSavedObject(savedObject),
+        ...rest,
+      });
       this.auditLogger.log(auditEvent);
     }
   }
@@ -1054,7 +1081,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       new Set<string>()
     );
     const traversedObjects = new Set<string>();
-    const filteredObjectsMap = new Map<string, SavedObjectReferenceWithContext>();
+    const filteredObjectsMap = new Map<string, WithAuditName<SavedObjectReferenceWithContext>>();
     const getIsAuthorizedForInboundReference = (inbound: { type: string; id: string }) => {
       const found = filteredObjectsMap.get(`${inbound.type}:${inbound.id}`);
       return found && !found.isMissing; // If true, this object can be linked back to one of the requested objects
@@ -1062,7 +1089,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     let objectsToProcess = [...objects];
     while (objectsToProcess.length > 0) {
       const obj = objectsToProcess.shift()!;
-      const { type, id, spaces, inboundReferences } = obj;
+      const { type, id, spaces, inboundReferences, name } = obj;
       const objKey = `${type}:${id}`;
       traversedObjects.add(objKey);
       // Is the user authorized to access this object in this space?
@@ -1096,7 +1123,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           // ("empty result" means the object was a non-multi-namespace type, or hidden type, or not found)
           this.addAuditEvent({
             action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
-            savedObject: { type, id },
+            savedObject: { type, id, name },
           });
         }
         filteredObjectsMap.set(objKey, obj);
@@ -1160,8 +1187,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const redactedSpaces = getRedactedSpaces(spaces)!;
       const redactedSpacesWithMatchingAliases = getRedactedSpaces(spacesWithMatchingAliases);
       const redactedSpacesWithMatchingOrigins = getRedactedSpaces(spacesWithMatchingOrigins);
+      const { name, ...normalizedObject } = obj;
+
       return {
-        ...obj,
+        ...normalizedObject,
         spaces: redactedSpaces,
         ...(redactedSpacesWithMatchingAliases && {
           spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
@@ -1183,10 +1212,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const typesAndSpaces = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>();
-    const auditableObjects: Array<{ type: string; id: string }> = [];
+    const auditableObjects: SavedObjectAudit[] = [];
 
     for (const result of objects) {
-      let auditableObject: { type: string; id: string } | undefined;
+      let auditableObject: SavedObjectAudit | undefined;
       if (isBulkResolveError(result)) {
         const { type, id, error } = result;
         if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
@@ -1194,8 +1223,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           auditableObject = { type, id };
         }
       } else {
-        const { type, id, namespaces = [] } = (result as SavedObjectsResolveResponse).saved_object;
-        auditableObject = { type, id };
+        const {
+          type,
+          id,
+          name,
+          namespaces = [],
+        } = (result as SavedObjectsResolveResponse).saved_object as SavedObjectWithName;
+        auditableObject = { type, id, name };
         for (const space of namespaces) {
           spacesToAuthorize.add(space);
         }
@@ -1227,11 +1261,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       if (isBulkResolveError(result)) {
         return result;
       }
+
+      const { name, ...normalizedSavedObject } = result.saved_object as SavedObjectWithName<T>;
+
       return {
         ...result,
         saved_object: this.redactNamespaces({
           typeMap,
-          savedObject: result.saved_object,
+          savedObject: normalizedSavedObject,
         }),
       };
     });
@@ -1366,19 +1403,21 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   auditObjectsForSpaceDeletion<T>(
     spaceId: string,
-    resultObjects: Array<SavedObjectsFindResult<T>>
+    resultObjects: Array<WithAuditName<SavedObjectsFindResult<T>>>
   ) {
     resultObjects.forEach((obj) => {
-      const { namespaces = [] } = obj;
+      const { namespaces = [], id, type, name } = obj;
+
       const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
       if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(spaceId)) {
         // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
         return;
       }
+
       this.addAuditEvent({
         action: isOnlySpace ? AuditAction.DELETE : AuditAction.UPDATE_OBJECTS_SPACES,
         outcome: 'unknown',
-        savedObject: { type: obj.type, id: obj.id },
+        savedObject: { id, type, name },
         ...(!isOnlySpace && { deleteFromSpaces: [spaceId] }),
       });
     });
@@ -1386,6 +1425,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   getCurrentUser() {
     return this.getCurrentUserFunc();
+  }
+
+  includeSavedObjectNames() {
+    return this.auditLogger.includeSavedObjectNames;
   }
 }
 

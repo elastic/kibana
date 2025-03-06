@@ -23,7 +23,7 @@ import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
@@ -31,9 +31,9 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -89,6 +89,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   isLoading,
   isDisabled,
   hideRunQueryText,
+  hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
@@ -104,6 +105,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const editorModel = useRef<monaco.editor.ITextModel>();
+  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const containerRef = useRef<HTMLElement>(null);
+
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -116,6 +121,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
+    data,
   } = kibana.services;
 
   const variablesService = kibana.services?.esql?.variablesService;
@@ -236,9 +242,9 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
-      setImmediate(() => {
+      setTimeout(() => {
         editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-      });
+      }, 0);
     }
   }, []);
 
@@ -312,6 +318,25 @@ export const ESQLEditor = memo(function ESQLEditor({
     );
   });
 
+  monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.FUNCTIONS,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  editor1.current?.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+    onQuerySubmit
+  );
+
   const styles = esqlEditorStyles(
     theme.euiTheme,
     editorHeight,
@@ -321,9 +346,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     Boolean(editorIsInline),
     Boolean(hasOutline)
   );
-  const editorModel = useRef<monaco.editor.ITextModel>();
-  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const containerRef = useRef<HTMLElement>(null);
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
     (
@@ -384,7 +406,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -418,11 +440,12 @@ export const ESQLEditor = memo(function ESQLEditor({
           };
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
+          const timeRange = data.query.timefilter.timefilter.getTime();
           try {
             const table = await memoizedFieldsFromESQL(
               esqlQuery,
               expressions,
-              undefined,
+              timeRange,
               abortController
             ).result;
             const columns: ESQLRealField[] =
@@ -466,19 +489,21 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
     memoizedSources,
     dataViews,
     core,
     esqlFieldsCache,
+    data.query.timefilter.timefilter,
     memoizedFieldsFromESQL,
     expressions,
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    variablesService,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    variablesService?.esqlVariables,
+    variablesService?.areSuggestionsEnabled,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -635,51 +660,54 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const codeEditorOptions: CodeEditorProps['options'] = {
-    hover: {
-      above: false,
-    },
-    accessibilitySupport: 'off',
-    autoIndent: 'none',
-    automaticLayout: true,
-    fixedOverflowWidgets: true,
-    folding: false,
-    fontSize: 14,
-    hideCursorInOverviewRuler: true,
-    // this becomes confusing with multiple markers, so quick fixes
-    // will be proposed only within the tooltip
-    lightbulb: {
-      enabled: false,
-    },
-    lineDecorationsWidth: 20,
-    lineNumbers: 'on',
-    lineNumbersMinChars: 3,
-    minimap: { enabled: false },
-    overviewRulerLanes: 0,
-    overviewRulerBorder: false,
-    padding: {
-      top: 8,
-      bottom: 8,
-    },
-    quickSuggestions: true,
-    readOnly: isDisabled,
-    renderLineHighlight: 'line',
-    renderLineHighlightOnlyWhenFocus: true,
-    scrollbar: {
-      horizontal: 'hidden',
-      horizontalScrollbarSize: 6,
-      vertical: 'auto',
-      verticalScrollbarSize: 6,
-    },
-    scrollBeyondLastLine: false,
-    theme: ESQL_LANG_ID,
-    wordWrap: 'on',
-    wrappingIndent: 'none',
-  };
+  const codeEditorOptions: CodeEditorProps['options'] = useMemo(
+    () => ({
+      hover: {
+        above: false,
+      },
+      accessibilitySupport: 'off',
+      autoIndent: 'none',
+      automaticLayout: true,
+      fixedOverflowWidgets: true,
+      folding: false,
+      fontSize: 14,
+      hideCursorInOverviewRuler: true,
+      // this becomes confusing with multiple markers, so quick fixes
+      // will be proposed only within the tooltip
+      lightbulb: {
+        enabled: false,
+      },
+      lineDecorationsWidth: 20,
+      lineNumbers: 'on',
+      lineNumbersMinChars: 3,
+      minimap: { enabled: false },
+      overviewRulerLanes: 0,
+      overviewRulerBorder: false,
+      padding: {
+        top: 8,
+        bottom: 8,
+      },
+      quickSuggestions: true,
+      readOnly: isDisabled,
+      renderLineHighlight: 'line',
+      renderLineHighlightOnlyWhenFocus: true,
+      scrollbar: {
+        horizontal: 'hidden',
+        horizontalScrollbarSize: 6,
+        vertical: 'auto',
+        verticalScrollbarSize: 6,
+      },
+      scrollBeyondLastLine: false,
+      theme: ESQL_LANG_ID,
+      wordWrap: 'on',
+      wrappingIndent: 'none',
+    }),
+    [isDisabled]
+  );
 
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
@@ -771,13 +799,6 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onKeyDown(() => {
                       onEditorFocus();
                     });
-
-                    // on CMD/CTRL + Enter submit the query
-                    editor.addCommand(
-                      // eslint-disable-next-line no-bitwise
-                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                      onQuerySubmit
-                    );
 
                     // on CMD/CTRL + / comment out the entire line
                     editor.addCommand(

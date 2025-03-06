@@ -560,24 +560,6 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'gmail',
   },
   {
-    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
-    description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.openTextDocumentum.description',
-      {
-        defaultMessage: 'Search over your content on OpenText Documentum.',
-      }
-    ),
-    iconPath: 'connector.svg',
-    isBeta: false,
-    isNative: false,
-    isTechPreview: true,
-    keywords: ['opentext', 'documentum', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.openTextDocumentum.name', {
-      defaultMessage: 'OpenText Documentum',
-    }),
-    serviceType: 'opentext_documentum',
-  },
-  {
     categories: ['search', 'elastic_stack', 'custom', 'datastore', 'connector', 'connector_client'],
     description: i18n.translate('searchConnectors.content.nativeConnectors.oracle.description', {
       defaultMessage: 'Search over your content on Oracle.',

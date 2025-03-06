@@ -79,7 +79,7 @@
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
-    background-color: $euiColorBackgroundBaseInteractiveHover;
+    background-color: $euiColorLightestShade; // we keep using a deprecated shade until a proper token is available
   }
 
   .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {

@@ -60,6 +60,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       showColumnTokens
       canDragAndDropColumns
       enableComparisonMode
+      enableInTableSearch
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}

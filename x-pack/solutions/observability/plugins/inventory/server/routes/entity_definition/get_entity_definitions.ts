@@ -9,8 +9,10 @@ import { extractEntityIndexPatternsFromDefinitions } from './extract_entity_inde
 
 export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entity/definitions/sources',
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   async handler({ context, request, plugins }) {
     const [_coreContext, entityManagerStart] = await Promise.all([

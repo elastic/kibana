@@ -13,10 +13,13 @@ import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
+import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   abortStream: () => void;
   content?: string;
+  contentReferences: StreamingOrFinalContentReferences;
+  contentReferencesVisible: boolean;
   isError?: boolean;
   isFetching?: boolean;
   isControlsEnabled?: boolean;
@@ -31,6 +34,8 @@ interface Props {
 export const StreamComment = ({
   abortStream,
   content,
+  contentReferences,
+  contentReferencesVisible,
   index,
   isControlsEnabled = false,
   isError = false,
@@ -106,7 +111,9 @@ export const StreamComment = ({
         <MessageText
           data-test-subj={isError ? 'errorComment' : undefined}
           content={message}
+          contentReferences={contentReferences}
           index={index}
+          contentReferencesVisible={contentReferencesVisible}
           loading={isAnythingLoading}
         />
       }

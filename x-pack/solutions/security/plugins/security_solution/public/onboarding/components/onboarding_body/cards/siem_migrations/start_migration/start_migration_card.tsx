@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
 import { PanelText } from '../../../../../../common/components/panel_text';
 import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
@@ -15,11 +16,17 @@ import { useLatestStats } from '../../../../../../siem_migrations/rules/service/
 import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import type { OnboardingCardComponent } from '../../../../../types';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
+import type { StartMigrationCardMetadata } from './types';
 import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from './start_migration_card.styles';
 import * as i18n from './translations';
+import {
+  MissingPrivilegesCallOut,
+  MissingPrivilegesDescription,
+} from '../../common/missing_privileges';
+import { UploadRulesSectionPanel } from './upload_rules_panel';
 
-export const StartMigrationCard: OnboardingCardComponent = React.memo(
+const StartMigrationsBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId }) => {
     const styles = useStyles();
     const { data: migrationsStats, isLoading, refreshStats } = useLatestStats();
@@ -44,7 +51,11 @@ export const StartMigrationCard: OnboardingCardComponent = React.memo(
 
     return (
       <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
-        <OnboardingCardContentPanel paddingSize="none" className={styles}>
+        <OnboardingCardContentPanel
+          data-test-subj="StartMigrationsCardBody"
+          paddingSize="none"
+          className={styles}
+        >
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (
@@ -61,6 +72,44 @@ export const StartMigrationCard: OnboardingCardComponent = React.memo(
         </OnboardingCardContentPanel>
       </RuleMigrationDataInputWrapper>
     );
+  }
+);
+StartMigrationsBody.displayName = 'StartMigrationsBody';
+
+export const StartMigrationCard: OnboardingCardComponent<StartMigrationCardMetadata> = React.memo(
+  ({ checkCompleteMetadata, ...props }) => {
+    const UpsellSectionComp = useUpsellingComponent('siem_migrations_start');
+    if (!checkCompleteMetadata) {
+      return <CenteredLoadingSpinner />;
+    }
+
+    if (UpsellSectionComp) {
+      return (
+        <OnboardingCardContentPanel paddingSize="none">
+          <EuiFlexGroup direction="column" gutterSize="l">
+            <EuiFlexItem>
+              <UpsellSectionComp />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UploadRulesSectionPanel isUploadMore={false} isDisabled />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </OnboardingCardContentPanel>
+      );
+    }
+
+    const { missingCapabilities } = checkCompleteMetadata;
+    if (missingCapabilities.length > 0) {
+      return (
+        <OnboardingCardContentPanel>
+          <MissingPrivilegesCallOut>
+            <MissingPrivilegesDescription privileges={missingCapabilities} />
+          </MissingPrivilegesCallOut>
+        </OnboardingCardContentPanel>
+      );
+    }
+
+    return <StartMigrationsBody {...props} />;
   }
 );
 StartMigrationCard.displayName = 'StartMigrationCard';

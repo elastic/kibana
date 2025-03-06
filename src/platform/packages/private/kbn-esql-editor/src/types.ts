@@ -16,7 +16,8 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -46,6 +47,8 @@ export interface ESQLEditorProps {
   dataTestSubj?: string;
   /** Hide the Run query information which appears on the footer*/
   hideRunQueryText?: boolean;
+  /** Hide the Run query button which appears when editor is inlined*/
+  hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)
    * which want to add the editor without being part of the Unified search component
    * It renders a submit query button inside the editor
@@ -110,6 +113,7 @@ export interface EsqlPluginStartBase {
 export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;

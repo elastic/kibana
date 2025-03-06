@@ -789,7 +789,6 @@ paths:
         - cases
       parameters:
         - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/includeComments'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1358,14 +1357,6 @@ components:
       schema:
         type: string
         example: 9c235210-6834-11ea-a78c-6ffb38a34414
-    includeComments:
-      in: query
-      name: includeComments
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      deprecated: true
-      schema:
-        type: boolean
-        default: true
     comment_id:
       in: path
       name: commentId

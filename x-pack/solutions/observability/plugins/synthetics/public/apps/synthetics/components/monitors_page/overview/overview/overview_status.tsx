@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -104,6 +104,7 @@ export function OverviewStatus({
       titleAppend={titleAppend}
       hideTitle={hideTitle}
     >
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiStat

@@ -230,12 +230,24 @@ describe('getAvailableVersions', () => {
         JSON.stringify([
           [
             {
+              title: 'Elastic Agent 9.0.0',
+              version_number: '9.0.0-rc1',
+            },
+            {
               title: 'Elastic Agent 8.0.0',
-              version_number: '8.0.0-rc1',
+              version_number: '8.0.0-rc2',
             },
             {
               title: 'Elastic Agent 8.0.0',
               version_number: '8.0.0-beta1',
+            },
+            {
+              title: 'Elastic Agent 8.0.0',
+              version_number: '8.0.0-alpha1',
+            },
+            {
+              title: 'Elastic Agent 8.0.0',
+              version_number: '8.0.0-unkown',
             },
           ],
         ])

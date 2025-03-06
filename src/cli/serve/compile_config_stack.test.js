@@ -15,7 +15,7 @@ jest.mock('@kbn/repo-info', () => ({
 }));
 jest.mock('@kbn/config');
 
-import { statSync, existsSync, writeFileSync } from 'fs';
+import { statSync } from 'fs';
 import { getConfigFromFiles } from '@kbn/config';
 
 import { compileConfigStack } from './compile_config_stack';
@@ -69,20 +69,12 @@ describe('compileConfigStack', () => {
       'serverless.security.yml',
       'kibana.yml',
       'kibana.dev.yml',
-      'serverless.recent.dev.yml',
       'serverless.dev.yml',
       'serverless.security.dev.yml',
     ]);
   });
 
   it('defaults to "es" if --serverless and --dev are there', async () => {
-    existsSync.mockImplementationOnce((filename) => {
-      if (Path.basename(filename) === 'serverless.recent.dev.yml') {
-        return false;
-      } else {
-        return true;
-      }
-    });
     getConfigFromFiles.mockImplementationOnce(() => {
       return {
         serverless: 'es',
@@ -94,53 +86,13 @@ describe('compileConfigStack', () => {
       serverless: true,
     }).map(toFileNames);
 
-    expect(existsSync).toHaveBeenCalledWith(
-      '/some/imaginary/path/config/serverless.recent.dev.yml'
-    );
-    expect(writeFileSync).toHaveBeenCalledWith(
-      '/some/imaginary/path/config/serverless.recent.dev.yml',
-      expect.stringContaining('serverless: es')
-    );
     expect(configList).toEqual([
       'serverless.yml',
       'serverless.es.yml',
       'kibana.yml',
       'kibana.dev.yml',
-      'serverless.recent.dev.yml',
       'serverless.dev.yml',
       'serverless.es.dev.yml',
-    ]);
-  });
-
-  it('respects persisted project-switcher decision when --serverless && --dev true', async () => {
-    existsSync.mockImplementationOnce((filename) => {
-      if (Path.basename(filename) === 'serverless.recent.dev.yml') {
-        return true;
-      }
-    });
-    getConfigFromFiles.mockImplementationOnce(() => {
-      return {
-        serverless: 'oblt',
-      };
-    });
-
-    const configList = compileConfigStack({
-      dev: true,
-      serverless: true,
-    }).map(toFileNames);
-
-    expect(existsSync).toHaveBeenCalledWith(
-      '/some/imaginary/path/config/serverless.recent.dev.yml'
-    );
-    expect(writeFileSync).not.toHaveBeenCalled();
-    expect(configList).toEqual([
-      'serverless.yml',
-      'serverless.oblt.yml',
-      'kibana.yml',
-      'kibana.dev.yml',
-      'serverless.recent.dev.yml',
-      'serverless.dev.yml',
-      'serverless.oblt.dev.yml',
     ]);
   });
 });

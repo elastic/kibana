@@ -110,6 +110,7 @@ import { SavedObject } from '@kbn/core/server';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -224,6 +225,7 @@ describe('Task Runner', () => {
       uiSettings: uiSettingsService,
       usageCounter: mockUsageCounter,
       isServerless: false,
+      getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
     };
 
     describe(`using ${label} for alert indices`, () => {

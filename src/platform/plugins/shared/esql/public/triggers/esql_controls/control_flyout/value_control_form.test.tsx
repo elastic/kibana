@@ -12,7 +12,7 @@ import { render, within, fireEvent } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
@@ -37,6 +37,7 @@ jest.mock('@kbn/esql-utils', () => {
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
+    getValuesFromQueryField: jest.fn().mockReturnValue('field'),
   };
 });
 
@@ -55,6 +56,7 @@ describe('ValueControlForm', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataMock,
   };
 
   describe('Interval type', () => {
@@ -248,9 +250,6 @@ describe('ValueControlForm', () => {
         expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(
           `Values from a query`
         );
-
-        // code editor should be rendered
-        expect(await findByTestId('ESQLEditor')).toBeInTheDocument();
 
         // values preview panel should be rendered
         expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();

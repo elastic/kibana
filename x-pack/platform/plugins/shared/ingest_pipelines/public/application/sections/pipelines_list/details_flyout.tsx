@@ -39,7 +39,7 @@ export interface Props {
   pipeline: Pipeline;
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
-  onDeleteClick: (pipelineName: string[]) => void;
+  onDeleteClick: (pipelineName: Pipeline[]) => void;
   onClose: () => void;
 }
 
@@ -80,9 +80,10 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
         defaultMessage: 'Delete',
       }),
       icon: <EuiIcon type="trash" />,
+      'data-test-subj': 'deletePipelineButton',
       onClick: () => {
         setShowPopover(false);
-        onDeleteClick([pipeline.name]);
+        onDeleteClick([pipeline]);
       },
     },
   ];

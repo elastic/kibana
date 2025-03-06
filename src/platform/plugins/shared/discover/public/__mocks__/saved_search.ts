@@ -14,13 +14,16 @@ import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 import { dataViewAdHoc } from './data_view_complex';
 import { dataViewEsql } from './data_view_esql';
 
-export const savedSearchMock = {
-  id: 'the-saved-search-id',
-  title: 'A saved search',
-  searchSource: createSearchSourceMock({ index: dataViewMock }),
-  columns: ['default_column'],
-  sort: [],
-} as unknown as SavedSearch;
+export const createSavedSearchMock = () =>
+  ({
+    id: 'the-saved-search-id',
+    title: 'A saved search',
+    searchSource: createSearchSourceMock({ index: dataViewMock }),
+    columns: ['default_column'],
+    sort: [],
+  } as unknown as SavedSearch);
+
+export const savedSearchMock = createSavedSearchMock();
 
 export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',
@@ -40,7 +43,10 @@ export const savedSearchMockWithESQL = {
   isTextBasedQuery: true,
 } as unknown as SavedSearch;
 
-export const savedSearchAdHoc = {
-  id: 'the-saved-search-with-ad-hoc',
-  searchSource: createSearchSourceMock({ index: dataViewAdHoc }),
-} as unknown as SavedSearch;
+export const createSavedSearchAdHocMock = () =>
+  ({
+    id: 'the-saved-search-with-ad-hoc',
+    searchSource: createSearchSourceMock({ index: dataViewAdHoc }),
+  } as unknown as SavedSearch);
+
+export const savedSearchAdHoc = createSavedSearchAdHocMock();

@@ -8,30 +8,29 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
+  uiMetricService,
+  GRAPH_INVESTIGATION,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
   VISUALIZE_TAB_GRAPH_VISUALIZATION_BUTTON_TEST_ID,
   VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
 } from './test_ids';
-import {
-  ANALYZE_GRAPH_ID,
-  AnalyzeGraph,
-  ANALYZER_PREVIEW_BANNER,
-} from '../components/analyze_graph';
+import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
 import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
+import { METRIC_TYPE } from '../../../../common/lib/telemetry';
+import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -88,35 +87,32 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { scopeId, getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
+  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
-  const key = useWhichFlyout() ?? 'memory';
   const { startTransaction } = useStartTransaction();
   const onChangeCompressed = useCallback(
     (optionId: string) => {
       setActiveVisualizationId(optionId);
       if (optionId === ANALYZE_GRAPH_ID) {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-        openPreviewPanel({
-          id: DocumentDetailsAnalyzerPanelKey,
-          params: {
-            resolverComponentInstanceID: `${key}-${scopeId}`,
-            banner: ANALYZER_PREVIEW_BANNER,
-          },
-        });
+      } else if (optionId === GRAPH_ID) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
       }
     },
-    [startTransaction, openPreviewPanel, key, scopeId]
+    [startTransaction]
   );
 
   useEffect(() => {
     if (panels.left?.path?.subTab) {
       setActiveVisualizationId(panels.left?.path?.subTab);
+
+      if (panels.left?.path?.subTab === GRAPH_ID) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
+      }
     }
   }, [panels.left?.path?.subTab]);
 
@@ -127,13 +123,11 @@ export const VisualizeTab = memo(() => {
     dataFormattedForFieldBrowser,
   });
 
-  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
-    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
-  );
+  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
 
   const options = [...visualizeButtons];
 
-  if (hasGraphRepresentation && isGraphFeatureEnabled) {
+  if (hasGraphRepresentation && graphVisualizationEnabled) {
     options.push(graphVisualizationButton);
   }
 

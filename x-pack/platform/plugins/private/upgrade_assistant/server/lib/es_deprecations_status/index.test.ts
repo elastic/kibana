@@ -7,13 +7,14 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 import * as esMigrationsMock from '../__fixtures__/es_deprecations';
 import type { FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
+import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 describe('getESUpgradeStatus', () => {
@@ -81,6 +82,8 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      ilm_policies: {},
+      templates: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -97,6 +100,8 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      ilm_policies: {},
+      templates: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -117,12 +122,14 @@ describe('getESUpgradeStatus', () => {
             message: 'Index created before 7.0',
             url: 'https://',
             details: '...',
-            // @ts-expect-error not full interface
             resolve_during_rolling_upgrade: false,
           },
         ],
       },
       data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
@@ -168,7 +175,7 @@ describe('getESUpgradeStatus', () => {
     const mockResponse = {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockDataStreamDeprecations(),
-    };
+    } as MigrationDeprecationsResponse;
     esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
@@ -214,6 +221,9 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
@@ -226,6 +236,52 @@ describe('getESUpgradeStatus', () => {
       ...upgradeStatus.enrichedHealthIndicators,
     ]).toHaveLength(0);
     expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
+  });
+
+  it('filters out frozen indices if old index deprecations exist for the same indices', async () => {
+    esClient.asCurrentUser.migration.deprecations.mockResponse({
+      cluster_settings: [],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {
+        frozen_index: [
+          {
+            level: 'critical',
+            message: 'Old index with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0',
+            details: 'This index has version: 7.17.28-8.0.0',
+            resolve_during_rolling_upgrade: false,
+            _meta: { reindex_required: true },
+          },
+          {
+            level: 'critical',
+            message:
+              'Index [frozen_index] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
+            details:
+              'Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)',
+            resolve_during_rolling_upgrade: false,
+          },
+        ],
+      },
+      data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
+    });
+
+    // @ts-expect-error not full interface of response
+    esClient.asCurrentUser.indices.resolveIndex.mockResponse(resolvedIndices);
+
+    const upgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+    });
+
+    expect([
+      ...upgradeStatus.migrationsDeprecations,
+      ...upgradeStatus.enrichedHealthIndicators,
+    ]).toHaveLength(1);
+    expect(upgradeStatus.totalCriticalDeprecations).toBe(1);
   });
 
   it('returns health indicators', async () => {
@@ -244,6 +300,9 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
     });
 
     esClient.asCurrentUser.healthReport.mockResponse({

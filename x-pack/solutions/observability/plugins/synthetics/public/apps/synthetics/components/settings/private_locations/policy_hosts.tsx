@@ -104,7 +104,11 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
         fullWidth
         label={POLICY_HOST_LABEL}
         labelAppend={
-          <EuiButtonEmpty size="xs" href={basePath + '/app/fleet/policies?create'}>
+          <EuiButtonEmpty
+            data-test-subj="syntheticsPolicyHostsFieldCreatePolicyButton"
+            size="xs"
+            href={basePath + '/app/fleet/policies?create'}
+          >
             {i18n.translate('xpack.synthetics.policyHostsField.createButtonEmptyLabel', {
               defaultMessage: 'Create policy',
             })}

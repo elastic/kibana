@@ -12,6 +12,9 @@ import {
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
   validateKafkaHosts,
+  validateKibanaURL,
+  validateKibanaAPIKey,
+  validateDynamicKafkaTopics,
 } from './output_form_validators';
 
 describe('Output form validation', () => {
@@ -127,6 +130,58 @@ describe('Output form validation', () => {
       const res = validateESHosts(['ftp://test.fr']);
 
       expect(res).toEqual([{ index: 0, message: 'Invalid protocol' }]);
+    });
+  });
+
+  describe('validateKibanaURL', () => {
+    it('should not work with empty url', () => {
+      const res = validateKibanaURL('', true);
+
+      expect(res).toEqual(['URL is required']);
+    });
+
+    it('should work with empty url if syncEnabled is false', () => {
+      const res = validateKibanaURL('', false);
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should work with valid url', () => {
+      const res = validateKibanaURL('https://test.fr:9200', true);
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should return an error with invalid url', () => {
+      const res = validateKibanaURL('toto', false);
+
+      expect(res).toEqual(['Invalid URL']);
+    });
+
+    it('should return an error with url with invalid port', () => {
+      const res = validateKibanaURL('https://test.fr:qwerty9200', true);
+
+      expect(res).toEqual(['Invalid URL']);
+    });
+
+    it('should return an error when invalid protocol', () => {
+      const res = validateKibanaURL('ftp://test.fr', false);
+
+      expect(res).toEqual(['Invalid protocol']);
+    });
+  });
+
+  describe('validateKibanaAPIKey', () => {
+    it('should not work with empty url', () => {
+      const res = validateKibanaAPIKey('');
+
+      expect(res).toEqual(['Kibana API Key is required']);
+    });
+
+    it('should work with valid url', () => {
+      const res = validateKibanaAPIKey('apikey');
+
+      expect(res).toBeUndefined();
     });
   });
 
@@ -280,6 +335,30 @@ describe('Output form validation', () => {
           message: 'Missing value for key "test3"',
         },
       ]);
+    });
+  });
+
+  describe('validateDynamicKafkaTopics', () => {
+    const validTopics = [
+      { label: 'field1', value: '%{[field]}' },
+      { label: 'field2', value: 'field2' },
+      { label: 'field3', value: '%{[field2]}-%{[field3]}' },
+    ];
+    const invalidBracketTopic = [{ label: '%{[field}', value: '%{[field}' }];
+    const invalidPercentTopic = [{ label: '{[field]}', value: '{[field]}' }];
+    it('should work with valid topics', () => {
+      const res = validateDynamicKafkaTopics(validTopics);
+      expect(res).toBeUndefined();
+    });
+    it("should return error with missing brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidBracketTopic);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it("should return error with missing percent sign before opening brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidPercentTopic);
+      expect(res).toEqual(['Opening brackets should be preceded by a percent sign']);
     });
   });
 });

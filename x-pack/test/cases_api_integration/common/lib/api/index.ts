@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -99,18 +99,16 @@ export const getSignalsWithES = async ({
   const signals: TransportResult<estypes.SearchResponse<SignalHit>, unknown> = await es.search(
     {
       index: indices,
-      body: {
-        size: 10000,
-        query: {
-          bool: {
-            filter: [
-              {
-                ids: {
-                  values: toArray(ids),
-                },
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: toArray(ids),
               },
-            ],
-          },
+            },
+          ],
         },
       },
     },
@@ -306,12 +304,10 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
   > = await es.search(
     {
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      body: {
-        query: {
-          term: {
-            type: {
-              value: 'cases-connector-mappings',
-            },
+      query: {
+        term: {
+          type: {
+            value: 'cases-connector-mappings',
           },
         },
       },
@@ -336,12 +332,10 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
   > = await es.search(
     {
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      body: {
-        query: {
-          term: {
-            type: {
-              value: CASE_CONFIGURE_SAVED_OBJECT,
-            },
+      query: {
+        term: {
+          type: {
+            value: CASE_CONFIGURE_SAVED_OBJECT,
           },
         },
       },
@@ -359,12 +353,10 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
   > = await es.search(
     {
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      body: {
-        query: {
-          term: {
-            type: {
-              value: CASE_SAVED_OBJECT,
-            },
+      query: {
+        term: {
+          type: {
+            value: CASE_SAVED_OBJECT,
           },
         },
       },
@@ -382,12 +374,10 @@ export const getCaseCommentSavedObjectsFromES = async ({ es }: { es: Client }) =
   > = await es.search(
     {
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      body: {
-        query: {
-          term: {
-            type: {
-              value: CASE_COMMENT_SAVED_OBJECT,
-            },
+      query: {
+        term: {
+          type: {
+            value: CASE_COMMENT_SAVED_OBJECT,
           },
         },
       },
@@ -405,12 +395,10 @@ export const getCaseUserActionsSavedObjectsFromES = async ({ es }: { es: Client 
   > = await es.search(
     {
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      body: {
-        query: {
-          term: {
-            type: {
-              value: CASE_USER_ACTION_SAVED_OBJECT,
-            },
+      query: {
+        term: {
+          type: {
+            value: CASE_USER_ACTION_SAVED_OBJECT,
           },
         },
       },
@@ -451,19 +439,15 @@ export const updateCase = async ({
 export const getCase = async ({
   supertest,
   caseId,
-  includeComments,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<Case> => {
-  const basePath = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
-  const path =
-    includeComments != null ? `${basePath}?includeComments=${includeComments}` : basePath;
+  const path = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
 
   const { body: theCase } = await supertest
     .get(path)
@@ -500,22 +484,16 @@ export const getCaseMetrics = async ({
 export const resolveCase = async ({
   supertest,
   caseId,
-  includeComments = false,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<CaseResolveResponse> => {
   const { body: theResolvedCase } = await supertest
-    .get(
-      `${getSpaceUrlPrefix(
-        auth?.space
-      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
-    )
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/resolve`)
     .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);

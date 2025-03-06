@@ -11,7 +11,7 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onFlyoutClose, addInferenceEndpoint, http, toasts, onSubmitSuccess, isEdit, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+          "({ onFlyoutClose, http, toasts, isEdit, onSubmitSuccess, inferenceEndpoint, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.InferenceFlyoutWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onFlyoutClose,\n  addInferenceEndpoint,\n  http,\n  toasts,\n  onSubmitSuccess,\n  isEdit,\n}",
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  onSubmitSuccess,\n  inferenceEndpoint,\n}",
             "description": [],
             "signature": [
               "InferenceFlyoutWrapperProps"
@@ -44,7 +44,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, isEdit, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, isEdit, isPreconfigured, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -55,12 +55,62 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  isEdit,\n}",
+            "label": "{\n  http,\n  toasts,\n  isEdit,\n  isPreconfigured,\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.isInferenceEndpointExists",
+        "type": "Function",
+        "tags": [],
+        "label": "isInferenceEndpointExists",
+        "description": [],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ", inferenceEndpointId: string) => Promise<boolean>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/inference_endpoint_exists.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.isInferenceEndpointExists.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/inference_endpoint_exists.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.isInferenceEndpointExists.$2",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceEndpointId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/inference_endpoint_exists.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1615,6 +1665,55 @@
               {
                 "parentPluginId": "@kbn/inference-endpoint-ui-common",
                 "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.watsonxai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.jinaai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.jinaai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.jinaai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.jinaai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.jinaai.solutions",
                 "type": "Array",
                 "tags": [],
                 "label": "solutions",

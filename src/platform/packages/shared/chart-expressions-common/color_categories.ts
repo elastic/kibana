@@ -13,6 +13,8 @@ import { RawValue, SerializedValue, serializeField } from '@kbn/data-plugin/comm
 /**
  * Returns all serialized categories of the dataset for color matching.
  * All non-serializable fields will be as a plain unformatted string.
+ *
+ * Note: This does **NOT** support transposed columns
  */
 export function getColorCategories(
   rows: DatatableRow[] = [],

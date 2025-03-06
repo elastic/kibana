@@ -227,18 +227,310 @@ describe('useSetupTechnology', () => {
     jest.clearAllMocks();
   });
 
-  it('should initialize with default values when agentless is disabled', () => {
-    const { result } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-        updatePackagePolicy: updatePackagePolicyMock,
-      })
-    );
+  describe('default values', () => {
+    it('should be agent-based when agentless is disabled', () => {
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+        })
+      );
 
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    });
+
+    it('should be agent-based when agentless is enabled and integrations have a mix of deployment modes', () => {
+      (useConfig as MockFn).mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'https://agentless.api.url',
+          },
+        },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+          packageInfo: {
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'Template 1',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+              {
+                name: 'template2',
+                title: 'Template 2',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+            ],
+          } as PackageInfo,
+        })
+      );
+
+      expect(result.current.allowedSetupTechnologies).toStrictEqual([
+        SetupTechnology.AGENTLESS,
+        SetupTechnology.AGENT_BASED,
+      ]);
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    });
+
+    it('should be agent-based when agentless is enabled and selected integration is agent-based by default', () => {
+      (useConfig as MockFn).mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'https://agentless.api.url',
+          },
+        },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+          packageInfo: {
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'Template 1',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+              {
+                name: 'template2',
+                title: 'Template 2',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                    is_default: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+            ],
+          } as PackageInfo,
+          integrationToEnable: 'template2',
+        })
+      );
+
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    });
+
+    it('should be agent-based when packageInfo has no policy templates', () => {
+      (useConfig as MockFn).mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'https://agentless.api.url',
+          },
+        },
+      } as any);
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+          packageInfo: {
+            policy_templates: [] as PackageInfo['policy_templates'],
+          } as PackageInfo,
+        })
+      );
+
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    });
+
+    it('should be agentless when agentless is enabled and all integrations are only agentless', () => {
+      (useConfig as MockFn).mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'https://agentless.api.url',
+          },
+        },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+          packageInfo: {
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'Template 1',
+                deployment_modes: {
+                  default: {
+                    enabled: false,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+              {
+                name: 'template2',
+                title: 'Template 2',
+                deployment_modes: {
+                  default: {
+                    enabled: false,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+            ],
+          } as PackageInfo,
+        })
+      );
+
+      expect(result.current.allowedSetupTechnologies).toStrictEqual([SetupTechnology.AGENTLESS]);
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    });
+
+    it('should be agentless when agentless is enabled and selected integration is only agentless', () => {
+      (useConfig as MockFn).mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'https://agentless.api.url',
+          },
+        },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+          packageInfo: {
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'Template 1',
+                deployment_modes: {
+                  default: {
+                    enabled: false,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+              {
+                name: 'template2',
+                title: 'Template 2',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+            ],
+          } as PackageInfo,
+          integrationToEnable: 'template1',
+        })
+      );
+
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    });
+
+    it('should be agentless when agentless is enabled and selected integration is agentless by default', () => {
+      (useConfig as MockFn).mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'https://agentless.api.url',
+          },
+        },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useSetupTechnology({
+          setNewAgentPolicy,
+          newAgentPolicy: newAgentPolicyMock,
+          setSelectedPolicyTab: setSelectedPolicyTabMock,
+          packagePolicy: packagePolicyMock,
+          updatePackagePolicy: updatePackagePolicyMock,
+          packageInfo: {
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'Template 1',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                    is_default: true,
+                  },
+                },
+              },
+              {
+                name: 'template2',
+                title: 'Template 2',
+                deployment_modes: {
+                  default: {
+                    enabled: true,
+                  },
+                  agentless: {
+                    enabled: true,
+                  },
+                },
+              },
+            ],
+          } as PackageInfo,
+          integrationToEnable: 'template1',
+        })
+      );
+
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    });
   });
 
   it('should set agentless setup technology if agent policy supports agentless in edit page', async () => {
@@ -270,7 +562,7 @@ describe('useSetupTechnology', () => {
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
   });
 
-  it('should create agentless policy if isCloud  and agentless.enabled', async () => {
+  it('should create agentless policy if isCloud and agentless.enabled', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,

@@ -14,6 +14,7 @@ import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/
 import { loggerMock } from '@kbn/logging-mocks';
 import { getPromptSuffixForOssModel } from './common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 
 describe('NaturalLanguageESQLTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -33,6 +34,7 @@ describe('NaturalLanguageESQLTool', () => {
   const logger = loggerMock.create();
   const inference = {} as InferenceServerStart;
   const connectorId = 'fake-connector';
+  const contentReferencesStore = {} as ContentReferencesStore;
   const rest = {
     chain,
     esClient,
@@ -41,6 +43,7 @@ describe('NaturalLanguageESQLTool', () => {
     inference,
     connectorId,
     isEnabledKnowledgeBase: true,
+    contentReferencesStore,
   };
 
   describe('isSupported', () => {

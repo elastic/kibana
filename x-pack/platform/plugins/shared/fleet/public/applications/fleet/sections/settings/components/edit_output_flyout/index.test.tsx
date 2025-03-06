@@ -126,9 +126,9 @@ describe('EditOutputFlyout', () => {
       utils.queryByLabelText('Elasticsearch CA trusted fingerprint (optional)')
     ).not.toBeNull();
 
-    // Does not show logstash SSL inputs
+    // Shows SSL inputs
     logstashInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
+      expect(utils.queryByLabelText(label)).not.toBeNull();
     });
 
     // Does not show kafka inputs nor sections
@@ -319,7 +319,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should render the flyout if the output provided is a remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -333,6 +335,8 @@ describe('EditOutputFlyout', () => {
       id: 'outputR',
       is_default: false,
       is_default_monitoring: false,
+      kibana_url: 'http://localhost',
+      sync_integrations: true,
     });
 
     remoteEsOutputLabels.forEach((label) => {
@@ -345,10 +349,19 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('remoteClusterConfigurationCallout')).not.toBeNull();
+    expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeNull();
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
+    ).toEqual('http://localhost');
+    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).not.toBeNull();
   });
 
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -364,11 +377,22 @@ describe('EditOutputFlyout', () => {
       is_default_monitoring: false,
       service_token: '1234',
       hosts: ['https://localhost:9200'],
+      kibana_url: 'http://localhost:5601',
+      kibana_api_key: 'key',
     });
 
     expect((utils.getByTestId('serviceTokenSecretInput') as HTMLInputElement).value).toEqual(
       '1234'
     );
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
+    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).toBeNull();
+
+    fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
+    ).toEqual('http://localhost:5601');
+    expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -376,8 +400,11 @@ describe('EditOutputFlyout', () => {
       expect(mockSendPutOutput).toHaveBeenCalledWith(
         'outputR',
         expect.objectContaining({
-          secrets: { service_token: '1234' },
+          sync_integrations: true,
+          secrets: { service_token: '1234', kibana_api_key: 'key' },
           service_token: undefined,
+          kibana_api_key: undefined,
+          kibana_url: 'http://localhost:5601',
         })
       );
     });

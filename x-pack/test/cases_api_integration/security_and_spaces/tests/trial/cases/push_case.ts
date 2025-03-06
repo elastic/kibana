@@ -836,7 +836,6 @@ export default ({ getService }: FtrProviderContext): void => {
           const theCase = await getCase({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            includeComments: false,
             auth: { user: superUser, space: 'space1' },
           });
 

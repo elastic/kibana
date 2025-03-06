@@ -9,767 +9,7 @@
     "objects": []
   },
   "server": {
-    "classes": [
-      {
-        "parentPluginId": "eventLog",
-        "id": "def-server.ClusterClientAdapter",
-        "type": "Class",
-        "tags": [],
-        "label": "ClusterClientAdapter",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "eventLog",
-            "scope": "server",
-            "docId": "kibEventLogPluginApi",
-            "section": "def-server.ClusterClientAdapter",
-            "text": "ClusterClientAdapter"
-          },
-          "<TDoc>"
-        ],
-        "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "opts",
-                "description": [],
-                "signature": [
-                  "ConstructorOpts"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.shutdown",
-            "type": "Function",
-            "tags": [],
-            "label": "shutdown",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.indexDocument",
-            "type": "Function",
-            "tags": [],
-            "label": "indexDocument",
-            "description": [],
-            "signature": [
-              "(doc: TDoc) => void"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.indexDocument.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "doc",
-                "description": [],
-                "signature": [
-                  "TDoc"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.indexDocuments",
-            "type": "Function",
-            "tags": [],
-            "label": "indexDocuments",
-            "description": [],
-            "signature": [
-              "(docs: TDoc[]) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.indexDocuments.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "docs",
-                "description": [],
-                "signature": [
-                  "TDoc[]"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist",
-            "type": "Function",
-            "tags": [],
-            "label": "doesIndexTemplateExist",
-            "description": [],
-            "signature": [
-              "(name: string) => Promise<boolean>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.createIndexTemplate",
-            "type": "Function",
-            "tags": [],
-            "label": "createIndexTemplate",
-            "description": [],
-            "signature": [
-              "(name: string, template: Record<string, unknown>) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "template",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.updateIndexTemplate",
-            "type": "Function",
-            "tags": [],
-            "label": "updateIndexTemplate",
-            "description": [],
-            "signature": [
-              "(name: string, template: Record<string, unknown>) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.updateIndexTemplate.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.updateIndexTemplate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "template",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.getExistingLegacyIndexTemplates",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingLegacyIndexTemplates",
-            "description": [],
-            "signature": [
-              "(indexTemplatePattern: string) => Promise<",
-              "IndicesGetTemplateResponse",
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.getExistingLegacyIndexTemplates.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexTemplatePattern",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.setLegacyIndexTemplateToHidden",
-            "type": "Function",
-            "tags": [],
-            "label": "setLegacyIndexTemplateToHidden",
-            "description": [],
-            "signature": [
-              "(indexTemplateName: string, currentIndexTemplate: ",
-              "IndicesTemplateMapping",
-              ") => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.setLegacyIndexTemplateToHidden.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexTemplateName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.setLegacyIndexTemplateToHidden.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "currentIndexTemplate",
-                "description": [],
-                "signature": [
-                  "IndicesTemplateMapping"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.getExistingIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndices",
-            "description": [],
-            "signature": [
-              "(indexPattern: string) => Promise<",
-              "IndicesGetSettingsResponse",
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.getExistingIndices.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.setIndexToHidden",
-            "type": "Function",
-            "tags": [],
-            "label": "setIndexToHidden",
-            "description": [],
-            "signature": [
-              "(indexName: string) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.setIndexToHidden.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.getExistingIndexAliases",
-            "type": "Function",
-            "tags": [],
-            "label": "getExistingIndexAliases",
-            "description": [],
-            "signature": [
-              "(indexPattern: string) => Promise<",
-              "IndicesGetAliasResponse",
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.getExistingIndexAliases.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.setIndexAliasToHidden",
-            "type": "Function",
-            "tags": [],
-            "label": "setIndexAliasToHidden",
-            "description": [],
-            "signature": [
-              "(aliasName: string, currentAliasData: ",
-              "ParsedIndexAlias",
-              "[]) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.setIndexAliasToHidden.$1",
-                "type": "string",
-                "tags": [],
-                "label": "aliasName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.setIndexAliasToHidden.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "currentAliasData",
-                "description": [],
-                "signature": [
-                  "ParsedIndexAlias",
-                  "[]"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.doesDataStreamExist",
-            "type": "Function",
-            "tags": [],
-            "label": "doesDataStreamExist",
-            "description": [],
-            "signature": [
-              "(name: string) => Promise<boolean>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.doesDataStreamExist.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.createDataStream",
-            "type": "Function",
-            "tags": [],
-            "label": "createDataStream",
-            "description": [],
-            "signature": [
-              "(name: string) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.createDataStream.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.updateConcreteIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "updateConcreteIndices",
-            "description": [],
-            "signature": [
-              "(name: string) => Promise<void>"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.updateConcreteIndices.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects",
-            "type": "Function",
-            "tags": [],
-            "label": "queryEventsBySavedObjects",
-            "description": [],
-            "signature": [
-              "(queryOptions: ",
-              "FindEventsOptionsBySavedObjectFilter",
-              ") => Promise<",
-              {
-                "pluginId": "eventLog",
-                "scope": "server",
-                "docId": "kibEventLogPluginApi",
-                "section": "def-server.QueryEventsBySavedObjectResult",
-                "text": "QueryEventsBySavedObjectResult"
-              },
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "queryOptions",
-                "description": [],
-                "signature": [
-                  "FindEventsOptionsBySavedObjectFilter"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.queryEventsWithAuthFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "queryEventsWithAuthFilter",
-            "description": [],
-            "signature": [
-              "(queryOptions: ",
-              "FindEventsOptionsWithAuthFilter",
-              ") => Promise<",
-              {
-                "pluginId": "eventLog",
-                "scope": "server",
-                "docId": "kibEventLogPluginApi",
-                "section": "def-server.QueryEventsBySavedObjectResult",
-                "text": "QueryEventsBySavedObjectResult"
-              },
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.queryEventsWithAuthFilter.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "queryOptions",
-                "description": [],
-                "signature": [
-                  "FindEventsOptionsWithAuthFilter"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects",
-            "type": "Function",
-            "tags": [],
-            "label": "aggregateEventsBySavedObjects",
-            "description": [],
-            "signature": [
-              "(queryOptions: ",
-              "AggregateEventsOptionsBySavedObjectFilter",
-              ") => Promise<",
-              {
-                "pluginId": "eventLog",
-                "scope": "server",
-                "docId": "kibEventLogPluginApi",
-                "section": "def-server.AggregateEventsBySavedObjectResult",
-                "text": "AggregateEventsBySavedObjectResult"
-              },
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "queryOptions",
-                "description": [],
-                "signature": [
-                  "AggregateEventsOptionsBySavedObjectFilter"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "eventLog",
-            "id": "def-server.ClusterClientAdapter.aggregateEventsWithAuthFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "aggregateEventsWithAuthFilter",
-            "description": [],
-            "signature": [
-              "(queryOptions: ",
-              "AggregateEventsWithAuthFilter",
-              ") => Promise<",
-              {
-                "pluginId": "eventLog",
-                "scope": "server",
-                "docId": "kibEventLogPluginApi",
-                "section": "def-server.AggregateEventsBySavedObjectResult",
-                "text": "AggregateEventsBySavedObjectResult"
-              },
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.aggregateEventsWithAuthFilter.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "queryOptions",
-                "description": [],
-                "signature": [
-                  "AggregateEventsWithAuthFilter"
-                ],
-                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "eventLog",
@@ -1327,6 +567,62 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.findEventsByDocumentIds",
+            "type": "Function",
+            "tags": [],
+            "label": "findEventsByDocumentIds",
+            "description": [],
+            "signature": [
+              "(docs: { _id: string; _index: string; }[]) => Promise<Pick<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.QueryEventsBySavedObjectResult",
+                "text": "QueryEventsBySavedObjectResult"
+              },
+              ", \"data\">>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsByDocumentIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "docs",
+                "description": [],
+                "signature": [
+                  "{ _id: string; _index: string; }[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.refreshIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshIndex",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1458,6 +754,118 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.updateEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "updateEvents",
+            "description": [],
+            "signature": [
+              "(events: { internalFields: ",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.InternalFields",
+                "text": "InternalFields"
+              },
+              "; event: ",
+              "IEvent",
+              "; }[]) => Promise<",
+              "BulkResponse",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.updateEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [],
+                "signature": [
+                  "{ internalFields: ",
+                  {
+                    "pluginId": "eventLog",
+                    "scope": "server",
+                    "docId": "kibEventLogPluginApi",
+                    "section": "def-server.InternalFields",
+                    "text": "InternalFields"
+                  },
+                  "; event: ",
+                  "IEvent",
+                  "; }[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.InternalFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalFields",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.InternalFields._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.InternalFields._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.InternalFields._seq_no",
+            "type": "number",
+            "tags": [],
+            "label": "_seq_no",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.InternalFields._primary_term",
+            "type": "number",
+            "tags": [],
+            "label": "_primary_term",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1514,7 +922,7 @@
             "label": "data",
             "description": [],
             "signature": [
-              "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
+              "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; })[]"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
@@ -1534,7 +942,7 @@
         "label": "IEvent",
         "description": [],
         "signature": [
-          "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+          "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
         "deprecated": false,
@@ -1549,9 +957,24 @@
         "label": "IValidatedEvent",
         "description": [],
         "signature": [
-          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined"
+          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.IValidatedEventInternalDocInfo",
+        "type": "Type",
+        "tags": [],
+        "label": "IValidatedEventInternalDocInfo",
+        "description": [],
+        "signature": [
+          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

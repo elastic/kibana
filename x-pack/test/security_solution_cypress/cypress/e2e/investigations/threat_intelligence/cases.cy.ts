@@ -105,7 +105,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
 
     cy.log('should add to new case when clicking on the button in the indicators flyout');
 
-    openFlyout(0);
+    openFlyout();
     openFlyoutTakeAction();
     openAddToNewCaseFromFlyout();
     createNewCaseFromTI();
@@ -122,7 +122,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
 
     cy.log('should add to existing case when clicking on the button in the indicators flyout');
 
-    openFlyout(0);
+    openFlyout();
     openFlyoutTakeAction();
     openAddToExistingCaseFromFlyout();
     selectExistingCase();

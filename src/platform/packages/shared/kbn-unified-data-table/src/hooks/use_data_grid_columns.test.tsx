@@ -16,7 +16,7 @@ import { Capabilities } from '@kbn/core/types';
 
 describe('useColumns', () => {
   const defaultProps = {
-    capabilities: { discover: { save: true } } as unknown as Capabilities,
+    capabilities: { discover_v2: { save: true } } as unknown as Capabilities,
     config: configMock,
     dataView: dataViewMock,
     dataViews: dataViewsMock,

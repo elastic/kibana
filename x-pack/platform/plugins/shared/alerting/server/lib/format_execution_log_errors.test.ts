@@ -190,6 +190,10 @@ function getEsResults({
     per_page: perPage,
     total,
     data: data.map((d: GetEsResult) => ({
+      _id: 'test-id',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': d.timestamp,
       event: {
         provider: d.provider,

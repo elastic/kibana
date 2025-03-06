@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connectorIndex, crawlerIndex, apiIndex } from '../__mocks__/view_index.mock';
+import { connectorIndex, apiIndex } from '../__mocks__/view_index.mock';
 
 import moment from 'moment';
 
@@ -22,10 +22,8 @@ import {
   getLastUpdated,
   indexToViewIndex,
   isConnectorIndex,
-  isCrawlerIndex,
   isApiIndex,
   isConnectorViewIndex,
-  isCrawlerViewIndex,
   isApiViewIndex,
 } from './indices';
 
@@ -33,9 +31,6 @@ describe('Indices util functions', () => {
   describe('getIngestionMethod', () => {
     it('should return correct ingestion method for connector', () => {
       expect(getIngestionMethod(connectorIndex)).toEqual(IngestionMethod.CONNECTOR);
-    });
-    it('should return correct ingestion method for crawler', () => {
-      expect(getIngestionMethod(crawlerIndex)).toEqual(IngestionMethod.CRAWLER);
     });
     it('should return correct ingestion method for API', () => {
       expect(getIngestionMethod(apiIndex)).toEqual(IngestionMethod.API);
@@ -138,30 +133,13 @@ describe('Indices util functions', () => {
     it('should return true for connector indices', () => {
       expect(isConnectorIndex(connectorIndex)).toEqual(true);
     });
-    it('should return false for crawler indices', () => {
-      expect(isConnectorIndex(crawlerIndex)).toEqual(false);
-    });
     it('should return false for API indices', () => {
       expect(isConnectorIndex(apiIndex)).toEqual(false);
-    });
-  });
-  describe('isCrawlerIndex', () => {
-    it('should return true for crawler indices', () => {
-      expect(isCrawlerIndex(crawlerIndex)).toEqual(true);
-    });
-    it('should return false for connector and API indices', () => {
-      expect(isCrawlerIndex(connectorIndex)).toEqual(false);
-    });
-    it('should return false for API indices', () => {
-      expect(isCrawlerIndex(apiIndex)).toEqual(false);
     });
   });
   describe('isApiIndex', () => {
     it('should return true for API indices', () => {
       expect(isApiIndex(apiIndex)).toEqual(true);
-    });
-    it('should return false for crawler indices', () => {
-      expect(isApiIndex(crawlerIndex)).toEqual(false);
     });
     it('should return false for connector and API indices', () => {
       expect(isApiIndex(connectorIndex)).toEqual(false);
@@ -171,30 +149,13 @@ describe('Indices util functions', () => {
     it('should return true for connector indices', () => {
       expect(isConnectorViewIndex(connectorIndex)).toEqual(true);
     });
-    it('should return false for crawler indices', () => {
-      expect(isConnectorViewIndex(crawlerIndex)).toEqual(false);
-    });
     it('should return false for API indices', () => {
       expect(isConnectorViewIndex(apiIndex)).toEqual(false);
-    });
-  });
-  describe('isCrawlerViewIndex', () => {
-    it('should return true for crawler indices', () => {
-      expect(isCrawlerViewIndex(crawlerIndex)).toEqual(true);
-    });
-    it('should return false for connector and API indices', () => {
-      expect(isCrawlerViewIndex(connectorIndex)).toEqual(false);
-    });
-    it('should return false for API indices', () => {
-      expect(isCrawlerViewIndex(apiIndex)).toEqual(false);
     });
   });
   describe('isApiViewIndex', () => {
     it('should return true for API indices', () => {
       expect(isApiViewIndex(apiIndex)).toEqual(true);
-    });
-    it('should return false for crawler indices', () => {
-      expect(isApiViewIndex(crawlerIndex)).toEqual(false);
     });
     it('should return false for connector and API indices', () => {
       expect(isApiViewIndex(connectorIndex)).toEqual(false);

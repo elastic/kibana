@@ -7,31 +7,42 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
 import { OtelLogsPanel } from '../quickstart_flows/otel_logs';
+import { type ObservabilityOnboardingAppServices } from '../..';
 
-export const OtelLogsPage = () => (
-  <PageTemplate
-    customHeader={
-      <CustomHeader
-        logo="opentelemetry"
-        headlineCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.text',
-          {
-            defaultMessage: 'OpenTelemetry',
-          }
-        )}
-        captionCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
-          {
-            defaultMessage:
-              'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
-          }
-        )}
-      />
-    }
-  >
-    <OtelLogsPanel />
-  </PageTemplate>
-);
+export const OtelLogsPage = () => {
+  const {
+    services: {
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  return (
+    <PageTemplate
+      customHeader={
+        <CustomHeader
+          logo="opentelemetry"
+          headlineCopy={i18n.translate(
+            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.text',
+            {
+              defaultMessage: 'OpenTelemetry',
+            }
+          )}
+          captionCopy={i18n.translate(
+            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
+            {
+              defaultMessage:
+                'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
+            }
+          )}
+          isTechnicalPreview={isServerless}
+        />
+      }
+    >
+      <OtelLogsPanel />
+    </PageTemplate>
+  );
+};

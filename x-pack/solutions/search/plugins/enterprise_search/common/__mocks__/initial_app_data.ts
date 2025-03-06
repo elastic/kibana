@@ -6,13 +6,13 @@
  */
 
 export const DEFAULT_INITIAL_APP_DATA = {
-  kibanaVersion: '9.0.0',
+  kibanaVersion: '9.1.0',
   features: {
     hasConnectors: true,
     hasDefaultIngestPipeline: true,
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
-    hasNativeConnectors: true,
+    hasNativeConnectors: false,
     hasWebCrawler: false,
   },
 };

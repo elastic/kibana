@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
-import { inKnownTimeInterval } from '@kbn/esql-validation-autocomplete';
-import { type ESQLColumn, parse, walk, mutate, BasicPrettyPrinter, Walker } from '@kbn/esql-ast';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { timeUnits } from '@kbn/esql-validation-autocomplete';
+
+function inKnownTimeInterval(timeIntervalUnit: string): boolean {
+  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
+}
 
 export const updateQueryStringWithVariable = (
   queryString: string,
@@ -62,31 +66,27 @@ export const areValuesIntervalsValid = (values: string[]) => {
   });
 };
 
-export const getRecurrentVariableName = (name: string, existingNames: string[]) => {
+export const getVariablePrefix = (variableType: ESQLVariableType) => {
+  switch (variableType) {
+    case ESQLVariableType.FIELDS:
+      return 'field';
+    case ESQLVariableType.FUNCTIONS:
+      return 'function';
+    case ESQLVariableType.TIME_LITERAL:
+      return 'interval';
+    default:
+      return 'variable';
+  }
+};
+
+export const getRecurrentVariableName = (name: string, existingNames: Set<string>) => {
   let newName = name;
   let i = 1;
-  while (existingNames.includes(newName)) {
+  while (existingNames.has(newName)) {
     newName = `${name}${i}`;
     i++;
   }
   return newName;
-};
-
-export const getValuesFromQueryField = (queryString: string) => {
-  const validQuery = `${queryString} ""`;
-  const { root } = parse(validQuery);
-  const lastCommand = root.commands[root.commands.length - 1];
-  const columns: ESQLColumn[] = [];
-
-  walk(lastCommand, {
-    visitColumn: (node) => columns.push(node),
-  });
-
-  const column = Walker.match(lastCommand, { type: 'column' });
-
-  if (column) {
-    return `${column.name}`;
-  }
 };
 
 export const getFlyoutStyling = () => {
@@ -101,19 +101,6 @@ export const getFlyoutStyling = () => {
             block-size: 100%;
           }
   `;
-};
-
-export const appendStatsByToQuery = (queryString: string, column: string) => {
-  const { root } = parse(queryString);
-  const lastCommand = root.commands[root.commands.length - 1];
-  if (lastCommand.name === 'stats') {
-    const statsCommand = lastCommand;
-    mutate.generic.commands.remove(root, statsCommand);
-    const queryWithoutStats = BasicPrettyPrinter.print(root);
-    return `${queryWithoutStats}\n| STATS BY ${column}`;
-  } else {
-    return `${queryString}\n| STATS BY ${column}`;
-  }
 };
 
 export const validateVariableName = (variableName: string) => {
