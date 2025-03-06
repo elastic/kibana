@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { LegacyField } from '@kbn/alerting-types';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
+
+const emptyUserProfiles = { profiles: [], isLoading: false };
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
@@ -28,11 +30,12 @@ export const PreviewRenderCellValue: React.FC<
   rowRenderers,
   truncate,
 }) => {
+  const legacyAlert = useMemo(() => (data ?? []) as LegacyField[], [data]);
   return (
     <CellValue
       tableType={TableId.rulePreview}
       sourcererScope={SourcererScopeName.detections}
-      legacyAlert={(data ?? []) as LegacyField[]}
+      legacyAlert={legacyAlert}
       ecsAlert={ecsData}
       asPlainText={true}
       setCellProps={setCellProps}
@@ -44,7 +47,7 @@ export const PreviewRenderCellValue: React.FC<
       columnId={columnId}
       rowRenderers={rowRenderers}
       truncate={truncate}
-      userProfiles={{ profiles: [], isLoading: false }}
+      userProfiles={emptyUserProfiles}
     />
   );
 };
