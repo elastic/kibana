@@ -449,7 +449,7 @@ export async function getFieldsOrFunctionsSuggestions(
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
-    literals ? getCompatibleLiterals(commandName, types) : []
+    literals ? getCompatibleLiterals(types) : []
   );
 
   return suggestions;

@@ -7,17 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { findFinalWord } from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
-import { buildConstantsDefinitions } from '../../factories';
 import { pipeCompleteItem } from '../../complete_items';
 
-export function suggest({ innerText }: CommandSuggestParams<'limit'>): SuggestionRawDefinition[] {
-  if (/[0-9]\s+$/.test(innerText)) {
+export async function suggest({
+  innerText,
+  getColumnsByType,
+}: CommandSuggestParams<'limit'>): Promise<SuggestionRawDefinition[]> {
+  if (/MV_EXPAND\s+\S+\s+$/i.test(innerText)) {
     return [pipeCompleteItem];
   }
 
-  return buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
-    advanceCursorAndOpenSuggestions: true,
+  const columnSuggestions = await getColumnsByType('any', undefined, {
+    advanceCursor: true,
+    openSuggestions: true,
   });
+
+  const fragment = findFinalWord(innerText);
+  columnSuggestions.forEach((suggestion) => {
+    suggestion.rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length,
+    };
+  });
+
+  return columnSuggestions;
 }

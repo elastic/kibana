@@ -112,11 +112,6 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
-  describe('mv_expand', () => {
-    testSuggestions('from a | mv_expand /', getFieldNamesByType('any'));
-    testSuggestions('from a | mv_expand a /', ['| ']);
-  });
-
   describe('rename', () => {
     testSuggestions('from a | rename /', getFieldNamesByType('any'));
     testSuggestions('from a | rename keywordField /', ['AS $0'], ' ');
