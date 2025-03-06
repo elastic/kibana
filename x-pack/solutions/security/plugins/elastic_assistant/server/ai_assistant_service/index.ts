@@ -327,6 +327,8 @@ export class AIAssistantService {
             })
           )
         );
+
+        console.log('Aslkdjfalksdjfalksjdflaksjdfaklsjd ->', JSON.stringify(mappings, null, 2));
       } catch (error) {
         /* empty */
       }
@@ -337,7 +339,6 @@ export class AIAssistantService {
           (value?.template?.mappings?.properties?.semantic_text as { inference_id: string })
             ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID
       );
-
       // Used only for testing purposes
       if (this.modelIdOverride && !isUsingDedicatedInferenceEndpoint) {
         await this.rolloverDataStream(

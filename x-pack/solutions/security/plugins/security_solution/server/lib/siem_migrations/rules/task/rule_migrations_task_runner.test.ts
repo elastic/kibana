@@ -124,12 +124,8 @@ describe('RuleMigrationTaskRunner', () => {
       await expect(taskRunner.run({})).resolves.toBeUndefined();
 
       expect(mockRuleMigrationsDataClient.rules.saveProcessing).toHaveBeenCalled();
-      expect(mockTimeout).toHaveBeenCalledTimes(2); // initialization timeout + random execution sleep
-      expect(mockTimeout).toHaveBeenNthCalledWith(
-        1,
-        expect.any(Function),
-        20 * 60 * 1000 // init timeout 20 minutes
-      );
+      expect(mockTimeout).toHaveBeenCalledTimes(1); // random execution sleep
+      expect(mockTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), expect.any(Number));
 
       expect(mockInvoke).toHaveBeenCalledTimes(1);
       expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalled();
@@ -157,9 +153,7 @@ describe('RuleMigrationTaskRunner', () => {
 
           runPromise = taskRunner.run({});
           await expect(runPromise).rejects.toEqual(
-            Error(
-              'Migration initialization failed. Make sure the ELSER model is correctly started: Error: Test error message'
-            )
+            Error('Migration initialization failed. Error: Test error message')
           );
         });
       });
@@ -239,27 +233,22 @@ describe('RuleMigrationTaskRunner', () => {
              * rule 2 -> success
              */
             expect(mockInvoke).toHaveBeenCalledTimes(6);
-            expect(mockTimeout).toHaveBeenCalledTimes(7); // 1 init timeout + 3 execution sleeps + 3 backoff sleeps
+            expect(mockTimeout).toHaveBeenCalledTimes(6); // 2 execution sleeps + 3 backoff sleeps + 1 execution sleep
             expect(mockTimeout).toHaveBeenNthCalledWith(
               1,
               expect.any(Function),
-              expect.any(Number) // init timeout
+              expect.any(Number) // exec random sleep
             );
             expect(mockTimeout).toHaveBeenNthCalledWith(
               2,
               expect.any(Function),
               expect.any(Number) // exec random sleep
             );
+            expect(mockTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 1000);
+            expect(mockTimeout).toHaveBeenNthCalledWith(4, expect.any(Function), 2000);
+            expect(mockTimeout).toHaveBeenNthCalledWith(5, expect.any(Function), 4000);
             expect(mockTimeout).toHaveBeenNthCalledWith(
-              3,
-              expect.any(Function),
-              expect.any(Number) // exec random sleep
-            );
-            expect(mockTimeout).toHaveBeenNthCalledWith(4, expect.any(Function), 1000);
-            expect(mockTimeout).toHaveBeenNthCalledWith(5, expect.any(Function), 2000);
-            expect(mockTimeout).toHaveBeenNthCalledWith(6, expect.any(Function), 4000);
-            expect(mockTimeout).toHaveBeenNthCalledWith(
-              7,
+              6,
               expect.any(Function),
               expect.any(Number) // exec random sleep
             );
@@ -278,7 +267,7 @@ describe('RuleMigrationTaskRunner', () => {
 
             // maxRetries = 8
             expect(mockInvoke).toHaveBeenCalledTimes(10); // 8 retries + 2 executions
-            expect(mockTimeout).toHaveBeenCalledTimes(11); // 1 init timeout + 2 execution sleeps + 8 backoff sleeps
+            expect(mockTimeout).toHaveBeenCalledTimes(10); // 2 execution sleeps + 8 backoff sleeps
 
             expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalledTimes(2); // 2 rules
           });
