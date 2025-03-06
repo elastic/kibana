@@ -34,7 +34,6 @@ import {
   ControlGroupRendererApi,
   type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -210,7 +209,7 @@ export const EditExample = () => {
               },
             };
           }}
-          viewMode={ViewMode.EDIT}
+          viewMode={'edit'}
         />
       </EuiPanel>
     </>
