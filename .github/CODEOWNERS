@@ -1697,6 +1697,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/page_objects/header_page.ts @elastic/appex-qa
 /test/functional/page_objects/error_page.ts @elastic/appex-qa
 /test/functional/page_objects/common_page.ts @elastic/appex-qa
+/test/functional/page_objects/space_settings.ts @elastic/appex-qa
 /test/functional/jest.config.js @elastic/appex-qa
 /test/functional/ftr_provider_context.ts @elastic/appex-qa
 /test/functional/fixtures/es_archiver/README.md @elastic/appex-qa

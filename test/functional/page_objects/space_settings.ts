@@ -11,11 +11,9 @@ import { FtrService } from '../ftr_provider_context';
 
 export class SpaceSettingsPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly log = this.ctx.getService('log');
-  private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
 
-  public async navigateTo(spaceName?: string = 'default') {
+  public async navigateTo(spaceName: string = 'default') {
     await this.common.navigateToUrl('management', `kibana/spaces/edit/${spaceName}`, {
       shouldUseHashForSubUrl: false,
     });
@@ -31,7 +29,7 @@ export class SpaceSettingsPageObject extends FtrService {
     solution = 'oblt',
   }: {
     spaceName?: string;
-    solution?: 'es' | 'oblt' | 'search' | 'classic';
+    solution?: 'security' | 'oblt' | 'search' | 'classic';
   }) {
     const solutionSpecificTestSubjectMap = {
       search: 'solutionViewEsOption',
