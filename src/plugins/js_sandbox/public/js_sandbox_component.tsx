@@ -83,7 +83,7 @@ export const JsSandboxComponent: FC<{
   const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
   const [data, setData] = useState<{ data: any[]; dataCrossfilter: any[] }>();
 
-  const filters = crossfilter.useState((state) => state.filters);
+  const filters = crossfilter.useEventBusState((state) => state.filters);
 
   const panelFilters = useMemo(() => {
     const pfs = cloneDeep(filters);
