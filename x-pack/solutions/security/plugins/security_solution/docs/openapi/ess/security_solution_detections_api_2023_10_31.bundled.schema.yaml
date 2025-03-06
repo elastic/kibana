@@ -245,8 +245,10 @@ paths:
         * `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
 
 
-        The `id` is a unique identifier for each data item, while `rule_id` is a
-        unique identifier for each rule.
+        The difference between the `id` and `rule_id` is that the `id` is a
+        unique rule identifier that is randomly generated when a rule is created
+        and cannot be set, whereas `rule_id` is a stable rule identifier that
+        can be assigned during rule creation.
       operationId: DeleteRule
       parameters:
         - description: The rule's `id` value.
@@ -276,7 +278,7 @@ paths:
         - lang: cURL
           source: |
             curl \
-              --request DELETE https://localhost:5601/api/detection_engine/rules?id=16947168-5405-453d-a8b5-aadad357af42 \
+              --request DELETE https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
               --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
     get:
       description: >
@@ -291,8 +293,10 @@ paths:
         * `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
 
 
-        The `id` is a unique identifier for each data item, while `rule_id` is a
-        unique identifier for each rule.
+        The difference between the `id` and `rule_id` is that the `id` is a
+        unique rule identifier that is randomly generated when a rule is created
+        and cannot be set, whereas `rule_id` is a stable rule identifier that
+        can be assigned during rule creation.
       operationId: ReadRule
       parameters:
         - description: The rule's `id` value.
@@ -403,7 +407,7 @@ paths:
         - lang: cURL
           source: |
             curl \
-              --request GET https://localhost:5601/api/detection_engine/rules?id=16947168-5405-453d-a8b5-aadad357af42 \
+              --request GET https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
               --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
     patch:
       description: >
@@ -411,9 +415,10 @@ paths:
         or `id` field.
 
 
-        The `id` is a unique identifier for each specific instance of a rule,
-        whereas `rule_id` is a unique identifier for the rule itself, shared
-        across all instances of that rule.
+        The difference between the `id` and `rule_id` is that the `id` is a
+        unique rule identifier that is randomly generated when a rule is created
+        and cannot be set, whereas `rule_id` is a stable rule identifier that
+        can be assigned during rule creation.
 
         > warn
 
@@ -427,11 +432,6 @@ paths:
         > If the API key that is used for authorization has different privileges
         than the key that created or most recently updated the rule, the rule
         behavior might change.
-
-
-        > info
-
-        > You cannot modify the `id` or `rule_id` values.
       operationId: PatchRule
       requestBody:
         content:
@@ -459,6 +459,9 @@ paths:
                           reference: https://attack.mitre.org/techniques/T1193
             schema:
               $ref: '#/components/schemas/RulePatchProps'
+        description: |
+          > info
+          > You cannot modify the `id` or `rule_id` values.
         required: true
       responses:
         '200':
@@ -1359,9 +1362,10 @@ paths:
         rule is replaced, and all unspecified fields are deleted.
 
 
-        The `id` is a unique identifier for each specific instance of a rule,
-        whereas `rule_id` is a unique identifier for the rule itself, shared
-        across all instances of that rule.
+        The difference between the `id` and `rule_id` is that the `id` is a
+        unique rule identifier that is randomly generated when a rule is created
+        and cannot be set, whereas `rule_id` is a stable rule identifier that
+        can be assigned during rule creation.
 
         > warn
 
@@ -1375,11 +1379,6 @@ paths:
         > If the API key that is used for authorization has different privileges
         than the key that created or most recently updated the rule, the rule
         behavior might change.
-
-
-        > info
-
-        > You cannot modify the `id` or `rule_id` values.
       operationId: UpdateRule
       requestBody:
         content:
@@ -1401,6 +1400,11 @@ paths:
                           reference: https://attack.mitre.org/techniques/T1193
             schema:
               $ref: '#/components/schemas/RuleUpdateProps'
+        description: >
+          > info
+
+          > All unspecified fields are deleted. You cannot modify the `id` or
+          `rule_id` values.
         required: true
       responses:
         '200':

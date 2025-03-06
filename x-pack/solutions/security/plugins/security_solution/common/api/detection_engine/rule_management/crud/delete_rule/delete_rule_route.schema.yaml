@@ -17,7 +17,7 @@ paths:
         * `id` - `DELETE /api/detection_engine/rules?id=<id>`
         * `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
 
-        The `id` is a unique identifier for each specific instance of a rule, whereas `rule_id` is a unique identifier for the rule itself, shared across all instances of that rule.
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
       tags:
         - Rules API
       parameters:
