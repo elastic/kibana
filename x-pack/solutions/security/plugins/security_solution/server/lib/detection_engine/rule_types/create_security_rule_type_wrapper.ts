@@ -246,6 +246,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
                 message: errorMessage,
+                userError: true,
               });
 
               return { state: result.state };
