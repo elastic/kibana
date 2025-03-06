@@ -107,13 +107,11 @@ export const RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_SOLVABLE_CONFLICTS = ({
     id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithoutConflictsAndRulesWithSolvableConflicts"
     defaultMessage="{numOfRulesWithSolvableConflictsStrong} of {numOfRulesStrong} selected rules have auto-resolved conflicts. You may proceed and update only {numOfRulesWithoutConflictsStrong} {numOfRulesWithoutConflicts, plural, =1 {rule} other {rules}} without conflicts or update all rules which is potentially dangerous and may result in broken rules."
     values={{
-      numOfRules: numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts,
       numOfRulesStrong: (
         <strong>{numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts}</strong>
       ),
       numOfRulesWithoutConflicts,
       numOfRulesWithoutConflictsStrong: <strong>{numOfRulesWithoutConflicts}</strong>,
-      numOfRulesWithSolvableConflicts,
       numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
     }}
   />
@@ -133,10 +131,6 @@ export const ALL_KINDS_OF_RULES = ({
       id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.allKindsOfRules"
       defaultMessage="{numOfRulesWithConflictsStrong} of {numOfRulesStrong} selected rules have conflicts. You may proceed and update only {numOfRulesWithoutConflictsStrong} {numOfRulesWithoutConflicts, plural, =1 {rule} other {rules}} without conflicts or update also {numOfRulesWithSolvableConflictsStrong} {numOfRulesWithSolvableConflicts, plural, =1 {rule} other {rules}} with auto-resolved conflicts which is potentially dangerous and may result in broken rules."
       values={{
-        numOfRules:
-          numOfRulesWithoutConflicts +
-          numOfRulesWithSolvableConflicts +
-          numOfRulesWithNonSolvableConflicts,
         numOfRulesStrong: (
           <strong>
             {numOfRulesWithoutConflicts +
@@ -144,8 +138,6 @@ export const ALL_KINDS_OF_RULES = ({
               numOfRulesWithNonSolvableConflicts}
           </strong>
         ),
-        numOfRulesWithConflicts:
-          numOfRulesWithSolvableConflicts + numOfRulesWithNonSolvableConflicts,
         numOfRulesWithConflictsStrong: (
           <strong>{numOfRulesWithSolvableConflicts + numOfRulesWithNonSolvableConflicts}</strong>
         ),
