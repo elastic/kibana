@@ -294,8 +294,8 @@ export class AutomaticAgentUpgradeTask {
     //     As an imperfect alternative, sort agents by version. Since versions sort alphabetically, this will not always result in ascending semver sorting.
     const statusKuery =
       '(status:online OR status:offline OR status:enrolling OR status:degraded OR status:error OR status:orphaned)'; // active status except updating
-    const oldStuckInUpdatingKuery = `(NOT upgrade_details AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
-    const newStuckInUpdatingKuery = `(NOT upgrade_attempts:* AND upgrade_details.target_version:{version} AND upgrade_details.state:UPG_FAILED)`;
+    const oldStuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
+    const newStuckInUpdatingKuery = `(NOT upgrade_attempts:* AND upgrade_details.target_version:${requiredVersion.version} AND upgrade_details.state:UPG_FAILED)`;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
       kuery: `policy_id:${agentPolicy.id} AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
       perPage: AGENTS_BATCHSIZE,
