@@ -49,8 +49,7 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
-  const { savedDataViews, managedDataViews, adHocDataViews } =
-    useInternalStateSelector(selectDataViewsForPicker);
+  const { managedDataViews, adHocDataViews } = useInternalStateSelector(selectDataViewsForPicker);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
@@ -184,18 +183,9 @@ export const DiscoverTopNav = ({
       onChangeDataView: stateContainer.actions.onChangeDataView,
       adHocDataViews,
       managedDataViews,
-      savedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
-  }, [
-    adHocDataViews,
-    addField,
-    createNewDataView,
-    dataView,
-    managedDataViews,
-    savedDataViews,
-    stateContainer,
-  ]);
+  }, [adHocDataViews, addField, createNewDataView, dataView, managedDataViews, stateContainer]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {

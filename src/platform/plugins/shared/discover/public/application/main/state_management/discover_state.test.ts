@@ -60,7 +60,6 @@ async function getState(
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
-  await nextState.actions.loadDataViewList();
   if (savedSearch) {
     nextState.savedSearchState.load = jest.fn(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearch));
@@ -427,7 +426,6 @@ describe('Test discover state actions', () => {
   test('fetchData', async () => {
     const { state } = await getState('/');
     const dataState = state.dataState;
-    await state.actions.loadDataViewList();
     expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     await state.actions.loadSavedSearch();
     const unsubscribe = state.actions.initializeAndSync();
@@ -441,14 +439,8 @@ describe('Test discover state actions', () => {
     expect(dataState.data$.documents$.value.result).toEqual([]);
   });
 
-  test('loadDataViewList', async () => {
-    const { state } = await getState('');
-    expect(state.internalState.getState().savedDataViews.length).toBe(3);
-  });
-
   test('loadSavedSearch with no id given an empty URL', async () => {
     const { state, getCurrentUrl } = await getState('');
-    await state.actions.loadDataViewList();
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();

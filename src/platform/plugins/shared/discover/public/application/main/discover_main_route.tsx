@@ -64,7 +64,7 @@ export function DiscoverMainRoute({
   const {
     core,
     chrome,
-    data,
+    dataViews,
     toastNotifications,
     http: { basePath },
     dataViewEditor,
@@ -120,17 +120,13 @@ export function DiscoverMainRoute({
         const isEsqlQuery = isDataSourceType(dataSource, DataSourceType.Esql);
 
         if (savedSearchId || isEsqlQuery || nextDataView) {
-          // Although ES|QL doesn't need a data view, we still need to load the data view list to
-          // ensure the data view is available for the user to switch to classic mode
-          await stateContainer.actions.loadDataViewList();
           return true;
         }
 
         const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists] = await Promise.all([
-          data.dataViews.hasData.hasUserDataView().catch(() => false),
-          data.dataViews.hasData.hasESData().catch(() => false),
-          data.dataViews.defaultDataViewExists().catch(() => false),
-          stateContainer.actions.loadDataViewList(),
+          dataViews.hasData.hasUserDataView().catch(() => false),
+          dataViews.hasData.hasESData().catch(() => false),
+          dataViews.defaultDataViewExists().catch(() => false),
         ]);
 
         const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
@@ -156,7 +152,7 @@ export function DiscoverMainRoute({
         return false;
       }
     },
-    [data.dataViews, historyLocationState?.dataViewSpec, savedSearchId, stateContainer]
+    [dataViews, historyLocationState?.dataViewSpec, savedSearchId, stateContainer]
   );
 
   const loadSavedSearch = useCallback(
@@ -306,9 +302,9 @@ export function DiscoverMainRoute({
     () => ({
       coreStart: core,
       dataViews: {
-        ...data.dataViews,
+        ...dataViews,
         hasData: {
-          ...data.dataViews.hasData,
+          ...dataViews.hasData,
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
@@ -320,7 +316,7 @@ export function DiscoverMainRoute({
       dataViewEditor,
       noDataPage: services.noDataPage,
     }),
-    [core, data.dataViews, dataViewEditor, noDataState, services.noDataPage, share]
+    [core, dataViews, dataViewEditor, noDataState, services.noDataPage, share]
   );
 
   const loadingIndicator = useMemo(
