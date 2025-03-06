@@ -21,8 +21,9 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 /**
  * Mutates the Find options provided on input to include a filter that will scope the search
  * down to only data that should be visible in active space
+ * @param endpointServices
+ * @param httpRequest
  * @param findOptions
- * @protected
  */
 export const setFindRequestFilterScopeToActiveSpace = async (
   endpointServices: EndpointAppContextService,
