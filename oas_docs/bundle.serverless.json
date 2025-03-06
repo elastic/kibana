@@ -22300,6 +22300,14 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "in": "query",
+            "name": "withPackagePoliciesCount",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -22619,10 +22627,6 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": [
-                                  "name",
-                                  "started_at"
-                                ],
                                 "type": "object"
                               },
                               "latest_install_failed_attempts": {
@@ -24278,10 +24282,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "name",
-                                "started_at"
-                              ],
                               "type": "object"
                             },
                             "latest_install_failed_attempts": {
@@ -25205,10 +25205,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "name",
-                                "started_at"
-                              ],
                               "type": "object"
                             },
                             "latest_install_failed_attempts": {
@@ -25956,12 +25952,101 @@
                           "proxy_id": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "secrets": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "ssl": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "es_key": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "key": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "ssl": {
+                            "additionalProperties": false,
+                            "nullable": true,
+                            "properties": {
+                              "certificate": {
+                                "type": "string"
+                              },
+                              "certificate_authorities": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "client_auth": {
+                                "enum": [
+                                  "optional",
+                                  "required",
+                                  "none"
+                                ],
+                                "type": "string"
+                              },
+                              "es_certificate": {
+                                "type": "string"
+                              },
+                              "es_certificate_authorities": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "es_key": {
+                                "type": "string"
+                              },
+                              "key": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
                           }
                         },
                         "required": [
-                          "id",
                           "name",
-                          "host_urls"
+                          "host_urls",
+                          "id"
                         ],
                         "type": "object"
                       },
@@ -26069,6 +26154,95 @@
                   "proxy_id": {
                     "nullable": true,
                     "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ssl": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "es_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "ssl": {
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "properties": {
+                      "certificate": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "client_auth": {
+                        "enum": [
+                          "optional",
+                          "required",
+                          "none"
+                        ],
+                        "type": "string"
+                      },
+                      "es_certificate": {
+                        "type": "string"
+                      },
+                      "es_certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "es_key": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -26117,12 +26291,101 @@
                         "proxy_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "secrets": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "ssl": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "es_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ssl": {
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "properties": {
+                            "certificate": {
+                              "type": "string"
+                            },
+                            "certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "client_auth": {
+                              "enum": [
+                                "optional",
+                                "required",
+                                "none"
+                              ],
+                              "type": "string"
+                            },
+                            "es_certificate": {
+                              "type": "string"
+                            },
+                            "es_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "es_key": {
+                              "type": "string"
+                            },
+                            "key": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [
-                        "id",
                         "name",
-                        "host_urls"
+                        "host_urls",
+                        "id"
                       ],
                       "type": "object"
                     }
@@ -26295,12 +26558,101 @@
                         "proxy_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "secrets": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "ssl": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "es_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ssl": {
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "properties": {
+                            "certificate": {
+                              "type": "string"
+                            },
+                            "certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "client_auth": {
+                              "enum": [
+                                "optional",
+                                "required",
+                                "none"
+                              ],
+                              "type": "string"
+                            },
+                            "es_certificate": {
+                              "type": "string"
+                            },
+                            "es_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "es_key": {
+                              "type": "string"
+                            },
+                            "key": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [
-                        "id",
                         "name",
-                        "host_urls"
+                        "host_urls",
+                        "id"
                       ],
                       "type": "object"
                     }
@@ -26394,6 +26746,95 @@
                   "proxy_id": {
                     "nullable": true,
                     "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ssl": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "es_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "ssl": {
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "properties": {
+                      "certificate": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "client_auth": {
+                        "enum": [
+                          "optional",
+                          "required",
+                          "none"
+                        ],
+                        "type": "string"
+                      },
+                      "es_certificate": {
+                        "type": "string"
+                      },
+                      "es_certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "es_key": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -26441,12 +26882,101 @@
                         "proxy_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "secrets": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "ssl": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "es_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ssl": {
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "properties": {
+                            "certificate": {
+                              "type": "string"
+                            },
+                            "certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "client_auth": {
+                              "enum": [
+                                "optional",
+                                "required",
+                                "none"
+                              ],
+                              "type": "string"
+                            },
+                            "es_certificate": {
+                              "type": "string"
+                            },
+                            "es_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "es_key": {
+                              "type": "string"
+                            },
+                            "key": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [
-                        "id",
                         "name",
-                        "host_urls"
+                        "host_urls",
+                        "id"
                       ],
                       "type": "object"
                     }
