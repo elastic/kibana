@@ -309,7 +309,7 @@ export {
   termsAggFilter,
   getTermsBucketAgg,
   MultiFieldKey,
-  isMultiFieldKey,
+  RangeKey,
   MULTI_FIELD_KEY_SEPARATOR,
   aggMultiTermsFnName,
   aggMultiTerms,
