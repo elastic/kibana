@@ -114,6 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
+        // Scroll needs to be triggered to hide the footer
+        await dataGrid.scrollTo(defaultPageLimit + 10);
+
         await testSubjects.missingOrFail('unifiedDataTableFooter');
         await testSubjects.missingOrFail('dscGridSampleSizeFetchMoreLink');
       });
