@@ -901,7 +901,7 @@ describe('SAMLAuthenticationProvider', () => {
         const request = httpServerMock.createKibanaRequest();
 
         mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
-          id: 'someRequestId',
+          id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
           realm: 'test-realm',
         });
@@ -916,7 +916,7 @@ describe('SAMLAuthenticationProvider', () => {
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
             {
               state: {
-                requestIds: ['someRequestId'],
+                requestIds: ['some-request-id'],
                 redirectURL: '/test-base-path/some-path#some-fragment',
                 realm: 'test-realm',
               },
@@ -939,7 +939,7 @@ describe('SAMLAuthenticationProvider', () => {
         const request = httpServerMock.createKibanaRequest();
 
         mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
-          id: 'someRequestId',
+          id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
           realm: 'test-realm',
         });
@@ -958,7 +958,7 @@ describe('SAMLAuthenticationProvider', () => {
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
             {
               state: {
-                requestIds: ['someRequestId'],
+                requestIds: ['some-request-id'],
                 redirectURL: '/test-base-path/some-path#some-fragment',
                 realm: 'test-realm',
               },
@@ -987,7 +987,7 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         customMockOptions.client.asInternalUser.transport.request.mockResolvedValue({
-          id: 'someRequestId',
+          id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
           realm: 'test-realm',
         });
@@ -1006,7 +1006,7 @@ describe('SAMLAuthenticationProvider', () => {
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
             {
               state: {
-                requestIds: ['someRequestId'],
+                requestIds: ['some-request-id'],
                 redirectURL: '/test-base-path/some-path#some-fragment',
                 realm: 'test-realm',
               },
@@ -1116,7 +1116,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('initiates SAML handshake for non-AJAX request that can not be authenticated, but includes URL hash fragment.', async () => {
       mockOptions.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/s/foo/some-path');
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
-        id: 'someRequestId',
+        id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
@@ -1124,13 +1124,12 @@ describe('SAMLAuthenticationProvider', () => {
         path: '/s/foo/some-path',
         query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
       });
-
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
           'https://idp-host/path/login?SAMLRequest=some%20request%20',
           {
             state: {
-              requestIds: ['someRequestId'],
+              requestIds: ['some-request-id'],
               redirectURL: '/mock-server-basepath/s/foo/some-path#some-fragment',
             },
           }
