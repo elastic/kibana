@@ -12,7 +12,7 @@
     "patterns": [
       ""
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/rest-api-root.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-info",
     "availability": {
       "stack": true,
       "serverless": true
