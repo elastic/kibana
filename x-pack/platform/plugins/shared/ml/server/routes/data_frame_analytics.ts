@@ -474,9 +474,14 @@ export function dataFrameAnalyticsRoutes(
                     // It's possible that the destination index has been reindexed with a new name
                     // so if it's an alias first, then delete the real index
                     let destinationIndexToDelete = destinationIndex;
-                    const alias = await client.asCurrentUser.indices.getAlias({
-                      index: destinationIndex,
-                    });
+                    const alias = await client.asCurrentUser.indices.getAlias(
+                      {
+                        index: destinationIndex,
+                      },
+                      {
+                        ignore: [404],
+                      }
+                    );
                     if (alias) {
                       const reindexedDestName = Object.keys(alias)[0];
                       if (reindexedDestName && isPopulatedObject(alias, [reindexedDestName])) {
@@ -487,10 +492,17 @@ export function dataFrameAnalyticsRoutes(
                       }
                     }
 
-                    await client.asCurrentUser.indices.delete({
-                      index: destinationIndexToDelete,
-                    });
-                    destIndexDeleted.success = true;
+                    const deleted = await client.asCurrentUser.indices.delete(
+                      {
+                        index: destinationIndexToDelete,
+                      },
+                      {
+                        ignore: [404],
+                      }
+                    );
+                    if (deleted?.acknowledged) {
+                      destIndexDeleted.success = true;
+                    }
                   } catch ({ body }) {
                     destIndexDeleted.error = body;
                   }
