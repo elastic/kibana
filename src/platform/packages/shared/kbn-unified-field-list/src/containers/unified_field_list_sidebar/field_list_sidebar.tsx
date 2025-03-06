@@ -519,42 +519,6 @@ const fieldListItemCss = ({
   }
 `;
 
-const unifiedFieldListSidebarCss = ({
-  euiTheme,
-  smallScreenBreakpoint,
-  isSidebarCollapsed,
-  fullWidth,
-}: {
-  euiTheme: UseEuiTheme['euiTheme'];
-  smallScreenBreakpoint: ReturnType<typeof useEuiBreakpoint>;
-  isSidebarCollapsed?: boolean;
-  fullWidth?: boolean;
-}) => css`
-  overflow: hidden;
-  margin: 0 !important;
-  flex-grow: 1;
-  padding: ${isSidebarCollapsed ? `${euiTheme.size.s} ${euiTheme.size.s} 0` : '0'};
-  height: 100%;
-  width: ${fullWidth ? '100%' : isSidebarCollapsed ? 'auto' : `${euiTheme.base * 19}px`};
-  min-width: ${fullWidth ? '0 !important' : 'initial'};
-
-  ${smallScreenBreakpoint} {
-    width: 100%;
-    padding: ${euiTheme.size.base};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  }
-
-  .unifiedFieldListItemButton__dragging {
-    background: ${euiTheme.colors.emptyShade};
-  }
-
-  .unifiedFieldListItemButton.kbnFieldButton {
-    margin-bottom: calc(${euiTheme.size.xs} / 2);
-    background: none;
-    box-shadow: none;
-  }
-`;
-
 const editFieldCss = ({ euiTheme }: UseEuiTheme) => css`
   padding: ${euiTheme.size.s};
   border-top: ${euiTheme.border.thin};
