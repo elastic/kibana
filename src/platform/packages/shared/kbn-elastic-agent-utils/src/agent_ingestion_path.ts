@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableInput } from '../types';
-
-export interface SavedObjectEmbeddableInput extends EmbeddableInput {
-  savedObjectId: string;
-}
-
-export function isSavedObjectEmbeddableInput(
-  input: EmbeddableInput | SavedObjectEmbeddableInput
-): input is SavedObjectEmbeddableInput {
-  return Boolean((input as SavedObjectEmbeddableInput).savedObjectId);
-}
+export const getIngestionPath = (hasOpenTelemetryFields: boolean) =>
+  hasOpenTelemetryFields ? 'otel_native' : 'classic_apm';
