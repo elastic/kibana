@@ -39,7 +39,7 @@ export const AnalysisSummary: FC<Props> = ({ results, showTitle = true }) => {
 
       <EuiDescriptionList
         type="column"
-        columnWidths={[30, 70]}
+        columnWidths={showTitle ? [15, 85] : [50, 50]}
         listItems={items}
         className="analysis-summary-list"
         compressed
