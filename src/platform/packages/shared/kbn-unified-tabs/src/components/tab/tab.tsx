@@ -100,7 +100,7 @@ export const Tab: React.FC<TabProps> = ({
       gutterSize="none"
       onClick={onClickEvent}
     >
-      <div css={getTabContentCss(euiTheme)}>
+      <div css={getTabContentCss()}>
         {isInlineEditActive ? (
           <EditTabLabel
             item={item}
