@@ -48,9 +48,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [Scenario: Importing new prebuilt rules when the package is not installed](#scenario-importing-new-prebuilt-rules-when-the-package-is-not-installed)
     - [Scenario: Importing prebuilt rules on top of existing rules when the package is not installed](#scenario-importing-prebuilt-rules-on-top-of-existing-rules-when-the-package-is-not-installed)
   - [Converting between prebuilt and custom rules](#converting-between-prebuilt-and-custom-rules)
-    - [Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`](#scenario-importing-a-custom-rule-with-a-matching-prebuilt-rule_id-and-version)
-    - [Scenario: Importing a prebuilt rule with a non-existent `rule_id`](#scenario-importing-a-prebuilt-rule-with-a-non-existent-rule_id)
-    - [Scenario: Importing a custom rule before a prebuilt rule asset is created with the same `rule_id`](#scenario-importing-a-custom-rule-before-a-prebuilt-rule-asset-is-created-with-the-same-rule_id)
+    - [Scenario: Converting a custom rule to a customized prebuilt rule on import](#scenario-converting-a-custom-rule-to-a-customized-prebuilt-rule-on-import)
+    - [Scenario: Converting a custom rule to a non-customized prebuilt rule on import](#scenario-converting-a-custom-rule-to-a-non-customized-prebuilt-rule-on-import)
+    - [Scenario: Converting a prebuilt rule to a custom rule on import](#scenario-converting-a-prebuilt-rule-to-a-custom-rule-on-import)
+    - [Scenario: Making an imported custom rule upgradeable to a prebuilt rule](#scenario-making-an-imported-custom-rule-upgradeable-to-a-prebuilt-rule)
   - [Handling missing base versions](#handling-missing-base-versions)
     - [Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-no-matching-version)
   - [Handling missing fields in the import request payload](#handling-missing-fields-in-the-import-request-payload)
@@ -323,40 +324,85 @@ And the updated rules' parameters should match the import payload
 
 ### Converting between prebuilt and custom rules
 
-#### Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`
+#### Scenario: Converting a custom rule to a customized prebuilt rule on import
 
-**Automation**: 1 cypress test and 1 integration test.
+This is an edge case that can happen when the user manually edits an ndjson file and:
+
+- By mistake, sets `rule_id` and `version` fields of a custom rule to the values of an existing prebuilt rule asset.
+
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a custom rule
-And its rule_id and version match a rule asset from the installed package
+And this rule has a base version in the installed package
+And this rule is different from its base version
+And this rule is not installed
 When the user imports the rule
-Then the rule should be created or updated
-And the ruleSource type should be "external"
-And isCustomized should be true
+Then the rule should be created
+And the created rule should be prebuilt
+And the created rule should be marked as customized
+And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a prebuilt rule with a non-existent `rule_id`
+#### Scenario: Converting a custom rule to a non-customized prebuilt rule on import
 
-**Automation**: 1 integration test.
+This is an edge case that can happen when the user manually edits an ndjson file and:
+
+- By mistake, makes a legit prebuilt rule in it custom by updating the `immutable` and `rule_source` fields.
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a custom rule
+And this rule has a base version in the installed package
+And this rule is equal to its base version
+And this rule is not installed
+When the user imports the rule
+Then the rule should be created
+And the created rule should be prebuilt
+And the created rule should be marked as non-customized
+And the created rule's parameters should match the import payload
+```
+
+#### Scenario: Converting a prebuilt rule to a custom rule on import
+
+This is an edge case that can happen when the user manually edits an ndjson file and:
+
+- By mistake, makes a legit custom rule in it prebuilt by updating the `immutable` and `rule_source` fields.
+
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
 And its rule_id does NOT match any rule assets from the installed package
+And this rule is not installed
 When the user imports the rule
 Then the rule should be created
-And the ruleSource type should be "internal"
+And the created rule should be custom
+And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a custom rule before a prebuilt rule asset is created with the same `rule_id`
+#### Scenario: Making an imported custom rule upgradeable to a prebuilt rule
 
-**Automation**: 1 integration test.
+This is an edge case that can happen when Elastic ships a new prebuilt rule with a `rule_id` accidentally matching the `rule_id` of a user's custom rule.
+
+**Automation**: 1 API integration test.
 
 ```Gherkin
-Given the environment contains an imported custom rule
-And this rule has a rule_id of X
-When a prebuilt rule asset is added with a rule_id of X
-Then the imported custom rule should be upgradeable as if it were a prebuilt rule
+Given the import payload contains a custom rule
+And its rule_id does NOT match any rule assets from the installed package
+And this rule is not installed
+When the user imports the rule
+Then the rule should be created
+And the created rule should be custom
+When a new version of the package gets installed
+And a new prebuilt rule asset is added in it with the same rule_id and a higher version
+Then the rule should be upgradeable to the asset's version as if it were a prebuilt rule
+When the user upgrades this rule to the TARGET version
+Then the rule should be upgraded to the asset's version
+And the upgraded rule should be prebuilt
+And the upgraded rule should be marked as non-customized
+And the upgraded rule's parameters should match the asset
 ```
 
 ### Handling missing base versions
