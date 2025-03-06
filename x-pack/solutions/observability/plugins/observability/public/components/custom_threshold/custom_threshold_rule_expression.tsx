@@ -36,6 +36,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -78,7 +79,12 @@ export default function Expressions(props: Props) {
     unifiedSearch: {
       ui: { SearchBar },
     },
+    featureFlags,
   } = useKibana().services;
+
+  const isLinkedDashboardsEnabled = useObservable(
+    featureFlags.getBooleanValue$('rca.linkedDashboards', false)
+  );
 
   const hasGroupBy = useMemo<boolean>(
     () => !!ruleParams.groupBy && ruleParams.groupBy.length > 0,
@@ -659,25 +665,27 @@ export default function Expressions(props: Props) {
           }
         }}
       />
-      <EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiTitle size="xs">
-          <h6>
-            <FormattedMessage
-              id="xpack.observability.customThreshold.rule.alertFlyout.linkDashboards"
-              defaultMessage="Link dashboard(s)"
-            />
-          </h6>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiComboBox
-          fullWidth
-          options={dashboardList}
-          selectedOptions={selectedDashboards}
-          onChange={onChange}
-        />
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
+      {isLinkedDashboardsEnabled && (
+        <EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h6>
+              <FormattedMessage
+                id="xpack.observability.customThreshold.rule.alertFlyout.linkDashboards"
+                defaultMessage="Link dashboard(s)"
+              />
+            </h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiComboBox
+            fullWidth
+            options={dashboardList}
+            selectedOptions={selectedDashboards}
+            onChange={onChange}
+          />
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      )}
       <EuiSpacer size="m" />
     </>
   );
