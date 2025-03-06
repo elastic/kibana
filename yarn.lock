@@ -2278,21 +2278,21 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-common@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.10.tgz#253da1337abae656ab93917bb3ed7e6f48e5f9a1"
-  integrity sha512-MruijLreN1VpyQgUK2pXcdFIbpYpjc3ZaZ+f0r1Aa0KON935wIf7VAb861tYPmAJxaf+4X4kyoqS0F+8rO9tbg==
+"@elastic/eui-theme-common@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.11.tgz#950d06a652a25b09c46cec8f16a449223ada45a3"
+  integrity sha512-DV8qX45R/01SWdCoINWbFwJgMdWHYuq7ZmdY/J3pE1QNKIGv52SdOpiW+XwhT8S3dOv+XFidoywVT9pAjcMmyA==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@99.3.0-classic.0":
-  version "99.3.0-classic.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.3.0-classic.0.tgz#063b5d237338fca947d26c885bb831f0081f8de8"
-  integrity sha512-XamKr4CO2Umb8e828Krl7TQN2MHa4i5jB/OZgpPt/bOMFE7jWO6Fw5S1Q0M5cNmUsVoefd3hi7C7juLKPuILZw==
+"@elastic/eui@100.0.0-classic.0":
+  version "100.0.0-classic.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-100.0.0-classic.0.tgz#3849fb9a1d4797a93f51cace9c1ba3e97568320a"
+  integrity sha512-aK7cuQo4UWF/03X2Wvu88/JZN3p58LM8asRxGVpMMQFbjCLAL/vR0JpVGvy8Qpc9k3pYFuZWcINWTawvAqqiPA==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.10"
+    "@elastic/eui-theme-common" "0.0.11"
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
