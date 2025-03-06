@@ -1716,20 +1716,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.ViewMode",
-        "type": "Enum",
-        "tags": [],
-        "label": "ViewMode",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "embeddable",
@@ -3111,71 +3098,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.isSavedObjectEmbeddableInput",
-        "type": "Function",
-        "tags": [],
-        "label": "isSavedObjectEmbeddableInput",
-        "description": [],
-        "signature": [
-          "(input: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          " | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ") => boolean"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.isSavedObjectEmbeddableInput.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "input",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.SavedObjectEmbeddableInput",
-                "text": "SavedObjectEmbeddableInput"
-              },
-              " | ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              }
-            ],
-            "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "embeddable",
@@ -3329,98 +3252,10 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.SavedObjectEmbeddableInput",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectEmbeddableInput",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          }
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.SavedObjectEmbeddableInput.savedObjectId",
-            "type": "string",
-            "tags": [],
-            "label": "savedObjectId",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.ViewMode",
-        "type": "Enum",
-        "tags": [],
-        "label": "ViewMode",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.EmbeddableInput",
-        "type": "Type",
-        "tags": [],
-        "label": "EmbeddableInput",
-        "description": [],
-        "signature": [
-          "{ version?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; title?: string | undefined; description?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; }"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "embeddable",
         "id": "def-common.EmbeddablePersistableStateService",
