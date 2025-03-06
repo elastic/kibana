@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray, sum } from 'lodash';
-import moment, { unitOfTime } from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
+import { castArray } from 'lodash';
+import moment, { unitOfTime } from 'moment';
 import { SynthtraceGenerator } from '../types';
 import { Fields } from './entity';
 import { Serializable } from './serializable';
+import { TimerangeProgressReporter } from './timerange_progress_reporter';
 
 export function parseInterval(interval: string): {
   intervalAmount: number;
@@ -33,7 +34,7 @@ interface IntervalOptions {
   to: Date;
   interval: string;
   rate?: number;
-  log: ToolingLog;
+  log?: ToolingLog;
 }
 
 interface StepDetails {
@@ -88,78 +89,21 @@ export class Interval<TFields extends Fields = Fields> {
     };
 
     let index = 0;
-
-    const startTime = performance.now();
-    const from = this.options.from.getTime();
-    const to = this.options.to.getTime();
-
     const calculateEvery = 10;
 
-    const reportEveryMs = 5000;
-
-    let lastReport = 0;
-
-    let count = 0;
-
-    const measurements: number[] = [];
-
-    let lastTimestamp = from;
-    let lastNow = performance.now();
-
-    const measure = (timestamp: number) => {
-      const timeProcessed = timestamp - lastTimestamp;
-
-      lastTimestamp = timestamp;
-
-      const now = performance.now();
-
-      const timeProcessedPerMs = timeProcessed / (now - lastNow);
-
-      lastNow = now;
-
-      measurements.unshift(timeProcessedPerMs);
-      measurements.length = Math.min(10, measurements.length);
-
-      if (now - lastReport >= reportEveryMs) {
-        report(now);
-      }
-    };
-
-    const report = (now: number) => {
-      const totalProgress = (lastTimestamp - from) / (to - from);
-
-      const timeElapsedInMs = now - startTime;
-
-      const durationFormatted = moment.duration(timeElapsedInMs, 'ms').humanize();
-
-      const avgSpeed = sum(measurements) / measurements.length;
-
-      const timeLeftToProcess = to - lastTimestamp;
-
-      const estimatedTimeOfCompletion = timeLeftToProcess / avgSpeed;
-
-      const etaFormatted = moment.duration(estimatedTimeOfCompletion, 'ms').humanize(true);
-
-      lastReport = now;
-
-      this.options.log.info(
-        `progress=${(totalProgress * 100).toPrecision(
-          3
-        )}%, duration=${durationFormatted}, eta=${etaFormatted}`
-      );
-    };
+    const reporter = this.options.log
+      ? new TimerangeProgressReporter({
+          log: this.options.log,
+          reportEvery: 5000,
+          total: timestamps.length,
+        })
+      : undefined;
 
     for (const timestamp of timestamps) {
       const events = castArray(map(timestamp, index, stepDetails));
       index++;
-      count += events.length;
       if (index % calculateEvery === 0) {
-        if (events.length) {
-          const last = events.find((event) => event.fields['@timestamp'])?.fields['@timestamp'];
-          if (last) {
-            measure(last);
-          }
-        }
+        reporter?.next(index);
       }
       for (const event of events) {
         yield event;

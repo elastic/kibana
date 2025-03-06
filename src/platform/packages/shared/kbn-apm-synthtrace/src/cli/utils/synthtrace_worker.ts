@@ -12,10 +12,11 @@ import { bootstrap } from './bootstrap';
 import { indexHistoricalData } from './index_historical_data';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
+import { StreamManager } from './stream_manager';
 
 export interface WorkerData {
-  from: Date;
-  to: Date;
+  from: number;
+  to: number;
   bucketFrom: Date;
   bucketTo: Date;
   runOptions: RunOptions;
@@ -27,8 +28,11 @@ const { bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as W
 async function start() {
   const logger = loggerProxy;
 
+  const streamManager = new StreamManager(logger);
+
   const { clients } = await bootstrap({
     ...runOptions,
+    skipClientBootstrap: true,
     clean: false,
   });
 
@@ -41,6 +45,7 @@ async function start() {
     workerId,
     from,
     to,
+    streamManager,
   });
 }
 

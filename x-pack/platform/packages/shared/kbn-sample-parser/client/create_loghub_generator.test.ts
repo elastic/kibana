@@ -30,12 +30,13 @@ describe('createLoghubGenerator', () => {
         readme: '',
         // 2rpm
         logLines: ['0', '60000'],
+        templates: [],
       };
       log = new ToolingLog();
     });
 
     it('generates the first event at the start time', () => {
-      const generator = createLoghubGenerator({ system, parser, log });
+      const generator = createLoghubGenerator({ system, parser, log, queries: [] });
       const startTime = 100_000;
       const docs = generator.next(startTime);
 
@@ -45,7 +46,7 @@ describe('createLoghubGenerator', () => {
     });
 
     it('generates the second event with the right offset', () => {
-      const generator = createLoghubGenerator({ system, parser, log });
+      const generator = createLoghubGenerator({ system, parser, log, queries: [] });
       const startTime = 100_000;
       generator.next(startTime);
 
@@ -55,7 +56,7 @@ describe('createLoghubGenerator', () => {
     });
 
     it('returns no events if current time is before the next event', () => {
-      const generator = createLoghubGenerator({ system, parser, log });
+      const generator = createLoghubGenerator({ system, parser, log, queries: [] });
       const startTime = 100_000;
       generator.next(startTime);
 
@@ -70,13 +71,14 @@ describe('createLoghubGenerator', () => {
         name: 'TestSystem',
         readme: '',
         // 200rpm
-        logLines: ['0', '600'],
+        logLines: ['0', '599'],
+        templates: [],
       };
       log = new ToolingLog();
     });
 
-    test('applies speed throttle when log rate is too high', () => {
-      const generator = createLoghubGenerator({ system, parser, log, targetRpm: 100 });
+    it('applies speed throttle when log rate is too high', () => {
+      const generator = createLoghubGenerator({ system, parser, log, targetRpm: 100, queries: [] });
 
       const startTime = 100_000;
       const firstBatch = generator.next(startTime);
@@ -86,10 +88,10 @@ describe('createLoghubGenerator', () => {
       expect(firstBatch[0]['@timestamp']).toBe(startTime);
 
       // after that, the delta should be half of what is expected
-      const secondBatch = generator.next(startTime + 600);
-      const expectedTimestamp = startTime + 300;
+      const secondBatch = generator.next(startTime + 1200);
+      const expectedTimestamp = startTime + 1200;
 
-      expect(secondBatch.length).toBeGreaterThanOrEqual(1);
+      expect(secondBatch.length).toBe(1);
 
       expect(secondBatch[0]['@timestamp']).toBe(expectedTimestamp);
     });

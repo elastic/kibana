@@ -125,10 +125,10 @@ const scenario: Scenario<LogDocument> = async ({ from, to, ...runOptions }) => {
         log.info(`Completed bootstrapping of streams with critical events`);
       }
     },
-    teardown: async ({ client: esClient }) => {
+    teardown: async ({ esClient }) => {
       const ranges = [0.25, 4, 24, 48]; // 15m, 4h, 24h, 48h
 
-      const end = to.toISOString();
+      const end = new Date(to).toISOString();
 
       const requests: Array<{
         name: string;

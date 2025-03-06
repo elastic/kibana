@@ -25,9 +25,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     bootstrap: async ({ streamsClient }) => {
       await streamsClient.enable();
     },
-    teardown: async ({ streamsClient }) => {
-      await streamsClient.clean();
-    },
     generate: ({ range, clients: { streamsClient } }) => {
       return withClient(
         streamsClient,

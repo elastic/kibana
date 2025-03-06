@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable, Transform, pipeline } from 'stream';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import { Required } from 'utility-types';
 import { Condition, StreamUpsertRequest } from '@kbn/streams-schema';
+import { Readable, Transform, pipeline } from 'stream';
+import { Required } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
-import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { internalKibanaHeaders } from '../shared/client_headers';
+import { getSerializeTransform } from '../shared/get_serialize_transform';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StreamsDocument {}
@@ -73,12 +73,6 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
   }
 
   override async clean(): Promise<void> {
-    await this.client.deleteByQuery({
-      index: '.alerts*',
-      query: {
-        match_all: {},
-      },
-    });
     await this.disable();
     await super.clean();
   }

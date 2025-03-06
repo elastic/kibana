@@ -26,8 +26,8 @@ export async function startHistoricalDataUpload({
   to,
 }: {
   runOptions: RunOptions;
-  from: Date;
-  to: Date;
+  from: number;
+  to: number;
 }) {
   const { logger, clients } = await bootstrap(runOptions);
 
@@ -51,8 +51,6 @@ export async function startHistoricalDataUpload({
 
   const streamManager = new StreamManager(logger, teardown);
 
-  streamManager.init();
-
   if (scenario.bootstrap) {
     await scenario.bootstrap(clients);
   }
@@ -61,9 +59,7 @@ export async function startHistoricalDataUpload({
 
   let workers = Math.min(runOptions.workers ?? 10, cores - 1);
 
-  const rangeEnd = to;
-
-  const diff = moment(from).diff(rangeEnd);
+  const diff = moment(from).diff(to);
 
   const d = moment.duration(Math.abs(diff), 'ms');
 
@@ -81,10 +77,12 @@ export async function startHistoricalDataUpload({
     logger.info(`updating maxWorkers to ${workers} to ensure each worker does enough work`);
   }
 
-  logger.info(`Generating data from ${from.toISOString()} to ${rangeEnd.toISOString()}`);
+  logger.info(
+    `Generating data from ${new Date(from).toISOString()} to ${new Date(to).toISOString()}`
+  );
 
   function rangeStep(interval: number) {
-    if (from > rangeEnd) return moment(from).subtract(interval, 'ms').toDate();
+    if (from > to) return moment(from).subtract(interval, 'ms').toDate();
     return moment(from).add(interval, 'ms').toDate();
   }
 
@@ -121,6 +119,9 @@ export async function startHistoricalDataUpload({
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData,
       });
+
+      streamManager.trackWorker(worker);
+
       worker.on('message', ([logLevel, msg]: [string, string]) => {
         switch (logLevel) {
           case LogLevel.debug:
@@ -172,11 +173,12 @@ export async function startHistoricalDataUpload({
             workerId: 'i',
             from,
             to,
+            streamManager,
           }),
         ]
       : range(0, intervals.length).map((index) => runService(intervals[index]));
 
-  await Promise.all(workerServices);
+  await Promise.race(workerServices);
 
   await teardown();
 }

@@ -9,10 +9,6 @@
 
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray, once } from 'lodash';
-import { PassThrough, Readable, Writable } from 'stream';
-import { isGeneratorObject } from 'util/types';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
@@ -24,8 +20,8 @@ export async function startLiveDataUpload({
   to,
 }: {
   runOptions: RunOptions;
-  from: Date;
-  to: Date;
+  from: number;
+  to: number;
 }) {
   const file = runOptions.file;
 
@@ -46,8 +42,6 @@ export async function startLiveDataUpload({
 
   const streamManager = new StreamManager(logger, teardown);
 
-  streamManager.init();
-
   if (scenarioBootstrap) {
     await scenarioBootstrap(clients);
   }
@@ -55,16 +49,13 @@ export async function startLiveDataUpload({
   const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = from;
 
-  // @ts-expect-error upgrade typescript v4.9.5
-  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
-
   async function uploadNextBatch() {
     const now = Date.now();
 
-    if (now > requestedUntil.getTime()) {
-      const bucketCount = Math.floor((now - requestedUntil.getTime()) / bucketSizeInMs);
+    if (now > requestedUntil) {
+      const bucketCount = Math.floor((now - requestedUntil) / bucketSizeInMs);
 
-      const rangeStart = requestedUntil.getTime();
+      const rangeStart = requestedUntil;
       const rangeEnd = rangeStart + bucketCount * bucketSizeInMs;
 
       logger.info(
@@ -73,57 +64,30 @@ export async function startLiveDataUpload({
         ).toISOString()} in ${bucketCount} bucket(s)`
       );
 
-      const generatorsAndClients = generate({
-        range: timerange(rangeStart, rangeEnd, logger),
-        clients,
-      });
+      const generatorsAndClients = castArray(
+        generate({
+          range: timerange(rangeStart, rangeEnd, logger),
+          clients,
+        })
+      );
 
-      const generatorsAndClientsArray = castArray(generatorsAndClients);
+      await Promise.all(
+        generatorsAndClients.map(async ({ generator, client }) => {
+          await streamManager.index(client, generator);
+        })
+      );
 
-      const streams = generatorsAndClientsArray.map(({ client }) => {
-        let stream: PassThrough;
+      logger.debug('Indexing completed');
 
-        if (cachedStreams.has(client)) {
-          stream = cachedStreams.get(client)!;
-        } else {
-          stream = new PassThrough({ objectMode: true });
-          cachedStreams.set(client, stream);
-          client.index(stream);
-        }
-
-        return stream;
-      });
-
-      streams.forEach((stream) => streamManager.trackStream(stream));
-
-      const promises = generatorsAndClientsArray.map(({ generator }, i) => {
-        const concatenatedStream = castArray(generator)
-          .reverse()
-          .reduce<Writable>((prev, current) => {
-            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-            return currentStream.pipe(prev);
-          }, new PassThrough({ objectMode: true }));
-
-        concatenatedStream.pipe(streams[i], { end: false });
-
-        return awaitStream(concatenatedStream);
-      });
-
-      await Promise.all(promises);
-
-      logger.info('Indexing completed');
-
-      const refreshPromise = generatorsAndClientsArray.map(async ({ client }) => {
+      const refreshPromise = generatorsAndClients.map(async ({ client }) => {
         await client.refresh();
       });
 
       await Promise.all(refreshPromise);
 
-      streams.forEach((stream) => streamManager.untrackStream(stream));
+      logger.debug('Refreshing completed');
 
-      logger.info('Refreshing completed');
-
-      requestedUntil = new Date(rangeEnd);
+      requestedUntil = rangeEnd;
     }
   }
 

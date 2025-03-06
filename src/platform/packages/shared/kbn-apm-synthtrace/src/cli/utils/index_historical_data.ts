@@ -14,6 +14,7 @@ import { Logger } from '../../lib/utils/create_logger';
 import { SynthtraceClients } from './get_clients';
 import { getScenario } from './get_scenario';
 import { WorkerData } from './synthtrace_worker';
+import { StreamManager } from './stream_manager';
 
 export async function indexHistoricalData({
   bucketFrom,
@@ -24,7 +25,8 @@ export async function indexHistoricalData({
   clients,
   from,
   to,
-}: WorkerData & { logger: Logger; clients: SynthtraceClients }) {
+  streamManager,
+}: WorkerData & { logger: Logger; clients: SynthtraceClients; streamManager: StreamManager }) {
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
@@ -39,14 +41,14 @@ export async function indexHistoricalData({
 
   logger.debug('Generating scenario');
 
-  const generatorsAndClients = logger.perf('generate_scenario', () =>
-    generate({
-      range: timerange(bucketFrom, bucketTo, logger),
-      clients,
-    })
+  const generatorsAndClients = castArray(
+    logger.perf('generate_scenario', () =>
+      generate({
+        range: timerange(bucketFrom, bucketTo, logger),
+        clients,
+      })
+    )
   );
-
-  const generatorsAndClientsArray = castArray(generatorsAndClients);
 
   logger.debug('Indexing scenario');
 
@@ -56,7 +58,7 @@ export async function indexHistoricalData({
 
   let cpuUsage = process.cpuUsage();
 
-  setInterval(async () => {
+  const intervalId = setInterval(async () => {
     cpuUsage = process.cpuUsage(cpuUsage);
     const mem = memoryUsage();
     logger.debug(
@@ -67,11 +69,12 @@ export async function indexHistoricalData({
   }, 5000);
 
   await logger.perf('index_scenario', async () => {
-    const promises = generatorsAndClientsArray.map(async ({ client, generator }) => {
-      await client.index(generator);
-      await client.refresh();
+    await Promise.all(
+      generatorsAndClients.map(async ({ client, generator }) => {
+        await streamManager.index(client, generator);
+      })
+    ).finally(() => {
+      clearInterval(intervalId);
     });
-
-    await Promise.all(promises);
   });
 }

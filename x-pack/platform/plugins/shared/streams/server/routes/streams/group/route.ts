@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { badRequest } from '@hapi/boom';
+import { badData, badRequest } from '@hapi/boom';
 import {
   GroupObjectGetResponse,
   groupObjectUpsertRequestSchema,
@@ -71,6 +71,10 @@ const upsertGroupRoute = createServerRoute({
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
+
+    if (!(await streamsClient.isStreamsEnabled())) {
+      throw badData('Streams are not enabled for Group streams.');
+    }
 
     const { name } = params.path;
 

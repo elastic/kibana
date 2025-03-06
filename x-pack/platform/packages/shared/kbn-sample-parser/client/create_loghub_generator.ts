@@ -58,10 +58,11 @@ export function createLoghubGenerator({
 
         const rel = (line.timestamp - min) / range;
 
-        const delta = (1 / speed) * range * (rotations + rel);
+        // add 1 ms per rotation to separate start and end events
+        const delta = (1 / speed) * range * (rel + rotations) + rotations;
 
+        // ES likes its timestamp to be an integer
         const simulatedTimestamp = Math.floor(start + delta);
-
         if (simulatedTimestamp > timestamp) {
           break;
         }

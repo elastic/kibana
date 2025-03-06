@@ -30,17 +30,19 @@ export interface SynthtraceClients {
   streamsClient: StreamsSynthtraceClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
   entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
-  client: Client;
+  esClient: Client;
 }
 
 export async function getClients({
   logger,
   options,
   packageVersion,
+  skipBootstrap,
 }: {
   logger: Logger;
   options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>;
   packageVersion?: string;
+  skipBootstrap?: boolean;
 }): Promise<SynthtraceClients> {
   const apmKibanaClient = new ApmSynthtraceKibanaClient({
     logger,
@@ -51,12 +53,14 @@ export async function getClients({
 
   if (!version) {
     version = await apmKibanaClient.fetchLatestApmPackageVersion();
-    await apmKibanaClient.installApmPackage(version);
+    if (!skipBootstrap) {
+      await apmKibanaClient.installApmPackage(version);
+    }
   } else if (version === 'latest') {
     version = await apmKibanaClient.fetchLatestApmPackageVersion();
   }
 
-  logger.info(`Using package version: ${version}`);
+  logger.debug(`Using package version: ${version}`);
 
   const apmEsClient = new ApmSynthtraceEsClient({
     ...options,
@@ -86,6 +90,6 @@ export async function getClients({
     streamsClient,
     syntheticsEsClient,
     entitiesKibanaClient,
-    client: options.client,
+    esClient: options.client,
   };
 }

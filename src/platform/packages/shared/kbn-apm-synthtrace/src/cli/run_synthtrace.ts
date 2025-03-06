@@ -67,6 +67,14 @@ function options(y: Argv) {
       number: true,
       default: 1,
     })
+    .option('debug', {
+      describe: 'Use a debug log level',
+      boolean: true,
+    })
+    .option('verbose', {
+      describe: 'Use a verbose log level',
+      boolean: true,
+    })
     .option('logLevel', {
       describe: 'Log level',
       choices: ['verbose', 'debug', 'info', 'error'],
@@ -127,15 +135,13 @@ function options(y: Argv) {
 async function run(argv: RunCliFlags) {
   const runOptions = parseRunCliFlags(argv);
 
-  const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
-  const to = new Date(toMs);
+  const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
 
   const defaultTimeRange = '1m';
 
-  const fromMs = argv.from
+  const from = argv.from
     ? datemath.parse(String(argv.from))!.valueOf()
-    : toMs - intervalToMs(defaultTimeRange);
-  const from = new Date(fromMs);
+    : to - intervalToMs(defaultTimeRange);
 
   const live = argv.live;
 

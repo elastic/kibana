@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badData, badRequest } from '@hapi/boom';
 import {
   IngestGetResponse,
   StreamUpsertRequest,
@@ -76,6 +76,13 @@ const upsertIngestRoute = createServerRoute({
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
+
+    if (
+      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
+      !(await streamsClient.isStreamsEnabled())
+    ) {
+      throw badData('Streams are not enabled for Wired streams.');
+    }
 
     const name = params.path.name;
 

@@ -148,9 +148,9 @@ export class SynthtraceEsClient<TFields extends Fields> {
         count++;
 
         if (count % 100000 === 0) {
-          this.logger.info(`Indexed ${count} documents`);
-        } else if (count % 1000 === 0) {
           this.logger.debug(`Indexed ${count} documents`);
+        } else if (count % 1000 === 0) {
+          this.logger.verbose(`Indexed ${count} documents`);
         }
 
         if (doc._action) {
