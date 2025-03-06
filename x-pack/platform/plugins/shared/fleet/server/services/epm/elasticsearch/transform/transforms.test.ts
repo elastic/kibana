@@ -386,6 +386,7 @@ _meta:
             _meta: meta,
             composed_of: [
               'logs-endpoint.metadata_current-template@package',
+              'endpoint@custom',
               'logs-endpoint.metadata_current-template@custom',
             ],
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
@@ -670,6 +671,7 @@ _meta:
             _meta: meta,
             composed_of: [
               'logs-endpoint.metadata_current-template@package',
+              'endpoint@custom',
               'logs-endpoint.metadata_current-template@custom',
             ],
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
