@@ -14,6 +14,21 @@ import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
 
+function safeJsonParse(logger: Pick<Logger, 'error'>, jsonString?: string) {
+  try {
+    return JSON.parse(jsonString ?? '{}');
+  } catch (error) {
+    logger.error(
+      `Failed to parse function call arguments when converting messages for inference: ${error}`
+    );
+    // if the LLM returns invalid JSON, it is likley because it is hallucinating
+    // the function. We don't want to propogate the error about invalid JSON here.
+    // Any errors related to the function call will be caught when the function and
+    // it's arguments are validated
+    return {};
+  }
+}
+
 export function convertMessagesForInference(
   messages: Message[],
   logger: Pick<Logger, 'error'>
@@ -22,24 +37,6 @@ export function convertMessagesForInference(
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
-      let parsedArguments;
-      if (message.message.function_call?.name) {
-        try {
-          parsedArguments = message.message.function_call?.arguments
-            ? JSON.parse(message.message.function_call.arguments)
-            : {};
-        } catch (error) {
-          logger.error(
-            `Failed to parse function call arguments when converting messages for inference: ${error}`
-          );
-          // if the LLM returns invalid JSON, it is likley because it is hallucinating
-          // the function. We don't want to propogate the error about invalid JSON here.
-          // Any errors related to the function call will be caught when the function and
-          // it's arguments are validated
-          return {};
-        }
-      }
-
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
         content: message.message.content ?? null,
@@ -49,7 +46,7 @@ export function convertMessagesForInference(
                 {
                   function: {
                     name: message.message.function_call.name,
-                    arguments: parsedArguments || {},
+                    arguments: safeJsonParse(logger, message.message.function_call?.arguments),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },
