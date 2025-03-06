@@ -42,7 +42,9 @@ export function createUpsertStreamActor({
               ingest: {
                 ...input.definition.stream.ingest,
                 processing: input.processors.map(processorConverter.toAPIDefinition),
-                ...(input.fields && { wired: { fields: input.fields } }),
+                ...(input.fields && {
+                  wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
+                }),
               },
             }
           : {
