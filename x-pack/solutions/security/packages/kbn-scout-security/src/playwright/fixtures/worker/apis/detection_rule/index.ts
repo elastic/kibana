@@ -6,11 +6,10 @@
  */
 
 import { KbnClient } from '@kbn/scout';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-} from '@kbn/security-solution-plugin/common/constants';
 import { CUSTOM_QUERY_RULE } from '../../../test_data';
+
+const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
+const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
 
 export interface DetectionRuleFixture {
   createCustomQueryRule: () => Promise<void>;
