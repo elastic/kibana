@@ -15,12 +15,21 @@ interface UseChatProps {
   conversationId: string | undefined;
   agentId: string;
   onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
+  onError?: (error: any) => void;
 }
 
-export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseChatProps) => {
+export type ChatStatus = 'ready' | 'loading' | 'error';
+
+export const useChat = ({
+  conversationId,
+  agentId,
+  onConversationUpdate,
+  onError,
+}: UseChatProps) => {
   const { chatService } = useWorkChatServices();
   const [conversationEvents, setConversationEvents] = useState<ConversationEvent[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [status, setStatus] = useState<ChatStatus>('ready');
 
   const sendMessage = useCallback(
     async (nextMessage: string) => {
@@ -28,6 +37,8 @@ export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseCh
 
       let concatenatedChunks = '';
       const events$ = await chatService.converse({ nextMessage, conversationId, agentId });
+
+      setStatus('loading');
 
       events$.subscribe({
         next: (event) => {
@@ -46,10 +57,15 @@ export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseCh
             assistantMessageEvent(concatenatedChunks),
           ]);
           setPendingMessage('');
+          setStatus('ready');
+        },
+        error: (err) => {
+          setStatus('error');
+          onError?.(err);
         },
       });
     },
-    [chatService, agentId, conversationId, onConversationUpdate]
+    [chatService, agentId, conversationId, onConversationUpdate, onError]
   );
 
   const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {
@@ -64,6 +80,7 @@ export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseCh
   }, [conversationEvents, pendingMessage]);
 
   return {
+    status,
     sendMessage,
     conversationEvents: allEvents,
     setConversationEvents: setConversationEventsExternal,

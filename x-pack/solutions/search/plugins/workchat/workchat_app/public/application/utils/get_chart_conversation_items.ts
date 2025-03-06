@@ -7,11 +7,13 @@
 
 import type { ConversationEvent } from '../../../common/conversations';
 import { isMessageEvent } from '../../../common/utils/conversation';
+import type { ChatStatus } from '../hooks/use_chat';
 
+// TODO: maybe composition from ConversationEvent?
 export interface ConversationItem {
   type: 'message';
   user: 'user' | 'assistant';
-  loading: false;
+  loading: boolean;
   id: string;
   createdAt: string;
   content: string;
@@ -22,11 +24,12 @@ export interface ConversationItem {
  */
 export const getChartConversationItems = ({
   conversationEvents,
+  chatStatus,
 }: {
   conversationEvents: ConversationEvent[];
+  chatStatus: ChatStatus;
 }): ConversationItem[] => {
-  return conversationEvents.filter(isMessageEvent).map<ConversationItem>((event) => {
-    // TODO: maybe composition from ConversationEvent?
+  const items = conversationEvents.filter(isMessageEvent).map<ConversationItem>((event, index) => {
     return {
       type: 'message',
       user: event.message.type,
@@ -36,4 +39,23 @@ export const getChartConversationItems = ({
       content: event.message.content,
     };
   });
+
+  if (chatStatus === 'loading') {
+    const lastItem = items[items.length - 1];
+    if (lastItem.user === 'assistant') {
+      lastItem.loading = true;
+    } else {
+      // need to insert loading placeholder
+      items.push({
+        type: 'message',
+        user: 'assistant',
+        loading: true,
+        id: '__placeholder__',
+        createdAt: '',
+        content: '',
+      });
+    }
+  }
+
+  return items;
 };

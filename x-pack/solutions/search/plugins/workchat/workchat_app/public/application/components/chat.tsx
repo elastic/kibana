@@ -33,7 +33,7 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
 `;
 
 export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate }) => {
-  const { sendMessage, conversationEvents } = useConversation({
+  const { sendMessage, conversationEvents, chatStatus } = useConversation({
     conversationId,
     agentId: 'default',
     onConversationUpdate,
@@ -66,7 +66,7 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
-            <ChatConversation conversationEvents={conversationEvents} />
+            <ChatConversation conversationEvents={conversationEvents} chatStatus={chatStatus} />
           </EuiPanel>
         </div>
       </EuiFlexItem>

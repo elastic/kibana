@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiComment, EuiPanel, EuiAvatar } from '@elastic/eui';
+import { EuiComment, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChatMessageText } from './chat_message_text';
+import { ChatMessageAvatar } from './chat_message_avatar';
 import type { ConversationItem } from '../utils/get_chart_conversation_items';
 
 interface ChatMessageProps {
@@ -34,19 +35,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   return (
     <EuiComment
       username={getUserLabel(message)}
-      timelineAvatar={
-        isUserMessage ? (
-          <EuiAvatar name="User" initials="Y" color="subdued" />
-        ) : (
-          <EuiAvatar iconType="agentApp" name="WorkChat" color="subdued" />
-        )
-      }
+      timelineAvatar={<ChatMessageAvatar role={message.user} loading={message.loading} />}
       event=""
       eventColor={isUserMessage ? 'primary' : 'subdued'}
       actions={<></>}
     >
       <EuiPanel hasShadow={false} paddingSize="s">
-        <ChatMessageText content={message.content} loading={false} />
+        <ChatMessageText content={message.content} loading={message.loading} />
       </EuiPanel>
     </EuiComment>
   );

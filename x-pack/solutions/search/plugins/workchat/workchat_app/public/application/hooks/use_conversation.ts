@@ -29,14 +29,19 @@ export const useConversation = ({
     [onConversationUpdate]
   );
 
-  const { conversationEvents, setConversationEvents, sendMessage } = useChat({
+  const {
+    conversationEvents,
+    setConversationEvents,
+    sendMessage,
+    status: chatStatus,
+  } = useChat({
     agentId,
     conversationId,
     onConversationUpdate: onConversationUpdateInternal,
   });
 
   useAbortableAsync(async () => {
-    // TODO: better init / state management
+    // TODO: better conv state management - only has events atm
     if (conversationId) {
       const conversation = await conversationService.get(conversationId);
       setConversationEvents(conversation.events);
@@ -45,5 +50,5 @@ export const useConversation = ({
     }
   }, [conversationId, conversationService]);
 
-  return { conversationEvents, sendMessage };
+  return { conversationEvents, chatStatus, sendMessage };
 };

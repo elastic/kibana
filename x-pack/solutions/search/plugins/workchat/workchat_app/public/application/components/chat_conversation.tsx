@@ -10,15 +10,20 @@ import { EuiCommentList } from '@elastic/eui';
 import type { ConversationEvent } from '../../../common/conversations';
 import { getChartConversationItems } from '../utils/get_chart_conversation_items';
 import { ChatMessage } from './chat_message';
+import type { ChatStatus } from '../hooks/use_chat';
 
 interface ChatConversationProps {
   conversationEvents: ConversationEvent[];
+  chatStatus: ChatStatus;
 }
 
-export const ChatConversation: React.FC<ChatConversationProps> = ({ conversationEvents }) => {
+export const ChatConversation: React.FC<ChatConversationProps> = ({
+  conversationEvents,
+  chatStatus,
+}) => {
   const conversationItems = useMemo(() => {
-    return getChartConversationItems({ conversationEvents });
-  }, [conversationEvents]);
+    return getChartConversationItems({ conversationEvents, chatStatus });
+  }, [conversationEvents, chatStatus]);
 
   return (
     <EuiCommentList>
