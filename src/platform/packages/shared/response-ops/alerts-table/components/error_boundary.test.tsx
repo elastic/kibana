@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ErrorBoundary } from './error_boundary';
 
 const FallbackComponent = () => <div>Fallback</div>;
@@ -19,20 +19,20 @@ const ComponentThatThrows = () => {
 
 describe('ErrorBoundary', () => {
   it('should render its children when no error is thrown in its subtree', () => {
-    const { getByText } = render(
+    render(
       <ErrorBoundary fallback={FallbackComponent}>
         <div>Children</div>
       </ErrorBoundary>
     );
-    expect(getByText('Children')).toBeInTheDocument();
+    expect(screen.getByText('Children')).toBeInTheDocument();
   });
 
   it('should display the provided fallback component when an error is thrown in its subtree', () => {
-    const { getByText } = render(
+    render(
       <ErrorBoundary fallback={FallbackComponent}>
         <ComponentThatThrows />
       </ErrorBoundary>
     );
-    expect(getByText('Fallback')).toBeInTheDocument();
+    expect(screen.getByText('Fallback')).toBeInTheDocument();
   });
 });

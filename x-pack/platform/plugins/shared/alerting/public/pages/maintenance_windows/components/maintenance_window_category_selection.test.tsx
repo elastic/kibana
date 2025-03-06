@@ -17,10 +17,10 @@ describe('maintenanceWindowCategorySelection', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={[]}
@@ -35,6 +35,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('should disable options if option is not in the available categories array', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={[]}
@@ -49,6 +50,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('can initialize checkboxes with initial values from props', async () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={['securitySolution', 'management']}
@@ -63,6 +65,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('can check checkboxes', async () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={['observability']}
@@ -84,6 +87,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('should display loading spinner if isLoading is true', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         isLoading
@@ -96,6 +100,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('should display error message if it exists', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={[]}
@@ -108,6 +113,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('should display radio group if scoped query is enabled', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         isScopedQueryEnabled={false}
@@ -134,6 +140,7 @@ describe('maintenanceWindowCategorySelection', () => {
   });
 
   it('should set only 1 category at a time if scoped query is enabled', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         isScopedQueryEnabled={true}

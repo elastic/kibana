@@ -124,10 +124,10 @@ describe('useRuleFormSteps', () => {
     render(<TestComponent />);
 
     // Use screen reader text for testing
-    expect(await screen.getByText('Step 1 is incomplete')).toBeInTheDocument();
+    expect(screen.getByText('Step 1 is incomplete')).toBeInTheDocument();
     const step1 = screen.getByTestId('ruleFormStep-rule-definition-reportOnBlur');
-    await fireEvent.blur(step1!);
-    expect(await screen.getByText('Step 1 has errors')).toBeInTheDocument();
+    fireEvent.blur(step1!);
+    expect(screen.getByText('Step 1 has errors')).toBeInTheDocument();
   });
 });
 
@@ -212,7 +212,7 @@ describe('useRuleFormHorizontalSteps', () => {
 
     render(<TestComponent />);
 
-    expect(await screen.getByText('Current step is 1')).toBeInTheDocument();
+    expect(screen.getByText('Current step is 1')).toBeInTheDocument();
 
     const nextButton = screen.getByText('Next');
     const previousButton = screen.getByText('Previous');
@@ -220,22 +220,22 @@ describe('useRuleFormHorizontalSteps', () => {
     fireEvent.click(nextButton);
     fireEvent.click(nextButton);
 
-    expect(await screen.getByText('Current step is 3')).toBeInTheDocument();
+    expect(screen.getByText('Current step is 3')).toBeInTheDocument();
 
     fireEvent.click(nextButton);
 
-    expect(await screen.getByText('Current step is 3')).toBeInTheDocument();
+    expect(screen.getByText('Current step is 3')).toBeInTheDocument();
 
     fireEvent.click(previousButton);
 
-    expect(await screen.getByText('Current step is 2')).toBeInTheDocument();
+    expect(screen.getByText('Current step is 2')).toBeInTheDocument();
 
     fireEvent.click(previousButton);
 
-    expect(await screen.getByText('Current step is 1')).toBeInTheDocument();
+    expect(screen.getByText('Current step is 1')).toBeInTheDocument();
 
     fireEvent.click(previousButton);
 
-    expect(await screen.getByText('Current step is 1')).toBeInTheDocument();
+    expect(screen.getByText('Current step is 1')).toBeInTheDocument();
   });
 });

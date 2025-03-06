@@ -52,11 +52,11 @@ describe('useCreateMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    appMockRenderer = createAppMockRenderer();
     createMaintenanceWindow.mockResolvedValue(maintenanceWindow);
   });
 
   it('should call onSuccess if api succeeds', async () => {
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useCreateMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -68,6 +68,7 @@ describe('useCreateMaintenanceWindow', () => {
   });
 
   it('should call onError if api fails', async () => {
+    appMockRenderer = createAppMockRenderer();
     createMaintenanceWindow.mockRejectedValue('');
 
     const { result } = renderHook(() => useCreateMaintenanceWindow(), {
@@ -84,6 +85,7 @@ describe('useCreateMaintenanceWindow', () => {
   });
 
   it('should show 400 error messages', async () => {
+    appMockRenderer = createAppMockRenderer();
     createMaintenanceWindow.mockRejectedValue({
       body: { statusCode: 400, message: 'Bad request' },
     });

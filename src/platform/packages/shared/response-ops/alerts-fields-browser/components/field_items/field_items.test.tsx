@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { omit } from 'lodash/fp';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { mockBrowserFields } from '../../mock';
 import { getFieldColumns, getFieldItemsData } from './field_items';
@@ -277,11 +277,9 @@ describe('field_items', () => {
       });
 
       const columns = getFieldColumns(getFieldColumnsParams);
-      const { getByTestId } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
-      );
+      render(<EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />);
 
-      getByTestId(`field-${timestampFieldId}-checkbox`).click();
+      screen.getByTestId(`field-${timestampFieldId}-checkbox`).click();
       expect(onToggleColumn).toHaveBeenCalledWith(timestampFieldId);
     });
 
@@ -297,18 +295,16 @@ describe('field_items', () => {
         ...getFieldColumnsParams,
       });
 
-      const { getByTestId, getAllByText } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
-      );
+      render(<EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />);
 
-      expect(getAllByText('Name').at(0)).toBeInTheDocument();
-      expect(getAllByText('Description').at(0)).toBeInTheDocument();
-      expect(getAllByText('Category').at(0)).toBeInTheDocument();
+      expect(screen.getAllByText('Name').at(0)).toBeInTheDocument();
+      expect(screen.getAllByText('Description').at(0)).toBeInTheDocument();
+      expect(screen.getAllByText('Category').at(0)).toBeInTheDocument();
 
-      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
     });
 
     it('should render default columns without description column', () => {
@@ -322,18 +318,16 @@ describe('field_items', () => {
       const columns = getFieldColumns({
         ...getFieldColumnsParams,
       });
-      const { getByTestId, getAllByText, queryAllByText, queryByTestId } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
-      );
+      render(<EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />);
 
-      expect(getAllByText('Name').at(0)).toBeInTheDocument();
-      expect(queryAllByText('Description').at(0)).toBeInTheDocument();
-      expect(getAllByText('Category').at(0)).toBeInTheDocument();
+      expect(screen.getAllByText('Name').at(0)).toBeInTheDocument();
+      expect(screen.getAllByText('Description').at(0)).toBeInTheDocument();
+      expect(screen.getAllByText('Category').at(0)).toBeInTheDocument();
 
-      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
-      expect(queryByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
+      expect(screen.getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
     });
 
     it('should format the cases column correctly', () => {
@@ -349,11 +343,9 @@ describe('field_items', () => {
         ...getFieldColumnsParams,
       });
 
-      const { getByText } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
-      );
+      render(<EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />);
 
-      expect(getByText('Cases')).toBeInTheDocument();
+      expect(screen.getByText('Cases')).toBeInTheDocument();
     });
   });
 });

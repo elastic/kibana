@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
 import { SUB_ACTION } from '../../../common/thehive/constants';
@@ -53,18 +53,18 @@ describe('TheHiveParamsFields renders', () => {
   });
 
   it('all Params fields is rendered', () => {
-    const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
+    render(<TheHiveParamsAlertFields {...defaultProps} />);
 
-    expect(getByTestId('titleInput')).toBeInTheDocument();
-    expect(getByTestId('descriptionTextArea')).toBeInTheDocument();
-    expect(getByTestId('tagsInput')).toBeInTheDocument();
-    expect(getByTestId('severitySelectInput')).toBeInTheDocument();
-    expect(getByTestId('tlpSelectInput')).toBeInTheDocument();
-    expect(getByTestId('typeInput')).toBeInTheDocument();
-    expect(getByTestId('sourceInput')).toBeInTheDocument();
-    expect(getByTestId('sourceRefInput')).toBeInTheDocument();
+    expect(screen.getByTestId('titleInput')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+    expect(screen.getByTestId('severitySelectInput')).toBeInTheDocument();
+    expect(screen.getByTestId('tlpSelectInput')).toBeInTheDocument();
+    expect(screen.getByTestId('typeInput')).toBeInTheDocument();
+    expect(screen.getByTestId('sourceInput')).toBeInTheDocument();
+    expect(screen.getByTestId('sourceRefInput')).toBeInTheDocument();
 
-    expect(getByTestId('severitySelectInput')).toHaveValue('2');
-    expect(getByTestId('tlpSelectInput')).toHaveValue('2');
+    expect(screen.getByTestId('severitySelectInput')).toHaveValue('2');
+    expect(screen.getByTestId('tlpSelectInput')).toHaveValue('2');
   });
 });

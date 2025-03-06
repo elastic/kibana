@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RuleTagBadge } from './rule_tag_badge';
 
@@ -33,26 +33,26 @@ describe('RuleTagBadge', () => {
   });
 
   it('can open and close the popover', () => {
-    const { rerender, baseElement } = render(
+    const { rerender } = render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBe(null);
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBe(null);
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBe(null);
+    expect(screen.queryByTestId('ruleTagBadgeItem-a')).toBe(null);
+    expect(screen.queryByTestId('ruleTagBadgeItem-b')).toBe(null);
+    expect(screen.queryByTestId('ruleTagBadgeItem-c')).toBe(null);
 
-    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    fireEvent.click(screen.getByTestId('ruleTagBadge')!);
     expect(onClickMock).toHaveBeenCalledTimes(1);
 
     rerender(
       <RuleTagBadge isOpen={true} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBeTruthy();
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBeTruthy();
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBeTruthy();
+    expect(screen.getByTestId('ruleTagBadgeItem-a')).toBeTruthy();
+    expect(screen.getByTestId('ruleTagBadgeItem-b')).toBeTruthy();
+    expect(screen.getByTestId('ruleTagBadgeItem-c')).toBeTruthy();
 
-    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    fireEvent.click(screen.getByTestId('ruleTagBadge')!);
     expect(onClickMock).toHaveBeenCalledTimes(2);
   });
 

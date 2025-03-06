@@ -12,7 +12,7 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { act, fireEvent, render, waitFor, within, screen } from '@testing-library/react';
+import { fireEvent, render, waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -133,31 +133,31 @@ describe('JiraParamsFields renders', () => {
   });
 
   it('all params fields are rendered', async () => {
-    const results = render(<JiraParamsFields {...defaultProps} />);
+    render(<JiraParamsFields {...defaultProps} />);
 
-    expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
-    expect((results.getByRole('option', { name: 'Bug' }) as HTMLOptionElement).selected).toBe(true);
+    expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
+    expect((screen.getByRole('option', { name: 'Bug' }) as HTMLOptionElement).selected).toBe(true);
 
-    expect(results.getByTestId('prioritySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+      expect((screen.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
         true
       );
     });
 
-    expect(results.getByTestId('summaryInput')).toBeInTheDocument();
-    expect(results.getByTestId('descriptionTextArea')).toBeInTheDocument();
-    expect(results.getByTestId('labelsComboBox')).toBeInTheDocument();
-    expect(results.getByTestId('commentsTextArea')).toBeInTheDocument();
-    expect(results.getByTestId('otherFieldsJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('summaryInput')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('labelsComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('otherFieldsJsonEditor')).toBeInTheDocument();
   });
 
   it('it shows loading when loading issue types', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
-    const results = render(<JiraParamsFields {...defaultProps} />);
+    render(<JiraParamsFields {...defaultProps} />);
 
-    expect(results.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('it shows loading when loading fields', () => {
@@ -166,10 +166,10 @@ describe('JiraParamsFields renders', () => {
       isLoading: true,
     });
 
-    const results = render(<JiraParamsFields {...defaultProps} />);
+    render(<JiraParamsFields {...defaultProps} />);
 
-    const prioritySelect = within(results.getByTestId('priority-wrapper'));
-    const labelsComboBox = within(results.getByTestId('labels-wrapper'));
+    const prioritySelect = within(screen.getByTestId('priority-wrapper'));
+    const labelsComboBox = within(screen.getByTestId('labels-wrapper'));
 
     expect(prioritySelect.getByRole('progressbar')).toBeInTheDocument();
     expect(labelsComboBox.getByRole('progressbar')).toBeInTheDocument();
@@ -178,11 +178,11 @@ describe('JiraParamsFields renders', () => {
   it('it disabled the fields when loading issue types', async () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    const results = render(<JiraParamsFields {...defaultProps} />);
-    const labels = within(results.getByTestId('labelsComboBox'));
+    render(<JiraParamsFields {...defaultProps} />);
+    const labels = within(screen.getByTestId('labelsComboBox'));
 
-    expect(results.getByTestId('issueTypeSelect')).toBeDisabled();
-    expect(results.getByTestId('prioritySelect')).toBeDisabled();
+    expect(screen.getByTestId('issueTypeSelect')).toBeDisabled();
+    expect(screen.getByTestId('prioritySelect')).toBeDisabled();
     expect(labels.getByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
@@ -192,11 +192,11 @@ describe('JiraParamsFields renders', () => {
       isLoading: true,
     });
 
-    const results = render(<JiraParamsFields {...defaultProps} />);
-    const labels = within(results.getByTestId('labelsComboBox'));
+    render(<JiraParamsFields {...defaultProps} />);
+    const labels = within(screen.getByTestId('labelsComboBox'));
 
-    expect(results.getByTestId('issueTypeSelect')).toBeDisabled();
-    expect(results.getByTestId('prioritySelect')).toBeDisabled();
+    expect(screen.getByTestId('issueTypeSelect')).toBeDisabled();
+    expect(screen.getByTestId('prioritySelect')).toBeDisabled();
     expect(labels.getByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
@@ -206,16 +206,16 @@ describe('JiraParamsFields renders', () => {
       ...useGetFieldsByIssueTypeResponse,
       fields: {},
     });
-    const results = render(<JiraParamsFields {...defaultProps} />);
+    render(<JiraParamsFields {...defaultProps} />);
 
-    expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
-    expect(results.getByTestId('summaryInput')).toBeInTheDocument();
-    expect(results.getByTestId('commentsTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('summaryInput')).toBeInTheDocument();
+    expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
 
-    expect(results.queryByTestId('prioritySelect')).toBeFalsy();
-    expect(results.queryByTestId('descriptionTextArea')).toBeFalsy();
-    expect(results.queryByTestId('labelsComboBox')).toBeFalsy();
-    expect(results.queryByTestId('search-parent-issues')).toBeFalsy();
+    expect(screen.queryByTestId('prioritySelect')).toBeFalsy();
+    expect(screen.queryByTestId('descriptionTextArea')).toBeFalsy();
+    expect(screen.queryByTestId('labelsComboBox')).toBeFalsy();
+    expect(screen.queryByTestId('search-parent-issues')).toBeFalsy();
   });
 
   it('If issue type is undefined, set to first item in issueTypes', () => {
@@ -277,8 +277,8 @@ describe('JiraParamsFields renders', () => {
       },
     };
 
-    const results = render(<JiraParamsFields {...newProps} />);
-    expect(results.queryByTestId('prioritySelect')).toBeFalsy();
+    render(<JiraParamsFields {...newProps} />);
+    expect(screen.queryByTestId('prioritySelect')).toBeFalsy();
   });
 
   it('If summary has errors, form row is invalid', () => {
@@ -287,8 +287,8 @@ describe('JiraParamsFields renders', () => {
       errors: { 'subActionParams.incident.summary': ['error'] },
     };
 
-    const results = render(<JiraParamsFields {...newProps} />);
-    const summary = within(results.getByTestId('summary-row'));
+    render(<JiraParamsFields {...newProps} />);
+    const summary = within(screen.getByTestId('summary-row'));
 
     expect(summary.getByText('error')).toBeInTheDocument();
   });
@@ -338,16 +338,16 @@ describe('JiraParamsFields renders', () => {
 
   describe('UI updates', () => {
     it('updates summary', () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
+      render(<JiraParamsFields {...defaultProps} />);
 
-      fireEvent.change(results.getByTestId('summaryInput'), { target: { value: 'new title' } });
+      fireEvent.change(screen.getByTestId('summaryInput'), { target: { value: 'new title' } });
       expect(editAction.mock.calls[0][1].incident.summary).toEqual('new title');
     });
 
     it('updates description', () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
+      render(<JiraParamsFields {...defaultProps} />);
 
-      fireEvent.change(results.getByTestId('descriptionTextArea'), {
+      fireEvent.change(screen.getByTestId('descriptionTextArea'), {
         target: { value: 'new desc' },
       });
 
@@ -355,35 +355,35 @@ describe('JiraParamsFields renders', () => {
     });
 
     it('updates issue type', async () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
+      render(<JiraParamsFields {...defaultProps} />);
 
-      expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
-      expect((results.getByRole('option', { name: 'Bug' }) as HTMLOptionElement).selected).toBe(
+      expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
+      expect((screen.getByRole('option', { name: 'Bug' }) as HTMLOptionElement).selected).toBe(
         true
       );
 
       await userEvent.selectOptions(
-        results.getByTestId('issueTypeSelect'),
-        results.getByRole('option', { name: 'Task' })
+        screen.getByTestId('issueTypeSelect'),
+        screen.getByRole('option', { name: 'Task' })
       );
 
       expect(editAction.mock.calls[0][1].incident.issueType).toEqual('10005');
     });
 
     it('updates priority', async () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
+      render(<JiraParamsFields {...defaultProps} />);
 
-      expect(results.getByTestId('prioritySelect')).toBeInTheDocument();
+      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+        expect((screen.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
           true
         );
       });
 
       await userEvent.selectOptions(
-        results.getByTestId('prioritySelect'),
-        results.getByRole('option', { name: 'Medium' })
+        screen.getByTestId('prioritySelect'),
+        screen.getByRole('option', { name: 'Medium' })
       );
 
       expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
@@ -398,22 +398,20 @@ describe('JiraParamsFields renders', () => {
         },
       });
 
-      const results = render(<JiraParamsFields {...defaultProps} />);
+      render(<JiraParamsFields {...defaultProps} />);
 
       await waitFor(() => {
-        expect(results.getByTestId('search-parent-issues')).toBeInTheDocument();
+        expect(screen.getByTestId('search-parent-issues')).toBeInTheDocument();
       });
 
-      const parentField = within(results.getByTestId('search-parent-issues'));
+      const parentField = within(screen.getByTestId('search-parent-issues'));
 
-      await act(async () => {
-        await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
-          delay: 1,
-        });
+      await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
+        delay: 1,
       });
 
       await waitFor(async () => {
-        expect(results.getByText('parent issue')).toBeInTheDocument();
+        expect(screen.getByText('parent issue')).toBeInTheDocument();
       });
 
       await waitFor(() => {
@@ -422,13 +420,11 @@ describe('JiraParamsFields renders', () => {
     });
 
     it('updates labels correctly', async () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
-      const labels = within(results.getByTestId('labelsComboBox'));
+      render(<JiraParamsFields {...defaultProps} />);
+      const labels = within(screen.getByTestId('labelsComboBox'));
 
-      await act(async () => {
-        await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
-          delay: 1,
-        });
+      await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
+        delay: 1,
       });
 
       await waitFor(() => {
@@ -450,8 +446,8 @@ describe('JiraParamsFields renders', () => {
           },
         },
       };
-      const results = render(<JiraParamsFields {...newProps} />);
-      const labels = within(results.getByTestId('labelsComboBox'));
+      render(<JiraParamsFields {...newProps} />);
+      const labels = within(screen.getByTestId('labelsComboBox'));
 
       fireEvent.focusOut(labels.getByTestId('comboBoxSearchInput'));
 
@@ -461,8 +457,8 @@ describe('JiraParamsFields renders', () => {
     });
 
     it('updates a comment ', () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
-      const comments = results.getByTestId('commentsTextArea');
+      render(<JiraParamsFields {...defaultProps} />);
+      const comments = screen.getByTestId('commentsTextArea');
 
       fireEvent.change(comments, {
         target: { value: 'new comment' },
@@ -475,8 +471,8 @@ describe('JiraParamsFields renders', () => {
 
     it('updates additional fields', () => {
       const TEST_VALUE = '{"field_id":"bar"}';
-      const results = render(<JiraParamsFields {...defaultProps} />);
-      const otherFields = results.getByTestId('otherFieldsJsonEditor');
+      render(<JiraParamsFields {...defaultProps} />);
+      const otherFields = screen.getByTestId('otherFieldsJsonEditor');
 
       fireEvent.change(otherFields, {
         target: { value: TEST_VALUE },
@@ -513,10 +509,10 @@ describe('JiraParamsFields renders', () => {
 
       const results = render(<JiraParamsFields {...defaultProps} />);
 
-      expect(results.getByTestId('prioritySelect')).toBeInTheDocument();
+      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+        expect((screen.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
           true
         );
       });
@@ -524,9 +520,9 @@ describe('JiraParamsFields renders', () => {
       results.rerender(<JiraParamsFields {...rerenderProps} />);
 
       await waitFor(() => {
-        expect(results.queryByTestId('priority-wrapper')).toBeFalsy();
-        expect(editAction.mock.calls[0][1].incident.priority).toEqual(null);
+        expect(screen.queryByTestId('priority-wrapper')).toBeFalsy();
       });
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual(null);
     });
 
     it('Preserve priority when the issue type fields are loading and hasPriority becomes stale', async () => {
@@ -541,15 +537,15 @@ describe('JiraParamsFields renders', () => {
       results.rerender(<JiraParamsFields {...defaultProps} />);
 
       await waitFor(() => {
-        expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+        expect((screen.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
           true
         );
       });
     });
 
     it('renders additional info for the additional fields field', () => {
-      const results = render(<JiraParamsFields {...defaultProps} />);
-      const additionalFields = results.getByText('Additional fields help');
+      render(<JiraParamsFields {...defaultProps} />);
+      const additionalFields = screen.getByText('Additional fields help');
 
       expect(additionalFields).toBeInTheDocument();
     });

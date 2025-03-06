@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import {
   RulesListTableStatusCell,
   RulesListTableStatusCellProps,
@@ -52,14 +52,12 @@ describe('RulesListTableStatusCell', () => {
   });
 
   it('should render successful rule outcome', async () => {
-    const { getByTestId } = render(
-      <ComponentWithLocale rule={mockRule} onManageLicenseClick={onManageLicenseClickMock} />
-    );
-    expect(getByTestId('ruleStatus-succeeded')).not.toBe(null);
+    render(<ComponentWithLocale rule={mockRule} onManageLicenseClick={onManageLicenseClickMock} />);
+    expect(screen.getByTestId('ruleStatus-succeeded')).not.toBe(null);
   });
 
   it('should render failed rule outcome', async () => {
-    const { getByTestId } = render(
+    render(
       <ComponentWithLocale
         rule={
           {
@@ -75,11 +73,11 @@ describe('RulesListTableStatusCell', () => {
         onManageLicenseClick={onManageLicenseClickMock}
       />
     );
-    expect(getByTestId('ruleStatus-failed')).not.toBe(null);
+    expect(screen.getByTestId('ruleStatus-failed')).not.toBe(null);
   });
 
   it('should render warning rule outcome', async () => {
-    const { getByTestId } = render(
+    render(
       <ComponentWithLocale
         rule={
           {
@@ -95,11 +93,11 @@ describe('RulesListTableStatusCell', () => {
         onManageLicenseClick={onManageLicenseClickMock}
       />
     );
-    expect(getByTestId('ruleStatus-warning')).not.toBe(null);
+    expect(screen.getByTestId('ruleStatus-warning')).not.toBe(null);
   });
 
   it('should render license errors', async () => {
-    const { getByTestId, getByText } = render(
+    render(
       <ComponentWithLocale
         rule={
           {
@@ -116,12 +114,12 @@ describe('RulesListTableStatusCell', () => {
         onManageLicenseClick={onManageLicenseClickMock}
       />
     );
-    expect(getByTestId('ruleStatus-warning')).not.toBe(null);
-    expect(getByText('License Error')).not.toBe(null);
+    expect(screen.getByTestId('ruleStatus-warning')).not.toBe(null);
+    expect(screen.getByText('License Error')).not.toBe(null);
   });
 
   it('should render loading indicator for new rules', async () => {
-    const { getByLabelText } = render(
+    render(
       <ComponentWithLocale
         rule={
           {
@@ -137,11 +135,11 @@ describe('RulesListTableStatusCell', () => {
       />
     );
 
-    expect(getByLabelText('Statistic is loading')).not.toBe(null);
+    expect(screen.getByLabelText('Statistic is loading')).not.toBe(null);
   });
 
   it('should render rule with no last run', async () => {
-    const { queryByText, getAllByText } = render(
+    render(
       <ComponentWithLocale
         rule={
           {
@@ -156,7 +154,7 @@ describe('RulesListTableStatusCell', () => {
       />
     );
 
-    expect(queryByText('Statistic is loading')).toBe(null);
-    expect(getAllByText('--')).not.toBe(null);
+    expect(screen.queryByText('Statistic is loading')).toBe(null);
+    expect(screen.getAllByText('--')).not.toBe(null);
   });
 });

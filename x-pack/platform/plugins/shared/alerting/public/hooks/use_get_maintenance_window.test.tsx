@@ -38,11 +38,10 @@ let appMockRenderer: AppMockRenderer;
 describe('useGetMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('should call onError if api fails', async () => {
+    appMockRenderer = createAppMockRenderer();
     getMaintenanceWindow.mockRejectedValue('');
 
     renderHook(() => useGetMaintenanceWindow('testId'), {

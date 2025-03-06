@@ -157,8 +157,9 @@ describe('useSearchAlertsQuery', () => {
     const { result } = renderHook(() => useSearchAlertsQuery(params), {
       wrapper,
     });
+
+    expect(result.current.data).toBeDefined();
     await waitFor(() => {
-      expect(result.current.data).toBeDefined();
       expect(result.current.data).toEqual(
         expect.objectContaining({
           ...expectedResponse,

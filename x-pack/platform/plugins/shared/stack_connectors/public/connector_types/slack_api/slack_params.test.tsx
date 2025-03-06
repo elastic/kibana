@@ -238,7 +238,7 @@ describe('SlackParamsFields renders', () => {
 
   test('should toggle subaction when button group clicked', async () => {
     const mockEditFunc = jest.fn();
-    const { getByTestId } = render(
+    render(
       <IntlProvider locale="en">
         <SlackParamsFields
           actionConnector={
@@ -261,10 +261,10 @@ describe('SlackParamsFields renders', () => {
       </IntlProvider>
     );
 
-    getByTestId('blockkit').click();
+    screen.getByTestId('blockkit').click();
     expect(mockEditFunc).toBeCalledWith('subAction', 'postBlockkit', 0);
 
-    getByTestId('text').click();
+    screen.getByTestId('text').click();
     expect(mockEditFunc).toBeCalledWith('subAction', 'postMessage', 0);
   });
 
@@ -293,11 +293,11 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
-    expect(screen.findByText('Channel')).toBeTruthy();
+    expect(await screen.findByText('Channel')).toBeTruthy();
     expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
-    expect(getByTestId('slackApiChannelId')).toHaveValue('old channel name');
+    expect(screen.getByTestId('slackApiChannelId')).toHaveValue('old channel name');
   });
 
   test('show the Channel ID label when using the new attribute "channelIds" in subActionParams', async () => {
@@ -325,11 +325,11 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
-    expect(screen.findByText('Channel ID')).toBeTruthy();
+    expect(await screen.findByText('Channel ID')).toBeTruthy();
     expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
-    expect(getByTestId('slackApiChannelId')).toHaveValue('channel-id-xxx');
+    expect(screen.getByTestId('slackApiChannelId')).toHaveValue('channel-id-xxx');
   });
 
   test('channel id in subActionParams should be validated', async () => {
@@ -370,11 +370,11 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
-    getByTestId('slackApiChannelId').click();
-    await userEvent.clear(getByTestId('slackApiChannelId'));
-    fireEvent.change(getByTestId('slackApiChannelId'), {
+    screen.getByTestId('slackApiChannelId').click();
+    await userEvent.clear(screen.getByTestId('slackApiChannelId'));
+    fireEvent.change(screen.getByTestId('slackApiChannelId'), {
       target: { value: 'new-channel-id' },
     });
     await userEvent.tab();
@@ -385,14 +385,15 @@ describe('SlackParamsFields renders', () => {
         { channelIds: ['new-channel-id'], channels: undefined, text: 'some text' },
         0
       );
-      expect(mockUseSubAction).toBeCalledWith({
-        connectorId: 'connector-id',
-        disabled: false,
-        subAction: 'validChannelId',
-        subActionParams: {
-          channelId: 'new-channel-id',
-        },
-      });
+    });
+
+    expect(mockUseSubAction).toBeCalledWith({
+      connectorId: 'connector-id',
+      disabled: false,
+      subAction: 'validChannelId',
+      subActionParams: {
+        channelId: 'new-channel-id',
+      },
     });
   });
 
@@ -436,24 +437,25 @@ describe('SlackParamsFields renders', () => {
         </IntlProvider>
       );
     };
-    const { getByTestId } = render(<WrappedComponent />);
+    render(<WrappedComponent />);
 
-    expect(screen.findByText('Channel ID')).toBeTruthy();
-    expect(getByTestId('slackChannelsComboBox')).toBeInTheDocument();
-    expect(getByTestId('slackChannelsComboBox').textContent).toBe('channel-id-1 - channel 1');
+    expect(await screen.findByText('Channel ID')).toBeTruthy();
+    expect(screen.getByTestId('slackChannelsComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('slackChannelsComboBox').textContent).toBe(
+      'channel-id-1 - channel 1'
+    );
 
-    act(() => {
-      const combobox = getByTestId('slackChannelsComboBox');
-      const inputCombobox = within(combobox).getByTestId('comboBoxSearchInput');
-      inputCombobox.click();
-    });
+    const combobox = screen.getByTestId('slackChannelsComboBox');
+    const inputCombobox = within(combobox).getByTestId('comboBoxSearchInput');
+    inputCombobox.click();
 
     await waitFor(() => {
-      // const popOverElement = within(baseElement).getByTestId('slackChannelsComboBox-optionsList');
       expect(screen.getByTestId('channel-id-1')).toBeInTheDocument();
-      expect(screen.getByTestId('channel-id-2')).toBeInTheDocument();
-      expect(screen.getByTestId('channel-id-3')).toBeInTheDocument();
     });
+    // const popOverElement = within(baseElement).getByTestId('slackChannelsComboBox-optionsList');
+
+    expect(screen.getByTestId('channel-id-2')).toBeInTheDocument();
+    expect(screen.getByTestId('channel-id-3')).toBeInTheDocument();
 
     act(() => {
       screen.getByTestId('channel-id-3').click();
@@ -461,19 +463,20 @@ describe('SlackParamsFields renders', () => {
 
     await waitFor(() => {
       expect(
-        within(getByTestId('slackChannelsComboBox')).getByText('channel-id-3 - channel 3')
+        within(screen.getByTestId('slackChannelsComboBox')).getByText('channel-id-3 - channel 3')
       ).toBeInTheDocument();
-      expect(mockEditFunc).toBeCalledWith(
-        'subActionParams',
-        { channelIds: ['channel-id-3'], channels: undefined, text: 'some text' },
-        0
-      );
-      expect(mockUseSubAction).toBeCalledWith({
-        connectorId: 'connector-id',
-        disabled: false,
-        subAction: 'validChannelId',
-        subActionParams: { channelId: '' },
-      });
+    });
+
+    expect(mockEditFunc).toBeCalledWith(
+      'subActionParams',
+      { channelIds: ['channel-id-3'], channels: undefined, text: 'some text' },
+      0
+    );
+    expect(mockUseSubAction).toBeCalledWith({
+      connectorId: 'connector-id',
+      disabled: false,
+      subAction: 'validChannelId',
+      subActionParams: { channelId: '' },
     });
   });
 

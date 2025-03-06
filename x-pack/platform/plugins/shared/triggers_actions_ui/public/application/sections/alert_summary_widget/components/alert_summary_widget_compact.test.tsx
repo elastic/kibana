@@ -11,7 +11,7 @@ import {
   AlertSummaryWidgetCompact,
   AlertSummaryWidgetCompactProps,
 } from './alert_summary_widget_compact';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
 import { LIGHT_THEME } from '@elastic/charts';
@@ -37,32 +37,24 @@ describe('AlertSummaryWidgetCompact', () => {
     );
 
   it('should render AlertSummaryWidgetCompact', async () => {
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+    expect(screen.getByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
   it('should render counts correctly', async () => {
-    const alertSummaryWidget = renderComponent();
+    renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
-      '2'
-    );
-    expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
-      '22'
-    );
+    expect(screen.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent('2');
+    expect(screen.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent('22');
   });
 
   it('should render higher counts correctly', async () => {
-    const alertSummaryWidget = renderComponent({
+    renderComponent({
       activeAlertCount: 2000,
     });
 
-    expect(alertSummaryWidget.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
-      '2k'
-    );
-    expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
-      '2.02k'
-    );
+    expect(screen.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent('2k');
+    expect(screen.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent('2.02k');
   });
 });

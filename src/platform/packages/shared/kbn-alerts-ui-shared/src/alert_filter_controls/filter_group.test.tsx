@@ -115,8 +115,8 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT)).toBeVisible();
-        expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible();
       });
+      expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible();
     });
 
     it('should go into edit mode without any issues', async () => {
@@ -126,9 +126,9 @@ describe(' Filter Group Component ', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
       await waitFor(() => {
         expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeVisible();
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeVisible();
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeDisabled();
       });
+      expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeVisible();
+      expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeDisabled();
     });
 
     it('should have add button disable/enable when controls are more/less than max', async () => {
@@ -156,9 +156,9 @@ describe(' Filter Group Component ', () => {
       await waitFor(() => {
         // add button should be enabled now
         expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
-        // save button should also be enable since changes have taken place
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeDisabled();
       });
+      // save button should also be enable since changes have taken place
+      expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeDisabled();
     });
 
     it('should open flyout when clicked on ADD', async () => {
@@ -186,9 +186,9 @@ describe(' Filter Group Component ', () => {
       await waitFor(() => {
         // add button should be enabled now
         expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
-        // save button should also be enable since changes have taken place
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeDisabled();
       });
+      // save button should also be enable since changes have taken place
+      expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeDisabled();
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
@@ -373,13 +373,13 @@ describe(' Filter Group Component ', () => {
         // edit model gone
         expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
         // check if upsert was called correctly
-        expect(controlGroupMock.updateInput.mock.calls.length).toBe(1);
-        expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
-          initialChildControlState: {
-            '0': { ...COMMON_OPTIONS_LIST_CONTROL_INPUTS, ...DEFAULT_CONTROLS[0] },
-            '1': { ...initialInputData.initialChildControlState['3'], order: 1 },
-          },
-        });
+      });
+      expect(controlGroupMock.updateInput.mock.calls.length).toBe(1);
+      expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
+        initialChildControlState: {
+          '0': { ...COMMON_OPTIONS_LIST_CONTROL_INPUTS, ...DEFAULT_CONTROLS[0] },
+          '1': { ...initialInputData.initialChildControlState['3'], order: 1 },
+        },
       });
     });
 
@@ -446,11 +446,11 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         expect(controlGroupMock.updateInput).toHaveBeenCalled();
-        expect(controlGroupMock.updateInput.mock.calls.length).toBe(1);
-        // discard changes
-        expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
-          initialChildControlState: initialInputData.initialChildControlState,
-        });
+      });
+      expect(controlGroupMock.updateInput.mock.calls.length).toBe(1);
+      // discard changes
+      expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
+        initialChildControlState: initialInputData.initialChildControlState,
       });
     });
 
@@ -613,8 +613,8 @@ describe(' Filter Group Component ', () => {
       updateControlGroupOutputMock(sampleOutputData);
       await waitFor(() => {
         expect(onFilterChangeMock.mock.calls.length).toBe(1);
-        expect(onFilterChangeMock.mock.calls[0][0]).toMatchObject(sampleOutputData.filters);
       });
+      expect(onFilterChangeMock.mock.calls[0][0]).toMatchObject(sampleOutputData.filters);
 
       // updating output should call filter change again with different output
       const changedOutput = { ...sampleOutputData, filters: [] };
@@ -636,8 +636,8 @@ describe(' Filter Group Component ', () => {
       });
       await waitFor(() => {
         expect(onFilterChangeMock.mock.calls.length).toBe(2);
-        expect(onFilterChangeMock.mock.calls[1][0]).toMatchObject([]);
       });
+      expect(onFilterChangeMock.mock.calls[1][0]).toMatchObject([]);
 
       // updating output should call filter change again with different output
       const changedOutput = { ...sampleOutputData, filters: [] };
@@ -690,13 +690,13 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         expect(addOptionsListControlMock.mock.calls.length).toBe(5);
-        expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
-          expect.objectContaining({
-            existsSelected: true,
-            exclude: false,
-          })
-        );
       });
+      expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
+        expect.objectContaining({
+          existsSelected: true,
+          exclude: false,
+        })
+      );
     });
 
     it('should restore from localstorage when one of the value has both exists and exclude true', async () => {
@@ -718,13 +718,13 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         expect(addOptionsListControlMock.mock.calls.length).toBe(5);
-        expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
-          expect.objectContaining({
-            existsSelected: true,
-            exclude: true,
-          })
-        );
       });
+      expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
+        expect.objectContaining({
+          existsSelected: true,
+          exclude: true,
+        })
+      );
     });
 
     it('should restore from localstorage when some value has selected options', async () => {
@@ -745,12 +745,12 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         expect(addOptionsListControlMock.mock.calls.length).toBe(5);
-        expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
-          expect.objectContaining({
-            selectedOptions: ['abc'],
-          })
-        );
       });
+      expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
+        expect.objectContaining({
+          selectedOptions: ['abc'],
+        })
+      );
     });
   });
 });

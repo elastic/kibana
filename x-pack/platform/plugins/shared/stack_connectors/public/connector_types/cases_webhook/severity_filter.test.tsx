@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { CaseSeverity, SeverityFilter } from './severity_filter';
 import * as i18n from './translations';
 const onSeverityChange = jest.fn();
@@ -19,14 +19,14 @@ describe('SeverityFilter', () => {
     jest.clearAllMocks();
   });
   it('should render EuiSuperSelect with correct options and selected value', () => {
-    const { getByTestId, getAllByRole } = render(<SeverityFilter {...defaultProps} />);
+    render(<SeverityFilter {...defaultProps} />);
 
-    const superSelect = getByTestId('case-severity-selection');
+    const superSelect = screen.getByTestId('case-severity-selection');
 
     expect(superSelect).toBeInTheDocument();
     expect(superSelect).toHaveTextContent('Low');
     fireEvent.click(superSelect);
-    const options = getAllByRole('option');
+    const options = screen.getAllByRole('option');
 
     expect(options).toHaveLength(Object.values(CaseSeverity).length);
     expect(options.map((option) => option.textContent)).toEqual([
@@ -38,11 +38,11 @@ describe('SeverityFilter', () => {
   });
 
   it('should call onSeverityChange with selected severity when an option is clicked', () => {
-    const { getByTestId } = render(<SeverityFilter {...defaultProps} />);
+    render(<SeverityFilter {...defaultProps} />);
 
-    const superSelect = getByTestId('case-severity-selection');
+    const superSelect = screen.getByTestId('case-severity-selection');
     fireEvent.click(superSelect);
-    const option = getByTestId(`case-severity-selection-${CaseSeverity.MEDIUM}`);
+    const option = screen.getByTestId(`case-severity-selection-${CaseSeverity.MEDIUM}`);
     fireEvent.click(option);
 
     expect(onSeverityChange).toHaveBeenCalledWith(CaseSeverity.MEDIUM);

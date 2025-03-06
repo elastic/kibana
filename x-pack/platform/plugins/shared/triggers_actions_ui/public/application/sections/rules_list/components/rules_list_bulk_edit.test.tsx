@@ -17,7 +17,13 @@ import {
   ruleType,
 } from './test_helpers';
 import { IToasts } from '@kbn/core/public';
-import { render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+  fireEvent,
+  within,
+} from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -168,15 +174,15 @@ describe('Rules list Bulk Edit', () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-    expect(screen.queryByTestId('totalRulesCount')).toBeInTheDocument();
+    expect(screen.getByTestId('totalRulesCount')).toBeInTheDocument();
     expect(screen.queryByTestId('showBulkActionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
 
     expect(screen.queryByTestId('totalRulesCount')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('showBulkActionButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('selectAllRulesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showBulkActionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
   });
 
   it('selects all will select all items', async () => {
@@ -186,18 +192,23 @@ describe('Rules list Bulk Edit', () => {
     fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
     fireEvent.click(screen.getByTestId('selectAllRulesButton'));
 
+    const table = screen.getByRole('table');
+
     mockedRulesData.forEach((rule) => {
-      expect(screen.getByTestId(`checkboxSelectRow-${rule.id}`).closest('tr')).toHaveClass(
-        'euiTableRow-isSelected'
-      );
+      // expect(screen.getByTestId(`checkboxSelectRow-${rule.id}`).closest('tr')).toHaveClass(
+      //   'euiTableRow-isSelected'
+      // );
+      const row = within(table).getByRole('row', { name: new RegExp(rule.id, 'i') });
+
+      expect(row).toHaveClass('euiTableRow-isSelected');
     });
 
     fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
-    expect(screen.queryByTestId('ruleQuickEditButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('bulkDisable')).toBeInTheDocument();
-    expect(screen.queryByTestId('bulkEnable')).toBeInTheDocument();
-    expect(screen.queryByTestId('bulkDelete')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleQuickEditButton')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDisable')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkEnable')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDelete')).toBeInTheDocument();
   });
 
   it('does not render select all button if the user is not authorized', async () => {
@@ -207,7 +218,7 @@ describe('Rules list Bulk Edit', () => {
 
     fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
 
-    expect(screen.queryByTestId('showBulkActionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showBulkActionButton')).toBeInTheDocument();
     expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
   });
 });

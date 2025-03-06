@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import { HealthCheck } from './health_check';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
 import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 jest.mock('../../common/lib/kibana');
@@ -22,7 +21,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
-    const { queryByText, container } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -31,12 +30,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
-    });
 
-    expect(container.getElementsByClassName('euiLoadingSpinner').length).toBe(1);
-    expect(queryByText('shouldnt render')).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+    expect(screen.queryByText('shouldnt render')).not.toBeInTheDocument();
   });
 
   it('renders children immediately if waitForCheck is false', async () => {
@@ -44,7 +40,7 @@ describe('health check', () => {
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
 
-    const { queryByText, container } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={false}>
@@ -53,12 +49,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
-    });
 
-    expect(container.getElementsByClassName('euiLoadingSpinner').length).toBe(0);
-    expect(queryByText('should render')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar', { name: 'Loading' })).not.toBeInTheDocument();
+    expect(screen.getByText('should render')).toBeInTheDocument();
   });
 
   it('renders children if keys are enabled', async () => {
@@ -72,7 +65,7 @@ describe('health check', () => {
       },
       isAlertsAvailable: true,
     });
-    const { queryByText } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -81,10 +74,10 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
+
+    await waitFor(() => {
+      expect(screen.getByText('should render')).toBeInTheDocument();
     });
-    expect(queryByText('should render')).toBeInTheDocument();
   });
 
   test('renders warning if API keys are disabled', async () => {
@@ -98,7 +91,7 @@ describe('health check', () => {
       },
       isAlertsAvailable: true,
     }));
-    const { queryAllByText } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -107,12 +100,11 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
-    });
 
-    const [description] = queryAllByText(/API keys/i);
-    const [action] = queryAllByText(/Learn more/i);
+    await waitFor(() => {});
+
+    const [description] = screen.queryAllByText(/API keys/i);
+    const [action] = screen.queryAllByText(/Learn more/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
       `"You must enable API keys to use Alerting. Learn more.(external, opens in a new tab or window)"`
@@ -138,7 +130,7 @@ describe('health check', () => {
       },
       isAlertsAvailable: true,
     }));
-    const { queryByText, queryByRole } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -147,16 +139,14 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
-    });
 
-    const description = queryByRole('banner');
+    await waitFor(() => {});
+    const description = screen.queryByRole('banner');
     expect(description!.textContent).toMatchInlineSnapshot(
       `"You must configure an encryption key to use Alerting. Learn more.(external, opens in a new tab or window)"`
     );
 
-    const action = queryByText(/Learn/i);
+    const action = screen.queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
       `"Learn more.(external, opens in a new tab or window)"`
     );
@@ -177,7 +167,7 @@ describe('health check', () => {
       isAlertsAvailable: true,
     }));
 
-    const { queryByText } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -186,17 +176,15 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
-    });
 
-    const description = queryByText(/You must enable/i);
+    await waitFor(() => {});
+    const description = screen.queryByText(/You must enable/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
       `"You must enable API keys and configure an encryption key to use Alerting. Learn more.(external, opens in a new tab or window)"`
     );
 
-    const action = queryByText(/Learn/i);
+    const action = screen.queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
       `"Learn more.(external, opens in a new tab or window)"`
     );
@@ -212,7 +200,7 @@ describe('health check', () => {
       .mockResolvedValueOnce({ isAlertsAvailable: true })
       // result from alerting health
       .mockRejectedValueOnce(new Error('for example, not authorized for rules / 403 response'));
-    const { queryByText } = render(
+    render(
       <I18nProvider>
         <HealthContextProvider>
           <HealthCheck waitForCheck={true}>
@@ -221,9 +209,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
-      // wait for useEffect to run
+
+    await waitFor(() => {
+      expect(screen.getByText('should render')).toBeInTheDocument();
     });
-    expect(queryByText('should render')).toBeInTheDocument();
   });
 });

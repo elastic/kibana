@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, screen, within } from '@testing-library/react';
 import { mockBrowserFields } from '../../mock';
 
 import { FieldTable, FieldTableProps } from './field_table';
@@ -44,15 +44,19 @@ describe('FieldTable', () => {
   });
 
   it('should render empty field table', () => {
-    const result = renderComponent();
+    renderComponent();
 
-    expect(result.getByText('No items found')).toBeInTheDocument();
+    expect(screen.getByText('No items found')).toBeInTheDocument();
   });
 
   it('should render field table with fields of all categories', () => {
-    const result = renderComponent({ filteredBrowserFields: mockBrowserFields });
+    renderComponent({ filteredBrowserFields: mockBrowserFields });
+    const table = screen.getByRole('table');
+    const rows = within(table).getAllByRole('row');
+    // remove the table header
+    const dataRows = rows.slice(1);
 
-    expect(result.container.getElementsByClassName('euiTableRow').length).toBe(defaultPageSize);
+    expect(dataRows.length).toBe(defaultPageSize);
   });
 
   it('should render field table with fields of categories selected', () => {
@@ -64,12 +68,17 @@ describe('FieldTable', () => {
       0
     );
 
-    const result = renderComponent({
+    renderComponent({
       selectedCategoryIds,
       filteredBrowserFields: mockBrowserFields,
     });
 
-    expect(result.container.getElementsByClassName('euiTableRow').length).toBe(fieldCount);
+    const table = screen.getByRole('table');
+    const rows = within(table).getAllByRole('row');
+    // remove the table header
+    const dataRows = rows.slice(1);
+
+    expect(dataRows.length).toBe(fieldCount);
   });
 
   it('should render field table with custom columns', () => {
@@ -81,57 +90,57 @@ describe('FieldTable', () => {
       },
     ];
 
-    const result = renderComponent({
+    renderComponent({
       getFieldTableColumns: () => fieldTableColumns,
       filteredBrowserFields: mockBrowserFields,
     });
 
-    expect(result.getAllByText('Custom column').length).toBeGreaterThan(0);
-    expect(result.getAllByTestId('customColumn').length).toEqual(defaultPageSize);
+    expect(screen.getAllByText('Custom column').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('customColumn').length).toEqual(defaultPageSize);
   });
 
   it('should render field table with unchecked field', () => {
-    const result = renderComponent({
+    renderComponent({
       selectedCategoryIds: ['base'],
       filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
     });
 
-    const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
+    const checkbox = screen.getByTestId(`field-${timestampFieldId}-checkbox`);
     expect(checkbox).not.toHaveAttribute('checked');
   });
 
   it('should render field table with checked field', () => {
-    const result = renderComponent({
+    renderComponent({
       selectedCategoryIds: ['base'],
       columnIds,
       filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
     });
 
-    const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
+    const checkbox = screen.getByTestId(`field-${timestampFieldId}-checkbox`);
     expect(checkbox).toHaveAttribute('checked');
   });
 
   describe('selection', () => {
     it('should call onToggleColumn callback when field unchecked', () => {
-      const result = renderComponent({
+      renderComponent({
         selectedCategoryIds: ['base'],
         columnIds,
         filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
       });
 
-      result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
+      screen.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
       expect(mockOnToggleColumn).toHaveBeenCalledTimes(1);
       expect(mockOnToggleColumn).toHaveBeenCalledWith(timestampFieldId);
     });
 
     it('should call onToggleColumn callback when field checked', () => {
-      const result = renderComponent({
+      renderComponent({
         selectedCategoryIds: ['base'],
         filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
       });
 
-      result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
+      screen.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
       expect(mockOnToggleColumn).toHaveBeenCalledTimes(1);
       expect(mockOnToggleColumn).toHaveBeenCalledWith(timestampFieldId);
@@ -139,11 +148,11 @@ describe('FieldTable', () => {
   });
 
   describe('pagination', () => {
-    const isAtFirstPage = (result: RenderResult) =>
-      result.getByTestId('pagination-button-0').hasAttribute('aria-current');
+    const isAtFirstPage = () =>
+      screen.getByTestId('pagination-button-0').hasAttribute('aria-current');
 
     const changePage = (result: RenderResult) => {
-      result.getByTestId('pagination-button-1').click();
+      screen.getByTestId('pagination-button-1').click();
     };
 
     const paginationProps = {
@@ -153,11 +162,11 @@ describe('FieldTable', () => {
     it('should paginate on page clicked', () => {
       const result = renderComponent(paginationProps);
 
-      expect(isAtFirstPage(result)).toBeTruthy();
+      expect(isAtFirstPage()).toBeTruthy();
 
       changePage(result);
 
-      expect(isAtFirstPage(result)).toBeFalsy();
+      expect(isAtFirstPage()).toBeFalsy();
     });
 
     it('should not reset on field checked', () => {
@@ -165,10 +174,10 @@ describe('FieldTable', () => {
 
       changePage(result);
 
-      result.getAllByRole('checkbox').at(0)?.click();
+      screen.getAllByRole('checkbox').at(0)?.click();
       expect(mockOnToggleColumn).toHaveBeenCalled(); // assert some field has been selected
 
-      expect(isAtFirstPage(result)).toBeFalsy();
+      expect(isAtFirstPage()).toBeFalsy();
     });
 
     it('should reset on filter change', () => {
@@ -178,7 +187,7 @@ describe('FieldTable', () => {
       });
 
       changePage(result);
-      expect(isAtFirstPage(result)).toBeFalsy();
+      expect(isAtFirstPage()).toBeFalsy();
 
       result.rerender(
         getComponent({
@@ -187,7 +196,7 @@ describe('FieldTable', () => {
         })
       );
 
-      expect(isAtFirstPage(result)).toBeTruthy();
+      expect(isAtFirstPage()).toBeTruthy();
     });
   });
 });

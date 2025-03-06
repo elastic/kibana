@@ -497,7 +497,7 @@ describe('Rule Definition', () => {
 
     await userEvent.click(screen.getByTestId('ruleSettingsFlappingTitleTooltipButton'));
 
-    expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSettingsFlappingTooltipTitle')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('ruleSettingsFlappingTitleTooltipButton'));
 

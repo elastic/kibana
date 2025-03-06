@@ -8,7 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, cleanup, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
@@ -98,16 +98,15 @@ describe('rules_settings_link', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   test('renders the rules setting link correctly', async () => {
-    const result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.getByText('Settings')).toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
     });
-    expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(screen.getByText('Settings')).not.toBeDisabled();
+    expect(screen.queryByTestId('rulesSettingsModal')).toBe(null);
   });
 
   test('renders the rules setting link correctly (readFlappingSettingsUI = true)', async () => {
@@ -128,12 +127,12 @@ describe('rules_settings_link', () => {
       },
     };
 
-    const result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.getByText('Settings')).toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
     });
-    expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(screen.getByText('Settings')).not.toBeDisabled();
+    expect(screen.queryByTestId('rulesSettingsModal')).toBe(null);
   });
 
   test('renders the rules setting link correctly (readQueryDelaySettingsUI = true)', async () => {
@@ -154,24 +153,24 @@ describe('rules_settings_link', () => {
       },
     };
 
-    const result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.getByText('Settings')).toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
     });
-    expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(screen.getByText('Settings')).not.toBeDisabled();
+    expect(screen.queryByTestId('rulesSettingsModal')).toBe(null);
   });
 
   test('clicking the settings link opens the rules settings modal', async () => {
-    const result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+      expect(screen.queryByTestId('rulesSettingsModal')).toBe(null);
     });
 
-    await userEvent.click(result.getByText('Settings'));
+    await userEvent.click(screen.getByText('Settings'));
 
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsModal')).not.toBe(null);
+      expect(screen.queryByTestId('rulesSettingsModal')).not.toBe(null);
     });
   });
 
@@ -193,9 +192,9 @@ describe('rules_settings_link', () => {
       },
     };
 
-    let result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsLink')).toBe(null);
+      expect(screen.queryByTestId('rulesSettingsLink')).toBe(null);
     });
 
     useKibanaMock().services.application.capabilities = {
@@ -210,9 +209,9 @@ describe('rules_settings_link', () => {
       },
     };
 
-    result = render(<RulesSettingsLinkWithProviders />);
+    render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsLink')).toBe(null);
+      expect(screen.queryByTestId('rulesSettingsLink')).toBe(null);
     });
   });
 });

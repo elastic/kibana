@@ -94,8 +94,9 @@ describe('useFetchAlertsFieldsQuery', () => {
       }
     );
 
+    expect(mockHttpGet).toHaveBeenCalledTimes(1);
+
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(result.current.data).toEqual({
         browserFields: { fakeCategory: {} },
         fields: [
@@ -108,8 +109,8 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     rerender();
 
+    expect(mockHttpGet).toHaveBeenCalledTimes(1);
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(result.current.data).toEqual({
         browserFields: { fakeCategory: {} },
         fields: [
@@ -134,9 +135,9 @@ describe('useFetchAlertsFieldsQuery', () => {
     );
 
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(0);
       expect(result.current.data).toEqual(emptyData);
     });
+    expect(mockHttpGet).toHaveBeenCalledTimes(0);
   });
 
   it('should filter out the non valid feature id', async () => {
@@ -153,9 +154,9 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
-      expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/browser_fields', {
-        query: { ruleTypeIds: ['apm', 'logs'] },
-      });
+    });
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/browser_fields', {
+      query: { ruleTypeIds: ['apm', 'logs'] },
     });
   });
 });

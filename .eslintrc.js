@@ -1628,6 +1628,27 @@ module.exports = {
       },
     },
 
+    {
+      files: [
+        'x-pack/platform/plugins/shared/actions/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/response-ops/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      extends: ['plugin:testing-library/react'],
+      rules: {
+        'testing-library/render-result-naming-convention': 'off',
+      },
+    },
     /**
      * Lens overrides
      */

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { LicensePrompt } from './license_prompt';
 
@@ -14,14 +15,14 @@ describe('LicensePrompt', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(<LicensePrompt />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<LicensePrompt />);
 
-    expect(result.getByTestId('license-prompt-title')).toBeInTheDocument();
-    expect(result.getByTestId('license-prompt-upgrade')).toBeInTheDocument();
-    expect(result.getByTestId('license-prompt-trial')).toBeInTheDocument();
+    expect(screen.getByTestId('license-prompt-title')).toBeInTheDocument();
+    expect(screen.getByTestId('license-prompt-upgrade')).toBeInTheDocument();
+    expect(screen.getByTestId('license-prompt-trial')).toBeInTheDocument();
   });
 });

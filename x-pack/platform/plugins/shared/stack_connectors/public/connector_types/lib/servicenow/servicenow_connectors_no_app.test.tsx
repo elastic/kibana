@@ -6,6 +6,7 @@
  */
 
 import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import React from 'react';
 import { AppMockRenderer, ConnectorFormTestProvider, createAppMockRenderer } from '../test_utils';
 import ServiceNowConnectorFieldsNoApp from './servicenow_connectors_no_app';
@@ -50,11 +51,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
   let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders a basic auth connector', () => {
-    const { getByTestId } = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <ConnectorFormTestProvider connector={basicAuthConnector}>
         <ServiceNowConnectorFieldsNoApp
           readOnly={false}
@@ -64,13 +65,14 @@ describe('ServiceNowActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-username-form-input')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-password-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-username-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-password-form-input')).toBeInTheDocument();
   });
 
   it('renders an oauth connector', () => {
-    const { getByTestId } = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <ConnectorFormTestProvider connector={oauthConnector}>
         <ServiceNowConnectorFieldsNoApp
           readOnly={false}
@@ -80,12 +82,14 @@ describe('ServiceNowActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-client-id-form-input')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-user-identifier-form-input')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-jwt-key-id-form-input')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-client-secret-form-input')).toBeInTheDocument();
-    expect(getByTestId('connector-servicenow-private-key-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-client-id-form-input')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('connector-servicenow-user-identifier-form-input')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-jwt-key-id-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-client-secret-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-private-key-form-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -111,7 +115,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     ];
 
     it.each(basicAuthTests)('validates correctly %p', async (field, value) => {
-      const res = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider connector={basicAuthConnector} onSubmit={onSubmit}>
           <ServiceNowConnectorFieldsNoApp
             readOnly={false}
@@ -121,20 +125,20 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
 
     it.each(oauthTests)('validates correctly %p', async (field, value) => {
-      const res = appMockRenderer.render(
+      appMockRenderer.render(
         <ConnectorFormTestProvider connector={oauthConnector} onSubmit={onSubmit}>
           <ServiceNowConnectorFieldsNoApp
             readOnly={false}
@@ -144,14 +148,14 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
