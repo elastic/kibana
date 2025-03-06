@@ -15,7 +15,6 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   UiActionsEnhancedMemoryActionStorage,
@@ -37,9 +36,9 @@ import {
 import { mount } from './mount';
 import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
 import { registerButtonEmbeddable } from './embeddables/register_button_embeddable';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface SetupDependencies {
-  dashboard: DashboardSetup;
   data: DataPublicPluginSetup;
   developerExamples: DeveloperExamplesSetup;
   discover: DiscoverSetup;
@@ -48,9 +47,9 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
-  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   discover: DiscoverStart;
+  share: SharePluginStart;
   uiActionsEnhanced: AdvancedUiActionsStart;
 }
 

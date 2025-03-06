@@ -51,6 +51,7 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -86,6 +87,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  share?: SharePluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
