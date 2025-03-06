@@ -29,6 +29,7 @@ export interface PostChatCompleteParams {
 export interface ChatCompleteResponse {
   response: string;
   isError: boolean;
+  isStream: boolean;
   traceData?: {
     transactionId: string;
     traceId: string;
@@ -84,11 +85,13 @@ export const postChatComplete = async ({
         return {
           response: `${API_ERROR}\n\n${response.service_message}`,
           isError: true,
+          isStream: false,
         };
       }
       return {
         response: API_ERROR,
         isError: true,
+        isStream: false,
       };
     }
 
@@ -105,12 +108,14 @@ export const postChatComplete = async ({
       response: response.data,
       metadata: response.metadata,
       isError: false,
+      isStream: false,
       traceData,
     };
   } catch (error) {
     return {
       response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
       isError: true,
+      isStream: false,
     };
   }
 };

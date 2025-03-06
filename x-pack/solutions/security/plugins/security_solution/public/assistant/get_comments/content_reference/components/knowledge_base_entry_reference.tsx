@@ -8,17 +8,17 @@
 import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useAssistantContext } from '../../../../..';
 import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
 }
 
 export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceNode }) => {
-  const { navigateToApp } = useAssistantContext();
+  const { navigateToApp } = useKibana().services.application;
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {

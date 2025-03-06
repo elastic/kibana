@@ -175,6 +175,3 @@ export {
   SuggestedPrompts,
   AttackDiscoveryWidget,
 } from './impl/alerts';
-
-export type { StreamingOrFinalContentReferences } from './impl/alerts/message_text';
-export { MessageText } from './impl/alerts/message_text';

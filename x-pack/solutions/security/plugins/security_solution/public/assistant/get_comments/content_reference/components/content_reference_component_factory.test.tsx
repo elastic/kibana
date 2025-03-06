@@ -15,11 +15,19 @@ import type {
   UnresolvedContentReferenceNode,
 } from '../content_reference_parser';
 
-jest.mock('../../../../assistant_context', () => ({
-  ...jest.requireActual('../../../../assistant_context'),
-  useAssistantContext: () => ({
-    navigateToApp: jest.fn(),
-    discoverLocator: jest.fn(),
+jest.mock('../../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+  }),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      discover: {
+        locator: jest.fn(),
+      },
+      application: {
+        navigateToApp: jest.fn(),
+      },
+    },
   }),
 }));
 
