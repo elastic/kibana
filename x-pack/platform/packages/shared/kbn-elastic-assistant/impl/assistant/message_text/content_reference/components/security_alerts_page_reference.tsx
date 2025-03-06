@@ -11,9 +11,11 @@ import { EuiLink } from '@elastic/eui';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
-import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../../common/types';
+import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_page_with_filters';
 
+// copied from x-pack/solutions/security/plugins/security_solution/common/types/index.ts
+export const FILTER_OPEN = 'open';
+export const FILTER_ACKNOWLEDGED = 'acknowledged';
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertsPageContentReference>;
 }

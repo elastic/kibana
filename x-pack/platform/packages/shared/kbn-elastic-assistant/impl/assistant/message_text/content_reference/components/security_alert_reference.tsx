@@ -8,17 +8,17 @@
 import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useAssistantContext } from '../../../../..';
 import { SECURITY_ALERT_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
-import { useKibana } from '../../../../common/lib/kibana';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertContentReference>;
 }
 
 export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode }) => {
-  const { navigateToApp } = useKibana().services.application;
+  const { navigateToApp } = useAssistantContext();
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {

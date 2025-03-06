@@ -136,6 +136,7 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     application: { navigateToApp, currentAppId$ },
+    discover: { locator },
     http,
     notifications,
     storage,
@@ -226,6 +227,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
+      discoverLocator={locator}
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
