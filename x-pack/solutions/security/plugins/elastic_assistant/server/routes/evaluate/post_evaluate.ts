@@ -26,20 +26,13 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
-import { getModelOrOss } from '../../lib/prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
-import {
-  formatPrompt,
-  formatPromptStructured,
-} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
@@ -55,6 +48,8 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -103,7 +98,7 @@ export const postEvaluateRoute = (
         const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
@@ -254,6 +249,7 @@ export const postEvaluateRoute = (
                   signal: abortSignal,
                   streaming: false,
                   maxRetries: 0,
+                  convertSystemMessageToHumanContent: false,
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
@@ -353,27 +349,24 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable =
-                isOpenAI || llmType === 'inference'
-                  ? await createOpenAIToolsAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : llmType && ['bedrock', 'gemini'].includes(llmType)
-                  ? createToolCallingAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : await createStructuredChatAgent({
-                      llm,
-                      tools,
-                      prompt: formatPromptStructured(defaultSystemPrompt),
-                      streamRunnable: false,
-                    });
+              const chatPromptTemplate = formatPrompt({
+                prompt: defaultSystemPrompt,
+                llmType,
+                isOpenAI,
+              });
+
+              const agentRunnable = await agentRunableFactory({
+                llm: createLlmInstance(),
+                isOpenAI,
+                llmType,
+                tools,
+                isStream: false,
+                prompt: chatPromptTemplate,
+              });
+
+              const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
+                DEFAULT_DATE_FORMAT_TZ
+              );
 
               return {
                 connectorId: connector.id,
@@ -389,6 +382,11 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
+                  getFormattedTime: () =>
+                    getFormattedTime({
+                      screenContextTimezone: request.body.screenContext?.timeZone,
+                      uiSettingsDateFormatTimezone,
+                    }),
                 }),
               };
             })
@@ -400,14 +398,14 @@ export const postEvaluateRoute = (
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
-              const r = await graph.invoke(
+              const result = await graph.invoke(
                 {
                   input: input.input,
                   connectorId,
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  isStreaming: false,
+                  isStream: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
@@ -415,7 +413,7 @@ export const postEvaluateRoute = (
                   tags: ['evaluation'],
                 }
               );
-              const output = r.agentOutcome.returnValues.output;
+              const output = (result.agentOutcome as AgentFinish).returnValues.output;
               return output;
             };
 
