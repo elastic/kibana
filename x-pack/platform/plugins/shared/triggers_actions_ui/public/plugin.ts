@@ -33,25 +33,22 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
-import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import { getActionFormLazy } from './common/get_action_form';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
-import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import type { ExperimentalFeatures, ExperimentalFeatures } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import type { TriggersActionsUiConfigType } from '../common/types';
@@ -60,6 +57,7 @@ import type { AlertSummaryWidgetProps } from './application/sections/alert_summa
 import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
@@ -86,20 +84,6 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
-
-import type { TriggersActionsUiConfigType } from '../common/types';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PAGE_ID } from './common/constants';
-import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
-import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
-import { getRuleDefinitionLazy } from './common/get_rule_definition';
-import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import type { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
-import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
-import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
-import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
-import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
-import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
