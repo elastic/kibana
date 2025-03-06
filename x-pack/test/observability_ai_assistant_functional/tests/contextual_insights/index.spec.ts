@@ -126,7 +126,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await openContextualInsights();
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         await retry.tryForTime(5 * 1000, async () => {
           const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);

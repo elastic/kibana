@@ -31,7 +31,8 @@
       "expressions",
       "lens",
       "controls",
-      "embeddable"
+      "embeddable",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cloud",

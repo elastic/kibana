@@ -67,7 +67,8 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
-  describe('No connectors or conversations exist', () => {
+  // On serverless we provide deafult .inference `Elastic LLM` connector
+  describe('No connectors or conversations exist', { tags: ['@skipInServerless'] }, () => {
     it('Shows welcome setup when no connectors or conversations exist', () => {
       visitGetStartedPage();
       openAssistant();

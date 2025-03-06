@@ -285,7 +285,7 @@
             "SimulationDocReport",
             "[]; processors_metrics: Record<string, ",
             "ProcessorMetrics",
-            ">; failure_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
+            ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1020,7 +1020,7 @@
           "SimulationDocReport",
           "[]; processors_metrics: Record<string, ",
           "ProcessorMetrics",
-          ">; failure_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
+          ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

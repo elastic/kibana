@@ -46,7 +46,9 @@ export function ChatHeader({
   licenseInvalid,
   loading,
   title,
+  isConversationOwnedByCurrentUser,
   onCopyConversation,
+  onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
@@ -57,7 +59,9 @@ export function ChatHeader({
   licenseInvalid: boolean;
   loading: boolean;
   title: string;
+  isConversationOwnedByCurrentUser: boolean;
   onCopyConversation: () => void;
+  onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
@@ -115,7 +119,8 @@ export function ChatHeader({
               !conversationId ||
               !connectors.selectedConnector ||
               licenseInvalid ||
-              !Boolean(onSaveTitle)
+              !Boolean(onSaveTitle) ||
+              !isConversationOwnedByCurrentUser
             }
             onChange={(e) => {
               setNewTitle(e.currentTarget.nodeValue || '');
@@ -201,6 +206,7 @@ export function ChatHeader({
                 conversationId={conversationId}
                 disabled={licenseInvalid}
                 onCopyConversationClick={onCopyConversation}
+                onDuplicateConversationClick={onDuplicateConversation}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

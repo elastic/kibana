@@ -13,7 +13,7 @@ import { setKibanaSetting } from '../../tasks/api_calls/kibana_advanced_settings
 import { ASSET_INVENTORY_URL } from '../../urls/navigation';
 
 const NO_PRIVILEGES_BOX = getDataTestSubjectSelector('noPrivilegesPage');
-const ALL_ASSETS_TITLE = getDataTestSubjectSelector('all-assets-title');
+const ALL_ASSETS_TITLE = getDataTestSubjectSelector('asset-inventory-test-subj-page-title');
 
 const disableAssetInventory = () => {
   setKibanaSetting(SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING, false);

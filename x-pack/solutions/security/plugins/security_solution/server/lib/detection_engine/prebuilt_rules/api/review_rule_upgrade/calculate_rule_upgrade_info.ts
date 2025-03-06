@@ -23,6 +23,7 @@ export const calculateRuleUpgradeInfo = (
     const { ruleDiff, ruleVersions } = result;
     const installedCurrentVersion = ruleVersions.input.current;
     const targetVersion = ruleVersions.input.target;
+    const baseVersion = ruleVersions.input.base;
     invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
     invariant(targetVersion != null, 'targetVersion not found');
 
@@ -43,6 +44,7 @@ export const calculateRuleUpgradeInfo = (
       version: installedCurrentVersion.version,
       current_rule: installedCurrentVersion,
       target_rule: targetRule,
+      has_base_version: baseVersion !== undefined,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,

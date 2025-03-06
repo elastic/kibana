@@ -16,6 +16,7 @@ import {
   getScriptPathsMock,
   getBrowserLoggingConfigMock,
   getApmConfigMock,
+  getIsThemeBundledMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -615,12 +616,41 @@ describe('RenderingService', () => {
         globalClient: uiSettingsServiceMock.createClient(),
       };
 
+      getIsThemeBundledMock.mockImplementation((name) => ['borealis', 'amsterdam'].includes(name));
+
       let renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(getIsThemeBundledMock).toHaveBeenCalledWith('borealis');
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
 
       themeName$.next('amsterdam');
       renderResult = await render(createKibanaRequest(), uiSettings);
       expect(renderResult).toContain(',&quot;name&quot;:&quot;amsterdam&quot;');
+    });
+
+    it('falls back to the default theme if theme is not bundled', async () => {
+      // setup and render added to assert the current theme name
+      const { render } = await service.setup(mockRenderingSetupDeps);
+      const themeName$ = new BehaviorSubject<ThemeName>('unknown' as any);
+      const getStringValue$ = jest
+        .fn()
+        .mockImplementation((_, fallback) => themeName$.asObservable());
+      service.start({
+        ...mockRenderingStartDeps,
+        featureFlags: {
+          ...mockRenderingStartDeps.featureFlags,
+          getStringValue$,
+        },
+      });
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+
+      getIsThemeBundledMock.mockReturnValue(false);
+
+      const renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
     });
   });
 });

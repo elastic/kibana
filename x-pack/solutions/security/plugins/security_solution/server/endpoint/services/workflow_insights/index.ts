@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
-
 import type {
   SearchHit,
   UpdateResponse,
@@ -15,13 +13,14 @@ import type {
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
+import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 
 import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
 import {
   buildEsQueryParams,
@@ -45,6 +44,7 @@ interface SetupInterface {
 
 interface StartInterface {
   esClient: ElasticsearchClient;
+  registerDefendInsightsCallback: (callbackId: CallbackIds, callback: Function) => void;
 }
 
 class SecurityWorkflowInsightsService {
@@ -83,7 +83,7 @@ class SecurityWorkflowInsightsService {
     this.setup$.next();
   }
 
-  public async start({ esClient }: StartInterface) {
+  public async start({ esClient, registerDefendInsightsCallback }: StartInterface) {
     if (!this.isFeatureEnabled) {
       return;
     }
@@ -92,6 +92,7 @@ class SecurityWorkflowInsightsService {
     await firstValueFrom(this.setup$);
 
     try {
+      this.registerDefendInsightsCallbacks(registerDefendInsightsCallback);
       await createPipeline(esClient);
       await this.ds?.install({
         logger: this.logger,
@@ -129,6 +130,10 @@ class SecurityWorkflowInsightsService {
     defendInsights: DefendInsight[],
     request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
   ): Promise<Array<Awaited<WriteResponseBase | void>>> {
+    if (!defendInsights || !defendInsights.length) {
+      return [];
+    }
+
     await this.isInitialized;
 
     const workflowInsights = await buildWorkflowInsights({
@@ -244,6 +249,15 @@ class SecurityWorkflowInsightsService {
     }
 
     return this._endpointContext;
+  }
+
+  private registerDefendInsightsCallbacks(
+    registerCallback: (callbackId: CallbackIds, callback: Function) => void
+  ) {
+    registerCallback(
+      CallbackIds.DefendInsightsPostCreate,
+      this.createFromDefendInsights.bind(this)
+    );
   }
 }
 

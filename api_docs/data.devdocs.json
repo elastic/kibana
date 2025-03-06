@@ -11764,10 +11764,6 @@
             {
               "plugin": "expressionPartitionVis",
               "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
-            },
-            {
-              "plugin": "expressionPartitionVis",
-              "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             }
           ]
         },

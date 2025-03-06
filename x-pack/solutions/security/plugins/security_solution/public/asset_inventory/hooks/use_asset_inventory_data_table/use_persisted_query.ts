@@ -7,8 +7,8 @@
 
 import { useCallback } from 'react';
 import type { Query } from '@kbn/es-query';
-import type { AssetsBaseURLQuery } from './use_asset_inventory_data_table';
 import { useKibana } from '../../../common/lib/kibana';
+import type { AssetsBaseURLQuery } from './use_asset_inventory_data_table';
 
 export const usePersistedQuery = <T>(getter: ({ filters, query }: AssetsBaseURLQuery) => T) => {
   const {
