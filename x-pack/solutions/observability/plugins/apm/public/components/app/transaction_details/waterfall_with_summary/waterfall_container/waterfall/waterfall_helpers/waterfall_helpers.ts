@@ -403,22 +403,43 @@ function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['erro
   }, {});
 }
 
-export function getOrphanItemsIds(waterfall: IWaterfallSpanOrTransaction[]) {
+export function getOrphanItemsIds(
+  waterfall: IWaterfallSpanOrTransaction[],
+  entryWaterfallTransactionId?: string
+) {
   const waterfallItemsIds = new Set(waterfall.map((item) => item.id));
   return waterfall
-    .filter((item) => item.parentId && !waterfallItemsIds.has(item.parentId))
+    .filter(
+      (item) =>
+        // the first item should never be orphan
+        entryWaterfallTransactionId !== item.id &&
+        item.parentId &&
+        !waterfallItemsIds.has(item.parentId)
+    )
     .map((item) => item.id);
 }
 
 export function reparentOrphanItems(
   orphanItemsIds: string[],
   waterfallItems: IWaterfallSpanOrTransaction[],
-  newParentId?: string
+  entryWaterfallTransaction?: IWaterfallTransaction
 ) {
   const orphanIdsMap = new Set(orphanItemsIds);
   return waterfallItems.map((item) => {
     if (orphanIdsMap.has(item.id)) {
-      item.parentId = newParentId;
+      if (
+        entryWaterfallTransaction &&
+        (item.duration > entryWaterfallTransaction.duration ||
+          item.doc.timestamp.us < entryWaterfallTransaction.doc.timestamp.us)
+      ) {
+        // we need to hide the orphan item if it's longer or if it has started before the entry transaction
+        // as this means it's a parent of the entry transaction
+        item.parentId = undefined;
+
+        // item.parentId = entryWaterfallTransaction.id;
+      } else {
+        item.parentId = ROOT_ID;
+      }
       item.isOrphan = true;
     }
     return item;
@@ -455,15 +476,10 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     waterfallItems
   );
 
-  const orphanItemsIds = getOrphanItemsIds(waterfallItems);
+  const orphanItemsIds = getOrphanItemsIds(waterfallItems, entryWaterfallTransaction?.id);
   const childrenByParentId = getChildrenGroupedByParentId(
-    reparentOrphanItems(
-      orphanItemsIds,
-      reparentSpans(waterfallItems),
-      entryWaterfallTransaction?.id
-    )
+    reparentOrphanItems(orphanItemsIds, reparentSpans(waterfallItems), entryWaterfallTransaction)
   );
-
   const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
   const errorItems = getWaterfallErrors(traceItems.errorDocs, items, entryWaterfallTransaction);
 
