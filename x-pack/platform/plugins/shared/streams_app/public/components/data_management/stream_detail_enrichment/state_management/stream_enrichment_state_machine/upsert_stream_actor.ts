@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FieldDefinition, IngestStreamGetResponse, IngestUpsertRequest } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  IngestStreamGetResponse,
+  isWiredStreamGetResponse,
+} from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
@@ -33,13 +37,20 @@ export function createUpsertStreamActor({
         path: {
           name: input.definition.stream.name,
         },
-        body: {
-          ingest: {
-            ...input.definition.stream.ingest,
-            processing: input.processors.map(processorConverter.toAPIDefinition),
-            ...(input.fields && { wired: { fields: input.fields } }),
-          },
-        } as IngestUpsertRequest,
+        body: isWiredStreamGetResponse(input.definition)
+          ? {
+              ingest: {
+                ...input.definition.stream.ingest,
+                processing: input.processors.map(processorConverter.toAPIDefinition),
+                ...(input.fields && { wired: { fields: input.fields } }),
+              },
+            }
+          : {
+              ingest: {
+                ...input.definition.stream.ingest,
+                processing: input.processors.map(processorConverter.toAPIDefinition),
+              },
+            },
       },
     });
   });
