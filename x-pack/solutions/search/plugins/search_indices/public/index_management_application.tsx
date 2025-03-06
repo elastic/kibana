@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IndexManagementApp } from './components/index_mangement/app';
+import { IndexManagementApp } from './components/index_management/index_management_app';
 
 export const renderIndexManagementApp = async (
   element: HTMLElement,
