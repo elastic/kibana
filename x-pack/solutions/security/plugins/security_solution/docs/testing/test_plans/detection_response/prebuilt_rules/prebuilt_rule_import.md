@@ -42,7 +42,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [Scenario: Importing a new custom rule](#scenario-importing-a-new-custom-rule)
     - [Scenario: Importing a custom rule on top of an existing custom rule](#scenario-importing-a-custom-rule-on-top-of-an-existing-custom-rule)
   - [Importing multiple rules in bulk](#importing-multiple-rules-in-bulk)
-    - [Scenario: Importing both custom and prebuilt rules](#scenario-importing-both-custom-and-prebuilt-rules)
+    - [Scenario: Importing a mixture of new prebuilt and custom rules](#scenario-importing-a-mixture-of-new-prebuilt-and-custom-rules)
+    - [Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules](#scenario-importing-a-mixture-of-prebuilt-and-custom-rules-on-top-of-existing-rules)
   - [Importing prebuilt rules when the package is not installed](#importing-prebuilt-rules-when-the-package-is-not-installed)
     - [Scenario: Importing a prebuilt rule when the rules package is not installed](#scenario-importing-a-prebuilt-rule-when-the-rules-package-is-not-installed)
   - [Converting between prebuilt and custom rules](#converting-between-prebuilt-and-custom-rules)
@@ -242,16 +243,40 @@ And the updated rule's parameters should match the import payload
 
 ### Importing multiple rules in bulk
 
-#### Scenario: Importing both custom and prebuilt rules
+#### Scenario: Importing a mixture of new prebuilt and custom rules
 
-**Automation**: 1 integration test.
+This scenario is a "smoke test" for all the user stories from the [Product requirements](#product-requirements) section.
+
+**Automation**: 1 API integration test, 1 e2e test.
 
 ```Gherkin
 Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
+And the prebuilt rules have a base version (their rule_id and version match a rule asset)
+And the custom rules' rule_id does NOT match any rule assets from the installed package
+And the rules are not installed or created yet
 When the user imports these rules
-Then custom rules should be created or updated, with versions defaulted to 1
-And prebuilt rules should be created or updated,
-And prebuilt rules missing versions should be rejected
+Then the rules should be created
+And the created rules should be correctly identified as prebuilt or custom
+And the created rules' is_customized field should be correctly calculated
+And the created rules' parameters should match the import payload
+```
+
+#### Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules
+
+This scenario is a "smoke test" for all the user stories from the [Product requirements](#product-requirements) section.
+
+**Automation**: 1 API integration test, 1 e2e test.
+
+```Gherkin
+Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
+And the prebuilt rules have a base version (their rule_id and version match a rule asset)
+And the custom rules' rule_id does NOT match any rule assets from the installed package
+And the rules are already installed or created
+When the user imports these rules
+Then the rules should be updated
+And the updated rules should be correctly identified as prebuilt or custom
+And the updated rules' is_customized field should be correctly calculated
+And the updated rules' parameters should match the import payload
 ```
 
 ### Importing prebuilt rules when the package is not installed
