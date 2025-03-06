@@ -17,6 +17,7 @@ import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_c
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
@@ -478,7 +479,7 @@ export function dataFrameAnalyticsRoutes(
                     });
                     if (alias) {
                       const reindexedDestName = Object.keys(alias)[0];
-                      if (reindexedDestName) {
+                      if (reindexedDestName && isPopulatedObject(alias, [reindexedDestName])) {
                         const keys = Object.keys(alias[reindexedDestName]?.aliases);
                         if (keys[0] === destinationIndex) {
                           destinationIndexToDelete = reindexedDestName;
