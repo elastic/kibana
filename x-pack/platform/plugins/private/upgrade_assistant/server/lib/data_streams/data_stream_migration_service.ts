@@ -199,6 +199,39 @@ export const dataStreamMigrationServiceFactory = ({
         }
 
         if (taskResponse.complete) {
+          /**
+           * If the task is complete, check if there are any remaining indices that require upgrade
+           * If that is the case, we need to update the status to not started
+           * This way the user can trigger a new migration.
+           * Note: This is the best place to do this call because we it'll only be called
+           * 1 timeonce the task is complete.
+           * Cases we reach this code execution:
+           *     1. Task is complete and the user has the UA open. It'll disappear once the user refreshes.
+           *     2. Task is complete but we have remaining indices that require upgrade.
+           */
+
+          const { data_streams: dataStreamsDeprecations } = await esClient.migration.deprecations({
+            filter_path: `data_streams`,
+          });
+
+          const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
+          if (deprecationsDetails && deprecationsDetails.length) {
+            const deprecationDetails = deprecationsDetails.find(
+              (deprecation) => deprecation._meta!.reindex_required
+            );
+            if (deprecationDetails) {
+              const stillNeedsUpgrade =
+                deprecationDetails._meta!.reindex_required === true &&
+                deprecationDetails._meta!.indices_requiring_upgrade_count > 0;
+              if (stillNeedsUpgrade) {
+                return {
+                  status: DataStreamMigrationStatus.notStarted,
+                };
+              }
+            }
+          }
+
+          // Find the first deprecation that has reindex_required set to true
           // Update the status
           return {
             taskPercComplete: 1,

@@ -6,11 +6,11 @@
  */
 
 import { matchExclusionPattern } from './data_source_exclusions';
-import { DataSounceExclusions } from '../../common/types';
+import { DataSourceExclusions } from '../../common/types';
 
 describe('matchExclusionPattern', () => {
   it('should return the actions that should be excluded', () => {
-    const exclusions: DataSounceExclusions = {
+    const exclusions: DataSourceExclusions = {
       data_stream_1: ['readOnly'],
     };
 
@@ -19,7 +19,7 @@ describe('matchExclusionPattern', () => {
   });
 
   it('should return an empty array if no exclusions match', () => {
-    const exclusions: DataSounceExclusions = {
+    const exclusions: DataSourceExclusions = {
       data_stream_1: ['readOnly'],
     };
 
@@ -28,7 +28,7 @@ describe('matchExclusionPattern', () => {
   });
 
   it(`should match patterns ending with '*'`, () => {
-    const exclusions: DataSounceExclusions = {
+    const exclusions: DataSourceExclusions = {
       'data_stream_*': ['readOnly'],
     };
 

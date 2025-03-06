@@ -73,27 +73,27 @@ export interface DataStreamReindexStatusNotStarted {
 }
 
 export interface DataStreamReindexStatusInProgress {
-  resolutionType: 'reindex';
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.inProgress;
   taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusCompleted {
-  resolutionType: 'reindex';
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.completed;
   taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusFailed {
-  resolutionType: 'reindex';
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.failed;
   errorMessage: string;
 }
 
 export interface DataStreamReindexStatusCancelled {
-  resolutionType: 'reindex';
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.cancelled;
 }
 
