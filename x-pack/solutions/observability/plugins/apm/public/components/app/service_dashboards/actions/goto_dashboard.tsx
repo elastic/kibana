@@ -10,15 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import type { SavedApmCustomDashboard } from '../../../../../common/custom_dashboards';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApmCustomDashboard }) {
   const {
     services: {
-      dashboard: { locator: dashboardLocator },
+      share
     },
   } = useKibana<ApmPluginStartDeps>();
 
-  const url = dashboardLocator?.getRedirectUrl({
+  const url = share?.url.locators.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
     dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
   return (
