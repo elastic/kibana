@@ -279,7 +279,12 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeReindexButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
                 defaultMessage="Close"

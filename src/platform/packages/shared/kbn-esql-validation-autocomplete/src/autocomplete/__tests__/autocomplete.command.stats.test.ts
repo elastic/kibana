@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQLVariableType } from '@kbn/esql-types';
 import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { ESQLVariableType } from '../../shared/types';
 import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';
 import { roundParameterTypes } from './constants';

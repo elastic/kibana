@@ -99,7 +99,9 @@
     "@kbn/discover-contextual-components",
     "@kbn/esql-ast",
     "@kbn/discover-shared-plugin",
-    "@kbn/ui-theme"
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/ui-theme",
+    "@kbn/response-ops-rule-form",
   ],
   "exclude": ["target/**/*"]
 }

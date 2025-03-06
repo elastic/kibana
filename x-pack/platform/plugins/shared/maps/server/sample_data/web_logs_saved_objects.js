@@ -269,7 +269,7 @@ export const getWebLogsSavedObjects = () => {
         }),
         description: '',
         mapStateJSON:
-          '{"zoom":3.64,"center":{"lon":-88.92107,"lat":42.16337},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"language":"kuery","query":""}}',
+          '{"zoom":3.64,"center":{"lon":-88.92107,"lat":42.16337},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"language":"kuery","query":""},"settings":{"projection":"globeInterpolate"}}',
         layerListJSON: JSON.stringify(layerList),
         uiStateJSON: '{"isDarkMode":false}',
         bounds: {

@@ -115,9 +115,9 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables content references (citations) in the AI Assistant
+   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
    */
-  contentReferencesEnabled: false,
+  assistantAttackDiscoverySchedulingEnabled: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.

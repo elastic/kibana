@@ -66,7 +66,6 @@ import { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugi
 import { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
 import { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
-import { EndpointUploadActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/upload/upload.gen';
 import {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
@@ -750,13 +749,12 @@ If a record already exists for the specified entity, that record is overwritten 
     /**
      * Upload a file to an endpoint.
      */
-    endpointUploadAction(props: EndpointUploadActionProps, kibanaSpace: string = 'default') {
+    endpointUploadAction(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/endpoint/action/upload', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     entityStoreGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
@@ -1798,9 +1796,6 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUnisolateRedirectProps {
   body: EndpointUnisolateRedirectRequestBodyInput;
-}
-export interface EndpointUploadActionProps {
-  body: EndpointUploadActionRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;

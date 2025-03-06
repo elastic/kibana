@@ -909,6 +909,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.ransomware.dump_process',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.dump_process',
+      {
+        defaultMessage:
+          "A value of 'false' disables the generation of a memory dump of the Ransomware process. This is ignored if the canary protection is off. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.shellcode',
     first_supported_version: '7.15',
     documentation: i18n.translate(
