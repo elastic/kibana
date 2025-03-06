@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { GridPanelData, GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { GridPanelData, GridLayoutStateManager } from '../types';
 import {
   getPointerPosition,
   isMouseEvent,
@@ -32,7 +32,7 @@ export const useGridLayoutEvents = ({
   rowId,
   panelId,
 }: {
-  interactionType: PanelInteractionEvent['type'];
+  interactionType: 'drag' | 'resize';
   rowId: string;
   panelId: string;
 }) => {
@@ -40,18 +40,26 @@ export const useGridLayoutEvents = ({
 
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
   const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
+  const startingMouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
 
-      const onStart = () => startAction(e, gridLayoutStateManager, interactionType, rowId, panelId);
+      const onStart = () =>
+        startAction(e, gridLayoutStateManager, interactionType, rowId, panelId, startingMouse);
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
-        moveAction(gridLayoutStateManager, pointerPixel.current, lastRequestedPanelPosition);
+        moveAction(
+          interactionType,
+          gridLayoutStateManager,
+          pointerPixel.current,
+          lastRequestedPanelPosition,
+          startingMouse
+        );
       };
 
       const onEnd = () => commitAction(gridLayoutStateManager);

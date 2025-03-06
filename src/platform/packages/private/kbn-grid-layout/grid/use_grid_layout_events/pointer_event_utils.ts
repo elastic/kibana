@@ -14,34 +14,42 @@ import { UserInteractionEvent } from './types';
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   interactionEvent,
-  pointerPixel,
+  translate,
 }: {
-  pointerPixel: { clientX: number; clientY: number };
   interactionEvent: PanelInteractionEvent;
+  translate: {
+    x: number;
+    y: number;
+  };
 }) => {
-  const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
-
+  const left = interactionEvent.startingRect.left;
+  const top = interactionEvent.startingRect.top;
   return {
-    left: panelRect.left,
-    top: panelRect.top,
-    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.pointerOffsets.right,
+    left,
+    top,
+    bottom: top + interactionEvent.startingRect.height + translate.y,
+    right: left + interactionEvent.startingRect.width + translate.x,
   };
 };
 
 // Calculates the preview rect coordinates for a dragged panel
 export const getDragPreviewRect = ({
-  pointerPixel,
   interactionEvent,
+  translate,
 }: {
-  pointerPixel: { clientX: number; clientY: number };
   interactionEvent: PanelInteractionEvent;
+  translate: {
+    x: number;
+    y: number;
+  };
 }) => {
+  const left = interactionEvent.startingRect.left + translate.x;
+  const top = interactionEvent.startingRect.top + translate.y;
   return {
-    left: pointerPixel.clientX - interactionEvent.pointerOffsets.left,
-    top: pointerPixel.clientY - interactionEvent.pointerOffsets.top,
-    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.pointerOffsets.right,
+    left,
+    top,
+    bottom: top + interactionEvent.startingRect.height,
+    right: left + interactionEvent.startingRect.width,
   };
 };
 

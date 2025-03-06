@@ -50,16 +50,6 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface ActivePanel {
-  id: string;
-  position: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  };
-}
-
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
@@ -68,7 +58,6 @@ export interface GridLayoutStateManager {
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
@@ -102,14 +91,18 @@ export interface PanelInteractionEvent {
   panelDiv: HTMLDivElement;
 
   /**
-   * The pixel offsets from where the mouse was at drag start to the
-   * edges of the panel
+   * The DOMRect of the panel being interacted with **before** any event has been applied
    */
-  pointerOffsets: {
+  startingRect: DOMRect;
+
+  /**
+   * The translations to apply to the starting rect, which is calculated via the mouse position
+   */
+  translateRect: {
     top: number;
     left: number;
-    right: number;
-    bottom: number;
+    width: number;
+    height: number;
   };
 }
 
