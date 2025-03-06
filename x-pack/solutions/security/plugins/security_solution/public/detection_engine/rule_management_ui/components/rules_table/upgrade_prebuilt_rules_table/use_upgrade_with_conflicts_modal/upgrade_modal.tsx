@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiText,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import { ConfirmRulesUpgrade } from './use_upgrade_modal';
@@ -47,70 +46,6 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
     [onConfirm]
   );
 
-  // Only solvable conflicts
-  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithNonSolvableConflicts === 0) {
-    return (
-      <EuiConfirmModal
-        title={i18n.UPGRADE_CONFLICTS_MODAL_TITLE}
-        onCancel={onCancel}
-        onConfirm={confirmUpgradingRulesWithSolvableConflicts}
-        cancelButtonText={i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}
-        confirmButtonText={i18n.UPGRADE_RULES_WITH_CONFLICTS}
-        buttonColor="warning"
-        defaultFocusedButton="cancel"
-        data-test-subj="upgradeConflictsModal"
-      >
-        <EuiText>
-          {i18n.ONLY_RULES_WITH_SOLVABLE_CONFLICTS(numOfRulesWithSolvableConflicts)}
-        </EuiText>
-      </EuiConfirmModal>
-    );
-  }
-
-  // Only non-solvable conflicts
-  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithSolvableConflicts === 0) {
-    return (
-      <EuiModal data-test-subj="upgradeConflictsModal" onClose={onCancel}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.UPGRADE_CONFLICTS_MODAL_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-
-        <EuiModalBody>
-          <EuiText>
-            {i18n.ONLY_RULES_WITH_NON_SOLVABLE_CONFLICTS(numOfRulesWithNonSolvableConflicts)}
-          </EuiText>
-        </EuiModalBody>
-
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>{i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}</EuiButtonEmpty>
-        </EuiModalFooter>
-      </EuiModal>
-    );
-  }
-
-  // Rules without conflicts + rules with non-solvable conflicts
-  if (numOfRulesWithSolvableConflicts === 0) {
-    return (
-      <EuiConfirmModal
-        title={i18n.UPGRADE_CONFLICTS_MODAL_TITLE}
-        onCancel={onCancel}
-        onConfirm={confirmUpgradingRulesWithoutConflicts}
-        cancelButtonText={i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}
-        confirmButtonText={i18n.UPGRADE_RULES_WITHOUT_CONFLICTS}
-        buttonColor="primary"
-        defaultFocusedButton="cancel"
-        data-test-subj="upgradeConflictsModal"
-      >
-        <EuiText>
-          {i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_NON_SOLVABLE_CONFLICTS({
-            numOfRulesWithoutConflicts,
-            numOfRulesWithNonSolvableConflicts,
-          })}
-        </EuiText>
-      </EuiConfirmModal>
-    );
-  }
-
   return (
     <EuiModal data-test-subj="upgradeConflictsModal" onClose={onCancel}>
       <EuiModalHeader>
@@ -119,7 +54,7 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
 
       <EuiModalBody>
         <EuiText>
-          {i18n.ALL_KINDS_OF_RULES({
+          {getModalBodyText({
             numOfRulesWithoutConflicts,
             numOfRulesWithSolvableConflicts,
             numOfRulesWithNonSolvableConflicts,
@@ -128,14 +63,64 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={confirmUpgradingRulesWithoutConflicts}>
-          {i18n.UPGRADE_RULES_WITHOUT_CONFLICTS}
-        </EuiButton>
-        <EuiButton onClick={confirmUpgradingRulesWithSolvableConflicts} color="warning">
-          {i18n.UPGRADE_RULES_WITH_CONFLICTS}
-        </EuiButton>
+        {numOfRulesWithoutConflicts > 0 && (
+          <EuiButton onClick={confirmUpgradingRulesWithoutConflicts}>
+            {i18n.UPGRADE_RULES_WITHOUT_CONFLICTS}
+          </EuiButton>
+        )}
+        {numOfRulesWithSolvableConflicts > 0 && (
+          <EuiButton onClick={confirmUpgradingRulesWithSolvableConflicts} color="warning">
+            {i18n.UPGRADE_RULES_WITH_CONFLICTS}
+          </EuiButton>
+        )}
         <EuiButtonEmpty onClick={onCancel}>{i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}</EuiButtonEmpty>
       </EuiModalFooter>
     </EuiModal>
   );
 });
+
+function getModalBodyText({
+  numOfRulesWithoutConflicts,
+  numOfRulesWithSolvableConflicts,
+  numOfRulesWithNonSolvableConflicts,
+}: RulesConflictStats): JSX.Element {
+  // Only solvable conflicts
+  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithNonSolvableConflicts === 0) {
+    return i18n.ONLY_RULES_WITH_SOLVABLE_CONFLICTS(numOfRulesWithSolvableConflicts);
+  }
+
+  // Only non-solvable conflicts
+  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithSolvableConflicts === 0) {
+    return i18n.ONLY_RULES_WITH_NON_SOLVABLE_CONFLICTS(numOfRulesWithNonSolvableConflicts);
+  }
+
+  // Only conflicts
+  if (numOfRulesWithoutConflicts === 0) {
+    return i18n.ONLY_RULES_WITH_CONFLICTS({
+      numOfRulesWithSolvableConflicts,
+      numOfRulesWithNonSolvableConflicts,
+    });
+  }
+
+  // Rules without conflicts + rules with solvable conflicts
+  if (numOfRulesWithNonSolvableConflicts === 0) {
+    return i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_SOLVABLE_CONFLICTS({
+      numOfRulesWithoutConflicts,
+      numOfRulesWithSolvableConflicts,
+    });
+  }
+
+  // Rules without conflicts + rules with non-solvable conflicts
+  if (numOfRulesWithSolvableConflicts === 0) {
+    return i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_NON_SOLVABLE_CONFLICTS({
+      numOfRulesWithoutConflicts,
+      numOfRulesWithNonSolvableConflicts,
+    });
+  }
+
+  return i18n.ALL_KINDS_OF_RULES({
+    numOfRulesWithoutConflicts,
+    numOfRulesWithSolvableConflicts,
+    numOfRulesWithNonSolvableConflicts,
+  });
+}
