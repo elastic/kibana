@@ -1,9 +1,0 @@
-/*
-  Resets the badge's default strong font-weight so it's possible
-  to put custom emphasis inside the badge only on a part of it.
-  Used in the Explorer Chart label badge to display an entity's
-  field_name as `normal` and field_value as `strong`.
-*/
-.ml-reset-font-weight {
-  font-weight: normal;
-}
