@@ -104,18 +104,6 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   );
 };
 
-/* `important` is to ensure that even if styles ordering is different (like for some reason on Developer Examples page), this one will be used instead of eui defaults */
-
-const fieldPopoverPanelCss = ({ euiTheme }: UseEuiTheme) => css`
-  min-width: ${euiTheme.size.xxl} * 6.5 !important;
-  max-width: ${euiTheme.size.xxl} * 10 !important;
-
-  .unifiedFieldListItemButton {
-    box-shadow: none;
-    background: none;
-  }
-`;
-
 const fieldPopoverContentCss = ({ euiTheme }: UseEuiTheme) => css`
   padding: ${euiTheme.size.base};
   margin: -${euiTheme.size.base};
