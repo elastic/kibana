@@ -7,10 +7,10 @@
 
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { IOCRightPanelKey } from './constants/panel_keys';
+import type { IOCPanelKey } from './constants/panel_keys';
 
 export interface AIForSOCDetailsProps extends FlyoutPanelProps {
-  key: typeof IOCRightPanelKey;
+  key: typeof IOCPanelKey;
   params?: {
     doc: DataTableRecord;
   };
