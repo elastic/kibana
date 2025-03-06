@@ -823,7 +823,7 @@ export function getQueryBodyWithAuthFilter(
   };
 }
 
-function getNamespaceQuery(namespace?: string) {
+function getNamespaceQuery(namespace?: string): estypes.QueryDslQueryContainer {
   const defaultNamespaceQuery = {
     bool: {
       must_not: {
@@ -836,7 +836,7 @@ function getNamespaceQuery(namespace?: string) {
   const namedNamespaceQuery = {
     term: {
       'kibana.saved_objects.namespace': {
-        value: namespace,
+        value: namespace!,
       },
     },
   };

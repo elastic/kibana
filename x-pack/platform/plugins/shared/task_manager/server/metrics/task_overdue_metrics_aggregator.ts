@@ -78,7 +78,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
       for (const key of Object.keys(metric.numOverdueTasks)) {
         const hist = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
         (metric.numOverdueTasks[key] ?? []).forEach((bucket) => {
-          const overdueInSec = parseInt(bucket.key, 10);
+          const overdueInSec = parseInt(`${bucket.key}`, 10);
           hist.record(overdueInSec, bucket.doc_count);
 
           if (key === 'total') {
