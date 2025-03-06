@@ -19,10 +19,9 @@ import {
   TrustedAppValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreUpdateItemServerExtension['callback'];
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreUpdateItemServerExtension['callback'] => {
   return async function ({
     data,
     context: { request, exceptionListClient },

@@ -15,10 +15,9 @@ import {
   TrustedAppValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreSingleListFindServerExtension['callback'];
 export const getExceptionsPreSingleListFindHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreSingleListFindServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;

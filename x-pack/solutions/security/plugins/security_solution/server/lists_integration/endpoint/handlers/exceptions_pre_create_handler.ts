@@ -18,10 +18,9 @@ import {
   TrustedAppValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreCreateItemServerExtension['callback'];
 export const getExceptionsPreCreateItemHandler = (
   endpointAppContext: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreCreateItemServerExtension['callback'] => {
   return async function ({ data, context: { request } }): Promise<CreateExceptionListItemOptions> {
     if (data.namespaceType !== 'agnostic') {
       return data;

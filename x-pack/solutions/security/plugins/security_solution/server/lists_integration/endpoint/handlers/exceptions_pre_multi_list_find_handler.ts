@@ -15,10 +15,9 @@ import {
   TrustedAppValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreMultiListFindServerExtension['callback'];
 export const getExceptionsPreMultiListFindHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreMultiListFindServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
     if (!data.namespaceType.includes('agnostic')) {
       return data;
