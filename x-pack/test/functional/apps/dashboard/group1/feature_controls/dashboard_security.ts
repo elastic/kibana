@@ -31,8 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     shouldLoginIfPrompted: false,
   };
 
-  const from = 'Sep 15, 2015 @ 00:00:00.000';
-  const to = 'Sep 16, 2015 @ 00:00:00.000';
+  const from = 'Sep 20, 2015 @ 00:00:00.000';
+  const to = 'Sep 21, 2015 @ 00:00:00.000';
 
   // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
