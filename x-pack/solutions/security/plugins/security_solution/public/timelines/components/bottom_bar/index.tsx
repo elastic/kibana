@@ -63,9 +63,11 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
               {title}
             </EuiLink>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
-            <TimelineQueryTabEventsCount timelineId={timelineId} />
-          </EuiFlexItem>
+          {!show && ( // We only want to show this when the timeline modal is closed
+            <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
+              <TimelineQueryTabEventsCount timelineId={timelineId} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <TimelineSaveStatus timelineId={timelineId} />
           </EuiFlexItem>
