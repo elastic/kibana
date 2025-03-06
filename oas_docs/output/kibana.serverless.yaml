@@ -37023,6 +37023,130 @@ paths:
       tags:
         - Security Lists API
       x-beta: true
+  /api/lists/items/_bulk:
+    delete:
+      description: Delete a value list item using its `id`, or its `list_id` and `value` fields.
+      operationId: BulkDeleteListItems
+      parameters:
+        - description: Value list item's identifier. Required if `list_id` and `value` are not specified.
+          in: query
+          name: ids
+          required: false
+          schema:
+            items:
+              $ref: '#/components/schemas/Security_Lists_API_ListItemId'
+            type: array
+        - description: Value list's identifier. Required if `id` is not specified.
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
+        - description: The value used to evaluate exceptions. Required if `id` is not specified.
+          in: query
+          name: value
+          required: false
+          schema:
+            example: 255.255.255.255
+            type: string
+        - description: Determines when changes made by the request are made visible to search.
+          in: query
+          name: refresh
+          required: false
+          schema:
+            default: 'false'
+            enum:
+              - 'true'
+              - 'false'
+              - wait_for
+            example: false
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzIwLDFd
+                    '@timestamp': '2025-01-08T05:15:05.159Z'
+                    created_at: '2025-01-08T05:15:05.159Z'
+                    created_by: elastic
+                    id: pd1WRJQBs4HAK3VQeHFI
+                    list_id: ip_list
+                    tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                    type: ip
+                    updated_at: '2025-01-08T05:44:14.009Z'
+                    updated_by: elastic
+                    value: 255.255.255.0
+              schema:
+                items:
+                  $ref: '#/components/schemas/Security_Lists_API_ListItem'
+                type: array
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: Either \"list_id\" or \"id\" needs to be defined in the request
+                    status_code: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [DELETE /api/lists/items?id=pd1WRJQBs4HAK3VQeHFI] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found'
+                    status_code: 404
+              schema:
+                $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
+          description: List item not found response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Delete multiple value list items from the same list id
+      tags:
+        - Security Lists API
+      x-beta: true
   /api/lists/items/_export:
     post:
       description: Export list item values from the specified value list.
