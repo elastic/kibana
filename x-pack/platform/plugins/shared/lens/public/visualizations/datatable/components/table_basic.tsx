@@ -35,10 +35,7 @@ import { getOriginalId } from '@kbn/transpose-utils';
 import { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import {
-  getColorCategories,
-  getLegacyColorCategories,
-} from '@kbn/chart-expressions-common';
+import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';

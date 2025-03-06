@@ -15,8 +15,10 @@ export {
   SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
 } from './constants';
-export * from './serializable_field';
-export * from './serialize_utils';
+export type { RawValue } from './serializable_field';
+export { SerializableField } from './serializable_field';
+export type { SerializedField, SerializedValue } from './serialize_utils';
+export { SerializableType, deserializeField, serializeField } from './serialize_utils';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
 export { getEsQueryConfig } from './es_query';
