@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -13,22 +15,15 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { RelevantPanel, RecommendedDashboard } from '@kbn/observability-schema';
-import type {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-} from '@kbn/dashboard-plugin/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/server/content_management/v3';
 import type { InvestigateAlertsClient, AlertData } from './investigate_alerts_client';
-import type { DashboardsClient } from './create_dashboards_client';
 
-type Dashboard = SavedObjectsFindResult<DashboardSavedObjectAttributes>;
-type ParsedDashboard = SavedObjectsFindResult<DashboardSavedObjectAttributes> & {
-  attributes: { panels: SavedDashboardPanel[] };
-};
-
+type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class SuggestedDashboardsClient {
   private logger: Logger;
-  private dashboardsById = new Map<string, ParsedDashboard>();
-  private dashboardClient: DashboardsClient;
+  private dashboardsById = new Map<string, Dashboard>();
+  private dashboardClient: IContentClient<Dashboard>;
   private alertsClient: InvestigateAlertsClient;
   private alertId: string;
 
@@ -39,7 +34,7 @@ export class SuggestedDashboardsClient {
     alertId,
   }: {
     logger: Logger;
-    dashboardClient: DashboardsClient;
+    dashboardClient: IContentClient<Dashboard>;
     alertsClient: InvestigateAlertsClient;
     alertId: string;
   }) {
@@ -49,13 +44,16 @@ export class SuggestedDashboardsClient {
     this.alertId = alertId;
   }
 
-  async fetchSuggestedDashboards(): Promise<{ dashboards: RecommendedDashboard[] }> {
+  async fetchSuggestedDashboards(): Promise<{ suggestedDashboards: RecommendedDashboard[] }> {
     const allRelatedDashboards = new Set<RecommendedDashboard>();
     const relevantDashboardsById = new Map<string, RecommendedDashboard>();
     const [alert] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
       this.fetchDashboards(),
     ]);
+    if (!alert) {
+      return { suggestedDashboards: [] };
+    }
     const index = await this.getRuleQueryIndex(alert);
     const relevantRuleFields = this.alertsClient.getRelevantRuleFields(alert);
     const relevantAlertFields = this.alertsClient.getRelevantAADFields(alert);
@@ -85,13 +83,16 @@ export class SuggestedDashboardsClient {
         relevantPanels: dedupedPanels,
       });
     });
-    return { dashboards: Array.from(relevantDashboardsById.values()) };
+    return { suggestedDashboards: Array.from(relevantDashboardsById.values()) };
   }
 
   async fetchDashboards() {
-    const dashboards = await this.dashboardClient.getAllDashboards();
-    dashboards.forEach((dashboard: SavedObjectsFindResult<DashboardSavedObjectAttributes>) => {
-      this.dashboardsById.set(dashboard.id, this.parseDashboardPanels(dashboard));
+    const dashboards = await this.dashboardClient.search({}, { spaces: ['*'] });
+    const {
+      result: { hits },
+    } = dashboards;
+    hits.forEach((dashboard: Dashboard) => {
+      this.dashboardsById.set(dashboard.id, dashboard);
     });
   }
 
@@ -112,7 +113,12 @@ export class SuggestedDashboardsClient {
           matchedBy: { index: [index] },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
-            panel: p,
+            panel: {
+              panelIndex: p.panelIndex || uuidv4(),
+              type: p.type,
+              embeddableConfig: p.panelConfig,
+              title: p.title,
+            },
             matchedBy: { index: [index] },
           })),
         });
@@ -155,7 +161,12 @@ export class SuggestedDashboardsClient {
           matchedBy: { fields: Array.from(allMatchingFields) },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
-            panel: p.panel,
+            panel: {
+              panelIndex: p.panel.panelIndex || uuidv4(),
+              type: p.panel.type,
+              embeddableConfig: p.panel.panelConfig,
+              title: p.panel.title,
+            },
             matchedBy: { fields: Array.from(p.matchingFields) },
           })),
         });
@@ -164,7 +175,7 @@ export class SuggestedDashboardsClient {
     return { dashboards: relevantDashboards };
   }
 
-  getPanelsByIndex(index: string, panels: SavedDashboardPanel[]): SavedDashboardPanel[] {
+  getPanelsByIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
     const panelsByIndex = panels.filter((p) => {
       const panelIndices = this.getPanelIndices(p);
       return panelIndices.has(index);
@@ -174,8 +185,8 @@ export class SuggestedDashboardsClient {
 
   getPanelsByField(
     fields: string[],
-    panels: SavedDashboardPanel[]
-  ): Array<{ matchingFields: Set<string>; panel: SavedDashboardPanel }> {
+    panels: DashboardPanel[]
+  ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
     const panelsByField = panels.reduce((acc, p) => {
       const panelFields = this.getPanelFields(p);
       const matchingFields = fields.filter((f) => panelFields.has(f));
@@ -183,15 +194,15 @@ export class SuggestedDashboardsClient {
         acc.push({ matchingFields: new Set(matchingFields), panel: p });
       }
       return acc;
-    }, [] as Array<{ matchingFields: Set<string>; panel: SavedDashboardPanel }>);
+    }, [] as Array<{ matchingFields: Set<string>; panel: DashboardPanel }>);
     return panelsByField;
   }
 
-  getPanelIndices(panel: SavedDashboardPanel): Set<string> {
+  getPanelIndices(panel: DashboardPanel): Set<string> {
     const indices = new Set<string>();
     switch (panel.type) {
       case 'lens':
-        const lensAttr = panel.embeddableConfig.attributes as unknown as LensAttributes;
+        const lensAttr = panel.panelConfig.attributes as unknown as LensAttributes;
         if (!lensAttr) {
           return indices;
         }
@@ -202,11 +213,11 @@ export class SuggestedDashboardsClient {
     }
   }
 
-  getPanelFields(panel: SavedDashboardPanel): Set<string> {
+  getPanelFields(panel: DashboardPanel): Set<string> {
     const fields = new Set<string>();
     switch (panel.type) {
       case 'lens':
-        const lensAttr = panel.embeddableConfig.attributes as unknown as LensAttributes;
+        const lensAttr = panel.panelConfig.attributes as unknown as LensAttributes;
         const lensFields = this.getLensVizFields(lensAttr);
         return lensFields;
       default:
@@ -247,27 +258,5 @@ export class SuggestedDashboardsClient {
       });
     });
     return fields;
-  }
-
-  parseDashboardPanels(dashboard: Dashboard): ParsedDashboard {
-    try {
-      const panels = JSON.parse(dashboard.attributes.panelsJSON);
-      return {
-        ...dashboard,
-        attributes: {
-          ...dashboard.attributes,
-          panels,
-        },
-      };
-    } catch (e) {
-      this.logger.error(`Failed to parse dashboard panels for ${dashboard.id}`);
-      return {
-        ...dashboard,
-        attributes: {
-          ...dashboard.attributes,
-          panels: [],
-        },
-      };
-    }
   }
 }

@@ -14,6 +14,7 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
+import { AlertNotFoundError } from '../common/errors/alert_not_found_error';
 
 export type AlertData = Awaited<ReturnType<AlertsClient['get']>>;
 
@@ -29,10 +30,17 @@ export class InvestigateAlertsClient {
     if (!indices.length) {
       throw new Error('No alert indices exist');
     }
-    return await this.alertsClient.get({
-      id: alertId,
-      index: indices.join(','),
-    });
+    try {
+      return await this.alertsClient.get({
+        id: alertId,
+        index: indices.join(','),
+      });
+    } catch (e) {
+      if (e.output.payload.statusCode === 404) {
+        throw new AlertNotFoundError(`Alert with id ${alertId} not found`);
+      }
+      throw e;
+    }
   }
 
   async getAlertsIndices() {

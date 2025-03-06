@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { type RecommendedDashboard, relatedDashboardSchema } from './v1';
+export class AlertNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AlertNotFoundError';
+  }
+}

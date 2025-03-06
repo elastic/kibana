@@ -6,7 +6,7 @@
  */
 
 export {
-  type GetRelatedDashboardsResponse,
-  getRelatedDashboardsResponseSchema,
-  getRelatedDashboardsParamsSchema,
+  type GetRecommendedDashboardsResponse,
+  getRecommendedDashboardsResponseSchema,
+  getRecommendedDashboardsParamsSchema,
 } from './v1';

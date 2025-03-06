@@ -8,10 +8,10 @@
 export { type RelevantPanel, relevantPanelSchema } from './schema/relevant_panel/v1';
 export {
   type RecommendedDashboard,
-  recommendedDashboardSchema,
+  relatedDashboardSchema,
 } from './schema/recommended_dashboard/v1';
 export {
-  type GetRelatedDashboardsResponse,
-  getRelatedDashboardsResponseSchema,
-  getRelatedDashboardsParamsSchema,
+  type GetRecommendedDashboardsResponse,
+  getRecommendedDashboardsResponseSchema,
+  getRecommendedDashboardsParamsSchema,
 } from './rest_specs/get_related_dashboards/v1';

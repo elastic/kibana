@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { relevantPanelSchema } from '../relevant_panel/latest';
 
-export const recommendedDashboardSchema = z.object({
+export const relatedDashboardSchema = z.object({
   id: z.string(),
   title: z.string(),
   matchedBy: z.object({
@@ -19,4 +19,4 @@ export const recommendedDashboardSchema = z.object({
   relevantPanels: z.array(relevantPanelSchema),
 });
 
-export type RecommendedDashboard = z.output<typeof recommendedDashboardSchema>;
+export type RecommendedDashboard = z.output<typeof relatedDashboardSchema>;

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
@@ -67,6 +69,7 @@ interface PluginSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
+  contentManagement: ContentManagementServerSetup;
 }
 
 interface PluginStart {
@@ -74,6 +77,7 @@ interface PluginStart {
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  dashboard: DashboardPluginStart;
 }
 
 const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES.map(
@@ -189,6 +193,7 @@ export class ObservabilityPlugin
     });
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
+      console.log('pluginStart', pluginStart);
       registerRoutes({
         core,
         dependencies: {
@@ -196,6 +201,7 @@ export class ObservabilityPlugin
             ...plugins,
             core,
           },
+          dashboard: pluginStart.dashboard,
           ruleRegistry: pluginStart.ruleRegistry,
           dataViews: pluginStart.dataViews,
           spaces: pluginStart.spaces,
