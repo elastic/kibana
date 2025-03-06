@@ -32,7 +32,7 @@ import { PageTitle } from './page_title';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 import { EmptyMigrationRulesPage } from './empty';
 
-type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
+export type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
 export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
   ({
@@ -139,6 +139,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
+          data-test-subj="migrationRulesPageLoading"
           isLoading={isLoading}
           loadingContent={
             <>
