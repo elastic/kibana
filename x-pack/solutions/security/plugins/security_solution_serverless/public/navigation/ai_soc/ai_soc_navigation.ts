@@ -13,9 +13,8 @@ import type {
 
 import type { WritableDraft } from 'immer/dist/internal';
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-// import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { AiForTheSocIcon } from './icons';
-import { findAndRemoveNodes } from './utils';
+import { filterFromWhitelist, moveToAnotherSection } from './utils';
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine, ProductTier } from '../../../common/product';
 import { knowledgeSourceLink } from './links';
@@ -41,6 +40,16 @@ const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
   isCollapsible: false,
   children: [],
 };
+// Elements we want to show in AI for SOC navigation
+// This is a temporary solution until we figure out a way to handle Upselling with new Tier
+const whitelist = [
+  ExternalPageName.managementKnowledgeSources,
+  SecurityPageName.case,
+  SecurityPageName.caseCreate,
+  SecurityPageName.caseConfigure,
+  SecurityPageName.attackDiscovery,
+  ExternalPageName.discover,
+];
 
 // Apply AI for SOC navigation tree changes.
 // The navigation tree received by parameter is generated at: x-pack/solutions/security/plugins/security_solution/public/app/solution_navigation/navigation_tree.ts
@@ -61,17 +70,23 @@ export const applyAiSocNavigation = (
   // hardcode Knowledge Sources to exists in AI for SOC group
   securityGroup.children.push(knowledgeSourceLink);
 
+  // Overwrite the children with only the elements available for AI for SOC navigation
+  // Temporary solution until we have clarity how to procees with Upselling in the new Tier
+  // (eg. Threat Intelligence couldn't be hidden)
+  securityGroup.children = filterFromWhitelist(securityGroup.children, whitelist);
+
   if (isAIStandalone(productTypes)) {
     draft.body = [{ ...aiGroup, children: securityGroup.children }];
     return;
   }
 
-  const pageIdsToAttach = [
+  // The below will be removed from Security section and moved to AiSoc section
+  const pageIdsToMove = [
     SecurityPageName.attackDiscovery,
     ExternalPageName.managementKnowledgeSources,
   ]; // Add more IDs as needed
 
-  const attachedPages = findAndRemoveNodes(securityGroup.children, pageIdsToAttach);
+  const attachedPages = moveToAnotherSection(securityGroup.children, pageIdsToMove);
 
   if (attachedPages.length) {
     securityGroup.appendHorizontalRule = true; // does not seem to work :( talk with sharedUx team
