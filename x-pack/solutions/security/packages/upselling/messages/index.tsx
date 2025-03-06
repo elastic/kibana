@@ -79,3 +79,10 @@ export const PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION = (
       },
     }
   );
+
+export const SIEM_MIGRATION_MANAGER_LICENSE_BTN = i18n.translate(
+  'securitySolutionPackages.upselling.siemMigrations.manageLicenseBtn',
+  {
+    defaultMessage: 'Manage license',
+  }
+);

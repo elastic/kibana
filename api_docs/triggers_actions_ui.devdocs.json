@@ -5431,6 +5431,26 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7128,146 +7148,6 @@
                 "Omit<",
                 "EditConnectorFlyoutProps",
                 ", \"actionTypeRegistry\">"
-              ],
-              "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddRuleFlyout",
-          "type": "Function",
-          "tags": [],
-          "label": "getAddRuleFlyout",
-          "description": [],
-          "signature": [
-            "<Params extends ",
-            {
-              "pluginId": "@kbn/alerting-types",
-              "scope": "common",
-              "docId": "kibKbnAlertingTypesPluginApi",
-              "section": "def-common.RuleTypeParams",
-              "text": "RuleTypeParams"
-            },
-            " = ",
-            {
-              "pluginId": "@kbn/alerting-types",
-              "scope": "common",
-              "docId": "kibKbnAlertingTypesPluginApi",
-              "section": "def-common.RuleTypeParams",
-              "text": "RuleTypeParams"
-            },
-            ", MetaData extends ",
-            {
-              "pluginId": "alerting",
-              "scope": "common",
-              "docId": "kibAlertingPluginApi",
-              "section": "def-common.RuleTypeMetaData",
-              "text": "RuleTypeMetaData"
-            },
-            " = ",
-            {
-              "pluginId": "alerting",
-              "scope": "common",
-              "docId": "kibAlertingPluginApi",
-              "section": "def-common.RuleTypeMetaData",
-              "text": "RuleTypeMetaData"
-            },
-            ">(props: Omit<",
-            "RuleAddProps",
-            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
-            "RuleAddProps",
-            "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddRuleFlyout.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "Omit<",
-                "RuleAddProps",
-                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
-              ],
-              "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout",
-          "type": "Function",
-          "tags": [],
-          "label": "getEditRuleFlyout",
-          "description": [],
-          "signature": [
-            "<Params extends ",
-            {
-              "pluginId": "@kbn/alerting-types",
-              "scope": "common",
-              "docId": "kibKbnAlertingTypesPluginApi",
-              "section": "def-common.RuleTypeParams",
-              "text": "RuleTypeParams"
-            },
-            " = ",
-            {
-              "pluginId": "@kbn/alerting-types",
-              "scope": "common",
-              "docId": "kibKbnAlertingTypesPluginApi",
-              "section": "def-common.RuleTypeParams",
-              "text": "RuleTypeParams"
-            },
-            ", MetaData extends ",
-            {
-              "pluginId": "alerting",
-              "scope": "common",
-              "docId": "kibAlertingPluginApi",
-              "section": "def-common.RuleTypeMetaData",
-              "text": "RuleTypeMetaData"
-            },
-            " = ",
-            {
-              "pluginId": "alerting",
-              "scope": "common",
-              "docId": "kibAlertingPluginApi",
-              "section": "def-common.RuleTypeMetaData",
-              "text": "RuleTypeMetaData"
-            },
-            ">(props: Omit<",
-            "RuleEditProps",
-            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
-            "RuleEditProps",
-            "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "Omit<",
-                "RuleEditProps",
-                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

@@ -18,7 +18,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -36,8 +39,11 @@ export const OptionsListPopoverActionBar = ({
 }: OptionsListPopoverProps) => {
   const { api, stateManager, displaySettings } = useOptionsListContext();
 
+  // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
+  // to avoid debouncing input value
+  const searchString = useStateFromPublishingSubject(stateManager.searchString);
+
   const [
-    searchString,
     searchTechnique,
     searchStringValid,
     invalidSelections,
@@ -45,7 +51,6 @@ export const OptionsListPopoverActionBar = ({
     field,
     allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
-    stateManager.searchString,
     stateManager.searchTechnique,
     stateManager.searchStringValid,
     api.invalidSelections$,

@@ -45,7 +45,6 @@
       "spaces",
       "ml",
       "home",
-      "embeddable",
       "osquery",
       "cloud",
       "profilingDataAccess",
@@ -60,7 +59,6 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "embeddable",
       "controls"
     ]
   }

@@ -48,6 +48,13 @@ export async function invokeChatCompleteWithFunctionRequest({
           {
             '@timestamp': new Date().toISOString(),
             message: {
+              role: MessageRole.User,
+              content: 'Hello from user',
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
               role: MessageRole.Assistant,
               content: '',
               function_call: functionCall,

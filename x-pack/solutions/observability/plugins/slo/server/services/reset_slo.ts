@@ -86,7 +86,7 @@ export class ResetSLO {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 

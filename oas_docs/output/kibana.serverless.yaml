@@ -22139,6 +22139,11 @@ paths:
           required: false
           schema:
             type: boolean
+        - in: query
+          name: withPackagePoliciesCount
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -38854,13 +38859,9 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
-                    type: boolean
-                  pipeline_exists:
                     type: boolean
                   product_documentation_status:
                     type: string

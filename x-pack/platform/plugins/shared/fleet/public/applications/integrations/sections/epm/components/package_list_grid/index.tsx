@@ -103,7 +103,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   spacer = true,
   scrollElementId,
 }) => {
-  const localSearchRef = useLocalSearch(list, !!isLoading);
+  const localSearch = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -135,18 +135,20 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
 
   const filteredPromotedList = useMemo(() => {
     if (isLoading) return [];
+
+    const searchResults =
+      (localSearch?.search(searchTerm) as IntegrationCardItem[]).map(
+        (match) => match[searchIdField]
+      ) ?? [];
+
     const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
+      ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
     return sortByFeaturedIntegrations
       ? promoteFeaturedIntegrations(filteredList, selectedCategory)
       : filteredList;
-  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
+  }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
   ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {

@@ -28681,7 +28681,7 @@
           "InstallableSavedObject",
           " | undefined; installationInfo?: ",
           "InstallationInfo",
-          " | undefined; }"
+          " | undefined; packagePoliciesInfo?: { count: number; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,

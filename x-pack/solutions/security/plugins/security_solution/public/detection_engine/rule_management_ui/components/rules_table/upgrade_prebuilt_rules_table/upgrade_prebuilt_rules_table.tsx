@@ -97,7 +97,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           ) : (
             <>
               <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
                   <RulesChangelogLink />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
