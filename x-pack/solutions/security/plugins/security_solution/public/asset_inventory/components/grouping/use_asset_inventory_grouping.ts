@@ -15,20 +15,23 @@ import {
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
-import { useCloudSecurityGrouping } from '@kbn/cloud-security-posture-plugin/public/components/cloud_security_grouping';
+
 import { useDataViewContext } from '../../hooks/data_view_context';
-import {
-  type AssetsGroupingAggregation,
-  type AssetsRootGroupingAggregation,
-  useGroupedAssets,
-} from './use_grouped_assets';
-import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './translations';
 import type { AssetsBaseURLQuery } from '../../hooks/use_asset_inventory_data_table';
 import {
   ASSET_GROUPING_OPTIONS,
   ASSET_FIELDS,
   LOCAL_STORAGE_ASSETS_GROUPING_KEY,
 } from '../../constants';
+
+// TODO Copy-pasted from '@kbn/cloud-security-posture-plugin/public/components/use_cloud_security_grouping';
+import { useCloudSecurityGrouping } from './use_cloud_security_grouping';
+import {
+  type AssetsGroupingAggregation,
+  type AssetsRootGroupingAggregation,
+  useGroupedAssets,
+} from './use_grouped_assets';
+import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './translations';
 
 // TODO Remove?
 export const ASSETS_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};

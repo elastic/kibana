@@ -94,9 +94,9 @@ const renderChildComponent = ({
   if (currentSelectedGroup === 'none') {
     return (
       <AssetInventoryDataTable
-      // groupSelectorComponent={groupSelectorComponent}
-      // nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-      // showDistributionBar={selectedGroupOptions.includes('none')}
+        groupSelectorComponent={groupSelectorComponent}
+        // nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
+        // showDistributionBar={selectedGroupOptions.includes('none')}
       />
     );
   }
@@ -143,6 +143,7 @@ const renderChildComponent = ({
 export const AllAssets = () => {
   // const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
   //   useAssetInventoryGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
+
   const { grouping, error, isEmptyResults } = useAssetInventoryGrouping({
     groupPanelRenderer,
     getGroupStats: groupStatsRenderer,

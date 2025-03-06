@@ -162,7 +162,13 @@ const getEntity = (record: DataTableRecord) => {
   };
 };
 
-export const AssetInventoryDataTable = () => {
+export interface AssetInventoryDataTableProps {
+  groupSelectorComponent?: JSX.Element;
+}
+
+export const AssetInventoryDataTable = ({
+  groupSelectorComponent,
+}: AssetInventoryDataTableProps) => {
   const {
     pageSize,
     sort,
@@ -373,6 +379,7 @@ export const AssetInventoryDataTable = () => {
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onResetColumns={onResetColumns}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 
