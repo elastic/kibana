@@ -20,6 +20,7 @@ import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 
 import {
   generateFleetConfig,
+  getBinarySourceSettings,
   getFullAgentPolicy,
   getFullMonitoringSettings,
   transformOutputToFullPolicyOutput,
@@ -126,6 +127,23 @@ jest.mock('../download_source', () => {
             is_default: false,
             name: 'Test',
             host: 'http://custom-registry-test',
+            ssl: {
+              certificate: 'cert',
+              certificate_authorities: ['ca'],
+              key: 'KEY1',
+            },
+          };
+        } else if (id === 'test-ds-secrets') {
+          return {
+            id: 'test-ds-1',
+            is_default: false,
+            name: 'Test',
+            host: 'http://custom-registry-test',
+            secrets: {
+              ssl: {
+                key: 'KEY1',
+              },
+            },
           };
         }
         return {
@@ -685,7 +703,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchSnapshot();
   });
 
-  it('should return the sourceURI from the agent policy', async () => {
+  it('should return agent binary sourceURI and ssl options from the agent policy', async () => {
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -710,6 +728,53 @@ describe('getFullAgentPolicy', () => {
       agent: {
         download: {
           sourceURI: 'http://custom-registry-test',
+          ssl: {
+            certificate: 'cert',
+            certificate_authorities: ['ca'],
+            key: 'KEY1',
+          },
+        },
+        monitoring: {
+          namespace: 'default',
+          use_output: 'default',
+          enabled: true,
+          logs: false,
+          metrics: true,
+          traces: false,
+        },
+      },
+    });
+  });
+  it('should return agent binary with secrets if there are any present', async () => {
+    mockAgentPolicy({
+      namespace: 'default',
+      revision: 1,
+      monitoring_enabled: ['metrics'],
+      download_source_id: 'test-ds-secrets',
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      outputs: {
+        default: {
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      },
+      inputs: [],
+      revision: 1,
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      agent: {
+        download: {
+          sourceURI: 'http://custom-registry-test',
+          secrets: {
+            ssl: {
+              key: 'KEY1',
+            },
+          },
         },
         monitoring: {
           namespace: 'default',
@@ -1771,5 +1836,92 @@ describe('generateFleetConfig', () => {
         },
       }
   `);
+  });
+});
+
+describe('getBinarySourceSettings', () => {
+  const downloadSource = {
+    id: 'test-ds-1',
+    is_default: false,
+    name: 'Test',
+    host: 'http://custom-registry-test',
+  } as any;
+
+  it('should return sourceURI for agent download config', () => {
+    expect(getBinarySourceSettings(downloadSource, null)).toEqual({
+      sourceURI: 'http://custom-registry-test',
+    });
+  });
+
+  it('should return agent download config with ssl options if present', () => {
+    const downloadSourceSSL = {
+      ...downloadSource,
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: ['ca'],
+        key: 'KEY1',
+      },
+    };
+    expect(getBinarySourceSettings(downloadSourceSSL, null)).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: ['ca'],
+        key: 'KEY1',
+      },
+    });
+  });
+
+  it('should return agent download config when there is a proxy', () => {
+    expect(getBinarySourceSettings(downloadSource, 'http://proxy_uri.it')).toEqual({
+      proxy_url: 'http://proxy_uri.it',
+      sourceURI: 'http://custom-registry-test',
+    });
+  });
+
+  it('should return agent download config with secrets if present', () => {
+    const downloadSourceSecrets = {
+      ...downloadSource,
+      secrets: {
+        ssl: {
+          key: { id: 'keyid' },
+        },
+      },
+    };
+    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      secrets: {
+        ssl: {
+          key: { id: 'keyid' },
+        },
+      },
+    });
+  });
+
+  it('should return agent download config with secrets and ssl if present', () => {
+    const downloadSourceSecrets = {
+      ...downloadSource,
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: ['ca'],
+      },
+      secrets: {
+        ssl: {
+          key: { id: 'keyid' },
+        },
+      },
+    };
+    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: ['ca'],
+      },
+      secrets: {
+        ssl: {
+          key: { id: 'keyid' },
+        },
+      },
+    });
   });
 });
