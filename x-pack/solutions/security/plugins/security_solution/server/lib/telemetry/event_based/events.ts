@@ -12,6 +12,7 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
+import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -528,11 +529,130 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
   },
 };
 
+export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeIngestPipelinesStats> =
+  {
+    eventType: 'telemetry_node_ingest_pipelines_stats_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'The naem of the node' },
+      },
+      pipelines: {
+        type: 'array',
+        items: {
+          properties: {
+            name: {
+              type: 'keyword',
+              _meta: { description: 'The name of the pipeline.' },
+            },
+            totals: {
+              properties: {
+                count: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Total number of documents ingested during the lifetime of this node.',
+                  },
+                },
+                time_in_millis: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Ingestion elapsed time during the lifetime of this node.',
+                  },
+                },
+                current: {
+                  type: 'long',
+                  _meta: { description: 'Total number of documents currently being ingested.' },
+                },
+                failed: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Total number of failed ingest operations during the lifetime of this node.',
+                  },
+                },
+              },
+            },
+            processors: {
+              type: 'array',
+              items: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                    _meta: { description: 'The name of the pipeline.' },
+                  },
+                  totals: {
+                    properties: {
+                      count: {
+                        type: 'long',
+                        _meta: {
+                          description:
+                            'Total number of documents ingested during the lifetime of this node.',
+                        },
+                      },
+                      time_in_millis: {
+                        type: 'long',
+                        _meta: {
+                          description: 'Ingestion elapsed time during the lifetime of this node.',
+                        },
+                      },
+                      current: {
+                        type: 'long',
+                        _meta: {
+                          description: 'Total number of documents currently being ingested.',
+                        },
+                      },
+                      failed: {
+                        type: 'long',
+                        _meta: {
+                          description:
+                            'Total number of failed ingest operations during the lifetime of this node.',
+                        },
+                      },
+                    },
+                  },
+                },
+                _meta: { description: 'Datastreams' },
+              },
+            },
+          },
+          _meta: { description: 'Datastreams' },
+        },
+      },
+      totals: {
+        properties: {
+          count: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of documents ingested during the lifetime of this node.',
+            },
+          },
+          time_in_millis: {
+            type: 'long',
+            _meta: { description: 'Ingestion elapsed time during the lifetime of this node.' },
+          },
+          current: {
+            type: 'long',
+            _meta: { description: 'Total number of documents currently being ingested.' },
+          },
+          failed: {
+            type: 'long',
+            _meta: {
+              description:
+                'Total number of failed ingest operations during the lifetime of this node.',
+            },
+          },
+        },
+      },
+    },
+  };
+
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
   endTime: Date;
 }
+
 export const createAssetCriticalityProcessedFileEvent = ({
   result,
   startTime,
@@ -997,6 +1117,7 @@ export const events = [
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
+  TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
