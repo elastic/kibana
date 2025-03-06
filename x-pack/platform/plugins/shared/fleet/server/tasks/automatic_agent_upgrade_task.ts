@@ -304,6 +304,12 @@ export class AutomaticAgentUpgradeTask {
     });
 
     let { done, agents } = await this.getNextAgentsBatch(agentsFetcher);
+    if (agents.length === 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: no candidate agents found for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+      );
+      return;
+    }
     let shouldProcessAgents = true;
 
     while (shouldProcessAgents) {
@@ -388,7 +394,7 @@ export class AutomaticAgentUpgradeTask {
   private async getNextAgentsBatch(agentsFetcher: AsyncIterable<Agent[]>) {
     const agentsFetcherIter = agentsFetcher[Symbol.asyncIterator]();
     const agentsBatch = await agentsFetcherIter.next();
-    const agents: Agent[] = agentsBatch.value;
+    const agents: Agent[] = agentsBatch.value ?? [];
     return {
       done: agentsBatch.done,
       agents: agents.filter((agent): agent is AgentWithDefinedVersion => agent.agent !== undefined),
