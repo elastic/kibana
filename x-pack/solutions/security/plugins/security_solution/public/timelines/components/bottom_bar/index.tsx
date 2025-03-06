@@ -63,11 +63,9 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
               {title}
             </EuiLink>
           </EuiFlexItem>
-          {!show && ( // this is a hack because TimelineEventsCountBadge is using react-reverse-portal so the component which is used in multiple places cannot be visible in multiple places at the same time
-            <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
-              <TimelineQueryTabEventsCount timelineId={timelineId} />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
+            <TimelineQueryTabEventsCount timelineId={timelineId} />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TimelineSaveStatus timelineId={timelineId} />
           </EuiFlexItem>

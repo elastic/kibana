@@ -12,6 +12,14 @@ import type { TimelineId } from '../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
 
+export interface LazyTimelineTabRendererProps {
+  children: React.ReactElement | null;
+  dataTestSubj: string;
+  isOverflowYScroll?: boolean;
+  shouldShowTab: boolean;
+  timelineId: TimelineId;
+}
+
 /**
  * We check for the timeline open status to request the fields for the fields browser as the fields request
  * is often a much longer running request for customers with a significant number of indices and fields in those indices.
@@ -22,23 +30,14 @@ import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
  * has chosen to interact with timeline at least once, so we use this flag to prevent re-requesting of this fields data
  * every time timeline is closed and re-opened after the first interaction.
  */
-
-export interface OnDemandRendererProps {
-  children: React.ReactElement | null;
-  dataTestSubj: string;
-  isOverflowYScroll?: boolean;
-  shouldShowTab: boolean;
-  timelineId: TimelineId;
-}
-
-export const OnDemandRenderer = React.memo(
+export const LazyTimelineTabRenderer = React.memo(
   ({
     children,
     dataTestSubj,
     shouldShowTab,
     isOverflowYScroll,
     timelineId,
-  }: OnDemandRendererProps) => {
+  }: LazyTimelineTabRendererProps) => {
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
@@ -60,15 +59,15 @@ export const OnDemandRenderer = React.memo(
         `}
         data-test-subj={dataTestSubj}
       >
-        {hasTimelineTabBeenOpenedOnce ? children : <EuiLoadingElastic size="xl" />}
+        {hasTimelineTabBeenOpenedOnce ? children : <TimelineTabFallback />}
       </div>
     );
   }
 );
 
-OnDemandRenderer.displayName = 'OnDemandRenderer';
+LazyTimelineTabRenderer.displayName = 'LazyTimelineTabRenderer';
 
-export const OnDemandSuspenseFallback = () => (
+export const TimelineTabFallback = () => (
   <EuiFlexGroup direction="row" justifyContent="spaceAround">
     <EuiFlexItem
       grow={false}
