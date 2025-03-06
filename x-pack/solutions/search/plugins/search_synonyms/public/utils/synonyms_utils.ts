@@ -55,7 +55,7 @@ export const synonymsStringToOption = (synonyms: string) =>
     : synonyms
         .trim()
         .split(',')
-        .map((s, index) => ({ label: s, key: index + '-' + s }));
+        .map((s, index) => ({ label: s, key: index + '-' + s.trim() }));
 
 export const synonymsOptionToString = ({
   fromTerms,

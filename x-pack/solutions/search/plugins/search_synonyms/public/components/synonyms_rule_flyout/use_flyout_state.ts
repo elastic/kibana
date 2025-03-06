@@ -37,14 +37,21 @@ export const useFlyoutState = ({
   const [mapToTermErrors, setMapToTermErrors] = useState<string[]>([]);
 
   const hasChanges =
-    synonymsOptionToString({
-      fromTerms,
-      toTerms: mapToTerms,
-      isExplicit,
-    }) !== synonymRule.synonyms;
+    flyoutMode === 'create'
+      ? (fromTerms.length !== 0 || mapToTerms.length !== 0) &&
+        synonymsOptionToString({
+          fromTerms,
+          toTerms: mapToTerms,
+          isExplicit,
+        }) !== synonymRule.synonyms
+      : synonymsOptionToString({
+          fromTerms,
+          toTerms: mapToTerms,
+          isExplicit,
+        }) !== synonymRule.synonyms;
 
   const canSave =
-    fromTerms.length &&
+    !!fromTerms.length &&
     !(isExplicit && !mapToTerms) &&
     hasChanges &&
     !isFromTermsInvalid &&
@@ -100,7 +107,7 @@ export const useFlyoutState = ({
       setMapToTermErrors([ERROR_MESSAGES.multiple_explicit_separator]);
       return false;
     }
-    if (value.trim().split(',').includes('')) {
+    if (value.trim().split(',').includes('') || value.trim().split(',').includes(' ')) {
       setIsMapToTermsInvalid(true);
       setMapToTermErrors([ERROR_MESSAGES.empty_to_term]);
       return false;
