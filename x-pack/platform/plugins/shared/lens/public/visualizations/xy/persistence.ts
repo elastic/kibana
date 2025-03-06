@@ -99,7 +99,7 @@ export function convertToPersistable(state: XYState) {
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
   persistableState.layers.forEach((layer) => {
-    // anything by an annotation can just be persisted as is
+    // anything but an annotation can just be persisted as is
     if (!isAnnotationsLayer(layer)) {
       persistableLayers.push(layer);
       return;
