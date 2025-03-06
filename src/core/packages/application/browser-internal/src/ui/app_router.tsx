@@ -154,8 +154,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 return (
                   <MountedRoute
                     appPath={url}
-                    // think this is a real type error hidden by the previous {..{...}} or w/e
-                    appId={mounters.has(appId) ? appId : undefined}
+                    appId={mounters.has(appId) ? appId : ''}
                     appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                     createScopedHistory={createScopedHistory}
                     mounter={mounters.has(appId) ? mounters.get(appId) : undefined}

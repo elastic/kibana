@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';

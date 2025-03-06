@@ -9,7 +9,6 @@ import React from 'react';
 
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { PAGE_CONTENT_WIDTH } from '../constants';

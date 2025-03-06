@@ -13,7 +13,6 @@ import { IMAGE } from './translations';
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 import illustration from './integrations_light.svg';
-import { SecuritySolutionPluginTemplateWrapper } from '../../containers/security_solution_plugin_template_wrapper';
 
 export const DOCS_LINK_TEST_ID = 'tiEmptyPageDocsLink';
 export const EMPTY_PROMPT_TEST_ID = 'tiEmptyPage';

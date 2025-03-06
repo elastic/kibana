@@ -227,6 +227,4 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   theme$: Observable<CoreTheme>;
-
-  rootReducer?: any;
 }

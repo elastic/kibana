@@ -965,12 +965,12 @@ exports[`SolutionNav renders with icon 1`] = `
             css={
               Object {
                 "map": undefined,
-                "name": "cmwv0a",
+                "name": "ip9ufg",
                 "next": undefined,
                 "styles": "
-              margin-right: 12px;
-              align-self: flex-start;
-            ",
+        margin-right: 12px;
+        align-self: flex-start;
+      ",
                 "toString": [Function],
               }
             }
@@ -1083,12 +1083,12 @@ exports[`SolutionNav renders with icon 1`] = `
           css={
             Object {
               "map": undefined,
-              "name": "cmwv0a",
+              "name": "ip9ufg",
               "next": undefined,
               "styles": "
-              margin-right: 12px;
-              align-self: flex-start;
-            ",
+        margin-right: 12px;
+        align-self: flex-start;
+      ",
               "toString": [Function],
             }
           }

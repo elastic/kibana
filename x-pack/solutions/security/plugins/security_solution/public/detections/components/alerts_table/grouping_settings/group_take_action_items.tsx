@@ -205,7 +205,17 @@ export const useGroupTakeActionsItems = ({
     ]
   );
 
-  const getActionItems = useCallback(
+  const getActionItems: ({
+    query,
+    tableId,
+    groupNumber,
+    selectedGroup,
+  }: {
+    query?: string | undefined;
+    tableId: string;
+    groupNumber: number;
+    selectedGroup: string;
+  }) => React.JSX.Element[] = useCallback(
     ({
       query,
       tableId,
@@ -219,7 +229,6 @@ export const useGroupTakeActionsItems = ({
     }) => {
       if (!showAlertStatusActions) return [];
 
-      // Handle single status case
       if (currentStatus?.length === 1) {
         const singleStatus = currentStatus[0];
         const statusConfig = [
@@ -250,10 +259,9 @@ export const useGroupTakeActionsItems = ({
               return null;
             }
           })
-          .filter(Boolean);
+          .filter(Boolean) as React.JSX.Element[];
       }
 
-      // Handle multiple status case
       return Object.entries(STATUS_ACTIONS).map(([status, label]) => (
         <StatusMenuItem
           status={status}

@@ -12,7 +12,6 @@ import { NoteManagementPage } from './pages/note_management_page';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { NOTES_PATH, SecurityPageName } from '../../common/constants';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const NotesManagementTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.notes}>

@@ -11,7 +11,6 @@ import type { DragStart, DropResult } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import type { BrowserFields } from '../../containers/source';
