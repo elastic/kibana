@@ -198,6 +198,7 @@ export interface EditProcessorPanelProps {
 export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
+  const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 
   const processorDescription = getProcessorDescription(processor);
@@ -228,11 +229,11 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
 
   useEffect(() => {
     const subscription = processorRef.on('processor.changesDiscarded', () => {
-      methods.reset(defaultValues);
+      methods.reset(getFormStateFrom(previousProcessor));
     });
 
     return () => subscription.unsubscribe();
-  }, [defaultValues, methods, processorRef]);
+  }, [methods, previousProcessor, processorRef]);
 
   const handleCancel = useDiscardConfirm(
     () => processorRef?.send({ type: 'processor.cancel' }),

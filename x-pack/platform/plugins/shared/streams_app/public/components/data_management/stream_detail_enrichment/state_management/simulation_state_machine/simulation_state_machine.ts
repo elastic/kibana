@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ActorRefFrom,
-  MachineImplementationsFrom,
-  SnapshotFrom,
-  assign,
-  raise,
-  setup,
-} from 'xstate5';
+import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
@@ -112,7 +105,7 @@ export const simulationMachine = setup({
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBGlOR3pHT0NZQ2VJZUdpdVMLBEtHPUUbLqbGnUd9eV9-dDDg0iYkvLhYQiTYegAqctFqlGC6xENJEfsPPRGuvvVpAasZaXtDQ2dJTUN5dT11WTzEChIIRFZrKIbLbRWiQrAHSpHE6VeofeScegKNztSTtLzSeRPBCdDFo1w9W56PTdIEg8IkcHrWCbJLROJ0Dg8Q6CY61FGIdR-FqGKk-bp-DRE4Z6eg9WQPTjyWQ3dqOQy0xaghmrJks+gQMBYMBsBH8HnI0ComTqeyOF4yeS3TiPcyIXp2Rzqd5oxzyeQivQawL0sg6yHM6EGo0myQVM01ET84mGZ30f4-dNuR1E6SSRR236-bq9ZSuINLCL0FDEXk4LAoABe1agpFNVXNfMtUlaNvk-zz-vOHXaRK0mPUylknD0hj+Cn9gb8wM1IarNYIdcbzdbse5CeIpwQFy69AejVUExnoyJLiUNj0XmpyrtP3LWsiBoARoQMMQos2AGF2RgWBGXDPVYniTk43bfdDz7V4qSnAl-j0ZVJClX17HRGc-l6JplABN9Vy-H8-0A4C4FIMRYDwSh6BwAAzUoAApSN-SEABV0DAABKUg6WCfUwG-DiKKg2A2yRTtxCkWxJFPf1ejPXpHRMV0j04WR6BkWQtGUeRGjnWdiKE9jyLoICJOo2j6KY1jzK4nj+MEytHPEjlJN3REO0TLtNLkTEFCMQVui0dTBnaG0tO0Do3AuQxXEBJdXJIegsEIHAIGbABlHA0CYI1QIgEgwDXVJCAAazK2B8sKuACmNWIwCSABBKI8C2KTfIPJMZFUextEcTgLhGVoPlHWxZUVNV1GnVwZlGUzKwyrLcrqorSBatZWUK-BGK2NB6FqgqisavBmrajquq5Hy4KTFNhvoDNJDQlw5p0foNJsOxVDUua3BuWZlrSnBmRagg6ByldgioMAAEcMBQFI0DAYg8FA7r7v8vM7WemxrlxAF3hvGxTw+i5RkS3N1BByIwdgCHcphiI4cR5GwFR9HMe8+NeT82Sj0dDF5IMqdzgMr4bx0Z6ATkdxflUC46foJJfxrKGWYZEriDK6sKuq46teIKh1Za9rOrKW6+YtQW5G0i8mmdGZEsnIk1KUB5dCcHoH1+FW1eIDWoGh4Nlm26E9rwA6kiO1KTbNq7Lax-nev8+WdI8EbAaGqkiUI15unRJVS1zWRHF8JdiEIA14EqeO91T+C+zTNDnT7OdqSldpFCMH4O6fKdlBV6ta3rJs6Eb236mPbThsIlwxYudRCQ0ywATvEZRl0LpBWdEeICNKeZPqFxtJXwzcXkfQZy6HM-XsfQFdGa+b5V9zLMouubZPgULiUeU188xaAnFLb63R6BAL0uXJ8TQZwq1WtlKGG04DHwFjPeUCkfRoWvtcIwUp0SDVsFOG4ypZx+jmClY2DFwZJEhiHY2bMkYozRhjNBadBZaCpEFKk2J3heBcESRKzRzgXD6JMXMRcA7q2ZmHGS0l0FyRTLKFeuhb5zgJPnCcOlhrIWGr0PMtNK5AA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBFlHSXplFXVDPRl1ZVlNUwsES2VJR3oRw0dDeXUXR04ZX390MODSUKCI+hTYMDxy0WqUYLrEKdcx9T15ecNJPVlO6X6rQ3V6SddDdzd5K-llRyLEDrcIkUhMJJ5OCwQhJWD0ABU+0qh2OlXqkhmikc8kkhmU6hm+n08meg3xzU4-3aUy0kmmyiBINWEKhsBhSWitCiYCwyP4giOtXRpxGynoBhmhkMsipLlJ5isb2U13u8mk6qmRl0TOWGzBrJ57Nh0TidA4PAOgrRoHqhL07w6elpBL0GjJlkcDoBvWkcr0k0ahl1gVBZEN0JNEF5uwtFQFNREIoQ0oU9GmOlusr9KrJNkULlkmLdk2l6g0IZWEXBkKNHPo0awsfYknjVWtwttpzmdnkuNubk6KscZL7dkL8g+-3V0hllf1kRQxCFOCwKAAXkuoKR+e3E8QTggRo43r9NGOs6m87J6L0epxnZcFPIOvOw-Qlyu15u6DvW1b90PMVmnUdwvC8GxnSuMkXCUSCvE6B4mimN9ggbMAACNCAwYgoi3ABhM0YFgGs2XrWJ4jjAChSTLsEF+aQJXuTgNT0J9Og9HF7FVV4Az9RwCVkVDNmjLCcLwuhCMokixFgPBKHoHAADNSgAClE7DcLAAAVdAwAASjWPV3w08SCKIuBd1RTtxCkWwQJfRxpFAjwNUmPNOBvGQix0dUNHuV5hJIdCxNw8zpNIWT5LYRSVLAJJ1MwzSeV0tADKM0M0NMsLJIs2AWzbazaNso8WJvbR-leTRhlkExFRTXp7G0bQOmkcZXCEvxgWMtCsEIHAIC3ABlHA0CYJsSIgEgwA-YhUkIABrGbYFG8a4AKXZYnigBBKI8FhKyO2KjEVE4JrGnmRwvSuiYPLsVRJ1eB9XAEq4gsiPqBuG1aJtIeLIU5cb8CU2E0HoFaxomja8C2pJdv2spLRRI6D2TQx5jeSQeh6X4XxkBUBhse6qUmctB1e+R3sU9l4oIOghp6iIqDAABHDAUBSNLiDwEjDsA5N6SaehbhYr08SlOqBiLM7CU8kYri+Nr1CpnAaaSOmoAZzKmdZ9nObAbnef-ZH+bowWzvslVZVuFVMRgnRhZmOR3AZS6qaSHDl3pxmwSm4gZqXealvBn3iCoT2dr2g6kYTGjUbouQb1UVQ5g8IwVFkUdJiUUDdCcAE3Wmd3PeG0O-qSAH6CBvAQaSMHmSZiO4ajxHCpRw9nbGDx5kHbQvT0MkCUYrHrnkHR3C0QEgWIQho3gSoG+Kor45KvsHT0ZjWPYyROJPFpqSxhRug1Tgp6WbXgs-AhVw3LdqJtEqxRvOZBJUMeRnUAmlRvNr+-+XRMTlmkFTFAEAmz3xsvUQs9BP7qjxP8DeFIyQakUAhF2fxdAbyptlCSUApLmnnrHB+doRhKF6P8ekWhuh23qpILG6YaqT0QqfZ0VNPqDXpj9OAEDjpSF6M0CYk41StC9EYD01wmq2FlAGB4rw+yUy6ovSIqsdjq1LhfMOusOZgC5jzHhK8MQPAdNoDebhpTox6E8eqXxRi3BGM5U+E8R7F2IF7TWod9FAVsGdAk-9nSunlIPboYw5jZjmE5ekytfDeCAA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
     dateRangeRef: spawn('dateRangeMachine', {
@@ -163,7 +156,10 @@ export const simulationMachine = setup({
         target: '.assertingSimulationRequirements',
         actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
       },
-      { actions: raise({ type: 'simulation.reset' }) },
+      {
+        target: '.idle',
+        actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+      },
     ],
   },
   states: {

@@ -104,8 +104,8 @@ export const processorMachine = setup({
                 'processor.cancel': {
                   target: '#configured.idle',
                   actions: [
-                    { type: 'resetToPrevious' },
                     { type: 'emitChangesDiscarded' },
+                    { type: 'resetToPrevious' },
                     { type: 'forwardEventToParent' },
                   ],
                 },
