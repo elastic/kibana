@@ -1360,6 +1360,8 @@
       "@kbn/observability-shared-plugin/*": ["x-pack/solutions/observability/plugins/observability_shared/*"],
       "@kbn/observability-synthetics-test-data": ["x-pack/solutions/observability/packages/synthetics-test-data"],
       "@kbn/observability-synthetics-test-data/*": ["x-pack/solutions/observability/packages/synthetics-test-data/*"],
+      "@kbn/observability-ui-semantic-conventions": ["x-pack/platform/packages/shared/kbn-observability-ui-semantic-conventions"],
+      "@kbn/observability-ui-semantic-conventions/*": ["x-pack/platform/packages/shared/kbn-observability-ui-semantic-conventions/*"],
       "@kbn/observability-utils-browser": ["x-pack/solutions/observability/packages/utils-browser"],
       "@kbn/observability-utils-browser/*": ["x-pack/solutions/observability/packages/utils-browser/*"],
       "@kbn/observability-utils-common": ["x-pack/solutions/observability/packages/utils-common"],
