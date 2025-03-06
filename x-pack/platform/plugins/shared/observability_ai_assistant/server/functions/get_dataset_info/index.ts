@@ -35,7 +35,7 @@ export function registerGetDatasetInfoFunction({
           index: {
             type: 'string',
             description:
-              'Index pattern the user is interested in. You are allowed to specify multi comma-separated patterns like "index1,index2". If you provide an empty string, all indices will be returned.',
+              'Index pattern the user is interested in. You are allowed to specify multiple, comma-separated patterns like "index1,index2". If you provide an empty string, all indices will be returned. By default matching indicies in local and remote indices are searched. If you want to limit the search to a specific cluster you can prefix the index pattern with the cluster name. For example, "cluster1:my-index".',
           },
         },
         required: ['index'],
@@ -92,8 +92,23 @@ async function getIndicesFromIndexPattern(
   esClient: IScopedClusterClient,
   logger: Logger
 ) {
+  let name: string[] = [];
+  if (indexPattern === '') {
+    name = ['*', '*:*'];
+  } else {
+    name = indexPattern.split(',').flatMap((pattern) => {
+      // search specific cluster
+      if (pattern.includes(':')) {
+        const [cluster, p] = pattern.split(':');
+        return `${cluster}:*${p}*`;
+      }
+
+      // search across all clusters
+      return [`*:*${pattern}*`, `*${pattern}*`];
+    });
+  }
+
   try {
-    const name = indexPattern === '' ? ['*', '*:*'] : indexPattern.split(',').map((i) => `*${i}*`);
     const body = await esClient.asCurrentUser.indices.resolveIndex({
       name,
       expand_wildcards: 'open', // exclude hidden and closed indices

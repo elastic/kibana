@@ -337,7 +337,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(body.fields.length).to.be.greaterThan(0);
       });
 
-      it('accepts comma-separated patterns', async () => {
+      it('accepts a comma-separated of patterns', async () => {
         llmProxy.interceptSelectRelevantFieldsToolChoice({ to: 20 });
 
         const { body } = await observabilityAIAssistantAPIClient.editor({
