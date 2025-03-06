@@ -137,7 +137,6 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
  * The route to the overwritten session UI.
  */
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
-
 function assertLoginAttempt(attempt: ProviderLoginAttempt) {
   if (!isLoginAttemptWithProviderType(attempt) && !isLoginAttemptWithProviderName(attempt)) {
     throw new Error(
@@ -194,20 +193,15 @@ function instantiateProvider(
 }
 
 /**
- * Authenticator is responsible for authentication of the request using a chain of
+ * Authenticator is responsible for authentication of the request using chain of
  * authentication providers. The chain is essentially a prioritized list of configured
  * providers (typically of various types). The order of the list determines the order in
- * which the providers will be consulted.
- *
- * During the authentication process, the Authenticator
+ * which the providers will be consulted. During the authentication process, Authenticator
  * will try to authenticate the request via one provider at a time. Once one of the
  * providers successfully authenticates the request, the authentication is considered
  * to be successful and the authenticated user will be associated with the request.
- *
- * If the current provider cannot authenticate the request, the next provider in line
- * will be used.
- *
- * If all providers in the chain could not authenticate the request,
+ * If provider cannot authenticate the request, the next in line provider in the chain
+ * will be used. If all providers in the chain could not authenticate the request,
  * the authentication is then considered to be unsuccessful and an authentication error
  * will be returned.
  */
@@ -400,14 +394,13 @@ export class Authenticator {
     const suggestedProviderName =
       existingSession.value?.provider.name ??
       request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
-
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
         existingSession.value?.provider.name === providerName &&
         existingSession.value?.provider.type === provider.type;
 
-      let authenticationResult: AuthenticationResult = await provider.authenticate(
+      let authenticationResult = await provider.authenticate(
         request,
         ownsSession ? existingSession.value!.state : null
       );
@@ -778,20 +771,16 @@ export class Authenticator {
     const sessionShouldBeUpdatedOrExtended =
       (authenticationResult.succeeded() || authenticationResult.redirected()) &&
       (authenticationResult.shouldUpdateState() || (!request.isSystemRequest && ownsSession));
-
     if (!sessionShouldBeUpdatedOrExtended) {
       return ownsSession ? { value: existingSessionValue, overwritten: false } : null;
     }
 
     const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
-
     const isNewSessionAuthenticated = !!authenticationResult.user;
 
     const providerHasChanged = !!existingSessionValue && !ownsSession;
-
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
-
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&
@@ -809,21 +798,17 @@ export class Authenticator {
       this.logger.warn(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
-
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-
       await this.invalidateSessionValue({
         request,
         sessionValue: existingSessionValue,
         skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
       });
-
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
