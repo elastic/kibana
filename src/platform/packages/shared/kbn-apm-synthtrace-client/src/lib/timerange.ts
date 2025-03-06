@@ -18,7 +18,7 @@ export class Timerange {
   constructor(
     public readonly from: Date,
     public readonly to: Date,
-    private readonly log: ToolingLog
+    private readonly log?: ToolingLog
   ) {}
 
   interval(interval: string) {
@@ -70,7 +70,7 @@ function getDateFrom(date: DateLike, now: Date): Date {
   return date.toDate();
 }
 
-export function timerange(from: DateLike, to: DateLike, log: ToolingLog) {
+export function timerange(from: DateLike, to: DateLike, log?: ToolingLog) {
   const now = new Date();
   return new Timerange(getDateFrom(from, now), getDateFrom(to, now), log);
 }

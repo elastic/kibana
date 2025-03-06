@@ -34,7 +34,7 @@ interface IntervalOptions {
   to: Date;
   interval: string;
   rate?: number;
-  log: ToolingLog;
+  log?: ToolingLog;
 }
 
 interface StepDetails {
@@ -89,20 +89,21 @@ export class Interval<TFields extends Fields = Fields> {
     };
 
     let index = 0;
-
     const calculateEvery = 10;
 
-    const reporter = new TimerangeProgressReporter({
-      log: this.options.log,
-      reportEvery: 5000,
-      total: timestamps.length,
-    });
+    const reporter = this.options.log
+      ? new TimerangeProgressReporter({
+          log: this.options.log,
+          reportEvery: 5000,
+          total: timestamps.length,
+        })
+      : undefined;
 
     for (const timestamp of timestamps) {
       const events = castArray(map(timestamp, index, stepDetails));
       index++;
       if (index % calculateEvery === 0) {
-        reporter.next(index);
+        reporter?.next(index);
       }
       for (const event of events) {
         yield event;
