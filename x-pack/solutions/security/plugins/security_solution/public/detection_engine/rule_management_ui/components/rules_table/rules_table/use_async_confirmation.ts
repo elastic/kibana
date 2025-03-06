@@ -19,7 +19,8 @@ interface UseAsyncConfirmationArgs {
 }
 
 // TODO move to common hooks
-export const useAsyncConfirmation = <ConfirmResult = true>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useAsyncConfirmation = <ConfirmResult = any>({
   onInit,
   onFinish,
 }: UseAsyncConfirmationArgs): UseAsyncConfirmationReturn<ConfirmResult> => {
