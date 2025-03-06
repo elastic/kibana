@@ -6,8 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import isEmpty from 'lodash/isEmpty';
+import memoize from 'lodash/memoize';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import { useKibana } from '../../common/lib/kibana';
 import { type DataViewManagerScopeName } from '../constants';
@@ -16,6 +18,28 @@ import { useDataView } from './use_data_view';
 export interface UseGetScopedSourcererDataViewArgs {
   dataViewManagerScope: DataViewManagerScopeName;
 }
+
+/**
+ * Creates a DataView from the provided DataViewSpec.
+ *
+ * This is a memoized function that will return the same DataView instance
+ * for the same dataViewSpec version or title.
+ */
+const dataViewFromSpec: (
+  fieldFormats: FieldFormatsStartCommon,
+  dataViewSpec?: DataViewSpec
+) => DataView | undefined = memoize(
+  (fieldFormats: FieldFormatsStartCommon, dataViewSpec?: DataViewSpec) => {
+    if (isEmpty(dataViewSpec?.fields)) {
+      return undefined;
+    }
+
+    return new DataView({ spec: dataViewSpec, fieldFormats });
+  },
+  (...args) => {
+    return args[1]?.version ?? args[1]?.title;
+  }
+);
 
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
@@ -29,13 +53,10 @@ export const useFullDataView = ({
   } = useKibana();
   const { dataView: dataViewSpec } = useDataView(dataViewManagerScope);
 
-  const dataView = useMemo(() => {
-    if (!isEmpty(dataViewSpec?.fields)) {
-      return new DataView({ spec: dataViewSpec, fieldFormats });
-    } else {
-      return undefined;
-    }
-  }, [dataViewSpec, fieldFormats]);
+  const dataView = useMemo(
+    () => dataViewFromSpec(fieldFormats, dataViewSpec),
+    [dataViewSpec, fieldFormats]
+  );
 
   return dataView;
 };
