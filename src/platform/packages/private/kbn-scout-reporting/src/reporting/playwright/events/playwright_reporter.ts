@@ -25,11 +25,11 @@ import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type CodeOwnersEntry,
-  type CodeOwnerArea,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
-  findAreaForCodeOwner,
+  findGroupByOwner,
 } from '@kbn/code-owners';
+import type { KibanaGroup } from '@kbn/constants';
 import {
   ScoutEventsReport,
   ScoutFileInfo,
@@ -71,10 +71,10 @@ export class ScoutPlaywrightReporter implements Reporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
-  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
+  private getOwnersGroups(owners: string[]): KibanaGroup[] {
     return owners
-      .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .map((owner) => findGroupByOwner(owner))
+      .filter((area) => area !== undefined) as KibanaGroup[];
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
@@ -83,7 +83,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     return {
       path: filePath,
       owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      area: this.getOwnersGroups(fileOwners),
     };
   }
 

@@ -9,9 +9,11 @@
 
 import { execSync } from 'child_process';
 import axios from 'axios';
+import type { KibanaSolution } from '@kbn/constants';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
+  // TODO TBCworkchat handle the new project type, and ideally rename 'elasticsearch' to 'search'
   const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
   try {
     return (
@@ -19,6 +21,7 @@ async function getPrProjects() {
         projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
         projectRequest.get('/api/v1/serverless/projects/security'),
         projectRequest.get('/api/v1/serverless/projects/observability'),
+        // TODO TBCworkchat handle the new project type, and ideally rename 'elasticsearch' to 'search'
       ])
     )
       .map((response) => response.data.items)
@@ -47,12 +50,17 @@ async function deleteProject({
   id,
   name,
 }: {
-  type: 'elasticsearch' | 'observability' | 'security';
+  type: KibanaSolution;
   id: number;
   name: string;
 }) {
   try {
-    await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
+    // TODO TBCworkchat handle the new project type, and ideally rename 'elasticsearch' to 'search'
+    await projectRequest.delete(
+      `/api/v1/serverless/projects/${
+        type === ('search' as KibanaSolution) ? 'elasticsearch' : type
+      }/${id}`
+    );
 
     execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
       cwd: getKibanaDir(),
