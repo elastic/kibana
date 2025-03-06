@@ -84,8 +84,8 @@ export interface FleetConfigType {
     };
   };
   createArtifactsBulkBatchSize?: number;
-  autoUpgrades: {
-    retryDelays: string[];
+  autoUpgrades?: {
+    retryDelays?: string[];
   };
 }
 

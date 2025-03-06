@@ -12,7 +12,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { isValidExperimentalValue } from '../common/experimental_features';
-import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../common/constants';
 
 import {
   PreconfiguredPackagesSchema,
@@ -283,11 +282,11 @@ export const config: PluginConfigDescriptor = {
           min: 400,
         })
       ),
-      autoUpgrades: schema.object({
-        retryDelays: schema.arrayOf(schema.string(), {
-          defaultValue: AUTO_UPGRADE_DEFAULT_RETRIES,
-        }),
-      }),
+      autoUpgrades: schema.maybe(
+        schema.object({
+          retryDelays: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
     },
     {
       validate: (configToValidate) => {
