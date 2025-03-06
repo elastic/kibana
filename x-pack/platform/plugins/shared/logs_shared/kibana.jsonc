@@ -32,7 +32,6 @@
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "discover",
     ],
     "extraPublicDirs": [
       "common"

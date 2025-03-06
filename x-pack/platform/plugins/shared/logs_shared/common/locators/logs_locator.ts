@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
@@ -33,7 +33,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const discoverAppLocator =
-      this.deps.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)!;
+      this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
     return discoverAppLocator.getLocation({
       dataViewId: ALL_LOGS_DATA_VIEW_ID,
