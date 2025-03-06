@@ -439,8 +439,6 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
     });
 
-    it('Should set pending recovered', async () => {});
-
     it('should set flapping and flapping_history for flapping alerts over a period of time longer than the lookback', async () => {
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
