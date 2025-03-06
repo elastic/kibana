@@ -30,8 +30,11 @@ import {
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
 } from '../../../../common/constants';
 import {
+  getAgentlessCredentialsType,
+  getAwsAgentlessFormOptions,
+  getAwsCloudConnectorsCredentialsFormOptions,
+  getAwsCloudConnectorsFormAgentlessOptions,
   getAwsCredentialsFormAgentlessOptions,
-  getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import { getAwsCredentialsType, getPosturePolicy } from '../utils';
@@ -237,14 +240,32 @@ export const AwsCredentialsFormAgentless = ({
   setupTechnology,
   hasInvalidRequiredVars,
 }: AwsFormProps) => {
-  const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-  const options = getAwsCredentialsFormOptions(true);
-  const group = options[awsCredentialsType];
-  const fields = getInputVarsFields(input, group.fields);
-  const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   const { cloud } = useKibana().services;
-
+  const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+
+  // Elastic Service ID refers to the deployment ID or project ID
+  const elasticResourceId = cloud?.isCloudEnabled
+    ? cloud?.deploymentId
+    : cloud?.serverless.projectId;
+
+  const cloudConnectorRemoteRoleTemplate = elasticResourceId
+    ? getTemplateUrlFromPackageInfo(
+        packageInfo,
+        input.policy_template,
+        SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+      )
+        ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+        ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
+    : undefined;
+  // Todo: Remove feature flag cloudConnectorsEnabled  before release.
+  // Feature flag to detect if serverless project or deployment was created on AWS cluster
+  const showCloudConnectors =
+    cloud?.csp === 'aws' && !!cloudConnectorRemoteRoleTemplate && cloudConnectorsEnabled;
+
+  const awsCredentialsType = getAgentlessCredentialsType(input, true);
+
+  const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
 
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
@@ -273,21 +294,6 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  // Elastic Service ID refers to the deployment ID or project ID
-  const elasticResourceId = cloud?.isCloudEnabled
-    ? cloud?.deploymentId
-    : cloud?.serverless.projectId;
-
-  const cloudConnectorRemoteRoleTemplate = elasticResourceId
-    ? getTemplateUrlFromPackageInfo(
-        packageInfo,
-        input.policy_template,
-        SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-      )
-        ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-        ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
-    : undefined;
-
   const cloudFormationSettings = {
     [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
       accordianTitleLink: <EuiLink>Steps to Generate AWS Account Credentials</EuiLink>,
@@ -304,12 +310,12 @@ export const AwsCredentialsFormAgentless = ({
   const isCloudFormationSupported =
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+  const agentlessOptions = true // Todo change to showCloudConnectors
+    ? getAwsCloudConnectorsCredentialsFormOptions()
+    : getAwsAgentlessFormOptions();
 
-  const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
-  // Todo: Remove feature flag cloudConnectorsEnabled  before release.
-  // Feature flag to detect if serverless project or deployment was created on AWS cluster
-  const showCloudConnectors = cloud?.csp === 'aws' && !!cloudConnectorRemoteRoleTemplate;
-
+  const group = agentlessOptions[awsCredentialsType as keyof typeof agentlessOptions];
+  const fields = getInputVarsFields(input, group.fields);
   return (
     <>
       <AWSSetupInfoContent
@@ -336,7 +342,11 @@ export const AwsCredentialsFormAgentless = ({
           defaultMessage: 'Preferred method',
         })}
         type={awsCredentialsType}
-        options={getAwsCredentialsFormAgentlessOptions(showCloudConnectors)}
+        options={
+          showCloudConnectors
+            ? getAwsCredentialsFormAgentlessOptions()
+            : getAwsCloudConnectorsFormAgentlessOptions()
+        }
         disabled={!!isEditPage && awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE}
         onChange={(optionId) => {
           const supportsCloudConnector =
