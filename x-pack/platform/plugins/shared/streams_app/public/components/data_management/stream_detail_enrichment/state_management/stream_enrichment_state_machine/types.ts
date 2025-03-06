@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { FieldDefinition, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
@@ -33,7 +33,6 @@ export interface StreamEnrichmentContext {
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
   simulatorRef?: SimulationActorRef;
-  fields?: FieldDefinition;
 }
 
 export type StreamEnrichmentEvent =

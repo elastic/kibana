@@ -7,7 +7,6 @@
 import {
   MachineImplementationsFrom,
   assign,
-  enqueueActions,
   not,
   setup,
   sendTo,
@@ -96,9 +95,6 @@ export const streamEnrichmentMachine = setup({
         processorsRefs,
       };
     }),
-    setupFields: assign((_, params: { definition: WiredStreamGetResponse }) => ({
-      fields: params.definition.stream.ingest.wired.fields,
-    })),
     addProcessor: assign(
       (
         { context, spawn, self },
@@ -167,7 +163,7 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATADYK3RYoAsy7soCcAVmVHV2gDQgAngpMUDqo1qOPtqgIynlAXx9XUTFxCYnIqGjpGFjYuD34kEBExOklpOQQlfQoPIwB2TUUDbgBmVWKDZStbBF0HCqNixQ9cwqdFVT8A9Gx8IlJKUIhrdlg+sOIsMAwAN0geeKFRcVSE9MViiia1A0UzIxzdRSqFRQdTDwvlbU0PblyDYs7wbuCxgdIhilHQygwIBjAIzeFGIsDABHm0iSyykqwUpQ0xWUOV2qhauV0qmOCC8TQoLUU3FU3BMRn07SegR6IX6II+1i+wL+AKBPwoAFdBBASAQwJCEtCUrDQOklCp8bkPMVXMo9ESDB5sR5DhRdA1DLcysqOv5nkFemzBgzvrTOdy6CgOBBJGBwtNhABrW2csFoAg08gAQSwBGEaH5i2SEmFsjsDXxxW4mgMGMcxW0RiV5Q22lyssluwuTlylJeBtpRsZbLNPJiYDQaD9FEEDB5ADM-ZQXeX3W9vb7-XwoUshWl4XoKHlVMoM1KyQZtJYbIgxwYKOU7o1cqoV0ZtLn9R73iRPlTcGRUAQKBAMLAayRrGwAAqVyawWB+2DsQS3uAPtCwCg7iABxI94N9hk6zKKq7S6PGRLIrkuTYqUuSgSUK5Sh46x3EYG7UsChZ7jgB4oEeJ5nrWl6Wjewh3u+T4vuRb6PnSfoQOWv6CgBcIZJO6gNCS5TaDopQKjB04IM4pzcB4xiEiUphNDqXSblh9IUDheEEae54kVAZEUY+z6vveVaMQCvLMf+Kwigo1weKqxIjlqyLuIJ1TxiB5h5MqCbcIcjy6jhW50juDLKYex5qcR156ZRuk0fpaAULgJCWnyXYCqZIaik03Cqq4JRkoYZQqNiIkaOJpLmOUabeXJmGGopQX4SFREXmweAYGQ7K1kKFDTBgYAAO4ACI8iQN5gN1fUjK17WlpIXU9QN4JgD6kAAGI9QwECwCZQZmaGGRGPYtyodwE4mOYlRCQYxigbc0pmCoxKKBhrw1QFSl5ipDXqc1k0dcGs19YNBDDcQY29RNbW-TN8WJSNoP9eRsCrQwvKdgsf7bWlJzxpsqHicUxQtMUUrYoUVkmPcUq7KYngGE9+bjLV73BYRX2Wi1EPTSg-3zbyS0QKtYDrU+Ygc51cNDbDc1bTCgHyGuIEKqohT3PjE6FEqRJWQTSLKPjnn3Amfi6igwiMfACS+W83YY7LtxqDjkZ4wT6xeNi8jKhsjjOLk+y5ETY7oT5eZ+dQ4hRKwlrWzLbHyDGpz3H7TjHWqkpu-tFDIiJ6yNNol3GHTflGlHvYx3HDtiQ8ztE8USoDq5+SqAqVNlLJerVQWikmuQxeseZGQPJl0GzrKUaN4qQleATDjQT7pgEp5lVt89HevV3vz-GAPc7aKw6e8Ol3EjsyJXEmpiqjPig+4cOZB-JL2fGvHJcqWkcpTbMfmHOko+w0ZUqC0Sp9pGFVBOKMyo0wH3XLfduDNXp1QIFvTG-dIzlydoTYmQlTDAOVG5RoahG7XEDlVZesDdxM3qizMKpEIqPkQbLTwwDeKOHuIfJEl9CpZFRISYkRNXD7QLgpOB5DVKNQ0uzKaJdAzRz7mKECWhHaV3QTXISPt4L6ApvtQwqZJQCPvoFYRn0qFQHEZDLm4sgaSz6nQmO0F1D43cqmKM-EsQXSurxG6+0lZqE0LoleZD9QfUoU1NmP1Obc36gtPmAshbWJkbKbQDh8auCJu0WUhhsSXUYRlW6XjiSt0tjVB8DBZgQAAErCGEK2H4sTdryGHGTEkmY9hrjEmndQ7hvYJlzgTB4OQjY+CAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATADYK3RYoAsy7soCcAVmVHV2gDQgAngpMUDqo1qOPtqgIynlAXx9XUTFxCYnIqGjpGFjYuD34kEBExOklpOQQlfQoPIwB2TUUDbgBmVWKDZStbBF0HCqNixQ9cwqdFVT8A9Gx8IlJKUIhrdlg+sOIsMAwAN0geeKFRcVSE9I9tB3zNE3zHPINcqrsjCibVVTVuT2Lm1SvO8G7gsYHSIYpR0MoMCAYwEZeFGIsDABHm0iSyykqwUpQ0xWUOUUZhauV0qiOCC8TQoLUUV24JiM+naD0CPRC-SBb2sH0BPz+AK+FAAroIICQCGBwQlISloaB0koVLjch5iq5lHorgYPJj1spFBRdA1DB4rjd3GSnr1mYNaZ8qWyOXQUBwIJIwOFpsIANZWtkgtAESnkACCWAIwjQPMWyQkAtkx2KuOK3E0B20jmK2iM8vKIe0uSlYuRHg8Tly2qCuqp+rpzONnJiYDQaG9FEEDE5ADNvZRHaWXS8PV6fXwIUt+WlYXoKHkLqnxcSDNpLDZEMODBRytxco1cucnNpsxTAfnybgyKgCBQIBhYFWSNY2AAFcuTWCwb2wdiCC9wa9oWAUEgQCC+xJdgM9jKKBHKu0ugxlciK5IcE4IKUuSASU5zih4-5zkYq7PHqNIUJuODbigu77oe1Ynma57CJeT63vepGPje1LehApafnyP4whkY7qA0hLlNoOilLKEHVM4SrcB4xj4iUphnKhubjBhWE4XhB5HkRUAkWRN53g+V4VvRfxcox34rIKCjaMJyp3Moi43Ii7j8YgMbKBQ5h5OssbcLo-5Sa6rxvrSck7nuimEWemnkRpVFaWgFC4CQZrch2vIGYGQpNNwyquCUxKGGUKiYoJGgiUS5jlMmxSeeusk6vJAUEcebB4BgZAstW-IUNMGBgAA7gAIpyJDnmAbWdSMDVNcWkite13WgmAnqQAAYu1DAQLA+n+oZQYZEY9jqkh3CjiY5iVJBBjGIB6oSmYKh3IoZXoT5mGVf5+FKXVI3NQGE2dT1BB9cQg0dcNjXveN0Wxf1-1daRsALQwXLtgsX5rUlCj-hsWhhiJxTFC0NzFJihQeP2Fmyo0hUibdeYVTmVXPUFZr1UDY0oJ9U1crNEALWAS23mIjMtRDvXg5Nq1Qr+8hGLUsqqIUuQGFjo6FPKVyE9jCLKFjbmy7Gfj+CAKDCPR8AJFhXmdkjYvqmopxIZj2P-l4mLyOsIZ7IouR5PiTTihTYTUOIUSsGaZuiyx8gHEqsvzk4e0qmKjtbRQiKCf+jRRidKG6yb5U+cH3ah+H1sY3Ldu45io6ObGqiOHoEqmBUPvee8hrkLnzFGRkcupeBU5SuGVdypBXjY5s4HhnLo4mSumc6l51L3c33y-GArfrUKFwuxcJ13AYKheOO1TiqYyrgaiEuKlm085rP+YL6y7LFkHCXm6H5jTmK7sNEVKgtPKW0nFGJlhJJkMG4Buc93h+VwivZGHcwyF2EsXHG4pMSmBOOsZyCJEJbwRGAjcj1cLVResREKN5oFi08P-Vostt4IjdrlLIyJpYEhuK4LauCqY9BpoFWq9M3pMzIaHLQDl0YIKxkgvGkF3YwX0LLJo5R2jmAvl0K+2cIH4IUjVZSDNRr80mt9X6A1JoCPbvIcC6gsYuSTOGXiGJjqnW4udLa0tLg3UvmuO6ajqZPW4VovhuivrTXZpzbmxiNryClBsYurgbjtClIYMu9iUoXWcXcDobi0KU2vAwWYEAABKwhhDNi+KEteiJ+yEjTGYLaJkB7VHFuodwzg0QSzlrLFhOsfBAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -188,22 +184,13 @@ export const streamEnrichmentMachine = setup({
     ready: {
       id: 'ready',
       type: 'parallel',
-      entry: enqueueActions(({ check, enqueue }) => {
-        enqueue({ type: 'stopProcessors' });
-        enqueue({
+      entry: [
+        { type: 'stopProcessors' },
+        {
           type: 'setupProcessors',
           params: ({ context }) => ({ definition: context.definition }),
-        });
-        // Setup fields for wired stream only
-        if (check('isWiredStream')) {
-          enqueue({
-            type: 'setupFields',
-            params: ({ context }) => ({
-              definition: context.definition as WiredStreamGetResponse,
-            }),
-          });
-        }
-      }),
+        },
+      ],
       on: {
         'stream.received': {
           target: '#ready',
@@ -238,7 +225,7 @@ export const streamEnrichmentMachine = setup({
                     .map((proc) => proc.getSnapshot())
                     .filter((proc) => proc.matches('configured'))
                     .map((proc) => proc.context.processor),
-                  fields: context.fields,
+                  fields: undefined, // TODO: implementing in follow-up PR
                 }),
                 onDone: {
                   target: 'idle',
