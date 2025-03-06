@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { matchExclusionPattern } from './data_stream_exclusions';
-import { DataStreamExclusions } from '../../../common/types';
+import { matchExclusionPattern } from './data_source_exclusions';
+import { DataSounceExclusions } from '../../common/types';
 
 describe('matchExclusionPattern', () => {
   it('should return the actions that should be excluded', () => {
-    const exclusions: DataStreamExclusions = {
+    const exclusions: DataSounceExclusions = {
       data_stream_1: ['readOnly'],
     };
 
@@ -19,7 +19,7 @@ describe('matchExclusionPattern', () => {
   });
 
   it('should return an empty array if no exclusions match', () => {
-    const exclusions: DataStreamExclusions = {
+    const exclusions: DataSounceExclusions = {
       data_stream_1: ['readOnly'],
     };
 
@@ -28,7 +28,7 @@ describe('matchExclusionPattern', () => {
   });
 
   it(`should match patterns ending with '*'`, () => {
-    const exclusions: DataStreamExclusions = {
+    const exclusions: DataSounceExclusions = {
       'data_stream_*': ['readOnly'],
     };
 

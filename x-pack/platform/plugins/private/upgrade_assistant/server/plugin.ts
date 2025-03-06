@@ -37,9 +37,9 @@ import {
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
-import type { DataStreamExclusions, FeatureSet } from '../common/types';
+import type { DataSounceExclusions, FeatureSet } from '../common/types';
 import { getEntepriseSearchRegisteredDeprecations } from './lib/enterprise_search/enterprise_search_deprecations';
-import { defaultExclusions } from './lib/data_streams/data_stream_exclusions';
+import { defaultExclusions } from './lib/data_source_exclusions';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -58,7 +58,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
-  private readonly initialDataStreamExclusions: DataStreamExclusions;
+  private readonly initialDataSourceExclusions: DataSounceExclusions;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -73,9 +73,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
 
-    const { featureSet, dataStreamExclusions } = config.get();
+    const { featureSet, dataSourceExclusions } = config.get();
     this.initialFeatureSet = featureSet;
-    this.initialDataStreamExclusions = Object.assign({}, defaultExclusions, dataStreamExclusions);
+    this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
   }
 
   private getWorker() {
@@ -143,7 +143,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       },
       config: {
         featureSet: this.initialFeatureSet,
-        dataStreamExclusions: this.initialDataStreamExclusions,
+        dataSourceExclusions: this.initialDataSourceExclusions,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
       current: versionService.getCurrentVersion(),

@@ -11,7 +11,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import SemVer from 'semver/classes/semver';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { handleEsError } from './shared_imports';
-import type { DataStreamExclusions, FeatureSet } from '../common/types';
+import type { DataSounceExclusions, FeatureSet } from '../common/types';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -24,7 +24,7 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
   config: {
-    dataStreamExclusions: DataStreamExclusions;
+    dataSourceExclusions: DataSounceExclusions;
     featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };

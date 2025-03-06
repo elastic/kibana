@@ -10,19 +10,20 @@ import {
   EnrichedDeprecationInfo,
   ESUpgradeStatus,
   FeatureSet,
-  DataStreamExclusions,
+  DataSounceExclusions,
   DataStreamsAction,
+  ReindexAction,
 } from '../../../common/types';
 import { getEnrichedDeprecations } from './migrations';
 import { getHealthIndicators } from './health_indicators';
-import { matchExclusionPattern } from '../data_streams/data_stream_exclusions';
+import { matchExclusionPattern } from '../data_source_exclusions';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient,
   {
     featureSet,
-    dataStreamExclusions,
-  }: { featureSet: FeatureSet; dataStreamExclusions: DataStreamExclusions }
+    dataSourceExclusions,
+  }: { featureSet: FeatureSet; dataSourceExclusions: DataSounceExclusions }
 ): Promise<ESUpgradeStatus> {
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
@@ -30,22 +31,44 @@ export async function getESUpgradeStatus(
 
     const toggledMigrationsDeprecations = enrichedDeprecations
       .map((deprecation) => {
-        if (deprecation.type === 'data_streams') {
-          const excludedActions = matchExclusionPattern(deprecation.index!, dataStreamExclusions);
+        const correctiveActionType = deprecation.correctiveAction?.type;
+        if (correctiveActionType === 'dataStream') {
+          const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
+
           (deprecation.correctiveAction as DataStreamsAction).metadata.excludedActions =
             excludedActions;
         }
+        if (correctiveActionType === 'reindex') {
+          const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
+
+          (deprecation.correctiveAction as ReindexAction).excludedActions = excludedActions;
+        }
         return deprecation;
       })
-      .filter(({ type, correctiveAction }) => {
-        if (type === 'data_streams') {
-          const { excludedActions = [] } = (correctiveAction as DataStreamsAction).metadata;
-          const allActionsExcluded =
-            excludedActions.includes('readOnly') && excludedActions.includes('reindex');
+      .filter(({ correctiveAction }) => {
+        const correctiveActionType = correctiveAction?.type;
+        switch (correctiveActionType) {
+          // Only show the deprecation if there are actions that are not excluded
+          // This only applies to data streams since normal reindexing shows a "delete" manual option.
+          case 'dataStream': {
+            const { excludedActions } = (correctiveAction as DataStreamsAction).metadata;
 
-          return !allActionsExcluded;
+            // nothing exlcuded, keep the deprecation
+            if (!excludedActions || !excludedActions.length) {
+              return true;
+            }
+
+            // if all actions are excluded, don't show the deprecation
+            const allActionsExcluded =
+              excludedActions.includes('readOnly') && excludedActions.includes('reindex');
+
+            return !allActionsExcluded;
+          }
+          case 'reindex':
+          default: {
+            return true;
+          }
         }
-        return true;
       })
       .filter(({ type, correctiveAction }) => {
         /**
