@@ -161,7 +161,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const refreshPage = useRefetchQueries();
 
-  const privileges = useMissingRiskEnginePrivileges(['read']);
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   if (!isAuthorized) {
     return null;
