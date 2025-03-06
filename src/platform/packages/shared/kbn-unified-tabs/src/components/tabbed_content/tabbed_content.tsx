@@ -71,7 +71,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const onLabelEdited = useCallback(
-    (item: TabItem, newLabel: string) => {
+    async (item: TabItem, newLabel: string) => {
       const editedItem = { ...item, label: newLabel };
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
     },
@@ -79,20 +79,20 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const onSelect = useCallback(
-    (item: TabItem) => {
+    async (item: TabItem) => {
       changeState((prevState) => selectTab(prevState, item));
     },
     [changeState]
   );
 
   const onClose = useCallback(
-    (item: TabItem) => {
+    async (item: TabItem) => {
       changeState((prevState) => closeTab(prevState, item));
     },
     [changeState]
   );
 
-  const onAdd = useCallback(() => {
+  const onAdd = useCallback(async () => {
     const newItem = createItem();
     changeState((prevState) => addTab(prevState, newItem));
   }, [changeState, createItem]);

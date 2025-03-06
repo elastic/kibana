@@ -29,8 +29,8 @@ export interface TabProps {
   tabContentId: string;
   getTabMenuItems?: GetTabMenuItems;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
-  onSelect: (item: TabItem) => void;
-  onClose: ((item: TabItem) => void) | undefined;
+  onSelect: (item: TabItem) => Promise<void>;
+  onClose: ((item: TabItem) => Promise<void>) | undefined;
 }
 
 export const Tab: React.FC<TabProps> = ({
@@ -49,6 +49,10 @@ export const Tab: React.FC<TabProps> = ({
   const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
+  });
+
+  const tabButtonAriaLabel = i18n.translate('unifiedTabs.tabButtonAriaLabel', {
+    defaultMessage: 'Click to select or double-click to edit session name',
   });
 
   const onSelectEvent = useCallback(
@@ -104,6 +108,7 @@ export const Tab: React.FC<TabProps> = ({
       ) : (
         <>
           <button
+            aria-label={tabButtonAriaLabel}
             css={getTabButtonCss(euiTheme)}
             className="unifiedTabs__tabBtn"
             data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}

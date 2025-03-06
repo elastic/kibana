@@ -20,7 +20,7 @@ export type TabsBarProps = Pick<
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
-  onAdd: () => void;
+  onAdd: () => Promise<void>;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({

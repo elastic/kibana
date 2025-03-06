@@ -25,7 +25,7 @@ enum SubmitState {
 
 export interface EditTabLabelProps {
   item: TabItem;
-  onLabelEdited: (item: TabItem, newLabel: string) => void;
+  onLabelEdited: (item: TabItem, newLabel: string) => Promise<void>;
   onExit: () => void;
 }
 
@@ -42,7 +42,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
   );
 
   const onSubmit = useCallback(
-    (newLabel: string) => {
+    async (newLabel: string) => {
       if (!newLabel) {
         return;
       }
@@ -54,7 +54,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
 
       setSubmitState(SubmitState.submitting);
       try {
-        onLabelEdited(item, newLabel);
+        await onLabelEdited(item, newLabel);
         onExit();
       } catch {
         setSubmitState(SubmitState.error);
@@ -64,14 +64,14 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
   );
 
   const onKeyUp = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
+    async (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === keys.ESCAPE) {
         onExit();
         return;
       }
 
       if (event.key === keys.ENTER) {
-        onSubmit(value.trim());
+        await onSubmit(value.trim());
       }
     },
     [value, onSubmit, onExit]
