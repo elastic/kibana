@@ -20,6 +20,7 @@ import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -165,10 +166,26 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           defaultMessage: 'More actions',
         });
 
+  const onExpandEvent = () => {
+    const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
+
+    openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID]);
+  };
   const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
 
   return (
     <>
+      <EuiFlexItem>
+        <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS}>
+          <EuiButtonIcon
+            data-test-subj="expand-event"
+            iconType="expand"
+            onClick={onExpandEvent}
+            size="s"
+            color="text"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
       {!hideViewInApp && (
         <EuiFlexItem>
           <EuiToolTip
@@ -230,5 +247,9 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default AlertActions;
+
+const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetailsTextLabel', {
+  defaultMessage: 'Alert details',
+});
 
 export type AlertActions = typeof AlertActions;
