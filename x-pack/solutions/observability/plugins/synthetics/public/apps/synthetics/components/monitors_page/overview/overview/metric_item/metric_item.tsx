@@ -13,7 +13,6 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
-import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
