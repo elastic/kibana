@@ -61,43 +61,39 @@ async function getThroughputChartsForDependencyForTimeRange({
     apm: {
       events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...termQuery(SPAN_NAME, spanName || null),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
-            ),
-            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...termQuery(SPAN_NAME, spanName || null),
+          ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
+          { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
+        ],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
-          aggs: {
-            throughput: {
-              rate: {
-                ...(searchServiceDestinationMetrics
-                  ? {
-                      field: getDocCountFieldForServiceDestinationStatistics(
-                        searchServiceDestinationMetrics
-                      ),
-                    }
-                  : {}),
-                unit: 'minute',
-              },
+    },
+    aggs: {
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: intervalString,
+          min_doc_count: 0,
+          extended_bounds: { min: startWithOffset, max: endWithOffset },
+        },
+        aggs: {
+          throughput: {
+            rate: {
+              ...(searchServiceDestinationMetrics
+                ? {
+                    field: getDocCountFieldForServiceDestinationStatistics(
+                      searchServiceDestinationMetrics
+                    ),
+                  }
+                : {}),
+              unit: 'minute',
             },
           },
         },

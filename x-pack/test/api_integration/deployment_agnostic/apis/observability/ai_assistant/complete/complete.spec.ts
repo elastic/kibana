@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           scopes: ['all'],
         });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
       return String(response.body)
         .split('\n')
@@ -133,7 +133,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         parsedEvents = decodeEvents(receivedChunks.join(''));
       });
@@ -210,6 +210,44 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           },
         });
+      });
+    });
+
+    describe('LLM invocation with system message', () => {
+      let systemMessage: string;
+      before(async () => {
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/functions',
+          params: {
+            query: {
+              scopes: ['all'],
+            },
+          },
+        });
+
+        expect(status).to.be(200);
+        systemMessage = body.systemMessage;
+      });
+
+      it('forwards the system message as the first message in the request to the LLM with message role "system"', async () => {
+        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: false,
+              screenContexts: [],
+              scopes: ['all'],
+            },
+          },
+        });
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        const simulator = await simulatorPromise;
+        const requestData = simulator.requestBody;
+        expect(requestData.messages[0].role).to.eql('system');
+        expect(requestData.messages[0].content).to.eql(systemMessage);
       });
     });
 
@@ -382,7 +420,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(createResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
@@ -425,7 +463,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(updatedResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       after(async () => {

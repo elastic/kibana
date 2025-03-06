@@ -121,15 +121,13 @@ describe('healthRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        application: [
-          {
-            application: `kibana-foo`,
-            resources: ['*'],
-            privileges: [`api:8.0:taskManager`],
-          },
-        ],
-      },
+      application: [
+        {
+          application: `kibana-foo`,
+          resources: ['*'],
+          privileges: [`api:8.0:taskManager`],
+        },
+      ],
     });
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
@@ -164,15 +162,13 @@ describe('healthRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        application: [
-          {
-            application: `kibana-foo`,
-            resources: ['*'],
-            privileges: [`api:8.0:taskManager`],
-          },
-        ],
-      },
+      application: [
+        {
+          application: `kibana-foo`,
+          resources: ['*'],
+          privileges: [`api:8.0:taskManager`],
+        },
+      ],
     });
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);

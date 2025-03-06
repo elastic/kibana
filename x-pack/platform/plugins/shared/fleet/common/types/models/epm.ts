@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -132,17 +132,15 @@ export interface ArchiveEntry {
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  /**
-   * @deprecated Use `archiveIterator` to access the package archive entries
-   * without loading them all into memory at once.
-   */
-  assetsMap: AssetsMap;
   paths: string[];
   archiveIterator: ArchiveIterator;
 }
@@ -584,6 +582,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
+  packagePoliciesInfo?: { count: number };
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

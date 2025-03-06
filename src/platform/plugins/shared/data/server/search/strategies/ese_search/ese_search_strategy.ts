@@ -10,12 +10,11 @@
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError } from '../../report_search_error';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
@@ -156,23 +155,23 @@ export const enhancedEsSearchStrategyProvider = (
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
-    const { body, index, ...params } = request.params!;
-    const method = 'POST';
-    const path = encodeURI(`/${index}/_rollup_search`);
     const querystring = {
       ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
       ...(await getDefaultSearchParams(uiSettingsClient)),
-      ...params,
     };
 
+    // Custom 400 error here because the client tries to run `index.toString()` and we no-longer can rely on ES 400
+    if (!request.params?.index) {
+      throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
+    }
+
     try {
-      const esResponse = await client.transport.request(
+      const esResponse = await client.rollup.rollupSearch(
         {
-          method,
-          path,
-          body,
-          querystring,
+          ...querystring,
+          ...request.params,
+          index: request.params.index,
         },
         {
           signal: options?.abortSignal,
@@ -180,7 +179,7 @@ export const enhancedEsSearchStrategyProvider = (
         }
       );
 
-      const response = esResponse.body as estypes.SearchResponse<any>;
+      const response = esResponse.body;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...(esResponse.meta?.request?.params
