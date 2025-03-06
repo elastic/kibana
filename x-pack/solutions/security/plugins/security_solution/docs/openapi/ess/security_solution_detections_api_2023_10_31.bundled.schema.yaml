@@ -363,6 +363,43 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - description: Process started by MS Office program - possible payload
+                    enabled: false
+                    filters:
+                      - query:
+                          match:
+                            event.action:
+                              query: 'Process Create (rule: ProcessCreate)'
+                              type: phrase
+                    from: now-6m
+                    interval: 5m
+                    language: kuery
+                    name: MS Office child process
+                    query: >-
+                      process.parent.name:EXCEL.EXE or
+                      process.parent.name:MSPUB.EXE or
+                      process.parent.name:OUTLOOK.EXE or
+                      process.parent.name:POWERPNT.EXE or
+                      process.parent.name:VISIO.EXE or
+                      process.parent.name:WINWORD.EXE
+                    risk_score: 50
+                    rule_id: process_started_by_ms_office_program_possible_payload
+                    severity: low
+                    tags:
+                      - child process
+                      - ms office
+                    type: query
+                  - description: Query with a rule_id for referencing an external id
+                    from: now-6m
+                    name: Second bulk rule
+                    query: 'user.name: root or user.name: admin'
+                    risk_score: 2
+                    rule_id: query-rule-id-2
+                    severity: low
+                    type: query
             schema:
               items:
                 $ref: '#/components/schemas/RuleCreateProps'
@@ -391,6 +428,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
             schema:
               items:
                 type: object
@@ -445,6 +487,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
             schema:
               items:
                 type: object
@@ -503,6 +550,22 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                    threat:
+                      - framework: MITRE ATT&CK
+                        id: TA0001
+                        name: Initial Access
+                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        tactic: null
+                        technique:
+                          - id: T1193
+                            name: Spearphishing Attachment
+                            reference: 'https://attack.mitre.org/techniques/T1193'
+                  - id: 56b22b65-173e-4a5b-b27a-82599cb1433e
+                    name: New name
             schema:
               items:
                 $ref: '#/components/schemas/RulePatchProps'
@@ -538,6 +601,22 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                    threat:
+                      - framework: MITRE ATT&CK
+                        id: TA0001
+                        name: Initial Access
+                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        tactic: null
+                        technique:
+                          - id: T1193
+                            name: Spearphishing Attachment
+                            reference: 'https://attack.mitre.org/techniques/T1193'
+                  - id: 56b22b65-173e-4a5b-b27a-82599cb1433e
+                    name: New name
             schema:
               items:
                 $ref: '#/components/schemas/RuleUpdateProps'
