@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';

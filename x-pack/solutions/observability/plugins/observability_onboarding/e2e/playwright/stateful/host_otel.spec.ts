@@ -31,7 +31,7 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
   await otelHostFlowPage.copyCollectorStartSnippetToClipboard();
   const collectorStartSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
-  const codeSnippet = `${collectorDownloadSnippet}\n${collectorStartSnippet}`;
+  const codeSnippet = `${collectorDownloadSnippet}\n${collectorStartSnippet} > collector-output.log 2>&1 &`;
 
   /**
    * Ensemble story watches for the code snippet file

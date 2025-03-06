@@ -295,6 +295,17 @@ export const GetAgentPolicyResponseSchema = schema.object({
   item: AgentPolicyResponseSchema,
 });
 
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string(),
+      agents: schema.number(),
+      failedUpgradeAgents: schema.number(),
+    })
+  ),
+  totalAgents: schema.number(),
+});
+
 export const FullAgentPolicyResponseSchema = schema.object({
   id: schema.string(),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -328,6 +339,17 @@ export const FullAgentPolicyResponseSchema = schema.object({
             certificate: schema.maybe(schema.string()),
             key: schema.maybe(schema.string()),
             renegotiation: schema.maybe(schema.string()),
+          })
+        ),
+        secrets: schema.maybe(
+          schema.object({
+            ssl: schema.maybe(
+              schema.object({
+                key: schema.object({
+                  id: schema.maybe(schema.string()),
+                }),
+              })
+            ),
           })
         ),
       }),

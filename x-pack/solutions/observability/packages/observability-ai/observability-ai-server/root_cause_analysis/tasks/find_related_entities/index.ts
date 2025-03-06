@@ -11,7 +11,7 @@ import {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import {
   analyzeFetchedRelatedEntities,
@@ -45,7 +45,7 @@ export async function findRelatedEntities({
   start: number;
   end: number;
   index: string | string[];
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   entity: Record<string, string>;
   analysis: {
     truncated: TruncatedDocumentAnalysis;

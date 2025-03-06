@@ -87,6 +87,7 @@ export class FlyoutService {
 
     return {
       open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
+        const { isResizable, ...restOptions } = options;
         // If there is an active flyout session close it before opening a new one.
         if (this.activeFlyout) {
           this.activeFlyout.close();
@@ -113,9 +114,9 @@ export class FlyoutService {
         };
 
         const getWrapper = (children: JSX.Element) => {
-          return options?.isResizable ? (
+          return isResizable ? (
             <EuiFlyoutResizable
-              {...options}
+              {...restOptions}
               onClose={onCloseFlyout}
               ref={React.createRef()}
               maxWidth={Number(options?.maxWidth)}
@@ -123,7 +124,7 @@ export class FlyoutService {
               {children}
             </EuiFlyoutResizable>
           ) : (
-            <EuiFlyout {...options} onClose={onCloseFlyout}>
+            <EuiFlyout {...restOptions} onClose={onCloseFlyout}>
               {children}
             </EuiFlyout>
           );

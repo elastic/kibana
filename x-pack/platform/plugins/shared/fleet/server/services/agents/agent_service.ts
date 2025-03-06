@@ -15,7 +15,7 @@ import type {
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 

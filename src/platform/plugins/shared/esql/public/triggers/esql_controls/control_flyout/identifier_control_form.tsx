@@ -20,11 +20,8 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  ESQLControlVariable,
-  aggregationFunctionDefinitions,
-} from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
@@ -131,7 +128,7 @@ export function IdentifierControlForm({
         });
       }
       if (variableType === ESQLVariableType.FUNCTIONS) {
-        const aggregatedFunctions = aggregationFunctionDefinitions.map((func) => {
+        const aggregatedFunctions = aggFunctionDefinitions.map((func) => {
           return {
             label: func.name,
             key: func.name,

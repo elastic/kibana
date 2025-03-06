@@ -30,13 +30,11 @@ export const createEntityIndexComponentTemplate = (
   const name = getComponentTemplateName(id);
   return esClient.cluster.putComponentTemplate({
     name,
-    body: {
-      template: {
-        settings: {
-          hidden: true,
-        },
-        mappings: indexMappings,
+    template: {
+      settings: {
+        hidden: true,
       },
+      mappings: indexMappings,
     },
   });
 };

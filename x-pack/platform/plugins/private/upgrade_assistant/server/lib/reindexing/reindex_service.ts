@@ -163,7 +163,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const putReadonly = await esClient.indices.putSettings({
       index: indexName,
-      body: { blocks: { write: true } },
+      settings: { blocks: { write: true } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -449,20 +449,18 @@ export const reindexServiceFactory = (
       }
 
       const resp = await esClient.security.hasPrivileges({
-        body: {
-          cluster: ['manage'],
-          index: [
-            {
-              names,
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
-          ],
-        },
+        cluster: ['manage'],
+        index: [
+          {
+            names,
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read'],
+          },
+        ],
       });
 
       return resp.has_all_requested;
