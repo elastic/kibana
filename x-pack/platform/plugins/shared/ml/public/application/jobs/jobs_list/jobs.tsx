@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -63,6 +63,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
+      <EuiSpacer size="m" />
       <JobsListView
         euiTheme={euiTheme}
         isMlEnabledInSpace={isMlEnabledInSpace}

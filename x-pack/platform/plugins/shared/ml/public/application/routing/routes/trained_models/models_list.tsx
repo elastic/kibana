@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { MlRoute } from '../../router';
 import { PageLoader } from '../../router';
@@ -59,6 +59,7 @@ const PageWrapper: FC = () => {
         </EuiFlexGroup>
       </MlPageHeader>
 
+      <EuiSpacer size="m" />
       <ModelsList />
     </PageLoader>
   );

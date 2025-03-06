@@ -265,6 +265,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   return (
     <SpaceManagementContextWrapper>
+      <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsJobList">
         {modals}
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
