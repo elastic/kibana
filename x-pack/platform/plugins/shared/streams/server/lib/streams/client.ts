@@ -195,15 +195,28 @@ export class StreamsClient {
 
   private async syncStreamObjects({ definition }: { definition: StreamDefinition }) {
     const { logger, scopedClusterClient } = this.dependencies;
+    console.log('syncStreamObjects', definition.name);
 
     if (isWiredStreamDefinition(definition)) {
+      const directChildren = await this.getDescendants(definition.name);
+      const ancestors = await this.getAncestors(definition.name);
+      console.log('synStreamObjects ', JSON.stringify(ancestors));
+
+      console.log('syncWiredStreamDefinitionObjects', definition.name);
       await syncWiredStreamDefinitionObjects({
         definition,
         logger,
         scopedClusterClient,
         isServerless: this.dependencies.isServerless,
+        directChildren,
+        ancestors,
       });
 
+      console.log(
+        'findInheritedLifecycle',
+        definition.name,
+        isInheritLifecycle(definition.ingest.lifecycle)
+      );
       const effectiveLifecycle = findInheritedLifecycle(
         definition,
         isInheritLifecycle(definition.ingest.lifecycle)
@@ -253,6 +266,7 @@ export class StreamsClient {
         // If the parent is not routing to the child, we need to update the parent
         // to include the child in the routing with an empty condition, which means that no data is routed.
         // The user can set the condition later on the parent
+
         await this.updateStreamRouting({
           definition: parentDefinition,
           routing: parentDefinition.ingest.routing.concat({
@@ -311,9 +325,11 @@ export class StreamsClient {
     result: 'created' | 'updated';
     parentDefinition?: WiredStreamDefinition;
   }> {
+    console.log('validateAndUpsertStream', definition.name);
     if (isWiredStreamDefinition(definition)) {
       await this.assertNoHierarchicalConflicts(definition.name);
     }
+    console.log('after assertNoHierarchicalConflicts', definition.name);
 
     const existingDefinition = await this.getStream(definition.name).catch((error) => {
       if (isDefinitionNotFoundError(error)) {
@@ -322,6 +338,8 @@ export class StreamsClient {
       throw error;
     });
 
+    console.log('after existingDefinition', definition.name);
+
     // we need to return this to allow consumers to update the routing of the parent
     let parentDefinition: WiredStreamDefinition | undefined;
 
@@ -329,6 +347,7 @@ export class StreamsClient {
       // Only allow wired-to-wired and ingest-to-ingest updates
       validateStreamTypeChanges(existingDefinition, definition);
     }
+    console.log('after validateStreamTypeChanges', definition.name);
 
     if (isGroupStreamDefinition(definition)) {
       await this.assertValidGroupMembers({ definition });
@@ -349,6 +368,7 @@ export class StreamsClient {
         existingDefinition: existingDefinition as WiredStreamDefinition,
         definition,
       });
+      console.log('after validateWiredStreamAndCreateChildrenIfNeeded', definition.name);
 
       parentDefinition = validateWiredStreamResult.parentDefinition;
     } else if (isUnwiredStreamDefinition(definition)) {
@@ -380,9 +400,11 @@ export class StreamsClient {
 
   private async assertNoHierarchicalConflicts(definitionName: string) {
     const streamNames = [...getAncestors(definitionName), definitionName];
+    console.log('before hasConflict', definitionName);
     const hasConflict = await Promise.all(
       streamNames.map((streamName) => this.isStreamNameTaken(streamName))
     );
+    console.log('after hasConflict', definitionName);
     const conflicts = streamNames.filter((_, index) => hasConflict[index]);
 
     if (conflicts.length !== 0) {
@@ -433,6 +455,7 @@ export class StreamsClient {
     existingDefinition?: WiredStreamDefinition;
     definition: WiredStreamDefinition;
   }): Promise<{ parentDefinition?: WiredStreamDefinition }> {
+    console.log('validateWiredStreamAndCreateChildrenIfNeeded', definition.name);
     const [ancestors, descendants] = await Promise.all([
       this.getAncestors(definition.name),
       this.getDescendants(definition.name),
@@ -537,16 +560,23 @@ export class StreamsClient {
     parent,
     name,
     if: condition,
+    virtual,
   }: {
     parent: string;
     name: string;
     if: Condition;
+    virtual?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
 
     const childDefinition: WiredStreamDefinition = {
       name,
-      ingest: { lifecycle: { inherit: {} }, processing: [], routing: [], wired: { fields: {} } },
+      ingest: {
+        lifecycle: { inherit: {} },
+        processing: [],
+        routing: [],
+        wired: { fields: {}, virtual },
+      },
     };
 
     // check whether root stream has a child of the given name already
@@ -786,13 +816,18 @@ export class StreamsClient {
 
     const privileges = await checkAccessBulk({
       names: streams
-        .filter((stream) => !isGroupStreamDefinition(stream))
+        .filter(
+          (stream) =>
+            !isGroupStreamDefinition(stream) &&
+            (!isWiredStreamDefinition(stream) || !stream.ingest.wired.virtual)
+        )
         .map((stream) => stream.name),
       scopedClusterClient,
     });
 
     return streams.filter((stream) => {
       if (isGroupStreamDefinition(stream)) return true;
+      if (isWiredStreamDefinition(stream) && stream.ingest.wired.virtual) return true;
       return privileges[stream.name]?.read === true;
     });
   }
@@ -832,7 +867,12 @@ export class StreamsClient {
         await this.deleteStream(item.destination);
       }
 
-      await deleteStreamObjects({ scopedClusterClient, name: definition.name, logger });
+      await deleteStreamObjects({
+        scopedClusterClient,
+        name: definition.name,
+        logger,
+        isVirtual: definition.ingest.wired.virtual,
+      });
     }
 
     await assetClient.syncAssetList({
@@ -858,6 +898,7 @@ export class StreamsClient {
     definition: WiredStreamDefinition;
     routing: WiredStreamDefinition['ingest']['routing'];
   }) {
+    console.log('updateStreamRouting', definition.name);
     const update = cloneDeep(definition);
     update.ingest.routing = routing;
 
@@ -917,6 +958,7 @@ export class StreamsClient {
 
   async getAncestors(name: string): Promise<WiredStreamDefinition[]> {
     const ancestorIds = getAncestors(name);
+    console.log('getAncestors', ancestorIds);
 
     return this.getManagedStreams({
       query: {
@@ -924,7 +966,12 @@ export class StreamsClient {
           filter: [{ terms: { name: ancestorIds } }],
         },
       },
-    }).then((streams) => streams.filter(isWiredStreamDefinition));
+    }).then((streams) =>
+      streams.filter((s) => {
+        console.log('check for wiredness', JSON.stringify(s));
+        return isWiredStreamDefinition(s);
+      })
+    );
   }
 
   async getDescendants(name: string): Promise<WiredStreamDefinition[]> {
@@ -956,9 +1003,15 @@ export class StreamsClient {
    * to existing children data streams that do not specify an override.
    */
   private async updateStreamLifecycle(root: StreamDefinition, lifecycle: IngestStreamLifecycle) {
+    if (isWiredStreamDefinition(root) && root.ingest.wired.virtual) {
+      return;
+    }
     const { logger, scopedClusterClient } = this.dependencies;
     const inheritingStreams = isWiredStreamDefinition(root)
-      ? findInheritingStreams(root, await this.getDescendants(root.name))
+      ? findInheritingStreams(
+          root,
+          (await this.getDescendants(root.name)).filter((s) => !s.ingest.wired.virtual)
+        )
       : [root.name];
 
     await updateDataStreamsLifecycle({

@@ -22,6 +22,7 @@ interface IngestBase {
 interface WiredIngest extends IngestBase {
   wired: {
     fields: FieldDefinition;
+    virtual?: boolean;
   };
 }
 
@@ -65,6 +66,7 @@ const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
   z.object({
     wired: z.object({
       fields: fieldDefinitionSchema,
+      virtual: z.boolean().optional(),
     }),
   })
 );

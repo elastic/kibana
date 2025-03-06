@@ -28,6 +28,7 @@ interface BaseParams {
 
 interface DeleteStreamParams extends BaseParams {
   name: string;
+  isVirtual?: boolean;
   logger: Logger;
 }
 
@@ -113,7 +114,15 @@ export async function deleteStreamObjects({
   name,
   scopedClusterClient,
   logger,
+  isVirtual,
 }: DeleteStreamParams) {
+  if (isVirtual) {
+    await scopedClusterClient.asCurrentUser.indices.deleteAlias({
+      name,
+      index: '*',
+    });
+    return;
+  }
   await deleteDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     name,
@@ -220,6 +229,7 @@ export async function checkAccessBulk({
   if (!names.length) {
     return {};
   }
+  console.log('checkAccessBulk for', names);
   const hasPrivilegesResponse = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
     index: [{ names, privileges: ['read', 'write'] }],
   });

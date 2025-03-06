@@ -16,6 +16,9 @@ export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
   ancestors: WiredStreamDefinition[]
 ): WiredIngestStreamEffectiveLifecycle {
+  console.log('Finding inherited lifecycle for', definition.name);
+  console.log(JSON.stringify(ancestors, null, 2));
+  console.log(JSON.stringify(definition, null, 2));
   const originDefinition = [...ancestors, definition]
     .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
     .findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
