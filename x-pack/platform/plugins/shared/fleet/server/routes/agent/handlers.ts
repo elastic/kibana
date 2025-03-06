@@ -185,6 +185,19 @@ export const getAgentsHandler: FleetRequestHandler<
   const { agentClient } = fleetContext;
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
+  // Unwrap searchAfter from request query
+  let searchAfter: [number, string] | undefined;
+  if (request.query.searchAfter) {
+    const parts = request.query.searchAfter.split(',');
+    if (parts.length === 2 && !isNaN(Number(parts[0]))) {
+      searchAfter = [Number(parts[0]), parts[1]];
+    } else {
+      return response.badRequest({
+        body: { message: 'Invalid searchAfter format. Expected "{number},{string}".' },
+      });
+    }
+  }
+
   const agentRes = await agentClient.asCurrentUser.listAgents({
     page: request.query.page,
     perPage: request.query.perPage,
@@ -193,11 +206,11 @@ export const getAgentsHandler: FleetRequestHandler<
     kuery: request.query.kuery,
     sortField: request.query.sortField,
     sortOrder: request.query.sortOrder,
-    searchAfter: request.query.searchAfter,
+    searchAfter,
     getStatusSummary: request.query.getStatusSummary,
   });
 
-  const { total, page, perPage, statusSummary } = agentRes;
+  const { total, page, perPage, statusSummary, pit } = agentRes;
   let { agents } = agentRes;
 
   // Assign metrics
@@ -210,6 +223,7 @@ export const getAgentsHandler: FleetRequestHandler<
     total,
     page,
     perPage,
+    ...(pit ? { pit } : {}),
     ...(statusSummary ? { statusSummary } : {}),
   };
   return response.ok({ body });

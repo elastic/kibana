@@ -373,6 +373,7 @@ export async function getAgentsByKuery(
     total,
     page,
     perPage,
+    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };

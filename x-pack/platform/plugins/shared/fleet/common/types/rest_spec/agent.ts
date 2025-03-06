@@ -6,7 +6,6 @@
  */
 
 import type { SearchHit } from '@kbn/es-types';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   Agent,
@@ -25,7 +24,7 @@ export interface GetAgentsRequest {
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
-    searchAfter?: SortResults;
+    searchAfter?: string;
     openPit?: boolean;
     pitId?: string;
     pitKeepAlive?: string;
@@ -33,6 +32,7 @@ export interface GetAgentsRequest {
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
+  pit?: string;
   statusSummary?: Record<AgentStatus, number>;
 }
 

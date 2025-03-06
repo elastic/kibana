@@ -21,7 +21,7 @@ import { ListResponseSchema } from '../../routes/schema/utils';
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
-      page: schema.number({ defaultValue: 1 }),
+      page: schema.maybe(schema.number()),
       perPage: schema.number({ defaultValue: 20 }),
       kuery: schema.maybe(
         schema.string({
@@ -39,12 +39,7 @@ export const GetAgentsRequestSchema = {
       getStatusSummary: schema.boolean({ defaultValue: false }),
       sortField: schema.maybe(schema.string()),
       sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-      searchAfter: schema.maybe(
-        schema.arrayOf(schema.oneOf([schema.number(), schema.string()]), {
-          minSize: 2,
-          maxSize: 2,
-        })
-      ),
+      searchAfter: schema.maybe(schema.string()),
       openPit: schema.maybe(schema.boolean()),
       pitId: schema.maybe(schema.string()),
       pitKeepAlive: schema.maybe(schema.duration()),
@@ -65,7 +60,7 @@ export const GetAgentsRequestSchema = {
         }
 
         // If not using searchAfter, ensure that pagination parameters are not over the search limit
-        if (!usingSearchAfter && request.page * request.perPage > SO_SEARCH_LIMIT) {
+        if (!usingSearchAfter && (request.page || 1) * request.perPage > SO_SEARCH_LIMIT) {
           return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
         }
 
@@ -251,6 +246,7 @@ export const AgentResponseSchema = schema.object({
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
+  pit: schema.maybe(schema.string()),
   statusSummary: schema.maybe(schema.recordOf(AgentStatusSchema, schema.number())),
 });
 

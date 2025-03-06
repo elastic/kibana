@@ -102,6 +102,7 @@ export interface AgentClient {
     total: number;
     page: number;
     perPage: number;
+    pit?: string;
     statusSummary?: Record<AgentStatus, number>;
     aggregations?: Record<string, estypes.AggregationsAggregate>;
   }>;
