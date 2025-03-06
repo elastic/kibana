@@ -176,56 +176,42 @@ export class ProductFeaturesService {
   }
 
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
-    const securityProductFeaturesConfig = configurator.security?.();
-    if (securityProductFeaturesConfig) {
-      this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
-      this.securityV2ProductFeatures.setConfig(securityProductFeaturesConfig);
-    }
+    const securityProductFeaturesConfig = configurator.security();
+    this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
+    this.securityV2ProductFeatures.setConfig(securityProductFeaturesConfig);
 
-    const casesProductFeaturesConfig = configurator.cases?.();
-    if (casesProductFeaturesConfig) {
-      this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
-      this.casesProductV2Features.setConfig(casesProductFeaturesConfig);
-      this.casesProductFeaturesV3.setConfig(casesProductFeaturesConfig);
-    }
+    const casesProductFeaturesConfig = configurator.cases();
+    this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
+    this.casesProductV2Features.setConfig(casesProductFeaturesConfig);
+    this.casesProductFeaturesV3.setConfig(casesProductFeaturesConfig);
 
-    const securityAssistantProductFeaturesConfig = configurator.securityAssistant?.();
-    if (securityAssistantProductFeaturesConfig) {
-      this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
-    }
+    const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
+    this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
 
-    const attackDiscoveryProductFeaturesConfig = configurator.attackDiscovery?.();
-    if (attackDiscoveryProductFeaturesConfig) {
-      this.attackDiscoveryProductFeatures.setConfig(attackDiscoveryProductFeaturesConfig);
-    }
+    const attackDiscoveryProductFeaturesConfig = configurator.attackDiscovery();
+    this.attackDiscoveryProductFeatures.setConfig(attackDiscoveryProductFeaturesConfig);
 
-    const timelineProductFeaturesConfig = configurator.timeline?.();
-    if (timelineProductFeaturesConfig) {
-      this.timelineProductFeatures.setConfig(timelineProductFeaturesConfig);
-    }
+    const timelineProductFeaturesConfig = configurator.timeline();
+    this.timelineProductFeatures.setConfig(timelineProductFeaturesConfig);
 
-    const notesProductFeaturesConfig = configurator.notes?.();
-    if (notesProductFeaturesConfig) {
-      this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
-    }
+    const notesProductFeaturesConfig = configurator.notes();
+    this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
 
-    let siemMigrationsProductFeaturesConfig;
+    let siemMigrationsProductFeaturesConfig = new Map();
     if (!this.experimentalFeatures.siemMigrationsDisabled) {
-      siemMigrationsProductFeaturesConfig = configurator.siemMigrations?.();
-      if (siemMigrationsProductFeaturesConfig) {
-        this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
-      }
+      siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
+      this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
     }
 
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
-        ...(securityProductFeaturesConfig?.keys() ?? []),
-        ...(casesProductFeaturesConfig?.keys() ?? []),
-        ...(securityAssistantProductFeaturesConfig?.keys() ?? []),
-        ...(attackDiscoveryProductFeaturesConfig?.keys() ?? []),
-        ...(timelineProductFeaturesConfig?.keys() ?? []),
-        ...(notesProductFeaturesConfig?.keys() ?? []),
-        ...(siemMigrationsProductFeaturesConfig?.keys() ?? []),
+        ...securityProductFeaturesConfig.keys(),
+        ...casesProductFeaturesConfig.keys(),
+        ...securityAssistantProductFeaturesConfig.keys(),
+        ...attackDiscoveryProductFeaturesConfig.keys(),
+        ...timelineProductFeaturesConfig.keys(),
+        ...notesProductFeaturesConfig.keys(),
+        ...siemMigrationsProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }

@@ -84,13 +84,13 @@ export interface ProductFeatureParams<T extends string = string> {
 }
 
 export interface ProductFeaturesConfigurator {
-  security?: () => ProductFeaturesConfig<SecuritySubFeatureId>;
-  cases?: () => ProductFeaturesConfig<CasesSubFeatureId>;
-  securityAssistant?: () => ProductFeaturesConfig<AssistantSubFeatureId>;
-  attackDiscovery?: () => ProductFeaturesConfig;
-  timeline?: () => ProductFeaturesConfig;
-  notes?: () => ProductFeaturesConfig;
-  siemMigrations?: () => ProductFeaturesConfig;
+  security: () => ProductFeaturesConfig<SecuritySubFeatureId>;
+  cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
+  securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
+  attackDiscovery: () => ProductFeaturesConfig;
+  timeline: () => ProductFeaturesConfig;
+  notes: () => ProductFeaturesConfig;
+  siemMigrations: () => ProductFeaturesConfig;
 }
 
 export type ProductFeatureConfiguratorName = keyof ProductFeaturesConfigurator;

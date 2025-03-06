@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
@@ -69,7 +70,10 @@ export class SecuritySolutionServerlessPlugin
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
-    registerProductFeatures(pluginsSetup, this.config);
+    // Register product features
+    const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
+
+    registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));

@@ -39,11 +39,15 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     search_ai_lake: [],
     essentials: [
       ProductFeatureKey.detections,
+      ProductFeatureKey.timeline,
+      ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
     ],
     complete: [
       ProductFeatureKey.detections,
+      ProductFeatureKey.timeline,
+      ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
       ProductFeatureKey.advancedInsights,
