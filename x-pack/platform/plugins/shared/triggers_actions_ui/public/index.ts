@@ -86,10 +86,6 @@ export {
 
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
 
-export type { ActionGroupWithCondition } from './application/sections';
-
-export { AlertConditions, AlertConditionsGroup } from './application/sections';
-
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
