@@ -7,7 +7,6 @@
 
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
-import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ALERT_GROUP, ALERT_RULE_UUID, ALERT_UUID, AlertStatus, TAGS } from '@kbn/rule-data-utils';
 import React, { useEffect, useState } from 'react';
@@ -30,7 +29,6 @@ import { AlertsByGroupingAgg } from '../../../../components/alerts_table/types';
 import { RELATED_ALERTS_TABLE_CONFIG_ID } from '../../../../constants';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { useKibana } from '../../../../utils/kibana_react';
-import { mergeBoolQueries } from '../../../alerts/helpers/merge_bool_queries';
 import { EmptyState } from './empty_state';
 import { StatusFilter, getAssociatedStatusFilter } from './status_filter';
 
@@ -53,31 +51,14 @@ export function RelatedAlerts({ alert }: Props) {
   const [ruleChecked, setRuleChecked] = useState(false);
 
   const [range, setRange] = useState({ from: 'now-24h', to: 'now' });
-  const [kuery, setKuery] = useState('');
   const [status, setStatus] = useState<AlertStatus | undefined>('active');
-  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>({
-    bool: {
-      must: [],
-      must_not: [],
-      filter: [],
-      should: [],
-    },
-  });
+
+  if (!alert) {
+    return null;
+  }
+
   const statusFilter = getAssociatedStatusFilter(status);
-
-  useEffect(() => {
-    if (alert) {
-      const newKuery = getKuery({ alert, tagsChecked, groupsChecked, ruleChecked });
-      const newEsQuery = buildEsQuery({
-        timeRange: range,
-        kuery: newKuery,
-        filters: statusFilter ? [statusFilter] : [],
-      });
-
-      setKuery(newKuery);
-      setEsQuery(newEsQuery);
-    }
-  }, [tagsChecked, groupsChecked, ruleChecked, alert, range, statusFilter]);
+  const kuery = getKuery({ alert, tagsChecked, groupsChecked, ruleChecked });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -120,13 +101,14 @@ export function RelatedAlerts({ alert }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        {!esQuery && <EmptyState />}
-        {esQuery && (
+        {!kuery && <EmptyState />}
+        {kuery && (
           <AlertsGrouping<AlertsByGroupingAgg>
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
             from={range.from}
             to={range.to}
+            defaultFilters={statusFilter ? [statusFilter] : []}
             globalFilters={statusFilter ? [statusFilter] : []}
             globalQuery={{ query: kuery, language: 'kuery' }}
             groupingId={RELATED_ALERTS_TABLE_CONFIG_ID}
@@ -142,15 +124,17 @@ export function RelatedAlerts({ alert }: Props) {
           >
             {(groupingFilters) => {
               const groupQuery = buildEsQuery({
-                filters: groupingFilters,
+                filters: statusFilter ? groupingFilters.concat(statusFilter) : groupingFilters,
+                timeRange: range,
+                kuery,
               });
-              // TODO: Need to use esQuery (derived from kuery + filters) + groupQuery
+
               return (
                 <ObservabilityAlertsTable
                   id={ALERTS_TABLE_ID}
                   ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                   consumers={observabilityAlertFeatureIds}
-                  query={mergeBoolQueries(esQuery, groupQuery)}
+                  query={groupQuery}
                   initialPageSize={ALERTS_PER_PAGE}
                   renderAdditionalToolbarControls={() => (
                     <GroupingToolbarControls
