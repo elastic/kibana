@@ -36,7 +36,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -82,9 +81,7 @@ export default function Expressions(props: Props) {
     featureFlags,
   } = useKibana().services;
 
-  const isLinkedDashboardsEnabled = useObservable(
-    featureFlags.getBooleanValue$('rca.linkedDashboards', false)
-  );
+  const isLinkedDashboardsEnabled = featureFlags.getBooleanValue('rca.linkedDashboards', false);
 
   const hasGroupBy = useMemo<boolean>(
     () => !!ruleParams.groupBy && ruleParams.groupBy.length > 0,
