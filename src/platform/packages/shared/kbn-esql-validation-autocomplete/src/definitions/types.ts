@@ -278,7 +278,7 @@ export interface CommandSuggestParams<CommandName extends string> {
 
 export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]>;
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;
