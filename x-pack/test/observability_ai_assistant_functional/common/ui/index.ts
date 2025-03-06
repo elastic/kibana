@@ -45,6 +45,7 @@ const pages = {
       shareButton: 'observabilityAiAssistantChatAccessBadge',
       sharedOption: 'observabilityAiAssistantChatSharedOption',
       privateOption: 'observabilityAiAssistantChatPrivateOption',
+      loadingBadge: 'observabilityAiAssistantChatAccessLoadingBadge',
     },
   },
   createConnectorFlyout: {

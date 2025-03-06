@@ -78,13 +78,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       describe('when changing access to Shared', () => {
         before(async () => {
           await testSubjects.click(ui.pages.conversations.access.sharedOption);
+          await testSubjects.existOrFail(ui.pages.conversations.access.loadingBadge);
+          await testSubjects.missingOrFail(ui.pages.conversations.access.loadingBadge);
         });
 
         it('should update the badge to "Shared"', async () => {
-          const badgeText = await testSubjects.getVisibleText(
-            ui.pages.conversations.access.shareButton
-          );
-          expect(badgeText).to.contain('Shared');
+          await retry.try(async () => {
+            const badgeText = await testSubjects.getVisibleText(
+              ui.pages.conversations.access.shareButton
+            );
+            expect(badgeText).to.contain('Shared');
+          });
         });
 
         it('should persist the change in the backend', async () => {
@@ -102,13 +106,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         before(async () => {
           await testSubjects.click(ui.pages.conversations.access.shareButton);
           await testSubjects.click(ui.pages.conversations.access.privateOption);
+          await testSubjects.existOrFail(ui.pages.conversations.access.loadingBadge);
+          await testSubjects.missingOrFail(ui.pages.conversations.access.loadingBadge);
         });
 
         it('should update the badge to "Private"', async () => {
-          const badgeText = await testSubjects.getVisibleText(
-            ui.pages.conversations.access.shareButton
-          );
-          expect(badgeText).to.contain('Private');
+          await retry.try(async () => {
+            const badgeText = await testSubjects.getVisibleText(
+              ui.pages.conversations.access.shareButton
+            );
+            expect(badgeText).to.contain('Private');
+          });
         });
 
         it('should persist the change in the backend', async () => {

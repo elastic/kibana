@@ -160,7 +160,7 @@ export function useConversation({
 
     try {
       const sharedConversation = await service.callApi(
-        `PUT /internal/observability_ai_assistant/conversation/{conversationId}/access`,
+        `PATCH /internal/observability_ai_assistant/conversation/{conversationId}`,
         {
           signal: null,
           params: {
@@ -185,7 +185,8 @@ export function useConversation({
     } catch (err) {
       notifications!.toasts.addError(err, {
         title: i18n.translate('xpack.aiAssistant.updateConversationAccessErrorToast', {
-          defaultMessage: 'Could not share conversation',
+          defaultMessage: 'Could not update conversation access to "{access}"',
+          values: { access },
         }),
       });
       throw err;

@@ -11,6 +11,7 @@ import {
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   MessageRole,
+  ConversationAccess,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../../services/observability_ai_assistant_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -628,6 +629,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('conversation sharing', () => {
       let createdConversationId: string;
+      const patchConversationRoute =
+        'PATCH /internal/observability_ai_assistant/conversation/{conversationId}';
 
       before(async () => {
         const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -655,10 +658,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('allows the owner to update the access of their conversation', async () => {
         const updateResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/access',
+          endpoint: patchConversationRoute,
           params: {
             path: { conversationId: createdConversationId },
-            body: { access: 'shared' },
+            body: { access: ConversationAccess.SHARED },
           },
         });
 
@@ -668,10 +671,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('does not allow a different user (admin) to update access of a conversation they do not own', async () => {
         const updateResponse = await observabilityAIAssistantAPIClient.admin({
-          endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/access',
+          endpoint: patchConversationRoute,
           params: {
             path: { conversationId: createdConversationId },
-            body: { access: 'shared' },
+            body: { access: ConversationAccess.SHARED },
           },
         });
 
@@ -680,10 +683,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns 404 when updating access for a non-existing conversation', async () => {
         const updateResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/access',
+          endpoint: patchConversationRoute,
           params: {
             path: { conversationId: 'non-existing-conversation-id' },
-            body: { access: 'shared' },
+            body: { access: ConversationAccess.SHARED },
           },
         });
 
@@ -692,9 +695,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns 400 for invalid access value', async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/access',
+          endpoint: patchConversationRoute,
           params: {
             path: { conversationId: createdConversationId },
+            // @ts-expect-error
             body: { access: 'invalid_access' }, // Invalid value
           },
         });
@@ -705,6 +709,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('conversation deletion', () => {
       let createdConversationId: string;
+      const deleteConversationRoute =
+        'DELETE /internal/observability_ai_assistant/conversation/{conversationId}';
 
       before(async () => {
         // Create a conversation to delete
@@ -723,7 +729,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('allows the owner to delete their conversation', async () => {
         const deleteResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+          endpoint: deleteConversationRoute,
           params: {
             path: { conversationId: createdConversationId },
           },
@@ -757,7 +763,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         // try deleting as an admin
         const deleteResponse = await observabilityAIAssistantAPIClient.admin({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+          endpoint: deleteConversationRoute,
           params: {
             path: { conversationId: unauthorizedConversationId },
           },
@@ -767,7 +773,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         // Ensure the owner can still delete the conversation
         const ownerDeleteResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+          endpoint: deleteConversationRoute,
           params: {
             path: { conversationId: unauthorizedConversationId },
           },

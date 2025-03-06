@@ -10,7 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatSharingMenu } from './chat_sharing_menu';
 import { ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
 
-const mockOnChangeConversationAccess = jest.fn(() => Promise.resolve());
+const mockOnChangeConversationAccess = jest.fn();
 
 describe('ChatSharingMenu', () => {
   const renderComponent = (props = {}) =>
@@ -45,19 +45,21 @@ describe('ChatSharingMenu', () => {
 
   it('opens the popover on badge click', () => {
     renderComponent();
-    const badge = screen.getByRole('button');
-    fireEvent.click(badge);
+    fireEvent.click(screen.getByRole('button'));
     expect(screen.getByText('This conversation is only visible to you.')).toBeInTheDocument();
   });
 
   it('changes conversation access when a new option is selected', async () => {
+    mockOnChangeConversationAccess.mockResolvedValueOnce(undefined);
     renderComponent();
+
     fireEvent.click(screen.getByRole('button'));
     fireEvent.click(screen.getByText('Shared'));
 
     await waitFor(() =>
       expect(mockOnChangeConversationAccess).toHaveBeenCalledWith(ConversationAccess.SHARED)
     );
+    await waitFor(() => expect(screen.queryByText('Shared')).toBeInTheDocument());
   });
 
   it('keeps conversation access unchanged if no new option is selected', async () => {
@@ -66,5 +68,44 @@ describe('ChatSharingMenu', () => {
     fireEvent.click(screen.getAllByText('Private')[1]);
 
     await waitFor(() => expect(mockOnChangeConversationAccess).not.toHaveBeenCalled());
+  });
+
+  it('shows loading state when changing access', async () => {
+    mockOnChangeConversationAccess.mockImplementation(() => new Promise(() => {}));
+    renderComponent();
+
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByText('Shared'));
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('reverts to previous selection if update fails', async () => {
+    mockOnChangeConversationAccess.mockRejectedValueOnce(new Error('Update failed'));
+    renderComponent();
+
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByText('Shared'));
+
+    await waitFor(() =>
+      expect(mockOnChangeConversationAccess).toHaveBeenCalledWith(ConversationAccess.SHARED)
+    );
+
+    await waitFor(() => expect(screen.getByText('Private')).toBeInTheDocument());
+  });
+
+  it('closes the popover when clicked on an option', async () => {
+    mockOnChangeConversationAccess.mockResolvedValueOnce(undefined);
+    renderComponent();
+
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByText('Shared'));
+
+    await waitFor(() => expect(mockOnChangeConversationAccess).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(
+        screen.queryByText('This conversation is only visible to you.')
+      ).not.toBeInTheDocument()
+    );
   });
 });

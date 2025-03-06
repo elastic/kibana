@@ -16,9 +16,11 @@ import {
   EuiSelectableOption,
   EuiIcon,
   useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
+import { css } from '@emotion/css';
 
 interface OptionData {
   description?: string;
@@ -46,6 +48,8 @@ export function ChatSharingMenu({
     isPublic ? ConversationAccess.SHARED : ConversationAccess.PRIVATE
   );
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [previousValue, setPreviousValue] = useState(selectedValue);
+  const [isLoading, setIsLoading] = useState(false);
 
   const options: Array<EuiSelectableOption<OptionData>> = [
     {
@@ -83,6 +87,41 @@ export function ChatSharingMenu({
     ),
     [euiTheme.size.xs]
   );
+
+  const handleChange = async (newOptions: EuiSelectableOption[]) => {
+    const selectedOption = newOptions.find((option) => option.checked === 'on');
+
+    if (selectedOption && selectedOption.key !== selectedValue) {
+      setPreviousValue(selectedValue);
+      setSelectedValue(selectedOption.key as ConversationAccess);
+      setIsLoading(true);
+
+      try {
+        await onChangeConversationAccess(selectedOption.key as ConversationAccess);
+      } catch (err) {
+        setSelectedValue(previousValue);
+      }
+
+      setIsLoading(false);
+      setIsPopoverOpen(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <EuiBadge
+        color="default"
+        data-test-subj="observabilityAiAssistantChatAccessLoadingBadge"
+        className={css`
+          min-width: ${euiTheme.size.xxxxl};
+          display: flex;
+          justify-content: center;
+        `}
+      >
+        <EuiLoadingSpinner size="s" />
+      </EuiBadge>
+    );
+  }
 
   if (disabled) {
     return (
@@ -127,14 +166,7 @@ export function ChatSharingMenu({
         options={options}
         singleSelection="always"
         renderOption={renderOption}
-        onChange={(newOptions) => {
-          const selectedOption = newOptions.find((option) => option.checked === 'on');
-          if (selectedOption && selectedOption.key !== selectedValue) {
-            setSelectedValue(selectedOption.key as ConversationAccess);
-            onChangeConversationAccess(selectedOption.key as ConversationAccess);
-          }
-          setIsPopoverOpen(false);
-        }}
+        onChange={handleChange}
         listProps={{
           isVirtualized: false,
           onFocusBadge: false,

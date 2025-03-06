@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound, forbidden, badRequest } from '@hapi/boom';
+import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -566,7 +566,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
-      throw new Error('Cannot update conversation that is not owned by the user');
+      throw forbidden('Updating a conversation is only allowed for the owner of the conversation.');
     }
 
     const updatedConversation: Conversation = merge(
@@ -579,35 +579,6 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
-  };
-
-  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge(
-      {},
-      conversation,
-      { conversation: { title } },
-      this.getConversationUpdateValues(new Date().toISOString())
-    );
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: { conversation: { title } },
       refresh: true,
     });
 
@@ -636,48 +607,23 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  updateAccess = async ({
+  updatePartial = async ({
     conversationId,
-    access,
+    updates,
   }: {
     conversationId: string;
-    access: ConversationAccess;
-  }) => {
-    if (![ConversationAccess.SHARED, ConversationAccess.PRIVATE].includes(access)) {
-      throw badRequest('Invalid access value. Allowed values are SHARED and PRIVATE.');
-    }
-
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
+    updates: Partial<{ title: string; access: ConversationAccess }>;
+  }): Promise<Conversation> => {
     const conversation = await this.get(conversationId);
     if (!conversation) {
       throw notFound();
     }
 
-    if (!this.isConversationOwnedByUser(conversation)) {
-      throw forbidden('Conversation access can only be updated by the owner of the conversation.');
-    }
-
-    const isPublic = access === ConversationAccess.SHARED;
-
     const updatedConversation: Conversation = merge({}, conversation, {
-      public: isPublic,
-      conversation: {
-        last_updated: new Date().toISOString(),
-      },
+      ...(updates.access !== undefined && { public: updates.access === ConversationAccess.SHARED }),
     });
 
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
+    return this.update(conversationId, updatedConversation);
   };
 
   duplicateConversation = async (conversationId: string): Promise<Conversation> => {

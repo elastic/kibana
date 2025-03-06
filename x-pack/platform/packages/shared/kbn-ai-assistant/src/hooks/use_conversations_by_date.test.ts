@@ -15,7 +15,7 @@ jest.mock('../utils/date', () => ({
   isValidDateMath: jest.fn(),
 }));
 
-const getDisplayedConversation = (conversation: Conversation) => {
+export const getDisplayedConversation = (conversation: Conversation) => {
   return {
     id: conversation.conversation.id,
     label: conversation.conversation.title,

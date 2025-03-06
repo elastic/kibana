@@ -13,6 +13,7 @@ import { ConversationList } from './conversation_list';
 import { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConversationsByDate, useConversationContextMenu } from '../hooks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { getDisplayedConversation } from '../hooks/use_conversations_by_date.test';
 
 jest.mock('../hooks/use_conversations_by_date', () => ({
   useConversationsByDate: jest.fn(),
@@ -45,7 +46,11 @@ const mockConversations: UseConversationListResult['conversations'] = {
         numeric_labels: {},
         messages: [],
         namespace: 'namespace-1',
-        public: true,
+        public: false,
+        user: {
+          id: 'user_1',
+          name: 'user_one',
+        },
       },
       {
         conversation: {
@@ -59,6 +64,10 @@ const mockConversations: UseConversationListResult['conversations'] = {
         messages: [],
         namespace: 'namespace-2',
         public: true,
+        user: {
+          id: 'user_2',
+          name: 'user_two',
+        },
       },
     ],
   },
@@ -68,22 +77,8 @@ const mockConversations: UseConversationListResult['conversations'] = {
 };
 
 const mockCategorizedConversations = {
-  TODAY: [
-    {
-      id: '1',
-      label: "Today's Conversation",
-      lastUpdated: '2025-01-21T10:00:00Z',
-      href: '/conversation/1',
-    },
-  ],
-  YESTERDAY: [
-    {
-      id: '2',
-      label: "Yesterday's Conversation",
-      lastUpdated: '2025-01-20T10:00:00Z',
-      href: '/conversation/2',
-    },
-  ],
+  TODAY: [getDisplayedConversation(mockConversations.value?.conversations[0]!)],
+  YESTERDAY: [getDisplayedConversation(mockConversations.value?.conversations[1]!)],
   THIS_WEEK: [],
   LAST_WEEK: [],
   THIS_MONTH: [],
@@ -93,8 +88,8 @@ const mockCategorizedConversations = {
 };
 
 const mockAuthenticatedUser = {
-  username: 'my_username',
-  profile_uid: 'my_profile_uid',
+  username: 'user_one',
+  profile_uid: 'user_1',
   authentication_realm: {
     type: 'my_realm_type',
     name: 'my_realm_name',
