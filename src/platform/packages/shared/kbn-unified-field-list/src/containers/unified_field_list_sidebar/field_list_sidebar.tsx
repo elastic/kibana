@@ -416,7 +416,26 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
               </EuiFlexGroup>
             }
             className="unifiedFieldListSidebar__list"
-            css={({ euiTheme }) => fieldListItemCss({ euiTheme, smallScreenBreakpoint })}
+            css={css`
+              padding: ${`${euiTheme.size.s} ${euiTheme.size.xs} 0 ${euiTheme.size.xs}`};
+
+              > *,
+              .euiAccordion__triggerWrapper,
+              .euiAccordion__children,
+              .unifiedFieldListItemButton {
+                padding-inline: ${euiTheme.size.xs};
+              }
+
+              ${smallScreenBreakpoint} {
+                padding: ${euiTheme.size.s} 0 0 0;
+                > *,
+                .euiAccordion__triggerWrapper,
+                .unifiedFieldListSidebar__accordionContainer,
+                .unifiedFieldListItemButton {
+                  padding-inline: 0;
+                }
+              }
+            `}
           >
             {showFieldList ? (
               <FieldListGrouped
@@ -490,33 +509,6 @@ const fieldListSidebarContainerCss = css`
 
 const fieldItemSidebarPrependedItemCss = ({ euiTheme }: UseEuiTheme) => css`
   margin-bottom: ${euiTheme.size.s};
-`;
-
-const fieldListItemCss = ({
-  euiTheme,
-  smallScreenBreakpoint,
-}: {
-  euiTheme: UseEuiTheme['euiTheme'];
-  smallScreenBreakpoint: ReturnType<typeof useEuiBreakpoint>;
-}) => css`
-  padding: ${`${euiTheme.size.s} ${euiTheme.size.xs} 0 ${euiTheme.size.xs}`};
-
-  > *,
-  .euiAccordion__triggerWrapper,
-  .euiAccordion__children,
-  .unifiedFieldListItemButton {
-    padding-inline: ${euiTheme.size.xs};
-  }
-
-  ${smallScreenBreakpoint} {
-    padding: ${euiTheme.size.s} 0 0 0;
-    > *,
-    .euiAccordion__triggerWrapper,
-    .unifiedFieldListSidebar__accordionContainer,
-    .unifiedFieldListItemButton {
-      padding-inline: 0;
-    }
-  }
 `;
 
 const editFieldCss = ({ euiTheme }: UseEuiTheme) => css`
