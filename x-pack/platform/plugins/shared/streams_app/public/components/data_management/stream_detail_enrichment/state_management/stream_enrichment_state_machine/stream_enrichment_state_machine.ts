@@ -7,6 +7,7 @@
 import {
   MachineImplementationsFrom,
   assign,
+  forwardTo,
   not,
   setup,
   sendTo,
@@ -37,7 +38,6 @@ import {
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import {
   simulationMachine,
-  PreviewDocsFilterOption,
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
@@ -123,20 +123,14 @@ export const streamEnrichmentMachine = setup({
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),
-    forwardEventToSimulator: sendTo(
+    forwardProcessorsEventToSimulator: sendTo(
       'simulator',
       ({ context }, params: { type: StreamEnrichmentEvent['type'] }) => ({
         type: params.type,
         processors: getStagedProcessors(context),
       })
     ),
-    sendFilterChangeToSimulator: sendTo(
-      'simulator',
-      (_, params: { filter: PreviewDocsFilterOption }) => ({
-        type: 'simulation.changePreviewDocsFilter',
-        filter: params.filter,
-      })
-    ),
+    sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
   },
   guards: {
     hasMultipleProcessors: ({ context }) => context.processorsRefs.length > 1,
@@ -208,10 +202,12 @@ export const streamEnrichmentMachine = setup({
                 'stream.reset': {
                   guard: 'hasStagedChanges',
                   target: '#ready',
+                  actions: [{ type: 'sendResetEventToSimulator' }],
                   reenter: true,
                 },
                 'stream.update': {
                   guard: 'canUpdateStream',
+                  actions: [{ type: 'sendResetEventToSimulator' }],
                   target: 'updating',
                 },
               },
@@ -269,10 +265,14 @@ export const streamEnrichmentMachine = setup({
               initial: 'viewDataPreview',
               on: {
                 'processors.*': {
-                  actions: [{ type: 'forwardEventToSimulator', params: ({ event }) => event }],
+                  actions: [
+                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
                 },
                 'processor.*': {
-                  actions: [{ type: 'forwardEventToSimulator', params: ({ event }) => event }],
+                  actions: [
+                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
                 },
               },
               states: {
@@ -280,9 +280,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'simulation.viewDetectedFields': 'viewDetectedFields',
                     'simulation.changePreviewDocsFilter': {
-                      actions: [
-                        { type: 'sendFilterChangeToSimulator', params: ({ event }) => event },
-                      ],
+                      actions: [forwardTo('simulator')],
                     },
                   },
                 },

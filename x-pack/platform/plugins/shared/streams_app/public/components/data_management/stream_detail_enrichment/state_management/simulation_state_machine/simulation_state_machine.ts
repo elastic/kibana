@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
+import {
+  ActorRefFrom,
+  MachineImplementationsFrom,
+  SnapshotFrom,
+  assign,
+  raise,
+  setup,
+} from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
@@ -130,6 +137,10 @@ export const simulationMachine = setup({
         { type: 'derivePreviewDocuments' },
       ],
     },
+    'simulation.reset': {
+      target: '.idle',
+      actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+    },
     // Handle adding/reordering processors
     'processors.*': {
       target: '.assertingSimulationRequirements',
@@ -152,10 +163,7 @@ export const simulationMachine = setup({
         target: '.assertingSimulationRequirements',
         actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
       },
-      {
-        target: '.idle',
-        actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
-      },
+      { actions: raise({ type: 'simulation.reset' }) },
     ],
   },
   states: {

@@ -35,6 +35,7 @@ export interface SimulationInput {
 export type SimulationEvent =
   | DateRangeToParentEvent
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'simulation.reset' }
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
