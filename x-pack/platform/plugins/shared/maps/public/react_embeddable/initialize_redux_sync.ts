@@ -220,14 +220,14 @@ export function initializeReduxSync({
           store.dispatch(setGotoWithCenter(nextValue));
         },
         (a, b) => {
-          if (a?.zoom === undefined || b?.zoom === undefined) {
+          if (!a || !b) {
             return a === b;
           }
 
-          if (a!.lat !== b!.lat) return false;
-          if (a!.lon !== b!.lon) return false;
+          if (a.lat !== b.lat) return false;
+          if (a.lon !== b.lon) return false;
           // Map may not restore reset zoom exactly
-          return Math.abs(a!.zoom - b!.zoom) < 0.05
+          return Math.abs(a.zoom - b.zoom) < 0.05
         },
       ],
       openTOCDetails: [
