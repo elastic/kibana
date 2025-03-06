@@ -388,7 +388,13 @@ paths:
                     version: 1
               schema:
                 $ref: '#/components/schemas/RuleResponse'
-          description: Indicates a successful call.
+          description: >
+            Indicates a successful call.
+
+            > info
+
+            > These fields are under development and their usage or schema may
+            change: execution_summary.
       summary: Retrieve a detection rule
       tags:
         - Security Detections API
@@ -405,9 +411,9 @@ paths:
         or `id` field.
 
 
-        The `id` is a unique identifier for each data item, while `rule_id` is a
-        unique identifier for each rule.
-
+        The `id` is a unique identifier for each specific instance of a rule,
+        whereas `rule_id` is a unique identifier for the rule itself, shared
+        across all instances of that rule.
 
         > warn
 
@@ -513,7 +519,6 @@ paths:
       description: >
         Create a new detection rule.
 
-
         > warn
 
         > When used with [API
@@ -561,7 +566,6 @@ paths:
 
         * **Machine learning rules**: Creates an alert when a machine learning
         job discovers an anomaly above the defined threshold.
-
 
         > info
 
@@ -623,7 +627,6 @@ paths:
         * Jira
 
         * ServiceNow ITSM
-
 
         > info
 
@@ -1356,9 +1359,9 @@ paths:
         rule is replaced, and all unspecified fields are deleted.
 
 
-        The `id` is a unique identifier for each data item, while `rule_id` is a
-        unique identifier for each rule.
-
+        The `id` is a unique identifier for each specific instance of a rule,
+        whereas `rule_id` is a unique identifier for the rule itself, shared
+        across all instances of that rule.
 
         > warn
 
@@ -1461,7 +1464,6 @@ paths:
         multiple detection rules. The bulk action is applied to all rules that
         match the query or to the rules listed by their IDs.
 
-
         > warn
 
         > When used with  [API
@@ -1491,7 +1493,6 @@ paths:
             dry_run=true to the end of the request URL. Rules specified in the
             request will be temporarily updated. These updates won’t be written
             to Elasticsearch.
-
 
             > info
 
@@ -2013,7 +2014,6 @@ paths:
 
         - Exception lists
 
-
         > info
 
         > Rule actions and connectors are included in the exported file, but
@@ -2048,7 +2048,6 @@ paths:
             type: boolean
         - description: >
             File name for saving the exported rules.
-
 
             > info
 
@@ -2151,7 +2150,6 @@ paths:
             - interval
 
             - updatedBy
-
 
             > info
 
@@ -2305,7 +2303,6 @@ paths:
           description: >
             Successful response
 
-
             > info
 
             > These fields are under development and their usage or schema may
@@ -2329,7 +2326,6 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
 
         - A link to the `.ndjson` file containing the rules.
-
 
         > warn
 
@@ -4304,7 +4300,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -4496,7 +4491,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -4691,7 +4685,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -4863,7 +4856,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -5067,7 +5059,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -5260,7 +5251,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -5447,7 +5437,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -5642,7 +5631,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -5968,7 +5956,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -6160,7 +6147,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -6358,7 +6344,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -6546,7 +6531,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -6840,7 +6824,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -7033,7 +7016,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -7245,7 +7227,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -7442,7 +7423,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -7766,7 +7746,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -7959,7 +7938,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -8169,7 +8147,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -8360,7 +8337,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -8925,6 +8901,10 @@ components:
     RuleExecutionStatusOrder:
       type: integer
     RuleExecutionSummary:
+      description: |
+        Summary of the last execution of a rule.
+        > info
+        > This field is under development and its usage or schema may change
       type: object
       properties:
         last_execution:
@@ -9263,7 +9243,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -9456,7 +9435,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -9666,7 +9644,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -9857,7 +9834,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -10221,7 +10197,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -10414,7 +10389,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -10640,7 +10614,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -10840,7 +10813,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -11128,7 +11100,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -11321,7 +11292,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 
@@ -11533,7 +11503,6 @@ components:
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
 
-
                 > info
 
                 > The value of required_fields does not affect the rule’s
@@ -11727,7 +11696,6 @@ components:
               description: >
                 Elasticsearch fields and their types that need to be present for
                 the rule to function.
-
 
                 > info
 

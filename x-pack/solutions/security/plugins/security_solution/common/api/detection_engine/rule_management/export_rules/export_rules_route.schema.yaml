@@ -13,7 +13,6 @@ paths:
         Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
         - Actions
         - Exception lists
-
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
@@ -35,7 +34,6 @@ paths:
           required: false
           description: |
             File name for saving the exported rules.
-
             > info
             > When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.
           schema:

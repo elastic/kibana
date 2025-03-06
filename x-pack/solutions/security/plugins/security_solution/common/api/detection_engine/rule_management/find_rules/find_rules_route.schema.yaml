@@ -32,7 +32,6 @@ paths:
             - createdBy
             - interval
             - updatedBy
-
             > info
             > Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
           required: false
@@ -86,7 +85,6 @@ paths:
         '200':
           description: |
             Successful response
-
             > info
             > These fields are under development and their usage or schema may change: execution_summary.
           content:

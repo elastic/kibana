@@ -17,7 +17,7 @@ paths:
         * `id` - `GET /api/detection_engine/rules?id=<id>`
         * `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
 
-        The `id` is a unique identifier for each data item, while `rule_id` is a unique identifier for each rule.
+        The `id` is a unique identifier for each specific instance of a rule, whereas `rule_id` is a unique identifier for the rule itself, shared across all instances of that rule.
       tags:
         - Rules API
       parameters:
@@ -37,11 +37,14 @@ paths:
         - lang: cURL
           source: |
             curl \
-              --request GET https://localhost:5601/api/detection_engine/rules?id=16947168-5405-453d-a8b5-aadad357af42 \
+              --request GET https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
               --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
       responses:
         200:
-          description: Indicates a successful call.
+          description: |
+            Indicates a successful call.
+            > info
+            > These fields are under development and their usage or schema may change: execution_summary.
           content:
             application/json:
               schema:
