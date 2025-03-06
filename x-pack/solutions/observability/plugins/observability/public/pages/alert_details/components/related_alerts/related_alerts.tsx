@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { i18n } from '@kbn/i18n';
 import { ALERT_GROUP, ALERT_RULE_UUID, ALERT_UUID, AlertStatus, TAGS } from '@kbn/rule-data-utils';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ObservabilityAlertsTable, TopAlert } from '../../../..';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
@@ -31,6 +37,7 @@ import { buildEsQuery } from '../../../../utils/build_es_query';
 import { useKibana } from '../../../../utils/kibana_react';
 import { EmptyState } from './empty_state';
 import { StatusFilter, getAssociatedStatusFilter } from './status_filter';
+import { TagsFilter } from './tags_filter';
 
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
@@ -42,37 +49,35 @@ interface Props {
 export function RelatedAlerts({ alert }: Props) {
   const { http, notifications, dataViews } = useKibana().services;
 
-  const tagsCheckboxId = useGeneratedHtmlId({ prefix: 'tags' });
   const groupsCheckboxId = useGeneratedHtmlId({ prefix: 'groups' });
   const ruleCheckboxId = useGeneratedHtmlId({ prefix: 'rule' });
 
-  const [tagsChecked, setTagsChecked] = useState(false);
   const [groupsChecked, setGroupsChecked] = useState(false);
   const [ruleChecked, setRuleChecked] = useState(false);
 
   const [range, setRange] = useState({ from: 'now-24h', to: 'now' });
   const [status, setStatus] = useState<AlertStatus | undefined>('active');
+  const [tags, setTags] = useState<string[]>(alert?.fields[TAGS] ?? []);
 
   if (!alert) {
     return null;
   }
 
   const statusFilter = getAssociatedStatusFilter(status);
-  const kuery = getKuery({ alert, tagsChecked, groupsChecked, ruleChecked });
+  const kuery = getKuery({ alert, tags, groupsChecked, ruleChecked });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row" gutterSize="s">
         <EuiFlexItem>
-          <EuiCheckbox
-            id={tagsCheckboxId}
-            label={i18n.translate('xpack.observability.relatedAlerts.useTagsLabel', {
-              defaultMessage: 'Use tags',
-            })}
-            checked={tagsChecked}
-            onChange={(e) => setTagsChecked(e.target.checked)}
+          <TagsFilter
+            availableTags={alert?.fields[TAGS] ?? []}
+            tags={tags}
+            onChange={(newTags) => setTags(newTags)}
           />
         </EuiFlexItem>
+
         <EuiFlexItem>
           <EuiCheckbox
             id={groupsCheckboxId}
@@ -155,17 +160,16 @@ export function RelatedAlerts({ alert }: Props) {
 
 function getKuery({
   alert,
-  tagsChecked,
+  tags,
   groupsChecked,
   ruleChecked,
 }: {
   alert: TopAlert<ObservabilityFields>;
-  tagsChecked: boolean;
+  tags: string[];
   groupsChecked: boolean;
   ruleChecked: boolean;
 }): string {
   const alertId = alert.fields[ALERT_UUID];
-  const tags = tagsChecked ? alert.fields[TAGS] : [];
   const groups = groupsChecked ? alert.fields[ALERT_GROUP] : [];
   const ruleId = ruleChecked ? alert.fields[ALERT_RULE_UUID] : undefined;
   const sharedFields = getSharedFields(alert.fields);
