@@ -231,5 +231,14 @@ describe('common', () => {
         },
       });
     });
+
+    it('works with empty queries and filters', () => {
+      expect(getElasticsearchQueryOrThrow('')).toEqual({
+        match_all: {},
+      });
+      expect(getElasticsearchQueryOrThrow({} as any)).toEqual({
+        match_all: {},
+      });
+    });
   });
 });

@@ -9,12 +9,16 @@ import { buildEsQuery } from '@kbn/es-query';
 import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/logging';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { isEmpty } from 'lodash';
 import { SLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
 
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?: DataView) {
   try {
+    if (isEmpty(kuery)) {
+      return { match_all: {} };
+    }
     const kqlQuery = kqlQuerySchema.is(kuery) ? kuery : kuery.kqlQuery;
     const filters = kqlQuerySchema.is(kuery) ? [] : kuery.filters;
     return buildEsQuery(
