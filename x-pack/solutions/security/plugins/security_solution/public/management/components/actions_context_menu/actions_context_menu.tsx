@@ -77,11 +77,11 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         />
       );
 
-      if (!disabledTooltip) {
-        return button;
+      if (isDisabled && disabledTooltip) {
+        return <EuiToolTip content={disabledTooltip}>{button}</EuiToolTip>;
       }
 
-      return <EuiToolTip content={disabledTooltip}>{button}</EuiToolTip>;
+      return button;
     }, [disabledTooltip, getTestId, handleToggleMenu, icon, isDisabled]);
 
     return (

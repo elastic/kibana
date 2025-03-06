@@ -10,6 +10,10 @@ import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE,
+  MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE,
+} from './translations';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -35,29 +39,35 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
     );
     const activeSpaceId = useSpaceId();
 
-    const { isDisabled, disabledTooltip } = useMemo<{
+    interface MenuButtonDisableOptions {
       isDisabled: boolean;
       disabledTooltip: ReactNode;
-    }>(() => {
-      if (!isSpacesEnabled || canManageGlobalArtifacts) {
-        return { isDisabled: false, disabledTooltip: undefined };
+    }
+    const { isDisabled, disabledTooltip } = useMemo<MenuButtonDisableOptions>(() => {
+      const response: MenuButtonDisableOptions = { isDisabled: false, disabledTooltip: undefined };
+
+      if (!isSpacesEnabled) {
+        return response;
+      }
+
+      if (canManageGlobalArtifacts) {
+        return response;
       }
 
       if (isGlobal) {
-        return {
-          isDisabled: true,
-          disabledTooltip: 'something here: not allowed to manage global artifacts',
-        };
+        response.isDisabled = true;
+        response.disabledTooltip = MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE;
+        return response;
       }
 
       if (!activeSpaceId || !ownerSpaceIds.includes(activeSpaceId)) {
-        return {
-          isDisabled: true,
-          disabledTooltip: 'SOmething here: not allowed to manage shared artifact in active space',
-        };
+        response.isDisabled = true;
+        response.disabledTooltip = MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE;
+
+        return response;
       }
 
-      return { isDisabled: false, disabledTooltip: undefined };
+      return response;
     }, [activeSpaceId, canManageGlobalArtifacts, isGlobal, isSpacesEnabled, ownerSpaceIds]);
 
     return actions && actions.length > 0 ? (
