@@ -103,8 +103,8 @@ async function getIndicesFromIndexPattern(
         return `${cluster}:*${p}*`;
       }
 
-      // search across all clusters
-      return [`*:*${pattern}*`, `*${pattern}*`];
+      // search across local and remote clusters
+      return [`*${pattern}*`, `*:*${pattern}*`];
     });
   }
 
