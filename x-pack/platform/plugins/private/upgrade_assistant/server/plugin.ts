@@ -39,6 +39,7 @@ import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import type { DataStreamExclusions, FeatureSet } from '../common/types';
 import { getEntepriseSearchRegisteredDeprecations } from './lib/enterprise_search/enterprise_search_deprecations';
+import { defaultExclusions } from './lib/data_streams/default_exclusions';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -74,7 +75,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     const { featureSet, dataStreamExclusions } = config.get();
     this.initialFeatureSet = featureSet;
-    this.initialDataStreamExclusions = dataStreamExclusions;
+    this.initialDataStreamExclusions = Object.assign({}, defaultExclusions, dataStreamExclusions);
   }
 
   private getWorker() {
