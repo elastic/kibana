@@ -45,7 +45,7 @@ import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../st
 import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { OnDemandRenderer, OnDemandSuspenseFallback } from './on_demand_renderer';
+import { LazyTimelineTabRenderer, TimelineTabFallback } from './lazy_timeline_tab_renderer';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component
@@ -68,31 +68,31 @@ const tabWithSuspense = <P extends {}, R = {}>(
 
 const QueryTab = tabWithSuspense(
   lazy(() => import('./query')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 const EqlTab = tabWithSuspense(
   lazy(() => import('./eql')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 const GraphTab = tabWithSuspense(
   lazy(() => import('./graph')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 const NotesTab = tabWithSuspense(
   lazy(() => import('./notes')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 const PinnedTab = tabWithSuspense(
   lazy(() => import('./pinned')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 const SessionTab = tabWithSuspense(
   lazy(() => import('./session')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 const EsqlTab = tabWithSuspense(
   lazy(() => import('./esql')),
-  <OnDemandSuspenseFallback />
+  <TimelineTabFallback />
 );
 
 interface BasicTimelineTab {
@@ -152,7 +152,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
 
     return (
       <>
-        <OnDemandRenderer
+        <LazyTimelineTabRenderer
           timelineId={timelineId}
           shouldShowTab={TimelineTabs.query === activeTimelineTab}
           dataTestSubj={`timeline-tab-content-${TimelineTabs.query}`}
@@ -162,17 +162,17 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
-        </OnDemandRenderer>
+        </LazyTimelineTabRenderer>
         {showTimeline && shouldShowESQLTab && activeTimelineTab === TimelineTabs.esql && (
-          <OnDemandRenderer
+          <LazyTimelineTabRenderer
             timelineId={timelineId}
             shouldShowTab={true}
             dataTestSubj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             <EsqlTab timelineId={timelineId} />
-          </OnDemandRenderer>
+          </LazyTimelineTabRenderer>
         )}
-        <OnDemandRenderer
+        <LazyTimelineTabRenderer
           timelineId={timelineId}
           shouldShowTab={TimelineTabs.pinned === activeTimelineTab}
           dataTestSubj={`timeline-tab-content-${TimelineTabs.pinned}`}
@@ -182,9 +182,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
-        </OnDemandRenderer>
+        </LazyTimelineTabRenderer>
         {timelineType === TimelineTypeEnum.default && (
-          <OnDemandRenderer
+          <LazyTimelineTabRenderer
             timelineId={timelineId}
             shouldShowTab={TimelineTabs.eql === activeTimelineTab}
             dataTestSubj={`timeline-tab-content-${TimelineTabs.eql}`}
@@ -194,16 +194,16 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
               rowRenderers={rowRenderers}
               timelineId={timelineId}
             />
-          </OnDemandRenderer>
+          </LazyTimelineTabRenderer>
         )}
-        <OnDemandRenderer
+        <LazyTimelineTabRenderer
           timelineId={timelineId}
           shouldShowTab={isGraphOrNotesTabs}
           isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
           dataTestSubj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
           {isGraphOrNotesTabs ? getTab(activeTimelineTab) : null}
-        </OnDemandRenderer>
+        </LazyTimelineTabRenderer>
       </>
     );
   }

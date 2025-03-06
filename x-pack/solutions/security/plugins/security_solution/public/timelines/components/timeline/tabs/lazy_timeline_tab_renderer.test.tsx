@@ -7,14 +7,14 @@
 
 import React, { useEffect } from 'react';
 import { render } from '@testing-library/react';
-import type { OnDemandRendererProps } from './on_demand_renderer';
-import { OnDemandRenderer } from './on_demand_renderer';
+import type { LazyTimelineTabRendererProps } from './lazy_timeline_tab_renderer';
+import { LazyTimelineTabRenderer } from './lazy_timeline_tab_renderer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../../../common/hooks/use_selector');
 
-describe('OnDemandRenderer', () => {
+describe('LazyTimelineTabRenderer', () => {
   const mockUseDeepEqualSelector = useDeepEqualSelector as jest.Mock;
   const defaultProps = {
     dataTestSubj: 'test',
@@ -23,12 +23,12 @@ describe('OnDemandRenderer', () => {
     timelineId: TimelineId.test,
   };
 
-  const TestComponent = ({ children, ...restProps }: Partial<OnDemandRendererProps>) => (
-    <OnDemandRenderer {...defaultProps} {...restProps}>
+  const TestComponent = ({ children, ...restProps }: Partial<LazyTimelineTabRendererProps>) => (
+    <LazyTimelineTabRenderer {...defaultProps} {...restProps}>
       <div>{children ?? 'test component'}</div>
-    </OnDemandRenderer>
+    </LazyTimelineTabRenderer>
   );
-  const renderTestComponents = (props?: Partial<OnDemandRendererProps>) => {
+  const renderTestComponents = (props?: Partial<LazyTimelineTabRendererProps>) => {
     const { children, ...restProps } = props ?? {};
     return render(<TestComponent {...restProps}>{children}</TestComponent>);
   };
@@ -72,7 +72,7 @@ describe('OnDemandRenderer', () => {
       return <div>{testChildString}</div>;
     };
 
-    const RerenderTestComponent = (props?: Partial<OnDemandRendererProps>) => (
+    const RerenderTestComponent = (props?: Partial<LazyTimelineTabRendererProps>) => (
       <TestComponent {...props}>
         <TestChild />
       </TestComponent>
@@ -84,8 +84,7 @@ describe('OnDemandRenderer', () => {
     });
 
     it('should NOT re-render children after the first render', () => {
-      const { rerender, queryByText } = render(<RerenderTestComponent />);
-      rerender(<RerenderTestComponent />);
+      const { queryByText } = render(<RerenderTestComponent />);
       expect(queryByText(testChildString)).toBeInTheDocument();
       expect(mockFnShouldThatShouldOnlyRunOnce).toHaveBeenCalledTimes(1);
     });
