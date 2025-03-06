@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import isEmpty from 'lodash/isEmpty';
+
 import { useKibana } from '../../common/lib/kibana';
 import { type DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
@@ -28,7 +30,7 @@ export const useFullDataView = ({
   const { dataView: dataViewSpec } = useDataView(dataViewManagerScope);
 
   const dataView = useMemo(() => {
-    if (Object.keys(dataViewSpec?.fields ?? {}).length) {
+    if (!isEmpty(dataViewSpec?.fields)) {
       return new DataView({ spec: dataViewSpec, fieldFormats });
     } else {
       return undefined;
