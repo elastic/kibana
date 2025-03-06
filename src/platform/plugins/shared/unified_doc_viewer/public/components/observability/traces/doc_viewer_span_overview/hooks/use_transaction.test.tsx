@@ -12,6 +12,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { TransactionProvider, useTransactionContext } from './use_transaction';
+import { TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
 jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -68,7 +69,7 @@ describe('useTransaction hook', () => {
     (lastValueFrom as jest.Mock).mockResolvedValue({
       rawResponse: {
         hits: {
-          hits: [{ _source: { transaction: { name: transactionName } } }],
+          hits: [{ fields: { [TRANSACTION_NAME_FIELD]: transactionName } }],
         },
       },
     });
