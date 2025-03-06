@@ -6,10 +6,8 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { defer, map, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
+import { defer, map } from 'rxjs';
 import {
-  createInferenceInternalError,
   Message,
   MessageRole,
   ToolChoiceType,
@@ -18,7 +16,7 @@ import {
   ToolSchemaType,
 } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { convertUpstreamError } from '../../utils';
+import { handleConnectorResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
@@ -53,21 +51,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
         },
       });
     }).pipe(
-      switchMap((response) => {
-        if (response.status === 'error') {
-          return throwError(() =>
-            convertUpstreamError(response.serviceMessage!, {
-              messagePrefix: 'Error calling connector:',
-            })
-          );
-        }
-        if (isReadable(response.data as any)) {
-          return eventSourceStreamIntoObservable(response.data as Readable);
-        }
-        return throwError(() =>
-          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
-        );
-      }),
+      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
       }),

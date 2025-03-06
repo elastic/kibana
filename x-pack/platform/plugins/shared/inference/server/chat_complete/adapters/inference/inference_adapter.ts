@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { defer, identity, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
-import { createInferenceInternalError } from '@kbn/inference-common';
+import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
+import { isNativeFunctionCallingSupported, handleConnectorResponse } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
@@ -57,21 +55,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         },
       });
     }).pipe(
-      switchMap((response) => {
-        if (response.status === 'error') {
-          return throwError(() =>
-            convertUpstreamError(response.serviceMessage!, {
-              messagePrefix: 'Error calling connector:',
-            })
-          );
-        }
-        if (isReadable(response.data as any)) {
-          return eventSourceStreamIntoObservable(response.data as Readable);
-        }
-        return throwError(() =>
-          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
-        );
-      }),
+      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
