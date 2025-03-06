@@ -168,41 +168,38 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
 
   checkInstructionSetStatus = async (instructionSetIndex: number) => {
     const instructionSets = this.getInstructionSets();
-
-    if (!instructionSets) {
-      return;
-    }
+    if (!instructionSets) return;
 
     const instructionSet = instructionSets[instructionSetIndex];
-    if (!instructionSet) {
-      return;
-    }
-    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
-    if (this.state.tutorial) {
-      const customStatusCheckCallback = this.state.tutorial.customStatusCheckName
-        ? getServices().tutorialService.getCustomStatusCheck(
-            this.state.tutorial.customStatusCheckName
-          )
-        : undefined;
+    if (!instructionSet) return;
 
-      const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
-        ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
-        ...(customStatusCheckCallback
-          ? [this.fetchCustomStatusCheck(customStatusCheckCallback)]
-          : []),
-      ]);
-      const nextStatusCheckState: StatusCheckStatesType =
-        esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
-        customStatusCheck === StatusCheckStates.HAS_DATA
-          ? StatusCheckStates.HAS_DATA
-          : StatusCheckStates.NO_DATA;
+    const esHitsCheckConfig = instructionSet.statusCheck?.esHitsCheck;
+    if (!this.state.tutorial) return;
 
-      this.setState((prevState) => {
-        const newStatusCheckStates = [...prevState.statusCheckStates];
-        newStatusCheckStates[instructionSetIndex] = nextStatusCheckState;
-        return { statusCheckStates: newStatusCheckStates };
-      });
-    }
+    const customStatusCheckCallback = this.state.tutorial.customStatusCheckName
+      ? getServices().tutorialService.getCustomStatusCheck(
+          this.state.tutorial.customStatusCheckName
+        )
+      : undefined;
+
+    const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
+      ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
+      ...(customStatusCheckCallback
+        ? [this.fetchCustomStatusCheck(customStatusCheckCallback)]
+        : []),
+    ]);
+
+    const nextStatusCheckState: StatusCheckStatesType =
+      esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
+      customStatusCheck === StatusCheckStates.HAS_DATA
+        ? StatusCheckStates.HAS_DATA
+        : StatusCheckStates.NO_DATA;
+
+    this.setState((prevState) => {
+      const newStatusCheckStates = [...prevState.statusCheckStates];
+      newStatusCheckStates[instructionSetIndex] = nextStatusCheckState;
+      return { statusCheckStates: newStatusCheckStates };
+    });
   };
 
   fetchCustomStatusCheck = async (customStatusCheckCallback: CustomStatusCheckCallback) => {
@@ -291,14 +288,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     let offset = 1;
     return instructionSets.map((instructionSet: InstructionSetType, index: number) => {
       const currentOffset = offset;
-      if (instructionSet.instructionVariants && instructionSet.instructionVariants.length > 0) {
-        offset +=
-          instructionSet.instructionVariants[0].instructions.length > 0
-            ? instructionSet.instructionVariants[0].instructions.length
-            : 0;
-      } else {
-        offset += 0;
-      }
+      offset += instructionSet.instructionVariants[0].instructions.length;
 
       return (
         <Fragment key={index}>

@@ -31,7 +31,6 @@ jest.mock('../../kibana_services', () => ({
     },
   }),
 }));
-// function TutorialConfigAgentRumScript
 
 const replaceTemplateStrings = (text: string) => text;
 const commonProps: InstructionProps = {

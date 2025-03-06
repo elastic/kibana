@@ -9,14 +9,14 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Footer } from './footer';
 
 test('render Footer component', () => {
   const { getByText, getByRole } = render(
-    <IntlProvider locale="en">
+    <I18nProvider>
       <Footer url={'/app/myapp'} label={'launch myapp'} />
-    </IntlProvider>
+    </I18nProvider>
   );
 
   expect(

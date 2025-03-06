@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { SavedObjectsBatchResponse } from '@kbn/core-saved-objects-api-browser';
 import { Tutorial } from './tutorial';
@@ -90,7 +90,7 @@ describe('Tutorial component', () => {
   describe('when isCloudEnabled is false', () => {
     test('should render ON_PREM instructions with instruction toggle', async () => {
       const { getByText } = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={false}
@@ -99,7 +99,7 @@ describe('Tutorial component', () => {
             tutorialId={'my_testing_tutorial'}
             bulkCreate={bulkCreateMock}
           />
-        </IntlProvider>
+        </I18nProvider>
       );
       await loadTutorialPromise;
 
@@ -117,7 +117,7 @@ describe('Tutorial component', () => {
         return loadBasicTutorialPromise as unknown as Promise<TutorialType>;
       };
       const { queryByTestId } = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={false}
@@ -126,7 +126,7 @@ describe('Tutorial component', () => {
             tutorialId={'my_testing_tutorial'}
             bulkCreate={bulkCreateMock}
           />
-        </IntlProvider>
+        </I18nProvider>
       );
       await loadBasicTutorialPromise;
 
@@ -136,7 +136,7 @@ describe('Tutorial component', () => {
 
     test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
       const { getByTestId, getByText } = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={false}
@@ -145,7 +145,7 @@ describe('Tutorial component', () => {
             tutorialId={'my_testing_tutorial'}
             bulkCreate={bulkCreateMock}
           />
-        </IntlProvider>
+        </I18nProvider>
       );
       await loadTutorialPromise;
       fireEvent.click(getByTestId('onCloudTutorial'));
@@ -159,7 +159,7 @@ describe('Tutorial component', () => {
   describe('when isCloudEnabled is true', () => {
     test('should render ELASTIC_CLOUD instructions', async () => {
       const { getByText } = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={true}
@@ -168,7 +168,7 @@ describe('Tutorial component', () => {
             tutorialId={'my_testing_tutorial'}
             bulkCreate={bulkCreateMock}
           />
-        </IntlProvider>
+        </I18nProvider>
       );
       await loadTutorialPromise;
 

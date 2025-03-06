@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
 import { render } from '@testing-library/react';
@@ -80,9 +80,9 @@ beforeAll(() => {
 describe('render InstructionSet component', () => {
   test('should handle all status check states', () => {
     const { getByText, queryByText, rerender } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet {...defaultProps} statusCheckState={StatusCheckStates.NOT_CHECKED} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     // Initial state - no check has been attempted
@@ -93,43 +93,43 @@ describe('render InstructionSet component', () => {
 
     // Checking status
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet {...defaultProps} statusCheckState={StatusCheckStates.FETCHING} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(queryByText('custom success msg')).not.toBeInTheDocument();
     expect(queryByText('custom error msg')).not.toBeInTheDocument();
 
     // Failed status check - error
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet {...defaultProps} statusCheckState={StatusCheckStates.ERROR} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('custom error msg')).toBeInTheDocument();
 
     // Failed status check - no data
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet {...defaultProps} statusCheckState={StatusCheckStates.NO_DATA} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('custom error msg')).toBeInTheDocument();
 
     // Successful status check
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet {...defaultProps} statusCheckState={StatusCheckStates.HAS_DATA} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('custom success msg')).toBeInTheDocument();
   });
 
   test('should render different instruction variants', () => {
     const { getByText, rerender } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet {...defaultProps} statusCheckState={StatusCheckStates.NOT_CHECKED} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     // Check initial variant
@@ -138,7 +138,7 @@ describe('render InstructionSet component', () => {
 
     // Change to another variant
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet
           {...defaultProps}
           statusCheckState={StatusCheckStates.NOT_CHECKED}
@@ -147,7 +147,7 @@ describe('render InstructionSet component', () => {
             { id: 'LINUX', instructions, initialSelected: true },
           ]}
         />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('step 1')).toBeInTheDocument();
     expect(getByText('step 2')).toBeInTheDocument();
@@ -155,7 +155,7 @@ describe('render InstructionSet component', () => {
 
   test('should render custom callout', () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <InstructionSet
           {...defaultProps}
           statusCheckState={StatusCheckStates.NOT_CHECKED}
@@ -165,7 +165,7 @@ describe('render InstructionSet component', () => {
             title: 'Callout Title',
           }}
         />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(getByText('Callout Title')).toBeInTheDocument();

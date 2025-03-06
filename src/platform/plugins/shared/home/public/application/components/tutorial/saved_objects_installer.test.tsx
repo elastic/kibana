@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { SavedObjectsBatchResponse, SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
 import { SavedObjectsInstaller } from './saved_objects_installer';
@@ -21,9 +21,9 @@ test('renders', () => {
     });
 
   const { getByRole } = render(
-    <IntlProvider locale="en">
+    <I18nProvider>
       <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[]} />
-    </IntlProvider>
+    </I18nProvider>
   );
   const headingElement = getByRole('heading', { level: 2, name: 'Load Kibana objects' });
 
@@ -45,9 +45,9 @@ describe('bulkCreate', () => {
       });
 
     const { getByTestId, getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[savedObject]} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     fireEvent.click(getByTestId('loadSavedObjects'));
@@ -63,9 +63,9 @@ describe('bulkCreate', () => {
       .mockRejectedValue(new Error('simulated bulkRequest error'));
 
     const { getByTestId, getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[savedObject]} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     fireEvent.click(getByTestId('loadSavedObjects'));
@@ -80,12 +80,12 @@ describe('bulkCreate', () => {
       savedObjects: [savedObject],
     });
     const { getByTestId } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <SavedObjectsInstaller
           bulkCreate={bulkCreateMock}
           savedObjects={[{ ...savedObject, version: 'foo' }]}
         />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     fireEvent.click(getByTestId('loadSavedObjects'));

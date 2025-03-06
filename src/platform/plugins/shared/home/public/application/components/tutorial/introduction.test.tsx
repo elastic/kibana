@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { Introduction, IntroductionProps } from './introduction';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -25,9 +25,9 @@ const commonProps: Omit<IntroductionProps, 'intl'> = {
 describe('Introduction component', () => {
   test('renders with default props', () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('Great tutorial')).toBeInTheDocument();
     expect(getByText('this is a great tutorial about...')).toBeInTheDocument();
@@ -35,9 +35,9 @@ describe('Introduction component', () => {
 
   test('renders with iconType', () => {
     const { container } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} iconType="logoElastic" />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     const icon = container.querySelector('[data-euiicon-type="logoElastic"]');
@@ -46,9 +46,9 @@ describe('Introduction component', () => {
 
   test('renders with exportedFieldsUrl', () => {
     const { getByRole } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} exportedFieldsUrl="exported_fields_url" />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     const anchorElement = getByRole('link', {
@@ -59,9 +59,9 @@ describe('Introduction component', () => {
 
   test('renders with previewUrl', () => {
     const { getByRole } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} previewUrl="preview_image_url" />
-      </IntlProvider>
+      </I18nProvider>
     );
     const image = getByRole('img', { name: 'screenshot of primary dashboard.' });
     expect(image).toHaveAttribute('src', 'preview_image_url');
@@ -69,27 +69,27 @@ describe('Introduction component', () => {
 
   test('isBeta', () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} isBeta={true} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('Beta')).toBeInTheDocument();
   });
 
   test('Beats badge should show', () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} isBeta={true} category={TutorialsCategory.METRICS} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(getByText('Beats')).toBeInTheDocument();
   });
 
   test('Beats badge should not show', () => {
     const { queryByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Introduction {...commonProps} category={TutorialsCategory.SECURITY_SOLUTION} />
-      </IntlProvider>
+      </I18nProvider>
     );
     expect(queryByText('Beats')).not.toBeInTheDocument();
   });

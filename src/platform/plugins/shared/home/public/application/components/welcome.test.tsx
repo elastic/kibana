@@ -9,15 +9,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import './welcome.test.mocks';
 import { Welcome } from './welcome';
 
 test('should render a Welcome screen', () => {
   const { getByText } = render(
-    <IntlProvider locale="en">
+    <I18nProvider>
       <Welcome urlBasePath="/" onSkip={() => {}} />
-    </IntlProvider>
+    </I18nProvider>
   );
   expect(getByText('Welcome to Elastic')).toBeInTheDocument();
 });
