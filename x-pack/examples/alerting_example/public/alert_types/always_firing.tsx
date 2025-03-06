@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit, pick } from 'lodash';
 import {
-  ActionGroupWithCondition,
   RuleTypeModel,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -27,7 +26,7 @@ import {
   AlwaysFiringActionGroupIds,
   DEFAULT_INSTANCES_TO_GENERATE,
 } from '../../common/constants';
-import { RuleConditions, RuleConditionsGroup } from '../components';
+import { RuleConditions, RuleConditionsGroup, ActionGroupWithCondition } from '../components';
 
 export function getAlertType(): RuleTypeModel {
   return {
