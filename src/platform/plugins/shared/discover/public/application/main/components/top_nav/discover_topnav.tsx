@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
@@ -49,6 +50,10 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
+  const [actualQuery, setActualQuery] = useState(query);
+  useEffect(() => {
+    setActualQuery(query);
+  }, [query]);
   const { savedDataViews, managedDataViews, adHocDataViews } =
     useInternalStateSelector(selectDataViewsForPicker);
   const dataView = useInternalStateSelector((state) => state.dataView!);
@@ -213,17 +218,25 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
+  const onQuerySubmit = useCallback(
+    (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }, isUpdate?: boolean) => {
+      if (isUpdate === false) stateContainer.actions.onUpdateQuery(payload, isUpdate);
+      setActualQuery(payload.query);
+    },
+    [stateContainer]
+  );
+
   return (
     <>
       <SearchBar
         {...topNavProps}
         appName="discover"
         indexPatterns={[dataView]}
-        onQuerySubmit={stateContainer.actions.onUpdateQuery}
+        onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
-        query={query}
+        query={actualQuery}
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
         showDatePicker={showDatePicker}
