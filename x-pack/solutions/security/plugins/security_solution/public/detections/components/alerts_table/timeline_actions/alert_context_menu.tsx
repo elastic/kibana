@@ -62,7 +62,7 @@ interface AlertContextMenuProps {
   refetch: (() => void) | undefined;
 }
 
-const AlertContextMenu: React.FC<AlertContextMenuProps> = memo(
+export const AlertContextMenu: React.FC<AlertContextMenuProps> = memo(
   ({
     ariaLabel = i18n.MORE_ACTIONS,
     ariaRowindex,
