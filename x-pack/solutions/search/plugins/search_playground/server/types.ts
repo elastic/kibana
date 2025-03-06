@@ -9,6 +9,8 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { Document } from '@langchain/core/documents';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
@@ -28,3 +30,7 @@ export interface SearchPlaygroundPluginStartDependencies {
 }
 
 export * from '../common/types';
+
+export type HitDocMapper = (hit: SearchHit) => Document;
+
+export type ElasticsearchRetrieverContentField = string | Record<string, string | string[]>;

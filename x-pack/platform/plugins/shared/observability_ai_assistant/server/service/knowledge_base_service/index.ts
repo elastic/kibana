@@ -28,6 +28,11 @@ import {
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
+import {
+  isKnowledgeBaseIndexWriteBlocked,
+  isSemanticTextUnsupportedError,
+} from './reindex_knowledge_base';
+import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -406,7 +411,9 @@ export class KnowledgeBaseService {
     }
 
     try {
-      await this.dependencies.esClient.asInternalUser.index({
+      await this.dependencies.esClient.asInternalUser.index<
+        Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
+      >({
         index: resourceNames.aliases.kb,
         id,
         document: {
@@ -418,10 +425,40 @@ export class KnowledgeBaseService {
         },
         refresh: 'wait_for',
       });
+      this.dependencies.logger.debug(`Entry added to knowledge base`);
     } catch (error) {
+      this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
+
+      if (isSemanticTextUnsupportedError(error)) {
+        this.dependencies.core
+          .getStartServices()
+          .then(([_, pluginsStart]) => {
+            return scheduleKbSemanticTextMigrationTask({
+              taskManager: pluginsStart.taskManager,
+              logger: this.dependencies.logger,
+              runSoon: true,
+            });
+          })
+          .catch((e) => {
+            this.dependencies.logger.error(
+              `Failed to schedule knowledge base semantic text migration task: ${e}`
+            );
+          });
+
+        throw serverUnavailable(
+          'The knowledge base is currently being re-indexed. Please try again later'
+        );
+      }
+
+      if (isKnowledgeBaseIndexWriteBlocked(error)) {
+        throw new Error(
+          `Writes to the knowledge base are currently blocked due to an Elasticsearch write index block. This is most likely due to an ongoing re-indexing operation. Please try again later. Error: ${error.message}`
+        );
+      }
+
       throw error;
     }
   };

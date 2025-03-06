@@ -178,11 +178,12 @@
             "signature": [
               "(mountPoint: ",
               "MountPoint",
-              "<HTMLElement> | undefined) => void"
+              "<HTMLElement> | undefined) => void | UnsetMountPointFn"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
             "trackAdoption": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/react-kibana-mount",
@@ -197,11 +198,9 @@
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
                 "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "trackAdoption": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "@kbn/react-kibana-mount",

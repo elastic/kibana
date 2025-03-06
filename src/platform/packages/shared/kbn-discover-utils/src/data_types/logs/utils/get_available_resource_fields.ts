@@ -10,14 +10,13 @@
 import { ResourceFields } from '../../..';
 import * as constants from '../constants';
 
-export const getAvailableResourceFields = (resourceDoc: ResourceFields) => {
-  const resourceFields: Array<keyof ResourceFields> = [
-    constants.SERVICE_NAME_FIELD,
-    constants.CONTAINER_NAME_FIELD,
-    constants.HOST_NAME_FIELD,
-    constants.ORCHESTRATOR_NAMESPACE_FIELD,
-    constants.CLOUD_INSTANCE_ID_FIELD,
-  ];
+const AVAILABLE_RESOURCE_FIELDS: Array<keyof ResourceFields> = [
+  constants.SERVICE_NAME_FIELD,
+  constants.CONTAINER_NAME_FIELD,
+  constants.HOST_NAME_FIELD,
+  constants.ORCHESTRATOR_NAMESPACE_FIELD,
+  constants.CLOUD_INSTANCE_ID_FIELD,
+];
 
-  return resourceFields.filter((fieldName) => Boolean(resourceDoc[fieldName]));
-};
+export const getAvailableResourceFields = (resourceDoc: ResourceFields) =>
+  AVAILABLE_RESOURCE_FIELDS.filter((fieldName) => Boolean(resourceDoc[fieldName]));

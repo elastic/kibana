@@ -11,7 +11,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
 import type { ThresholdBucket } from './types';

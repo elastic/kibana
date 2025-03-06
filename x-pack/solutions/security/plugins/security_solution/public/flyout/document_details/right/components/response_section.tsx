@@ -29,8 +29,8 @@ export const ResponseSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const content = useMemo(() => {

@@ -9,11 +9,17 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export function ExplorerChartLabelBadge({ entity }) {
+  // Resets the badge's default strong font-weight so it's possible
+  // to put custom emphasis inside the badge only on a part of it.
+  // The entity's field_name will be styled as `normal` and field_value as `strong`.
+  const resetFontWeightCss = css({ fontWeight: 'normal' });
+
   return (
-    <span className="ml-explorer-chart-label-badge">
-      <EuiBadge color="hollow" className="ml-reset-font-weight">
+    <span>
+      <EuiBadge color="hollow" css={resetFontWeightCss}>
         {entity.fieldName} <strong>{entity.fieldValue}</strong>
       </EuiBadge>
     </span>
