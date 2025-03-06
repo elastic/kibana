@@ -21,7 +21,7 @@ export interface AppLink {
 }
 
 /** weighting factor for scoring keywords */
-export const keywordScoreWeighting = 0.8;
+export const keywordScoreWeighting = 1;
 
 export const getAppResults = (
   term: string,
