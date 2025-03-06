@@ -19,6 +19,7 @@ import {
   EuiPageSidebar,
   EuiPageSidebarProps,
   useEuiBreakpoint,
+  useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
@@ -172,6 +173,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   additionalFieldGroups,
   additionalFilters,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { dataViews, core } = services;
 
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
@@ -316,13 +318,31 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
 
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
     className: 'unifiedFieldListSidebar', // unifiedFieldListSidebar class is used in other depending styles
-    css: ({ euiTheme }) =>
-      unifiedFieldListSidebarCss({
-        euiTheme,
-        isSidebarCollapsed,
-        fullWidth,
-        smallScreenBreakpoint,
-      }),
+    css: css`
+      overflow: hidden;
+      margin: 0 !important;
+      flex-grow: 1;
+      padding: ${isSidebarCollapsed ? `${euiTheme.size.s} ${euiTheme.size.s} 0` : '0'};
+      height: 100%;
+      width: ${fullWidth ? '100%' : isSidebarCollapsed ? 'auto' : `${euiTheme.base * 19}px`};
+      min-width: ${fullWidth ? '0 !important' : 'initial'};
+
+      ${smallScreenBreakpoint} {
+        width: 100%;
+        padding: ${euiTheme.size.base};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+      }
+
+      .unifiedFieldListItemButton__dragging {
+        background: ${euiTheme.colors.emptyShade};
+      }
+
+      .unifiedFieldListItemButton.kbnFieldButton {
+        margin-bottom: calc(${euiTheme.size.xs} / 2);
+        background: none;
+        box-shadow: none;
+      }
+    `,
     'aria-label': i18n.translate('unifiedFieldList.fieldListSidebar.fieldsSidebarAriaLabel', {
       defaultMessage: 'Fields',
     }),
