@@ -38,27 +38,25 @@ export const getMlInferenceErrors = async (
     }
   >({
     index: indexName,
-    body: {
-      aggs: {
-        errors: {
-          terms: {
-            field: '_ingest.inference_errors.message.enum',
-            order: {
-              max_error_timestamp: 'desc',
-            },
-            size: 20,
+    aggs: {
+      errors: {
+        terms: {
+          field: '_ingest.inference_errors.message.enum',
+          order: {
+            max_error_timestamp: 'desc',
           },
-          aggs: {
-            max_error_timestamp: {
-              max: {
-                field: '_ingest.inference_errors.timestamp',
-              },
+          size: 20,
+        },
+        aggs: {
+          max_error_timestamp: {
+            max: {
+              field: '_ingest.inference_errors.timestamp',
             },
           },
         },
       },
-      size: 0,
     },
+    size: 0,
   });
 
   const errorBuckets = searchResult.aggregations?.errors.buckets;

@@ -84,6 +84,7 @@ export interface IEventLogClient {
   findEventsByDocumentIds(
     docs: Array<{ _id: string; _index: string }>
   ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>>;
+  refreshIndex(): Promise<void>;
 }
 
 export interface IEventLogger {

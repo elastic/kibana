@@ -72,6 +72,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -167,6 +168,7 @@ export interface ObservabilityPublicPluginsStart {
   toastNotifications: ToastsStart;
   investigate?: InvestigatePublicStart;
   streams?: StreamsPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -182,17 +184,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private lazyRegisterAlertsTableConfiguration() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
-      './components/alerts_table/register_alerts_table_configuration'
-    );
-  }
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -449,20 +440,8 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
-    const { application, http, notifications } = coreStart;
-    const { dataViews, triggersActionsUi } = pluginsStart;
+    const { application } = coreStart;
     const config = this.initContext.config.get();
-    const { alertsTableConfigurationRegistry } = triggersActionsUi;
-    this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
-      return registerAlertsTableConfiguration(
-        alertsTableConfigurationRegistry,
-        this.observabilityRuleTypeRegistry,
-        config,
-        dataViews,
-        http,
-        notifications
-      );
-    });
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,

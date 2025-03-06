@@ -25,7 +25,7 @@ import type { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'minusInCircle';
 const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
-  defaultMessage: 'Filter Out',
+  defaultMessage: 'Filter out',
 });
 
 export const createFilterOutActionFactory = createCellActionFactory(

@@ -138,6 +138,7 @@ const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
     query: row.result.search,
     query_language: 'spl',
     description: row.result['action.escu.eli5']?.trim() || row.result.description,
+    severity: row.result['alert.severity'] as OriginalRule['severity'],
   };
 
   if (row.result['action.correlationsearch.annotations']) {

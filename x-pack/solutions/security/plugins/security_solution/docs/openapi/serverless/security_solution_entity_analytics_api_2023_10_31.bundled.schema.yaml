@@ -161,7 +161,15 @@ paths:
               properties:
                 records:
                   items:
-                    $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+                    allOf:
+                      - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: >-
+                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                        required:
+                          - criticality_level
                   maxItems: 1000
                   minItems: 1
                   type: array
@@ -860,6 +868,18 @@ components:
         - high_impact
         - extreme_impact
       type: string
+    AssetCriticalityLevelsForBulkUpload:
+      description: >-
+        The criticality level of the asset for bulk upload. The value
+        `unassigned` is used to indicate that the criticality level is not
+        assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned
+      type: string
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
@@ -1037,6 +1057,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
       required:
@@ -1204,7 +1226,6 @@ components:
         - user
         - host
         - service
-        - universal
       type: string
     HostEntity:
       type: object
@@ -1280,7 +1301,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
       type: string
     IndexPattern:
       type: string
@@ -1305,6 +1325,8 @@ components:
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Metadata:
+      $ref: '#/components/schemas/TransformStatsMetadata'
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -1419,6 +1441,59 @@ components:
       required:
         - status_code
         - message
+    TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
     UserEntity:
       type: object
       properties:

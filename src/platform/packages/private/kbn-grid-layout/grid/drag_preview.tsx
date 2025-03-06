@@ -11,16 +11,11 @@ import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
+import { useGridLayoutContext } from './use_grid_layout_context';
 
-import { GridLayoutStateManager } from './types';
+export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
+  const { gridLayoutStateManager } = useGridLayoutContext();
 
-export const DragPreview = ({
-  rowIndex,
-  gridLayoutStateManager,
-}: {
-  rowIndex: number;
-  gridLayoutStateManager: GridLayoutStateManager;
-}) => {
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(
@@ -34,10 +29,10 @@ export const DragPreview = ({
         .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !proposedGridLayout?.[rowIndex].panels[activePanel.id]) {
+          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[rowIndex].panels[activePanel.id];
+            const panel = proposedGridLayout[rowId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
@@ -54,14 +49,9 @@ export const DragPreview = ({
     []
   );
 
-  return (
-    <div
-      ref={dragPreviewRef}
-      className={'kbnGridPanel--dragPreview'}
-      css={css`
-        display: none;
-        pointer-events: none;
-      `}
-    />
-  );
-};
+  return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
+});
+
+const styles = css({ display: 'none', pointerEvents: 'none' });
+
+DragPreview.displayName = 'KbnGridLayoutDragPreview';

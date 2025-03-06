@@ -103,6 +103,10 @@
     {
       "key": "cypress/cloud_security_posture_serverless",
       "name": "[Serverless] Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "elastic_synthetics/synthetics_plugin",
+      "name": "Synthetics plugin e2e tests - Elastic/Synthetics"
     }
   ]
 }

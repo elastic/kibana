@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
@@ -37,7 +38,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { CreateInvestigationResponse } from '@kbn/investigation-shared';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Group } from '@kbn/observability-alerting-rule-utils';
+import { Group } from '@kbn/alerting-rule-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
@@ -62,15 +63,20 @@ export function HeaderActions({
   alertStatus,
   onUntrackAlert,
 }: HeaderActionsProps) {
+  const { services } = useKibana();
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    triggersActionsUi: {
+      ruleTypeRegistry,
+      actionTypeRegistry,
+      getRuleSnoozeModal: RuleSnoozeModal,
+    },
     http,
     application: { navigateToApp },
     investigate: investigatePlugin,
-  } = useKibana().services;
+  } = services;
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -343,12 +349,14 @@ export function HeaderActions({
         </EuiFlexItem>
       </EuiFlexGroup>
       {rule && ruleConditionsFlyoutOpen ? (
-        <EditRuleFlyout
-          initialRule={rule}
-          onClose={() => {
+        <RuleFormFlyout
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+          id={rule.id}
+          onCancel={() => {
             setRuleConditionsFlyoutOpen(false);
           }}
-          onSave={async () => {
+          onSubmit={() => {
+            setRuleConditionsFlyoutOpen(false);
             refetch();
           }}
         />

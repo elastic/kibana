@@ -91,7 +91,7 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink />
       </>
     );
-    expect(queryByTestId('assistantNavLink')).toHaveStyle('background-color: rgb(204, 228, 245)');
+    expect(queryByTestId('assistantNavLink')).toHaveStyle('background-color: rgb(217, 232, 255)');
   });
 
   it('should render the header link text', () => {

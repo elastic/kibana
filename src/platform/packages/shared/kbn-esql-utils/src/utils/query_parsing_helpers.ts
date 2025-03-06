@@ -15,7 +15,7 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const DEFAULT_ESQL_LIMIT = 1000;
@@ -149,6 +149,13 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 
   return columns.map((column) => column.name);
 };
+
+export const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const usedVariablesInQuery = Walker.params(root);
+  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+};
+
 /**
  * This function is used to map the variables to the columns in the datatable
  * @param esql:string
@@ -164,12 +171,8 @@ export const mapVariableToColumn = (
   if (!variables.length) {
     return columns;
   }
-  const { root } = parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-
-  const uniqueVariablesInQyery = new Set<string>(
-    usedVariablesInQuery.map((v) => v.text.replace('?', ''))
-  );
+  const usedVariablesInQuery = getESQLQueryVariables(esql);
+  const uniqueVariablesInQyery = new Set<string>(usedVariablesInQuery);
 
   columns.map((column) => {
     if (variables.some((variable) => variable.value === column.id)) {

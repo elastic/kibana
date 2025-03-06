@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, act, type RenderResult, fireEvent } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
-import { DataStreamStep } from './data_stream_step';
+import { DataStreamStep, getNameFromTitle } from './data_stream_step';
 import { ActionsProvider } from '../../state';
 import { mockActions, mockState } from '../../mocks/state';
 
@@ -283,5 +283,58 @@ describe('DataStreamStep', () => {
     it('should render generation modal', () => {
       expect(result.queryByTestId('generationModal')).toBeInTheDocument();
     });
+  });
+
+  describe('when integrationSettings has an invalid generated name from title', () => {
+    describe.each(['123 abc', '1a'])('should render error for %s', (invalidTitle) => {
+      let result: RenderResult;
+      beforeEach(() => {
+        jest.clearAllMocks();
+        result = render(
+          <DataStreamStep
+            integrationSettings={{ title: invalidTitle }}
+            connector={mockState.connector}
+            isGenerating={false}
+            celInputResult={undefined}
+          />,
+          { wrapper }
+        );
+      });
+
+      it('should set empty name for invalid title', () => {
+        const input = result.getByTestId('nameInput');
+        expect(input).toHaveValue(''); // name is not set
+      });
+    });
+  });
+
+  describe('when integrationSettings has an valid generated name from title', () => {
+    describe.each(['abc 123', '$abc123', 'abc 123 abc', 'abc_123', 'abc_123_abc'])(
+      'should render error for %s',
+      (validTitle) => {
+        let result: RenderResult;
+        beforeEach(() => {
+          jest.clearAllMocks();
+          result = render(
+            <DataStreamStep
+              integrationSettings={{ title: validTitle }}
+              connector={mockState.connector}
+              isGenerating={false}
+              celInputResult={undefined}
+            />,
+            { wrapper }
+          );
+        });
+
+        it('should auto-generate name from title', () => {
+          const input = result.getByTestId('nameInput');
+          expect(input).toHaveValue(getNameFromTitle(validTitle));
+          expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
+            name: getNameFromTitle(validTitle),
+            title: validTitle,
+          });
+        });
+      }
+    );
   });
 });

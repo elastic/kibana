@@ -31,7 +31,7 @@ pageLoadAssetSize:
   dataUsage: 30000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
-  dataViewManagement: 5370
+  dataViewManagement: 6250
   dataViews: 65000
   dataVisualizer: 30000
   devTools: 38637
@@ -93,17 +93,16 @@ pageLoadAssetSize:
   kibanaReact: 74422
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
-  lens: 57135
+  lens: 76079
   licenseManagement: 41817
   licensing: 29004
   links: 8000
   lists: 22900
   logsDataAccess: 16759
-  logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
   management: 46112
-  maps: 90000
+  maps: 46000
   mapsEms: 26072
   metricsDataAccess: 73287
   ml: 85000
@@ -121,8 +120,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 11468
-  presentationUtil: 25000
+  presentationPanel: 11550
+  presentationUtil: 33905
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
@@ -156,13 +155,14 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 88160
-  slo: 37039
+  slo: 45000
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
   streams: 16742
   streamsApp: 20537
+  streamsAppWrapper: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
@@ -176,7 +176,7 @@ pageLoadAssetSize:
   unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
-  uptime: 37842
+  uptime: 60000
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762

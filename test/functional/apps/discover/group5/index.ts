@@ -28,7 +28,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_shared_links'));
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
-    loadTestFile(require.resolve('./_greeting_screen'));
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_url_state'));
   });
