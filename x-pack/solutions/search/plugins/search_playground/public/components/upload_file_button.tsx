@@ -9,7 +9,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { type FileUploadResults, OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 
@@ -30,17 +29,6 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
         onUploadComplete: (results: FileUploadResults) => {
           setSelectedIndices([results.index]);
         },
-        flyoutContent: {
-          showFileSummary: true,
-          showFileContentPreview: true,
-          title: i18n.translate('xpack.searchPlayground.setupPage.uploadFileFlyoutTitle', {
-            defaultMessage: 'Upload a file!!!',
-          }),
-          description: i18n.translate('xpack.searchPlayground.setupPage.uploadFileFlyoutTitle', {
-            defaultMessage: 'Upload a file test test test test',
-          }),
-        },
-        initialIndexName: 'test',
       });
     }
   }, [setSelectedIndices, uiActions]);
