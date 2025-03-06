@@ -150,11 +150,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    /* Future developer -> why are we doing that
-     * It is really expansive to re-render the QueryTab because the drag/drop
-     * Therefore, we are only hiding its dom when switching to another tab
-     * to avoid mounting/un-mounting === re-render
-     */
     return (
       <>
         <OnDemandRenderer
