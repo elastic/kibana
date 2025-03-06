@@ -47,4 +47,37 @@ describe('Tab', () => {
     expect(onClose).toHaveBeenCalled();
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
+
+  it('can render tab menu items', async () => {
+    const mockClick = jest.fn();
+    const getTabMenuItems = jest.fn(() => [
+      {
+        'data-test-subj': 'test-subj',
+        name: 'test-name',
+        label: 'test-label',
+        onClick: mockClick,
+      },
+    ]);
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        item={tabItem}
+        isSelected={false}
+        getTabMenuItems={getTabMenuItems}
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    const tabMenuButton = screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabItem.id}`);
+    tabMenuButton.click();
+
+    expect(getTabMenuItems).toHaveBeenCalledWith(tabItem);
+
+    const menuItem = screen.getByTestId('test-subj');
+    menuItem.click();
+    expect(mockClick).toHaveBeenCalledTimes(1);
+    expect(getTabMenuItems).toHaveBeenCalledTimes(1);
+  });
 });

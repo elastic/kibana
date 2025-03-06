@@ -39,7 +39,7 @@ export const unmappedFieldsRoute = createServerRoute({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],
@@ -122,7 +122,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     }
 
     const propertiesForSample = Object.fromEntries(
-      params.body.field_definitions.map((field) => [field.name, { type: 'keyword' }])
+      params.body.field_definitions.map((field) => [field.name, { type: 'keyword' as const }])
     );
 
     const documentSamplesSearchBody = {
@@ -138,7 +138,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],
@@ -244,7 +244,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],

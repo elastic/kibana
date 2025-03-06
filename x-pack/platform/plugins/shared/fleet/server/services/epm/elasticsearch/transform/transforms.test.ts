@@ -22,6 +22,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { getESAssetMetadata } from '../meta';
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import { createAppContextStartContractMock } from '../../../../mocks';
 import type { PackageInstallContext } from '../../../../../common/types';
 
@@ -136,44 +137,42 @@ _meta:
       TRANSFORM: {
         transform_id: `logs-endpoint.metadata_current-default-${transformVersion}`,
         defer_validation: true,
-        body: {
-          description: 'Merges latest endpoint and Agent metadata documents.',
-          dest: {
-            index: '.metrics-endpoint.metadata_united_default',
-            aliases: [],
-          },
-          frequency: '1s',
-          pivot: {
-            aggs: {
-              united: {
-                scripted_metric: {
-                  combine_script: 'return state.docs',
-                  init_script: 'state.docs = []',
-                  map_script: "state.docs.add(new HashMap(params['_source']))",
-                  reduce_script:
-                    "def ret = new HashMap(); for (s in states) { for (d in s) { if (d.containsKey('Endpoint')) { ret.endpoint = d } else { ret.agent = d } }} return ret",
-                },
-              },
-            },
-            group_by: {
-              'agent.id': {
-                terms: {
-                  field: 'agent.id',
-                },
-              },
-            },
-          },
-          source: {
-            index: ['metrics-endpoint.metadata_current_default*', '.fleet-agents*'],
-          },
-          sync: {
-            time: {
-              delay: '4s',
-              field: 'updated_at',
-            },
-          },
-          _meta: { fleet_transform_version: transformVersion, ...meta, run_as_kibana_system: true },
+        description: 'Merges latest endpoint and Agent metadata documents.',
+        dest: {
+          index: '.metrics-endpoint.metadata_united_default',
+          aliases: [],
         },
+        frequency: '1s',
+        pivot: {
+          aggs: {
+            united: {
+              scripted_metric: {
+                combine_script: 'return state.docs',
+                init_script: 'state.docs = []',
+                map_script: "state.docs.add(new HashMap(params['_source']))",
+                reduce_script:
+                  "def ret = new HashMap(); for (s in states) { for (d in s) { if (d.containsKey('Endpoint')) { ret.endpoint = d } else { ret.agent = d } }} return ret",
+              },
+            },
+          },
+          group_by: {
+            'agent.id': {
+              terms: {
+                field: 'agent.id',
+              },
+            },
+          },
+        },
+        source: {
+          index: ['metrics-endpoint.metadata_current_default*', '.fleet-agents*'],
+        },
+        sync: {
+          time: {
+            delay: '4s',
+            field: 'updated_at',
+          },
+        },
+        _meta: { fleet_transform_version: transformVersion, ...meta, run_as_kibana_system: true },
       },
     };
   };
@@ -270,28 +269,30 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
-            sourceData.BEATS_FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
-            sourceData.AGENT_FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            sourceData.FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
+              Buffer.from(sourceData.BEATS_FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
+              Buffer.from(sourceData.AGENT_FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -576,20 +577,22 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            Buffer.from(sourceData.FIELDS),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            Buffer.from(sourceData.MANIFEST),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            Buffer.from(sourceData.TRANSFORM),
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -862,16 +865,18 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            Buffer.from(sourceData.FIELDS),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            Buffer.from(sourceData.TRANSFORM),
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1094,16 +1099,18 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1198,16 +1205,18 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1293,20 +1302,22 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            sourceData.FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              sourceData.FIELDS,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
