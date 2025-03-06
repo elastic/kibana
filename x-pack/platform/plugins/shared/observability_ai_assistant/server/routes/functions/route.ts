@@ -99,6 +99,9 @@ const functionDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
     } = resources.params;
 
     const controller = new AbortController();
+    resources.request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
 
     const resp = await getDatasetInfo({
       resources,

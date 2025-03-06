@@ -334,6 +334,43 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           'logs-zookeeper.access-default',
           '.alerts-observability.logs.alerts-default',
         ]);
+        expect(body.fields.length).to.be.greaterThan(0);
+      });
+
+      it('accepts comma-separated patterns', async () => {
+        llmProxy.interceptSelectRelevantFieldsToolChoice({ to: 20 });
+
+        const { body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/functions/get_dataset_info',
+          params: {
+            query: {
+              index: 'zookeeper,apache',
+              connectorId,
+            },
+          },
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(body.indices).to.eql([
+          'logs-apache.access-default',
+          'logs-zookeeper.access-default',
+        ]);
+      });
+
+      it('handles no matching indices gracefully', async () => {
+        const { body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/functions/get_dataset_info',
+          params: {
+            query: {
+              index: 'foobarbaz',
+              connectorId,
+            },
+          },
+        });
+
+        expect(body.indices).to.eql([]);
+        expect(body.fields).to.eql([]);
       });
     });
   });
