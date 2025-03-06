@@ -160,6 +160,7 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
   body: TBody,
   otherProps: Partial<Exclude<TransportResult, 'body'>> = {}
 ): TransportResult => {
+  // @ts-expect-error TS requiring the definition of all the internal properties of `Connection` in `meta.connection`
   return elasticsearchServiceMock.createApiResponse({
     body,
     headers: {
@@ -175,7 +176,10 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
           body: undefined,
           querystring: '',
         },
-        options: {},
+        options: {
+          // @ts-expect-error Type 'null' is not assignable to type 'string | number | undefined' 🤷🏻‍♂️
+          requestTimeout: 30_000,
+        },
         id: 7160,
       },
       name: 'elasticsearch-js',
