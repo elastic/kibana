@@ -18,5 +18,10 @@
   "kbn_references": [
     "@kbn/react-kibana-context-root",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-user-profile-browser",
+    "@kbn/react-kibana-context-common",
   ]
 }

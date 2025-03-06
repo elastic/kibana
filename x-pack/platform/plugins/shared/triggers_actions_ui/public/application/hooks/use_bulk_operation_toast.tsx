@@ -48,10 +48,8 @@ export const useBulkOperationToast = ({
   onSearchPopulate?: (filter: string) => void;
 }) => {
   const {
-    i18n,
-    theme,
-    userProfile,
     notifications: { toasts },
+    ...startServices
   } = useKibana().services;
 
   const onSearchPopulateInternal = useCallback(
@@ -123,7 +121,7 @@ export const useBulkOperationToast = ({
             SINGLE_RULE_TITLE,
             MULTIPLE_RULE_TITLE
           ),
-          text: toMountPoint(renderToastErrorBody(errors, 'danger'), { i18n, theme, userProfile }),
+          text: toMountPoint(renderToastErrorBody(errors, 'danger'), { coreStart: startServices }),
         });
         return;
       }
@@ -136,10 +134,10 @@ export const useBulkOperationToast = ({
           SINGLE_RULE_TITLE,
           MULTIPLE_RULE_TITLE
         ),
-        text: toMountPoint(renderToastErrorBody(errors, 'warning'), { i18n, theme, userProfile }),
+        text: toMountPoint(renderToastErrorBody(errors, 'warning'), { coreStart: startServices }),
       });
     },
-    [i18n, theme, userProfile, toasts, renderToastErrorBody]
+    [startServices, toasts, renderToastErrorBody]
   );
 
   return useMemo(() => {
