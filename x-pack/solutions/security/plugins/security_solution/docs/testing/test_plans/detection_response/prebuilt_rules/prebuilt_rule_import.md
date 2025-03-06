@@ -53,7 +53,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [Scenario: Converting a prebuilt rule to a custom rule on import](#scenario-converting-a-prebuilt-rule-to-a-custom-rule-on-import)
     - [Scenario: Making an imported custom rule upgradeable to a prebuilt rule](#scenario-making-an-imported-custom-rule-upgradeable-to-a-prebuilt-rule)
   - [Handling missing base versions](#handling-missing-base-versions)
-    - [Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-no-matching-version)
+    - [Scenario: Importing a prebuilt rule with a missing base version when it's not installed](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-not-installed)
+    - [Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-but-not-equal-to-the-import-payload)
+    - [Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-is-not-customized-and-is-equal-to-the-import-payload)
+    - [Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is customized, and is equal to the import payload](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-is-customized-and-is-equal-to-the-import-payload)
   - [Handling missing fields in the import request payload](#handling-missing-fields-in-the-import-request-payload)
     - [Scenario: Importing a prebuilt rule without a `rule_id` field](#scenario-importing-a-prebuilt-rule-without-a-rule_id-field)
     - [Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
@@ -72,6 +75,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Allow importing prebuilt rules at the API level](https://github.com/elastic/kibana/issues/180168)
 - [Benchmark performance of importing a large number of prebuilt rules](https://github.com/elastic/kibana/issues/195632)
+- [Relax the rules of handling missing base versions of prebuilt rules](https://github.com/elastic/kibana/issues/210358)
 - [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
 
 ### Terminology
@@ -407,18 +411,87 @@ And the upgraded rule's parameters should match the asset
 
 ### Handling missing base versions
 
-#### Scenario: Importing a prebuilt rule with a matching `rule_id` but no matching `version`
+NOTE: These are not edge cases but rather normal cases. In many package upgrade scenarios, hundreds of prebuilt rules (out of ~1300 of them at the time of writing) won't have a base version.
 
-**Automation**: 1 integration test.
+**When the base version** of a prebuilt rule that is being imported **is missing** among the `security-rule` asset saved objects, and the user imports this rule, the following scenarios apply.
+
+#### Scenario: Importing a prebuilt rule with a missing base version when it's not installed
+
+If this rule is not installed, it should be created with `is_customized` field set to `false`.
+
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
 And its rule_id matches one or a few rule assets from the installed package
 And its version does NOT match any of those rule assets
+And this rule is not installed yet
 When the user imports the rule
-Then the rule should be created or updated
-And the ruleSource type should be "external"
-And isCustomized should be true
+Then the rule should be created
+And the created rule should be prebuilt
+And the created rule should be marked as non-customized
+And the created rule's version should match the import payload
+And the created rule's parameters should match the import payload
+```
+
+#### Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload
+
+If this rule is already installed, it should be updated. Its `is_customized` field should be set to `true` if the rule from the import payload is not equal to the installed rule.
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a non-customized prebuilt rule
+And its rule_id matches one or a few rule assets from the installed package
+And its version does NOT match any of those rule assets
+And this rule is already installed and marked as non-customized
+And the installed rule is NOT equal to the import payload
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as customized
+And the updated rule's version should match the import payload
+And the updated rule's parameters should match the import payload
+```
+
+#### Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload
+
+If this rule is already installed, it should be updated. Its `is_customized` field should stay unchanged (`false` or `true`) if the rule from the import payload is equal to the installed rule.
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a customized prebuilt rule
+And its rule_id matches one or a few rule assets from the installed package
+And its version does NOT match any of those rule assets
+And this rule is already installed and marked as non-customized
+And the installed rule is equal to the import payload
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as non-customized
+And the updated rule's version should stay unchanged
+And the updated rule's parameters should stay unchanged
+```
+
+#### Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is customized, and is equal to the import payload
+
+If this rule is already installed, it should be updated. Its `is_customized` field should stay unchanged (`false` or `true`) if the rule from the import payload is equal to the installed rule.
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a non-customized prebuilt rule
+And its rule_id matches one or a few rule assets from the installed package
+And its version does NOT match any of those rule assets
+And this rule is already installed and marked as customized
+And the installed rule is equal to the import payload
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as customized
+And the updated rule's version should stay unchanged
+And the updated rule's parameters should stay unchanged
 ```
 
 ### Handling missing fields in the import request payload
