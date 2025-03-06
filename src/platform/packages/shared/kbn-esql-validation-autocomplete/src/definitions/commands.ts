@@ -151,10 +151,11 @@ const statsValidator = (command: ESQLCommand) => {
       // * the agg function is at root level
       // * or if it's a operators function, then all operands are agg functions or literals
       // * or if it's a eval function then all arguments are agg functions or literals
+      // * or if a named param is used
       function checkFunctionContent(arg: ESQLFunction) {
         // TODO the grouping function check may not
         // hold true for all future cases
-        if (isAggFunction(arg)) {
+        if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
           return true;
         }
         return (arg as ESQLFunction).args.every(
