@@ -602,6 +602,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      assistantAttackDiscoverySchedulingEnabled:
+        config.experimentalFeatures.assistantAttackDiscoverySchedulingEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -690,9 +692,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       this.telemetryWatcher = new TelemetryConfigWatcher(
         plugins.fleet.packagePolicyService,
-        core.savedObjects,
         core.elasticsearch,
-        this.endpointContext.service
+        this.endpointAppContextService
       );
       this.telemetryWatcher.start(this.telemetryConfigProvider);
     }
@@ -730,6 +731,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     securityWorkflowInsightsService
       .start({
         esClient: core.elasticsearch.client.asInternalUser,
+        registerDefendInsightsCallback: plugins.elasticAssistant.registerCallback,
       })
       .catch(() => {});
 
@@ -786,6 +788,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
+    this.telemetryWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();

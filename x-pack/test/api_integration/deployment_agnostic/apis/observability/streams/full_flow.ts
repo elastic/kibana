@@ -16,6 +16,7 @@ import {
   enableStreams,
   fetchDocument,
   forkStream,
+  indexAndAssertTargetStream,
   indexDocument,
 } from './helpers/requests';
 
@@ -153,10 +154,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: 'somethingelse', // a field named stream should work as well
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-        const result = await fetchDocument(esClient, 'logs', response._id);
-        expect(result._index).to.match(/^\.ds\-logs-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: 'test',
@@ -191,11 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
-        expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: 'test',
@@ -225,11 +219,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx.access', response._id);
-        expect(result._index).to.match(/^\.ds\-logs.nginx.access-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
@@ -259,11 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
-        expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
@@ -299,10 +285,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response1 = await indexDocument(esClient, 'logs', doc1);
-        expect(response1.result).to.eql('created');
-        const response2 = await indexDocument(esClient, 'logs', doc2);
-        expect(response2.result).to.eql('created');
+        await indexAndAssertTargetStream(esClient, 'logs.number-test', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.number-test', doc2);
       });
 
       it('Fork logs to logs.string-test', async () => {
@@ -334,11 +318,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'status_code: 400',
           }),
         };
-        const response1 = await indexDocument(esClient, 'logs', doc1);
-        expect(response1.result).to.eql('created');
-
-        const response2 = await indexDocument(esClient, 'logs', doc2);
-        expect(response2.result).to.eql('created');
+        await indexAndAssertTargetStream(esClient, 'logs.string-test', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.string-test', doc2);
       });
 
       it('Fork logs to logs.weird-characters', async () => {
@@ -369,17 +350,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'weird fieldname': 'Keep where it is',
           },
         };
-        const response1 = await indexDocument(esClient, 'logs', doc1);
-        expect(response1.result).to.eql('created');
-
-        const result1 = await fetchDocument(esClient, 'logs.weird-characters', response1._id);
-        expect(result1._index).to.match(/^\.ds\-logs.weird-characters-.*/);
-
-        const response2 = await indexDocument(esClient, 'logs', doc2);
-        expect(response2.result).to.eql('created');
-
-        const result2 = await fetchDocument(esClient, 'logs', response2._id);
-        expect(result2._index).to.match(/^\.ds\-logs-.*/);
+        await indexAndAssertTargetStream(esClient, 'logs.weird-characters', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs', doc2);
       });
     });
   });

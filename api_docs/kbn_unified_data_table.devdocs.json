@@ -2290,10 +2290,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/unified_components/data_table/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/asset_inventory/pages/all_assets.tsx"
               }
             ]
           },

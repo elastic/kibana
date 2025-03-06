@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 
+import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -336,50 +337,56 @@ export default function (providerContext: FtrProviderContext) {
         id: 'all_assets',
       });
 
-      expect(res.attributes).eql({
+      expect({
+        ...res.attributes,
+        installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),
+      }).eql({
         installed_kibana_space_id: 'default',
-        installed_kibana: [
-          {
-            id: 'sample_dashboard',
-            type: 'dashboard',
-          },
-          {
-            id: 'sample_lens',
-            type: 'lens',
-          },
-          {
-            id: 'sample_visualization',
-            type: 'visualization',
-          },
-          {
-            id: 'sample_search2',
-            type: 'search',
-          },
-          {
-            id: 'sample_ml_module',
-            type: 'ml-module',
-          },
-          {
-            id: 'sample_security_rule',
-            type: 'security-rule',
-          },
-          {
-            id: 'sample_csp_rule_template2',
-            type: 'csp-rule-template',
-          },
-          {
-            id: 'sample_osquery_pack_asset',
-            type: 'osquery-pack-asset',
-          },
-          {
-            id: 'sample_osquery_saved_query',
-            type: 'osquery-saved-query',
-          },
-          {
-            id: 'sample_tag',
-            type: 'tag',
-          },
-        ],
+        installed_kibana: sortBy(
+          [
+            {
+              id: 'sample_dashboard',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_lens',
+              type: 'lens',
+            },
+            {
+              id: 'sample_visualization',
+              type: 'visualization',
+            },
+            {
+              id: 'sample_search2',
+              type: 'search',
+            },
+            {
+              id: 'sample_ml_module',
+              type: 'ml-module',
+            },
+            {
+              id: 'sample_security_rule',
+              type: 'security-rule',
+            },
+            {
+              id: 'sample_csp_rule_template2',
+              type: 'csp-rule-template',
+            },
+            {
+              id: 'sample_osquery_pack_asset',
+              type: 'osquery-pack-asset',
+            },
+            {
+              id: 'sample_osquery_saved_query',
+              type: 'osquery-saved-query',
+            },
+            {
+              id: 'sample_tag',
+              type: 'tag',
+            },
+          ],
+          'id'
+        ),
         installed_es: [
           {
             id: 'all_assets',

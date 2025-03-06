@@ -157,7 +157,81 @@ describe('trackPerformanceMeasureEntries', () => {
     expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
       duration: 1000,
       eventName: 'kibana:plugin_render_time',
-      meta: { query_range_secs: 86400, query_offset_secs: 0 },
+      meta: {
+        query_range_secs: 86400,
+        query_offset_secs: 0,
+      },
     });
+  });
+
+  test('reports an analytics event with description metadata', () => {
+    setupMockPerformanceObserver([
+      {
+        name: '/',
+        entryType: 'measure',
+        startTime: 100,
+        duration: 1000,
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          meta: {
+            isInitialLoad: false,
+            description:
+              '[ttfmp_dependencies] onPageReady is called when the most important content is rendered',
+          },
+        },
+      },
+    ]);
+    trackPerformanceMeasureEntries(analyticsClientMock, true);
+
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
+      duration: 1000,
+      eventName: 'kibana:plugin_render_time',
+      meta: {
+        is_initial_load: false,
+        query_range_secs: undefined,
+        query_offset_secs: undefined,
+        description:
+          '[ttfmp_dependencies] onPageReady is called when the most important content is rendered',
+      },
+    });
+  });
+
+  test('reports an analytics event with truncated description metadata', () => {
+    setupMockPerformanceObserver([
+      {
+        name: '/',
+        entryType: 'measure',
+        startTime: 100,
+        duration: 1000,
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          meta: {
+            isInitialLoad: false,
+            description:
+              '[ttfmp_dependencies] This is a very long long long long long long long long description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non risus in nunc tincidunt tincidunt. Proin vehicula, nunc at feugiat cursus, justo nulla fermentum lorem, non ultricies metus libero nec purus. Sed ut perspiciatis unde omnis iste natus.',
+          },
+        },
+      },
+    ]);
+    trackPerformanceMeasureEntries(analyticsClientMock, true);
+    const truncatedDescription =
+      '[ttfmp_dependencies] This is a very long long long long long long long long description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non risus in nunc tincidunt tincidunt. Proin vehicula, nunc at feugiat cursus, justo nulla fermentum l';
+
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
+      duration: 1000,
+      eventName: 'kibana:plugin_render_time',
+      meta: {
+        is_initial_load: false,
+        query_range_secs: undefined,
+        query_offset_secs: undefined,
+        description: truncatedDescription,
+      },
+    });
+
+    expect(truncatedDescription.length).toBe(256);
   });
 });

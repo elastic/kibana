@@ -22,3 +22,8 @@ export interface DashboardMountContextProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
+
+export type DashboardRedirect = (props: RedirectToProps) => void;
+export type RedirectToProps =
+  | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
+  | { destination: 'listing'; filter?: string; useReplace?: boolean };

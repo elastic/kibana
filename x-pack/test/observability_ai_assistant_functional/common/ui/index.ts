@@ -67,6 +67,8 @@ const pages = {
       'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
     saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
     aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
+    resetToDefaultLink:
+      'management-settings-resetField-observability:aiAssistantSearchConnectorIndexPattern',
   },
 };
 

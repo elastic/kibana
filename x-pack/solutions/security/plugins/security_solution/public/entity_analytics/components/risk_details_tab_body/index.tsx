@@ -93,7 +93,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     [setContributorsToggleStatus]
   );
 
-  const privileges = useMissingRiskEnginePrivileges();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   if (RiskScoreUpsell) {

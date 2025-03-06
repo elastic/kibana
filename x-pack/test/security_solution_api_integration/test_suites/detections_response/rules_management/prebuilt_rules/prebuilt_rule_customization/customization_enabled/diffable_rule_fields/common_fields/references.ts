@@ -297,10 +297,11 @@ export function referencesField({ getService }: FtrProviderContext): void {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'references',
             expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            isMergableField: true,
             expectedFieldDiffValues: {
               current: ['http://url-3'],
               target: ['http://url-1', 'http://url-2'],
-              merged: ['http://url-1', 'http://url-2'],
+              merged: ['http://url-3', 'http://url-1', 'http://url-2'],
             },
           },
           getService

@@ -384,6 +384,30 @@ export const secReadCasesNone: Role = {
   },
 };
 
+export const secNone: Role = {
+  name: 'sec_none_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: [],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 /**
  * Roles for Cases in the stack
  */

@@ -115,6 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
+   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
+   */
+  assistantAttackDiscoverySchedulingEnabled: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -251,11 +256,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
 
   /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.

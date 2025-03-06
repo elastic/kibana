@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,

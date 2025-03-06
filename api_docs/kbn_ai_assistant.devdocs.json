@@ -11,11 +11,11 @@
         "label": "ChatBody",
         "description": [],
         "signature": [
-          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}: { connectors: ",
+          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  onConversationDuplicate,\n}: { connectors: ",
           "UseGenAIConnectorsResult",
           "; currentUser?: Pick<",
           "AuthenticatedUser",
-          ", \"username\" | \"full_name\"> | undefined; flyoutPositionMode?: ",
+          ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined; flyoutPositionMode?: ",
           {
             "pluginId": "@kbn/ai-assistant",
             "scope": "public",
@@ -39,7 +39,15 @@
             "section": "def-public.UseKnowledgeBaseResult",
             "text": "UseKnowledgeBaseResult"
           },
-          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
+          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void; onConversationDuplicate: (conversation: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          ") => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
           {
             "pluginId": "@kbn/ai-assistant",
             "scope": "public",
@@ -58,7 +66,7 @@
             "id": "def-public.ChatBody.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}",
+            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  onConversationDuplicate,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
@@ -88,7 +96,7 @@
                 "signature": [
                   "Pick<",
                   "AuthenticatedUser",
-                  ", \"username\" | \"full_name\"> | undefined"
+                  ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -241,6 +249,52 @@
               },
               {
                 "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.onConversationDuplicate",
+                "type": "Function",
+                "tags": [],
+                "label": "onConversationDuplicate",
+                "description": [],
+                "signature": [
+                  "(conversation: ",
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Conversation",
+                    "text": "Conversation"
+                  },
+                  ") => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.onConversationDuplicate.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "conversation",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "common",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-common.Conversation",
+                        "text": "Conversation"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
                 "id": "def-public.ChatBody.$1.onToggleFlyoutPositionMode",
                 "type": "Function",
                 "tags": [],
@@ -331,7 +385,7 @@
         "label": "ChatFlyout",
         "description": [],
         "signature": [
-          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
+          "({\n  initialTitle,\n  initialMessages: initialMessagesFromProps,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -366,7 +420,7 @@
             "id": "def-public.ChatFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
+            "label": "{\n  initialTitle,\n  initialMessages: initialMessagesFromProps,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
             "deprecated": false,
@@ -1073,7 +1127,7 @@
         "label": "useConfirmModal",
         "description": [],
         "signature": [
-          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: () => Promise<boolean>; }"
+          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: (checkBoxLabel: string) => Promise<boolean>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
         "deprecated": false,

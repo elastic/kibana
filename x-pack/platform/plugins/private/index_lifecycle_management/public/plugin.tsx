@@ -48,6 +48,7 @@ export class IndexLifecycleManagementPlugin
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
+        keywords: ['ilm'],
         mount: async ({ element, history, setBreadcrumbs }) => {
           const [coreStart, { licensing }] = await getStartServices();
           const {

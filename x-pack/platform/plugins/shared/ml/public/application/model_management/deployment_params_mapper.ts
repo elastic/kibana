@@ -12,6 +12,7 @@ import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import type { AdaptiveAllocations } from '../../../server/lib/ml_client/types';
 import type { DeploymentParamsUI } from './deployment_setup';
+import type { StartAllocationParams } from '../services/ml_api_service/trained_models';
 
 export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploymentRequest &
   AdaptiveAllocations;
@@ -81,7 +82,6 @@ export class DeploymentParamsMapper {
   }
 
   constructor(
-    private readonly modelId: string,
     private readonly mlServerLimits: MlServerLimits,
     private readonly cloudInfo: CloudInfo,
     private readonly showNodeInfo: boolean,
@@ -189,8 +189,9 @@ export class DeploymentParamsMapper {
    * @param input
    */
   public mapUiToApiDeploymentParams(
+    modelId: string,
     input: DeploymentParamsUI
-  ): MlStartTrainedModelDeploymentRequestNew {
+  ): StartAllocationParams {
     const resultInput: DeploymentParamsUI = Object.create(input);
     if (!this.showNodeInfo && this.nlpSettings?.modelDeployment.allowStaticAllocations === false) {
       // Enforce adaptive resources for serverless projects with prohibited static allocations
@@ -200,21 +201,22 @@ export class DeploymentParamsMapper {
     const allocationParams = this.getAllocationsParams(resultInput);
 
     return {
-      model_id: this.modelId,
-      deployment_id: resultInput.deploymentId,
-      priority: 'normal',
-      threads_per_allocation: this.getNumberOfThreads(resultInput),
-      ...(resultInput.adaptiveResources
-        ? {
-            adaptive_allocations: {
-              enabled: true,
-              min_number_of_allocations: allocationParams.min_number_of_allocations,
-              max_number_of_allocations: allocationParams.max_number_of_allocations,
-            },
-          }
-        : {
-            number_of_allocations: allocationParams.number_of_allocations,
-          }),
+      modelId,
+      deploymentParams: {
+        deployment_id: resultInput.deploymentId,
+        threads_per_allocation: this.getNumberOfThreads(resultInput),
+        priority: 'normal',
+        ...(!resultInput.adaptiveResources && {
+          number_of_allocations: allocationParams.number_of_allocations,
+        }),
+      },
+      ...(resultInput.adaptiveResources && {
+        adaptiveAllocationsParams: {
+          enabled: true,
+          min_number_of_allocations: allocationParams.min_number_of_allocations,
+          max_number_of_allocations: allocationParams.max_number_of_allocations,
+        },
+      }),
     };
   }
 

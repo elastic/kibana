@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
@@ -58,17 +59,22 @@ export const createModifiedPrebuiltRuleAssets = ({
               assertPickVersionIsTarget({ ruleId, requestBody });
             }
 
-            const calculatedRuleDiff = calculateRuleFieldsDiff({
-              base_version: upgradeableRule.base
-                ? convertRuleToDiffable(
-                    convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
-                  )
-                : MissingVersion,
-              current_version: convertRuleToDiffable(upgradeableRule.current),
-              target_version: convertRuleToDiffable(
-                convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
-              ),
-            }) as AllFieldsDiff;
+            const isCustomized = isRuleCustomized(current);
+
+            const calculatedRuleDiff = calculateRuleFieldsDiff(
+              {
+                base_version: upgradeableRule.base
+                  ? convertRuleToDiffable(
+                      convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
+                    )
+                  : MissingVersion,
+                current_version: convertRuleToDiffable(upgradeableRule.current),
+                target_version: convertRuleToDiffable(
+                  convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
+                ),
+              },
+              isCustomized
+            ) as AllFieldsDiff;
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
               const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
