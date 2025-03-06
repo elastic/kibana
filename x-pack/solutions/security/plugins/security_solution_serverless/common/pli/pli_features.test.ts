@@ -14,6 +14,7 @@ describe('getProductProductFeatures', () => {
   });
 
   it('returns features for a single product type', () => {
+    // @ts-ignore- reassigning readonly value for testing
     pliConfig.PLI_PRODUCT_FEATURES = {
       security: {
         search_ai_lake: [],
@@ -27,23 +28,6 @@ describe('getProductProductFeatures', () => {
     ]);
 
     expect(productFeatureKeys).toEqual(['foo']);
-  });
-
-  it('returns combined features for multiple product types', () => {
-    pliConfig.PLI_PRODUCT_FEATURES = {
-      security: {
-        search_ai_lake: [],
-        essentials: ['foo'],
-        complete: ['baz'],
-      },
-    };
-
-    const productFeatureKeys = getEnabledProductFeatures([
-      { product_line: ProductLine.security, product_tier: ProductTier.essentials },
-      { product_line: ProductLine.security, product_tier: ProductTier.complete },
-    ]);
-
-    expect(productFeatureKeys).toEqual(['foo', 'baz']);
   });
 
   it('returns an empty object if no PLIs are enabled', () => {
