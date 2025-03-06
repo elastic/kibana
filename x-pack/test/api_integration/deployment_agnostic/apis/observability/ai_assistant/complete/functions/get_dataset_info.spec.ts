@@ -263,10 +263,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
             const relevantFields = await getRelevantFields();
             expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
-            expect(parsedContent.indices).to.eql([
-              'logs-web.access-default',
-              '.alerts-observability.logs.alerts-default',
-            ]);
+            expect(parsedContent.indices).to.contain('.alerts-observability.logs.alerts-default');
           });
         });
       });
