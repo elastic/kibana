@@ -35,16 +35,13 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   return (
     <SearchEmptyPrompt
       icon="plugs"
-      title={i18n.translate('xpack.serverlessSearch.elasticManagedConnectorEmpty.title', {
+      title={i18n.translate('xpack.serverlessSearch.selfManagedConnectorEmpty.title', {
         defaultMessage: 'Set up a connector',
       })}
-      description={i18n.translate(
-        'xpack.serverlessSearch.elasticManagedConnectorEmpty.description',
-        {
-          defaultMessage:
-            "To set up and deploy a connector you'll be working between data source, your terminal, and the Kibana UI. The high level process looks like this:",
-        }
-      )}
+      description={i18n.translate('xpack.serverlessSearch.selfManagedConnectorEmpty.description', {
+        defaultMessage:
+          "To set up and deploy a connector you'll be working between data source, your terminal, and the Kibana UI. The high level process looks like this:",
+      })}
       body={
         <EuiFlexGroup
           alignItems="stretch"
