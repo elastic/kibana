@@ -18,7 +18,7 @@ import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../config/default_color_mapping';
-import { getColorAssignmentMatcher } from './assignment';
+import { getColorAssignmentMatcher } from './color_assignment_matcher';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
