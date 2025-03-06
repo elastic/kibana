@@ -7,14 +7,14 @@
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useEventDetails } from '../document_details/shared/hooks/use_event_details';
 import type { AIForSOCDetailsProps } from './types';
 import { FlyoutError } from '../shared/components/flyout_error';
 
 export interface AIForSOCDetailsContext {
-  /**
-   *
-   */
   doc: DataTableRecord;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
 }
 
 /**
@@ -30,14 +30,19 @@ export type AIForSOCDetailsProviderProps = {
 } & Partial<AIForSOCDetailsProps['params']>;
 
 export const AIForSOCDetailsProvider = memo(({ doc, children }: AIForSOCDetailsProviderProps) => {
+  const { dataFormattedForFieldBrowser } = useEventDetails({
+    eventId: doc?.id,
+    indexName: doc?.raw._index,
+  });
   const contextValue = useMemo(
     () => ({
+      dataFormattedForFieldBrowser,
       doc,
     }),
-    [doc]
+    [dataFormattedForFieldBrowser, doc]
   );
 
-  if (!contextValue) {
+  if (!contextValue || !contextValue.doc) {
     return <FlyoutError />;
   }
 
