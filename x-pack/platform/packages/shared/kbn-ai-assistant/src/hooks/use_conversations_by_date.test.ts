@@ -15,6 +15,8 @@ jest.mock('../utils/date', () => ({
   isValidDateMath: jest.fn(),
 }));
 
+jest.unmock('./use_conversations_by_date');
+
 export const getDisplayedConversation = (conversation: Conversation) => {
   return {
     id: conversation.conversation.id,
@@ -71,6 +73,10 @@ describe('useConversationsByDate', () => {
       return validTimestamps.includes(value);
     });
   });
+
+  // afterEach(() => {
+  //   jest.resetModules();
+  // });
 
   afterAll(() => {
     jest.useRealTimers();
