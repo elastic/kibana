@@ -167,7 +167,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const onApply = useCallback(() => {
-    if (visualization.activeId == null) {
+    if (visualization.activeId == null || !currentAttributes) {
       return;
     }
     if (savedObjectId) {

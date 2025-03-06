@@ -75,17 +75,7 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
-    attributes,
-    dataLoading$,
-    lensAdapters,
-    data,
-    updateSuggestion,
-    setCurrentAttributes,
-    parentApi,
-    panelId,
-    closeFlyout,
-    canEditTextBasedQuery,
-    editorContainer,
+    ...editorProps
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -298,7 +288,9 @@ export function LayerPanel(props: LayerPanelProps) {
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() || isOfAggregateQueryType(attributes?.state.query) || false;
+    datasource?.isTextBasedLanguage() ||
+    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
+    false;
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -428,21 +420,11 @@ export function LayerPanel(props: LayerPanelProps) {
             )}
             <ESQLEditor
               isTextBasedLanguage={isTextBasedLanguage}
-              attributes={attributes}
               framePublicAPI={framePublicAPI}
               datasourceMap={datasourceMap}
-              lensAdapters={lensAdapters}
-              parentApi={parentApi}
-              panelId={panelId}
               layerId={layerId}
-              closeFlyout={closeFlyout}
-              data={data}
-              canEditTextBasedQuery={canEditTextBasedQuery}
-              editorContainer={editorContainer}
               visualizationMap={visualizationMap}
-              setCurrentAttributes={setCurrentAttributes}
-              updateSuggestion={updateSuggestion}
-              dataLoading$={dataLoading$}
+              {...editorProps}
             />
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent

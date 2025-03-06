@@ -17,6 +17,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import type { Simplify } from '../../../types';
 import { onActiveDataChange, useLensDispatch } from '../../../state_management';
@@ -91,6 +92,13 @@ export function ESQLEditor({
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
 
+  const currentAttributes = useCurrentAttributes({
+    textBasedMode: isTextBasedLanguage,
+    initialAttributes: attributes,
+    datasourceMap,
+    visualizationMap,
+  });
+
   const adHocDataViews =
     attributes && attributes.state.adHocDataViews
       ? Object.values(attributes.state.adHocDataViews)
@@ -141,7 +149,8 @@ export function ESQLEditor({
         abortController,
         setDataGridAttrs,
         esqlVariables,
-        shouldUpdateAttrs
+        shouldUpdateAttrs,
+        currentAttributes
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -159,6 +168,7 @@ export function ESQLEditor({
       esqlVariables,
       setCurrentAttributes,
       updateSuggestion,
+      currentAttributes,
     ]
   );
 
