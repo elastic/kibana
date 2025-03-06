@@ -7,12 +7,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MessageText } from '@kbn/elastic-assistant';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
-import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {

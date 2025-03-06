@@ -10,25 +10,21 @@ import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useAssistantContext } from '../../../../..';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<EsqlContentReference>;
 }
 
 export const EsqlQueryReference: React.FC<Props> = ({ contentReferenceNode }) => {
-  const {
-    discover: { locator },
-    application: { navigateToApp },
-  } = useKibana().services;
-
+  const { discoverLocator, navigateToApp } = useAssistantContext();
   const onClick = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
-      if (!locator) {
+      if (!discoverLocator) {
         return;
       }
-      const url = await locator.getLocation({
+      const url = await discoverLocator.getLocation({
         query: {
           esql: contentReferenceNode.contentReference.query,
         },
@@ -40,7 +36,7 @@ export const EsqlQueryReference: React.FC<Props> = ({ contentReferenceNode }) =>
         openInNewTab: true,
       });
     },
-    [locator, contentReferenceNode, navigateToApp]
+    [discoverLocator, contentReferenceNode, navigateToApp]
   );
 
   return (
