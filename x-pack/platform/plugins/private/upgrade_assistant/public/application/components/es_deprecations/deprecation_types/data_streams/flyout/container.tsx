@@ -228,7 +228,20 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         );
       }
       case 'completed': {
-        return <MigrationCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
+        if (!meta || !resolutionType) {
+          return (
+            <InitializingFlyoutStep
+              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
+            />
+          );
+        }
+        return (
+          <MigrationCompletedFlyoutStep
+            meta={meta}
+            resolutionType={resolutionType}
+            closeFlyout={closeFlyout}
+          />
+        );
       }
     }
   }, [
