@@ -6,19 +6,17 @@
  */
 
 import { timerange, log } from '@kbn/apm-synthtrace-client';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export async function createSimpleSyntheticLogs({
-  getService,
+  logsSynthtraceEsClient,
   message,
   dataset,
 }: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
+  logsSynthtraceEsClient: LogsSynthtraceEsClient;
   message?: string;
   dataset?: string;
 }) {
-  const synthtrace = getService('synthtrace');
-  const logSynthtraceEsClient = await synthtrace.createLogsSynthtraceEsClient();
   const range = timerange('now-15m', 'now');
 
   const simpleLogs = range
@@ -32,6 +30,5 @@ export async function createSimpleSyntheticLogs({
         .timestamp(timestamp)
     );
 
-  await logSynthtraceEsClient.index([simpleLogs]);
-  return { logSynthtraceEsClient };
+  await logsSynthtraceEsClient.index([simpleLogs]);
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { Message } from '../../../common';
 import { FunctionRegistrationParameters } from '..';
 import { FunctionVisibility } from '../../../common/functions/types';
@@ -34,7 +35,7 @@ export function registerGetDatasetInfoFunction({
           index: {
             type: 'string',
             description:
-              'Index pattern the user is interested in or empty string to get information about all available indices. You are allowed to use wildcards like `logs*`.',
+              'Index pattern the user is interested in. You are allowed to specify multi comma-separated patterns like "index1,index2". If you provide an empty string, all indices will be returned.',
           },
         },
         required: ['index'],
@@ -61,37 +62,16 @@ export async function getDatasetInfo({
   chat: FunctionCallChatFunction;
 }) {
   const coreContext = await resources.context.core;
-
   const esClient = coreContext.elasticsearch.client;
   const savedObjectsClient = coreContext.savedObjects.client;
 
-  let indices: string[] = [];
-
-  try {
-    const name = indexPattern === '' ? ['*', '*:*'] : `${indexPattern.split(',')}*`;
-    const body = await esClient.asCurrentUser.indices.resolveIndex({
-      name,
-      expand_wildcards: 'open',
-    });
-    indices = [
-      ...body.indices.map((i) => i.name),
-      ...body.data_streams.map((d) => d.name),
-      ...body.aliases.map((d) => d.name),
-    ];
-  } catch (e) {
-    resources.logger.error(`Error resolving index pattern: ${e.message}`);
-    indices = [];
-  }
-
+  const indices = await getIndicesFromIndexPattern(indexPattern, esClient, resources.logger);
   if (indices.length === 0 || indexPattern === '') {
-    return {
-      indices,
-      fields: [],
-    };
+    return { indices, fields: [] };
   }
 
   try {
-    const relevantFieldNames = await getRelevantFieldNames({
+    const { fields, stats } = await getRelevantFieldNames({
       index: indices,
       messages,
       esClient: esClient.asCurrentUser,
@@ -100,16 +80,42 @@ export async function getDatasetInfo({
       signal,
       chat,
     });
-    return {
-      indices,
-      fields: relevantFieldNames.fields,
-      stats: relevantFieldNames.stats,
-    };
+    return { indices, fields, stats };
   } catch (e) {
     resources.logger.error(`Error getting relevant field names: ${e.message}`);
-    return {
-      indices,
-      fields: [],
-    };
+    return { indices, fields: [] };
+  }
+}
+
+async function getIndicesFromIndexPattern(
+  indexPattern: string,
+  esClient: IScopedClusterClient,
+  logger: Logger
+) {
+  try {
+    const name = indexPattern === '' ? ['*', '*:*'] : indexPattern.split(',').map((i) => `*${i}*`);
+    const body = await esClient.asCurrentUser.indices.resolveIndex({
+      name,
+      expand_wildcards: 'open', // exclude hidden and closed indices
+    });
+
+    // if there is an exact match, only return that
+    const hasExactMatch =
+      body.indices.some((i) => i.name === indexPattern) ||
+      body.aliases.some((i) => i.name === indexPattern);
+
+    if (hasExactMatch) {
+      return [indexPattern];
+    }
+
+    // otherwise return all matching indices, data streams, and aliases
+    return [
+      ...body.indices.map((i) => i.name),
+      ...body.data_streams.map((d) => d.name),
+      ...body.aliases.map((d) => d.name),
+    ];
+  } catch (e) {
+    logger.error(`Error resolving index pattern: ${e.message}`);
+    return [];
   }
 }

@@ -23,6 +23,7 @@ import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_log
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const synthtrace = getService('synthtrace');
 
   describe('get_dataset_info', function () {
     this.tags(['failsOnMKI']);
@@ -46,13 +47,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     // Calling `get_dataset_info` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let messageAddedEvents: MessageAddEvent[];
-      let logSynthtraceEsClient: LogsSynthtraceEsClient;
+      let logsSynthtraceEsClient: LogsSynthtraceEsClient;
       let getRelevantFields: () => Promise<RelevantField[]>;
 
       const USER_MESSAGE = 'Do I have any Apache logs?';
 
       before(async () => {
-        ({ logSynthtraceEsClient } = await createSimpleSyntheticLogs({ getService }));
+        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+        await createSimpleSyntheticLogs({ logsSynthtraceEsClient });
 
         void llmProxy.interceptWithFunctionRequest({
           name: 'get_dataset_info',
@@ -92,7 +94,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        await logSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
       });
 
       describe('LLM requests', () => {
@@ -241,7 +243,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const functionResponseMessage = last(thirdRequestBody.messages);
             const parsedContent = JSON.parse(functionResponseMessage?.content as string);
             expect(Object.keys(parsedContent)).to.eql(['indices', 'fields', 'stats']);
-            expect(parsedContent.indices).to.eql(['logs-web.access-default']);
+            expect(parsedContent.indices).to.eql([
+              'logs-web.access-default',
+              '.alerts-observability.logs.alerts-default',
+            ]);
           });
 
           it('emits a messageAdded event with the `get_dataset_info` function response', async () => {
@@ -261,7 +266,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
             const relevantFields = await getRelevantFields();
             expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
-            expect(parsedContent.indices).to.eql(['logs-web.access-default']);
+            expect(parsedContent.indices).to.eql([
+              'logs-web.access-default',
+              '.alerts-observability.logs.alerts-default',
+            ]);
           });
         });
       });
@@ -275,20 +283,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     // Calling `get_dataset_info` directly
     describe('GET /internal/observability_ai_assistant/functions/get_dataset_info', () => {
-      let logSynthtraceEsClient: LogsSynthtraceEsClient;
+      let logsSynthtraceEsClient: LogsSynthtraceEsClient;
 
       before(async () => {
-        ({ logSynthtraceEsClient } = await createSimpleSyntheticLogs({
-          getService,
-          dataset: 'zookeeper.access',
-        }));
+        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+        await Promise.all([
+          createSimpleSyntheticLogs({ logsSynthtraceEsClient, dataset: 'zookeeper.access' }),
+          createSimpleSyntheticLogs({ logsSynthtraceEsClient, dataset: 'apache.access' }),
+        ]);
       });
 
       after(async () => {
-        await logSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
       });
 
-      it('returns nothing when requesting "zookeeper" logs', async () => {
+      it('returns Zookeeper logs but not the Apache logs', async () => {
+        llmProxy.interceptSelectRelevantFieldsToolChoice({ to: 20 });
+
         const { body } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/functions/get_dataset_info',
           params: {
@@ -299,13 +310,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        expect(body).to.eql({
-          indices: [],
-          fields: [],
-        });
+        expect(body.indices).to.eql(['logs-zookeeper.access-default']);
+        expect(body.fields.length).to.be.greaterThan(0);
       });
 
-      it('returns something when requesting "logs"', async () => {
+      it('returns both Zookeeper and Apache logs', async () => {
         llmProxy.interceptSelectRelevantFieldsToolChoice({ to: 20 });
 
         const { body } = await observabilityAIAssistantAPIClient.editor({
@@ -320,30 +329,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(body).to.eql({
-          indices: ['logs-zookeeper.access-default'],
-          fields: [
-            '@timestamp:date',
-            '_id:_id',
-            '_ignored:string',
-            '_index:_index',
-            '_score:number',
-            '_source:_source',
-            'data_stream.dataset:keyword',
-            'data_stream.namespace:keyword',
-            'data_stream.type:keyword',
-            'event.dataset:keyword',
-            'host.name:keyword',
-            'input.type:keyword',
-            'message:text',
-            'network.bytes:long',
-            'tls.established:boolean',
-          ],
-          stats: {
-            analyzed: 15,
-            total: 15,
-          },
-        });
+        expect(body.indices).to.eql([
+          'logs-apache.access-default',
+          'logs-zookeeper.access-default',
+          '.alerts-observability.logs.alerts-default',
+        ]);
       });
     });
   });
