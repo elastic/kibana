@@ -13,7 +13,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
-import { getEsQueryHits } from '../../../../common';
+import { getEsqlQueryHits } from '../../../../common';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -41,7 +41,7 @@ jest.mock('../../../../common', () => {
   const original = jest.requireActual('../../../../common');
   return {
     ...original,
-    getEsQueryHits: jest.fn(),
+    getEsqlQueryHits: jest.fn(),
   };
 });
 
@@ -184,7 +184,7 @@ describe('fetchEsqlQuery', () => {
       values: [],
     });
 
-    (getEsQueryHits as jest.Mock).mockReturnValue({
+    (getEsqlQueryHits as jest.Mock).mockReturnValue({
       results: {
         esResult: {
           _shards: { failed: 0, successful: 0, total: 0 },

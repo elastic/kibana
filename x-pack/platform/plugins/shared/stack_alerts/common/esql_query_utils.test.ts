@@ -7,9 +7,9 @@
 
 import {
   rowToDocument,
-  toEsQueryHits,
+  toEsqlQueryHits,
   transformDatatableToEsqlTable,
-  toGroupedEsQueryHits,
+  toGroupedEsqlQueryHits,
   getAlertId,
 } from './esql_query_utils';
 
@@ -34,9 +34,9 @@ describe('ESQL query utils', () => {
     });
   });
 
-  describe('toEsQueryHits', () => {
+  describe('toEsqlQueryHits', () => {
     it('correctly converts ESQL table to ES query hits', () => {
-      const { results, rows, cols, duplicateAlertIds } = toEsQueryHits({
+      const { results, rows, cols, duplicateAlertIds } = toEsqlQueryHits({
         columns,
         values: [value1, value2],
       });
@@ -99,9 +99,9 @@ describe('ESQL query utils', () => {
     });
   });
 
-  describe('toGroupedEsQueryHits', () => {
+  describe('toGroupedEsqlQueryHits', () => {
     it('correctly converts ESQL table to grouped ES query hits', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsQueryHits(
+      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2],
@@ -185,7 +185,7 @@ describe('ESQL query utils', () => {
       expect(duplicateAlertIds.size).toBe(0);
     });
     it('correctly converts ESQL table to grouped ES query hits with duplicates', () => {
-      const { results, duplicateAlertIds } = toGroupedEsQueryHits(
+      const { results, duplicateAlertIds } = toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value3],

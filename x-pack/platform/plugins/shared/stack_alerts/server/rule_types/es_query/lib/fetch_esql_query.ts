@@ -19,7 +19,7 @@ import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
 import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
-import { EsqlTable, getEsQueryHits } from '../../../../common';
+import { EsqlTable, getEsqlQueryHits } from '../../../../common';
 import { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
@@ -71,7 +71,7 @@ export async function fetchEsqlQuery({
   const sourceFields = getSourceFields(response);
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
   const isGroupAgg = isPerRowAggregation(params.groupBy);
-  const { results, duplicateAlertIds } = getEsQueryHits(
+  const { results, duplicateAlertIds } = getEsqlQueryHits(
     response,
     params.esqlQuery.esql,
     isGroupAgg

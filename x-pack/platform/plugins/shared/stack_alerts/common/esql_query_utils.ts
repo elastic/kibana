@@ -24,7 +24,7 @@ interface EsqlResultColumn {
   type: string;
 }
 
-interface EsQueryHits {
+interface EsqlQueryHits {
   results: ParseAggregationResultsOpts;
   duplicateAlertIds: Set<string>;
   rows: EsqlDocument[];
@@ -50,19 +50,19 @@ export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): 
   }, {});
 };
 
-export const getEsQueryHits = (
+export const getEsqlQueryHits = (
   table: EsqlTable,
   query: string,
   isGroupAgg: boolean
-): EsQueryHits => {
+): EsqlQueryHits => {
   if (isGroupAgg) {
     const alertId = getAlertId(query, table.columns);
-    return toGroupedEsQueryHits(table, alertId);
+    return toGroupedEsqlQueryHits(table, alertId);
   }
-  return toEsQueryHits(table);
+  return toEsqlQueryHits(table);
 };
 
-export const toEsQueryHits = (table: EsqlTable): EsQueryHits => {
+export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
   const hits: EsqlHit[] = [];
   const rows: EsqlDocument[] = [];
   for (const row of table.values) {
@@ -95,7 +95,7 @@ export const toEsQueryHits = (table: EsqlTable): EsQueryHits => {
   };
 };
 
-export const toGroupedEsQueryHits = (table: EsqlTable, alertId: string[]): EsQueryHits => {
+export const toGroupedEsqlQueryHits = (table: EsqlTable, alertId: string[]): EsqlQueryHits => {
   const duplicateAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
   const groupedHits = table.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {

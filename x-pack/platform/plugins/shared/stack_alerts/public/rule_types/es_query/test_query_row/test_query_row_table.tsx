@@ -60,7 +60,7 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ preview })
               </EuiBadge>
             );
           }
-          return value ?? '—';
+          return value ?? '-';
         }}
         pagination={{
           pageIndex: 0,

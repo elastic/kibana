@@ -35,7 +35,7 @@ import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import { transformDatatableToEsqlTable, getEsQueryHits } from '../../../../common';
+import { transformDatatableToEsqlTable, getEsqlQueryHits } from '../../../../common';
 
 const ALL_DOCUMENTS = 'all';
 const alertingOptions = [
@@ -140,7 +140,7 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const { results, duplicateAlertIds, rows, cols } = getEsQueryHits(
+      const { results, duplicateAlertIds, rows, cols } = getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
         isGroupAgg
@@ -149,7 +149,7 @@ export const EsqlQueryExpression: React.FC<
       setIsLoading(false);
       return {
         testResults: parseAggregationResults(results),
-        groupBy: isGroupAgg,
+        isGrouped: isGroupAgg,
         isGroupedByRow: isGroupAgg,
         timeWindow: window,
         preview: {

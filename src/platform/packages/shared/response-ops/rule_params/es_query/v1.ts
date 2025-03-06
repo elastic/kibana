@@ -125,6 +125,35 @@ function validateParams(anyParams: unknown): string | undefined {
     termSize,
   } = anyParams as EsQueryRuleParams;
 
+  if (isEsqlQueryRule(searchType)) {
+    const { timeField } = anyParams as EsQueryRuleParams;
+
+    if (!timeField) {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlTimeFieldErrorMessage', {
+        defaultMessage: '[timeField]: is required',
+      });
+    }
+    if (thresholdComparator !== Comparator.GT) {
+      return i18n.translate(
+        'xpack.responseOps.ruleParams.esQuery.esqlThresholdComparatorErrorMessage',
+        {
+          defaultMessage: '[thresholdComparator]: is required to be greater than',
+        }
+      );
+    }
+    if (threshold && threshold[0] !== 0) {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlThresholdErrorMessage', {
+        defaultMessage: '[threshold]: is required to be 0',
+      });
+    }
+    if (groupBy === 'top') {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlInvalidGroupByErrorMessage', {
+        defaultMessage: '[groupBy]: groupBy should be all or row when [searchType] is esqlQuery',
+      });
+    }
+    return;
+  }
+
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('responseOps.ruleParams.esQuery.invalidThreshold2ErrorMessage', {
       defaultMessage:
@@ -146,12 +175,6 @@ function validateParams(anyParams: unknown): string | undefined {
 
   // check grouping
   if (groupBy === 'top') {
-    if (isEsqlQueryRule(searchType)) {
-      return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidTopGroupByErrorMessage', {
-        defaultMessage: '[groupBy]: groupBy should be all or row when [searchType] is esqlQuery',
-      });
-    }
-
     if (termField == null) {
       return i18n.translate('xpack.responseOps.ruleParams.esQuery.termFieldRequiredErrorMessage', {
         defaultMessage: '[termField]: termField required when [groupBy] is top',
@@ -174,38 +197,13 @@ function validateParams(anyParams: unknown): string | undefined {
       );
     }
   }
-
-  if (groupBy === 'row' && !isEsqlQueryRule(searchType)) {
+  if (groupBy === 'row') {
     return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidRowGroupByErrorMessage', {
-      defaultMessage: '[groupBy]: groupBy must be all or top when [searchType] is not esqlQuery',
+      defaultMessage: '[groupBy]: groupBy should be all or top when [searchType] is not esqlQuery',
     });
   }
 
   if (isSearchSourceRule(searchType)) {
-    return;
-  }
-
-  if (isEsqlQueryRule(searchType)) {
-    const { timeField } = anyParams as EsQueryRuleParams;
-
-    if (!timeField) {
-      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlTimeFieldErrorMessage', {
-        defaultMessage: '[timeField]: is required',
-      });
-    }
-    if (thresholdComparator !== Comparator.GT) {
-      return i18n.translate(
-        'xpack.responseOps.ruleParams.esQuery.esqlThresholdComparatorErrorMessage',
-        {
-          defaultMessage: '[thresholdComparator]: is required to be greater than',
-        }
-      );
-    }
-    if (threshold && threshold[0] !== 0) {
-      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlThresholdErrorMessage', {
-        defaultMessage: '[threshold]: is required to be 0',
-      });
-    }
     return;
   }
 

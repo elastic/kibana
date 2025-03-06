@@ -11,7 +11,7 @@ export type { EsqlTable } from './esql_query_utils';
 export {
   rowToDocument,
   transformDatatableToEsqlTable,
-  getEsQueryHits,
+  getEsqlQueryHits,
   ALERT_ID_COLUMN,
 } from './esql_query_utils';
 
