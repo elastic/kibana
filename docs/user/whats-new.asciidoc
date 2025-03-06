@@ -86,6 +86,11 @@ Case observables enable structured data collection. You can now add common obser
 The Service Now connector is certified for the Xanadu release. 
 
 [discrete]
-==== POST for case information and attachment handling with Case API
+==== Assign users to a case
 
-Get case information with the REST API using a POST method, enabling easier integration with other technologies. Additionally, manage case attachments programmatically with new CRUD operations on the case attachments API. Check out the https://www.elastic.co/docs/api/doc/kibana/operation/operation-addcasefiledefaultspace[API documentation] to learn more. 
+You can now enable a role to assign users to a case. 
+
+[discrete]
+==== Attach file API
+
+You can now manage case attachments programmatically with new CRUD operations on the case attachments API. Check out the https://www.elastic.co/docs/api/doc/kibana/operation/operation-addcasefiledefaultspace[API documentation] to learn more. 
