@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { WorkChatServices } from './types';
-export { ChatService } from './chat/chat_service';
-export { ConversationService } from './conversation/conversation_service';
+export { ChatService } from './chat_service';

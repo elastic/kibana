@@ -8,6 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { InternalServices } from '../services';
 import { registerChatRoutes } from './chat';
+import { registerConversationRoutes } from './conversation';
 
 export const registerRoutes = ({
   router,
@@ -19,4 +20,5 @@ export const registerRoutes = ({
   getServices: () => InternalServices;
 }) => {
   registerChatRoutes({ router, logger, getServices });
+  registerConversationRoutes({ router, logger, getServices });
 };

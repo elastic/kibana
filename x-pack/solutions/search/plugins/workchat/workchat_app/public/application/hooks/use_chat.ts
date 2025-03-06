@@ -6,23 +6,28 @@
  */
 
 import { useCallback, useState, useMemo } from 'react';
-import type { ChatEvent } from '../../../common/chat_events';
+import type { ChatEvent, ConversationCreatedEvent } from '../../../common/chat_events';
 import type { Message } from '../../../common/messages';
 import { useWorkChatServices } from './use_workchat_service';
 
-export const useChat = () => {
+interface UseChatProps {
+  conversationId: string | undefined;
+  agentId: string;
+  onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
+}
+
+export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseChatProps) => {
   const { chatService } = useWorkChatServices();
   const [events, setEvents] = useState<ChatEvent[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
 
   const send = useCallback(
-    async (message: string) => {
-      setMessages((prevMessages) => [...prevMessages, { type: 'user', content: message }]);
-
-      const events$ = await chatService.callAgent({ message });
+    async (nextMessage: string) => {
+      setMessages((prevMessages) => [...prevMessages, { type: 'user', content: nextMessage }]);
 
       let chunks = '';
+      const events$ = await chatService.converse({ nextMessage, conversationId, agentId });
 
       events$.subscribe({
         next: (event) => {
@@ -32,6 +37,10 @@ export const useChat = () => {
             chunks += event.text_chunk;
             setPendingMessage(chunks);
           }
+
+          if (event.type === 'conversation_created') {
+            onConversationUpdate(event.conversation);
+          }
         },
         complete: () => {
           setMessages((previous) => [...previous, { type: 'assistant', content: chunks }]);
@@ -39,8 +48,13 @@ export const useChat = () => {
         },
       });
     },
-    [chatService]
+    [chatService, agentId, conversationId, onConversationUpdate]
   );
+
+  const setMessagesExternal = useCallback((newMessages: Message[]) => {
+    setMessages(newMessages);
+    setPendingMessage('');
+  }, []);
 
   const allMessages: Message[] = useMemo(() => {
     return [...messages].concat(
@@ -52,5 +66,6 @@ export const useChat = () => {
     send,
     events,
     messages: allMessages,
+    setMessages: setMessagesExternal,
   };
 };
