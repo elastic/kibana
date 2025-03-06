@@ -4,11 +4,6 @@
     "outDir": "target/types",
     "types": ["jest", "node", "@emotion/react/types/css-prop"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../../../../../typings/**/*",
-    "../../../../../typings/emotion.d.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "../../../../../typings/emotion.d.ts"],
   "exclude": ["target/**/*"]
 }

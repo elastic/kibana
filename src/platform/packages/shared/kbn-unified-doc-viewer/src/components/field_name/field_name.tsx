@@ -33,23 +33,6 @@ interface Props {
   highlight?: string;
 }
 
-const fieldIconContainerCss = ({ euiTheme }: UseEuiTheme) => css`
-  padding-top: calc(${euiTheme.size.xs} * 1.5);
-  line-height: ${euiTheme.size.base};
-`;
-
-const fieldNameCss = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.xs};
-  padding-left: 0;
-  line-height: ${euiTheme.font.lineHeightMultiplier};
-`;
-
-const multiFieldBadgeCss = ({ euiTheme }: UseEuiTheme) => css`
-  margin: ${euiTheme.size.xs} 0;
-  font-weight: ${euiTheme.font.weight.regular};
-  font-family: ${euiTheme.font.family};
-`;
-
 export function FieldName({
   fieldName,
   fieldMapping,
@@ -129,3 +112,20 @@ export function FieldName({
     </EuiFlexGroup>
   );
 }
+
+const fieldIconContainerCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding-top: calc(${euiTheme.size.xs} * 1.5);
+  line-height: ${euiTheme.size.base};
+`;
+
+const fieldNameCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.xs};
+  padding-left: 0;
+  line-height: ${euiTheme.font.lineHeightMultiplier};
+`;
+
+const multiFieldBadgeCss = ({ euiTheme }: UseEuiTheme) => css`
+  margin: ${euiTheme.size.xs} 0;
+  font-weight: ${euiTheme.font.weight.regular};
+  font-family: ${euiTheme.font.family};
+`;
