@@ -37,7 +37,7 @@ import {
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
-import type { DataSounceExclusions, FeatureSet } from '../common/types';
+import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { getEntepriseSearchRegisteredDeprecations } from './lib/enterprise_search/enterprise_search_deprecations';
 import { defaultExclusions } from './lib/data_source_exclusions';
 
@@ -58,7 +58,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
-  private readonly initialDataSourceExclusions: DataSounceExclusions;
+  private readonly initialDataSourceExclusions: DataSourceExclusions;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;

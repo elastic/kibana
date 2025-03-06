@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataSounceExclusions } from '../../common/types';
+import { DataSourceExclusions } from '../../common/types';
 
 /**
  * These are the default exclusions for data sources (data streams and indices).
@@ -19,7 +19,7 @@ import { DataSounceExclusions } from '../../common/types';
  * xpack.upgrade_assistant.dataSourceExclusions:
  *    '.siem-signals*': []
  */
-export const defaultExclusions: DataSounceExclusions = {
+export const defaultExclusions: DataSourceExclusions = {
   '.siem-signals*': ['readOnly'],
   '.alerts*': ['readOnly'],
   '.internal.alerts*': ['readOnly'],
@@ -49,7 +49,7 @@ export const defaultExclusions: DataSounceExclusions = {
  * If the exclusion ends with a `*` it will match any data source that starts with the excluded pattern.
  * Otherwise it will match the data source name exactly.
  */
-export const matchExclusionPattern = (dataStreamName: string, exclusions: DataSounceExclusions) => {
+export const matchExclusionPattern = (dataStreamName: string, exclusions: DataSourceExclusions) => {
   const result = Object.entries(exclusions).find(([excludedPattern]) => {
     const isPattern = /.+\*$/.test(excludedPattern);
     if (isPattern) {

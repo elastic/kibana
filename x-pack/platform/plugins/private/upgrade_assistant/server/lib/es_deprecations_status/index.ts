@@ -10,7 +10,7 @@ import {
   EnrichedDeprecationInfo,
   ESUpgradeStatus,
   FeatureSet,
-  DataSounceExclusions,
+  DataSourceExclusions,
   DataStreamsAction,
   ReindexAction,
 } from '../../../common/types';
@@ -23,7 +23,7 @@ export async function getESUpgradeStatus(
   {
     featureSet,
     dataSourceExclusions,
-  }: { featureSet: FeatureSet; dataSourceExclusions: DataSounceExclusions }
+  }: { featureSet: FeatureSet; dataSourceExclusions: DataSourceExclusions }
 ): Promise<ESUpgradeStatus> {
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
@@ -34,13 +34,10 @@ export async function getESUpgradeStatus(
         const correctiveActionType = deprecation.correctiveAction?.type;
         if (correctiveActionType === 'dataStream') {
           const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
-
           (deprecation.correctiveAction as DataStreamsAction).metadata.excludedActions =
             excludedActions;
-        }
-        if (correctiveActionType === 'reindex') {
+        } else if (correctiveActionType === 'reindex') {
           const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
-
           (deprecation.correctiveAction as ReindexAction).excludedActions = excludedActions;
         }
         return deprecation;

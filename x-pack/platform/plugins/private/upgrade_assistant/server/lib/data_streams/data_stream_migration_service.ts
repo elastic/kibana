@@ -203,6 +203,7 @@ export const dataStreamMigrationServiceFactory = ({
           return {
             taskPercComplete: 1,
             status: DataStreamMigrationStatus.completed,
+            resolutionType: 'reindex',
             progressDetails: {
               startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
@@ -218,6 +219,7 @@ export const dataStreamMigrationServiceFactory = ({
           return {
             status: DataStreamMigrationStatus.inProgress,
             taskPercComplete: perc,
+            resolutionType: 'reindex',
             progressDetails: {
               startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
@@ -241,6 +243,7 @@ export const dataStreamMigrationServiceFactory = ({
 
         return {
           status: DataStreamMigrationStatus.failed,
+          resolutionType: 'reindex',
           errorMessage: err.toString(),
         };
       }
@@ -257,6 +260,7 @@ export const dataStreamMigrationServiceFactory = ({
 
       return {
         status: DataStreamMigrationStatus.cancelled,
+        resolutionType: 'reindex',
       };
     },
     async getDataStreamMetadata(dataStreamName: string): Promise<DataStreamMetadata | null> {

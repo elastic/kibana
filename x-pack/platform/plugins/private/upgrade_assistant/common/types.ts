@@ -340,4 +340,4 @@ export interface FeatureSet {
   migrateDataStreams: boolean;
 }
 
-export type DataSounceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
