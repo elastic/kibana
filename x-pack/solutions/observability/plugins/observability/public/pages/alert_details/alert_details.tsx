@@ -19,7 +19,6 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
-  EuiNotificationBadge,
 } from '@elastic/eui';
 import {
   AlertStatus,
