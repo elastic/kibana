@@ -228,7 +228,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         toggle={(visible) => setModalState({ visible })}
         enableStore={enableEntityStore}
         riskScore={{
-          disabled: combinedRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
+          canToggle: combinedRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
           checked: combinedRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
         }}
         entityStore={{
