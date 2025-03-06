@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './field_list_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -331,6 +330,10 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         width: 100%;
         padding: ${euiTheme.size.base};
         background-color: ${euiTheme.colors.backgroundBasePlain};
+      }
+
+      .unifiedFieldListItemButton__dragging {
+        background: ${euiTheme.colors.emptyShade};
       }
 
       .unifiedFieldListItemButton.kbnFieldButton {
