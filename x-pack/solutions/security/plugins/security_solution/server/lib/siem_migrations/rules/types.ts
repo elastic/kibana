@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type {
-  UpdateRuleMigrationData,
   RuleMigrationTranslationResult,
+  UpdateRuleMigrationData,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigration,
@@ -31,6 +32,7 @@ export interface SiemRuleMigrationsClientDependencies {
   actionsClient: ActionsClient;
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export interface RuleMigrationIntegration {
@@ -54,3 +56,18 @@ export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
   translation_result?: RuleMigrationTranslationResult;
 };
+
+/**
+ *
+ * Based on the severity levels defined in the Splunk Common Information Model (CIM) documentation
+ *
+ * https://docs.splunk.com/Documentation/CIM/6.0.2/User/Alerts
+ *
+ * '1': 'INFO';
+ * '2': 'LOW';
+ * '3': 'MEDIUM';
+ * '4': 'HIGH';
+ * '5': 'CRITICAL';
+ *
+ **/
+export type SplunkSeverity = '1' | '2' | '3' | '4' | '5';

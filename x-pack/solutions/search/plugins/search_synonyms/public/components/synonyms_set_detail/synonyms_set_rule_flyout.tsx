@@ -72,7 +72,7 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
     synonymsOptionToString({ fromTerms: selectedFromTerms, toTerms: selectedToTerms, isExplicit });
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
         {flyoutMode === 'edit' ? (
           <EuiText>
@@ -103,6 +103,7 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
           })}
         >
           <EuiComboBox
+            fullWidth
             title="Synonyms"
             id="synonyms"
             options={selectedFromTerms}
@@ -130,6 +131,7 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
             })}
           >
             <EuiComboBox
+              fullWidth
               title="Synonyms"
               id="synonyms-to"
               options={selectedToTerms}

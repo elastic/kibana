@@ -132,6 +132,7 @@ export class AgentlessConnectorDeploymentsSyncService {
 
     const agentPolicyService = searchConnectorsPluginStartDependencies.fleet.agentPolicyService;
     const packagePolicyService = searchConnectorsPluginStartDependencies.fleet.packagePolicyService;
+    const agentService = searchConnectorsPluginStartDependencies.fleet.agentService;
 
     const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
 
@@ -140,6 +141,7 @@ export class AgentlessConnectorDeploymentsSyncService {
       esClient,
       packagePolicyService,
       agentPolicyService,
+      agentService,
       this.logger
     );
 

@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import rawExpect from 'expect';
 import expect from '@kbn/expect';
 import {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamUpsertRequest,
   WiredStreamGetResponse,
+  asIngestStreamGetResponse,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
-import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  putStream,
+  getStream,
+  getIlmStats,
+} from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -34,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   ) {
     const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
     for (const definition of definitions) {
-      expect(definition.effective_lifecycle).to.eql(expectedLifecycle);
+      expect(asIngestStreamGetResponse(definition).effective_lifecycle).to.eql(expectedLifecycle);
     }
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
@@ -74,19 +82,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    describe('Wired streams', () => {
-      const wiredPutBody: IngestStreamUpsertRequest = {
-        stream: {
-          ingest: {
-            lifecycle: { inherit: {} },
-            routing: [],
-            processing: [],
-            wired: { fields: {} },
-          },
+    const wiredPutBody: IngestStreamUpsertRequest = {
+      stream: {
+        ingest: {
+          lifecycle: { inherit: {} },
+          routing: [],
+          processing: [],
+          wired: { fields: {} },
         },
-        dashboards: [],
-      };
+      },
+      dashboards: [],
+    };
 
+    describe('Wired streams update', () => {
       it('updates lifecycle', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
 
@@ -105,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect((updatedRootDefinition as WiredStreamGetResponse).stream.ingest.lifecycle).to.eql({
           dsl: { data_retention: '999d' },
         });
-        expect(updatedRootDefinition.effective_lifecycle).to.eql({
+        expect((updatedRootDefinition as WiredStreamGetResponse).effective_lifecycle).to.eql({
           dsl: { data_retention: '999d' },
           from: 'logs',
         });
@@ -332,7 +340,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('Unwired streams', () => {
+    describe('Unwired streams update', () => {
       const unwiredPutBody: IngestStreamUpsertRequest = {
         stream: {
           ingest: {
@@ -427,6 +435,87 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           await clean();
+        });
+      }
+    });
+
+    describe('ilm stats', () => {
+      it('is not enabled for streams with dsl', async () => {
+        const indexName = 'logs.dslnostats';
+        await putStream(apiClient, indexName, {
+          dashboards: [],
+          stream: {
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              routing: [],
+              lifecycle: { dsl: { data_retention: '1d' } },
+            },
+          },
+        });
+        await getIlmStats(apiClient, indexName, 400);
+      });
+
+      if (!isServerless) {
+        it('returns not found when the policy does not exist', async () => {
+          const indexName = 'logs.ilmpolicydontexists';
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                routing: [],
+                lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
+              },
+            },
+          });
+          await getIlmStats(apiClient, indexName, 404);
+        });
+
+        it('returns the effective ilm phases', async () => {
+          const indexName = 'logs.ilmwithphases';
+          const policyName = 'streams_ilm_hotwarmdelete';
+          await esClient.ilm.putLifecycle({
+            name: policyName,
+            policy: {
+              phases: {
+                hot: { actions: { rollover: { max_age: '30m' } } },
+                warm: { min_age: '5d', actions: {} },
+                delete: { min_age: '10d', actions: {} },
+              },
+            },
+          });
+
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                routing: [],
+                lifecycle: { ilm: { policy: policyName } },
+              },
+            },
+          });
+
+          const stats = await getIlmStats(apiClient, indexName, 200);
+          rawExpect(stats).toEqual({
+            phases: {
+              hot: {
+                name: 'hot',
+                size_in_bytes: rawExpect.any(Number),
+                rollover: { max_age: '30m' },
+                min_age: '0ms',
+              },
+              warm: {
+                name: 'warm',
+                min_age: '5d',
+                size_in_bytes: rawExpect.any(Number),
+              },
+              delete: {
+                name: 'delete',
+                min_age: '10d',
+              },
+            },
+          });
         });
       }
     });

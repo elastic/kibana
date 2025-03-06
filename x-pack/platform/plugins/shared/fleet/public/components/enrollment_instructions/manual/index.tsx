@@ -89,14 +89,24 @@ export const ManualInstructions = ({
   const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =
     getDownloadSourceProxyArgs(downloadSourceProxy);
 
-  const linuxCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
+  const linuxAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-arm64.tar.gz ${curlDownloadSourceProxyArgs}
+  tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
+  cd elastic-agent-${agentVersion}-linux-arm64
+  sudo ./elastic-agent install ${enrollArgs}`;
+
+  const linuxX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
 tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz
 cd elastic-agent-${agentVersion}-linux-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
-  const macCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-darwin-aarch64.tar.gz ${curlDownloadSourceProxyArgs}
+  const macAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-darwin-aarch64.tar.gz ${curlDownloadSourceProxyArgs}
 tar xzvf elastic-agent-${agentVersion}-darwin-aarch64.tar.gz
 cd elastic-agent-${agentVersion}-darwin-aarch64
+sudo ./elastic-agent install ${enrollArgs}`;
+
+  const macX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-darwin-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
+tar xzvf elastic-agent-${agentVersion}-darwin-x86_64.tar.gz
+cd elastic-agent-${agentVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
@@ -105,11 +115,19 @@ Expand-Archive .\\elastic-agent-${agentVersion}-windows-x86_64.zip -DestinationP
 cd elastic-agent-${agentVersion}-windows-x86_64
 .\\elastic-agent.exe install ${enrollArgs}`;
 
-  const linuxDebCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-amd64.deb ${curlDownloadSourceProxyArgs}
+  const linuxDebAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-arm64.deb ${curlDownloadSourceProxyArgs}
+sudo dpkg -i elastic-agent-${agentVersion}-arm64.deb
+sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${enrollArgs} \n`;
+
+  const linuxDebX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-amd64.deb ${curlDownloadSourceProxyArgs}
 sudo dpkg -i elastic-agent-${agentVersion}-amd64.deb
 sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${enrollArgs} \n`;
 
-  const linuxRpmCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-x86_64.rpm ${curlDownloadSourceProxyArgs}
+  const linuxRpmAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-aarch64.rpm ${curlDownloadSourceProxyArgs}
+sudo rpm -vi elastic-agent-${agentVersion}-aarch64.rpm
+sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${enrollArgs} \n`;
+
+  const linuxRpmX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-x86_64.rpm ${curlDownloadSourceProxyArgs}
 sudo rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
 sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${enrollArgs} \n`;
 
@@ -118,11 +136,15 @@ sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo 
   } FLEET_URL=${fleetServerUrl?.trim()} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${agentVersion} ./deploy.sh`;
 
   return {
-    linux: linuxCommand,
-    mac: macCommand,
+    linux_aarch64: linuxAarch64Command,
+    linux_x86_64: linuxX8664Command,
+    mac_aarch64: macAarch64Command,
+    mac_x86_64: macX8664Command,
     windows: windowsCommand,
-    deb: linuxDebCommand,
-    rpm: linuxRpmCommand,
+    deb_aarch64: linuxDebAarch64Command,
+    deb_x86_64: linuxDebX8664Command,
+    rpm_aarch64: linuxRpmAarch64Command,
+    rpm_x86_64: linuxRpmX8664Command,
     kubernetes: k8sCommand,
     cloudFormation: '',
     googleCloudShell: googleCloudShellCommand,

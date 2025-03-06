@@ -23,6 +23,7 @@ export type BrowserUrlService = UrlService<
 
 export interface ShareContextObjectTypeConfig {
   draftModeCallOut?: ReactNode;
+  computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 /**
@@ -71,6 +72,9 @@ export interface ShareContext {
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
+  /**
+   * @deprecated use computeAnonymousCapabilities defined on objectTypeMeta config
+   */
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
   toasts: ToastsSetup;

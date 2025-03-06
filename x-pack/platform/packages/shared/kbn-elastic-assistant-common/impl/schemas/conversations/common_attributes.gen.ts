@@ -81,6 +81,15 @@ export const EsqlContentReference = BaseContentReference.merge(
      * Label of the query
      */
     label: z.string(),
+    /**
+     * Time range to select in the time picker.
+     */
+    timerange: z
+      .object({
+        from: z.string(),
+        to: z.string(),
+      })
+      .optional(),
   })
 );
 
@@ -318,7 +327,7 @@ export const ConversationResponse = z.object({
    */
   updatedAt: z.string().optional(),
   /**
-   * The last time conversation was updated.
+   * The time conversation was created.
    */
   createdAt: z.string(),
   replacements: Replacements.optional(),
@@ -331,10 +340,6 @@ export const ConversationResponse = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  /**
-   * Is default conversation.
-   */
-  isDefault: z.boolean().optional(),
   /**
    * excludeFromLastConversationStorage.
    */
@@ -394,10 +399,6 @@ export const ConversationCreateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  /**
-   * Is default conversation.
-   */
-  isDefault: z.boolean().optional(),
   /**
    * excludeFromLastConversationStorage.
    */

@@ -831,7 +831,7 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
 export const RULE_SOURCE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleSourceLabel',
   {
-    defaultMessage: 'Modifications',
+    defaultMessage: 'Modified/Unmodified',
   }
 );
 
@@ -1088,6 +1088,28 @@ export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
     defaultMessage: 'Clear filters',
+  }
+);
+
+export const HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
+  {
+    defaultMessage: 'Review the update to see the latest improvements, then update your rule.',
+  }
+);
+
+export const HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage',
+  {
+    defaultMessage:
+      'Before editing this rule, we strongly recommend that you update it to ensure you get the latest improvements.',
+  }
+);
+
+export const HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton',
+  {
+    defaultMessage: 'Return to details',
   }
 );
 
@@ -1433,10 +1455,17 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
   }
 );
 
+export const REVIEW_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.reviewRuleButton',
+  {
+    defaultMessage: 'Review rule',
+  }
+);
+
 export const UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.button.conflicts',
   {
-    defaultMessage: 'Rule has conflicts. Resolve them manually.',
+    defaultMessage: 'This rule has conflicts that must be manually resolved.',
   }
 );
 

@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * Text embeddable
        */
       it('emits when markup is added', async () => {
-        await dashboardAddPanel.clickMarkdownQuickButton();
+        await dashboardAddPanel.clickAddMarkdownPanel();
         await PageObjects.visEditor.setMarkdownTxt('There is no spoon');
         await PageObjects.visEditor.clickGo();
         await PageObjects.visualize.saveVisualizationExpectSuccess(MARKDOWN_PANEL_TITLE, {

@@ -47,26 +47,24 @@ export const createKnowledgeBaseEntry = async ({
   user,
   knowledgeBaseEntry,
   logger,
-  global = false,
   telemetry,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateSchema({
+  const document = transformToCreateSchema({
     createdAt,
     spaceId,
     user,
     entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
-    global,
   });
   const telemetryPayload = {
-    entryType: body.type,
-    required: body.required ?? false,
-    sharing: body.users.length ? 'private' : 'global',
-    ...(body.type === 'document' ? { source: body.source } : {}),
+    entryType: document.type,
+    required: document.required ?? false,
+    sharing: document.users.length ? 'private' : 'global',
+    ...(document.type === 'document' ? { source: document.source } : {}),
   };
   try {
     const response = await esClient.create({
-      body,
+      document,
       id: uuidv4(),
       index: knowledgeBaseIndex,
       refresh: 'wait_for',
@@ -112,14 +110,12 @@ interface TransformToUpdateSchemaProps {
   user: AuthenticatedUser;
   updatedAt: string;
   entry: KnowledgeBaseEntryUpdateProps;
-  global?: boolean;
 }
 
 export const transformToUpdateSchema = ({
   user,
   updatedAt,
   entry,
-  global = false,
 }: TransformToUpdateSchemaProps): UpdateKnowledgeBaseEntrySchema => {
   const base = {
     id: entry.id,
@@ -127,7 +123,8 @@ export const transformToUpdateSchema = ({
     updated_by: user.profile_uid ?? 'unknown',
     name: entry.name,
     type: entry.type,
-    users: global
+    global: entry.global,
+    users: entry.global
       ? []
       : [
           {
@@ -142,6 +139,7 @@ export const transformToUpdateSchema = ({
     return {
       ...base,
       ...restEntry,
+      users: restEntry.users ?? base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({
@@ -177,7 +175,6 @@ interface TransformToCreateSchemaProps {
   spaceId: string;
   user: AuthenticatedUser;
   entry: KnowledgeBaseEntryCreateProps;
-  global?: boolean;
 }
 
 export const transformToCreateSchema = ({
@@ -185,7 +182,6 @@ export const transformToCreateSchema = ({
   spaceId,
   user,
   entry,
-  global = false,
 }: TransformToCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
   const base = {
     '@timestamp': createdAt,
@@ -196,7 +192,8 @@ export const transformToCreateSchema = ({
     name: entry.name,
     namespace: spaceId,
     type: entry.type,
-    users: global
+    global: entry.global,
+    users: entry.global
       ? []
       : [
           {
@@ -211,6 +208,7 @@ export const transformToCreateSchema = ({
     return {
       ...base,
       ...restEntry,
+      users: restEntry.users ?? base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({

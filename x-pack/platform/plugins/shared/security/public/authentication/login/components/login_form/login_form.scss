@@ -53,4 +53,8 @@
   // This tightens up the layout if message is present
   margin-top: -($euiSizeXXL + $euiSizeS);
   padding: 0 $euiSize;
+
+  img {
+    max-width: 100%;
+  }
 }

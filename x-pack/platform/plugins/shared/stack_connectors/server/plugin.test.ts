@@ -26,7 +26,6 @@ describe('Stack Connectors Plugin', () => {
       context = coreMock.createPluginInitializerContext();
       mockParseExperimentalConfigValue.mockReturnValue({
         ...experimentalFeaturesMock,
-        inferenceConnectorOn: true,
       });
 
       plugin = new StackConnectorsPlugin(context);

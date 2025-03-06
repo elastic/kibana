@@ -56,6 +56,9 @@ components:
         annotations:
           description: The original rule annotations containing additional information.
           $ref: '#/components/schemas/OriginalRuleAnnotations'
+        severity:
+          type: string
+          description: The original rule's severity or some representation of it.
 
     ElasticRule:
       type: object

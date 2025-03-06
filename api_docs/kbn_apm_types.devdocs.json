@@ -53,7 +53,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
+              "\"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
@@ -2699,7 +2699,7 @@
         "label": "AgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
+          "\"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
         ],
         "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -3091,7 +3091,7 @@
           "\nWe cannot mark these arrays as const and derive their type\nbecause we need to be able to assign them as mutable entities for ES queries."
         ],
         "signature": [
-          "\"java\" | \"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
+          "\"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
         ],
         "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,

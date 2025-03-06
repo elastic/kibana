@@ -7,9 +7,8 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
-import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
@@ -20,19 +19,19 @@ import { MlJobLink } from '../ml_job_link/ml_job_link';
 import { MlAuditIcon } from '../ml_audit_icon';
 import { MlJobStatusBadge } from '../ml_job_status_badge';
 
-const Wrapper = styled.div`
-  overflow: hidden;
-  margin-bottom: ${euiThemeVars.euiSizeS};
-`;
-
 const MlJobItemComponent: FC<{
   job: MlSummaryJob;
   switchComponent: ReactNode;
 }> = ({ job, switchComponent, ...props }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
+  const { euiTheme } = useEuiTheme();
+  const containerStyles = css`
+    overflow: hidden;
+    margin-bottom: ${euiTheme.size.s};
+  `;
 
   return (
-    <Wrapper {...props}>
+    <div css={containerStyles} {...props}>
       <div>
         <MlJobLink jobId={job.id} jobName={job.customSettings?.security_app_display_name} />
         <MlAuditIcon message={job.auditMessage} />
@@ -46,7 +45,7 @@ const MlJobItemComponent: FC<{
           {isStarted ? i18n.ML_STOP_JOB_LABEL : i18n.ML_RUN_JOB_LABEL}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Wrapper>
+    </div>
   );
 };
 
