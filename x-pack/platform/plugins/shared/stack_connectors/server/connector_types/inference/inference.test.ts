@@ -158,7 +158,9 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponseRerank.rerank);
+      expect(response).toEqual(
+        mockResponseRerank.rerank.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }))
+      );
     });
   });
 
