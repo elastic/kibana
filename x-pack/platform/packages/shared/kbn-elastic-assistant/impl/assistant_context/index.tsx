@@ -17,7 +17,6 @@ import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assist
 import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import type { DiscoverAppLocator } from '@kbn/discover-plugin/common';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -78,7 +77,6 @@ export interface AssistantProviderProps {
   ) => CodeBlockDetails[][];
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
-  discoverLocator?: DiscoverAppLocator;
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: GetAssistantMessages;
@@ -111,7 +109,6 @@ export interface UseAssistantContext {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  discoverLocator?: DiscoverAppLocator;
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
   currentUserAvatar?: UserAvatar;
@@ -164,7 +161,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   basePath,
   basePromptContexts = [],
   children,
-  discoverLocator,
   getComments,
   http,
   inferenceEnabled = false,
@@ -359,7 +355,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       basePath,
       basePromptContexts,
       currentUserAvatar,
-      discoverLocator,
       docLinks,
       getComments,
       http,
@@ -411,7 +406,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       basePath,
       basePromptContexts,
       currentUserAvatar,
-      discoverLocator,
       docLinks,
       getComments,
       http,

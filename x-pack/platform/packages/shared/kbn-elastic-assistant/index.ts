@@ -159,5 +159,3 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
-
-export { MessageText } from './impl/assistant/message_text';
