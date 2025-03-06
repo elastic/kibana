@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { createPortal } from 'react-dom';
 import { EuiFlexItem } from '@elastic/eui';
 import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
@@ -239,7 +238,7 @@ export function ESQLEditor({
   );
 
   if (editorContainer) {
-    return <>{ReactDOM.render(EditorComponent, editorContainer)}</>;
+    return <>{createPortal(EditorComponent, editorContainer)}</>;
   }
   return EditorComponent;
 }
