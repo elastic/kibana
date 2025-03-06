@@ -24,30 +24,6 @@ export const initialSharedState: SharedDataViewSelectionState = {
   status: 'pristine',
 };
 
-export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>(scopeName: T) =>
-  createSlice({
-    name: `${SLICE_PREFIX}/${scopeName}`,
-    initialState: initialScopeState,
-    reducers: {
-      setSelectedDataView: (state, action: PayloadAction<DataViewSpec>) => {
-        state.dataView = action.payload;
-        state.status = 'ready';
-      },
-      dataViewSelectionError: (state, action: PayloadAction<string>) => {
-        state.status = 'error';
-      },
-    },
-    extraReducers(builder) {
-      builder.addCase(selectDataViewAsync, (state, action) => {
-        if (!action.payload.scope.includes(scopeName)) {
-          return state;
-        }
-
-        state.status = 'loading';
-      });
-    },
-  });
-
 export const sharedDataViewManagerSlice = createSlice({
   name: `${SLICE_PREFIX}/shared`,
   initialState: initialSharedState,
@@ -55,6 +31,17 @@ export const sharedDataViewManagerSlice = createSlice({
     setDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
       state.dataViews = action.payload;
       state.status = 'ready';
+    },
+    updateDataView: (state, action: PayloadAction<DataView>) => {
+      if (action.payload.isPersisted()) {
+        const dataViewIndex = state.dataViews.findIndex((dv) => dv.id === action.payload.id);
+        state.dataViews[dataViewIndex] = action.payload.toSpec();
+      } else {
+        const adHocDataViewIndex = state.adhocDataViews.findIndex(
+          (dv) => dv.title === action.payload.title
+        );
+        state.adhocDataViews[adHocDataViewIndex] = action.payload.toSpec();
+      }
     },
     addDataView: (state, action: PayloadAction<DataView>) => {
       const dataViewSpec = action.payload.toSpec();
@@ -81,3 +68,35 @@ export const sharedDataViewManagerSlice = createSlice({
     },
   },
 });
+
+export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>(scopeName: T) =>
+  createSlice({
+    name: `${SLICE_PREFIX}/${scopeName}`,
+    initialState: initialScopeState,
+    reducers: {
+      setSelectedDataView: (state, action: PayloadAction<DataViewSpec>) => {
+        state.dataView = action.payload;
+        state.status = 'ready';
+      },
+      dataViewSelectionError: (state, action: PayloadAction<string>) => {
+        state.status = 'error';
+      },
+    },
+    extraReducers(builder) {
+      builder.addCase(selectDataViewAsync, (state, action) => {
+        if (!action.payload.scope.includes(scopeName)) {
+          return state;
+        }
+
+        state.status = 'loading';
+      });
+
+      builder.addCase(sharedDataViewManagerSlice.actions.updateDataView, (state, action) => {
+        if (action.payload.isPersisted() && action.payload.id === state.dataView?.id) {
+          state.dataView = action.payload.toSpec();
+        } else if (action.payload.title === state.dataView?.title) {
+          state.dataView = action.payload.toSpec();
+        }
+      });
+    },
+  });

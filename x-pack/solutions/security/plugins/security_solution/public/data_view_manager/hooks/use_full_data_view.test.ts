@@ -31,7 +31,6 @@ describe('useFullDataView', () => {
           },
         },
         status: 'ready',
-        indicesExist: true,
       });
     });
 
@@ -55,7 +54,6 @@ describe('useFullDataView', () => {
           title: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         },
         status: 'pristine',
-        indicesExist: true,
       });
     });
 

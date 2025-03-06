@@ -74,7 +74,16 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
     [props.scope, selectDataView]
   );
 
-  const handleEditDataView = useCallback(() => {}, []);
+  /**
+   * Dispatches an action that will result in data view update in the in-memory caches,
+   * as well as across all scopes where the data view is currently selected.
+   */
+  const handleDataViewModified = useCallback(
+    (updatedDataView: DataView) => {
+      dispatch(sharedDataViewManagerSlice.actions.updateDataView(updatedDataView));
+    },
+    [dispatch]
+  );
 
   const triggerConfig = useMemo(() => {
     if (dataView.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
@@ -109,7 +118,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
       currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
       trigger={triggerConfig}
       onChangeDataView={handleChangeDataView}
-      onEditDataView={handleEditDataView}
+      onEditDataView={handleDataViewModified}
       onAddField={handleAddField}
       onDataViewCreated={createNewDataView}
       adHocDataViews={adhocDataViews}

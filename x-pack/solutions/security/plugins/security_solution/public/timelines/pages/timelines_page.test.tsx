@@ -25,8 +25,8 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../overview/components/events_by_dataset');
 jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/user_privileges');
-jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({ indicesExist: false })),
+jest.mock('../../data_view_manager/hooks/use_full_data_view', () => ({
+  useFullDataView: jest.fn(() => ({ matchedIndices: [] })),
 }));
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useEnableExperimental: jest.fn(() => jest.fn()),

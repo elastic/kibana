@@ -29,7 +29,6 @@ describe('useBrowserFields', () => {
         },
       },
       status: 'ready',
-      indicesExist: true,
     });
   });
 

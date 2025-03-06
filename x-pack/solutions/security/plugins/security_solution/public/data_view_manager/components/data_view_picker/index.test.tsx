@@ -71,7 +71,6 @@ describe('DataViewPicker', () => {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
       },
-      indicesExist: true,
       status: 'ready',
     });
 
