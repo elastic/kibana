@@ -32,14 +32,14 @@ spec:
           cronline: '0 0 * * *'
           env:
             IMAGES_CONFIG: kibana/base_image.yml
-          message: Builds Kibana VM images daily
+          message: Builds Kibana VM base image daily
         daily kibana cache layer build:
           branch: main
           cronline: '0 1 * * *' # make sure this runs after the daily kibana base image build
           env:
             IMAGES_CONFIG: kibana/base_image.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
-          message: Builds Kibana VM images daily
+          message: Builds Kibana VM cache warmup daily
         daily kibana fips image build:
           branch: main
           cronline: '0 4 * * *' # make sure this runs after the daily kibana cache image build
