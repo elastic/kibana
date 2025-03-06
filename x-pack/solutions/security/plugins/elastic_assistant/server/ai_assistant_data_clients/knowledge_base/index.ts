@@ -69,7 +69,6 @@ import {
 import {
   ASSISTANT_ELSER_INFERENCE_ID,
   ELASTICSEARCH_ELSER_INFERENCE_ID,
-  ELSER_MODEL_2,
 } from './field_maps_configuration';
 import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
@@ -91,8 +90,8 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
-  assistantDefaultInferenceEndpoint: boolean;
   trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+  modelIdOverride: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -164,8 +163,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   public getInferenceEndpointId = async () => {
-    const elserId = await this.options.getElserId();
-    if (!this.options.assistantDefaultInferenceEndpoint || !ELSER_MODEL_2.includes(elserId)) {
+    // Don't use default enpdpoint for pt_tiny_elser
+    if (this.options.modelIdOverride) {
       return ASSISTANT_ELSER_INFERENCE_ID;
     }
     const esClient = await this.options.elasticsearchClientPromise;
@@ -274,7 +273,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         // it's being used in the mapping so we need to force delete
         force: true,
       });
-      this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+      this.options.logger.debug(
+        `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
+      );
     } catch (error) {
       this.options.logger.error(
         `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
@@ -419,11 +420,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!inferenceExists) {
         await this.createInferenceEndpoint();
 
-        this.options.logger.debug(
+        this.options.logger.error(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
         );
       } else {
-        this.options.logger.debug(
+        this.options.logger.error(
           `Inference endpoint for ELSER model '${elserId}' is already deployed`
         );
       }
@@ -455,6 +456,21 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           await loadSecurityLabs(this, this.options.logger);
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
+        }
+      }
+
+      const inferenceId = await this.getInferenceEndpointId();
+
+      if (
+        inferenceId !== ASSISTANT_ELSER_INFERENCE_ID &&
+        (await this.isInferenceEndpointExists(ASSISTANT_ELSER_INFERENCE_ID))
+      ) {
+        try {
+          await this.deleteInferenceEndpoint();
+        } catch (error) {
+          this.options.logger.debug(
+            `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID}`
+          );
         }
       }
     } catch (e) {
