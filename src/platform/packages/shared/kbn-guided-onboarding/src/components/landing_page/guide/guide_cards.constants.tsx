@@ -10,9 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactNode } from 'react';
+import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { GuideId } from '../../../..';
 import { GuideCardSolutions } from './guide_cards';
-
 export interface GuideCardConstants {
   solution: GuideCardSolutions;
   title: string | ReactNode;
@@ -31,6 +31,7 @@ export interface GuideCardConstants {
   icon: string;
   // the guide will open a specific modal ESApiModal
   openEndpointModal?: boolean;
+  locatorParams?: ObservabilityOnboardingLocatorParams;
 }
 
 export const guideCards: GuideCardConstants[] = [
@@ -100,9 +101,9 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.logsObservability.title', {
       defaultMessage: 'Collect and analyze my logs',
     }),
-    navigateTo: {
-      appId: 'observabilityOnboarding',
-      path: '/?category=logs',
+    locatorParams: {
+      source: 'auto-detect',
+      category: 'host',
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,
@@ -132,9 +133,9 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title', {
       defaultMessage: 'Monitor my host metrics',
     }),
-    navigateTo: {
-      appId: 'observabilityOnboarding',
-      path: '/?category=infra',
+    locatorParams: {
+      source: 'auto-detect',
+      category: 'host',
     },
     telemetryId: 'onboarding--observability--hosts',
     order: 8,
@@ -148,9 +149,9 @@ export const guideCards: GuideCardConstants[] = [
         defaultMessage: 'Monitor Kubernetes clusters',
       }
     ),
-    navigateTo: {
-      appId: 'observabilityOnboarding',
-      path: '/kubernetes',
+    locatorParams: {
+      source: 'kubernetes',
+      category: 'host',
     },
     telemetryId: 'onboarding--observability--kubernetes',
     order: 11,

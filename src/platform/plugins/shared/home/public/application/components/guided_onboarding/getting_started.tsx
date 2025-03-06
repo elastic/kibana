@@ -37,6 +37,10 @@ import {
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
 import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -55,7 +59,12 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud, share } =
+    getServices();
+
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -235,6 +244,7 @@ export const GettingStarted = () => {
       activeFilter={filter as GuideFilterValues}
       guidesState={guidesState}
       filteredCards={filteredCards}
+      onboardingLocator={onboardingLocator}
     />
   );
 
