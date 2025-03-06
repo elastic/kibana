@@ -269,7 +269,7 @@ export async function getAgentsByKuery(
   const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
 
   const queryAgents = async (
-    queryOptions: { from: number; size: number } | { searchAfter: SortResults }
+    queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
   ) => {
     const aggs = {
       ...(aggregations || getStatusSummary
@@ -295,10 +295,11 @@ export async function getAgentsByKuery(
       { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
     >({
       ...('from' in queryOptions
-        ? { from: queryOptions.from, size: queryOptions.size }
+        ? { from: queryOptions.from }
         : {
             search_after: queryOptions.searchAfter,
           }),
+      size: queryOptions.size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
       runtime_mappings: runtimeFields,
@@ -323,7 +324,7 @@ export async function getAgentsByKuery(
 
   try {
     res = await queryAgents(
-      searchAfter ? { searchAfter } : { from: (page - 1) * perPage, size: perPage }
+      searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
     );
   } catch (err) {
     appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
@@ -371,7 +372,7 @@ export async function getAgentsByKuery(
   return {
     agents,
     total,
-    page,
+    ...(searchAfter ? { page: 0 } : { page }),
     perPage,
     ...(pitIdToUse ? { pit: pitIdToUse } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),

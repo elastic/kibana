@@ -186,15 +186,17 @@ export const getAgentsHandler: FleetRequestHandler<
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
   // Unwrap searchAfter from request query
-  let searchAfter: [number, string] | undefined;
+  let searchAfter: any[] | undefined;
   if (request.query.searchAfter) {
-    const parts = request.query.searchAfter.split(',');
-    if (parts.length === 2 && !isNaN(Number(parts[0]))) {
-      searchAfter = [Number(parts[0]), parts[1]];
-    } else {
-      return response.badRequest({
-        body: { message: 'Invalid searchAfter format. Expected "{number},{string}".' },
-      });
+    try {
+      const searchAfterArray = JSON.parse(request.query.searchAfter);
+      if (!Array.isArray(searchAfterArray) || searchAfterArray.length === 0) {
+        response.badRequest({ body: { message: 'searchAfter must be a non-empty array' } });
+      } else {
+        searchAfter = searchAfterArray;
+      }
+    } catch (e) {
+      response.badRequest({ body: { message: 'searchAfter must be a non-empty array' } });
     }
   }
 
@@ -207,6 +209,9 @@ export const getAgentsHandler: FleetRequestHandler<
     sortField: request.query.sortField,
     sortOrder: request.query.sortOrder,
     searchAfter,
+    openPit: request.query.openPit,
+    pitId: request.query.pitId,
+    pitKeepAlive: request.query.pitKeepAlive,
     getStatusSummary: request.query.getStatusSummary,
   });
 

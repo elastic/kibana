@@ -42,7 +42,7 @@ export const GetAgentsRequestSchema = {
       searchAfter: schema.maybe(schema.string()),
       openPit: schema.maybe(schema.boolean()),
       pitId: schema.maybe(schema.string()),
-      pitKeepAlive: schema.maybe(schema.duration()),
+      pitKeepAlive: schema.maybe(schema.string()),
     },
     {
       validate: (request) => {
@@ -52,21 +52,35 @@ export const GetAgentsRequestSchema = {
         // If using PIT search, ensure that all required PIT parameters are provided
         if (usingPIT) {
           if (request.openPit && request.pitId) {
-            return 'You cannot request to open a new point-in-time with an existing pitId or searchAfter parameters';
+            return 'You cannot request to open a new point-in-time with an existing pitId';
           }
           if (!request.pitKeepAlive) {
             return 'You must provide pitKeepAlive when using point-in-time parameters';
           }
         }
 
-        // If not using searchAfter, ensure that pagination parameters are not over the search limit
-        if (!usingSearchAfter && (request.page || 1) * request.perPage > SO_SEARCH_LIMIT) {
+        // Ensure that pagination parameters are not over the search limit
+        if ((request.page || 1) * request.perPage > SO_SEARCH_LIMIT) {
           return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
         }
 
-        // If using searchAfter, ensure that incompatible pagination parameters are not used
-        if (usingSearchAfter && request.page) {
-          return 'You cannot use page parameter when using searchAfter';
+        // If using searchAfter:
+        //   1. ensure that incompatible pagination parameters are not used
+        //   2. ensure that searchAfter is an array
+        if (usingSearchAfter) {
+          if (request.page) {
+            return 'You cannot use page parameter when using searchAfter';
+          }
+          // ensure that searchAfter is an array after parsing json
+          try {
+            const searchAfterArray = JSON.parse(request.searchAfter);
+
+            if (!Array.isArray(searchAfterArray) || searchAfterArray.length === 0) {
+              return 'searchAfter must be a non-empty array';
+            }
+          } catch (e) {
+            return 'searchAfter must be a non-empty array';
+          }
         }
       },
     }
