@@ -15,21 +15,25 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { WorkChatServices } from '../services';
 import { WorkchatChatPage } from './pages/chat';
 import { WorkChatServicesContext } from './context/workchat_services_context';
+import type { WorkChatAppPluginStartDependencies } from '../types';
 
 export const mountApp = async ({
   core,
+  plugins,
   services,
   element,
   history,
 }: {
   core: CoreStart;
+  plugins: WorkChatAppPluginStartDependencies;
   services: WorkChatServices;
   element: HTMLElement;
   history: ScopedHistory;
 }) => {
+  const kibanaServices = { ...core, plugins };
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider services={core}>
+      <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
           <WorkChatServicesContext.Provider value={services}>
             <Router history={history}>

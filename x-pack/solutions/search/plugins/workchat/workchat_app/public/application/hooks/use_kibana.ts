@@ -7,13 +7,12 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { WorkChatAppPluginStartDependencies } from '../../types';
 
-// TODO: add plugin deps
-export type StartServices<TAdditionalServices> = CoreStart & {
-  plugins: {};
-} & TAdditionalServices & {};
+export type StartServices = CoreStart & {
+  plugins: WorkChatAppPluginStartDependencies;
+};
 
-const useTypedKibana = <AdditionalServices extends object = {}>() =>
-  useKibana<StartServices<AdditionalServices>>();
+const useTypedKibana = () => useKibana<StartServices>();
 
 export { useTypedKibana as useKibana };

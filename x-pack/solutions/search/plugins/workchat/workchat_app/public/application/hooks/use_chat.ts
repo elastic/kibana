@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo, useRef } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import type { ChatEvent, ConversationCreatedEvent } from '../../../common/chat_events';
 import type { Message } from '../../../common/messages';
 import { useWorkChatServices } from './use_workchat_service';
@@ -22,16 +22,12 @@ export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseCh
   const [messages, setMessages] = useState<Message[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
 
-  // const onConversationUpdateRef = useRef(onConversationUpdate);
-  // onConversationUpdateRef.
-
   const send = useCallback(
     async (nextMessage: string) => {
       setMessages((prevMessages) => [...prevMessages, { type: 'user', content: nextMessage }]);
 
-      const events$ = await chatService.converse({ nextMessage, conversationId, agentId });
-
       let chunks = '';
+      const events$ = await chatService.converse({ nextMessage, conversationId, agentId });
 
       events$.subscribe({
         next: (event) => {
@@ -52,8 +48,13 @@ export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseCh
         },
       });
     },
-    [chatService, agentId, conversationId]
+    [chatService, agentId, conversationId, onConversationUpdate]
   );
+
+  const setMessagesExternal = useCallback((newMessages: Message[]) => {
+    setMessages(newMessages);
+    setPendingMessage('');
+  }, []);
 
   const allMessages: Message[] = useMemo(() => {
     return [...messages].concat(
@@ -65,6 +66,6 @@ export const useChat = ({ conversationId, agentId, onConversationUpdate }: UseCh
     send,
     events,
     messages: allMessages,
-    setMessages, // TODO: need abort / state clear / delete pending messages
+    setMessages: setMessagesExternal,
   };
 };

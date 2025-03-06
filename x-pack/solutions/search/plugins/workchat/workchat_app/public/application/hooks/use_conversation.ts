@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useAbortableAsync, AbortableAsyncState } from '@kbn/react-hooks';
 import type { Conversation } from '../../../common/conversations';
@@ -16,7 +15,7 @@ import { useWorkChatServices } from './use_workchat_service';
 
 export const useConversation = ({
   agentId,
-  conversationId: initialConversationId,
+  conversationId,
   onConversationUpdate,
 }: {
   agentId: string;
@@ -24,15 +23,14 @@ export const useConversation = ({
   onConversationUpdate: (update: ConversationCreatedEventPayload) => void;
 }) => {
   const { conversationService } = useWorkChatServices();
-  const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
+  // const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
 
-  useEffect(() => {
-    setConversationId(initialConversationId);
-  }, [initialConversationId]);
+  // useEffect(() => {
+  //   setConversationId(initialConversationId);
+  // }, [initialConversationId]);
 
   const onConversationUpdateInternal = useCallback(
     (update: ConversationCreatedEventPayload) => {
-      setConversationId(update.id);
       onConversationUpdate(update);
     },
     [onConversationUpdate]

@@ -6,12 +6,13 @@
  */
 
 import { css } from '@emotion/css';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConversationCreatedEventPayload } from '../../../common/chat_events';
 import { Chat } from '../components/chat';
+import { ChatHeader } from '../components/chat_header';
 import { ConversationList } from '../components/conversation_list';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { useConversationList } from '../hooks/use_conversation_list';
@@ -41,16 +42,13 @@ export const WorkchatChatPage: React.FC<{}> = () => {
     conversationId: string | undefined;
   }>();
 
-  const actualConversationId = useMemo(() => {
+  const conversationId = useMemo(() => {
     return conversationIdFromParams === newConversationId ? undefined : conversationIdFromParams;
   }, [conversationIdFromParams]);
-
-  const [conversationId, setConversationId] = useState<string | undefined>(actualConversationId);
 
   const onConversationUpdate = useCallback(
     (changes: ConversationCreatedEventPayload) => {
       if (!conversationId) {
-        setConversationId(changes.id);
         application.navigateToApp('workchat', { path: `/chat/${changes.id}` });
       }
       refreshConversations();
@@ -69,6 +67,7 @@ export const WorkchatChatPage: React.FC<{}> = () => {
       <KibanaPageTemplate.Sidebar>
         <ConversationList
           conversations={conversations}
+          activeConversationId={conversationId}
           onConversationSelect={(newConvId) => {
             application.navigateToApp('workchat', { path: `/chat/${newConvId}` });
           }}
@@ -86,22 +85,8 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           justifyContent="center"
           responsive={false}
         >
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasBorder={true} hasShadow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow>
-                  <EuiTitle>
-                    <h2>WorkChat</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>You know, for chat!</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <Chat conversationId={actualConversationId} onConversationUpdate={onConversationUpdate} />
+          <ChatHeader />
+          <Chat conversationId={conversationId} onConversationUpdate={onConversationUpdate} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
