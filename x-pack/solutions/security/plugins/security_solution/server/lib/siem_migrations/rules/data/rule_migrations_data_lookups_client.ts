@@ -16,11 +16,12 @@ export class RuleMigrationsDataLookupsClient {
   constructor(
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger
+    protected logger: Logger,
+    protected spaceId: string
   ) {}
 
   async create(lookupName: string, data: LookupData): Promise<string> {
-    const indexName = `${LOOKUPS_INDEX_PREFIX}${lookupName}`;
+    const indexName = `${LOOKUPS_INDEX_PREFIX}-${this.spaceId}-${lookupName}`;
     try {
       await this.executeEs(() =>
         this.esScopedClient.asCurrentUser.indices.create({
