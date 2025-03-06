@@ -10,6 +10,8 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -40,6 +42,7 @@ import { EventsCountBadge } from '../shared/layout';
  * at this current time.
  */
 
+const emptyFieldsList: string[] = [];
 export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string }> = ({
   timelineId,
 }) => {
@@ -158,15 +161,15 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
 
   const { defaultColumns } = useTimelineColumns(columns);
 
-  const [_, { totalCount }] = useTimelineEvents({
+  const [dataLoadingState, { totalCount }] = useTimelineEvents({
     dataViewId,
     endDate: end,
-    fields: [],
+    fields: emptyFieldsList,
     filterQuery: combinedQueries?.filterQuery,
     id: timelineId,
     indexNames: selectedPatterns,
     language: kqlQuery.language,
-    limit: 0,
+    limit: 0, // We only care about the totalCount here
     runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
@@ -208,9 +211,14 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
   }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
   // </Synchronisation of the timeline data service>
 
-  return showEventsCountBadge ? (
+  if (!showEventsCountBadge) return null;
+
+  return dataLoadingState === DataLoadingState.loading ||
+    dataLoadingState === DataLoadingState.loadingMore ? (
+    <EuiLoadingSpinner size="s" />
+  ) : (
     <EventsCountBadge data-test-subj="query-events-count">{totalCount}</EventsCountBadge>
-  ) : null;
+  );
 };
 
 const TimelineQueryTabEventsCount = React.memo(TimelineQueryTabEventsCountComponent);
