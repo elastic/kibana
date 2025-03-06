@@ -227,7 +227,7 @@ export function initializeReduxSync({
           if (a.lat !== b.lat) return false;
           if (a.lon !== b.lon) return false;
           // Map may not restore reset zoom exactly
-          return Math.abs(a.zoom - b.zoom) < 0.05
+          return Math.abs(a.zoom - b.zoom) < 0.05;
         },
       ],
       openTOCDetails: [
