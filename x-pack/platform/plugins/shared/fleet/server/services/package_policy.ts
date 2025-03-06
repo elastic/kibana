@@ -7,7 +7,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
-import { indexBy } from 'lodash/fp';
+import { chunk, indexBy, uniq } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -86,6 +86,7 @@ import {
   AgentPolicyNotFoundError,
   InputNotFoundError,
   StreamNotFoundError,
+  FleetNotFoundError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -102,6 +103,7 @@ import type { ExternalCallback } from '..';
 
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
@@ -390,7 +392,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
-      inputs = await _compilePackagePolicyInputs(
+      inputs = _compilePackagePolicyInputs(
         pkgInfo,
         enrichedPackagePolicy.vars || {},
         inputs,
@@ -816,7 +818,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     ids: string[],
     options: { ignoreMissing?: boolean } = {}
-  ): Promise<PackagePolicy[] | null> {
+  ): Promise<PackagePolicy[]> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
@@ -824,9 +826,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         type: savedObjectType,
       }))
     );
-    if (!packagePolicySO) {
-      return null;
-    }
 
     const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
@@ -1179,7 +1178,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
-    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      fromBulkUpgrade?: boolean;
+      asyncDeploy?: boolean;
+      oldPackagePolicies?: PackagePolicy[];
+    }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
     failedPolicies: Array<{
@@ -1196,10 +1201,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
       });
     }
-    const oldPackagePolicies = await this.getByIDs(
-      soClient,
-      packagePolicyUpdates.map((p) => p.id)
-    );
+    const oldPackagePolicies = options?.oldPackagePolicies
+      ? options?.oldPackagePolicies
+      : await this.getByIDs(
+          soClient,
+          packagePolicyUpdates.map((p) => p.id)
+        );
 
     if (!oldPackagePolicies || oldPackagePolicies.length === 0) {
       throw new PackagePolicyNotFoundError('Package policy not found');
@@ -1269,7 +1276,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               allSecretsToDelete.push(...secretsRes.secretsToDelete);
               inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
             }
-            inputs = await _compilePackagePolicyInputs(
+            inputs = _compilePackagePolicyInputs(
               pkgInfo,
               packagePolicy.vars || {},
               inputs,
@@ -1287,8 +1294,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        // Handle component template/mappings updates for experimental features, e.g. synthetic source
-        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+        if (!options?.fromBulkUpgrade) {
+          // Handle component template/mappings updates for experimental features, e.g. synthetic source
+          await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+        }
 
         policiesToUpdate.push({
           type: savedObjectType,
@@ -1702,6 +1711,128 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
+  public async bulkUpgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser; force?: boolean },
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyResponse> {
+    // Bulk upgrade packages policies
+    // 1. bulk get policies
+    // 2. get pkg version if not specificed based on installed version
+    // 3. for each policies get upgraded
+    // 4. bulkUpdate policies
+    return runWithCache(async () => {
+      const result: UpgradePackagePolicyResponse = [];
+      for (const chunkedIds of chunk(MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, ids)) {
+        const packagePolicies = await this.getByIDs(soClient, chunkedIds, {
+          ignoreMissing: true,
+        });
+        const packagePoliciesById = indexBy('id', packagePolicies);
+
+        const packageVersionMap = new Map<string, string>();
+
+        if (!pkgVersion) {
+          const packageNames =
+            packagePolicies
+              ?.map((policy) => policy.package?.name)
+              .filter((packageName): packageName is string => typeof packageName !== 'undefined') ??
+            [];
+
+          await pMap(
+            uniq(packageNames),
+            async (pkgName) => {
+              const installation = await getInstallation({
+                savedObjectsClient: soClient,
+                pkgName,
+              });
+
+              if (installation) {
+                packageVersionMap.set(pkgName, installation.version);
+              }
+            },
+            {
+              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+            }
+          );
+        }
+
+        const updatedPackagePolicies: Array<NewPackagePolicy & { version?: string; id: string }> =
+          [];
+        for (const id of chunkedIds) {
+          try {
+            const packagePolicy = packagePoliciesById[id];
+            if (!packagePolicy) {
+              throw new FleetNotFoundError(`Package policy ${packagePolicy} not found`);
+            }
+
+            const upgradePkgVersion = pkgVersion
+              ? pkgVersion
+              : packageVersionMap.get(packagePolicy.package?.name ?? '');
+
+            const { packagePolicy: currentPackagePolicy, packageInfo } =
+              await this.getUpgradePackagePolicyInfo(
+                soClient,
+                id,
+                packagePolicy,
+                upgradePkgVersion
+              );
+
+            if (currentPackagePolicy.is_managed && !options?.force) {
+              throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+            }
+
+            const updatePackagePolicy = await this.doUpgrade(
+              soClient,
+              esClient,
+              currentPackagePolicy,
+              packageInfo
+            );
+
+            updatedPackagePolicies.push({ ...updatePackagePolicy, id });
+          } catch (error) {
+            result.push({
+              id,
+              success: false,
+              ...fleetErrorToResponseOptions(error),
+            });
+          }
+        }
+
+        const bulkUpdateResults = await this.bulkUpdate(
+          soClient,
+          esClient,
+          updatedPackagePolicies,
+          {
+            asyncDeploy: true,
+            fromBulkUpgrade: true,
+            force: options?.force,
+            user: options?.user,
+            oldPackagePolicies: packagePolicies,
+          }
+        );
+
+        for (const res of bulkUpdateResults.updatedPolicies ?? []) {
+          result.push({
+            id: res.id,
+            name: res.name,
+            success: true,
+          });
+        }
+
+        for (const res of bulkUpdateResults.failedPolicies ?? []) {
+          result.push({
+            id: res.packagePolicy.id as string,
+            success: false,
+            ...fleetErrorToResponseOptions(res.error as FleetError),
+          });
+        }
+      }
+      return result;
+    });
+  }
+
   public async upgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1715,26 +1846,32 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       for (const id of ids) {
         try {
-          const {
-            packagePolicy: currentPackagePolicy,
-            packageInfo,
-            experimentalDataStreamFeatures,
-          } = await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
+          const { packagePolicy: currentPackagePolicy, packageInfo } =
+            await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
           if (currentPackagePolicy.is_managed && !options?.force) {
             throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
           }
 
-          await this.doUpgrade(
+          const updatePackagePolicy = await this.doUpgrade(
             soClient,
             esClient,
-            id,
             currentPackagePolicy,
-            result,
-            packageInfo,
-            experimentalDataStreamFeatures,
-            options
+            packageInfo
           );
+
+          const updateOptions = {
+            skipUniqueNameVerification: true,
+            ...options,
+          };
+
+          await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
+
+          result.push({
+            id,
+            name: updatePackagePolicy.name,
+            success: true,
+          });
         } catch (error) {
           result.push({
             id,
@@ -1751,12 +1888,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   private async doUpgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    id: string,
     packagePolicy: PackagePolicy,
-    result: UpgradePackagePolicyResponse,
     packageInfo: PackageInfo,
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[],
-    options?: { user?: AuthenticatedUser }
+    assetsMap?: PackagePolicyAssetsMap
   ) {
     const updatePackagePolicy = updatePackageInputs(
       {
@@ -1770,12 +1904,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageInfo,
       packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
     );
-    const assetsMap = await getAgentTemplateAssetsMap({
-      logger: appContextService.getLogger(),
-      packageInfo,
-      savedObjectsClient: soClient,
-    });
-    updatePackagePolicy.inputs = await _compilePackagePolicyInputs(
+    if (!assetsMap) {
+      assetsMap = await getAgentTemplateAssetsMap({
+        logger: appContextService.getLogger(),
+        packageInfo,
+        savedObjectsClient: soClient,
+      });
+    }
+
+    updatePackagePolicy.inputs = _compilePackagePolicyInputs(
       packageInfo,
       updatePackagePolicy.vars || {},
       updatePackagePolicy.inputs as PackagePolicyInput[],
@@ -1783,18 +1920,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
     updatePackagePolicy.elasticsearch = packageInfo.elasticsearch;
 
-    const updateOptions = {
-      skipUniqueNameVerification: true,
-      ...options,
-    };
-
-    await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
-
-    result.push({
-      id,
-      name: packagePolicy.name,
-      success: true,
-    });
+    return updatePackagePolicy;
   }
 
   public async getUpgradeDryRunDiff(
@@ -2504,26 +2630,24 @@ export function getInputsWithStreamIds(
   });
 }
 
-export async function _compilePackagePolicyInputs(
+export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
   assetsMap: PackagePolicyAssetsMap
-): Promise<PackagePolicyInput[]> {
-  const inputsPromises = inputs.map(async (input) => {
-    const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
-    const compiledStreams = await _compilePackageStreams(pkgInfo, vars, input, assetsMap);
+): PackagePolicyInput[] {
+  return inputs.map((input) => {
+    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
+    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
     return {
       ...input,
       compiled_input: compiledInput,
       streams: compiledStreams,
     };
   });
-
-  return Promise.all(inputsPromises);
 }
 
-async function _compilePackagePolicyInput(
+function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
@@ -2555,7 +2679,7 @@ async function _compilePackagePolicyInput(
     return undefined;
   }
 
-  const [pkgInputTemplate] = await getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
+  const [pkgInputTemplate] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
     path.endsWith(`/agent/input/${packageInput.template_path!}`)
   );
 
@@ -2572,17 +2696,15 @@ async function _compilePackagePolicyInput(
   );
 }
 
-async function _compilePackageStreams(
+function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   assetsMap: PackagePolicyAssetsMap
 ) {
-  const streamsPromises = input.streams.map((stream) =>
+  return input.streams.map((stream) =>
     _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
   );
-
-  return await Promise.all(streamsPromises);
 }
 
 // temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
@@ -2642,7 +2764,7 @@ export function _applyIndexPrivileges(
   return streamOut;
 }
 
-async function _compilePackageStream(
+function _compilePackageStream(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
@@ -2689,7 +2811,7 @@ async function _compilePackageStream(
 
   const datasetPath = packageDataStream.path;
 
-  const [pkgStreamTemplate] = await getAssetsDataFromAssetsMap(
+  const [pkgStreamTemplate] = getAssetsDataFromAssetsMap(
     pkgInfo,
     assetsMap,
     (path: string) => path.endsWith(streamFromPkg.template_path),
@@ -2781,7 +2903,7 @@ async function getPackageInfoForPackagePolicies(
   packagePolicies: NewPackagePolicyWithId[],
   soClient: SavedObjectsClientContract
 ) {
-  const pkgInfoMap = new Map<string, PackagePolicyPackage>();
+  const pkgInfoMap = new Map<string, { name: string; version: string }>();
 
   packagePolicies.forEach(({ package: pkg }) => {
     if (pkg) {
