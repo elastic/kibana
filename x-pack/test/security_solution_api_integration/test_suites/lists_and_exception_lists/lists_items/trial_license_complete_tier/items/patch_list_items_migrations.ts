@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { PatchListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_ITEM_URL, LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL, LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import {
   createListsIndex,
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const { body } = await supertest
-            .patch(LIST_ITEM_URL)
+            .patch(LIST_ITEMS_URL)
             .set('kbn-xsrf', 'true')
             .send(patchPayload)
             .expect(200);
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const { body } = await supertest
-            .patch(LIST_ITEM_URL)
+            .patch(LIST_ITEMS_URL)
             .set('kbn-xsrf', 'true')
             .send(patchPayload)
             .expect(200);

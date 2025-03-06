@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 
-import { LIST_URL, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_URL, LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 import { LIST_ITEM_ID, LIST_ID } from '@kbn/lists-plugin/common/constants.mock';
 import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_item_schema.mock';
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should give a validation error if the list_id is not supplied', async () => {
         const { body } = await supertest
-          .get(`${LIST_ITEM_URL}/_find`)
+          .get(`${LIST_ITEMS_URL}/_find`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(400);
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should give a 404 if the list has not been created yet', async () => {
         const { body } = await supertest
-          .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ITEM_ID}`)
+          .get(`${LIST_ITEMS_URL}/_find?list_id=${LIST_ITEM_ID}`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(404);
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const { body } = await supertest
-          .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
+          .get(`${LIST_ITEMS_URL}/_find?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const { body } = await supertest
-          .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}&filter=`)
+          .get(`${LIST_ITEMS_URL}/_find?list_id=${LIST_ID}&filter=`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -114,10 +114,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await supertest.post(LIST_URL).set('kbn-xsrf', 'true').send(listMock).expect(200);
 
-        await supertest.post(LIST_ITEM_URL).set('kbn-xsrf', 'true').send(listItemMock).expect(200);
+        await supertest.post(LIST_ITEMS_URL).set('kbn-xsrf', 'true').send(listItemMock).expect(200);
 
         const { body } = await supertest
-          .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
+          .get(`${LIST_ITEMS_URL}/_find?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
