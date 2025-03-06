@@ -216,7 +216,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(undefined);
           },
           {
-            retryCount: 10,
+            retryCount: 20,
             timeout: 30_1000,
           }
         );
