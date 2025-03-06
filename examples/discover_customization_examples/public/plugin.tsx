@@ -25,6 +25,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { internalStateActions } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -241,9 +242,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >();
           const stateStorage = stateContainer.stateStorage;
           const dataView = useObservable(
-            stateContainer.internalState.state$,
-            stateContainer.internalState.getState()
-          ).dataView;
+            stateContainer.runtimeStateManager.currentDataView$,
+            stateContainer.runtimeStateManager.currentDataView$.getValue()
+          );
 
           useEffect(() => {
             if (!controlGroupAPI) {
@@ -262,7 +263,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
 
             const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.internalState.transitions.setCustomFilters(newFilters);
+              stateContainer.internalState.dispatch(
+                internalStateActions.setCustomFilters(newFilters)
+              );
               stateContainer.actions.fetchData();
             });
 

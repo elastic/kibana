@@ -42,12 +42,12 @@ import {
 } from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import { InternalState } from '../state_management/discover_internal_state_container';
+import { InternalStateStore } from '../state_management/redux';
 
 export interface FetchDeps {
   abortController: AbortController;
   getAppState: () => DiscoverAppState;
-  getInternalState: () => InternalState;
+  internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -72,7 +72,7 @@ export function fetchAll(
   const {
     initialFetchStatus,
     getAppState,
-    getInternalState,
+    internalState,
     services,
     inspectorAdapters,
     savedSearch,
@@ -97,8 +97,8 @@ export function fetchAll(
         dataView,
         services,
         sort: getAppState().sort as SortOrder[],
-        customFilters: getInternalState().customFilters,
-        inputTimeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+        customFilters: internalState.getState().customFilters,
+        inputTimeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -119,7 +119,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
-          timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+          timeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -222,7 +222,7 @@ export async function fetchMoreDocuments(
   fetchDeps: FetchDeps
 ): Promise<void> {
   try {
-    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
+    const { getAppState, internalState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
@@ -250,7 +250,7 @@ export async function fetchMoreDocuments(
       dataView,
       services,
       sort: getAppState().sort as SortOrder[],
-      customFilters: getInternalState().customFilters,
+      customFilters: internalState.getState().customFilters,
     });
 
     // Fetch more documents
