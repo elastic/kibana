@@ -2283,21 +2283,21 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.11.tgz#edad01998f2de79b5d6b401f8951fbe10353e2d6"
   integrity sha512-M8tDj6zDkbM/K4G/MVol64CUO2e+d9wAlZWZ7odcZHBTAbxD35I3HQy0l0+z6EUzE02+2jUmPCK8IykpKLjPdg==
 
-"@elastic/eui-theme-common@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.10.tgz#253da1337abae656ab93917bb3ed7e6f48e5f9a1"
-  integrity sha512-MruijLreN1VpyQgUK2pXcdFIbpYpjc3ZaZ+f0r1Aa0KON935wIf7VAb861tYPmAJxaf+4X4kyoqS0F+8rO9tbg==
+"@elastic/eui-theme-common@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.11.tgz#950d06a652a25b09c46cec8f16a449223ada45a3"
+  integrity sha512-DV8qX45R/01SWdCoINWbFwJgMdWHYuq7ZmdY/J3pE1QNKIGv52SdOpiW+XwhT8S3dOv+XFidoywVT9pAjcMmyA==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@99.4.0-borealis.0":
-  version "99.4.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.4.0-borealis.0.tgz#8637698371fa3c6827da4f7cb689d3cd39de3841"
-  integrity sha512-ws2OVe67WrO9CBkembcqBXFh3Lo10HRvk19MZZL22RoZ3dyGlNr0WTxvZpLPEykycOaOCnf3hAo9p8V16wPWvw==
+"@elastic/eui@100.0.0":
+  version "100.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-100.0.0.tgz#7da6beb5c9b2592a8784835f1450388dcda5f51c"
+  integrity sha512-8A1pYmrw3N/N8ny6tDRYYSmetOBgz3j7KkARr+LWskHMLU7l+nduK+1dVn19qR15C85ufKOyZxAoZeYpxsppsQ==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.10"
+    "@elastic/eui-theme-common" "0.0.11"
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
