@@ -195,11 +195,12 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
         ? StatusCheckStates.HAS_DATA
         : StatusCheckStates.NO_DATA;
 
-    this.setState((prevState) => {
-      const newStatusCheckStates = [...prevState.statusCheckStates];
-      newStatusCheckStates[instructionSetIndex] = nextStatusCheckState;
-      return { statusCheckStates: newStatusCheckStates };
-    });
+    this.setState((prevState) => ({
+      statusCheckStates: {
+        ...prevState.statusCheckStates,
+        [instructionSetIndex]: nextStatusCheckState,
+      },
+    }));
   };
 
   fetchCustomStatusCheck = async (customStatusCheckCallback: CustomStatusCheckCallback) => {

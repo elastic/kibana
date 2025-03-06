@@ -26,12 +26,6 @@ const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security
 export interface HomeAppProps {
   directories: FeatureCatalogueEntry[];
   solutions: FeatureCatalogueSolution[];
-  match?: {
-    params: {
-      id: string;
-      tab: string;
-    };
-  };
 }
 
 export function HomeApp({ directories, solutions }: HomeAppProps) {
