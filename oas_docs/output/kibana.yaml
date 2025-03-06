@@ -20246,8 +20246,40 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  secrets:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      ssl:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   sourceURI:
                                     type: string
+                                  ssl:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      certificate:
+                                        type: string
+                                      certificate_authorities:
+                                        items:
+                                          type: string
+                                        type: array
+                                      key:
+                                        type: string
+                                      renegotiation:
+                                        type: string
+                                      verification_mode:
+                                        type: string
                                 required:
                                   - sourceURI
                               features:
