@@ -22,8 +22,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const SPACE_ID = 'default';
   const ARCHIVES = [
-    'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
-    'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
     'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
   ];
 
