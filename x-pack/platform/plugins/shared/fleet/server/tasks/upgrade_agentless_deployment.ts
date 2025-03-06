@@ -229,6 +229,25 @@ export class UpgradeAgentlessDeploymentsTask {
       throw e;
     }
 
+    try {
+      this.logger.info(`${LOGGER_SUBJECT} checking if the lastest version is agentless supported`);
+      const agentlessSupportedVersion = await agentlessAgentService.getAgentVersionSupported(
+        agentPolicy.id,
+        latestAgentVersion
+      );
+      this.logger.info(
+        `${LOGGER_SUBJECT} latest version ${latestAgentVersion} and agentless supported version ${agentlessSupportedVersion}`
+      );
+      if (agentlessSupportedVersion !== latestAgentVersion) {
+        latestAgentVersion = agentlessSupportedVersion;
+      }
+    } catch (e) {
+      this.logger.error(
+        `${LOGGER_SUBJECT} Failed to check if the latest version is agentless supported: ${e}`
+      );
+      throw e;
+    }
+
     // Compare the current agent version with the latest agent version And upgrade if necessary
     if (
       agent.status === 'online' &&

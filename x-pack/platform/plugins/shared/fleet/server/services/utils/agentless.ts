@@ -18,7 +18,7 @@ export const isAgentlessEnabled = () => {
 const AGENTLESS_ESS_API_BASE_PATH = '/api/v1/ess';
 const AGENTLESS_SERVERLESS_API_BASE_PATH = '/api/v1/serverless';
 
-type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}`;
+type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}` | `/versions/${string}`;
 
 export interface AgentlessConfig {
   enabled?: boolean;
