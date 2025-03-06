@@ -40,6 +40,7 @@ import {
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -86,6 +87,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleCustomizationStatus = detectionRulesClient.getRuleCustomizationStatus();
           const actionsClient = ctx.actions.getActionsClient();
@@ -159,6 +161,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
+            prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
             ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
           });
 
