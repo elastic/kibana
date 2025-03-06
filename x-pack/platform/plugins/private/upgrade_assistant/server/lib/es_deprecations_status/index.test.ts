@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 import * as esMigrationsMock from '../__fixtures__/es_deprecations';
-import type { DataSounceExclusions, FeatureSet } from '../../../common/types';
+import type { DataSourceExclusions, FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
 import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
@@ -24,7 +24,7 @@ describe('getESUpgradeStatus', () => {
     mlSnapshots: true,
     migrateDataStreams: true,
   };
-  const dataSourceExclusions: DataSounceExclusions = {};
+  const dataSourceExclusions: DataSourceExclusions = {};
 
   const resolvedIndices = {
     indices: fakeIndexNames.map((indexName) => {
