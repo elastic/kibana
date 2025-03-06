@@ -45,7 +45,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [Scenario: Importing a mixture of new prebuilt and custom rules](#scenario-importing-a-mixture-of-new-prebuilt-and-custom-rules)
     - [Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules](#scenario-importing-a-mixture-of-prebuilt-and-custom-rules-on-top-of-existing-rules)
   - [Importing prebuilt rules when the package is not installed](#importing-prebuilt-rules-when-the-package-is-not-installed)
-    - [Scenario: Importing a prebuilt rule when the rules package is not installed](#scenario-importing-a-prebuilt-rule-when-the-rules-package-is-not-installed)
+    - [Scenario: Importing new prebuilt rules when the package is not installed](#scenario-importing-new-prebuilt-rules-when-the-package-is-not-installed)
+    - [Scenario: Importing prebuilt rules on top of existing rules when the package is not installed](#scenario-importing-prebuilt-rules-on-top-of-existing-rules-when-the-package-is-not-installed)
   - [Converting between prebuilt and custom rules](#converting-between-prebuilt-and-custom-rules)
     - [Scenario: Importing a custom rule with a matching prebuilt `rule_id` and `version`](#scenario-importing-a-custom-rule-with-a-matching-prebuilt-rule_id-and-version)
     - [Scenario: Importing a prebuilt rule with a non-existent `rule_id`](#scenario-importing-a-prebuilt-rule-with-a-non-existent-rule_id)
@@ -79,6 +80,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **This rule is already installed**: a prebuilt rule with the same `rule_id` has been already installed and exists as an alerting rule saved object.
 - **This rule is not created yet**: a custom rule with the same `rule_id` hasn't been created yet and doesn't exist as an alerting rule saved object.
 - **This rule is already created**: a custom rule with the same `rule_id` has been already created and exists as an alerting rule saved object.
+- **This rule has a base version in the installed package**: package with prebuilt rules has been installed, and the rule's `rule_id` and `version` fields match one of the rule assets from this package.
+- **This rule has a base version in the latest package**: the rule's `rule_id` and `version` fields match one of the rule assets from the latest version of the package with prebuilt rules. It is likely assumed or stated explicitly that the latest package hasn't been installed yet.
 
 ## Requirements
 
@@ -86,8 +89,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 Assumptions about test environments and scenarios outlined in this test plan.
 
+Unless explicitly indicated otherwise:
+
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
-- The `overwrite` import request parameter is set to `true`, unless explicitly indicated otherwise.
+- Package with prebuilt rules is already installed, and rule assets from it are stored in Elasticsearch.
+- The `overwrite` import request parameter is set to `true`.
 
 ### Technical requirements
 
@@ -119,7 +125,7 @@ User stories:
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And this rule has a base version (its rule_id and version match a rule asset)
+And this rule has a base version in the installed package
 And this rule is equal to its base version
 And this rule is not installed
 When the user imports the rule
@@ -135,7 +141,7 @@ And the created rule's parameters should match the import payload
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And this rule has a base version (its rule_id and version match a rule asset)
+And this rule has a base version in the installed package
 And this rule is equal to its base version
 And this rule is already installed and is not customized
 When the user imports the rule
@@ -151,7 +157,7 @@ And the updated rule's parameters should match the import payload
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And this rule has a base version (its rule_id and version match a rule asset)
+And this rule has a base version in the installed package
 And this rule is equal to its base version
 And this rule is already installed and is customized
 When the user imports the rule
@@ -169,7 +175,7 @@ And the updated rule's parameters should match the import payload
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And this rule has a base version (its rule_id and version match a rule asset)
+And this rule has a base version in the installed package
 And this rule is different from its base version
 And this rule is not installed
 When the user imports the rule
@@ -185,7 +191,7 @@ And the created rule's parameters should match the import payload
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And this rule has a base version (its rule_id and version match a rule asset)
+And this rule has a base version in the installed package
 And this rule is different from its base version
 And this rule is already installed and is not customized
 When the user imports the rule
@@ -201,7 +207,7 @@ And the updated rule's parameters should match the import payload
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And this rule has a base version (its rule_id and version match a rule asset)
+And this rule has a base version in the installed package
 And this rule is different from its base version
 And this rule is already installed and is customized
 When the user imports the rule
@@ -251,7 +257,7 @@ This scenario is a "smoke test" for all the user stories from the [Product requi
 
 ```Gherkin
 Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
-And the prebuilt rules have a base version (their rule_id and version match a rule asset)
+And the prebuilt rules have a base version in the installed package
 And the custom rules' rule_id does NOT match any rule assets from the installed package
 And the rules are not installed or created yet
 When the user imports these rules
@@ -269,7 +275,7 @@ This scenario is a "smoke test" for all the user stories from the [Product requi
 
 ```Gherkin
 Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
-And the prebuilt rules have a base version (their rule_id and version match a rule asset)
+And the prebuilt rules have a base version in the installed package
 And the custom rules' rule_id does NOT match any rule assets from the installed package
 And the rules are already installed or created
 When the user imports these rules
@@ -281,18 +287,38 @@ And the updated rules' parameters should match the import payload
 
 ### Importing prebuilt rules when the package is not installed
 
-#### Scenario: Importing a prebuilt rule when the rules package is not installed
+#### Scenario: Importing new prebuilt rules when the package is not installed
 
-**Automation**: 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
-Given the import payload contains a prebuilt rule
-And its rule_id matches one or a few rule assets from the latest package
-And the package hasn't been installed yet
-When the user imports the rule
-Then the latest package should get installed automatically
-And the rule should be created or updated
-And the ruleSource type should be "external"
+Given the import payload contains two prebuilt rules (non-customized + customized)
+And these rules have a base version in the latest package
+And these rules are not installed yet
+And the package is not installed yet
+When the user imports the rules
+Then the latest package should be installed automatically
+And the rules should be created
+And the created rules should be prebuilt
+And the created rules should be correctly marked as non-customized or customized
+And the created rules' parameters should match the import payload
+```
+
+#### Scenario: Importing prebuilt rules on top of existing rules when the package is not installed
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains two prebuilt rules (non-customized + customized)
+And these rules have a base version in the latest package
+And these rules are already installed
+And the package has been deleted
+When the user imports the rules
+Then the latest package should be installed automatically
+And the rules should be updated
+And the updated rules should be prebuilt
+And the updated rules should be correctly marked as non-customized or customized
+And the updated rules' parameters should match the import payload
 ```
 
 ### Converting between prebuilt and custom rules
