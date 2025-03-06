@@ -43,7 +43,7 @@ const isRecoverable = (err: any) => {
 
 export const getRetryFilter = (
   retryOn: ChatCompleteRetryConfiguration['retryOn'] = 'auto'
-): ((err: any) => boolean) => {
+): ((err: Error) => boolean) => {
   if (typeof retryOn === 'function') {
     return retryOn;
   }

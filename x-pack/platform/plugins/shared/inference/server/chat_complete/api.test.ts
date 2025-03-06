@@ -135,8 +135,7 @@ describe('createChatCompleteApi', () => {
     it('implicitly retries errors when configured to', async () => {
       let count = 0;
       inferenceAdapter.chatComplete.mockImplementation(() => {
-        count++;
-        if (count < 3) {
+        if (++count < 3) {
           throw new Error(`Failing on attempt ${count}`);
         }
         return of(chunkEvent('chunk-1'), chunkEvent('chunk-2'));

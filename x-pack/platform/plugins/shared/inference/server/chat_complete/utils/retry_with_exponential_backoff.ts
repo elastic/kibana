@@ -25,7 +25,7 @@ export function retryWithExponentialBackoff<T>({
   maxRetry?: number;
   initialDelay?: number;
   backoffMultiplier?: number;
-  errorFilter?: (error: any) => boolean;
+  errorFilter?: (error: Error) => boolean;
 }) {
   return retry<T>({
     count: maxRetry,

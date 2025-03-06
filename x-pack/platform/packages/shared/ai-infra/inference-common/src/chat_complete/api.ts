@@ -139,7 +139,7 @@ export interface ChatCompleteRetryConfiguration {
    *
    * Defaults to "auto"
    */
-  retryOn?: 'all' | 'auto' | ((err: any) => boolean);
+  retryOn?: 'all' | 'auto' | ((err: Error) => boolean);
   /**
    * The initial delay for incremental backoff, in ms.
    *
