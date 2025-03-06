@@ -14,16 +14,18 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AlertSelection } from './alert_selection';
-import { Footer } from './footer';
-import * as i18n from './translations';
-import { getDefaultQuery } from '../helpers';
 import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
+import { useKibana } from '../../../common/lib/kibana';
+import { Footer } from './footer';
+import { getDefaultQuery } from '../helpers';
+import * as i18n from './translations';
 
 export const DEFAULT_STACK_BY_FIELD = 'kibana.alert.rule.name';
 
@@ -59,6 +61,9 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
   });
+
+  const { uiSettings } = useKibana().services;
+  const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
 
   const [alertSummaryStackBy0, setAlertSummaryStackBy0] = useState<string>(DEFAULT_STACK_BY_FIELD);
   const [alertsPreviewStackBy0, setAlertsPreviewStackBy0] =
@@ -110,6 +115,29 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
 
   const numericMaxAlerts = useMemo(() => getMaxAlerts(localMaxAlerts), [localMaxAlerts]);
 
+  useEffect(() => {
+    let isSubscribed = true;
+
+    // init the Filter manager with the local filters:
+    filterManager.current.setFilters(localFilters);
+
+    // subscribe to filter updates:
+    const subscription = filterManager.current.getUpdates$().subscribe({
+      next: () => {
+        if (isSubscribed) {
+          const newFilters = filterManager.current.getFilters();
+
+          setLocalFilters(newFilters);
+        }
+      },
+    });
+
+    return () => {
+      isSubscribed = false;
+      subscription.unsubscribe();
+    };
+  }, [localFilters]);
+
   return (
     <EuiFlyoutResizable
       aria-labelledby={flyoutTitleId}
@@ -133,13 +161,13 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
           alertsPreviewStackBy0={alertsPreviewStackBy0}
           alertSummaryStackBy0={alertSummaryStackBy0}
           end={localEnd}
+          filterManager={filterManager.current}
           filters={localFilters}
           maxAlerts={numericMaxAlerts}
           query={localQuery}
           setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
           setAlertSummaryStackBy0={setAlertSummaryStackBy0}
           setEnd={setLocalEnd}
-          setFilters={setLocalFilters}
           setMaxAlerts={setLocalMaxAlerts}
           setQuery={setLocalQuery}
           setStart={setLocalStart}

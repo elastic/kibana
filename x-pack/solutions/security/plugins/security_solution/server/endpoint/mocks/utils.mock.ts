@@ -58,7 +58,7 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
   esClientMock.closePointInTime.mockImplementation(async (...args) => {
     const closePitResponse = { succeeded: true, num_freed: 1 };
     const options = args[0];
-    const pitId = 'id' in options ? options.id : 'body' in options ? options.body?.id : undefined;
+    const pitId = options.id;
 
     if (pitId) {
       if (openedPitIds.has(pitId)) {

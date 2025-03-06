@@ -11,7 +11,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   computeIsESQLQueryAggregating,
@@ -31,6 +31,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { CreateRuleOptions, RunOpts, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { checkErrorDetails } from './utils/check_error_details';
 import * as i18n from '../translations';
 
 import {
@@ -274,6 +275,9 @@ export const esqlExecutor = async ({
         size += tuple.maxSignals;
       }
     } catch (error) {
+      if (checkErrorDetails(error).isUserError) {
+        result.userError = true;
+      }
       result.errors.push(error.message);
       result.success = false;
     }

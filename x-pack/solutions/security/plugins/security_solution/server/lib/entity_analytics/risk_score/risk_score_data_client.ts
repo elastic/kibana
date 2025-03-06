@@ -6,10 +6,10 @@
  */
 
 import type {
+  ClusterPutComponentTemplateRequest,
   MappingDynamicMapping,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
@@ -169,23 +169,21 @@ export class RiskScoreDataClient {
         esClient,
         template: {
           name: indexPatterns.template,
-          body: {
-            data_stream: { hidden: true },
-            index_patterns: [indexPatterns.alias],
-            composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
-            template: {
-              lifecycle: {},
-              settings: {
-                'index.mapping.total_fields.limit': totalFieldsLimit,
-                'index.default_pipeline': getIngestPipelineName(namespace),
-              },
-              mappings: {
-                dynamic: false,
-                _meta: indexMetadata,
-              },
+          data_stream: { hidden: true },
+          index_patterns: [indexPatterns.alias],
+          composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
+          template: {
+            lifecycle: {},
+            settings: {
+              'index.mapping.total_fields.limit': totalFieldsLimit,
+              'index.default_pipeline': getIngestPipelineName(namespace),
             },
-            _meta: indexMetadata,
+            mappings: {
+              dynamic: false,
+              _meta: indexMetadata,
+            },
           },
+          _meta: indexMetadata,
         },
       });
 
@@ -345,6 +343,7 @@ export class RiskScoreDataClient {
     const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
     await esClient.cluster.putComponentTemplate({
       name: newComponentTemplateName,
+      // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
       body: oldComponentTemplate.component_template,
     });
   }
@@ -356,20 +355,18 @@ export class RiskScoreDataClient {
         conflicts: 'proceed',
         ignore_unavailable: true,
         allow_no_indices: true,
-        body: {
-          query: {
-            bool: {
-              must_not: {
-                exists: {
-                  field: 'event.ingested',
-                },
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'event.ingested',
               },
             },
           },
-          script: {
-            source: 'ctx._source.event.ingested = ctx._source.@timestamp',
-            lang: 'painless',
-          },
+        },
+        script: {
+          source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+          lang: 'painless',
         },
       },
       {

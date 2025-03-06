@@ -144,6 +144,7 @@ const MODIFIED_COLUMN: TableColumn = {
 
 const createUpgradeButtonColumn = (
   upgradeRules: UpgradePrebuiltRulesTableActions['upgradeRules'],
+  openRulePreview: UpgradePrebuiltRulesTableActions['openRulePreview'],
   loadingRules: RuleSignatureId[],
   isDisabled: boolean,
   isPrebuiltRulesCustomizationEnabled: boolean
@@ -154,7 +155,7 @@ const createUpgradeButtonColumn = (
     const isRuleUpgrading = loadingRules.includes(ruleId);
     const isDisabledByConflicts =
       isPrebuiltRulesCustomizationEnabled && record.hasUnresolvedConflicts;
-    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled || isDisabledByConflicts;
+    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled;
     const spinner = (
       <EuiLoadingSpinner
         size="s"
@@ -162,21 +163,30 @@ const createUpgradeButtonColumn = (
       />
     );
 
-    const tooltipContent = isDisabledByConflicts
-      ? i18n.UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS
-      : undefined;
+    if (isDisabledByConflicts) {
+      return (
+        <EuiToolTip content={i18n.UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS}>
+          <EuiButtonEmpty
+            size="s"
+            disabled={isUpgradeButtonDisabled}
+            onClick={() => openRulePreview(ruleId)}
+            data-test-subj={`reviewSinglePrebuiltRuleButton-${ruleId}`}
+          >
+            {isRuleUpgrading ? spinner : i18n.REVIEW_RULE_BUTTON}
+          </EuiButtonEmpty>
+        </EuiToolTip>
+      );
+    }
 
     return (
-      <EuiToolTip content={tooltipContent}>
-        <EuiButtonEmpty
-          size="s"
-          disabled={isUpgradeButtonDisabled}
-          onClick={() => upgradeRules([ruleId])}
-          data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
-        >
-          {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
-        </EuiButtonEmpty>
-      </EuiToolTip>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isUpgradeButtonDisabled}
+        onClick={() => upgradeRules([ruleId])}
+        data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
+      >
+        {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
+      </EuiButtonEmpty>
     );
   },
   width: '10%',
@@ -189,7 +199,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
     state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
-    actions: { upgradeRules },
+    actions: { upgradeRules, openRulePreview },
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
@@ -234,6 +244,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         ? [
             createUpgradeButtonColumn(
               upgradeRules,
+              openRulePreview,
               loadingRules,
               isDisabled,
               isRulesCustomizationEnabled
@@ -246,6 +257,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
       showRelatedIntegrations,
       hasCRUDPermissions,
       upgradeRules,
+      openRulePreview,
       loadingRules,
       isDisabled,
       isRulesCustomizationEnabled,

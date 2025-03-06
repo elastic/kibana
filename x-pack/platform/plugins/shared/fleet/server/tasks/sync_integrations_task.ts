@@ -22,12 +22,14 @@ import { appContextService, outputService } from '../services';
 import { getInstalledPackageSavedObjects } from '../services/epm/packages/get';
 import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../services/setup/fleet_synced_integrations';
 
+import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
+
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
-const TIMEOUT = '1m';
+const TIMEOUT = '5m';
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
@@ -39,7 +41,7 @@ interface SyncIntegrationsTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
 
-interface SyncIntegrationsData {
+export interface SyncIntegrationsData {
   remote_es_hosts: Array<{
     name: string;
     hosts: string[];
@@ -127,7 +129,7 @@ export class SyncIntegrationsTask {
 
     this.logger.info(`[runTask()] started`);
 
-    const [coreStart] = await core.getStartServices();
+    const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
@@ -137,22 +139,18 @@ export class SyncIntegrationsTask {
       return;
     }
 
-    const indexExists = await esClient.indices.exists(
-      {
-        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-      },
-      { signal: this.abortController.signal }
-    );
-
-    if (!indexExists) {
-      this.logger.info(
-        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
-      );
-      return;
-    }
-
     try {
+      // write integrations on main cluster
       await this.updateSyncedIntegrationsData(esClient, soClient);
+
+      // sync integrations on remote cluster
+      await syncIntegrationsOnRemote(
+        esClient,
+        soClient,
+        packageService.asInternalUser,
+        this.abortController,
+        this.logger
+      );
 
       this.endRun('success');
     } catch (err) {
@@ -166,10 +164,46 @@ export class SyncIntegrationsTask {
     }
   };
 
+  private syncedIntegrationsIndexExists = async (esClient: ElasticsearchClient) => {
+    return await esClient.indices.exists(
+      {
+        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+      },
+      { signal: this.abortController.signal }
+    );
+  };
+
+  private hadAnyRemoteESSyncEnabled = async (esClient: ElasticsearchClient): Promise<boolean> => {
+    try {
+      const res = await esClient.get({
+        id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+      });
+      if (!(res._source as any)?.remote_es_hosts.some((host: any) => host.sync_integrations)) {
+        return false;
+      }
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return false;
+      }
+      throw error;
+    }
+    return true;
+  };
+
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClient
   ) => {
+    const indexExists = await this.syncedIntegrationsIndexExists(esClient);
+
+    if (!indexExists) {
+      this.logger.info(
+        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
+      );
+      return;
+    }
+
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
@@ -179,7 +213,10 @@ export class SyncIntegrationsTask {
     );
 
     if (!isSyncEnabled) {
-      return;
+      const hadAnyRemoteESSyncEnabled = await this.hadAnyRemoteESSyncEnabled(esClient);
+      if (!hadAnyRemoteESSyncEnabled) {
+        return;
+      }
     }
 
     const newDoc: SyncIntegrationsData = {
@@ -210,10 +247,8 @@ export class SyncIntegrationsTask {
       {
         id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-        body: {
-          doc: newDoc,
-          doc_as_upsert: true,
-        },
+        doc: newDoc,
+        doc_as_upsert: true,
       },
       { signal: this.abortController.signal }
     );

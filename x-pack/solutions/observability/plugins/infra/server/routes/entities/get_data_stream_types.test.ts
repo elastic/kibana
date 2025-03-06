@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { type InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getDataStreamTypes } from './get_data_stream_types';
@@ -22,13 +22,13 @@ jest.mock('./get_latest_entity', () => ({
 
 describe('getDataStreamTypes', () => {
   let infraMetricsClient: jest.Mocked<InfraMetricsClient>;
-  let obsEsClient: jest.Mocked<ObservabilityElasticsearchClient>;
+  let obsEsClient: jest.Mocked<TracedElasticsearchClient>;
   let entityManagerClient: jest.Mocked<EntityClient>;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     infraMetricsClient = {} as jest.Mocked<InfraMetricsClient>;
-    obsEsClient = {} as jest.Mocked<ObservabilityElasticsearchClient>;
+    obsEsClient = {} as jest.Mocked<TracedElasticsearchClient>;
     entityManagerClient = {} as jest.Mocked<EntityClient>;
     jest.clearAllMocks();
   });

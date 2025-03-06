@@ -472,7 +472,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+              "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
             "deprecated": false,
@@ -919,6 +919,101 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CspNavigationItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "CspNavigationItem",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CspNavigationItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CspNavigationItem.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CspNavigationItem.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CspPageNavigationItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "CspPageNavigationItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.CspPageNavigationItem",
+            "text": "CspPageNavigationItem"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.CspNavigationItem",
+            "text": "CspNavigationItem"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CspPageNavigationItem.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-cspm-dashboard\" | \"cloud_security_posture-kspm-dashboard\" | \"cloud_security_posture-vulnerability_dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-benchmarks-rules\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.CspVulnerabilityFinding",
         "type": "Interface",
         "tags": [],
@@ -1337,6 +1432,36 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.BenchmarkId",
+        "type": "Type",
+        "tags": [],
+        "label": "BenchmarkId",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/types_old.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.BenchmarkName",
+        "type": "Type",
+        "tags": [],
+        "label": "BenchmarkName",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/types_old.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.BenchmarksCisId",
         "type": "Type",
         "tags": [],
@@ -1498,6 +1623,21 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CloudSecurityPosturePageId",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudSecurityPosturePageId",
+        "description": [],
+        "signature": [
+          "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-cspm-dashboard\" | \"cloud_security_posture-kspm-dashboard\" | \"cloud_security_posture-vulnerability_dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-benchmarks-rules\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION",
         "type": "string",
         "tags": [],
@@ -1522,6 +1662,51 @@
           "\"/internal/cloud_security_posture/rules/_get_states\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CSP_MISCONFIGURATIONS_DATASET",
+        "type": "string",
+        "tags": [],
+        "label": "CSP_MISCONFIGURATIONS_DATASET",
+        "description": [],
+        "signature": [
+          "\"cloud_security_posture.findings\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CSP_MOMENT_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "CSP_MOMENT_FORMAT",
+        "description": [],
+        "signature": [
+          "\"MMMM D, YYYY @ HH:mm:ss.SSS\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CspBenchmarksPage",
+        "type": "Type",
+        "tags": [],
+        "label": "CspBenchmarksPage",
+        "description": [],
+        "signature": [
+          "\"rules\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1570,7 +1755,7 @@
         "label": "CspStatusCode",
         "description": [],
         "signature": [
-          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
         "deprecated": false,
@@ -1729,6 +1914,21 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.INTERNAL_FEATURE_FLAGS",
+        "type": "Object",
+        "tags": [],
+        "label": "INTERNAL_FEATURE_FLAGS",
+        "description": [],
+        "signature": [
+          "{ readonly showManageRulesMock: false; readonly showFindingFlyoutEvidence: true; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.MISCONFIGURATION_STATUS",
