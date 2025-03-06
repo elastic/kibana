@@ -24,6 +24,7 @@ import {
   DataTableRecord,
   getFieldValue,
   INDEX_FIELD,
+  FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
 } from '@kbn/discover-utils';
 import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
@@ -221,5 +222,11 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   };
 };
 
-const isFieldAllowed = (field: string) =>
-  !FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => field.startsWith(prefix));
+export const isFieldAllowed = (field: string): boolean => {
+  const isExactMatchExcluded = FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(field);
+  const isPrefixMatchExcluded = FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) =>
+    field.startsWith(prefix)
+  );
+
+  return !isExactMatchExcluded && !isPrefixMatchExcluded;
+};
