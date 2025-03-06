@@ -11,10 +11,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../../constants';
 
-interface AssetInventoryGroupingProps {
-  data: ParsedGroupingAggregation<unknown>; // TODO improve typing
+interface AssetInventoryGroupingProps<T> {
+  data: ParsedGroupingAggregation<T>;
   renderChildComponent: (groupFilter: Filter[]) => JSX.Element;
-  grouping: ReturnType<typeof useGrouping>;
+  grouping: ReturnType<typeof useGrouping<T>>;
   activePageIndex: number;
   isFetching: boolean;
   pageSize: number;
@@ -29,10 +29,10 @@ interface AssetInventoryGroupingProps {
  * This component is used to render the loading state of the AssetInventoryGrouping component
  * It's used to avoid the flickering of the table when the data is loading
  */
-export const AssetInventoryGroupingLoading = ({
+export const AssetInventoryGroupingLoading = <T,>({
   grouping,
   pageSize,
-}: Pick<AssetInventoryGroupingProps, 'grouping' | 'pageSize'>) => {
+}: Pick<AssetInventoryGroupingProps<T>, 'grouping' | 'pageSize'>) => {
   return (
     <div data-test-subj={TEST_SUBJ_GROUPING_LOADING}>
       {grouping.getGrouping({
@@ -54,7 +54,7 @@ export const AssetInventoryGroupingLoading = ({
   );
 };
 
-export const AssetInventoryGrouping = ({
+export const AssetInventoryGrouping = <T,>({
   data,
   renderChildComponent,
   grouping,
@@ -66,7 +66,7 @@ export const AssetInventoryGrouping = ({
   selectedGroup,
   groupingLevel = 0,
   groupSelectorComponent,
-}: AssetInventoryGroupingProps) => {
+}: AssetInventoryGroupingProps<T>) => {
   if (!data || isFetching) {
     return <AssetInventoryGroupingLoading grouping={grouping} pageSize={pageSize} />;
   }
