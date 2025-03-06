@@ -162,7 +162,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     const { samlResponse, relayState } = attempt;
-
     const authenticationResult = state
       ? await this.authenticateViaState(request, state)
       : AuthenticationResult.notHandled();
@@ -222,15 +221,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
-
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-
     if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
-
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
@@ -405,7 +401,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
     // depending on the configuration we may need to redirect user to this URL.
     let redirectURLFromRelayState;
-
     if (isIdPInitiatedLogin && relayState) {
       if (!this.useRelayStateDeepLink) {
         this.options.logger.warn(
