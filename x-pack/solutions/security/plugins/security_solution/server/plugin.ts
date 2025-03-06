@@ -601,6 +601,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      assistantAttackDiscoverySchedulingEnabled:
+        config.experimentalFeatures.assistantAttackDiscoverySchedulingEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -728,6 +730,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     securityWorkflowInsightsService
       .start({
         esClient: core.elasticsearch.client.asInternalUser,
+        registerDefendInsightsCallback: plugins.elasticAssistant.registerCallback,
       })
       .catch(() => {});
 
