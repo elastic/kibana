@@ -37,7 +37,6 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
 import { RelatedAlerts } from './components/related_alerts';
-import { RelatedDashboards } from './components/related_dashboards';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
@@ -73,7 +72,6 @@ export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory
 const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
-const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
@@ -300,18 +298,6 @@ export function AlertDetails() {
       ),
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alert={alertDetail?.formatted} />,
-    },
-    {
-      id: RELATED_DASHBOARDS_TAB_ID,
-      name: i18n.translate('xpack.observability.alertDetails.tab.relatedDashboardsLabel', {
-        defaultMessage: 'Related dashboards',
-      }),
-      content: <RelatedDashboards />,
-      append: (
-        <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {0}
-        </EuiNotificationBadge>
-      ),
     },
   ];
 
