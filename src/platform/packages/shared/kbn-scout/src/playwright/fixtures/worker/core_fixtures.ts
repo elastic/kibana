@@ -48,6 +48,8 @@ export const coreWorkerFixtures = base.extend<
     samlAuth: SamlSessionManager;
   }
 >({
+  // Provides a scoped logger instance for each worker to use in fixtures and tests.
+  // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [
     ({}, use, workerInfo) => {
       const workersCount = workerInfo.config.workers;
