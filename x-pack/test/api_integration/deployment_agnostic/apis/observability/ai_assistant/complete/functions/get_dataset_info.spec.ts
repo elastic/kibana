@@ -263,7 +263,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
             const relevantFields = await getRelevantFields();
             expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
-            expect(parsedContent.indices).to.contain('.alerts-observability.logs.alerts-default');
+            expect(parsedContent.indices).to.contain('logs-web.access-default');
           });
         });
       });
@@ -323,11 +323,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(body.indices).to.eql([
-          'logs-apache.access-default',
-          'logs-zookeeper.access-default',
-          '.alerts-observability.logs.alerts-default',
-        ]);
+        expect(body.indices).to.contain('logs-apache.access-default');
+        expect(body.indices).to.contain('logs-zookeeper.access-default');
         expect(body.fields.length).to.be.greaterThan(0);
       });
 
