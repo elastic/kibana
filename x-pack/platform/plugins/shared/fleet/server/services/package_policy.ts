@@ -1810,18 +1810,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ({ packagePolicy, packageInfo, experimentalDataStreamFeatures } =
         await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion));
 
-      // const getAgentTemplateAssets =
-      // getAgentTemplateAssetsMap;
       const assetsMap = await getAgentTemplateAssetsMap({
         logger: appContextService.getLogger(),
         packageInfo,
         savedObjectsClient: soClient,
       });
-      // const assetsMap = await getPackageAssetsMap({
-      //   logger: appContextService.getLogger(),
-      //   packageInfo,
-      //   savedObjectsClient: soClient,
-      // });
 
       // Ensure the experimental features from the Installation saved object come through on the package policy
       // during an upgrade dry run
