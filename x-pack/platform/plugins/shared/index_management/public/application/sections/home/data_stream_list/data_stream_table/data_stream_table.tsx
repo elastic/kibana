@@ -37,7 +37,6 @@ import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
-import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { FilterListButton, Filters } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 import { DataStreamActionsMenu } from '../data_stream_actions_menu';
