@@ -48,7 +48,7 @@ export const registerNodeJsDeprecationsInfo = ({
             message: {
               type: 'markdown',
               content: i18n.translate('core.deprecations.openSSLDeprecation.message.markdown', {
-                defaultMessage: `Kibana is currently running with the [legacy OpenSSL provider]({learnMore}) enabled, which is not recommended. For your security, legacy providers will be disabled by default in 9.0.`,
+                defaultMessage: `Kibana is currently running with the [legacy OpenSSL provider]({learnMore}) enabled, which is not recommended. For your security, the legacy provider will be disabled by default in 9.0.`,
                 values: {
                   learnMore: docLinks.links.kibana.legacyOpenSslProvider,
                 },
