@@ -9,7 +9,11 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useFullDataView } from '../../../data_view_manager/hooks/use_full_data_view';
 import { DataViewErrorComponent } from './data_view_error';
+import { useEnableExperimental } from '../../hooks/use_experimental_features';
+
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 
@@ -30,9 +34,16 @@ export const withDataView = <P extends WithDataViewArg>(
   fallback?: ReactElement
 ) => {
   const ComponentWithDataView = (props: OmitDataView<P>) => {
-    const dataView = useGetScopedSourcererDataView({
+    const experimentalDataView = useFullDataView(DataViewManagerScopeName.timeline);
+
+    let dataView = useGetScopedSourcererDataView({
       sourcererScope: SourcererScopeName.timeline,
     });
+
+    const { newDataViewPickerEnabled } = useEnableExperimental();
+    if (newDataViewPickerEnabled) {
+      dataView = experimentalDataView;
+    }
 
     if (!dataView) {
       return fallback ?? <DataViewErrorComponent />;
