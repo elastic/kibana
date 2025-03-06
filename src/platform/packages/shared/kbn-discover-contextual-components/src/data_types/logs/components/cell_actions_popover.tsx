@@ -96,6 +96,7 @@ export function CellActionsPopover({
         <EuiFlexItem style={{ maxWidth: '200px' }}>
           <EuiText
             size="s"
+            className="eui-textBreakWord"
             css={css`
               font-family: ${euiTheme.font.familyCode};
             `}
