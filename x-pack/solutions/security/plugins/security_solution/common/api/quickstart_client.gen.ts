@@ -704,7 +704,7 @@ You can create the following types of rules:
 * **Event correlation**: Searches the defined indices and creates an alert when results match an [Event Query Language (EQL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) query.
 * **Threshold**: Searches the defined indices and creates an alert when the number of times the specified field's value meets the threshold during a single execution. When there are multiple values that meet the threshold, an alert is generated for each value.
   For example, if the threshold `field` is `source.ip` and its `value` is `10`, an alert is generated for every source IP address that appears in at least 10 of the rule's search results. If you're interested, see [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) for more information.
-* **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/{ecs_version}/ecs-reference.html).
+* **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
 * **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
 * **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
 * **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
@@ -745,8 +745,8 @@ To retrieve connector IDs, which are required to configure rule notifications, c
 
 For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-* [Alerting](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting)
-* [Actions](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions)
+* [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+* [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
 
     */
   async createRule(props: CreateRuleProps) {
@@ -1211,9 +1211,9 @@ The `id` is a unique identifier for each data item, while `rule_id` is a unique 
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/8.17/managing-saved-objects.html#managing-saved-objects-export-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-export.html) and [import](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-import.html) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async exportRules(props: ExportRulesProps) {
@@ -1709,9 +1709,9 @@ finalize it.
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/8.17/managing-saved-objects.html#managing-saved-objects-export-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-export.html) and [import](https://www.elastic.co/guide/en/kibana/8.17/saved-objects-api-import.html) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.DO
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async importRules(props: ImportRulesProps) {

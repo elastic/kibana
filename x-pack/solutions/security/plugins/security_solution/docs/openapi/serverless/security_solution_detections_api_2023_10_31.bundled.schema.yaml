@@ -414,7 +414,7 @@ paths:
         For example, you can create an index for IP addresses and use this index
         to create an alert whenever an event's `destination.ip` equals a value
         in the index. The index's field mappings should be
-        [ECS-compliant](https://www.elastic.co/guide/en/ecs/{ecs_version}/ecs-reference.html).
+        [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
 
         * **New terms**: Generates an alert for each new term detected in source
         documents within a specified time range.
@@ -505,11 +505,11 @@ paths:
         API calls, see:
 
 
-        *
-        [Alerting](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting)
+        * [Alerting
+        API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
 
-        *
-        [Actions](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions)
+        * [Alerting and Actions
+        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
       operationId: CreateRule
       requestBody:
         content:
@@ -1700,18 +1700,18 @@ paths:
 
 
         > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html#managing-saved-objects-export-objects)
+        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
         UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
         (experimental) to
-        [export](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-export.html)
+        [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
         and
-        [import](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-import.html)
+        [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault)
         any necessary connectors before importing detection rules.
 
 
         > Similarly, any value lists used for rule exceptions are not included
         in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists)
+        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
         UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
         import value lists separately.
       operationId: ExportRules
@@ -2042,20 +2042,20 @@ paths:
 
 
         > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html#managing-saved-objects-export-objects)
+        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
         UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
         (experimental) to
-        [export](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-export.html)
+        [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
         and
-        [import](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-import.html)
+        [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault)
         any necessary connectors before importing detection rules.
 
 
         > Similarly, any value lists used for rule exceptions are not included
         in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#edit-value-lists)
+        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
         UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
-        import value lists separately.DO
+        import value lists separately.
       operationId: ImportRules
       parameters:
         - description: >-
