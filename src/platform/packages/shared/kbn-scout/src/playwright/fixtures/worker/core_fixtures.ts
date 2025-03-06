@@ -17,16 +17,18 @@ import {
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
+  getLogger,
+  ScoutLogger,
 } from '../../../common/services';
 import type { ScoutTestOptions } from '../../types';
 import type { ScoutTestConfig } from '.';
-import type { ScoutLogger } from './log';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../types';
+export type { ScoutLogger } from '../../../common/services/logger';
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
@@ -46,15 +48,24 @@ export const coreWorkerFixtures = base.extend<
     samlAuth: SamlSessionManager;
   }
 >({
+  log: [
+    ({}, use, workerInfo) => {
+      const workersCount = workerInfo.config.workers;
+      const loggerContext =
+        workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
+      use(getLogger(loggerContext));
+    },
+    { scope: 'worker' },
+  ],
   /**
    * Loads the test server configuration from the source file based on local or cloud
    * target, located by default in '.scout/servers' directory. It supplies Playwright
    * with all server-related information including hosts, credentials, type of deployment, etc.
    */
   config: [
-    ({ log }, use, testInfo) => {
+    ({ log }, use, workerInfo) => {
       const configName = 'local';
-      const projectUse = testInfo.project.use as ScoutTestOptions;
+      const projectUse = workerInfo.project.use as ScoutTestOptions;
       const serversConfigDir = projectUse.serversConfigDir;
       const configInstance = createScoutConfig(serversConfigDir, configName, log);
 

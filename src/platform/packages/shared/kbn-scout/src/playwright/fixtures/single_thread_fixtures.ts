@@ -33,12 +33,10 @@ import {
   validateTagsFixture,
 } from './test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
-import { logFixture } from './worker/log';
 export type { ScoutPage, PageObjects } from './test';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures
-  logFixture,
   coreWorkerFixtures,
   esArchiverFixture,
   uiSettingsFixture,

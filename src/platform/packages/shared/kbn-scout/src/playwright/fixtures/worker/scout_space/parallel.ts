@@ -25,7 +25,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         name: spaceId,
         disabledFeatures: [],
       };
-      await measurePerformanceAsync(log, `${spaceId}: 'spaces.create'`, async () => {
+      await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
         return kbnClient.spaces.create(spacePayload);
       });
 
@@ -33,28 +33,32 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const savedObjectsCache = new Map<string, string>();
 
       const load = async (path: string) => {
-        return measurePerformanceAsync(log, `${spaceId}: 'savedObjects.load'`, async () => {
-          const response = await kbnClient.importExport.load(path, {
-            space: spaceId,
-            // will create new copies of saved objects with unique ids
-            createNewCopies: true,
-          });
+        return measurePerformanceAsync(
+          log,
+          `savedObjects.load({spaceId:'${spaceId}'})`,
+          async () => {
+            const response = await kbnClient.importExport.load(path, {
+              space: spaceId,
+              // will create new copies of saved objects with unique ids
+              createNewCopies: true,
+            });
 
-          const imported = (response.successResults as ImportSavedObjects[]).map(
-            (r: { type: string; destinationId: string; meta: { title: string } }) => {
-              return { id: r.destinationId, type: r.type, title: r.meta.title };
-            }
-          );
+            const imported = (response.successResults as ImportSavedObjects[]).map(
+              (r: { type: string; destinationId: string; meta: { title: string } }) => {
+                return { id: r.destinationId, type: r.type, title: r.meta.title };
+              }
+            );
 
-          imported.forEach((so) => savedObjectsCache.set(so.title, so.id));
+            imported.forEach((so) => savedObjectsCache.set(so.title, so.id));
 
-          return imported;
-        });
+            return imported;
+          }
+        );
       };
       const cleanStandardList = async () => {
         return measurePerformanceAsync(
           log,
-          `${spaceId}: 'savedObjects.cleanStandardList'`,
+          `savedObjects.cleanStandardList({spaceId:'${spaceId}'})`,
           async () => {
             savedObjectsCache.clear();
             await kbnClient.savedObjects.cleanStandardList({
@@ -66,7 +70,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const setDefaultIndex = async (dataViewName: string) => {
         return measurePerformanceAsync(
           log,
-          `${spaceId}: 'savedObjects.setDefaultIndex'`,
+          `savedObjects.setDefaultIndex({spaceId:'${spaceId}'})`,
           async () => {
             if (savedObjectsCache.has(dataViewName)) {
               return kbnClient.uiSettings.update(
@@ -82,7 +86,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         );
       };
       const set = async (values: UiSettingValues) => {
-        return measurePerformanceAsync(log, `scoutSpace:${spaceId} 'uiSettings.set'`, async () => {
+        return measurePerformanceAsync(log, `uiSettings.set({spaceId:'${spaceId}'})`, async () => {
           return kbnClient.uiSettings.update(values, { space: spaceId });
         });
       };
@@ -94,16 +98,20 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         });
       };
       const setDefaultTime = async ({ from, to }: { from: string; to: string }) => {
-        return measurePerformanceAsync(log, `${spaceId}: 'uiSettings.setDefaultTime'`, async () => {
-          const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
-          const utcTo = isValidUTCDate(to) ? to : formatTime(to);
-          return kbnClient.uiSettings.update(
-            {
-              'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${utcTo}"}`,
-            },
-            { space: spaceId }
-          );
-        });
+        return measurePerformanceAsync(
+          log,
+          `uiSettings.setDefaultTime({spaceId:'${spaceId}')`,
+          async () => {
+            const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
+            const utcTo = isValidUTCDate(to) ? to : formatTime(to);
+            return kbnClient.uiSettings.update(
+              {
+                'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${utcTo}"}`,
+              },
+              { space: spaceId }
+            );
+          }
+        );
       };
 
       const savedObjects = {
@@ -122,7 +130,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call
-      await measurePerformanceAsync(log, `${spaceId} 'space.delete'`, async () => {
+      await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {
         log.debug(`Deleting space ${spaceId}`);
         return kbnClient.spaces.delete(spaceId);
       });
