@@ -10,6 +10,8 @@
 import {
   DeprecationsFactoryMock,
   registerConfigDeprecationsInfoMock,
+  registerApiDeprecationsInfoMock,
+  registerNodeJsDeprecationsInfoMock,
   loggingMock,
 } from './deprecations_service.test.mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -45,8 +47,6 @@ describe('DeprecationsService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    DeprecationsFactoryMock.mockClear();
-    registerConfigDeprecationsInfoMock.mockClear();
   });
 
   describe('#setup', () => {
@@ -63,10 +63,12 @@ describe('DeprecationsService', () => {
       );
     });
 
-    it('calls registerConfigDeprecationsInfo', async () => {
+    it('registers internal deprecations', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       await deprecationsService.setup(deprecationsCoreSetupDeps);
       expect(registerConfigDeprecationsInfoMock).toBeCalledTimes(1);
+      expect(registerApiDeprecationsInfoMock).toBeCalledTimes(1);
+      expect(registerNodeJsDeprecationsInfoMock).toBeCalledTimes(1);
     });
 
     describe('logging.configure tests', () => {
