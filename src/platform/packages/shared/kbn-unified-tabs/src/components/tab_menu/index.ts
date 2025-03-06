@@ -7,17 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface TabItem {
-  id: string;
-  label: string;
-}
-
-export interface TabMenuItemWithClick {
-  'data-test-subj': string;
-  name: string;
-  label: string;
-  onClick: () => void;
-}
-export type TabMenuItem = TabMenuItemWithClick | 'divider';
-
-export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];
+export { TabMenu, type TabMenuProps } from './tab_menu';
