@@ -30,11 +30,17 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Importing single prebuilt rules](#importing-single-prebuilt-rules)
-    - [Scenario: Importing a non-customized prebuilt rule with a matching `rule_id` and `version`](#scenario-importing-a-non-customized-prebuilt-rule-with-a-matching-rule_id-and-version)
-    - [Scenario: Importing a customized prebuilt rule with a matching `rule_id` and `version`](#scenario-importing-a-customized-prebuilt-rule-with-a-matching-rule_id-and-version)
+  - [Importing single prebuilt non-customized rules](#importing-single-prebuilt-non-customized-rules)
+    - [Scenario: Importing a non-customized rule when it's not installed](#scenario-importing-a-non-customized-rule-when-its-not-installed)
+    - [Scenario: Importing a non-customized rule on top of an installed non-customized rule](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
+    - [Scenario: Importing a non-customized rule on top of an installed customized rule](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
+  - [Importing single prebuilt customized rules](#importing-single-prebuilt-customized-rules)
+    - [Scenario: Importing a customized rule when it's not installed](#scenario-importing-a-customized-rule-when-its-not-installed)
+    - [Scenario: Importing a customized rule on top of an installed non-customized rule](#scenario-importing-a-customized-rule-on-top-of-an-installed-non-customized-rule)
+    - [Scenario: Importing a customized rule on top of an installed customized rule](#scenario-importing-a-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing single custom rules](#importing-single-custom-rules)
-    - [Scenario: Importing a custom rule with a matching custom `rule_id` and `version`](#scenario-importing-a-custom-rule-with-a-matching-custom-rule_id-and-version)
+    - [Scenario: Importing a new custom rule](#scenario-importing-a-new-custom-rule)
+    - [Scenario: Importing a custom rule on top of an existing custom rule](#scenario-importing-a-custom-rule-on-top-of-an-existing-custom-rule)
   - [Importing multiple rules in bulk](#importing-multiple-rules-in-bulk)
     - [Scenario: Importing both custom and prebuilt rules](#scenario-importing-both-custom-and-prebuilt-rules)
   - [Importing prebuilt rules when the package is not installed](#importing-prebuilt-rules-when-the-package-is-not-installed)
@@ -68,6 +74,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 ### Terminology
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **This rule is not installed**: a prebuilt rule with the same `rule_id` hasn't been installed yet and doesn't exist as an alerting rule saved object.
+- **This rule is already installed**: a prebuilt rule with the same `rule_id` has been already installed and exists as an alerting rule saved object.
+- **This rule is not created yet**: a custom rule with the same `rule_id` hasn't been created yet and doesn't exist as an alerting rule saved object.
+- **This rule is already created**: a custom rule with the same `rule_id` has been already created and exists as an alerting rule saved object.
 
 ## Requirements
 
@@ -76,6 +86,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 Assumptions about test environments and scenarios outlined in this test plan.
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+- The `overwrite` import request parameter is set to `true`, unless explicitly indicated otherwise.
 
 ### Technical requirements
 
@@ -99,47 +110,134 @@ User stories:
 
 ## Scenarios
 
-### Importing single prebuilt rules
+### Importing single prebuilt non-customized rules
 
-#### Scenario: Importing a non-customized prebuilt rule with a matching `rule_id` and `version`
+#### Scenario: Importing a non-customized rule when it's not installed
 
-**Automation**: 1 cypress test and 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
-Given the import payload contains a non-customized prebuilt rule
-And its rule_id and version match a rule asset from the installed package
+Given the import payload contains a prebuilt rule
+And this rule has a base version (its rule_id and version match a rule asset)
+And this rule is equal to its base version
+And this rule is not installed
 When the user imports the rule
-Then the rule should be created or updated
-And the ruleSource type should be "external"
-And isCustomized should be false
+Then the rule should be created
+And the created rule should be prebuilt
+And the created rule should be marked as non-customized
+And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a customized prebuilt rule with a matching `rule_id` and `version`
+#### Scenario: Importing a non-customized rule on top of an installed non-customized rule
 
-**Automation**: 1 cypress test and 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
-Given the import payload contains a customized prebuilt rule
-And its rule_id and version match a rule asset from the installed package
+Given the import payload contains a prebuilt rule
+And this rule has a base version (its rule_id and version match a rule asset)
+And this rule is equal to its base version
+And this rule is already installed and is not customized
 When the user imports the rule
-Then the rule should be created or updated
-And the ruleSource type should be "external"
-And isCustomized should be true
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as non-customized
+And the updated rule's parameters should match the import payload
+```
+
+#### Scenario: Importing a non-customized rule on top of an installed customized rule
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version (its rule_id and version match a rule asset)
+And this rule is equal to its base version
+And this rule is already installed and is customized
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as non-customized
+And the updated rule's parameters should match the import payload
+```
+
+### Importing single prebuilt customized rules
+
+#### Scenario: Importing a customized rule when it's not installed
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version (its rule_id and version match a rule asset)
+And this rule is different from its base version
+And this rule is not installed
+When the user imports the rule
+Then the rule should be created
+And the created rule should be prebuilt
+And the created rule should be marked as customized
+And the created rule's parameters should match the import payload
+```
+
+#### Scenario: Importing a customized rule on top of an installed non-customized rule
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version (its rule_id and version match a rule asset)
+And this rule is different from its base version
+And this rule is already installed and is not customized
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as customized
+And the updated rule's parameters should match the import payload
+```
+
+#### Scenario: Importing a customized rule on top of an installed customized rule
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version (its rule_id and version match a rule asset)
+And this rule is different from its base version
+And this rule is already installed and is customized
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as customized
+And the updated rule's parameters should match the import payload
 ```
 
 ### Importing single custom rules
 
-#### Scenario: Importing a custom rule with a matching custom `rule_id` and `version`
+#### Scenario: Importing a new custom rule
 
-**Automation**: 1 cypress test and 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a custom rule
-And its rule_id and version match a rule asset from the installed package
-And the overwrite flag is set to true
+And its rule_id does NOT match any rule assets from the installed package
+And this rule is not created yet
 When the user imports the rule
-Then the rule should be created or updated
-And the ruleSource type should be "internal"
+Then the rule should be created
+And the created rule should be custom
+And the created rule's parameters should match the import payload
+```
+
+#### Scenario: Importing a custom rule on top of an existing custom rule
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a custom rule
+And its rule_id does NOT match any rule assets from the installed package
+And this rule is already created
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be custom
+And the updated rule's parameters should match the import payload
 ```
 
 ### Importing multiple rules in bulk
