@@ -54,7 +54,7 @@ function MetricsWithWrapper() {
 
 describe('Metrics', () => {
   describe('render the correct metrics content for', () => {
-    describe('APM agent/server service', () => {
+    describe('APM agent / server service', () => {
       beforeEach(() => {
         jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'java',
@@ -80,12 +80,10 @@ describe('Metrics', () => {
       });
     });
 
-    describe('Otel native/ otel sdk with dashboard', () => {
+    describe('APM agent / EDOT sdk with dashboard', () => {
       beforeEach(() => {
         jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'opentelemetry/nodejs',
-          telemetrySdkName: 'opentelemetry',
-          telemetrySdkLanguage: 'nodejs',
+          agentName: 'opentelemetry/nodejs/elastic',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
           transactionTypes: [],
@@ -108,7 +106,7 @@ describe('Metrics', () => {
       });
     });
 
-    describe('APM agent/ otel sdk with no dashboard', () => {
+    describe('APM agent / otel sdk with no dashboard', () => {
       beforeEach(() => {
         jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'opentelemetry/go',
