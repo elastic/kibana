@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const CLUSTER_ACTIONS_MONITORING_COLLECTION_URL = `/api/monitoring_collection/cluster_actions`;
 
