@@ -24,55 +24,23 @@ import {
 export type Params = TypeOf<typeof ParamsSchema>;
 
 export const CoreQueryParamsSchemaProperties = {
-  /**
-   * The indices to query.
-   */
   index: schema.oneOf([
     schema.string({ minLength: 1 }),
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-  ]),
+  ], {meta: { description: 'The indices to query.'}}),
+  timeField: schema.string({ minLength: 1, meta: { description: 'The field that is used to calculate the time window.'} }),
+  aggType: schema.string({ validate: validateAggType, defaultValue: 'count', meta: { description: 'The type of aggregation to perform.'} }),
+  aggField: schema.maybe(schema.string({ minLength: 1, meta: { description: 'The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.'} })),
+  groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all', meta: { description: 'Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.'} }),
   /**
-   * The field that is used to calculate the time window.
+   * 
+   * 
    */
-  timeField: schema.string({ minLength: 1 }),
-  /**
-   * The type of aggregation to perform.
-   */
-  aggType: schema.string({ validate: validateAggType, defaultValue: 'count' }),
-  /**
-   * The name of the numeric field that is used in the aggregation.
-   * This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
-   */
-  aggField: schema.maybe(schema.string({ minLength: 1 })),
-  /**
-   * Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`).
-   * If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
-   */
-  groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
-  /**
-   * The names of up to four fields that are used for grouping the aggregation.
-   * This property is required when `groupBy` is `top`.
-   */
-  termField: schema.maybe(schema.string({ minLength: 1 })),
-  /**
-   * A Kibana Query Language (KQL) expression thats limits the scope of alerts.
-   */
-  filterKuery: schema.maybe(schema.string({ validate: validateKuery })),
-  /**
-   * This property is required when `groupBy` is `top`.
-   * It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
-   */
-  termSize: schema.maybe(schema.number({ min: 1 })),
-  /**
-   * The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents.
-   * Generally it should be a value higher than the rule check interval to avoid gaps in detection.
-   */
-  timeWindowSize: schema.number({ min: 1 }),
-  /**
-   * The type of units for the time window.
-   * For example: seconds, minutes, hours, or days.
-   */
-  timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
+  termField: schema.maybe(schema.string({ minLength: 1, meta: { description: 'The names of up to four fields that are used for grouping the aggregation. This property is required when `groupBy` is `top`.'} })),
+  filterKuery: schema.maybe(schema.string({ validate: validateKuery, meta: { description: 'A Kibana Query Language (KQL) expression thats limits the scope of alerts.'} })),
+  termSize: schema.maybe(schema.number({ min: 1, meta: { description: 'This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.'} })),
+  timeWindowSize: schema.number({ min: 1, meta: { description: 'The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.'} }),
+  timeWindowUnit: schema.string({ validate: validateTimeWindowUnits, meta: { description: 'The type of units for the time window. For example: seconds, minutes, hours, or days.'} }),
 };
 
 export const CoreQueryParamsSchema = schema.object(CoreQueryParamsSchemaProperties);
