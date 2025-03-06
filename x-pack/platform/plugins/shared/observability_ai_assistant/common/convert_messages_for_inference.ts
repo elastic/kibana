@@ -14,7 +14,7 @@ import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
 
-function safeJsonParse(logger: Pick<Logger, 'error'>, jsonString?: string) {
+function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
     return JSON.parse(jsonString ?? '{}');
   } catch (error) {
@@ -46,7 +46,7 @@ export function convertMessagesForInference(
                 {
                   function: {
                     name: message.message.function_call.name,
-                    arguments: safeJsonParse(logger, message.message.function_call?.arguments),
+                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },
