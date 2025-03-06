@@ -109,7 +109,11 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
     ...formData,
     config: {
       ...formData.config,
-      headers: isEmpty(headers) ? null : headers,
+      headers: isEmpty(headers)
+        ? formData.actionTypeId !== '.gen-ai'
+          ? null
+          : undefined
+        : headers,
     },
   };
 };
