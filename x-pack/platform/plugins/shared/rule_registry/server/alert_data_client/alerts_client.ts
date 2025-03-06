@@ -515,7 +515,7 @@ export class AlertsClient {
     query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
-    let lastSortIds;
+    let lastSortIds: Array<string | number> | undefined;
     let hasSortIds = true;
     const alertSpaceId = this.spaceId;
     if (alertSpaceId == null) {

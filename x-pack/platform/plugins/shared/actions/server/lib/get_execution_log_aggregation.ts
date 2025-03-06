@@ -322,7 +322,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const connectorId = outcomeAndMessage?.kibana?.action?.id ?? '';
   const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
   return {
-    id: bucket?.key ?? '',
+    id: bucket?.key ? `${bucket.key}` : '',
     timestamp: bucket?.actionExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
     status,
