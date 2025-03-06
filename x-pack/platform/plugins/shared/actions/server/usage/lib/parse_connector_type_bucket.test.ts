@@ -56,6 +56,7 @@ describe('parseActionRunOutcomeByConnectorTypesBucket', () => {
           doc_count: 78,
           outcome: {
             count: {
+              // @ts-expect-error
               buckets: [{ key: 'success', doc_count: 2 }, { key: 'failure' }],
             },
           },
@@ -63,6 +64,7 @@ describe('parseActionRunOutcomeByConnectorTypesBucket', () => {
         {
           key: '.index',
           outcome: {
+            // @ts-expect-error
             count: {},
           },
         },
