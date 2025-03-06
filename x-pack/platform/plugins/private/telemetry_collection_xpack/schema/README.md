@@ -13,6 +13,7 @@ There are currently 7 files:
 - `xpack_observability.json`: Same as `xpack_plugins.json` but for collectors defined in `<ROOT_DIR>/x-pack/solutions/observability/*`.
 - `xpack_search.json`: Same as `xpack_plugins.json` but for collectors defined in `<ROOT_DIR>/x-pack/solutions/search/*`.
 - `xpack_security.json`: Same as `xpack_plugins.json` but for collectors defined in `<ROOT_DIR>/x-pack/solutions/security/*`.
+- `xpack_TBCworkchat.json`: Same as `xpack_plugins.json` but for collectors defined in `<ROOT_DIR>/x-pack/solutions/TBCworkchat/*`.
 - `xpack_monitoring.json`: It declares the payload sent by the monitoring-sourced telemetry. The actual schema for the payload is declared under `properties.monitoringTelemetry.properties.stats.items`, but due to the general behaviour in the `@kbn/telemetry-tools`, it gets nested down in that path.
 
 NOTE: Despite its similarities to ES mappings, the intention of these files is not to define any index mappings. They should be considered as a tool to understand the format of the payload that will be sent when reporting telemetry to the Remote Service.

@@ -4078,6 +4078,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/constants@link:packages/kbn-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""

@@ -31,6 +31,7 @@ const createSAMLResponseSchema = schema.object({
   roles: schema.arrayOf(schema.string()),
 });
 
+// CHECKPOINT TBCworkchat SKA
 const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],

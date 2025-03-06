@@ -1382,6 +1382,7 @@
     "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
     "@kbn/code-editor-mock": "link:src/platform/packages/shared/shared-ux/code_editor/mocks",
     "@kbn/code-owners": "link:src/platform/packages/private/kbn-code-owners",
+    "@kbn/constants": "link:packages/kbn-constants",
     "@kbn/core-analytics-browser-mocks": "link:src/core/packages/analytics/browser-mocks",
     "@kbn/core-analytics-server-mocks": "link:src/core/packages/analytics/server-mocks",
     "@kbn/core-application-browser-mocks": "link:src/core/packages/application/browser-mocks",

@@ -23,11 +23,11 @@ import {
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
-  type CodeOwnerArea,
   getOwningTeamsForPath,
   getCodeOwnersEntries,
-  findAreaForCodeOwner,
+  findGroupByOwner,
 } from '@kbn/code-owners';
+import type { KibanaGroup } from '@kbn/constants';
 import { Runner, Test } from '../../../fake_mocha_types';
 import { Config as FTRConfig } from '../../config';
 
@@ -89,10 +89,8 @@ export class ScoutFTRReporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
-  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
-    return owners
-      .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+  private getOwnersGroups(owners: string[]): KibanaGroup[] {
+    return owners.map((owner) => findGroupByOwner(owner)).filter(Boolean) as KibanaGroup[];
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
@@ -101,7 +99,7 @@ export class ScoutFTRReporter {
     return {
       path: filePath,
       owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      area: this.getOwnersGroups(fileOwners),
     };
   }
 

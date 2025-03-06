@@ -51,6 +51,7 @@ packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
+packages/kbn-constants @elastic/kibana-core
 packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-docs-utils @elastic/kibana-operations

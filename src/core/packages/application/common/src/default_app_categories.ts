@@ -21,6 +21,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 1000,
   },
   enterpriseSearch: {
+    // CHECKPOINT TBCworkchat SKA
     id: 'enterpriseSearch',
     label: i18n.translate('core.ui.searchNavList.label', {
       defaultMessage: 'Elasticsearch',

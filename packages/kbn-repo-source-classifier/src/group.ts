@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import { KibanaSolutions, type ModuleGroup, type ModuleVisibility } from '@kbn/constants';
 
 interface ModuleAttrs {
   group: ModuleGroup;
@@ -37,18 +37,13 @@ const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugi
       group: 'platform',
       visibility: 'private',
     },
-    [`x-pack/solutions/observability/${type}`]: {
-      group: 'observability',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/security/${type}`]: {
-      group: 'security',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/search/${type}`]: {
-      group: 'search',
-      visibility: 'private',
-    },
+    ...KibanaSolutions.reduce<Record<string, ModuleAttrs>>((acc, solution) => {
+      acc[`x-pack/solutions/${solution}/${type}`] = {
+        group: solution,
+        visibility: 'private',
+      };
+      return acc;
+    }, {}),
   }))
   .reduce((acc, current) => ({ ...acc, ...current }), {
     'src/platform/test': {

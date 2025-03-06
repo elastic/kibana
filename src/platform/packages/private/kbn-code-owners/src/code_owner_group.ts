@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Code owner area names
- */
-export const CODE_OWNER_AREAS = ['platform', 'search', 'observability', 'security'] as const;
-export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
+import { type KibanaGroup, KibanaGroups } from '@kbn/constants';
 
 /**
- * Area mappings for code owners
+ * Group => kibana team mappings
  */
-export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
+export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
   platform: [
     'elastic/appex-ai-infra',
     'elastic/appex-qa',
@@ -78,20 +74,24 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
   ],
+  TBCworkchat: [
+    // CHECKPOINT SKA add owner teams here
+  ],
 };
 
 /**
- * Find what area a code owner belongs to
+ * Find what group a code owner belongs to
  *
- * @param owner Owner to find an area name
- * @returns The code owner area if a match for the given owner is found
+ * @param owner Owner to find an group name
+ * @returns The code owner group if a match for the given owner is found
  */
-export function findAreaForCodeOwner(owner: string): CodeOwnerArea | undefined {
-  for (const area of CODE_OWNER_AREAS) {
-    const owners = CODE_OWNER_AREA_MAPPINGS[area];
+export function findGroupByOwner(owner: string): KibanaGroup | undefined {
+  for (const group of KibanaGroups) {
+    // FIXME what happens if a team appears in 2 different groups?
+    const owners = KIBANA_GROUP_TEAMS_MAPPINGS[group];
 
     if (owners.includes(owner)) {
-      return area;
+      return group;
     }
   }
 }
