@@ -29,6 +29,15 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   params: getRecommendedDashboardsParamsSchema,
   handler: async (services): Promise<GetRecommendedDashboardsResponse | IKibanaResponse> => {
     const { dependencies, params, request, response, context, logger } = services;
+    const core = await context.core;
+    const featureFlags = core.featureFlags;
+    const isSuggestedDashboardsEnabled = await featureFlags.getBooleanValue(
+      'rca.recommendedDashboards',
+      false
+    );
+    if (isSuggestedDashboardsEnabled === false) {
+      return response.notFound();
+    }
     const { alertId } = params.query;
     const { ruleRegistry, dashboard } = dependencies;
     const { contentClient } = dashboard;
@@ -64,4 +73,4 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   },
 });
 
-export const alertsRouteRepository = alertsDynamicDashboardSuggestions;
+export const alertsSuggestedDashboardRepository = alertsDynamicDashboardSuggestions;
