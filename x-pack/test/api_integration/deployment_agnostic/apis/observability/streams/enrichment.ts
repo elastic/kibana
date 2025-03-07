@@ -77,8 +77,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             ],
-            routing: [],
             wired: {
+              routing: [],
               fields: {
                 'attributes.message2': {
                   type: 'match_only_text',
