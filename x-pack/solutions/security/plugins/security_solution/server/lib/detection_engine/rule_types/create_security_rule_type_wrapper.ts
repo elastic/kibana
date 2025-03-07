@@ -35,7 +35,7 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
+import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
@@ -382,18 +382,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               intendedTimestamp,
             });
 
-            const wrapSequences = wrapSequencesFactory({
-              ruleExecutionLogger,
-              ignoreFields: [...ignoreFields, ...legacySignalFields],
-              mergeStrategy,
-              completeRule,
-              spaceId,
-              publicBaseUrl,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
-              intendedTimestamp,
-            });
-
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               startedAt,
               alias: null,
@@ -409,7 +397,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ...options,
                   services,
                   state: runState,
-                  runOpts: {
+                  sharedParams: {
                     completeRule,
                     inputIndex,
                     exceptionFilter,
@@ -422,7 +410,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     tuple,
                     bulkCreate,
                     wrapHits,
-                    wrapSequences,
                     listClient,
                     ruleDataClient,
                     mergeStrategy,
@@ -436,6 +423,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     publicBaseUrl,
                     experimentalFeatures,
                     intendedTimestamp,
+                    spaceId,
                   },
                 });
 
