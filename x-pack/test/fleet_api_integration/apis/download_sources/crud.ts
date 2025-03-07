@@ -648,7 +648,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send()
           .expect(200);
-        console.log('##', getAgentPolicyResponse.item);
+
         expect(getAgentPolicyResponse.item.agent.download.proxy_url).to.eql(
           'https://some.source.proxy:3232'
         );
