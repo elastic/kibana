@@ -19,9 +19,9 @@ export const fetchSearchResults = async (
   size: number = DEFAULT_DOCS_PER_PAGE,
   trackTotalHits: boolean = false
 ): Promise<Paginate<SearchHit>> => {
-  const result = await fetchWithPagination(
-    async () =>
-      await client.search({
+  return fetchWithPagination(
+    () =>
+      client.search({
         from,
         index: indexName,
         size,
@@ -31,8 +31,4 @@ export const fetchSearchResults = async (
     from,
     size
   );
-  return {
-    ...result,
-    data: result.data,
-  };
 };

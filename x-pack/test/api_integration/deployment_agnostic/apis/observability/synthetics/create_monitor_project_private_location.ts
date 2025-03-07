@@ -30,6 +30,8 @@ import { comparePolicies } from './sample_data/test_policy';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
+    // see details: https://github.com/elastic/kibana/issues/213576
+    this.tags(['failsOnMKI']);
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');

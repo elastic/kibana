@@ -326,7 +326,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
-      version: pluginContext.env.packageInfo.version,
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,

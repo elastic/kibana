@@ -24,7 +24,7 @@ import {
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';
-import { getProductProductFeatures } from '../common/pli/pli_features';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -55,7 +55,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    securitySolution.setProductFeatureKeys(getProductProductFeatures(productTypes));
+    securitySolution.setProductFeatureKeys(getEnabledProductFeatures(productTypes));
     return {};
   }
 

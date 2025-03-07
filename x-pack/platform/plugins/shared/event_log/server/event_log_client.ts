@@ -15,8 +15,12 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
-import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import {
+  QueryEventsBySavedObjectResult,
+  QueryEventsBySavedObjectSearchAfterResult,
+} from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
+
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -57,6 +61,20 @@ export const queryOptionsSchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
+export const queryOptionsSearchAfterSchema = schema.object({
+  per_page: schema.number({ defaultValue: 10, min: 0 }),
+  pit_id: schema.maybe(schema.string()),
+  search_after: schema.maybe(
+    schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))
+  ),
+  start: optionalDateFieldSchema,
+  end: optionalDateFieldSchema,
+  sort: schema.arrayOf(sortSchema, {
+    defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
+  }),
+  filter: schema.maybe(schema.string()),
+});
+
 export type QueryOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'start' | 'end' | 'filter'>;
 
 // page & perPage are required, other fields are optional
@@ -71,6 +89,11 @@ export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'filt
   Partial<TypeOf<typeof queryOptionsSchema>> & {
     aggs: Record<string, estypes.AggregationsAggregationContainer>;
   };
+
+export type FindOptionsSearchAfterType = Omit<FindOptionsType, 'page'> & {
+  pit_id?: string;
+  search_after?: estypes.SortResults;
+};
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
@@ -205,6 +228,30 @@ export class EventLogClient implements IEventLogClient {
 
   public async refreshIndex(): Promise<void> {
     await this.esContext.esAdapter.refreshIndex();
+  }
+
+  public async findEventsBySavedObjectIdsSearchAfter(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsSearchAfterType>,
+    legacyIds?: string[]
+  ): Promise<QueryEventsBySavedObjectSearchAfterResult> {
+    const findOptions = queryOptionsSearchAfterSchema.validate(options ?? {});
+
+    await this.savedObjectGetter(type, ids);
+
+    return await this.esContext.esAdapter.queryEventsBySavedObjectsSearchAfter({
+      index: this.esContext.esNames.indexPattern,
+      namespace: await this.getNamespace(),
+      type,
+      ids,
+      findOptions,
+      legacyIds,
+    });
+  }
+
+  public async closePointInTime(pitId: string): Promise<void> {
+    return await this.esContext.esAdapter.closePointInTime(pitId);
   }
 
   private async getNamespace() {
