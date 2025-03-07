@@ -27,7 +27,10 @@ export const getValidatorNode = ({
 
         if (!generatedQueries.length) {
             return new Command({
-                goto: END
+                goto: END,
+                update: {
+                    maximumValidationAttempts: state.maximumValidationAttempts - 1,
+                }
             })
         }
 
@@ -40,16 +43,18 @@ export const getValidatorNode = ({
         if (containsInvalidQueries) {
             return new Command({
                 update: {
-                    messages: [lastMessageWithErrorReport(lastMessage.content as string, validateEsqlResults)]
+                    messages: [lastMessageWithErrorReport(lastMessage.content as string, validateEsqlResults)],
+                    maximumValidationAttempts: state.maximumValidationAttempts - 1
                 },
-                goto: NL_TO_ESQL_AGENT_NODE
+                goto: state.maximumValidationAttempts <= 0 || state.maximumLLMCalls <= 0 ? END : NL_TO_ESQL_AGENT_NODE
             })
         }
 
         return new Command({
             goto: END,
-            update:{
-                messages: `${lastMessage.content} \nAll of the queries have been validated and do not need to modified futher.`
+            update: {
+                messages: `${lastMessage.content} \nAll of the queries have been validated and do not need to modified futher.`,
+                maximumValidationAttempts: state.maximumValidationAttempts - 1
             }
         })
     }
@@ -60,7 +65,7 @@ const lastMessageWithErrorReport = (message: string, validateEsqlResults: Valida
     validateEsqlResults.reverse().forEach((validateEsqlResult) => {
         const index = messageWithErrorReport.indexOf('```', messageWithErrorReport.indexOf(validateEsqlResult.query))
         const errorMessage = formatValidateEsqlResultToHumanReadable(validateEsqlResult)
-        messageWithErrorReport = `${messageWithErrorReport.slice(0, index+3)}\n${errorMessage}\n${messageWithErrorReport.slice(index+3)}`
+        messageWithErrorReport = `${messageWithErrorReport.slice(0, index + 3)}\n${errorMessage}\n${messageWithErrorReport.slice(index + 3)}`
     })
 
     return new HumanMessage({
@@ -95,7 +100,7 @@ const validateEsql = async (esClient: ElasticsearchClient, query: string): Promi
     try {
         await esClient.esql.query(
             {
-                query: query,
+                query: `${query}\n| LIMIT 0`, // Add a LIMIT 0 to minimize the risk of executing a costly query
                 format: 'json',
             },
         )
