@@ -10,7 +10,6 @@ import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ChatEvent } from '../../../common/chat_events';
 import { createAgentGraph } from './agent_graph';
-import { IntegrationsService } from '../integrations/integrations_service';
 import { getLCTools } from '../integrations/utils';
 import { langchainToChatEvents } from './utils';
 import { IntergrationsSession } from '../integrations/integrations_session';
@@ -65,6 +64,15 @@ export const createAgent = async ({
         langchainToChatEvents(),
         shareReplay()
       );
+
+      events$.subscribe({
+        complete: () => {
+          integrationsSession.disconnect();
+        },
+        error: () => {
+          integrationsSession.disconnect();
+        },
+      });
 
       return {
         events$,

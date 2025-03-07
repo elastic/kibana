@@ -56,13 +56,13 @@ export class IntergrationsSession {
                 return toolsResponse.tools.map(tool => ({
                     name: `${clientId}${IntergrationsSession.TOOL_NAME_SEPARATOR}${tool.name}`,
                     description: tool.description || '',
-                    inputSchema: tool.inputSchema || {} as JsonSchemaObject
+                    inputSchema: (tool.inputSchema || {}) as JsonSchemaObject
                 }));
             }
             return [];
         }));
-        // TODO: fix this
-        // @ts-ignore
+
+
         return toolCalls.flat();
     }
 
@@ -76,6 +76,11 @@ export class IntergrationsSession {
             name: toolName,
             arguments: params,
         });
+    }
+
+    async disconnect() {
+        await Promise.all(Object.values(this.clients).map(client => client.close()));
+        this.clients = {};
     }
     
 }
