@@ -16,13 +16,16 @@ const MIN_TAB_WIDTH = 96;
 interface GetTabsSizeConfigProps {
   items: TabItem[];
   containerWidth: number | undefined;
+  hasReachedMaxItemsCount?: boolean;
 }
 
 export const calculateResponsiveTabs = ({
   items,
   containerWidth,
+  hasReachedMaxItemsCount,
 }: GetTabsSizeConfigProps): TabsSizeConfig => {
-  const availableContainerWidth = (containerWidth || window.innerWidth) - PLUS_BUTTON_SPACE;
+  const availableContainerWidth =
+    (containerWidth || window.innerWidth) - (hasReachedMaxItemsCount ? 0 : PLUS_BUTTON_SPACE);
 
   let calculatedTabWidth =
     items.length > 0 ? availableContainerWidth / items.length : MAX_TAB_WIDTH;

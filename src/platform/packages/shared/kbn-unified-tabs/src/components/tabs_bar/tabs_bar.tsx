@@ -42,12 +42,14 @@ export type TabsBarProps = Pick<
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
+  maxItemsCount?: number;
   onAdd: () => Promise<void>;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
+  maxItemsCount,
   tabContentId,
   getTabMenuItems,
   onAdd,
@@ -60,10 +62,12 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     null
   );
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+  const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
   const dimensions = useResizeObserver(tabsContainerWithPlus);
   const tabsSizeConfig = useMemo(
-    () => calculateResponsiveTabs({ items, containerWidth: dimensions.width }),
-    [items, dimensions.width]
+    () =>
+      calculateResponsiveTabs({ items, containerWidth: dimensions.width, hasReachedMaxItemsCount }),
+    [items, dimensions.width, hasReachedMaxItemsCount]
   );
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
@@ -120,16 +124,18 @@ export const TabsBar: React.FC<TabsBarProps> = ({
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="unifiedTabs_tabsBar_newTabBtn"
-              iconType="plus"
-              color="text"
-              aria-label={addButtonLabel}
-              title={addButtonLabel}
-              onClick={onAdd}
-            />
-          </EuiFlexItem>
+          {!hasReachedMaxItemsCount && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="unifiedTabs_tabsBar_newTabBtn"
+                iconType="plus"
+                color="text"
+                aria-label={addButtonLabel}
+                title={addButtonLabel}
+                onClick={onAdd}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
