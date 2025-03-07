@@ -28,7 +28,7 @@ describe('transactionDocumentProfileProvider', () => {
   };
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'traces-transaction-document-profile',
-    category: DataSourceCategory.Transactions,
+    category: DataSourceCategory.Traces,
   };
   const RESOLUTION_MATCH = {
     isMatch: true,

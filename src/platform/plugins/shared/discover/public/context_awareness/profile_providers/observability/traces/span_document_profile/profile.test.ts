@@ -28,7 +28,7 @@ describe('spanDocumentProfileProvider', () => {
   };
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'traces-span-document-profile',
-    category: DataSourceCategory.Spans,
+    category: DataSourceCategory.Traces,
   };
   const RESOLUTION_MATCH = {
     isMatch: true,
