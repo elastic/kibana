@@ -1833,6 +1833,52 @@
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.setProductFeatureKeys",
+          "type": "Function",
+          "tags": [],
+          "label": "setProductFeatureKeys",
+          "description": [],
+          "signature": [
+            "(productFeatureKeys: ",
+            {
+              "pluginId": "@kbn/security-solution-features",
+              "scope": "common",
+              "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+              "section": "def-common.ProductFeatureKeys",
+              "text": "ProductFeatureKeys"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginSetup.setProductFeatureKeys.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "productFeatureKeys",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/security-solution-features",
+                  "scope": "common",
+                  "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                  "section": "def-common.ProductFeatureKeys",
+                  "text": "ProductFeatureKeys"
+                }
+              ],
+              "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
