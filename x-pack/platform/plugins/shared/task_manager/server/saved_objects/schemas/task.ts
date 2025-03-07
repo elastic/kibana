@@ -55,9 +55,10 @@ export const taskSchemaV3 = taskSchemaV2.extends({
 });
 
 export const taskSchemaV4 = taskSchemaV3.extends({
+  apiKey: schema.maybe(schema.string()),
   userScope: schema.maybe(
     schema.object({
-      apiKey: schema.string(),
+      apiKeyId: schema.string(),
       spaceId: schema.string(),
       apiKeyCreatedByUser: schema.boolean(),
     })

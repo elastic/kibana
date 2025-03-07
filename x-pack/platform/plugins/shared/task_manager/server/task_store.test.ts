@@ -34,7 +34,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
 import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
-import { getUserScope } from './lib/api_key_utils';
+import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type {
   EncryptedSavedObjectsClient,
@@ -55,7 +55,7 @@ jest.mock('./task_validator', () => {
 });
 
 jest.mock('./lib/api_key_utils', () => ({
-  getUserScope: jest.fn(),
+  getApiKeyAndUserScope: jest.fn(),
 }));
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
@@ -268,14 +268,19 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
       const mockUserScope = {
-        apiKey: 'testApiKeyHas',
+        apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
         spaceId: 'testSpace',
       };
 
       const request = httpServerMock.createKibanaRequest();
-      (getUserScope as jest.Mock).mockResolvedValueOnce(mockUserScope);
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce({
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
       scopedSavedObjectsClient.create.mockImplementation(
@@ -285,7 +290,6 @@ describe('TaskStore', () => {
           attributes,
           references: [],
           version: '123',
-          userScope: mockUserScope,
         })
       );
 
@@ -295,19 +299,17 @@ describe('TaskStore', () => {
         'task',
         {
           attempts: 0,
-          schedule: undefined,
           params: '{"hello":"world"}',
           retryAt: null,
           runAt: '2019-02-12T21:01:22.479Z',
           scheduledAt: '2019-02-12T21:01:22.479Z',
-          scope: undefined,
           startedAt: null,
           state: '{"foo":"bar"}',
           status: 'idle',
           taskType: 'report',
-          user: undefined,
           traceparent: 'apmTraceparent',
           partition: 225,
+          apiKey: mockApiKey,
           userScope: mockUserScope,
         },
         {
@@ -316,7 +318,12 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getUserScope).toHaveBeenCalledWith(request, true, coreStart.security, spacesStart);
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -332,6 +339,7 @@ describe('TaskStore', () => {
         runAt: mockedDate,
         status: 'idle',
         partition: 225,
+        apiKey: mockApiKey,
         userScope: mockUserScope,
         id: 'testid',
         version: '123',
@@ -353,7 +361,9 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getUserScope as jest.Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
+      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+        new Error('Something went wrong!')
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -361,7 +371,7 @@ describe('TaskStore', () => {
         'Something went wrong!'
       );
 
-      expect(getUserScope).toHaveBeenCalled();
+      expect(getApiKeyAndUserScope).toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -611,6 +621,8 @@ describe('TaskStore', () => {
         ],
       });
     });
+
+    test('should return tasks with decrypted API keys', async () => {});
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
@@ -1540,8 +1552,9 @@ describe('TaskStore', () => {
         taskType: 'report',
         traceparent: 'apmTraceparent',
         partition: 225,
+        apiKey: mockApiKey,
         userScope: {
-          apiKey: mockApiKey,
+          apiKeyId: 'apiKeyId',
           apiKeyCreatedBy: 'testUser',
           spaceId: 'testSpace',
         },
@@ -1631,8 +1644,9 @@ describe('TaskStore', () => {
         taskType: 'report',
         traceparent: 'apmTraceparent',
         partition: 225,
+        apiKey: mockApiKey1,
         userScope: {
-          apiKey: mockApiKey1,
+          apiKeyId: 'apiKeyId1',
           apiKeyCreatedBy: 'testUser',
           spaceId: 'testSpace',
         },
@@ -1657,8 +1671,9 @@ describe('TaskStore', () => {
         taskType: 'report',
         traceparent: 'apmTraceparent',
         partition: 225,
+        apiKey: mockApiKey2,
         userScope: {
-          apiKey: mockApiKey2,
+          apiKeyId: 'apiKeyId2',
           apiKeyCreatedBy: 'testUser',
           spaceId: 'testSpace',
         },
@@ -2130,15 +2145,20 @@ describe('TaskStore', () => {
         taskType: 'report',
       };
 
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
       const mockUserScope = {
-        apiKey: 'testApiKeyHas',
+        apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
         spaceId: 'testSpace',
       };
 
       const request = httpServerMock.createKibanaRequest();
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
-      (getUserScope as jest.Mock).mockResolvedValueOnce(mockUserScope);
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce({
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
 
       scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
         saved_objects: [
@@ -2158,6 +2178,7 @@ describe('TaskStore', () => {
               taskType: 'report',
               traceparent: 'apmTraceparent',
               partition: 225,
+              apiKey: mockApiKey,
               userScope: mockUserScope,
             },
             references: [],
@@ -2179,6 +2200,7 @@ describe('TaskStore', () => {
               taskType: 'report',
               traceparent: 'apmTraceparent',
               partition: 225,
+              apiKey: mockApiKey,
               userScope: mockUserScope,
             },
             references: [],
@@ -2189,7 +2211,12 @@ describe('TaskStore', () => {
 
       const result = await store.bulkSchedule([task1, task2], { request });
 
-      expect(getUserScope).toHaveBeenCalledWith(request, true, coreStart.security, spacesStart);
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -2208,6 +2235,7 @@ describe('TaskStore', () => {
           taskType: 'report',
           traceparent: 'apmTraceparent',
           partition: 225,
+          apiKey: mockApiKey,
           userScope: mockUserScope,
           version: '123',
         },
@@ -2225,6 +2253,7 @@ describe('TaskStore', () => {
           taskType: 'report',
           traceparent: 'apmTraceparent',
           partition: 225,
+          apiKey: mockApiKey,
           userScope: mockUserScope,
           version: '123',
         },
@@ -2240,7 +2269,9 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getUserScope as jest.Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
+      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+        new Error('Something went wrong!')
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -2248,7 +2279,7 @@ describe('TaskStore', () => {
         'Something went wrong!'
       );
 
-      expect(getUserScope).toHaveBeenCalled();
+      expect(getApiKeyAndUserScope).toHaveBeenCalled();
     });
 
     test('errors if the task type is unknown', async () => {

@@ -248,7 +248,7 @@ export interface IntervalSchedule {
 }
 
 export interface TaskUserScope {
-  apiKey: string;
+  apiKeyId: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
 }
@@ -361,6 +361,11 @@ export interface TaskInstance {
 
   /**
    * Used to allow tasks to be scoped to a user via their API key
+   */
+  apiKey?: string;
+
+  /**
+   * Meta data related to the API key associated with this task
    */
   userScope?: TaskUserScope;
 }
@@ -495,6 +500,7 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+  apiKey?: string;
   userScope?: TaskUserScope;
 };
 

@@ -82,23 +82,36 @@ export const createApiKey = async (
     throw Error('Could not create API key.');
   }
 
-  return Buffer.from(`${apiKeyCreateResult.id}:${apiKeyCreateResult.api_key}`).toString('base64');
+  const encodedApiKey = Buffer.from(
+    `${apiKeyCreateResult.id}:${apiKeyCreateResult.api_key}`
+  ).toString('base64');
+
+  return {
+    apiKey: encodedApiKey,
+    apiKeyId: apiKeyCreateResult.id,
+  };
 };
 
-export const getUserScope = async (
+export const getApiKeyAndUserScope = async (
   request: KibanaRequest,
   canEncryptSo: boolean,
   security: SecurityServiceStart,
   spaces?: SpacesPluginStart
-): Promise<TaskUserScope> => {
-  const apiKey = await createApiKey(request, canEncryptSo, security);
+): Promise<{
+  apiKey: string;
+  userScope: TaskUserScope;
+}> => {
+  const { apiKey, apiKeyId } = await createApiKey(request, canEncryptSo, security);
   const space = await spaces?.spacesService.getActiveSpace(request);
 
   return {
     apiKey,
-    spaceId: space?.id || 'default',
-    // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
-    // not want to invalidate a specific API key that was not created by the task manager
-    apiKeyCreatedByUser: isRequestApiKeyType(request, security),
+    userScope: {
+      apiKeyId,
+      spaceId: space?.id || 'default',
+      // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
+      // not want to invalidate a specific API key that was not created by the task manager
+      apiKeyCreatedByUser: isRequestApiKeyType(request, security),
+    },
   };
 };

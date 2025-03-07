@@ -10,7 +10,6 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
-import { schema } from '@kbn/config-schema';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
@@ -159,67 +158,4 @@ export function defineRoutes(opts: RouteOptions) {
   runSoonRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
-
-  router.post(
-    {
-      path: '/api/alerting/schedule_task_with_api_key/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    async (context, request, res) => {
-      const alertingContext = await context.alerting;
-      const rulesClient = await alertingContext.getRulesClient();
-
-      const id = request.params.id;
-
-      rulesClient.scheduleTaskWithApiKey(id, request);
-
-      return res.ok();
-    }
-  );
-
-  router.post(
-    {
-      path: '/api/alerting/remove_task_with_api_key/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    async (context, request, res) => {
-      const alertingContext = await context.alerting;
-      const rulesClient = await alertingContext.getRulesClient();
-
-      const id = request.params.id;
-
-      rulesClient.removeTaskWithApiKey(id);
-
-      return res.ok();
-    }
-  );
-
-  router.post(
-    {
-      path: '/api/alerting/bulk_remove_task_with_api_key',
-      validate: {
-        body: schema.object({
-          ids: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    async (context, request, res) => {
-      const alertingContext = await context.alerting;
-      const rulesClient = await alertingContext.getRulesClient();
-
-      const ids = request.body.ids;
-
-      rulesClient.bulkRemoveTasksWithApiKey(ids);
-
-      return res.ok();
-    }
-  );
 }

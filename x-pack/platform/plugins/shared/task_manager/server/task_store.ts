@@ -21,6 +21,7 @@ import {
   SecurityServiceStart,
   SavedObjectsServiceStart,
   SPACES_EXTENSION_ID,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import {
@@ -52,7 +53,6 @@ import {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
-  TaskUserScope,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -64,7 +64,7 @@ import { ErrorOutput } from './lib/bulk_operation_buffer';
 import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
-import { getUserScope } from './lib/api_key_utils';
+import { getApiKeyAndUserScope } from './lib/api_key_utils';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -206,6 +206,27 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
+  private async maybeGetApiKeyFromRequest(request?: KibanaRequest) {
+    if (!request) {
+      return null;
+    }
+
+    let userScopeAndApiKey;
+    try {
+      userScopeAndApiKey = await getApiKeyAndUserScope(
+        request,
+        this.canEncryptSo(),
+        this.security,
+        this.spaces
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return userScopeAndApiKey;
+  }
+
   private async bulkGetDecryptedTasks(ids: string[]) {
     const result = new Map<string, ConcreteTaskInstance>();
     if (!this.canEncryptSo() || !ids.length) {
@@ -240,7 +261,7 @@ export class TaskStore {
     const ids: string[] = [];
 
     tasks.forEach((task) => {
-      if (task.userScope) {
+      if (task.apiKey) {
         ids.push(task.id);
       }
     });
@@ -253,8 +274,8 @@ export class TaskStore {
 
     const tasksWithDecryptedApiKeys = tasks.map((task) => ({
       ...task,
-      ...(decryptedTaskMap.get(task.id)?.userScope
-        ? { userScope: decryptedTaskMap.get(task.id)!.userScope }
+      ...(decryptedTaskMap.get(task.id)?.apiKey
+        ? { apiKey: decryptedTaskMap.get(task.id)!.apiKey }
         : {}),
     }));
 
@@ -283,15 +304,7 @@ export class TaskStore {
   ): Promise<ConcreteTaskInstance> {
     this.definitions.ensureHas(taskInstance.taskType);
 
-    let userScope: TaskUserScope | undefined;
-    try {
-      userScope =
-        options?.request &&
-        (await getUserScope(options.request, this.canEncryptSo(), this.security, this.spaces));
-    } catch (e) {
-      this.errors$.next(e);
-      throw e;
-    }
+    const { apiKey, userScope } = (await this.maybeGetApiKeyFromRequest(options?.request)) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -305,6 +318,7 @@ export class TaskStore {
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(userScope ? { userScope } : {}),
+          ...(apiKey ? { apiKey } : {}),
         },
         { id, refresh: false }
       );
@@ -329,15 +343,7 @@ export class TaskStore {
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
-    let userScope: TaskUserScope | undefined;
-    try {
-      userScope =
-        options?.request &&
-        (await getUserScope(options.request, this.canEncryptSo(), this.security, this.spaces));
-    } catch (e) {
-      this.errors$.next(e);
-      throw e;
-    }
+    const { apiKey, userScope } = (await this.maybeGetApiKeyFromRequest(options?.request)) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -350,6 +356,7 @@ export class TaskStore {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
+          ...(apiKey ? { apiKey } : {}),
           ...(userScope ? { userScope } : {}),
         },
         id,
@@ -580,11 +587,9 @@ export class TaskStore {
   public async remove(id: string): Promise<void> {
     const taskInstance = await this.get(id);
 
-    if (taskInstance.userScope?.apiKey && !taskInstance.userScope?.apiKeyCreatedByUser) {
-      const apiKeyId = Buffer.from(taskInstance.userScope.apiKey, 'base64')
-        .toString()
-        .split(':')[0];
-      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+    if (taskInstance?.apiKey && !taskInstance.userScope?.apiKeyCreatedByUser) {
+      const apiKeyId = Buffer.from(taskInstance.apiKey, 'base64').toString().split(':')[0];
+      await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
     }
 
     try {
@@ -607,18 +612,15 @@ export class TaskStore {
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (
-        unwrappedTaskInstance.userScope?.apiKey &&
-        !unwrappedTaskInstance.userScope?.apiKeyCreatedByUser
-      ) {
+      if (unwrappedTaskInstance?.apiKey && !unwrappedTaskInstance.userScope?.apiKeyCreatedByUser) {
         apiKeyIdsToRemove.push(
-          Buffer.from(unwrappedTaskInstance.userScope.apiKey, 'base64').toString().split(':')[0]
+          Buffer.from(unwrappedTaskInstance.apiKey, 'base64').toString().split(':')[0]
         );
       }
     });
 
     if (apiKeyIdsToRemove.length) {
-      this.security.authc.apiKeys.invalidateAsInternalUser({
+      await this.security.authc.apiKeys.invalidateAsInternalUser({
         ids: [...new Set(apiKeyIdsToRemove)],
       });
     }
@@ -964,7 +966,7 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -981,7 +983,7 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),

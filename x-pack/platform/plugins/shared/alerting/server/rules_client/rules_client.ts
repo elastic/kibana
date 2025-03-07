@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
 import { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
@@ -208,38 +207,4 @@ export class RulesClient {
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
-
-  public scheduleTaskWithApiKey = async (id: string, request: KibanaRequest) => {
-    await this.context.taskManager.schedule(
-      {
-        id,
-        taskType: 'taskWithApiKey',
-        params: {},
-        state: {},
-        schedule: {
-          interval: '30s',
-        },
-        enabled: true,
-      },
-      {
-        request,
-      }
-    );
-  };
-
-  public removeTaskWithApiKey = async (id: string) => {
-    try {
-      await this.context.taskManager.remove(id);
-    } catch (e) {
-      this.context.logger.warn(`Failed to remove task by id: ${e}`);
-    }
-  };
-
-  public bulkRemoveTasksWithApiKey = async (ids: string[]) => {
-    try {
-      await this.context.taskManager.bulkRemove(ids);
-    } catch (e) {
-      this.context.logger.warn(`Failed to bulk remove tasks by id: ${e}`);
-    }
-  };
 }

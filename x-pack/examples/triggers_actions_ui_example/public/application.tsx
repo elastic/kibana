@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient } from '@tanstack/react-query';
-import { EuiPage, EuiTitle, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -37,6 +37,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -235,53 +236,7 @@ const TriggersActionsUiExampleApp = ({
             path="/task_manager_with_api_key"
             render={() => (
               <Page title="Task Manager with API Key">
-                <div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/schedule_task_with_api_key/task1');
-                      }}
-                    >
-                      Schedule Task 1
-                    </EuiButton>
-                  </div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/schedule_task_with_api_key/task2');
-                      }}
-                    >
-                      Schedule Task 2
-                    </EuiButton>
-                  </div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/remove_task_with_api_key/task1');
-                      }}
-                    >
-                      Remove Task 1
-                    </EuiButton>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/remove_task_with_api_key/task2');
-                      }}
-                    >
-                      Remove Task 2
-                    </EuiButton>
-                  </div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/bulk_remove_task_with_api_key', {
-                          body: JSON.stringify({ ids: ['task1', 'task2'] }),
-                        });
-                      }}
-                    >
-                      Remove All Tasks
-                    </EuiButton>
-                  </div>
-                </div>
+                <TaskWithApiKeySandbox http={http} />
               </Page>
             )}
           />

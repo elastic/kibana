@@ -9,7 +9,7 @@ import {
   isRequestApiKeyType,
   getApiKeyFromRequest,
   createApiKey,
-  getUserScope,
+  getApiKeyAndUserScope,
 } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -81,7 +81,7 @@ describe('api_key_utils', () => {
       });
 
       const result = await createApiKey(request, true, coreStart.security);
-      const decodedApiKey = Buffer.from(result, 'base64').toString();
+      const decodedApiKey = Buffer.from(result.apiKey, 'base64').toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe('api_key_utils', () => {
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
       const result = await createApiKey(request, true, coreStart.security);
-      const decodedApiKey = Buffer.from(result, 'base64').toString();
+      const decodedApiKey = Buffer.from(result.apiKey, 'base64').toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
@@ -189,12 +189,15 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await getUserScope(request, true, coreStart.security, spacesStart);
+      const result = await getApiKeyAndUserScope(request, true, coreStart.security, spacesStart);
 
       expect(result).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
-        spaceId: 'testSpace',
-        apiKeyCreatedByUser: false,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          spaceId: 'testSpace',
+          apiKeyCreatedByUser: false,
+        },
       });
     });
 
@@ -217,12 +220,15 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await getUserScope(request, true, coreStart.security, spacesStart);
+      const result = await getApiKeyAndUserScope(request, true, coreStart.security, spacesStart);
 
       expect(result).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
-        spaceId: 'default',
-        apiKeyCreatedByUser: false,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
       });
     });
 
@@ -244,12 +250,15 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const result = await getUserScope(request, true, coreStart.security, spacesStart);
+      const result = await getApiKeyAndUserScope(request, true, coreStart.security, spacesStart);
 
       expect(result).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
-        spaceId: 'default',
-        apiKeyCreatedByUser: true,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          spaceId: 'default',
+          apiKeyCreatedByUser: true,
+        },
       });
     });
   });
