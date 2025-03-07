@@ -2,7 +2,6 @@
 
 exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
 <EuiDescriptionList
-  className="rule-detector-description-list"
   columnWidths={
     Array [
       15,
@@ -49,7 +48,6 @@ exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
 
 exports[`DetectorDescriptionList render for population detector with no anomaly values 1`] = `
 <EuiDescriptionList
-  className="rule-detector-description-list"
   columnWidths={
     Array [
       15,
