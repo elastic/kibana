@@ -6,7 +6,6 @@
  */
 
 import React, { ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 
@@ -38,16 +37,8 @@ export function ChatBanner({
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiText size="xs">
-            <h3>
-              {i18n.translate('xpack.aiAssistant.shareBanner.title', {
-                defaultMessage: title,
-              })}
-            </h3>
-            <p>
-              {i18n.translate('xpack.aiAssistant.shareBanner.description', {
-                defaultMessage: description,
-              })}
-            </p>
+            <h3>{title}</h3>
+            <p>{description}</p>
             {button}
           </EuiText>
         </EuiFlexItem>

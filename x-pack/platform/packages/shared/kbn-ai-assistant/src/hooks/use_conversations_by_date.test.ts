@@ -74,10 +74,6 @@ describe('useConversationsByDate', () => {
     });
   });
 
-  // afterEach(() => {
-  //   jest.resetModules();
-  // });
-
   afterAll(() => {
     jest.useRealTimers();
   });

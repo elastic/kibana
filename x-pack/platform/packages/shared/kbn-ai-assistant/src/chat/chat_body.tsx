@@ -354,7 +354,9 @@ export function ChatBody({
 
   const isPublic = conversation.value?.public;
   const showPromptEditor = !isPublic || isConversationOwnedByCurrentUser;
-  const bannerTitle = 'This conversation is shared with your team.';
+  const bannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
+    defaultMessage: 'This conversation is shared with your team.',
+  });
 
   let sharedBanner = null;
 
@@ -362,7 +364,10 @@ export function ChatBody({
     sharedBanner = (
       <ChatBanner
         title={bannerTitle}
-        description="You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged."
+        description={i18n.translate('xpack.aiAssistant.shareBanner.viewerDescription', {
+          defaultMessage:
+            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
+        })}
         button={
           <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
             {i18n.translate('xpack.aiAssistant.duplicateButton', {
@@ -376,7 +381,10 @@ export function ChatBody({
     sharedBanner = (
       <ChatBanner
         title={bannerTitle}
-        description="Any further edits you do to this conversation will be shared with the rest of the team."
+        description={i18n.translate('xpack.aiAssistant.shareBanner.ownerDescription', {
+          defaultMessage:
+            'Any further edits you do to this conversation will be shared with the rest of the team.',
+        })}
       />
     );
   }
