@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type {
@@ -25,7 +26,6 @@ import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';

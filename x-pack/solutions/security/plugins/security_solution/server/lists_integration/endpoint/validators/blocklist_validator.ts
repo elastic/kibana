@@ -243,14 +243,16 @@ export class BlocklistValidator extends BaseValidator {
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     await this.setOwnerSpaceId(item);
 
     return item;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreGetOneItem(): Promise<void> {
@@ -299,6 +301,8 @@ export class BlocklistValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 
     if (!hasArtifactOwnerSpaceId(_updatedItem)) {
       await this.setOwnerSpaceId(_updatedItem);

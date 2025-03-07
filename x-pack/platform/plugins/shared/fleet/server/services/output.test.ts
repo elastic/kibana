@@ -367,6 +367,32 @@ describe('Output Service', () => {
 
   describe('create', () => {
     describe('elasticsearch output', () => {
+      beforeEach(() => {
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: true,
+        } as any);
+      });
+      it('should throw if encryptedSavedObject is not configured', async () => {
+        const soClient = getMockedSoClient();
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: false,
+        } as any);
+
+        await expect(
+          outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Test',
+              type: 'elasticsearch',
+            },
+            { id: 'output-test' }
+          )
+        ).rejects.toThrow(`elasticsearch output needs encrypted saved object api key to be set`);
+      });
+
       it('works with a predefined id', async () => {
         const soClient = getMockedSoClient();
 
@@ -1040,6 +1066,34 @@ describe('Output Service', () => {
     });
 
     describe('remote elasticsearch output', () => {
+      beforeEach(() => {
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: true,
+        } as any);
+      });
+      it('should throw if encryptedSavedObject is not configured', async () => {
+        const soClient = getMockedSoClient();
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: false,
+        } as any);
+
+        await expect(
+          outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: true,
+              is_default_monitoring: false,
+              name: 'Test',
+              type: 'remote_elasticsearch',
+            },
+            { id: 'output-1' }
+          )
+        ).rejects.toThrow(
+          `remote_elasticsearch output needs encrypted saved object api key to be set`
+        );
+      });
+
       it('should update agentless policies with data_output_id=default_output_id if a new default remote es output is created', async () => {
         const soClient = getMockedSoClient({
           defaultOutputId: 'output-test',
@@ -1309,7 +1363,6 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
-        ssl: null,
         preset: 'balanced',
       });
     });
