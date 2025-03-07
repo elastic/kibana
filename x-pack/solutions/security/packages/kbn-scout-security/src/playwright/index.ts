@@ -6,4 +6,4 @@
  */
 
 export * from './fixtures';
-export type { SecurityPageObjects } from './page_objects';
+export type { SecurityPageObjects } from './fixtures/test/page_objects';

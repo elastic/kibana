@@ -7,9 +7,9 @@
 
 import { test as base } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
-import { extendPageObjects } from '../page_objects';
+import { extendPageObjects } from './test/page_objects';
 import { SecurityBrowserAuthFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
-import { extendBrowserAuth } from './authentication';
+import { extendBrowserAuth } from './test/authentication';
 import { createDetectionRuleFixture } from './worker/apis/detection_rule';
 
 export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({

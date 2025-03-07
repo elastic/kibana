@@ -6,7 +6,7 @@
  */
 
 import { spaceTest as spaceBase } from '@kbn/scout';
-import { extendPageObjects } from '../page_objects';
+import { extendPageObjects } from './test/page_objects';
 import { SecurityParallelTestFixtures, SecurityParallelWorkerFixtures } from './types';
 
 /**
