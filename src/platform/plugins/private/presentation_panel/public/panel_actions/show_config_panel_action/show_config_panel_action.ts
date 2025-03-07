@@ -81,11 +81,6 @@ export class ShowConfigPanelAction
     );
   }
 
-  /**
-   * The execute method contains a compatibility check with a wider scope
-   * as it can detect permission and "hijack" the show action into an edit action
-   * if the user can edit the panel
-   */
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     await embeddable.onShowConfig();
