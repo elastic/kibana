@@ -31,6 +31,6 @@ export const configureTextCustomFieldFactory: CustomFieldFactory<
     View,
     Create,
   }),
-  convertNullToEmpty: (value: string | number | boolean | null) =>
+  sanitizeTemplateValue: (value: string | number | boolean | null) =>
     value == null ? '' : String(value),
 });

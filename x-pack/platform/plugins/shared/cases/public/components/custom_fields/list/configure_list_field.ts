@@ -44,4 +44,16 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
     const option = configuration.options.find((opt) => opt.key === selectedKey);
     return option?.label ?? '';
   },
+  sanitizeTemplateValue: (
+    value: CaseCustomFieldList['value'],
+    configuration?: ListCustomFieldConfiguration
+  ): CaseCustomFieldList['value'] => {
+    if (!configuration || !value) return null;
+    const selectedKey = Object.keys(value)[0];
+    const option = configuration.options.find((opt) => opt.key === selectedKey);
+    if (option) return value;
+    // UI displays the first value if the template is set to a deleted key
+    const [{ key, label }] = configuration.options;
+    return { [key]: label };
+  },
 });

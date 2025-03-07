@@ -39,14 +39,20 @@ export interface CreateCaseFormFieldsProps {
 }
 
 const transformTemplateCaseFieldsToCaseFormFields = (
-  owner: string,
+  configuration: CasesConfigurationUI,
   caseTemplateFields: CasesConfigurationUITemplate['caseFields']
 ): CasePostRequest => {
   const caseFields = removeEmptyFields(caseTemplateFields ?? {});
+
   const transFormedCustomFields = caseFields?.customFields?.map((customField) => {
     const customFieldFactory = customFieldsBuilderMap[customField.type];
-    const { convertNullToEmpty } = customFieldFactory();
-    const value = convertNullToEmpty ? convertNullToEmpty(customField.value) : customField.value;
+    const { sanitizeTemplateValue } = customFieldFactory();
+    const customFieldConfiguration = configuration.customFields.find(
+      (configCustomField) => configCustomField.key === customField.key
+    );
+    const value = sanitizeTemplateValue
+      ? sanitizeTemplateValue(customField.value, customFieldConfiguration)
+      : customField.value;
 
     return {
       ...customField,
@@ -55,7 +61,7 @@ const transformTemplateCaseFieldsToCaseFormFields = (
   });
 
   return getInitialCaseValue({
-    owner,
+    owner: configuration.owner,
     ...caseFields,
     customFields: transFormedCustomFields as CaseUI['customFields'],
   });
@@ -94,7 +100,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const onTemplateChange = useCallback(
       ({ caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
         const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(
-          configurationOwner,
+          configuration,
           caseFields
         );
 
@@ -104,7 +110,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         });
         updateFieldValues(caseFormFields);
       },
-      [configurationOwner, reset, updateFieldValues]
+      [configuration, configurationOwner, reset, updateFieldValues]
     );
 
     const firstStep = useMemo(

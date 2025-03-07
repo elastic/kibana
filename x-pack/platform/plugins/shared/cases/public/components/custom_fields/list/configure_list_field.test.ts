@@ -20,6 +20,7 @@ describe('configureListCustomFieldFactory ', () => {
       label: 'List',
       getEuiTableColumn: expect.any(Function),
       build: expect.any(Function),
+      sanitizeTemplateValue: expect.any(Function),
       getFilterOptions: expect.any(Function),
       convertValueToDisplayText: expect.any(Function),
     });
