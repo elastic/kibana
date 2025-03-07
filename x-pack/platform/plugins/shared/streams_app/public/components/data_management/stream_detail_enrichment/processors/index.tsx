@@ -37,6 +37,7 @@ import {
   isGrokProcessor,
   isDissectProcessor,
   getDefaultFormStateByType,
+  isDateProcessor,
 } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
@@ -46,6 +47,7 @@ import {
   StreamEnrichmentContext,
 } from '../state_management/stream_enrichment_state_machine';
 import { ProcessorMetrics } from '../state_management/simulation_state_machine';
+import { DateProcessorForm } from './date';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -394,6 +396,8 @@ const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes)
     return processor.grok.patterns.join(' • ');
   } else if (isDissectProcessor(processor)) {
     return processor.dissect.pattern;
+  } else if (isDateProcessor(processor)) {
+    return `${processor.date.field} • ${processor.date.formats.join(' - ')}`;
   }
 
   return '';

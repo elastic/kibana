@@ -49,7 +49,7 @@ export const DateTimezoneField = () => {
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateTimezoneHelpText"
           defaultMessage="Timezone for the date. Defaults to {timezone}"
-          values={{ locale: <EuiCode>UTC</EuiCode> }}
+          values={{ timezone: <EuiCode>UTC</EuiCode> }}
         />
       }
       fullWidth
