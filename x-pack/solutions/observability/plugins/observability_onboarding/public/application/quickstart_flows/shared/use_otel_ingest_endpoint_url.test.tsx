@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useIngestEndpointUrl } from './use_ingest_endpoint_url';
+import { useOtelIngestEndpointUrl } from './use_otel_ingest_endpoint_url';
 
 const createWrapper = ({ isServerless }: { isServerless: boolean }) => {
   return function Wrapper({ children }: React.PropsWithChildren) {
@@ -24,11 +24,11 @@ const createWrapper = ({ isServerless }: { isServerless: boolean }) => {
   };
 };
 
-describe('useIngestEndpointUrl', () => {
+describe('useOtelIngestEndpointUrl', () => {
   it('returns ES endpoint when not on Serverless', () => {
     const { result } = renderHook(
       () =>
-        useIngestEndpointUrl({
+        useOtelIngestEndpointUrl({
           elasticsearchUrl: 'http://elasticsearch',
           managedServiceUrl: 'https://e2e-tests-c045db.apm.us-east-1.aws.elastic.cloud:443',
         }),
@@ -43,7 +43,7 @@ describe('useIngestEndpointUrl', () => {
   it('returns APM endpoint with replaced sub-domain when on Serverless', () => {
     const { result } = renderHook(
       () =>
-        useIngestEndpointUrl({
+        useOtelIngestEndpointUrl({
           elasticsearchUrl: 'http://elasticsearch',
           managedServiceUrl: 'https://e2e-tests-c045db.apm.us-east-1.aws.elastic.cloud:443',
         }),
