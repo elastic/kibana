@@ -224,7 +224,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   }, [validRuleTypes]);
 
   const ruleTypeIds = useMemo(() => {
-    if (!Array.isArray(validRuleTypes) || !solutionId || !mounted) {
+    if (!Array.isArray(validRuleTypes) || !mounted) {
       return [];
     }
 
@@ -253,8 +253,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     (isEnabled: boolean) => {
       if (isEnabled) {
         setFieldValue('solutionId', availableSolutions.sort()[0]);
-      } else {
-        setFieldValue('solutionId', undefined);
       }
       setIsScopedQueryEnabled(isEnabled);
     },
@@ -299,14 +297,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
-      {isEditMode && (
-        <>
-          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="warning" iconType="trash">
-            {i18n.ARCHIVE_SUBTITLE}
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
-      )}
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField
@@ -426,7 +416,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               <MaintenanceWindowSolutionSelection
                 isScopedQueryEnabled={isScopedQueryEnabled}
                 isLoading={isLoadingRuleTypes}
-                selectedSolution={solutionId || ''} // add default
+                selectedSolution={solutionId || ''}
                 availableSolutions={availableSolutions}
                 errors={field.errors.map((error) => error.message)}
                 onChange={onSolutionIdChange}

@@ -667,6 +667,20 @@ export const ARCHIVE_SUBTITLE = i18n.translate(
   }
 );
 
+export const SOLUTION_CONFIG_REMOVAL_WARNING_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.title',
+  {
+    defaultMessage: 'Solution specific configuration will be removed.',
+  }
+);
+
+export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
+  {
+    defaultMessage: 'Solution specific configuration will be removed.',
+  }
+);
+
 export const TABLE_ACTION_UNARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.unarchive',
   {

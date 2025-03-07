@@ -19,7 +19,11 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
-    return convertFromMaintenanceWindowToForm(maintenanceWindow);
+    return {
+      maintenanceWindow: convertFromMaintenanceWindowToForm(maintenanceWindow),
+      hasOldChosenSolutions:
+        maintenanceWindow.categoryIds && maintenanceWindow.categoryIds.length < 3,
+    };
   };
 
   const onErrorFn = () => {
@@ -40,7 +44,8 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
   });
 
   return {
-    maintenanceWindow: data,
+    maintenanceWindow: data?.maintenanceWindow,
+    hasOldChosenSolutions: data?.hasOldChosenSolutions,
     isLoading: isLoading || isInitialLoading,
     isError,
   };
