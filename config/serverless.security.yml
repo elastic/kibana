@@ -87,7 +87,6 @@ xpack.features.overrides:
         - feature: "savedQueryManagement"
           privileges: [ "read" ]
 
-
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
 

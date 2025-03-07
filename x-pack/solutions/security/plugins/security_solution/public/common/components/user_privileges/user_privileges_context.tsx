@@ -45,8 +45,8 @@ export const UserPrivilegesProvider = ({
   kibanaCapabilities,
   children,
 }: UserPrivilegesProviderProps) => {
-  const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID]?.crud === true;
-  const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID]?.show === true;
+  const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].crud === true;
+  const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
   const [kibanaSecuritySolutionsPrivileges, setKibanaSecuritySolutionsPrivileges] = useState({
     crud,
     read,

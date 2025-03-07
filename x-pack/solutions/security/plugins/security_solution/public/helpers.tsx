@@ -232,7 +232,7 @@ export const getSubPluginRoutesByCapabilities = (
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
-    return capabilities[CASES_FEATURE_ID]?.read_cases === true;
+    return capabilities[CASES_FEATURE_ID].read_cases === true;
   }
   return hasAccessToSecuritySolution(capabilities);
 };
