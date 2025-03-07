@@ -75,7 +75,7 @@ const streams: StreamPutItem[] = [
               if: {
                 and: [
                   {
-                    field: 'numberfield',
+                    field: 'attributes.numberfield',
                     operator: 'gt',
                     value: 15,
                   },
@@ -87,7 +87,7 @@ const streams: StreamPutItem[] = [
               if: {
                 and: [
                   {
-                    field: 'field2',
+                    field: 'attributes.field2',
                     operator: 'eq',
                     value: 'abc',
                   },
