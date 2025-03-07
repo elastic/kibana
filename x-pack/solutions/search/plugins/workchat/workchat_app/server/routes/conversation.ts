@@ -6,22 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
 import type {
   ListConversationResponse,
   GetConversationResponse,
 } from '../../common/http_api/conversation';
-import { InternalServices } from '../services';
+import type { RouteDependencies } from './types';
 
-export const registerConversationRoutes = ({
-  getServices,
-  router,
-  logger,
-}: {
-  router: IRouter;
-  logger: Logger;
-  getServices: () => InternalServices;
-}) => {
+export const registerConversationRoutes = ({ getServices, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/workchat/conversations/{conversationId}',

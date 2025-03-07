@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/css';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -59,6 +59,8 @@ export const WorkchatChatPage: React.FC<{}> = () => {
     [application, conversationId, refreshConversations]
   );
 
+  const [connectorId, setConnectorId] = useState<string>();
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -88,9 +90,10 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           justifyContent="center"
           responsive={false}
         >
-          <ChatHeader />
+          <ChatHeader connectorId={connectorId} onConnectorChange={setConnectorId} />
           <Chat
             conversationId={conversationId}
+            connectorId={connectorId}
             currentUser={currentUser}
             onConversationUpdate={onConversationUpdate}
           />

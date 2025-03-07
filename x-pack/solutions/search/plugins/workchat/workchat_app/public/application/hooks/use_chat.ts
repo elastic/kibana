@@ -14,6 +14,7 @@ import { useWorkChatServices } from './use_workchat_service';
 interface UseChatProps {
   conversationId: string | undefined;
   agentId: string;
+  connectorId?: string;
   onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
   onError?: (error: any) => void;
 }
@@ -23,6 +24,7 @@ export type ChatStatus = 'ready' | 'loading' | 'error';
 export const useChat = ({
   conversationId,
   agentId,
+  connectorId,
   onConversationUpdate,
   onError,
 }: UseChatProps) => {
@@ -35,10 +37,15 @@ export const useChat = ({
     async (nextMessage: string) => {
       setConversationEvents((prevEvents) => [...prevEvents, userMessageEvent(nextMessage)]);
 
-      let concatenatedChunks = '';
-      const events$ = await chatService.converse({ nextMessage, conversationId, agentId });
+      const events$ = await chatService.converse({
+        nextMessage,
+        conversationId,
+        agentId,
+        connectorId,
+      });
 
       setStatus('loading');
+      let concatenatedChunks = '';
 
       events$.subscribe({
         next: (event) => {
@@ -65,7 +72,7 @@ export const useChat = ({
         },
       });
     },
-    [chatService, agentId, conversationId, onConversationUpdate, onError]
+    [chatService, agentId, conversationId, connectorId, onConversationUpdate, onError]
   );
 
   const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {

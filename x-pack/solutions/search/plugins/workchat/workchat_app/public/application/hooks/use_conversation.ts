@@ -14,10 +14,12 @@ import { useWorkChatServices } from './use_workchat_service';
 export const useConversation = ({
   agentId,
   conversationId,
+  connectorId,
   onConversationUpdate,
 }: {
   agentId: string;
   conversationId: string | undefined;
+  connectorId?: string;
   onConversationUpdate: (update: ConversationEventChanges) => void;
 }) => {
   const { conversationService } = useWorkChatServices();
@@ -37,6 +39,7 @@ export const useConversation = ({
   } = useChat({
     agentId,
     conversationId,
+    connectorId,
     onConversationUpdate: onConversationUpdateInternal,
   });
 

@@ -17,6 +17,7 @@ import { ChatConversation } from './chat_conversation';
 
 interface ChatProps {
   conversationId: string | undefined;
+  connectorId: string | undefined;
   currentUser: AuthenticatedUser | undefined;
   onConversationUpdate: (changes: ConversationEventChanges) => void;
 }
@@ -38,9 +39,11 @@ export const Chat: React.FC<ChatProps> = ({
   conversationId,
   currentUser,
   onConversationUpdate,
+  connectorId,
 }) => {
   const { sendMessage, conversationEvents, chatStatus } = useConversation({
     conversationId,
+    connectorId,
     agentId: 'default',
     onConversationUpdate,
   });
