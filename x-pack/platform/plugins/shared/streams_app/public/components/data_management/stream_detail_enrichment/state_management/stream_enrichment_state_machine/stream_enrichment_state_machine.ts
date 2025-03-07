@@ -155,9 +155,7 @@ export const streamEnrichmentMachine = setup({
     '!hasPendingDraft': not('hasPendingDraft'),
     canUpdateStream: and(['hasStagedChanges', '!hasPendingDraft']),
     isStagedProcessor: ({ context }, params: { id: string }) => {
-      const processorRef = context.processorsRefs.find(
-        (p) => console.log(p.id, params.id) || p.id === params.id
-      );
+      const processorRef = context.processorsRefs.find((p) => p.id === params.id);
 
       if (!processorRef) return false;
       return processorRef.getSnapshot().context.isNew;
