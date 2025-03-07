@@ -17,7 +17,7 @@ import { Readable } from 'stream';
 import { Logger } from '@kbn/logging';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { GeminiPartText } from '@langchain/google-common/dist/types';
+import { GeminiPartText, GeminiRequest } from '@langchain/google-common/dist/types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import {
   convertResponseBadFinishReasonToErrorMsg,
@@ -36,6 +36,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
   maxTokens?: number;
   telemetryMetadata?: TelemetryMetadata;
+  convertSystemMessageToHumanContent?: boolean;
 }
 
 export class ActionsClientChatVertexAI extends ChatVertexAI {
@@ -56,7 +57,9 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     this.#model = props.model;
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
-    const client = this.buildClient(props);
+    // apiKey is required to build the client but is overridden by the actionsClient
+    const client = this.buildClient({ apiKey: 'nothing', ...props });
+
     this.connection = new ActionsClientChatConnection(
       {
         ...this,
@@ -80,7 +83,7 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
     const parameters = this.invocationParams(options);
-    const data = await this.connection.formatData(messages, parameters);
+    const data = (await this.connection.formatData(messages, parameters)) as GeminiRequest;
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
       const systemPart: GeminiPartText | undefined = data?.systemInstruction
         ?.parts?.[0] as unknown as GeminiPartText;

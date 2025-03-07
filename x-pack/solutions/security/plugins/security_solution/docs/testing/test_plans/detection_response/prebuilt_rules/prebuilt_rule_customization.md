@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of customizing prebuilt rules via:
@@ -24,10 +27,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
-  - [User stories](#user-stories)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Editing prebuilt rules](#editing-prebuilt-rules)
     - [**Scenario: User can edit a non-customized prebuilt rule from the rule edit page**](#scenario-user-can-edit-a-non-customized-prebuilt-rule-from-the-rule-edit-page)
@@ -60,9 +64,35 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Tests for prebuilt rule customization workflow](https://github.com/elastic/kibana/issues/202068)
 
-### User stories
+### Terminology
 
-**Prebuilt rule customization workflow:**
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
+- **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
+- **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
+
+## Requirements
+
+### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+- Rule package used will have all previous rule versions present (no missing base versions).
+
+### Technical requirements
+
+Non-functional requirements for the functionality outlined in this test plan.
+
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
+
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
+
+User stories:
 
 - User can edit a single prebuilt rule from the Rule Details page.
 - User can edit single prebuilt rules one-by-one from the Rule Management page.
@@ -75,22 +105,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - User can see if the rule is customized on the Rule Details page.
 - User can see which rules are customized on the Rule Management page in the Upgrade table.
 - User can un-customize a prebuilt rule by editing it and reverting its parameters back to their original values.
-
-### Terminology
-
-- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
-- **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
-- **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
-- **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
-
-### Assumptions
-
-- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
-- Rule package used will have all previous rule versions present (no missing base versions)
-
-### Non-functional requirements
-
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 
