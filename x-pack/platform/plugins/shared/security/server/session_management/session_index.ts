@@ -10,7 +10,6 @@ import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
   BulkOperationContainer,
-  CreateRequest,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
@@ -786,8 +785,8 @@ export class SessionIndex {
         index: this.aliasName,
         document: sessionValueToStore,
         refresh: false,
-        require_alias: true,
-      } as CreateRequest,
+        querystring: { require_alias: true },
+      },
       { meta: true, ignore: ignore404 ? [404] : [] }
     );
 
