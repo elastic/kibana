@@ -35,7 +35,7 @@ export function registerGetDatasetInfoFunction({
           index: {
             type: 'string',
             description:
-              'Index pattern the user is interested in. You are allowed to specify multiple, comma-separated patterns like "index1,index2". If you provide an empty string, all indices will be returned. By default matching indicies in local and remote indices are searched. If you want to limit the search to a specific cluster you can prefix the index pattern with the cluster name. For example, "cluster1:my-index".',
+              'Please specify the index pattern(s) that are relevant to the user\'s query. You are allowed to specify multiple, comma-separated patterns like "index1,index2". If you provide an empty string, it will search across all indicies in all clusters. By default indicies that match the pattern in both local and remote clusters are searched. If you want to limit the search to a specific cluster you can prefix the index pattern with the cluster name. For example, "cluster1:my-index".',
           },
         },
         required: ['index'],

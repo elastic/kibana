@@ -16,7 +16,7 @@ import {
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { getMessageAddedEvents, getSystemMessage, systemMessageSorted } from './helpers';
+import { chatComplete, getSystemMessage, systemMessageSorted } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
 
@@ -49,6 +49,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let messageAddedEvents: MessageAddEvent[];
       let logsSynthtraceEsClient: LogsSynthtraceEsClient;
       let getRelevantFields: () => Promise<RelevantField[]>;
+      let firstRequestBody: ChatCompletionStreamParams;
+      let secondRequestBody: ChatCompletionStreamParams;
+      let thirdRequestBody: ChatCompletionStreamParams;
 
       const USER_MESSAGE = 'Do I have any Apache logs?';
 
@@ -66,211 +69,181 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         void llmProxy.interceptConversation(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
 
-        const { status, body } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-          params: {
-            body: {
-              messages: [
-                {
-                  '@timestamp': new Date().toISOString(),
-                  message: {
-                    role: MessageRole.User,
-                    content: USER_MESSAGE,
-                  },
-                },
-              ],
-              connectorId,
-              persist: false,
-              screenContexts: [],
-              scopes: ['observability' as const],
-            },
-          },
-        });
-
-        expect(status).to.be(200);
+        ({ messageAddedEvents } = await chatComplete({
+          userPrompt: USER_MESSAGE,
+          connectorId,
+          observabilityAIAssistantAPIClient,
+        }));
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        messageAddedEvents = getMessageAddedEvents(body);
+
+        firstRequestBody = llmProxy.interceptedRequests[0].requestBody;
+        secondRequestBody = llmProxy.interceptedRequests[1].requestBody;
+        thirdRequestBody = llmProxy.interceptedRequests[2].requestBody;
       });
 
       after(async () => {
         await logsSynthtraceEsClient.clean();
       });
 
-      describe('LLM requests', () => {
-        let firstRequestBody: ChatCompletionStreamParams;
-        let secondRequestBody: ChatCompletionStreamParams;
-        let thirdRequestBody: ChatCompletionStreamParams;
+      it('makes 3 requests to the LLM', () => {
+        expect(llmProxy.interceptedRequests.length).to.be(3);
+      });
 
-        before(async () => {
-          firstRequestBody = llmProxy.interceptedRequests[0].requestBody;
-          secondRequestBody = llmProxy.interceptedRequests[1].requestBody;
-          thirdRequestBody = llmProxy.interceptedRequests[2].requestBody;
-        });
+      it('emits 5 messageAdded events', () => {
+        expect(messageAddedEvents.length).to.be(5);
+      });
 
-        it('makes 3 requests to the LLM', () => {
-          expect(llmProxy.interceptedRequests.length).to.be(3);
-        });
-
-        describe('every request to the LLM', () => {
-          it('contains a system message', () => {
-            const everyRequestHasSystemMessage = llmProxy.interceptedRequests.every(
-              ({ requestBody }) => {
-                const firstMessage = requestBody.messages[0];
-                return (
-                  firstMessage.role === 'system' &&
-                  (firstMessage.content as string).includes('You are a helpful assistant')
-                );
-              }
-            );
-            expect(everyRequestHasSystemMessage).to.be(true);
-          });
-
-          it('contains the original user message', () => {
-            const everyRequestHasUserMessage = llmProxy.interceptedRequests.every(
-              ({ requestBody }) =>
-                requestBody.messages.some(
-                  (message) =>
-                    message.role === 'user' && (message.content as string) === USER_MESSAGE
-                )
-            );
-            expect(everyRequestHasUserMessage).to.be(true);
-          });
-
-          it('contains the context function request and context function response', () => {
-            const everyRequestHasContextFunction = llmProxy.interceptedRequests.every(
-              ({ requestBody }) => {
-                const hasContextFunctionRequest = requestBody.messages.some(
-                  (message) =>
-                    message.role === 'assistant' &&
-                    message.tool_calls?.[0]?.function?.name === 'context'
-                );
-
-                const hasContextFunctionResponse = requestBody.messages.some(
-                  (message) =>
-                    message.role === 'tool' &&
-                    (message.content as string).includes('screen_description') &&
-                    (message.content as string).includes('learnings')
-                );
-
-                return hasContextFunctionRequest && hasContextFunctionResponse;
-              }
-            );
-
-            expect(everyRequestHasContextFunction).to.be(true);
-          });
-        });
-
-        describe('The first request', () => {
-          it('contains the correct number of messages', () => {
-            expect(firstRequestBody.messages.length).to.be(4);
-          });
-
-          it('contains the `get_dataset_info` tool', () => {
-            const hasTool = firstRequestBody.tools?.some(
-              (tool) => tool.function.name === 'get_dataset_info'
-            );
-
-            expect(hasTool).to.be(true);
-          });
-
-          it('leaves the function calling decision to the LLM via tool_choice=auto', () => {
-            expect(firstRequestBody.tool_choice).to.be('auto');
-          });
-
-          describe('The system message', () => {
-            it('has the primary system message', async () => {
-              const primarySystemMessage = await getSystemMessage(getService);
-              expect(systemMessageSorted(firstRequestBody.messages[0].content as string)).to.eql(
-                systemMessageSorted(primarySystemMessage)
+      describe('every request to the LLM', () => {
+        it('contains a system message', () => {
+          const everyRequestHasSystemMessage = llmProxy.interceptedRequests.every(
+            ({ requestBody }) => {
+              const firstMessage = requestBody.messages[0];
+              return (
+                firstMessage.role === 'system' &&
+                (firstMessage.content as string).includes('You are a helpful assistant')
               );
-            });
-
-            it('has a different system message from request 2', () => {
-              expect(firstRequestBody.messages[0]).not.to.eql(secondRequestBody.messages[0]);
-            });
-
-            it('has the same system message as request 3', () => {
-              expect(firstRequestBody.messages[0]).to.eql(thirdRequestBody.messages[0]);
-            });
-          });
+            }
+          );
+          expect(everyRequestHasSystemMessage).to.be(true);
         });
 
-        describe('The second request', () => {
-          it('contains the correct number of messages', () => {
-            expect(secondRequestBody.messages.length).to.be(5);
-          });
-
-          it('contains a system generated user message with a list of field candidates', () => {
-            const lastMessage = last(secondRequestBody.messages);
-
-            expect(lastMessage?.role).to.be('user');
-            expect(lastMessage?.content).to.contain('Below is a list of fields');
-            expect(lastMessage?.content).to.contain('@timestamp');
-          });
-
-          it('instructs the LLM to call the `select_relevant_fields` tool via `tool_choice`', () => {
-            const hasToolChoice =
-              // @ts-expect-error
-              secondRequestBody.tool_choice?.function?.name === 'select_relevant_fields';
-
-            expect(hasToolChoice).to.be(true);
-          });
-
-          it('has a custom, function-specific system message', () => {
-            expect(secondRequestBody.messages[0].content).to.be(
-              GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE
-            );
-          });
+        it('contains the original user message', () => {
+          const everyRequestHasUserMessage = llmProxy.interceptedRequests.every(({ requestBody }) =>
+            requestBody.messages.some(
+              (message) => message.role === 'user' && (message.content as string) === USER_MESSAGE
+            )
+          );
+          expect(everyRequestHasUserMessage).to.be(true);
         });
 
-        describe('The third request', () => {
-          it('contains the correct number of messages', () => {
-            expect(thirdRequestBody.messages.length).to.be(6);
-          });
+        it('contains the context function request and context function response', () => {
+          const everyRequestHasContextFunction = llmProxy.interceptedRequests.every(
+            ({ requestBody }) => {
+              const hasContextFunctionRequest = requestBody.messages.some(
+                (message) =>
+                  message.role === 'assistant' &&
+                  message.tool_calls?.[0]?.function?.name === 'context'
+              );
 
-          it('contains the `get_dataset_info` request', () => {
-            const hasFunctionRequest = thirdRequestBody.messages.some(
-              (message) =>
-                message.role === 'assistant' &&
-                message.tool_calls?.[0]?.function?.name === 'get_dataset_info'
+              const hasContextFunctionResponse = requestBody.messages.some(
+                (message) =>
+                  message.role === 'tool' &&
+                  (message.content as string).includes('screen_description') &&
+                  (message.content as string).includes('learnings')
+              );
+
+              return hasContextFunctionRequest && hasContextFunctionResponse;
+            }
+          );
+
+          expect(everyRequestHasContextFunction).to.be(true);
+        });
+      });
+
+      describe('The first request', () => {
+        it('contains the correct number of messages', () => {
+          expect(firstRequestBody.messages.length).to.be(4);
+        });
+
+        it('contains the `get_dataset_info` tool', () => {
+          const hasTool = firstRequestBody.tools?.some(
+            (tool) => tool.function.name === 'get_dataset_info'
+          );
+
+          expect(hasTool).to.be(true);
+        });
+
+        it('leaves the function calling decision to the LLM via tool_choice=auto', () => {
+          expect(firstRequestBody.tool_choice).to.be('auto');
+        });
+
+        describe('The system message', () => {
+          it('has the primary system message', async () => {
+            const primarySystemMessage = await getSystemMessage(getService);
+            expect(systemMessageSorted(firstRequestBody.messages[0].content as string)).to.eql(
+              systemMessageSorted(primarySystemMessage)
             );
-
-            expect(hasFunctionRequest).to.be(true);
           });
 
-          it('contains the `get_dataset_info` response', () => {
-            const functionResponseMessage = last(thirdRequestBody.messages);
-            const parsedContent = JSON.parse(functionResponseMessage?.content as string);
-            expect(Object.keys(parsedContent)).to.eql(['indices', 'fields', 'stats']);
-            expect(parsedContent.indices).to.contain('logs-web.access-default');
+          it('has a different system message from request 2', () => {
+            expect(firstRequestBody.messages[0]).not.to.eql(secondRequestBody.messages[0]);
           });
 
-          it('emits a messageAdded event with the `get_dataset_info` function response', async () => {
-            const event = messageAddedEvents.find(
-              ({ message }) =>
-                message.message.role === MessageRole.User &&
-                message.message.name === 'get_dataset_info'
-            );
-
-            const parsedContent = JSON.parse(event?.message.message.content!) as {
-              indices: string[];
-              fields: string[];
-            };
-
-            const fieldNamesWithType = parsedContent.fields;
-            const fieldNamesWithoutType = fieldNamesWithType.map((field) => field.split(':')[0]);
-
-            const relevantFields = await getRelevantFields();
-            expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
-            expect(parsedContent.indices).to.contain('logs-web.access-default');
+          it('has the same system message as request 3', () => {
+            expect(firstRequestBody.messages[0]).to.eql(thirdRequestBody.messages[0]);
           });
         });
       });
 
-      describe('messageAdded events', () => {
-        it('emits 5 messageAdded events', () => {
-          expect(messageAddedEvents.length).to.be(5);
+      describe('The second request', () => {
+        it('contains the correct number of messages', () => {
+          expect(secondRequestBody.messages.length).to.be(5);
+        });
+
+        it('contains a system generated user message with a list of field candidates', () => {
+          const lastMessage = last(secondRequestBody.messages);
+
+          expect(lastMessage?.role).to.be('user');
+          expect(lastMessage?.content).to.contain('Below is a list of fields');
+          expect(lastMessage?.content).to.contain('@timestamp');
+        });
+
+        it('instructs the LLM to call the `select_relevant_fields` tool via `tool_choice`', () => {
+          const hasToolChoice =
+            // @ts-expect-error
+            secondRequestBody.tool_choice?.function?.name === 'select_relevant_fields';
+
+          expect(hasToolChoice).to.be(true);
+        });
+
+        it('has a custom, function-specific system message', () => {
+          expect(secondRequestBody.messages[0].content).to.be(
+            GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE
+          );
+        });
+      });
+
+      describe('The third request', () => {
+        it('contains the correct number of messages', () => {
+          expect(thirdRequestBody.messages.length).to.be(6);
+        });
+
+        it('contains the `get_dataset_info` request', () => {
+          const hasFunctionRequest = thirdRequestBody.messages.some(
+            (message) =>
+              message.role === 'assistant' &&
+              message.tool_calls?.[0]?.function?.name === 'get_dataset_info'
+          );
+
+          expect(hasFunctionRequest).to.be(true);
+        });
+
+        it('contains the `get_dataset_info` response', () => {
+          const functionResponseMessage = last(thirdRequestBody.messages);
+          const parsedContent = JSON.parse(functionResponseMessage?.content as string);
+          expect(Object.keys(parsedContent)).to.eql(['indices', 'fields', 'stats']);
+          expect(parsedContent.indices).to.contain('logs-web.access-default');
+        });
+
+        it('emits a messageAdded event with the `get_dataset_info` function response', async () => {
+          const event = messageAddedEvents.find(
+            ({ message }) =>
+              message.message.role === MessageRole.User &&
+              message.message.name === 'get_dataset_info'
+          );
+
+          const parsedContent = JSON.parse(event?.message.message.content!) as {
+            indices: string[];
+            fields: string[];
+          };
+
+          const fieldNamesWithType = parsedContent.fields;
+          const fieldNamesWithoutType = fieldNamesWithType.map((field) => field.split(':')[0]);
+
+          const relevantFields = await getRelevantFields();
+          expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
+          expect(parsedContent.indices).to.contain('logs-web.access-default');
         });
       });
     });

@@ -75,6 +75,42 @@ export async function invokeChatCompleteWithFunctionRequest({
   return body;
 }
 
+export async function chatComplete({
+  userPrompt,
+  connectorId,
+  observabilityAIAssistantAPIClient,
+}: {
+  userPrompt: string;
+  connectorId: string;
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+}) {
+  const { status, body } = await observabilityAIAssistantAPIClient.editor({
+    endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+    params: {
+      body: {
+        messages: [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: userPrompt,
+            },
+          },
+        ],
+        connectorId,
+        persist: false,
+        screenContexts: [],
+        scopes: ['observability' as const],
+      },
+    },
+  });
+
+  expect(status).to.be(200);
+  const messageAddedEvents = getMessageAddedEvents(body);
+
+  return { messageAddedEvents, body, status };
+}
+
 // order of instructions can vary, so we sort to compare them
 export function systemMessageSorted(message: string) {
   return message

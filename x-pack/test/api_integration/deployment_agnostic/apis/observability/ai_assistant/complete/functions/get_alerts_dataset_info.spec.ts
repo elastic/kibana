@@ -20,7 +20,7 @@ import {
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { getMessageAddedEvents, getSystemMessage, systemMessageSorted } from './helpers';
+import { chatComplete, getSystemMessage, systemMessageSorted } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
 
@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
 
-  describe('function: get_alerts_dataset_info', function () {
+  describe('get_alerts_dataset_info', function () {
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
     let connectorId: string;
@@ -69,31 +69,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         `You have active alerts for the past 10 days. Back to work!`
       );
 
-      const { status, body } = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-        params: {
-          body: {
-            messages: [
-              {
-                '@timestamp': new Date().toISOString(),
-                message: {
-                  role: MessageRole.User,
-                  content: USER_MESSAGE,
-                },
-              },
-            ],
-            connectorId,
-            persist: false,
-            screenContexts: [],
-            scopes: ['observability' as const],
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      ({ messageAddedEvents } = await chatComplete({
+        userPrompt: USER_MESSAGE,
+        connectorId,
+        observabilityAIAssistantAPIClient,
+      }));
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-      messageAddedEvents = getMessageAddedEvents(body);
     });
 
     after(async () => {
@@ -113,7 +95,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    describe('LLM requests', () => {
+    describe('POST /internal/observability_ai_assistant/chat/complete', () => {
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
       let thirdRequestBody: ChatCompletionStreamParams;
@@ -128,6 +110,51 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('makes 4 requests to the LLM', () => {
         expect(llmProxy.interceptedRequests.length).to.be(4);
+      });
+
+      it('emits 7 messageAdded events', () => {
+        expect(messageAddedEvents.length).to.be(7);
+      });
+
+      it('emits messageAdded events in the correct order', async () => {
+        const formattedMessageAddedEvents = messageAddedEvents.map(({ message }) => {
+          const { role, name, function_call: functionCall } = message.message;
+          if (functionCall) {
+            return { function_call: functionCall, role };
+          }
+
+          return { name, role };
+        });
+
+        expect(formattedMessageAddedEvents).to.eql([
+          {
+            role: 'assistant',
+            function_call: { name: 'context', trigger: 'assistant' },
+          },
+          { name: 'context', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: {
+              name: 'get_alerts_dataset_info',
+              arguments: '{"start":"now-10d","end":"now"}',
+              trigger: 'assistant',
+            },
+          },
+          { name: 'get_alerts_dataset_info', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: {
+              name: 'alerts',
+              arguments: '{"start":"now-10d","end":"now"}',
+              trigger: 'assistant',
+            },
+          },
+          { name: 'alerts', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: { name: '', arguments: '', trigger: 'assistant' },
+          },
+        ]);
       });
 
       describe('every request to the LLM', () => {
@@ -339,53 +366,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(parsedContent.total).to.be(1);
           expect(parsedContent.alerts.length).to.be(1);
         });
-      });
-    });
-
-    describe('messageAdded events', () => {
-      it('emits 7 messageAdded events', () => {
-        expect(messageAddedEvents.length).to.be(7);
-      });
-
-      it('emits messageAdded events in the correct order', async () => {
-        const formattedMessageAddedEvents = messageAddedEvents.map(({ message }) => {
-          const { role, name, function_call: functionCall } = message.message;
-          if (functionCall) {
-            return { function_call: functionCall, role };
-          }
-
-          return { name, role };
-        });
-
-        expect(formattedMessageAddedEvents).to.eql([
-          {
-            role: 'assistant',
-            function_call: { name: 'context', trigger: 'assistant' },
-          },
-          { name: 'context', role: 'user' },
-          {
-            role: 'assistant',
-            function_call: {
-              name: 'get_alerts_dataset_info',
-              arguments: '{"start":"now-10d","end":"now"}',
-              trigger: 'assistant',
-            },
-          },
-          { name: 'get_alerts_dataset_info', role: 'user' },
-          {
-            role: 'assistant',
-            function_call: {
-              name: 'alerts',
-              arguments: '{"start":"now-10d","end":"now"}',
-              trigger: 'assistant',
-            },
-          },
-          { name: 'alerts', role: 'user' },
-          {
-            role: 'assistant',
-            function_call: { name: '', arguments: '', trigger: 'assistant' },
-          },
-        ]);
       });
     });
   });
