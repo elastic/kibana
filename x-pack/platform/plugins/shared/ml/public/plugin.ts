@@ -132,7 +132,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
-  private managementLocator: undefined | typeof MlManagementLocatorInternal;
+  private managementLocator: undefined | MlManagementLocatorInternal;
 
   private sharedMlServices: MlSharedServices | undefined;
 
@@ -179,7 +179,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     pluginsSetup: MlSetupDependencies
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
-    managementLocator?: typeof MlManagementLocatorInternal;
+    managementLocator?: MlManagementLocatorInternal;
     elasticModels?: ElasticModels;
   } {
     this.sharedMlServices = getMlSharedServices(core.http);
@@ -249,7 +249,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
-      // @ts-ignore - TODO: fix
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
@@ -362,7 +361,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     deps: MlStartDependencies
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
-    managementLocator?: typeof MlManagementLocatorInternal;
+    managementLocator?: MlManagementLocatorInternal;
     elasticModels?: ElasticModels;
     mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };

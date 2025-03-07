@@ -40,7 +40,7 @@ export class MlManagementLocatorInternal {
 
   private getPath = (params: MlLocatorParams) => {
     let path: string = '';
-    if (!params?.page) return path;
+    if (params?.page === undefined) return path;
     if (!this.validPaths.has(params.page)) {
       throw new Error('Page type is not provided or unknown');
     }

@@ -18,20 +18,17 @@ export const useMlManagementHref = (
   params: MlLocatorParams,
   appId: string = 'anomaly_detection'
 ) => {
-  const [mlManagementUrl, setMlManagementUrl] = useState();
+  const [mlManagementUrl, setMlManagementUrl] = useState<string | undefined>(undefined);
 
   useEffect(
     function setUpMlUrl() {
       const getUrl = async () => {
-        let url;
-
         if (ml && ml.managementLocator) {
-          // @ts-ignore - TODO: fix
           const result = await ml.managementLocator?.getUrl(params, appId);
-          url = result.url;
+          if (result.url) {
+            setMlManagementUrl(result.url);
+          }
         }
-
-        setMlManagementUrl(url);
       };
 
       getUrl();

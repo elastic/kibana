@@ -70,7 +70,7 @@ const PageWrapper: FC<PageProps> = () => {
   );
 
   if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === false) {
-    return <AccessDeniedCallout missingCapabilities={['contact']} />;
+    return <AccessDeniedCallout />;
   }
 
   return (
