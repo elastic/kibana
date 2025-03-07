@@ -260,11 +260,13 @@ export class KnowledgeBaseService {
     sortBy,
     sortDirection,
     namespace,
+    user,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
     namespace: string;
+    user?: { name: string; id?: string };
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
@@ -286,22 +288,12 @@ export class KnowledgeBaseService {
                 // exclude user instructions
                 bool: {
                   must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
-                  should: [
-                    {
-                      term: { namespace },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          exists: {
-                            field: 'namespace',
-                          },
-                        },
-                      },
-                    },
-                  ],
                 },
               },
+              ...getAccessQuery({
+                user,
+                namespace,
+              }),
             ],
           },
         },
