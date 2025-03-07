@@ -26,6 +26,8 @@ export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name} 2023-10-31',
   options: {
     access: 'public',
+    summary: 'Get a stream',
+    description: 'Fetches a stream definition and associated dashboards',
     availability: {
       stability: 'experimental',
     },
@@ -114,9 +116,14 @@ export const streamDetailRoute = createServerRoute({
 });
 
 export const listStreamsRoute = createServerRoute({
-  endpoint: 'GET /api/streams',
+  endpoint: 'GET /api/streams 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    description: 'Fetches list of all streams',
+    summary: 'Get stream list',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -138,6 +145,9 @@ export const editStreamRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{name} 2023-10-31',
   options: {
     access: 'public',
+    summary: 'Create or update a stream',
+    description:
+      'Creates or updates a stream definition. Classic streams can not be created through this API, only updated',
     availability: {
       stability: 'experimental',
     },
@@ -194,6 +204,8 @@ export const deleteStreamRoute = createServerRoute({
   endpoint: 'DELETE /api/streams/{name} 2023-10-31',
   options: {
     access: 'public',
+    summary: 'Delete a stream',
+    description: 'Deletes a stream definition and the underlying data stream',
     availability: {
       stability: 'experimental',
     },

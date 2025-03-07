@@ -32,6 +32,12 @@ actions:
         description: Alerting documentation
         url: https://www.elastic.co/docs/current/serverless/rules
       x-displayName: "Alerting"
+  - target: '$.tags[?(@.name=="streams")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      x-displayName: "Streams"
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:

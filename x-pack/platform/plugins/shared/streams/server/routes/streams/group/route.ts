@@ -19,6 +19,8 @@ const readGroupRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_group 2023-10-31',
   options: {
     access: 'public',
+    summary: 'Get group stream settings',
+    description: 'Fetches the group settings of a group stream definition',
     availability: {
       stability: 'experimental',
     },
@@ -54,6 +56,7 @@ const upsertGroupRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{name}/_group 2023-10-31',
   options: {
     access: 'public',
+    summary: 'Upserts the group settings of a group stream definition',
     availability: {
       stability: 'experimental',
     },

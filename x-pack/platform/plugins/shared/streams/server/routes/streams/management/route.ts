@@ -21,6 +21,8 @@ export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
   options: {
     access: 'public',
+    description: 'Forks a wired stream and creates a child stream',
+    summary: 'Fork a stream',
     availability: {
       stability: 'experimental',
     },
@@ -55,6 +57,8 @@ export const resyncStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_resync 2023-10-31',
   options: {
     access: 'public',
+    description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
+    summary: 'Resync streams',
     availability: {
       stability: 'experimental',
     },
@@ -81,7 +85,9 @@ export const getStreamsStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: ['streams_read'],
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {

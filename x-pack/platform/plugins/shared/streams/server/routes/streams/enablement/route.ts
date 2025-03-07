@@ -16,6 +16,8 @@ export const enableStreamsRoute = createServerRoute({
   params: z.object({}),
   options: {
     access: 'public',
+    summary: 'Enable streams',
+    description: 'Enables wired streams',
     availability: {
       stability: 'experimental',
     },
@@ -49,13 +51,18 @@ export const disableStreamsRoute = createServerRoute({
   params: z.object({}),
   options: {
     access: 'public',
+    summary: 'Disable streams',
+    description:
+      'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.',
     availability: {
       stability: 'experimental',
     },
   },
   security: {
     authz: {
-      requiredPrivileges: ['streams_write'],
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
