@@ -96,6 +96,7 @@ export class SiemRulesMigrationsService {
     return this.getMissingCapabilities(level).length > 0;
   }
 
+  /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
   public isAvailable() {
     return (
       !ExperimentalFeaturesService.get().siemMigrationsDisabled &&
@@ -270,10 +271,10 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        if (result.status === SiemMigrationTaskStatus.STOPPED) {
+        // automatically resume stopped migrations when all conditions are met
+        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_error) {
           const connectorId = this.connectorIdStorage.get();
           if (connectorId && !this.hasMissingCapabilities('all')) {
-            // automatically resume stopped migrations when connector is available
             await startRuleMigration({ migrationId: result.id, connectorId });
             pendingMigrationIds.push(result.id);
           }

@@ -57,7 +57,6 @@ describe('AssistantOverlay', () => {
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);
     expect(reportAssistantInvoked).toHaveBeenCalledWith({
       invokedBy: 'shortcut',
-      conversationId: 'Welcome',
     });
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);
