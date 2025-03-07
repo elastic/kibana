@@ -18,15 +18,18 @@ import type {
   SavedObjectsServiceSetup,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from '@kbn/encrypted-saved-objects-shared';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
 import type { EncryptedSavedObjectsService } from '../crypto';
-import type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions } from '@kbn/encrypted-saved-objects-shared';
 
 export { normalizeNamespace };
-export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions }
+export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
