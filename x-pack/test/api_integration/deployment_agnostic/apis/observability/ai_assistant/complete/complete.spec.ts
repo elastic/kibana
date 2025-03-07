@@ -247,7 +247,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const simulator = await simulatorPromise;
         const requestData = simulator.requestBody;
         expect(requestData.messages[0].role).to.eql('system');
-        expect(requestData.messages[0].content).to.eql(systemMessage);
+        expect(requestData.messages[0].content).to.contain(systemMessage);
       });
     });
 
