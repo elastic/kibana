@@ -259,14 +259,17 @@ export class KnowledgeBaseService {
     query,
     sortBy,
     sortDirection,
+    namespace,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+    namespace: string;
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
     }
+
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<
         KnowledgeBaseEntry & { doc_id?: string }
@@ -281,7 +284,23 @@ export class KnowledgeBaseService {
                 : []),
               {
                 // exclude user instructions
-                bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } },
+                bool: {
+                  must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
+                  should: [
+                    {
+                      term: { namespace },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -312,13 +331,15 @@ export class KnowledgeBaseService {
       });
 
       return {
-        entries: response.hits.hits.map((hit) => ({
-          ...hit._source!,
-          title: hit._source!.title ?? hit._source!.doc_id, // use `doc_id` as fallback title for backwards compatibility
-          role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
-          score: hit._score,
-          id: hit._id!,
-        })),
+        entries: response.hits.hits.map((hit) => {
+          return {
+            ...hit._source!,
+            title: hit._source!.title ?? hit._source!.doc_id, // use `doc_id` as fallback title for backwards compatibility
+            role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
+            score: hit._score,
+            id: hit._id!,
+          };
+        }),
       };
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
@@ -425,6 +446,7 @@ export class KnowledgeBaseService {
         },
         refresh: 'wait_for',
       });
+
       this.dependencies.logger.debug(`Entry added to knowledge base`);
     } catch (error) {
       this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
