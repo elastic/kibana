@@ -31,6 +31,7 @@
     "@kbn/inspector-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/observability-schema",
     "@kbn/shared-ux-router",
     "@kbn/kibana-react-plugin",
     "@kbn/react-kibana-context-render",
