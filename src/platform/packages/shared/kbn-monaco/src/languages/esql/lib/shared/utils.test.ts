@@ -35,7 +35,7 @@ describe('offsetRangeToMonacoRange', () => {
     });
   });
 
-  test('should convert offset range to monaco range for multiple lines query when the cursor is in not at the end', () => {
+  test('should convert offset range to monaco range for multiple lines query when the cursor is not at the end', () => {
     const expression = 'FROM test \n| WHERE test == \n| LIMIT 1';
     const range = { start: 27, end: 27 };
     const monacoRange = offsetRangeToMonacoRange(expression, range);
@@ -48,7 +48,7 @@ describe('offsetRangeToMonacoRange', () => {
     });
   });
 
-  test('should convert offset range to monaco range for multiple lines query when the cursor is in at the end', () => {
+  test('should convert offset range to monaco range for multiple lines query when the cursor is at the end', () => {
     const expression = 'FROM test \n| WHERE test == \n| LIMIT 1';
     const range = { start: 35, end: 35 };
     const monacoRange = offsetRangeToMonacoRange(expression, range);
