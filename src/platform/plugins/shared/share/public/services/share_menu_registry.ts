@@ -148,7 +148,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
 
     return this.getShareConfigOptionsForObject(objectType)
       .map((shareAction) => {
-        let config: ShareConfigs['config'];
+        let config: ShareConfigs['config'] | null;
 
         if (shareAction.shareType === 'legacy') {
           config = shareAction.config.call(null, {
