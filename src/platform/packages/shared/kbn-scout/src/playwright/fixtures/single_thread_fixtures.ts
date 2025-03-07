@@ -37,6 +37,7 @@ import {
 } from './test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects, PerfTrackerFixture } from './test';
 export type { ScoutPage, PageObjects } from './test';
+export type { LighthouseAuditOptions } from './worker';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures

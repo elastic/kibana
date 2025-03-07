@@ -10,7 +10,8 @@
 import { RunnerResult } from 'lighthouse';
 import { coreWorkerFixtures } from './core_fixtures';
 
-export interface AuditOptions {
+type OutputMode = 'html' | 'json' | 'csv';
+export interface LighthouseAuditOptions {
   maxWaitForLoad?: number;
   screenEmulation?: {
     width: number;
@@ -19,52 +20,70 @@ export interface AuditOptions {
 }
 
 export interface LighthouseFixture {
-  runAudit: (url: string, options?: AuditOptions) => Promise<RunnerResult>;
+  runAudit: (url: string, options?: LighthouseAuditOptions) => Promise<RunnerResult>;
 }
 
+/**
+ * Lighthouse fixture https://developer.chrome.com/docs/lighthouse/overview/
+ * It allow to run Lighthouse audits on a given URL
+ */
 export const lighthouseFixture = coreWorkerFixtures.extend<
   { lighthouse: LighthouseFixture },
   { debuggingPort: number }
 >({
-  /**
-   * Fixture to run Lighthouse audit
-   */
   lighthouse: [
     async ({ log, debuggingPort }, use, testInfo) => {
-      // ES module import issue
+      // Import Lighthouse dynamically (ES module)
       const lighthouse = (await import('lighthouse')).default;
 
       if (!debuggingPort) {
         throw new Error(
-          `Remote debugging port is not set: check 'use.launchOptions.args' in Playwright configuration`
+          `Remote debugging port is not set: Check 'use.launchOptions.args' in Playwright configuration`
         );
       }
 
-      const runAudit = async (url: string, auditOptions?: AuditOptions) => {
-        const auditResult = await lighthouse(url, {
-          port: debuggingPort,
-          maxWaitForLoad: auditOptions?.maxWaitForLoad || 30000,
-          output: ['html'],
-          formFactor: 'desktop',
-          screenEmulation: {
-            width: auditOptions?.screenEmulation?.width || 1920,
-            height: auditOptions?.screenEmulation?.height || 1080,
-            mobile: false,
-            deviceScaleFactor: 1,
-            disabled: false,
-          },
-        });
+      const DEFAULT_AUDIT_OPTIONS: Partial<import('lighthouse').Flags> = {
+        maxWaitForLoad: 30000,
+        output: ['html'],
+        formFactor: 'desktop',
+        screenEmulation: {
+          width: 1920,
+          height: 1080,
+          mobile: false,
+          deviceScaleFactor: 1,
+          disabled: false,
+        },
+      };
 
-        if (!auditResult) {
-          throw new Error('Lighthouse audit failed');
+      const runAudit = async (url: string, auditOptions?: LighthouseAuditOptions) => {
+        const options: import('lighthouse').Flags = {
+          port: debuggingPort,
+          maxWaitForLoad: auditOptions?.maxWaitForLoad ?? DEFAULT_AUDIT_OPTIONS.maxWaitForLoad,
+          output: DEFAULT_AUDIT_OPTIONS.output as OutputMode[],
+          formFactor: DEFAULT_AUDIT_OPTIONS.formFactor as 'desktop' | 'mobile',
+          screenEmulation: {
+            width:
+              auditOptions?.screenEmulation?.width ?? DEFAULT_AUDIT_OPTIONS.screenEmulation!.width,
+            height:
+              auditOptions?.screenEmulation?.height ??
+              DEFAULT_AUDIT_OPTIONS.screenEmulation!.height,
+            mobile: DEFAULT_AUDIT_OPTIONS.screenEmulation!.mobile,
+            deviceScaleFactor: DEFAULT_AUDIT_OPTIONS.screenEmulation!.deviceScaleFactor,
+            disabled: DEFAULT_AUDIT_OPTIONS.screenEmulation!.disabled,
+          },
+        };
+
+        const auditResult = await lighthouse(url, options);
+
+        if (!auditResult?.lhr?.categories?.performance?.score) {
+          throw new Error('Lighthouse audit failed: No performance score found');
         }
 
-        log.info(
-          `Lighthouse audit completed with '${auditResult.lhr.categories.performance.score}' perf score`
-        );
+        const perfScore = auditResult.lhr.categories.performance.score;
+        log.info(`✅ Lighthouse audit completed with performance score: ${perfScore}`);
 
         testInfo.attach('lighthouse-report', {
-          body: auditResult.report[0],
+          body: auditResult.report?.[0] ?? 'No report generated',
           contentType: 'text/html',
         });
 
