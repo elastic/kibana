@@ -13,26 +13,25 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
-import { useSelector, useDispatch } from 'react-redux';
-
-import { FlyoutParamProps } from './types';
-import { MetricItemBody } from './metric_item/metric_item_body';
+import { useDispatch, useSelector } from 'react-redux';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
   selectOverviewTrends,
   toggleErrorPopoverOpen,
-} from '../../../../state';
-import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
-import { formatDuration } from '../../../../utils/formatting';
-import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { ActionsPopover } from './actions_popover';
+} from '../../../../../state';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
-} from '../../../../state/manual_test_runs';
+} from '../../../../../state/manual_test_runs';
+import { formatDuration } from '../../../../../utils/formatting';
+import { ActionsPopover } from '../actions_popover';
+import { MetricItemBody } from './metric_item_body';
+import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
-import { MetricItemExtra } from './metric_item/metric_item_extra';
+import { FlyoutParamProps } from '../types';
 
 const METRIC_ITEM_HEIGHT = 160;
 
@@ -69,7 +68,7 @@ export const MetricItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
-  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
+  const { status, timestamp, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
     locationId: monitor.locationId,
   });
@@ -184,7 +183,6 @@ export const MetricItem = ({
           <MetricItemIcon
             monitor={monitor}
             status={status}
-            ping={ping}
             timestamp={timestamp}
             configIdByLocation={configIdByLocation}
           />
