@@ -28,7 +28,6 @@ import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../.
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import type { ProfilesManager } from '../../../../context_awareness';
 import { internalStateActions } from '../../state_management/redux';
 
@@ -112,13 +111,6 @@ describe('Discover documents layout', () => {
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
-  test('render default value for paginationMode as multiPage', async () => {
-    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
-    const discoverGridComponent = component.find(DiscoverGrid);
-    expect(discoverGridComponent.exists()).toBeTruthy();
-    expect(discoverGridComponent.prop('paginationMode')).toEqual('multiPage');
-  });
-
   test('render complete', async () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
@@ -179,20 +171,6 @@ describe('Discover documents layout', () => {
         '_source',
         'rootProfile',
       ]);
-    });
-
-    it('should pass pagination mode from profile', async () => {
-      const { profilesManagerMock, dataSourceProfileProviderMock } = createContextAwarenessMocks();
-      jest
-        .spyOn(dataSourceProfileProviderMock.profile, 'getPaginationConfig')
-        .mockReturnValue(() => ({
-          paginationMode: 'singlePage',
-        }));
-
-      await profilesManagerMock.resolveDataSourceProfile({});
-      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock, profilesManagerMock);
-      const discoverGridComponent = component.find(DiscoverGrid);
-      expect(discoverGridComponent.prop('paginationMode')).toEqual('singlePage');
     });
   });
 });

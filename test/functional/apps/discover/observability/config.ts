@@ -16,16 +16,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig,
     testFiles: [require.resolve('.')],
-    kbnTestServer: {
-      ...baseConfig.kbnTestServer,
-      serverArgs: [
-        ...baseConfig.kbnTestServer.serverArgs,
-        `--discover.experimental.enabledProfiles=${JSON.stringify([
-          'observability-root-profile',
-          'observability-logs-data-source-profile',
-          'observability-log-document-profile',
-        ])}`,
-      ],
-    },
   };
 }
