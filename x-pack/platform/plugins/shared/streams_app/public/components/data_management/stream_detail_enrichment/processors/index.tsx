@@ -43,7 +43,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
   useSimulatorSelector,
-  StreamEnrichmentContext,
+  StreamEnrichmentContextType,
 } from '../state_management/stream_enrichment_state_machine';
 import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 
@@ -191,7 +191,7 @@ const createDraftProcessorFromForm = (
 };
 
 export interface EditProcessorPanelProps {
-  processorRef: StreamEnrichmentContext['processorsRefs'][number];
+  processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
 }
 
