@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await dataViews.createFromSearchBar({
-          name: 'logs', // Must be anything but log/logs, since pagination is disabled for log sources
+          name: 'logs',
           adHoc: true,
           hasTimeField: true,
         });
