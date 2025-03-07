@@ -1212,7 +1212,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       throw new PackagePolicyNotFoundError('Package policy not found');
     }
 
-    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
+    const packageInfos = await getPackageInfoForPackagePolicies(
+      [...packagePolicyUpdates, ...oldPackagePolicies],
+      soClient
+    );
     const allSecretsToDelete: PolicySecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
@@ -1228,6 +1231,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }> = [];
 
     const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
+
+    const assetsToInstallFn: Array<() => Promise<void>> = [];
 
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
@@ -1263,6 +1268,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (pkgInfoAndAsset) {
             const { pkgInfo, assetsMap } = pkgInfoAndAsset;
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+
             if (secretStorageEnabled) {
               const secretsRes = await extractAndUpdateSecrets({
                 oldPackagePolicy,
@@ -1290,6 +1296,30 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 ...restOfPackagePolicy.package,
                 requires_root: requiresRoot,
               };
+            }
+
+            if (oldPackagePolicy.package && oldPackagePolicy.package.version !== pkgInfo.version) {
+              const oldPkgInfoAndAsset = packageInfosandAssetsMap.get(
+                `${oldPackagePolicy.package.name}-${oldPackagePolicy.package.version}`
+              );
+              if (oldPkgInfoAndAsset?.pkgInfo.type === 'integration') {
+                assetsToInstallFn.push(async () => {
+                  const updatedPackagePolicy = await this.get(soClient, id);
+
+                  if (!updatedPackagePolicy) {
+                    return;
+                  }
+
+                  await installAssetsForInputPackagePolicy({
+                    logger: appContextService.getLogger(),
+                    soClient,
+                    esClient,
+                    pkgInfo,
+                    packagePolicy: updatedPackagePolicy,
+                    force: true,
+                  });
+                });
+              }
             }
           }
         }
@@ -1346,6 +1376,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )
     );
 
+    const installAssetsPromise = pMap(assetsToInstallFn, (fn) => fn(), {
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+    });
+
     const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
       // Check if the agent policy is in both old and updated package policies
       const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
@@ -1386,7 +1420,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? deleteSecrets({ esClient, soClient, ids: allSecretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
-    await Promise.all([bumpPromise, removeAssetPromise, deleteSecretsPromise]);
+    await Promise.all([
+      bumpPromise,
+      removeAssetPromise,
+      deleteSecretsPromise,
+      installAssetsPromise,
+    ]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
 
@@ -1978,7 +2017,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
       true
     );
-    updatedPackagePolicy.inputs = await _compilePackagePolicyInputs(
+    updatedPackagePolicy.inputs = _compilePackagePolicyInputs(
       packageInfo,
       updatedPackagePolicy.vars || {},
       updatedPackagePolicy.inputs as PackagePolicyInput[],
