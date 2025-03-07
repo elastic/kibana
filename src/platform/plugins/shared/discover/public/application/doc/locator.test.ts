@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverSingleDocLocatorDefinition } from './locator';
+import { DISCOVER_SINGLE_DOC_LOCATOR, DiscoverSingleDocLocatorParams } from './locator';
+import { singleDocLocatorGetLocation } from './locator_get_location';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 
 const setup = () => {
-  const locator = new DiscoverSingleDocLocatorDefinition();
+  const locator = {
+    id: DISCOVER_SINGLE_DOC_LOCATOR,
+    getLocation: async (params: DiscoverSingleDocLocatorParams) => {
+      return singleDocLocatorGetLocation(params);
+    },
+  };
+
   return { locator };
 };
 

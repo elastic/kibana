@@ -22,7 +22,7 @@ import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../common/constants';
-import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
