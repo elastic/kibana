@@ -25,20 +25,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
-import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
 
-import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
-
-import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
-} from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
 import './index_mappings.scss';
 import { docLinks } from '../shared/doc_links';
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from './access_control_index_selector/access_control_index_selector';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);

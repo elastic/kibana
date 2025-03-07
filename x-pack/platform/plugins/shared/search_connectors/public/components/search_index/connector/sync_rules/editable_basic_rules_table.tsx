@@ -30,20 +30,17 @@ import {
   FilteringRuleRuleValues,
 } from '@kbn/search-connectors';
 
-import {
-  InlineEditableTableLogic,
-  InlineEditableTableProps,
-} from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
-import {
-  FormErrors,
-  InlineEditableTableColumn,
-} from '../../../../../shared/tables/inline_editable_table/types';
-import { ItemWithAnID } from '../../../../../shared/tables/types';
-
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 import { docLinks } from '../../../shared/doc_links';
+import {
+  InlineEditableTableLogic,
+  InlineEditableTableProps,
+} from '../../../shared/inline_editable_table/inline_editable_table_logic';
+import { InlineEditableTable } from '../../../shared/inline_editable_table';
+import { FormErrors, InlineEditableTableColumn } from '../../../shared/inline_editable_table/types';
+import { ItemWithAnID } from '../../../shared/types';
 
 const instanceId = 'FilteringRulesTable';
 
@@ -109,7 +106,7 @@ export const SyncRulesTable: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.index.connector.rule.basicTable.policyTitle', {
         defaultMessage: 'Policy',
       }),
-      render: (indexingRule) => (
+      render: (indexingRule: any) => (
         <EuiText size="s">{filteringPolicyToText(indexingRule.policy)}</EuiText>
       ),
     },
@@ -126,7 +123,7 @@ export const SyncRulesTable: React.FC = () => {
         'xpack.enterpriseSearch.index.connector.syncRules.basicTable.fieldTitle',
         { defaultMessage: 'Field' }
       ),
-      render: (rule) => (
+      render: (rule: any) => (
         <EuiText size="s">
           <EuiCode>{rule.field}</EuiCode>
         </EuiText>
@@ -149,7 +146,7 @@ export const SyncRulesTable: React.FC = () => {
         'xpack.enterpriseSearch.index.connector.syncRules.basicTable.ruleTitle',
         { defaultMessage: 'Rule' }
       ),
-      render: (rule) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
+      render: (rule: any) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
     },
     {
       editingRender: (rule, onChange) => (
@@ -166,7 +163,7 @@ export const SyncRulesTable: React.FC = () => {
           defaultMessage: 'Value',
         }
       ),
-      render: (rule) => (
+      render: (rule: any) => (
         <EuiText size="s">
           <EuiCode>{rule.value}</EuiCode>
         </EuiText>

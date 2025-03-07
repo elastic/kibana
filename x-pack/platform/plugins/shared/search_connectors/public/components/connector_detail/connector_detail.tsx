@@ -23,6 +23,7 @@ import { generateEncodedPath } from '../../encode_path_params';
 import { useAppContext } from '../../app_context';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
+import { SearchIndexPipelines } from '../search_index/pipelines';
 
 export enum ConnectorDetailTabId {
   // all indices

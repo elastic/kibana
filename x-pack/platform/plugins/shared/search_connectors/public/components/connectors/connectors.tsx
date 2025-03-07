@@ -9,24 +9,12 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSearchBar,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../routes';
-// import { EnterpriseSearchContentPageTemplate } from '../layout';
-
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { ConnectorStats } from './connector_stats';
@@ -36,7 +24,6 @@ import { CreateConnector } from './create_connector';
 import { DeleteConnectorModal } from './delete_connector_modal';
 import { ElasticManagedWebCrawlerEmptyPrompt } from './elastic_managed_web_crawler_empty_prompt';
 import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_empty_prompt';
-import { LEARN_MORE_LINK } from './translations';
 import { handlePageChange } from './utils';
 
 export const connectorsBreadcrumbs = [
