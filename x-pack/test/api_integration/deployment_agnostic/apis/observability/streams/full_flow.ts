@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IngestStreamUpsertRequest } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -18,6 +19,7 @@ import {
   forkStream,
   indexAndAssertTargetStream,
   indexDocument,
+  putStream,
 } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -54,7 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  describe.only('Basic functionality', () => {
+  describe('Basic functionality', () => {
     async function getEnabled() {
       const response = await apiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body.enabled;
@@ -354,6 +356,48 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await indexAndAssertTargetStream(esClient, 'logs', doc2);
       });
 
+      it('should allow to update field type to incompatible type', async () => {
+        const body: IngestStreamUpsertRequest = {
+          dashboards: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: {
+                fields: {
+                  myfield: {
+                    type: 'boolean',
+                  },
+                },
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.rollovertest', body, 200);
+        await putStream(
+          apiClient,
+          'logs.rollovertest',
+          {
+            ...body,
+            stream: {
+              ingest: {
+                ...body.stream.ingest,
+                wired: {
+                  ...body.stream.ingest.wired,
+                  fields: {
+                    myfield: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          200
+        );
+      });
+
       it('should not roll over more often than necessary', async () => {
         const expectedIndexCounts: Record<string, number> = {
           logs: 1,
@@ -363,13 +407,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.number-test': 1,
           'logs.string-test': 1,
           'logs.weird-characters': 1,
+          'logs.rollovertest': 2,
         };
         const dataStreams = await esClient.indices.getDataStream({
           name: Object.keys(expectedIndexCounts).join(','),
         });
-        for (const dataStream of dataStreams.data_streams) {
-          expect(dataStream.indices.length).to.eql(expectedIndexCounts[dataStream.name]);
-        }
+        const actualIndexCounts = Object.fromEntries(
+          dataStreams.data_streams.map((stream) => [stream.name, stream.indices.length])
+        );
+        expect(actualIndexCounts).to.eql(expectedIndexCounts);
       });
     });
   });
