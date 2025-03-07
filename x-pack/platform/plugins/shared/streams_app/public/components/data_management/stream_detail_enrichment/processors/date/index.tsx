@@ -24,16 +24,12 @@ export const DateProcessorForm = () => {
   return (
     <>
       <ProcessorFieldSelector />
-      <EuiSpacer size="m" />
       <DateFormatsField />
       <EuiSpacer size="m" />
       <OptionalFieldsAccordion>
         <DateTargetField />
-        <EuiSpacer size="m" />
         <DateTimezoneField />
-        <EuiSpacer size="m" />
         <DateLocaleField />
-        <EuiSpacer size="m" />
         <DateOutputFormatField />
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
