@@ -12,9 +12,13 @@ export const existingDashboardFileNames = new Set([
   'classic_apm-otel_other-nodejs',
   'classic_apm-otel_other-java',
   'classic_apm-otel_other-dotnet',
+  'classic_apm-otel_other-python',
   'classic_apm-edot-nodejs',
   'classic_apm-edot-java',
   'classic_apm-edot-dotnet',
+  'classic_apm-edot-python',
+  'otel_native-edot-python',
+  'otel_native-otel_other-python',
 ]);
 
 // The new dashboard files should be mapped here
@@ -69,6 +73,20 @@ export async function loadDashboardFile(filename: string) {
       return import(
         /* webpackChunkName: "lazyDotnetApmOtelDashboard" */
         './opentelemetry_dotnet.json'
+      );
+    }
+    case 'classic_apm-edot-python':
+    case 'classic_apm-otel_other-python': {
+      return import(
+        /* webpackChunkName: "lazyPythonOtelDashboard" */
+        './opentelemetry_python.json'
+      );
+    }
+    case 'otel_native-edot-python':
+    case 'otel_native-otel_other-python': {
+      return import(
+        /* webpackChunkName: "lazyPythonOtelDashboard" */
+        './opentelemetry_python.json'
       );
     }
     default: {
