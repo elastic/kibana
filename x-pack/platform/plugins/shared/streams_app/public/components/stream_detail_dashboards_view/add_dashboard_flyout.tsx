@@ -65,7 +65,7 @@ export function AddDashboardFlyout({
   const dashboardSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
+        .fetch('POST /api/streams/{name}/dashboards/_suggestions', {
           signal,
           params: {
             path: {

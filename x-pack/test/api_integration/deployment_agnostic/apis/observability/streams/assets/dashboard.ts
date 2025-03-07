@@ -134,7 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}', {
+        const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
