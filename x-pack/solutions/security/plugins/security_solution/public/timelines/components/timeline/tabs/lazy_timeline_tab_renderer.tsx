@@ -21,7 +21,7 @@ export interface LazyTimelineTabRendererProps {
 }
 
 /**
- * We check for the timeline open status to request the fields for the fields browser as the fields request
+ * We check for the timeline open status to request the fields for the fields browser. The fields request
  * is often a much longer running request for customers with a significant number of indices and fields in those indices.
  * This request should only be made after the user has decided to interact with a specific tab in the timeline to prevent any performance impacts
  * to the underlying security solution views, as this query will always run when the timeline exists on the page.
