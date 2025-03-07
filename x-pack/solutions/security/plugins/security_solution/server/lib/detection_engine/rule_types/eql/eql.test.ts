@@ -102,11 +102,11 @@ describe('eql_executor', () => {
     });
 
     it('should classify EQL verification exceptions as "user errors" when reporting to the framework', async () => {
-      alertServices.scopedClusterClient.asCurrentUser.eql.search.mockRejectedValue({
-        name: 'ResponseError',
-        message:
-          'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:1: Unknown column [event.category]',
-      });
+      alertServices.scopedClusterClient.asCurrentUser.eql.search.mockRejectedValue(
+        new Error(
+          'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:1: Unknown column [event.category]'
+        )
+      );
       const { result } = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
