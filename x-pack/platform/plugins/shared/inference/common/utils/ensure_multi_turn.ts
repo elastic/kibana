@@ -7,8 +7,6 @@
 
 import { Message, MessageRole } from '@kbn/inference-common';
 
-function isUserMessage(message: Message): boolean {
-  return message.role !== MessageRole.Assistant;
 type MessageRoleSequenceResult =
   | {
       roleSequenceValid: true;
@@ -63,16 +61,20 @@ function checkMessageRoleSequenceValid(
 
 export function ensureMultiTurn(messages: Message[]): Message[] {
   const next: Message[] = [];
+
   messages.forEach((message) => {
     const prevMessage = next[next.length - 1];
 
-    if (prevMessage && isUserMessage(prevMessage) === isUserMessage(message)) {
     const result = checkMessageRoleSequenceValid(prevMessage, message);
     if (!result.roleSequenceValid) {
       next.push({
         content: '-',
-        role: isUserMessage(message) ? MessageRole.Assistant : MessageRole.User,
         role: result.intermediaryRole,
       });
     }
 
+    next.push(message);
+  });
+
+  return next;
+}
