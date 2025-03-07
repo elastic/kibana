@@ -25,7 +25,7 @@ export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPlug
   indexManagement,
 }) => {
   const { history, searchNavigation, cloud } = useKibana().services;
-  const indexManagementRef = useRef(null);
+  const indexManagementRef = useRef<HTMLDivElement>(null);
   const setBreadcrumbs = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
       const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
@@ -52,7 +52,7 @@ export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPlug
     let indexManagementUnmount: () => void | undefined;
     indexManagement
       .renderIndexManagementApp({
-        element: indexManagementRef.current!,
+        element: indexManagementRef.current,
         setBreadcrumbs,
         history,
       })
@@ -70,12 +70,12 @@ export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPlug
     <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
-      data-test-subj="elasticsearchStartPage"
+      data-test-subj="elasticsearchIndexManagement"
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section>
-        <div ref={indexManagementRef!} />
+        <div ref={indexManagementRef} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
