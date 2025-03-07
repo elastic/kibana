@@ -294,6 +294,16 @@ export class DashboardPageObject extends FtrService {
       return panels.length === dragHandles.length;
     });
   }
+  public async switchToViewMode() {
+    this.log.debug('Switching to view mode');
+    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
+      await this.testSubjects.click('dashboardViewOnlyMode');
+    }
+    // wait until edit button appears
+    await this.retry.waitFor('in view mode', async () => {
+      return this.testSubjects.exists('dashboardEditMode');
+    });
+  }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');

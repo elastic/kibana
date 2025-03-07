@@ -177,9 +177,7 @@ describe('LensEditConfigurationFlyout', () => {
       displayFlyoutHeader: true,
       isNewPanel: true,
     });
-    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
-      'Create ES|QL visualization'
-    );
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Configuration');
   });
 
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
@@ -321,7 +319,7 @@ describe('LensEditConfigurationFlyout', () => {
     // @ts-ignore
     newProps.attributes.state.datasourceStates.testDatasource = 'state';
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
   it('save button should be disabled if expression cannot be generated', async () => {
     const updateByRefInputSpy = jest.fn();
@@ -341,6 +339,6 @@ describe('LensEditConfigurationFlyout', () => {
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
 });

@@ -10,6 +10,7 @@
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
+const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ = 'navigateToLensEditorLink';
@@ -303,6 +304,11 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ, title);
   }
 
+  async expectExistsShowConfigPanelAction(title = '') {
+    this.log.debug('expectExistsShowConfigPanelAction');
+    await this.expectExistsPanelAction(ACTION_SHOW_CONFIG_PANEL_SUBJ, title);
+  }
+
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
     const wrapper = await this.getPanelWrapper(title);
@@ -329,6 +335,11 @@ export class DashboardPanelActionsService extends FtrService {
   async expectMissingRemovePanelAction(title = '') {
     this.log.debug('expectMissingRemovePanelAction');
     await this.expectMissingPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, title);
+  }
+
+  async expectMissingShowConfigPanelAction(title = '') {
+    this.log.debug('expectMissingShowConfigPanelAction');
+    await this.expectMissingPanelAction(ACTION_SHOW_CONFIG_PANEL_SUBJ, title);
   }
 
   async getPanelHeading(title = '') {
