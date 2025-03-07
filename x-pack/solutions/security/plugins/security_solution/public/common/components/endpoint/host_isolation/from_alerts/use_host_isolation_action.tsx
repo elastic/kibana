@@ -33,7 +33,6 @@ export const useHostIsolationAction = ({
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
   const {
     isSupported: hostSupportsResponseActions,
-    isAlert,
     unsupportedReason,
     details: {
       agentType,
@@ -76,8 +75,8 @@ export const useHostIsolationAction = ({
   }, [hostSupportsResponseActions, agentStatus]);
 
   return useMemo<AlertTableContextMenuItem[]>(() => {
-    // If not an Alert OR user has no Authz, then don't show the menu item at all
-    if (!isAlert || (isHostIsolated && !canUnIsolateHost) || !canIsolateHost) {
+    // If user has no Authz, then don't show the menu item at all
+    if ((isHostIsolated && !canUnIsolateHost) || !canIsolateHost) {
       return [];
     }
 
@@ -109,7 +108,6 @@ export const useHostIsolationAction = ({
 
     return [menuItem];
   }, [
-    isAlert,
     isHostIsolated,
     canUnIsolateHost,
     canIsolateHost,
