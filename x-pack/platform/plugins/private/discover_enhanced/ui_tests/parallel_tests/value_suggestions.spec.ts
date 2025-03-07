@@ -21,10 +21,9 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
-      await page.waitForLoadingIndicatorHidden();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
