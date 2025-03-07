@@ -14,6 +14,7 @@ import {
   FieldDefinition,
   InheritedFieldDefinition,
   WiredStreamDefinition,
+  namespacePrefixes,
 } from '@kbn/streams-schema';
 
 export const logsSettings: IndicesIndexSettings = {
@@ -32,13 +33,6 @@ export const logsSettings: IndicesIndexSettings = {
     },
   },
 };
-
-export const namespacePrefixes = [
-  'body.structured.',
-  'attributes.',
-  'scope.attributes.',
-  'resource.attributes.',
-];
 
 export const baseFields: FieldDefinition = {
   '@timestamp': {

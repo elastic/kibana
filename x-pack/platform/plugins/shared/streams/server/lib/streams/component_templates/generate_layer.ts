@@ -16,11 +16,12 @@ import {
   isDslLifecycle,
   isIlmLifecycle,
   isRoot,
+  namespacePrefixes,
 } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
-import { moveFieldsToNamespaces, baseMappings, namespacePrefixes } from './logs_layer';
+import { moveFieldsToNamespaces, baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,

@@ -21,3 +21,14 @@ export const keepFields: string[] = [
   'resource.schema_url',
   'resource.dropped_attributes_count',
 ];
+
+export const namespacePrefixes = [
+  'body.structured.',
+  'attributes.',
+  'scope.attributes.',
+  'resource.attributes.',
+];
+
+export function isNamespacedEcsField(field: string): boolean {
+  return namespacePrefixes.some((prefix) => field.startsWith(prefix)) || keepFields.includes(field);
+}
