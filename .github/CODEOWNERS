@@ -1226,22 +1226,25 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Global Experience
 
-### Global Experience Reporting
+### Reporting
 /x-pack/test/functional/apps/dashboard/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/apps/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/apps/reporting_management/ @elastic/appex-sharedux
-/x-pack/test/examples/screenshotting/ @elastic/appex-sharedux
+/x-pack/test/functional/apps/reporting/ @elastic/response-ops
+/x-pack/test/functional/apps/reporting_management/ @elastic/response-ops
+/x-pack/test/examples/screenshotting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/es_archives/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/appex-sharedux
-/x-pack/test/reporting_api_integration/ @elastic/appex-sharedux
-/x-pack/test/reporting_functional/ @elastic/appex-sharedux
-/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/appex-sharedux
-/docs/user/reporting @elastic/appex-sharedux
-/docs/settings/reporting-settings.asciidoc @elastic/appex-sharedux
-/docs/setup/configuring-reporting.asciidoc @elastic/appex-sharedux
-/x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/appex-sharedux
-/x-pack/test/accessibility/apps/group3/reporting.ts @elastic/appex-sharedux
+/x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
+/x-pack/test/reporting_api_integration/ @elastic/response-ops
+/x-pack/test/reporting_functional/ @elastic/response-ops
+/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/response-ops
+/docs/user/reporting @elastic/response-ops
+/docs/settings/reporting-settings.asciidoc @elastic/response-ops
+/docs/setup/configuring-reporting.asciidoc @elastic/response-ops
+/x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/response-ops
+/x-pack/test/accessibility/apps/group3/reporting.ts @elastic/response-ops
+/x-pack/test/functional/page_objects/reporting_page.ts @elastic/response-ops
+/x-pack/test/upgrade/apps/reporting @elastic/response-ops
+/x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
@@ -2652,10 +2655,8 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/test/functional_cloud @elastic/appex-sharedux
 /x-pack/test/functional/services/user_menu.js @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
-/x-pack/test/functional/page_objects/reporting_page.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
-/x-pack/test/upgrade/apps/reporting @elastic/appex-sharedux
 /x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
@@ -2681,7 +2682,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 packages/react @elastic/appex-sharedux
 test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
-/x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
