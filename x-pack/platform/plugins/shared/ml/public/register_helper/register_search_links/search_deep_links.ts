@@ -39,7 +39,6 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
           defaultMessage: 'Anomaly Detection',
         }),
-        path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
         deepLinks: [
           {
             id: 'anomalyExplorer',
@@ -55,13 +54,6 @@ function createDeepLinks(
             }),
             path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
           },
-          {
-            id: 'suppliedConfigurations',
-            title: i18n.translate('xpack.ml.deepLink.suppliedConfigurations', {
-              defaultMessage: 'Supplied configurations',
-            }),
-            path: `/${ML_PAGES.SUPPLIED_CONFIGURATIONS}`,
-          },
         ],
       };
     },
@@ -74,7 +66,6 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
           defaultMessage: 'Data Frame Analytics',
         }),
-        path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
         deepLinks: [
           {
             id: 'resultExplorer',
