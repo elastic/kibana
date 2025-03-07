@@ -244,4 +244,3 @@ export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = true;
