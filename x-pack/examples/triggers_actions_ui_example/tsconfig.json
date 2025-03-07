@@ -31,5 +31,8 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/response-ops-rule-form",
+    "@kbn/spaces-plugin",
+    "@kbn/core-http-server-utils",
+    "@kbn/task-manager-plugin",
   ]
 }
