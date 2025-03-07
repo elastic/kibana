@@ -580,13 +580,14 @@ export function getControlSuggestion(
   ];
 }
 
-export function getLookupIndexCreateSuggestion(): SuggestionRawDefinition {
+export function getLookupIndexCreateSuggestion(indexName?: string): SuggestionRawDefinition {
   return {
     label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
       defaultMessage: 'Create lookup index',
     }),
     text: '',
     kind: 'Issue',
+    filterText: indexName,
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
       {
@@ -602,6 +603,7 @@ export function getLookupIndexCreateSuggestion(): SuggestionRawDefinition {
           defaultMessage: 'Click to create',
         }
       ),
+      arguments: [indexName],
     },
   } as SuggestionRawDefinition;
 }

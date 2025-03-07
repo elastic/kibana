@@ -143,7 +143,9 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
 
     case 'after_mnemonic':
     case 'index': {
-      const createIndexCommandSuggestion = getLookupIndexCreateSuggestion();
+      const indexNameInput = commandText.split(' ').pop() ?? '';
+
+      const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
       const joinIndices = await callbacks?.getJoinIndices?.();
 
       if (!joinIndices) {
