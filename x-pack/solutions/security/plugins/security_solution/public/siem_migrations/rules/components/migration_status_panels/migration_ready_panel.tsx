@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
@@ -16,6 +16,7 @@ import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
+import { RuleMigrationsLastError } from './last_error';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -74,6 +75,12 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {migrationStats.last_error && (
+        <>
+          <EuiSpacer size="m" />
+          <RuleMigrationsLastError message={migrationStats.last_error} />
+        </>
+      )}
     </EuiPanel>
   );
 });
