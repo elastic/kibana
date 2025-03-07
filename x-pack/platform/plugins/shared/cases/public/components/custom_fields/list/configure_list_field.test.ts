@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  CustomFieldTypes,
+  type ListCustomFieldConfiguration,
+} from '../../../../common/types/domain';
 import { configureListCustomFieldFactory } from './configure_list_field';
 
 describe('configureListCustomFieldFactory ', () => {
@@ -23,6 +27,34 @@ describe('configureListCustomFieldFactory ', () => {
       sanitizeTemplateValue: expect.any(Function),
       getFilterOptions: expect.any(Function),
       convertValueToDisplayText: expect.any(Function),
+    });
+  });
+
+  describe('sanitizeTemplateValue', () => {
+    it('returns the first value in the field configuration when passed an option that does not exist', () => {
+      const { sanitizeTemplateValue } = builder;
+      const mockConfiguration: ListCustomFieldConfiguration = {
+        type: CustomFieldTypes.LIST,
+        key: 'mock',
+        label: 'mock',
+        required: false,
+        options: [
+          {
+            key: '0',
+            label: 'A',
+          },
+          {
+            key: '1',
+            label: 'B',
+          },
+        ],
+      };
+      const sanizitedValue = sanitizeTemplateValue!({ '2': 'C' }, mockConfiguration);
+      expect(sanizitedValue).toMatchInlineSnapshot(`
+        Object {
+          "0": "A",
+        }
+      `);
     });
   });
 });
