@@ -366,6 +366,8 @@ exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
 
+exports[`Error USER_AGENT_VERSION 1`] = `undefined`;
+
 exports[`Error USER_ID 1`] = `undefined`;
 
 exports[`Error VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
@@ -720,6 +722,8 @@ exports[`Span URL_FULL 1`] = `undefined`;
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
+
+exports[`Span USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
@@ -1093,6 +1097,8 @@ exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
+
+exports[`Transaction USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
 
