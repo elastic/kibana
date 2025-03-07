@@ -41,7 +41,7 @@ export function getElasticsearchAndSOAvailability({
           index: TASK_MANAGER_INDEX,
         })
         .then((healthResult) => {
-          logger.debug(`Cluster health: ${healthResult}`);
+          logger.debug(`Cluster health: ${JSON.stringify(healthResult)}`);
           isEsHealthy = true;
           result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
         })
