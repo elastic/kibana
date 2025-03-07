@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
-import { RuleStatus } from '../../../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
+import type { RuleStatus } from '../../../types';
 
 export interface AggregateRulesResponse {
   ruleExecutionStatus: Record<string, number>;

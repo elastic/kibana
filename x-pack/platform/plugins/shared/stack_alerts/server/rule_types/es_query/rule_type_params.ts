@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import type { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { type EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS } from '../../../common';
 
 export interface EsQueryRuleState extends RuleTypeState {

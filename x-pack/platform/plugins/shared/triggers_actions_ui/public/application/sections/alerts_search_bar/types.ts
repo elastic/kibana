@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { SearchBarProps } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
-import { QuickFiltersMenuItem } from './quick_filters';
+import type { Filter } from '@kbn/es-query';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
+import type { QuickFiltersMenuItem } from './quick_filters';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 
