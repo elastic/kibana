@@ -1020,6 +1020,8 @@
       "@kbn/grid-example-plugin/*": ["examples/grid_example/*"],
       "@kbn/grid-layout": ["src/platform/packages/private/kbn-grid-layout"],
       "@kbn/grid-layout/*": ["src/platform/packages/private/kbn-grid-layout/*"],
+      "@kbn/grok-ui": ["src/platform/packages/shared/kbn-grok-ui"],
+      "@kbn/grok-ui/*": ["src/platform/packages/shared/kbn-grok-ui/*"],
       "@kbn/grokdebugger-plugin": ["x-pack/platform/plugins/private/grokdebugger"],
       "@kbn/grokdebugger-plugin/*": ["x-pack/platform/plugins/private/grokdebugger/*"],
       "@kbn/grouping": ["src/platform/packages/shared/kbn-grouping"],
