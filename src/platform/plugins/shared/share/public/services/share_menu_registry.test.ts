@@ -22,15 +22,15 @@ describe('ShareActionsRegistry', () => {
 
   describe('registerShareIntegration', () => {
     test('throws when registering duplicate id', () => {
-      const shareRegistry = new ShareRegistry().setup();
+      const shareRegistrySetup = new ShareRegistry().setup();
 
-      shareRegistry.registerShareIntegration({
+      shareRegistrySetup.registerShareIntegration({
         id: 'csvReports',
         config: () => ({}),
       });
 
       expect(() =>
-        shareRegistry.registerShareIntegration({
+        shareRegistrySetup.registerShareIntegration({
           id: 'csvReports',
           config: () => ({}),
         })

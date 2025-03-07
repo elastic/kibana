@@ -13,7 +13,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ShareMenuItemV2, ShareMenuProviderV2, ExportShare } from '@kbn/share-plugin/public/types';
+import { ExportShare } from '@kbn/share-plugin/public/types';
 import { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
@@ -114,7 +114,7 @@ export const downloadCsvLensShareProvider = ({
     shareType: 'integration',
     id: 'csvDownloadLens',
     groupId: 'export',
-    config({ sharingData }, userInput) {
+    config({ sharingData }) {
       // TODO fix sharingData types
       const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
 
@@ -142,25 +142,25 @@ export const downloadCsvLensShareProvider = ({
         supportedLayoutOptions: ['print'],
         requiresSavedState: false,
         generateAssetExport: downloadCSVHandler,
-        generateValueExport: () => '',
+        generateAssetURIValue: () => '',
         warnings: getWarnings(datatables),
         ...(atLeastGold()
           ? {
-            disabled: !csvEnabled,
-            renderLayoutOptionSwitch: false,
-            getJobParams: undefined,
-          }
+              disabled: !csvEnabled,
+              renderLayoutOptionSwitch: false,
+              getJobParams: undefined,
+            }
           : {
-            helpText: (
-              <FormattedMessage
-                id="xpack.lens.application.csvPanelContent.generationDescription"
-                defaultMessage="Download the data displayed in the visualization."
-              />
-            ),
-            generateExportButton: (
-              <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
-            ),
-          }),
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.application.csvPanelContent.generationDescription"
+                  defaultMessage="Download the data displayed in the visualization."
+                />
+              ),
+              generateExportButton: (
+                <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
+              ),
+            }),
       };
     },
   };
