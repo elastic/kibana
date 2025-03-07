@@ -66,6 +66,42 @@ describe('useTestQuery', () => {
     expect(result.current.testQueryError).toBe(null);
     expect(result.current.testQueryWarning).toBe(null);
     expect(result.current.testQueryResult).toContain('1s');
+    expect(result.current.testQueryResult).toContain(
+      'Grouped query matched 2 groups in the last 1s.'
+    );
+    expect(result.current.testQueryPreview).toEqual({
+      cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
+      rows: [{ grouped: 'test' }],
+    });
+  });
+
+  test('returning a valid result for grouped per row result', async () => {
+    const { result } = renderHook(useTestQuery, {
+      initialProps: () =>
+        Promise.resolve({
+          testResults: {
+            results: [
+              { group: 'a', count: 1, value: 10, hits: [], sourceFields: [] },
+              { group: 'b', count: 2, value: 20, hits: [], sourceFields: [] },
+            ],
+            truncated: false,
+          },
+          isGrouped: true,
+          isGroupedByRow: true,
+          timeWindow: '1s',
+          preview: {
+            cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
+            rows: [{ grouped: 'test' }],
+          },
+        }),
+    });
+    await act(async () => {
+      await result.current.onTestQuery();
+    });
+    expect(result.current.testQueryLoading).toBe(false);
+    expect(result.current.testQueryError).toBe(null);
+    expect(result.current.testQueryWarning).toBe(null);
+    expect(result.current.testQueryResult).toContain('1s');
     expect(result.current.testQueryResult).toContain('Query returned 2 rows in the last 1s.');
     expect(result.current.testQueryPreview).toEqual({
       cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
@@ -116,7 +152,9 @@ describe('useTestQuery', () => {
     expect(result.current.testQueryError).toBe(null);
     expect(result.current.testQueryWarning).toBe(warningMsg);
     expect(result.current.testQueryResult).toContain('1s');
-    expect(result.current.testQueryResult).toContain('Query returned 2 rows in the last 1s.');
+    expect(result.current.testQueryResult).toContain(
+      'Grouped query matched 2 groups in the last 1s.'
+    );
     expect(result.current.testQueryPreview).toEqual({
       cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
       rows: [{ grouped: 'test' }],
