@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Instruction, InstructionProps } from './instruction';
 
 jest.mock('../../kibana_services', () => ({
@@ -42,9 +42,9 @@ const commonProps: InstructionProps = {
 describe('Instruction component', () => {
   test('should render with textPre and textPost', async () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Instruction {...commonProps} textPre="Pre text" textPost="Post text" />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(getByText('Pre text')).toBeInTheDocument();
@@ -53,9 +53,9 @@ describe('Instruction component', () => {
 
   test('should render with commands', async () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Instruction {...commonProps} commands={['echo "Hello, World!"']} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(getByText('echo "Hello, World!"')).toBeInTheDocument();
@@ -63,9 +63,9 @@ describe('Instruction component', () => {
 
   test('should render with customComponentName', async () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Instruction {...commonProps} customComponentName={'customComponent'} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -75,9 +75,9 @@ describe('Instruction component', () => {
 
   test("shouldn't render with non existent component name", async () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Instruction {...commonProps} customComponentName={'fake'} />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -87,14 +87,14 @@ describe('Instruction component', () => {
 
   test('should render with isCloudEnabled', async () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <Instruction
           {...commonProps}
           isCloudEnabled={true}
           textPre="Cloud Pre text"
           textPost="Cloud Post text"
         />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(getByText('Cloud Pre text')).toBeInTheDocument();
