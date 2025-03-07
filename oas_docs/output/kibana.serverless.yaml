@@ -18992,6 +18992,11 @@ paths:
                             type: string
                           nullable: true
                           type: array
+                        upgrade_attempts:
+                          items:
+                            type: string
+                          nullable: true
+                          type: array
                         upgrade_details:
                           additionalProperties: false
                           nullable: true
@@ -19447,6 +19452,11 @@ paths:
                           type: string
                         nullable: true
                         type: array
+                      upgrade_attempts:
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
                       upgrade_details:
                         additionalProperties: false
                         nullable: true
@@ -19787,6 +19797,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -22136,6 +22151,11 @@ paths:
             type: boolean
         - in: query
           name: excludeInstallStatus
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: withPackagePoliciesCount
           required: false
           schema:
             type: boolean
@@ -38854,13 +38874,9 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
-                    type: boolean
-                  pipeline_exists:
                     type: boolean
                   product_documentation_status:
                     type: string
