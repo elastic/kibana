@@ -27,8 +27,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { APMApiKeyResponse } from '../../../../common/types';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
@@ -42,13 +40,10 @@ const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  const { data, error: createFlowError, refetch } = useKubernetesFlow('kubernetes_otel');
-  const [error, setError] = useState<IHttpFetchError<ResponseErrorBody> | null>(null);
+  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
-  const [encodedApiKey, setEncodedApiKey] = useState<string | null>(null);
   const {
     services: {
-      http,
       share,
       context: { isServerless },
     },
@@ -72,35 +67,6 @@ export const OtelKubernetesPanel: React.FC = () => {
     managedServiceUrl: data?.managedServiceUrl,
   });
 
-  useEffect(() => {
-    if (createFlowError) {
-      setError(createFlowError);
-    }
-  }, [createFlowError]);
-
-  useEffect(() => {
-    if (encodedApiKey !== null || !data) {
-      return;
-    }
-
-    if (!isServerless) {
-      setEncodedApiKey(data.apiKeyEncoded);
-      return;
-    }
-
-    const timestamp = new Date().toISOString();
-
-    http
-      .post<APMApiKeyResponse>('/api/apm/agent_keys', {
-        body: JSON.stringify({
-          name: `ingest-otel-k8s-${timestamp}`,
-          privileges: ['event:write'],
-        }),
-      })
-      .then((res) => setEncodedApiKey(res.agentKey.encoded))
-      .catch((err) => setError(err));
-  }, [data, encodedApiKey, http, isServerless]);
-
   if (error) {
     return (
       <EmptyPrompt onboardingFlowType="kubernetes_otel" error={error} onRetryClick={refetch} />
@@ -115,18 +81,17 @@ export const OtelKubernetesPanel: React.FC = () => {
     : '';
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
-  const installStackCommand =
-    data && encodedApiKey
-      ? `kubectl create namespace ${namespace}
+  const installStackCommand = data
+    ? `kubectl create namespace ${namespace}
 kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
   --from-literal=${elasticEndpointVarName}='${ingestEndpointUrl}' \\
-  --from-literal=elastic_api_key='${encodedApiKey}'
+  --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
   --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
-      : undefined;
+    : undefined;
 
   return (
     <EuiPanel hasBorder paddingSize="xl">

@@ -17,6 +17,7 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
+import { createManagedServiceApiKey } from '../../lib/api_key/create_managed_service_api_key';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -49,6 +50,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     plugins,
     services,
     kibanaVersion,
+    config,
   }): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
     const {
       elasticsearch: { client },
@@ -64,9 +66,16 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
+    const apiKeyPromise =
+      config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
+        ? createManagedServiceApiKey(
+            client.asCurrentUser,
+            `ingest-otel-k8s-${new Date().toISOString()}`
+          )
+        : createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
+      apiKeyPromise,
       getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
@@ -81,8 +90,8 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
-    const managedServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((config) => {
-      return config.managedServiceUrl;
+    const managedServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((apmConfig) => {
+      return apmConfig.managedServiceUrl;
     });
 
     return {
