@@ -64,7 +64,7 @@ export function getStateDefaults({
     columns,
     dataSource,
     interval: 'auto',
-    filters: cloneDeep(searchSource?.getOwnField('filter') ?? []) as DiscoverAppState['filters'],
+    filters: cloneDeep(searchSource?.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
