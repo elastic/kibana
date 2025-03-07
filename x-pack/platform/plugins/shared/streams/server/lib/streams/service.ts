@@ -8,7 +8,8 @@
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
 import { StreamDefinition } from '@kbn/streams-schema';
-import type { StreamsPluginStartDependencies } from '../../types';
+import { schema } from '@kbn/config-schema';
+import type { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
 
@@ -26,11 +27,27 @@ export const streamsStorageSettings = {
 export type StreamsStorageSettings = typeof streamsStorageSettings;
 export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, StreamDefinition>;
 
+export const REINDEX_QUERY_TASK_NAME = 'reindexQueryTask';
+
 export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
+    pluginsSetup: StreamsPluginSetupDependencies,
     private readonly logger: Logger
-  ) {}
+  ) {
+    pluginsSetup.taskManager.registerTaskDefinitions({
+      [REINDEX_QUERY_TASK_NAME]: {
+        paramsSchema: schema.object({
+          apiKey: schema.string(),
+        }),
+        createTaskRunner: (context) => {
+          return {
+            run: async () => {},
+          };
+        },
+      },
+    });
+  }
 
   async getClientWithRequest({
     request,
@@ -39,7 +56,7 @@ export class StreamsService {
     request: KibanaRequest;
     assetClient: AssetClient;
   }): Promise<StreamsClient> {
-    const [coreStart] = await this.coreSetup.getStartServices();
+    const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
@@ -47,11 +64,12 @@ export class StreamsService {
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
-    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, StreamDefinition>(
-      scopedClusterClient.asInternalUser,
-      logger,
-      streamsStorageSettings
-    );
+    const rulesClient = await pluginsStart.alerting.getRulesClientWithRequest(request);
+
+    const storageAdapter = new StorageIndexAdapter<
+      StreamsStorageSettings,
+      StreamDefinition & { _id: string }
+    >(scopedClusterClient.asInternalUser, logger, streamsStorageSettings);
 
     return new StreamsClient({
       assetClient,
@@ -59,6 +77,10 @@ export class StreamsService {
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
       isServerless,
+      rulesClient,
+      taskManager: pluginsStart.taskManager,
+      request,
+      security: pluginsStart.security,
     });
   }
 }

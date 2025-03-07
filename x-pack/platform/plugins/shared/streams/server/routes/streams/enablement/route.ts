@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { conflict } from '@hapi/boom';
+import { BooleanFromString } from '@kbn/zod-helpers';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
 import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -43,7 +44,13 @@ export const enableStreamsRoute = createServerRoute({
 
 export const disableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_disable',
-  params: z.object({}),
+  params: z.object({
+    query: z
+      .object({
+        force: BooleanFromString.optional(),
+      })
+      .optional(),
+  }),
   options: {
     access: 'internal',
   },
@@ -52,10 +59,12 @@ export const disableStreamsRoute = createServerRoute({
       requiredPrivileges: ['streams_write'],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
+  handler: async ({ request, params, getScopedClients }): Promise<DisableStreamsResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    return await streamsClient.disableStreams();
+    const { force } = params?.query ?? {};
+
+    return await streamsClient.disableStreams({ force });
   },
 });
 

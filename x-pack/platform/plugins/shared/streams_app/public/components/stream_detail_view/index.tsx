@@ -10,10 +10,11 @@ import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../data_management/stream_detail_management';
+import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
+import { StreamDetailCriticalEventsView } from '../stream_detail_critical_events_view';
 
 export function StreamDetailView() {
   const params1 = useStreamsAppParams('/{key}/{tab}', true);
@@ -50,6 +51,7 @@ export function StreamDetailView() {
           if (isWiredStreamGetResponse(response)) {
             return {
               dashboards: response.dashboards,
+              queries: response.queries,
               inherited_fields: response.inherited_fields,
               elasticsearch_assets: [],
               effective_lifecycle: response.effective_lifecycle,
@@ -63,6 +65,7 @@ export function StreamDetailView() {
           if (isUnwiredStreamGetResponse(response)) {
             return {
               dashboards: response.dashboards,
+              queries: response.queries,
               elasticsearch_assets: response.elasticsearch_assets,
               inherited_fields: {},
               effective_lifecycle: response.effective_lifecycle,
@@ -97,6 +100,13 @@ export function StreamDetailView() {
       content: <StreamDetailDashboardsView definition={streamEntity} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
+      }),
+    },
+    {
+      name: 'critical_events',
+      content: <StreamDetailCriticalEventsView definition={streamEntity} />,
+      label: i18n.translate('xpack.streams.streamDetailView.criticalEventsTab', {
+        defaultMessage: 'Critical events',
       }),
     },
     {

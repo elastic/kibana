@@ -66,7 +66,7 @@ export class StreamsPlugin
     } as StreamsServer;
 
     const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger);
+    const streamsService = new StreamsService(core, plugins, this.logger);
 
     registerRoutes({
       repository: streamsRouteRepository,

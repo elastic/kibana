@@ -11,7 +11,12 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type IScopedClusterClient,
+  type KibanaRequest,
+  type Logger,
+} from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   Condition,
@@ -39,6 +44,11 @@ import {
   findInheritingStreams,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { isBoom } from '@hapi/boom';
+import { v5 } from 'uuid';
 import { AssetClient } from './assets/asset_client';
 import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {
@@ -53,7 +63,7 @@ import {
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
+import { REINDEX_QUERY_TASK_NAME, StreamsStorageClient } from './service';
 import {
   checkAccess,
   checkAccessBulk,
@@ -67,6 +77,8 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { QueryLink } from '../../../common/assets';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -89,14 +101,37 @@ function isDefinitionNotFoundError(error: unknown): error is DefinitionNotFoundE
   return error instanceof DefinitionNotFoundError;
 }
 
+function getRuleId(query: QueryLink) {
+  const ruleId = v5(query['asset.uuid'], v5.DNS);
+  return ruleId;
+}
+
+/*
+ * When calling into Elasticsearch, the stack trace is lost.
+ * If we create an error before calling, and append it to
+ * any stack of the caught error, we get a more useful stack
+ * trace.
+ */
+function wrapEsCall<T>(p: Promise<T>): Promise<T> {
+  const error = new Error();
+  return p.catch((caughtError) => {
+    caughtError.stack += error.stack;
+    throw caughtError;
+  });
+}
+
 export class StreamsClient {
   constructor(
     private readonly dependencies: {
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
       storageClient: StreamsStorageClient;
+      rulesClient: RulesClient;
+      taskManager: TaskManagerStartContract;
       logger: Logger;
       isServerless: boolean;
+      security: SecurityPluginStart;
+      request: KibanaRequest;
     }
   ) {}
 
@@ -132,6 +167,7 @@ export class StreamsClient {
     await this.upsertStream({
       request: {
         dashboards: [],
+        queries: [],
         stream: omit(rootStreamDefinition, 'name'),
       },
       name: rootStreamDefinition.name,
@@ -146,20 +182,38 @@ export class StreamsClient {
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
    *
-   * It does NOT delete ingest streams.
+   * It does NOT delete unwired streams.
    */
-  async disableStreams(): Promise<DisableStreamsResponse> {
+  async disableStreams({
+    force = false,
+  }: { force?: boolean } = {}): Promise<DisableStreamsResponse> {
     const isEnabled = await this.isStreamsEnabled();
+
     if (!isEnabled) {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const definition = await this.getStream(LOGS_ROOT_STREAM_NAME);
-
-    await this.deleteStreamFromDefinition(definition);
+    await this.getStream(LOGS_ROOT_STREAM_NAME)
+      .then(async (definition) => {
+        await this.deleteStreamFromDefinition(definition);
+      })
+      .catch((error) => {
+        if (!force) {
+          throw error;
+        }
+      });
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([assetClient.clean(), storageClient.clean()]);
+
+    if (force) {
+      const unwiredStreams = await this.getUnmanagedDataStreams();
+      await Promise.all(
+        unwiredStreams.map(async (definition) => {
+          await this.deleteStreamFromDefinition(definition);
+        })
+      );
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -239,7 +293,7 @@ export class StreamsClient {
     request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
     const stream: StreamDefinition = { ...request.stream, name };
-    const { dashboards } = request;
+    const { dashboards, queries } = request;
     const { result, parentDefinition } = await this.validateAndUpsertStream({
       definition: stream,
     });
@@ -271,6 +325,7 @@ export class StreamsClient {
           name: parentId,
           request: {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
@@ -291,12 +346,29 @@ export class StreamsClient {
       }
     }
 
-    await this.dependencies.assetClient.syncAssetList({
-      entityId: stream.name,
-      entityType: 'stream',
-      assetIds: dashboards,
-      assetType: 'dashboard',
-    });
+    const queryLinks = queries.map((query) => ({
+      [ASSET_ID]: query.id,
+      [ASSET_TYPE]: 'query' as const,
+      query,
+    }));
+
+    const { deleted, indexed } = await this.dependencies.assetClient.syncAssetList(stream.name, [
+      ...dashboards.map((dashboard) => ({
+        [ASSET_ID]: dashboard,
+        [ASSET_TYPE]: 'dashboard' as const,
+      })),
+      ...queryLinks,
+    ]);
+
+    await this.uninstallQueries(
+      name,
+      deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query')
+    );
+
+    await this.installQueries(
+      name,
+      indexed.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query')
+    );
 
     return { acknowledged: true, result };
   }
@@ -670,28 +742,28 @@ export class StreamsClient {
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
-    return this.dependencies.scopedClusterClient.asCurrentUser.indices
-      .getDataStream({ name })
-      .then((response) => {
-        if (response.data_streams.length === 0) {
-          throw new errors.ResponseError({
-            meta: {
-              aborted: false,
-              attempts: 1,
-              connection: null,
-              context: null,
-              name: 'resource_not_found_exception',
-              request: {} as unknown as DiagnosticResult['meta']['request'],
-            },
-            warnings: [],
-            body: 'resource_not_found_exception',
-            statusCode: 404,
-          });
-        }
+    return wrapEsCall(
+      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
+    ).then((response) => {
+      if (response.data_streams.length === 0) {
+        throw new errors.ResponseError({
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'resource_not_found_exception',
+            request: {} as unknown as DiagnosticResult['meta']['request'],
+          },
+          warnings: [],
+          body: 'resource_not_found_exception',
+          statusCode: 404,
+        });
+      }
 
-        const dataStream = response.data_streams[0];
-        return dataStream;
-      });
+      const dataStream = response.data_streams[0];
+      return dataStream;
+    });
   }
 
   /**
@@ -755,8 +827,9 @@ export class StreamsClient {
    * stored definition).
    */
   private async getUnmanagedDataStreams(): Promise<UnwiredStreamDefinition[]> {
-    const response =
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream();
+    const response = await wrapEsCall(
+      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
+    );
 
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
@@ -840,14 +913,199 @@ export class StreamsClient {
       await deleteStreamObjects({ scopedClusterClient, name: definition.name, logger });
     }
 
-    await assetClient.syncAssetList({
-      entityId: definition.name,
-      entityType: 'stream',
-      assetType: 'dashboard',
-      assetIds: [],
+    const { deleted } = await assetClient.syncAssetList(definition.name, []);
+
+    const deletedQueries = deleted.filter((link): link is QueryLink => {
+      return link[ASSET_TYPE] === 'query';
     });
 
-    await this.dependencies.storageClient.delete({ id: definition.name });
+    await Promise.all([
+      this.uninstallQueries(definition.name, deletedQueries),
+      this.dependencies.storageClient.delete({ id: definition.name }),
+    ]);
+  }
+
+  private async uninstallQueries(name: string, queries: QueryLink[]) {
+    await Promise.all(
+      queries.map(async (query) => {
+        const taskId = `${REINDEX_QUERY_TASK_NAME}:${query['asset.uuid']}`;
+        await this.dependencies.taskManager.removeIfExists(taskId);
+        const ruleId = getRuleId(query);
+        await this.dependencies.rulesClient.delete({ id: ruleId }).catch((error) => {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            throw error;
+          }
+        });
+
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+          .deleteAlias({
+            name: `${name}.@critical_events_alerts.${query.query.id}`,
+            index: name,
+          })
+          .catch((err) => {
+            if (isElasticsearch404(err)) {
+              return;
+            }
+            throw err;
+          });
+
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+          .deleteAlias({
+            name: `${name}.@critical_events_query.${query.query.id}`,
+            index: name,
+          })
+          .catch((err) => {
+            if (isElasticsearch404(err)) {
+              return;
+            }
+            throw err;
+          });
+      })
+    );
+  }
+
+  private async installQueriesReindexTask(name: string, queries: QueryLink[]) {
+    await Promise.all(
+      queries.map(async (query) => {
+        const taskId = `${REINDEX_QUERY_TASK_NAME}:${query['asset.uuid']}`;
+        await this.dependencies.taskManager.removeIfExists(taskId);
+
+        const apiKey = await this.dependencies.security.authc.apiKeys.grantAsInternalUser(
+          this.dependencies.request,
+          {
+            name: `api:${taskId}`,
+            role_descriptors: {},
+            kibana_role_descriptors: {},
+          }
+        );
+
+        if (!apiKey) {
+          throw new Error(`Failed to get API key`);
+        }
+
+        if ('dsl' in query.query) {
+          await this.dependencies.taskManager.schedule({
+            id: taskId,
+            params: {
+              apiKey,
+              name,
+              query: {
+                body: query.query.dsl.query,
+              },
+            },
+            state: {},
+            taskType: REINDEX_QUERY_TASK_NAME,
+          });
+        }
+      })
+    );
+  }
+
+  private async installQueriesRules(name: string, queries: QueryLink[]) {
+    const ruleIdsToDelete = queries.map(getRuleId);
+
+    await this.dependencies.rulesClient.bulkDeleteRules({ ids: ruleIdsToDelete }).catch((error) => {
+      if (isBoom(error) && error.output.statusCode === 400) {
+        // no rules deleted
+        return;
+      }
+      throw error;
+    });
+
+    await Promise.all(
+      queries.map(async (query) => {
+        const ruleId = getRuleId(query);
+        const isEsqlQuery = 'esql' in query.query;
+        await this.dependencies.rulesClient.create<{}>({
+          data: {
+            name: query.query.title,
+            actions: [],
+            alertTypeId: isEsqlQuery ? 'siem.esqlRule' : 'siem.queryRule',
+            consumer: 'siem',
+            enabled: true,
+            params: {
+              author: [],
+              description: query.query.title,
+              falsePositives: [],
+              from: 'now-6m',
+              to: 'now',
+              ruleId,
+              immutable: true,
+              outputIndex: '',
+              maxSignals: 100,
+              riskScore: 100,
+              riskScoreMapping: [],
+              severity: 'critical',
+              severityMapping: [],
+              threat: [],
+              references: [],
+              version: 1,
+              exceptionsList: [],
+              index: [name, `${name}.*`],
+              ...('esql' in query.query
+                ? {
+                    type: 'esql',
+                    language: 'esql',
+                    query: query.query.esql.query,
+                  }
+                : {
+                    type: 'query',
+                    language: 'kuery',
+                    query: '',
+                    filters: [query.query.dsl.query],
+                  }),
+            },
+            tags: ['streams'],
+            schedule: {
+              interval: '3m',
+            },
+          },
+          options: {
+            id: ruleId,
+          },
+        });
+      })
+    );
+  }
+
+  private async installQueriesAliases(name: string, queries: QueryLink[]) {
+    for (const { query } of queries) {
+      if ('esql' in query) {
+        return;
+      }
+      const dsl = query.dsl;
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.putAlias({
+        index: name,
+        name: `${name}.@critical_events_alerts.${query.id}`,
+        filter: {
+          term: {
+            ['critical_event.query_id']: query.id,
+          },
+        },
+      });
+
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.putAlias({
+        index: name,
+        name: `${name}.@critical_events_query.${query.id}`,
+        filter: dsl.query,
+      });
+    }
+  }
+
+  private async installQueries(name: string, queries: QueryLink[]) {
+    const mode: 'reindex' | 'rule' | 'query' | 'noop' = 'noop';
+
+    await this.installQueriesAliases(name, queries);
+
+    if (mode === 'reindex') {
+      await this.installQueriesReindexTask(name, queries);
+      return;
+    }
+
+    if (mode === 'rule') {
+      await this.installQueriesRules(name, queries);
+      return;
+    }
   }
 
   /**
