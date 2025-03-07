@@ -20842,7 +20842,6 @@ paths:
           name: page
           required: false
           schema:
-            default: 1
             type: number
         - in: query
           name: perPage
@@ -20891,6 +20890,26 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+        - in: query
+          name: searchAfter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: openPit
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: pitId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pitKeepAlive
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -21192,6 +21211,8 @@ paths:
                     type: number
                   perPage:
                     type: number
+                  pit:
+                    type: string
                   statusSummary:
                     additionalProperties:
                       type: number
