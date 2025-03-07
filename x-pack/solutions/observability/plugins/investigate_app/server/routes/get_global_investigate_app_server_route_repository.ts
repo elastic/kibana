@@ -8,6 +8,7 @@
 import {
   GetEntitiesResponse,
   GetEventsResponse,
+  attacheFileParamsSchema,
   createInvestigationItemParamsSchema,
   createInvestigationNoteParamsSchema,
   createInvestigationParamsSchema,
@@ -27,6 +28,8 @@ import {
   updateInvestigationParamsSchema,
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+
+import { Readable } from 'stream';
 import { createEntitiesESClient } from '../clients/create_entities_es_client';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
@@ -387,6 +390,31 @@ const getEntitiesRoute = createInvestigateAppServerRoute({
   },
 });
 
+const postAttacheFileRoute = createInvestigateAppServerRoute({
+  endpoint: 'POST /api/observability/investigation/files 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: attacheFileParamsSchema,
+  handler: async ({
+    params,
+    context,
+    request,
+    plugins,
+  }): Promise<{ ok: boolean; file: Record<string, any> }> => {
+    const filesStarted = await plugins.files.start(); // TODO: move to setup
+    const tes = await filesStarted.fileServiceFactory.asScoped(request).create({
+      name: 'test',
+      meta: {
+        owner: 'investigation',
+      },
+      fileKind: 'observabilityFilesInvestigateApp',
+    });
+    const fileUpdated = await tes.uploadContent(Readable.from([Buffer.from('test')]));
+    return { ok: true, file: fileUpdated };
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -407,6 +435,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
     ...rootCauseAnalysisRoute,
+    ...postAttacheFileRoute,
   };
 }
 
