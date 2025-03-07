@@ -193,6 +193,11 @@ export function createTestConfig(
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
         license,
+        serverArgs: [
+          ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
+          // Enable LogsDB
+          'cluster.logsdb.enabled=true',
+        ],
       },
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
