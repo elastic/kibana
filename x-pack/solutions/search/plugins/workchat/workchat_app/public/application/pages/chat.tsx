@@ -64,7 +64,7 @@ export const WorkchatChatPage: React.FC<{}> = () => {
       grow={false}
       panelled={false}
     >
-      <KibanaPageTemplate.Sidebar>
+      <KibanaPageTemplate.Sidebar paddingSize="none">
         <ConversationList
           conversations={conversations}
           activeConversationId={conversationId}

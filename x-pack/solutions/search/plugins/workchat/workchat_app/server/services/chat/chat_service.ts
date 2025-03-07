@@ -132,11 +132,11 @@ export class ChatService {
       switchMap((updatedConversation) => {
         return of(
           conversationId
-            ? conversationCreatedEvent({
+            ? conversationUpdatedEvent({
                 title: updatedConversation.title,
                 id: updatedConversation.id,
               })
-            : conversationUpdatedEvent({
+            : conversationCreatedEvent({
                 title: updatedConversation.title,
                 id: updatedConversation.id,
               })
