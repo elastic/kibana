@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '../../../../common/lib/kibana';
-import type { AddFilterProps } from '../../alerts_kpis/common/types';
 import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { GroupBySelection } from '../../alerts_kpis/alerts_progress_bar_panel/types';
@@ -18,6 +16,7 @@ import { AlertsByRulePanel } from '../../alerts_kpis/alerts_by_rule_panel';
 import { AlertsProgressBarPanel } from '../../alerts_kpis/alerts_progress_bar_panel';
 
 const groupBySelection: GroupBySelection = 'host.name';
+const setGroupBySelection = () => {};
 
 export interface KPIsSectionProps {
   /**
@@ -31,42 +30,25 @@ export interface KPIsSectionProps {
  */
 export const KPIsSection = memo(({ dataView }: KPIsSectionProps) => {
   const signalIndexName = dataView.getIndexPattern();
-  const setGroupBySelection = () => {};
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
 
-  const {
-    data: {
-      query: { filterManager },
-    },
-  } = useKibana().services;
-
-  const addFilter = useCallback(
-    ({ field, value, negate }: AddFilterProps) => {
-      filterManager.addFilters([
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: negate ?? false,
-          },
-          ...(value != null
-            ? { query: { match_phrase: { [field]: value } } }
-            : { exists: { field } }),
-        },
-      ]);
-    },
-    [filterManager]
-  );
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <SeverityLevelPanel signalIndexName={signalIndexName} query={query} addFilter={addFilter} />
+        <SeverityLevelPanel
+          signalIndexName={signalIndexName}
+          query={query}
+          showCellActions={false}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        <AlertsByRulePanel signalIndexName={signalIndexName} query={query} />
+        <AlertsByRulePanel
+          signalIndexName={signalIndexName}
+          query={query}
+          showCellActions={false}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <AlertsProgressBarPanel
@@ -74,6 +56,8 @@ export const KPIsSection = memo(({ dataView }: KPIsSectionProps) => {
           groupBySelection={groupBySelection}
           query={query}
           setGroupBySelection={setGroupBySelection}
+          showGroupBySelection={false}
+          showCellActions={false}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

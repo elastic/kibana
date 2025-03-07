@@ -24,7 +24,7 @@ const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
 const DEFAULT_COMBOBOX_WIDTH = 150;
 const DEFAULT_OPTIONS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
 
-interface Props {
+interface AlertsProgressBarPanelProps {
   filters?: Filter[];
   query?: Query;
   signalIndexName: string | null;
@@ -32,9 +32,18 @@ interface Props {
   skip?: boolean;
   groupBySelection: GroupBySelection;
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
+  /**
+   * If true, render the StackComboBox to allow users to change the grouping
+   */
+  showGroupBySelection?: boolean;
   addFilter?: ({ field, value, negate }: AddFilterProps) => void;
+  /**
+   * If true, render the last column for cell actions (like filter for, out, add to timeline, copy...)
+   */
+  showCellActions?: boolean;
 }
-export const AlertsProgressBarPanel: React.FC<Props> = ({
+
+export const AlertsProgressBarPanel: React.FC<AlertsProgressBarPanelProps> = ({
   filters,
   query,
   signalIndexName,
@@ -42,7 +51,9 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
   skip,
   groupBySelection,
   setGroupBySelection,
+  showGroupBySelection = true,
   addFilter,
+  showCellActions = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid()}`, []);
   const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
@@ -81,20 +92,23 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
           titleSize="xs"
           hideSubtitle
         >
-          <StackByComboBox
-            data-test-subj="stackByComboBox"
-            selected={groupBySelection}
-            onSelect={onSelect}
-            prepend={''}
-            width={DEFAULT_COMBOBOX_WIDTH}
-            dropDownoptions={dropDownOptions}
-          />
+          {showGroupBySelection && (
+            <StackByComboBox
+              data-test-subj="stackByComboBox"
+              selected={groupBySelection}
+              onSelect={onSelect}
+              prepend={''}
+              width={DEFAULT_COMBOBOX_WIDTH}
+              dropDownoptions={dropDownOptions}
+            />
+          )}
         </HeaderSection>
         <AlertsProgressBar
           data={data}
           isLoading={isLoading}
           groupBySelection={groupBySelection}
           addFilter={addFilter}
+          showCellActions={showCellActions}
         />
       </EuiPanel>
     </InspectButtonContainer>
