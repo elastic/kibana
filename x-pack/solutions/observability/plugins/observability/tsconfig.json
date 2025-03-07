@@ -117,7 +117,8 @@
     "@kbn/response-ops-rule-form",
     "@kbn/data-service",
     "@kbn/ebt-tools",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/dashboard-plugin"
   ],
   "exclude": ["target/**/*"]
 }
