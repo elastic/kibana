@@ -24,8 +24,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RiskEngineStatus, StoreStatus } from '../../../../../common/api/entity_analytics';
+import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { useContractComponents } from '../../../../common/hooks/use_contract_component';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 import {
@@ -33,66 +35,86 @@ import {
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
   ENABLEMENT_WARNING_SELECT_TO_PROCEED,
 } from '../translations';
-import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from './missing_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../risk_engine_privileges_callout';
+import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
 
 export interface Enablements {
   riskScore: boolean;
   entityStore: boolean;
 }
 
-interface EntityStoreEnablementModalProps {
+export interface EntityStoreEnablementModalProps {
   visible: boolean;
   toggle: (visible: boolean) => void;
   enableStore: (enablements: Enablements) => () => void;
-  riskScore: {
-    canToggle?: boolean;
-    checked?: boolean;
-  };
-  entityStore: {
-    canToggle?: boolean;
-    checked?: boolean;
-  };
+  riskEngineStatus?: RiskEngineStatus;
+  entityStoreStatus?: StoreStatus;
 }
 
-const shouldAllowEnablement = (
-  riskScoreEnabled: boolean,
-  entityStoreEnabled: boolean,
+const isInstallButtonEnabled = (
+  canInstallRiskScore: boolean,
+  canInstallEntityStore: boolean,
   userHasEnabled: Enablements
 ) => {
-  if (riskScoreEnabled) {
-    return userHasEnabled.entityStore;
+  if (canInstallRiskScore || canInstallEntityStore) {
+    return userHasEnabled.riskScore || userHasEnabled.entityStore;
   }
-  if (entityStoreEnabled) {
-    return userHasEnabled.riskScore;
-  }
-  return userHasEnabled.riskScore || userHasEnabled.entityStore;
+
+  return false;
 };
 
 export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
   visible,
   toggle,
   enableStore,
-  riskScore,
-  entityStore,
+  riskEngineStatus,
+  entityStoreStatus,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const [enablements, setEnablements] = useState({
-    riskScore: !!riskScore.checked,
-    entityStore: !!entityStore.checked,
-  });
+  const riskEnginePrivileges = useMissingRiskEnginePrivileges();
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
-  const riskEnginePrivileges = useMissingRiskEnginePrivileges();
 
-  const enablementOptions = shouldAllowEnablement(
-    !riskScore.canToggle,
-    !entityStore.canToggle,
-    enablements
+  const hasRiskScorePrivileges = !(
+    riskEnginePrivileges.isLoading || !riskEnginePrivileges?.hasAllRequiredPrivileges
   );
   const { EnablementModalCallout } = useContractComponents();
+
+  const canInstallRiskScore =
+    hasRiskScorePrivileges && riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED;
+
+  const hasEntityStorePrivileges = !(
+    isLoadingEntityEnginePrivileges || !entityEnginePrivileges?.has_all_required
+  );
+
+  const canInstallEntityStore = hasEntityStorePrivileges && entityStoreStatus === 'not_installed';
+
+  const { euiTheme } = useEuiTheme();
+  const [toggleState, setToggleState] = useState({
+    riskScore: false,
+    entityStore: false,
+  });
+
+  /**
+   * Update the toggle state when the install status changes because privileges are async.
+   * We automatically toggle the switch when the user can enable the engine.
+   *
+   */
+  useEffect(() => {
+    setToggleState({
+      riskScore: canInstallRiskScore,
+      entityStore: canInstallEntityStore,
+    });
+  }, [canInstallRiskScore, canInstallEntityStore]);
+
+  const isInstallButtonDisabled = !isInstallButtonEnabled(
+    canInstallRiskScore,
+    canInstallEntityStore,
+    toggleState
+  );
+
+  const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
     return null;
@@ -130,12 +152,10 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                   defaultMessage="Risk Score"
                 />
               }
-              checked={enablements.riskScore}
-              disabled={
-                !riskScore.canToggle ||
-                (!riskEnginePrivileges.isLoading && !riskEnginePrivileges?.hasAllRequiredPrivileges)
-              }
-              onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
+              checked={toggleState.riskScore}
+              disabled={!canInstallRiskScore}
+              onChange={() => setToggleState((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
+              data-test-subj="enablementRiskScoreSwitch"
             />
           </EuiFlexItem>
           {!riskEnginePrivileges.isLoading && !riskEnginePrivileges.hasAllRequiredPrivileges && (
@@ -156,13 +176,10 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                     defaultMessage="Entity Store"
                   />
                 }
-                checked={enablements.entityStore}
-                disabled={
-                  !entityStore.canToggle ||
-                  (!isLoadingEntityEnginePrivileges && !entityEnginePrivileges?.has_all_required)
-                }
+                checked={toggleState.entityStore}
+                disabled={!canInstallEntityStore}
                 onChange={() =>
-                  setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
+                  setToggleState((prev) => ({ ...prev, entityStore: !prev.entityStore }))
                 }
               />
               <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
@@ -183,15 +200,18 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {!enablementOptions ? <EuiFlexItem>{proceedWarning}</EuiFlexItem> : null}
+          {isInstallButtonDisabled && (canInstallRiskScore || canInstallEntityStore) ? (
+            <EuiFlexItem>{proceedWarning}</EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" justifyContent="flexEnd">
               <EuiButtonEmpty onClick={() => toggle(false)}>{'Cancel'}</EuiButtonEmpty>
               <EuiButton
-                onClick={enableStore(enablements)}
+                onClick={enableStore(toggleState)}
                 fill
-                isDisabled={!enablementOptions}
-                aria-disabled={!enablementOptions}
+                isDisabled={isInstallButtonDisabled}
+                aria-disabled={isInstallButtonDisabled}
+                data-test-subj="entityStoreEnablementModalButton"
               >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.enablements.modal.enable"
