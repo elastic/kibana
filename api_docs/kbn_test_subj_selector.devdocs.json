@@ -31,7 +31,7 @@
         "signature": [
           "(selector: string) => string"
         ],
-        "path": "packages/kbn-test-subj-selector/test_subj_selector.ts",
+        "path": "src/platform/packages/shared/kbn-test-subj-selector/test_subj_selector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-test-subj-selector/test_subj_selector.ts",
+            "path": "src/platform/packages/shared/kbn-test-subj-selector/test_subj_selector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

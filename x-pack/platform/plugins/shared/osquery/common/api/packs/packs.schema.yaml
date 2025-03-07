@@ -11,18 +11,33 @@ paths:
       x-codegen-enabled: true
       x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: page
           in: query
-          required: true
+          required: false
           schema:
-            $ref: './find_packs.schema.yaml#/components/schemas/FindPacksRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './find_packs.schema.yaml#/components/schemas/FindPacksResponse'
     post:
       summary: Create a pack
       description: Create a query pack.
@@ -41,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksResponse'
   /api/osquery/packs/{id}:
     get:
       summary: Get pack details
@@ -61,7 +76,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './find_packs.schema.yaml#/components/schemas/FindPackResponse'
     delete:
       summary: Delete a pack
       description: Delete a query pack using the pack ID.
@@ -80,7 +95,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                type: object
+                properties: { }
+                example: { }
     put:
       summary: Update a pack
       description: |
@@ -108,4 +125,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksResponse'

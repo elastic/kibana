@@ -6,7 +6,7 @@ The tests and helper methods (services, page objects) defined here in
  `serverless_security` plugins.
 
  For how to set up Docker for serverless ES images, please refer to
- [packages/kbn-es/README](https://github.com/elastic/kibana/blob/main/packages/kbn-es/README.mdx).
+ [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
 ## Serverless testing structure and conventions
 
@@ -106,7 +106,7 @@ particularly when it comes to timing for API requests and UI interaction.
 
 ### Roles-based testing
 
-Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
 and in oder to properly test Kibana functionality, test design requires to login with
 a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.

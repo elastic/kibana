@@ -22,8 +22,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import { Adapters } from '@kbn/inspector-plugin/public';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
@@ -48,7 +46,7 @@ import { toExpressionAst } from '../../embeddable/to_ast';
 import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { EmbeddableOutput } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -95,7 +93,7 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
   savedVis?: VisSavedObject;
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
-export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+export type VisualizeByReferenceInput = { savedObjectId: string } & VisualizeInput;
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
@@ -122,11 +120,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService?: AttributeService<
-    VisualizeSavedObjectAttributes,
-    VisualizeByValueInput,
-    VisualizeByReferenceInput
-  >;
+  private attributeService?: AttributeService;
   private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
@@ -136,11 +130,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ) {
     super(initialInput, {
       defaultTitle: vis.title,

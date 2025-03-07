@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 
@@ -80,7 +80,7 @@ const _buildInactiveCondition = (opts: {
 
   return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
     'policy_id'
-  )}.size() > 0 && ${policyClauses}`;
+  )}.size() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(
@@ -103,14 +103,18 @@ function _buildSource(
   });
 
   return `
-    long lastCheckinMillis = ${field('last_checkin')}.size() > 0
+    long lastCheckinMillis = doc.containsKey(${fieldPath('last_checkin')}) && ${field(
+    'last_checkin'
+  )}.size() > 0
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli()
       : (
           ${field('enrolled_at')}.size() > 0
           ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
-    if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
+    if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
+    'active'
+  )}.value == false)) {
       emit('unenrolled');
     }
     ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
