@@ -363,17 +363,14 @@ function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: Discove
 
 export function getInitialState(
   initialUrlState: DiscoverAppState | undefined,
-  savedSearch: SavedSearch,
+  savedSearch: SavedSearch | undefined,
   services: DiscoverServices
 ) {
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
   });
-  return handleSourceColumnState(
-    initialUrlState === undefined ? defaultAppState : { ...defaultAppState, ...initialUrlState },
-    services.uiSettings
-  );
+  return handleSourceColumnState({ ...defaultAppState, ...initialUrlState }, services.uiSettings);
 }
 
 /**

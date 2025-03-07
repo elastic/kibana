@@ -33,6 +33,7 @@ import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 import { createRuntimeStateManager } from './redux';
+import { HistoryLocationState } from '../../../build_services';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -44,7 +45,7 @@ async function getState(
   url: string = '/',
   { savedSearch, isEmptyUrl }: { savedSearch?: SavedSearch; isEmptyUrl?: boolean } = {}
 ) {
-  const nextHistory = createBrowserHistory();
+  const nextHistory = createBrowserHistory<HistoryLocationState>();
   nextHistory.push(url);
 
   discoverServiceMock.dataViews.create = jest.fn().mockImplementation((spec) => {
@@ -59,8 +60,7 @@ async function getState(
   });
   const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateContainer({
-    services: discoverServiceMock,
-    history: nextHistory,
+    services: { ...discoverServiceMock, history: nextHistory },
     customizationContext: mockCustomizationContext,
     runtimeStateManager,
   });
@@ -90,7 +90,7 @@ async function getState(
 
 describe('Test discover state', () => {
   let stopSync = () => {};
-  let history: History;
+  let history: History<HistoryLocationState>;
   let state: DiscoverStateContainer;
   const getCurrentUrl = () => history.createHref(history.location);
 
@@ -98,8 +98,7 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getDiscoverStateContainer({
-      services: discoverServiceMock,
-      history,
+      services: { ...discoverServiceMock, history },
       customizationContext: mockCustomizationContext,
       runtimeStateManager: createRuntimeStateManager(),
     });
@@ -176,7 +175,7 @@ describe('Test discover state', () => {
 
 describe('Test discover state with overridden state storage', () => {
   let stopSync = () => {};
-  let history: History;
+  let history: History<HistoryLocationState>;
   let stateStorage: IKbnUrlStateStorage;
   let state: DiscoverStateContainer;
 
@@ -196,8 +195,7 @@ describe('Test discover state with overridden state storage', () => {
       useHashQuery: true,
     });
     state = getDiscoverStateContainer({
-      services: discoverServiceMock,
-      history,
+      services: { ...discoverServiceMock, history },
       customizationContext: mockCustomizationContext,
       stateStorageContainer: stateStorage,
       runtimeStateManager: createRuntimeStateManager(),
@@ -286,11 +284,10 @@ describe('Test discover state with legacy migration', () => {
 
 describe('Test createSearchSessionRestorationDataProvider', () => {
   let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
-  const history = createBrowserHistory();
+  const history = createBrowserHistory<HistoryLocationState>();
   const mockDataPlugin = dataPluginMock.createStartContract();
   const discoverStateContainer = getDiscoverStateContainer({
-    services: discoverServiceMock,
-    history,
+    services: { ...discoverServiceMock, history },
     customizationContext: mockCustomizationContext,
     runtimeStateManager: createRuntimeStateManager(),
   });
@@ -991,7 +988,7 @@ describe('Test discover state actions', () => {
 
 describe('Test discover state with embedded mode', () => {
   let stopSync = () => {};
-  let history: History;
+  let history: History<HistoryLocationState>;
   let state: DiscoverStateContainer;
   const getCurrentUrl = () => history.createHref(history.location);
 
@@ -999,8 +996,7 @@ describe('Test discover state with embedded mode', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getDiscoverStateContainer({
-      services: discoverServiceMock,
-      history,
+      services: { ...discoverServiceMock, history },
       customizationContext: {
         ...mockCustomizationContext,
         displayMode: 'embedded',

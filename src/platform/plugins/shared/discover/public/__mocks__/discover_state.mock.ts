@@ -17,6 +17,7 @@ import {
   RuntimeStateManager,
   createRuntimeStateManager,
 } from '../application/main/state_management/redux';
+import { HistoryLocationState } from '../build_services';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -27,11 +28,10 @@ export function getDiscoverStateMock({
   savedSearch?: SavedSearch;
   runtimeStateManager?: RuntimeStateManager;
 }) {
-  const history = createBrowserHistory();
+  const history = createBrowserHistory<HistoryLocationState>();
   history.push('/');
   const container = getDiscoverStateContainer({
-    services: discoverServiceMock,
-    history,
+    services: { ...discoverServiceMock, history },
     customizationContext: mockCustomizationContext,
     runtimeStateManager: runtimeStateManager ?? createRuntimeStateManager(),
   });
