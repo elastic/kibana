@@ -181,9 +181,7 @@ export const createResourceFields = ({
     return {
       name,
       rawValue: resourceDoc[name],
-      // TODO: formatFieldValue doesn't actually return a string in certain circumstances, change
-      // this line below once it does.
-      value: typeof value === 'string' ? value : `${value}`,
+      value,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
     };

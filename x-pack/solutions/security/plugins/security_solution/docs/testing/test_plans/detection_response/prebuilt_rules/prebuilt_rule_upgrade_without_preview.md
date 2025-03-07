@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
@@ -20,11 +23,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
-  - [User stories](#user-stories)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
-  - [Functional requirements](#functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Rule upgrade notifications on the Rule Management page](#rule-upgrade-notifications-on-the-rule-management-page)
     - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
@@ -86,84 +89,58 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
-### User stories
-
-**Prebuilt rule upgrade workflow:**
-
-- User can upgrade a single prebuilt rule to its latest version without previewing the incoming updates.
-- User can bulk upgrade multiple prebuilt rules to their latest versions without previewing the incoming updates.
-
 ### Terminology
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **CTA to install prebuilt rules**: a link button with a counter on the Rule Management page.
 - **CTA to upgrade prebuilt rules**: a tab with a counter on the Rule Management page.
 
+## Requirements
+
 ### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
-### Non-functional requirements
+### Technical requirements
 
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
+Non-functional requirements for the functionality outlined in this test plan.
 
-### Functional requirements
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
 
-User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
+### Product requirements
 
-User should be able to upgrade prebuilt rules with and without customizations. Where the following fields support customizations:
+Functional requirements for the functionality outlined in this test plan.
 
-| Rule type        | Field name in UI          | Diffable rule field       |
-| ---------------- | ------------------------- | ------------------------- |
-| All rule types   | Rule name                 | `name`                    |
-| All rule types   | Rule description          | `description`             |
-| All rule types   | Tags                      | `tags`                    |
-| All rule types   | Default severity          | `severity`                |
-| All rule types   | Severity Override         | `severity_mapping`        |
-| All rule types   | Default risk score        | `risk_score`              |
-| All rule types   | Risk score override       | `risk_score_mapping`      |
-| All rule types   | Reference URLs            | `references`              |
-| All rule types   | False positive examples   | `false_positives`         |
-| All rule types   | MITRE ATT&CK™ threats     | `threat`                  |
-| All rule types   | Setup guide               | `setup`                   |
-| All rule types   | Investigation guide       | `note`                    |
-| All rule types   | Related integrations      | `related_integrations`    |
-| All rule types   | Required fields           | `required_fields`         |
-| All rule types   | Rule schedule             | `rule_schedule`           |
-| All rule types   | Max alerts per run        | `max_signals`             |
-| All rule types   | Rule name override        | `rule_name_override`      |
-| All rule types   | Timestamp override        | `timestamp_override`      |
-| All rule types   | Timeline template         | `timeline_template`       |
-| All rule types   | Building block `*`        | `building_block`          |
-| All rule types   | Investigation fields      | `investigation_fields`    |
-| All rule types   | Data source `**`          | `data_source`             |
-| All rule types   | Suppress alerts           | `alert_suppression`       |
-| Custom Query     | Custom query              | `kql_query`               |
-| Saved Query      | Custom query              | `kql_query`               |
-| EQL              | EQL query                 | `eql_query`               |
-| ESQL             | ESQL query                | `esql_query`              |
-| Threat Match     | Custom query              | `kql_query`               |
-| Threat Match     | Indicator index patterns  | `threat_index`            |
-| Threat Match     | Indicator index query     | `threat_query`            |
-| Threat Match     | Indicator mapping         | `threat_mapping`          |
-| Threat Match     | Indicator prefix override | `threat_indicator_path`   |
-| Threshold        | Custom query              | `kql_query`               |
-| Threshold        | Threshold config          | `threshold`               |
-| Machine Learning | Machine Learning job      | `machine_learning_job_id` |
-| Machine Learning | Anomaly score threshold   | `anomaly_threshold`       |
-| New Terms        | Custom query              | `kql_query`               |
-| New Terms        | Fields                    | `new_terms_fields`        |
-| New Terms        | History Window Size       | `history_window_start`    |
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
 
-- `*` Building block field is used to mark alerts as building block alerts.
-- `**` Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
+User stories for upgrading single prebuilt rules one-by-one:
 
-User should be able to upgrade prebuilt rules with updates in the following non-customizable fields:
+- User can upgrade a single prebuilt rule to its latest version without previewing the incoming updates:
+  - if the rule doesn't have any conflicts with its latest version.
+- User can't upgrade a single prebuilt rule to its latest version without previewing the incoming updates:
+  - if the rule has any solvable conflicts with its latest version;
+  - if the rule has any non-solvable conflicts with its latest version;
+  - if the rule's type has been changed in the latest version by Elastic (this is considered a non-solvable conflict);
+  - in these situations user is required to upgrade the rule with preview.
 
-| Field name            | Diffable rule field |
-| --------------------- | ------------------- |
-| Rule type             | `type`              |
-| Rule version          | `version`           |
+User stories for upgrading multiple prebuilt rules in bulk:
+
+- User can bulk upgrade multiple prebuilt rules to their latest versions without previewing the incoming updates, but only those:
+  - that don't have any conflicts with their latest versions;
+  - that have some solvable conflicts but don't have any non-solvable conflicts with their latest versions.
+- User can't bulk upgrade multiple prebuilt rules to their latest versions without previewing the incoming updates:
+  - if these rules have any non-solvable conflicts with their latest versions;
+  - if these rules don't have any non-solvable conflicts, but have some solvable conflicts and the user doesn't confirm their intention to upgrade such rules;
+  - if these rules' types have been changed in their latest versions by Elastic (this is considered a non-solvable conflict);
+  - in these situations user is required to upgrade each rule one-by-one with preview.
+- User can bulk upgrade prebuilt rules with solvable conflicts only if the user confirms their intention to upgrade such rules.
+- User can "bulk upgrade" a single prebuilt rule via the bulk actions. In this case, the "user stories for upgrading multiple prebuilt rules in bulk" apply instead of the "user stories for upgrading single prebuilt rules one-by-one".
+
+User stories, misc:
+
+- In general, user can upgrade a prebuilt rule without preview regardless of the fact if the rule is customized or not. The ability to do so depends on the fact if this customization conflicts with the latest version or not, and if yes, is this conflict solvable or non-solvable.
 
 ## Scenarios
 
