@@ -5,42 +5,71 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertSummary } from '@kbn/elastic-assistant/impl/alerts/alert_summary';
+import { AlertSummary, SuggestedPrompts } from '@kbn/elastic-assistant';
+import type { PromptContext } from '@kbn/elastic-assistant';
+import { getRawData } from '../../assistant/helpers';
 import { useAIForSOCDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import type { AIForSOCDetailsProps } from './types';
 import { PanelFooter } from './footer';
+import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../shared/components/flyout_header';
-import { HeaderTitle } from './components/header_title';
-
-export const FLYOUT_BODY_TEST_ID = 'ai-for-soc-alert-flyout-body';
 
 /**
- * Panel to be displayed in AI for SOC alert summary flyout
+ * Panel to be displayed in the document details expandable flyout right section
  */
 export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() => {
-  const { doc } = useAIForSOCDetailsContext();
-  console.log('doc ==>', doc);
+  const { doc, dataFormattedForFieldBrowser } = useAIForSOCDetailsContext();
+  const getPromptContext = useCallback(
+    async () => getRawData(dataFormattedForFieldBrowser ?? []),
+    [dataFormattedForFieldBrowser]
+  );
+  const promptContext: PromptContext = {
+    category: 'alert',
+    description: 'Alert summary',
+    getPromptContext,
+    id: '_promptContextId',
+    suggestedUserPrompt: '_suggestedUserPrompt',
+    tooltip: '_tooltip',
+  };
+  const ruleName = useMemo(
+    () =>
+      // @ts-ignore anyone have advice for this type?
+      doc?.flattened?.['kibana.alert.rule.name']?.[0] ?? doc?.raw?._source?.message?.[0] ?? 'Alert',
+    [doc?.flattened, doc?.raw?._source?.message]
+  );
+  const timestamp = useMemo(
+    // @ts-ignore anyone have advice for this type?
+    () => doc?.flattened?.['@timestamp']?.[0] ?? doc?.raw?._source?.timestamp ?? '',
+    [doc?.flattened, doc?.raw?._source?.timestamp]
+  );
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <FlyoutHeader>
-        <HeaderTitle />
-      </FlyoutHeader>
+      <FlyoutHeader>{'AI for SOC'}</FlyoutHeader>
       <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <AlertSummary alertId={doc.id} />
+            <AlertSummary
+              isReady={(dataFormattedForFieldBrowser ?? []).length > 0}
+              promptContext={promptContext}
+            />
           </EuiFlexItem>
           <EuiFlexItem>{'Recommended action'}</EuiFlexItem>
           <EuiFlexItem>{'Highlighted fields'}</EuiFlexItem>
           <EuiFlexItem>{'Attack Discovery'}</EuiFlexItem>
           <EuiFlexItem>{'AI Assistant'}</EuiFlexItem>
-          <EuiFlexItem>{'Suggested prompts'}</EuiFlexItem>
+          <EuiFlexItem>
+            <SuggestedPrompts
+              getPromptContext={getPromptContext}
+              ruleName={ruleName}
+              timestamp={timestamp}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </FlyoutBody>
       <PanelFooter />
