@@ -19,8 +19,8 @@ const rootStreamDefinition: WiredStreamDefinition = {
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
-    routing: [],
     wired: {
+      routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
@@ -91,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
+              ...rootStreamDefinition.ingest.wired,
               fields: {
                 ...rootStreamDefinition.ingest.wired.fields,
                 'log.level': {
@@ -111,16 +112,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,
-            routing: [
-              {
-                destination: 'logs.gcpcloud',
-                if: {
-                  field: 'cloud.provider',
-                  operator: 'eq',
-                  value: 'gcp',
+            wired: {
+              ...rootStreamDefinition.ingest.wired,
+              routing: [
+                {
+                  destination: 'logs.gcpcloud',
+                  if: {
+                    field: 'cloud.provider',
+                    operator: 'eq',
+                    value: 'gcp',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       };

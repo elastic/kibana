@@ -96,7 +96,7 @@ describe('Knowledge base', () => {
       const conversation = await chatClient.complete({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
-        'Uses KB retrieval function to find information about the Quantum Revectorization Engine',
+        'Uses context function response to find information about the Quantum Revectorization Engine',
         'Correctly identifies Dr. Eliana Stone at Acme Labs in 2023 as the inventor',
         'Accurately describes that it reorders the subatomic structure of materials and can transform silicon wafers into superconductive materials',
         'Does not invent unrelated or hallucinated details not present in the KB',
@@ -111,7 +111,7 @@ describe('Knowledge base', () => {
       const conversation = await chatClient.complete({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
-        'Uses KB retrieval function to find the correct document about QRE constraints',
+        'Uses context function response to find the correct document about QRE constraints',
         'Mentions the 2 nanometer limit on the revectorization radius',
         'Mentions that specialized fusion reactors are needed',
         'Does not mention information unrelated to constraints or energy (i.e., does not mention the inventor or silicon wafer transformation from doc-invention-1)',

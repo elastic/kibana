@@ -73,6 +73,7 @@ import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { useFetchUserProfilesFromAlerts } from '../../configurations/security_solution_detections/fetch_page_context';
 import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/use_cell_actions';
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
+import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -172,9 +173,10 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
 
   const dispatch = useDispatch();
 
+  const timelineID = tableType;
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
-    timelineID: tableType,
+    timelineID,
     tabType: 'query',
     enableHostDetailsFlyout: true,
     enableIpDetailsFlyout: true,
@@ -454,44 +456,49 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       <FullWidthFlexGroupTable $visible={!graphEventId && graphOverlay == null} gutterSize="none">
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           <EuiDataGridContainer hideLastPage={false}>
-            <AlertsTable<SecurityAlertsTableContext>
-              ref={alertsTableRef}
-              // Stores separate configuration based on the view of the table
-              id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
-              ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
-              consumers={ALERT_TABLE_CONSUMERS}
-              query={finalBoolQuery}
-              initialSort={initialSort}
-              casesConfiguration={casesConfiguration}
-              gridStyle={gridStyle}
-              shouldHighlightRow={shouldHighlightRow}
-              rowHeightsOptions={rowHeightsOptions}
-              columns={finalColumns}
-              browserFields={finalBrowserFields}
-              onUpdate={onUpdate}
-              additionalContext={additionalContext}
-              height={alertTableHeight}
-              initialPageSize={50}
-              runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
-              toolbarVisibility={toolbarVisibility}
-              renderCellValue={CellValue}
-              renderActionsCell={ActionsCell}
-              renderAdditionalToolbarControls={
-                tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
-              }
-              actionsColumnWidth={leadingControlColumn.width}
-              getBulkActions={getBulkActions}
-              fieldsBrowserOptions={
-                tableType === TableId.alertsOnAlertsPage ||
-                tableType === TableId.alertsOnRuleDetailsPage
-                  ? fieldsBrowserOptions
-                  : undefined
-              }
-              cellActionsOptions={cellActionsOptions}
-              showInspectButton
-              services={services}
-              {...tablePropsOverrides}
-            />
+            <AlertTableCellContextProvider
+              tableId={tableType}
+              sourcererScope={SourcererScopeName.detections}
+            >
+              <AlertsTable<SecurityAlertsTableContext>
+                ref={alertsTableRef}
+                // Stores separate configuration based on the view of the table
+                id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
+                ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
+                consumers={ALERT_TABLE_CONSUMERS}
+                query={finalBoolQuery}
+                initialSort={initialSort}
+                casesConfiguration={casesConfiguration}
+                gridStyle={gridStyle}
+                shouldHighlightRow={shouldHighlightRow}
+                rowHeightsOptions={rowHeightsOptions}
+                columns={finalColumns}
+                browserFields={finalBrowserFields}
+                onUpdate={onUpdate}
+                additionalContext={additionalContext}
+                height={alertTableHeight}
+                initialPageSize={50}
+                runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
+                toolbarVisibility={toolbarVisibility}
+                renderCellValue={CellValue}
+                renderActionsCell={ActionsCell}
+                renderAdditionalToolbarControls={
+                  tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
+                }
+                actionsColumnWidth={leadingControlColumn.width}
+                getBulkActions={getBulkActions}
+                fieldsBrowserOptions={
+                  tableType === TableId.alertsOnAlertsPage ||
+                  tableType === TableId.alertsOnRuleDetailsPage
+                    ? fieldsBrowserOptions
+                    : undefined
+                }
+                cellActionsOptions={cellActionsOptions}
+                showInspectButton
+                services={services}
+                {...tablePropsOverrides}
+              />
+            </AlertTableCellContextProvider>
           </EuiDataGridContainer>
         </StatefulEventContext.Provider>
       </FullWidthFlexGroupTable>

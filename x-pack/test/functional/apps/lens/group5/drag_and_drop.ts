@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const xyChartContainer = 'xyVisChart';
 
-  describe('lens drag and drop tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/213324
+  describe.skip('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
       it('should construct a bar chart when dropping a field to create top values chart', async () => {
         await visualize.navigateToNewVisualization();

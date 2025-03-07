@@ -14,6 +14,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { AlertTableCellContextProvider } from '../../../../detections/configurations/security_solution_detections/cell_value_context';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import * as i18n from './translations';
@@ -142,7 +143,10 @@ const PreviewHistogramComponent = ({
   }, [config, indexPattern, previewId]);
 
   return (
-    <>
+    <AlertTableCellContextProvider
+      tableId={TableId.rulePreview}
+      sourcererScope={SourcererScopeName.detections}
+    >
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
@@ -199,7 +203,7 @@ const PreviewHistogramComponent = ({
           bulkActions={false}
         />
       </FullScreenContainer>
-    </>
+    </AlertTableCellContextProvider>
   );
 };
 

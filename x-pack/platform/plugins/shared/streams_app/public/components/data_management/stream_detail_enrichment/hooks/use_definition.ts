@@ -142,7 +142,9 @@ export const useDefinition = (
             ingest: {
               ...definition.stream.ingest,
               processing: nextProcessorDefinitions,
-              ...(isWiredStreamGetResponse(definition) && { wired: { fields } }),
+              ...(isWiredStreamGetResponse(definition) && {
+                wired: { ...definition.stream.ingest.wired, fields },
+              }),
             },
           } as IngestUpsertRequest,
         },
