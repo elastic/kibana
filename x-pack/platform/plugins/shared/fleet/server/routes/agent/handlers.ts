@@ -223,11 +223,15 @@ export const getAgentsHandler: FleetRequestHandler<
     agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
   }
 
+  // Retrieve last agent to use for nextSearchAfter
+  const lastAgent = agents.length > 0 ? agents[agents.length - 1] : undefined;
+
   const body: GetAgentsResponse = {
     items: agents,
     total,
     page,
     perPage,
+    ...(lastAgent && lastAgent.sort ? { nextSearchAfter: JSON.stringify(lastAgent.sort) } : {}),
     ...(pit ? { pit } : {}),
     ...(statusSummary ? { statusSummary } : {}),
   };

@@ -278,17 +278,17 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/fleet/agents?perPage=1&sortField=agent.id&sortOrder=desc'
         );
         expect(apiResponse.page).to.eql(1);
+        expect(apiResponse.nextSearchAfter).to.eql(JSON.stringify(apiResponse.items[0].sort));
         expect(apiResponse.items.map(({ agent }: any) => agent.id)).to.eql(['agent4']);
 
         const { body: apiResponse2 } = await supertest
           .get(
-            `/api/fleet/agents?perPage=2&sortField=agent.id&sortOrder=desc&searchAfter=${JSON.stringify(
-              apiResponse.items[0].sort
-            )}`
+            `/api/fleet/agents?perPage=2&sortField=agent.id&sortOrder=desc&searchAfter=${apiResponse.nextSearchAfter}`
           )
           .expect(200);
 
         expect(apiResponse2.page).to.eql(0);
+        expect(apiResponse2.nextSearchAfter).to.eql(JSON.stringify(apiResponse2.items[1].sort));
         expect(apiResponse2.items.map(({ agent }: any) => agent.id)).to.eql(['agent3', 'agent2']);
       });
 
@@ -300,6 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse).to.have.keys('page', 'total', 'items', 'pit');
         expect(apiResponse.items.length).to.eql(1);
         expect(apiResponse.pit).to.be.a('string');
+        expect(apiResponse.nextSearchAfter).to.eql(JSON.stringify(apiResponse.items[0].sort));
       });
 
       it('should use pit to return correct results', async () => {
@@ -310,6 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponse.pit).to.be.a('string');
+        expect(apiResponse.nextSearchAfter).to.eql(JSON.stringify(apiResponse.items[0].sort));
         expect(apiResponse.items.map(({ agent }: any) => agent.id)).to.eql(['agent4']);
 
         // update ES document to change the order by changing agent.id of agent2 to agent9
@@ -341,12 +343,11 @@ export default function ({ getService }: FtrProviderContext) {
         // old order saved by PIT is [agent4, agent3, agent2, agent1]
         const { body: apiResponse3 } = await supertest
           .get(
-            `/api/fleet/agents?perPage=2&sortField=agent.id&sortOrder=desc&searchAfter=${JSON.stringify(
-              apiResponse.items[0].sort
-            )}&pitId=${apiResponse.pit}&pitKeepAlive=1m`
+            `/api/fleet/agents?perPage=2&sortField=agent.id&sortOrder=desc&searchAfter=${apiResponse.nextSearchAfter}&pitId=${apiResponse.pit}&pitKeepAlive=1m`
           )
           .expect(200);
         expect(apiResponse3.items.map(({ agent }: any) => agent.id)).to.eql(['agent3', 'agent2']);
+        expect(apiResponse3.nextSearchAfter).to.eql(JSON.stringify(apiResponse3.items[1].sort));
       });
     });
   });

@@ -262,6 +262,7 @@ export const AgentResponseSchema = schema.object({
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
   pit: schema.maybe(schema.string()),
+  nextSearchAfter: schema.maybe(schema.string()),
   statusSummary: schema.maybe(schema.recordOf(AgentStatusSchema, schema.number())),
 });
 

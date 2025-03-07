@@ -33,6 +33,7 @@ export interface GetAgentsRequest {
 
 export interface GetAgentsResponse extends ListResult<Agent> {
   pit?: string;
+  nextSearchAfter?: string;
   statusSummary?: Record<AgentStatus, number>;
 }
 
