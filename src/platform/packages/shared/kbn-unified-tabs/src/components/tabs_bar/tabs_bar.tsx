@@ -20,17 +20,6 @@ const growingFlexItemCss = css`
   min-width: 0;
 `;
 
-const tabsContainerCss = css`
-  overflow-x: auto;
-  max-width: 100%;
-  user-select: none;
-  scrollbar-width: none; // hide the scrollbar
-  scroll-behavior: smooth;
-  &:::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
 export type TabsBarProps = Pick<
   TabProps,
   'getTabMenuItems' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
@@ -64,12 +53,13 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     defaultMessage: 'New session',
   });
 
-  const { tabsSizeConfig, scrollRightButton, scrollLeftButton } = useResponsiveTabs({
-    items,
-    hasReachedMaxItemsCount,
-    tabsContainerWithPlusElement,
-    tabsContainerElement,
-  });
+  const { tabsSizeConfig, scrollRightButton, scrollLeftButton, tabsContainerCss } =
+    useResponsiveTabs({
+      items,
+      hasReachedMaxItemsCount,
+      tabsContainerWithPlusElement,
+      tabsContainerElement,
+    });
 
   useEffect(() => {
     if (selectedItem && tabsContainerRef.current) {

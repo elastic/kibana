@@ -8,9 +8,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonIcon, useResizeObserver } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import useEvent from 'react-use/lib/useEvent';
 import type { TabItem } from '../types';
 import { calculateResponsiveTabs } from '../utils/calculate_responsive_tabs';
@@ -35,6 +36,7 @@ export const useResponsiveTabs = ({
   tabsContainerWithPlusElement,
   tabsContainerElement,
 }: UseResponsiveTabsProps) => {
+  const { euiTheme } = useEuiTheme();
   const dimensions = useResizeObserver(tabsContainerWithPlusElement);
   const tabsSizeConfig = useMemo(
     () =>
@@ -121,10 +123,55 @@ export const useResponsiveTabs = ({
     ]
   );
 
+  const tabsContainerCss = useMemo(() => {
+    let overflowGradient = '';
+    if (scrollState?.isScrollableLeft && scrollState?.isScrollableRight) {
+      overflowGradient = `
+        mask-image: linear-gradient(
+          to right,
+          rgba(255, 0, 0, 0.1) 0%,
+          rgb(255, 0, 0) ${euiTheme.size.s},
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgba(255, 0, 0, 0.1) 100%
+        );
+      `;
+    } else if (scrollState?.isScrollableLeft) {
+      overflowGradient = `
+        mask-image: linear-gradient(
+          to right,
+          rgba(255, 0, 0, 0.1) 0%,
+          rgb(255, 0, 0) ${euiTheme.size.s}
+        );
+      `;
+    } else if (scrollState?.isScrollableRight) {
+      overflowGradient = `
+        mask-image: linear-gradient(
+          to right,
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgba(255, 0, 0, 0.1) 100%
+        );
+      `;
+    }
+
+    return css`
+      overflow-x: auto;
+      max-width: 100%;
+      user-select: none;
+      scrollbar-width: none; // hide the scrollbar
+      scroll-behavior: smooth;
+      &:::-webkit-scrollbar {
+        display: none;
+      }
+      transform: translateZ(0);
+      ${overflowGradient}
+    `;
+  }, [scrollState, euiTheme.size.s]);
+
   return {
     tabsSizeConfig,
     scrollLeftButton,
     scrollRightButton,
+    tabsContainerCss,
   };
 };
 
