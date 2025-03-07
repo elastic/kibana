@@ -96,6 +96,7 @@ export function CellActionsPopover({
         <EuiFlexItem style={{ maxWidth: '200px' }}>
           <EuiText
             size="s"
+            className="eui-textBreakWord"
             css={css`
               font-family: ${euiTheme.font.familyCode};
             `}
@@ -171,6 +172,7 @@ export interface FieldBadgeWithActionsProps
     'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
   > {
   icon?: EuiBadgeProps['iconType'];
+  color?: string;
 }
 
 interface FieldBadgeWithActionsDependencies {
@@ -188,6 +190,7 @@ export function FieldBadgeWithActions({
   renderValue,
   value,
   rawValue,
+  color = 'hollow',
 }: FieldBadgeWithActionsPropsAndDependencies) {
   return (
     <CellActionsPopover
@@ -197,7 +200,7 @@ export function FieldBadgeWithActions({
       rawValue={rawValue}
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
-        <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
+        <EuiBadge {...popoverTriggerProps} color={color} iconType={icon} iconSide="left">
           {truncateMiddle(value)}
         </EuiBadge>
       )}

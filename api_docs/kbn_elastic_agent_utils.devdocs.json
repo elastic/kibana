@@ -84,6 +84,72 @@
       },
       {
         "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.getIngestionPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getIngestionPath",
+        "description": [],
+        "signature": [
+          "(hasOpenTelemetryFields: boolean) => \"otel_native\" | \"classic_apm\""
+        ],
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_ingestion_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getIngestionPath.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasOpenTelemetryFields",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_ingestion_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.getSdkNameAndLanguage",
+        "type": "Function",
+        "tags": [],
+        "label": "getSdkNameAndLanguage",
+        "description": [],
+        "signature": [
+          "(agentName: string) => SdkNameAndLanguage"
+        ],
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_sdk_name_and_language.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getSdkNameAndLanguage.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_sdk_name_and_language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
         "id": "def-common.hasOpenTelemetryPrefix",
         "type": "Function",
         "tags": [],

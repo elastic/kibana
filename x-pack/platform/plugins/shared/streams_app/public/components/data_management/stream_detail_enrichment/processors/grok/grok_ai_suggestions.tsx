@@ -29,10 +29,10 @@ import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
+import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
-import { useSimulatorContext } from '../../simulator_context';
+import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 
 const RefreshButton = ({
   generatePatterns,
@@ -148,12 +148,10 @@ function useAiEnabled() {
 }
 
 function InnerGrokAiSuggestions({
-  refreshSimulation,
-  filteredSamples,
+  previewDocuments,
   definition,
 }: {
-  refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
-  filteredSamples: FlattenRecord[];
+  previewDocuments: FlattenRecord[];
   definition: IngestStreamGetResponse;
 }) {
   const { dependencies } = useKibana();
@@ -193,7 +191,7 @@ function InnerGrokAiSuggestions({
           body: {
             field: fieldValue,
             connectorId: currentConnector,
-            samples: filteredSamples,
+            samples: previewDocuments,
           },
         },
       })
@@ -210,7 +208,7 @@ function InnerGrokAiSuggestions({
     currentConnector,
     definition.stream.name,
     fieldValue,
-    filteredSamples,
+    previewDocuments,
     streamsRepositoryClient,
   ]);
 
@@ -225,11 +223,11 @@ function InnerGrokAiSuggestions({
   const hasValidField = useMemo(() => {
     return Boolean(
       currentFieldName &&
-        filteredSamples.some(
+        previewDocuments.some(
           (sample) => sample[currentFieldName] && typeof sample[currentFieldName] === 'string'
         )
     );
-  }, [filteredSamples, currentFieldName]);
+  }, [previewDocuments, currentFieldName]);
 
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
@@ -304,7 +302,6 @@ function InnerGrokAiSuggestions({
                           { value: suggestion.pattern },
                         ]);
                       }
-                      refreshSimulation();
                     }}
                     data-test-subj="streamsAppGrokAiSuggestionsButton"
                     iconType="plusInCircle"
@@ -360,7 +357,8 @@ export function GrokAiSuggestions() {
     core: { http },
   } = useKibana();
   const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
-  const props = useSimulatorContext();
+  const { definition } = useStreamDetail();
+  const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
 
   if (!isAiEnabled && couldBeEnabled) {
     return (
@@ -390,8 +388,9 @@ export function GrokAiSuggestions() {
     );
   }
 
-  if (!isAiEnabled) {
+  if (!isAiEnabled || !definition) {
     return null;
   }
-  return <InnerGrokAiSuggestions {...props} />;
+
+  return <InnerGrokAiSuggestions definition={definition} previewDocuments={previewDocuments} />;
 }

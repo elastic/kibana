@@ -2352,7 +2352,7 @@
             "label": "operator",
             "description": [],
             "signature": [
-              "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\""
+              "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
             "deprecated": false,
@@ -3939,7 +3939,15 @@
                 "section": "def-common.FieldDefinition",
                 "text": "FieldDefinition"
               },
-              "; }"
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
             "deprecated": false,
@@ -4126,7 +4134,7 @@
         "label": "BinaryOperator",
         "description": [],
         "signature": [
-          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\""
+          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
         "deprecated": false,

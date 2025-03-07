@@ -99,6 +99,7 @@ interface AgentBase {
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;
+  upgrade_attempts?: string[] | null;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -275,6 +276,10 @@ export interface FleetServerAgent {
    * Upgrade state of the Elastic Agent
    */
   upgrade_details?: AgentUpgradeDetails;
+  /**
+   * List of timestamps of attempts of Elastic Agent automatic upgrades
+   */
+  upgrade_attempts?: string[] | null;
   access_api_key_id?: string;
   agent?: FleetServerAgentMetadata;
   /**
