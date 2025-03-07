@@ -336,7 +336,7 @@ describe('RuleMigrationsTaskClient', () => {
       expect(abortMock).toHaveBeenCalled();
     });
 
-    it('should not stop if migration is not running but total > 0', async () => {
+    it('should return stopped even if migration is already stopped', async () => {
       data.rules.getStats.mockResolvedValue({
         rules: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
@@ -348,7 +348,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const result = await client.stop(migrationId);
-      expect(result).toEqual({ exists: true, stopped: false });
+      expect(result).toEqual({ exists: true, stopped: true });
     });
 
     it('should return exists false if migration is not running and total equals 0', async () => {
@@ -363,7 +363,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const result = await client.stop(migrationId);
-      expect(result).toEqual({ exists: false, stopped: false });
+      expect(result).toEqual({ exists: false, stopped: true });
     });
 
     it('should catch errors and return exists true, stopped false', async () => {
