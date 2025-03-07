@@ -16,116 +16,74 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
-import { SampleDocument } from '@kbn/streams-schema';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useSelector } from '@xstate5/react';
+import { isEmpty, isEqual } from 'lodash';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import {
-  DocsFilterOption,
-  TableColumn,
-  UseProcessingSimulatorReturn,
-  docsFilterOptions,
-} from './hooks/use_processing_simulator';
 import { AssetImage } from '../../asset_image';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+} from './state_management/stream_enrichment_state_machine';
+import {
+  PreviewDocsFilterOption,
+  getTableColumns,
+  previewDocsFilterOptions,
+} from './state_management/simulation_state_machine';
 
-interface ProcessorOutcomePreviewProps {
-  columns: TableColumn[];
-  isLoading: UseProcessingSimulatorReturn['isLoading'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
-  filteredSamples: UseProcessingSimulatorReturn['samples'];
-  onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
-  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
-  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
-}
-
-export const ProcessorOutcomePreview = ({
-  columns,
-  isLoading,
-  simulation,
-  filteredSamples,
-  onRefreshSamples,
-  selectedDocsFilter,
-  setSelectedDocsFilter,
-}: ProcessorOutcomePreviewProps) => {
-  const { dependencies } = useKibana();
-  const { data } = dependencies.start;
-
-  const { timeRange, setTimeRange } = data.query.timefilter.timefilter.useTimefilter();
-
-  const tableColumns = useMemo(() => {
-    switch (selectedDocsFilter) {
-      case 'outcome_filter_unmatched':
-        return columns
-          .filter((column) => column.origin === 'processor')
-          .map((column) => column.name);
-      case 'outcome_filter_matched':
-      case 'outcome_filter_all':
-      default:
-        return columns.map((column) => column.name);
-    }
-  }, [columns, selectedDocsFilter]);
+export const ProcessorOutcomePreview = () => {
+  const isLoading = useSimulatorSelector(
+    (state) =>
+      state.matches('debouncingChanges') ||
+      state.matches('loadingSamples') ||
+      state.matches('runningSimulation')
+  );
 
   return (
     <>
       <EuiFlexItem grow={false}>
-        <OutcomeControls
-          docsFilter={selectedDocsFilter}
-          onDocsFilterChange={setSelectedDocsFilter}
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-          onTimeRangeRefresh={onRefreshSamples}
-          simulationFailureRate={simulation?.failure_rate}
-          simulationSuccessRate={simulation?.success_rate}
-        />
+        <OutcomeControls />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable documents={filteredSamples} columns={tableColumns} />
+      <OutcomePreviewTable />
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );
 };
 
-interface OutcomeControlsProps {
-  docsFilter: DocsFilterOption;
-  timeRange: TimeRange;
-  onDocsFilterChange: (filter: DocsFilterOption) => void;
-  onTimeRangeChange: (timeRange: TimeRange) => void;
-  onTimeRangeRefresh: () => void;
-  simulationFailureRate?: number;
-  simulationSuccessRate?: number;
-}
+const OutcomeControls = () => {
+  const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
-const OutcomeControls = ({
-  docsFilter,
-  timeRange,
-  onDocsFilterChange,
-  onTimeRangeChange,
-  onTimeRangeRefresh,
-  simulationFailureRate,
-  simulationSuccessRate,
-}: OutcomeControlsProps) => {
+  const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const simulationFailureRate = useSimulatorSelector((state) =>
+    state.context.simulation
+      ? state.context.simulation.failure_rate + state.context.simulation.skipped_rate
+      : undefined
+  );
+  const simulationSuccessRate = useSimulatorSelector(
+    (state) => state.context.simulation?.success_rate
+  );
+
+  const dateRangeRef = useSimulatorSelector((state) => state.context.dateRangeRef);
+  const timeRange = useSelector(dateRangeRef, (state) => state.context.timeRange);
+  const handleRefresh = () => dateRangeRef.send({ type: 'dateRange.refresh' });
+
   const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
     { dateRange },
     isUpdate
   ) => {
     if (!isUpdate) {
-      return onTimeRangeRefresh();
+      return handleRefresh();
     }
 
     if (dateRange) {
-      onTimeRangeChange({
-        from: dateRange.from,
-        to: dateRange?.to,
-        mode: dateRange.mode,
-      });
+      dateRangeRef.send({ type: 'dateRange.update', range: dateRange });
     }
   };
 
-  const getFilterButtonPropsFor = (filterId: DocsFilterOption) => ({
-    hasActiveFilters: docsFilter === filterId,
-    onClick: () => onDocsFilterChange(filterId),
+  const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
+    hasActiveFilters: previewDocsFilter === filter,
+    onClick: () => changePreviewDocsFilter(filter),
   });
 
   return (
@@ -136,45 +94,60 @@ const OutcomeControls = ({
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
         )}
       >
-        <EuiFilterButton {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_all.id)}>
-          {docsFilterOptions.outcome_filter_all.label}
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+        >
+          {previewDocsFilterOptions.outcome_filter_all.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_matched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_matched.id)}
           badgeColor="success"
           numActiveFilters={
             simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
           }
         >
-          {docsFilterOptions.outcome_filter_matched.label}
+          {previewDocsFilterOptions.outcome_filter_matched.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_unmatched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_unmatched.id)}
           badgeColor="accent"
           numActiveFilters={
             simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
           }
         >
-          {docsFilterOptions.outcome_filter_unmatched.label}
+          {previewDocsFilterOptions.outcome_filter_unmatched.label}
         </EuiFilterButton>
       </EuiFilterGroup>
       <StreamsAppSearchBar
         onQuerySubmit={handleQuerySubmit}
-        onRefresh={onTimeRangeRefresh}
-        dateRangeFrom={timeRange.from}
-        dateRangeTo={timeRange.to}
+        onRefresh={handleRefresh}
+        dateRangeFrom={timeRange?.from}
+        dateRangeTo={timeRange?.to}
       />
     </EuiFlexGroup>
   );
 };
 
-interface OutcomePreviewTableProps {
-  documents: SampleDocument[];
-  columns: string[];
-}
+const MemoPreviewTable = React.memo(PreviewTable, (prevProps, nextProps) => {
+  // Need to specify the props to compare since the columns might be the same even if the useMemo call returns a new array
+  return (
+    prevProps.documents === nextProps.documents &&
+    isEqual(prevProps.displayColumns, nextProps.displayColumns)
+  );
+});
 
-const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) => {
-  if (isEmpty(documents)) {
+const OutcomePreviewTable = () => {
+  const processors = useSimulatorSelector((state) => state.context.processors);
+  const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
+  const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
+
+  const previewColumns = useMemo(
+    () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),
+    [detectedFields, previewDocsFilter, processors]
+  );
+
+  if (!previewDocuments || isEmpty(previewDocuments)) {
     return (
       <EuiEmptyPrompt
         titleSize="xs"
@@ -202,5 +175,5 @@ const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) =
     );
   }
 
-  return <PreviewTable documents={documents} displayColumns={columns} />;
+  return <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
 };

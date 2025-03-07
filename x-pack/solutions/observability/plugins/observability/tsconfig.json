@@ -118,7 +118,8 @@
     "@kbn/data-service",
     "@kbn/ebt-tools",
     "@kbn/response-ops-rule-params",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": ["target/**/*"]
 }

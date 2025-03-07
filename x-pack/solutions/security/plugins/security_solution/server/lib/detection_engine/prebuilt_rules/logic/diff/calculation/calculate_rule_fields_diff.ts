@@ -60,9 +60,10 @@ const TARGET_TYPE_ERROR = `Target version can't be of different rule type`;
  * three-way diffs calculated for those fields.
  */
 export const calculateRuleFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableRule>
+  ruleVersions: ThreeVersionsOf<DiffableRule>,
+  isRuleCustomized: boolean = false
 ): RuleFieldsDiff => {
-  const commonFieldsDiff = calculateCommonFieldsDiff(ruleVersions);
+  const commonFieldsDiff = calculateCommonFieldsDiff(ruleVersions, isRuleCustomized);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { base_version, current_version, target_version } = ruleVersions;
   const hasBaseVersion = base_version !== MissingVersion;
@@ -78,11 +79,14 @@ export const calculateRuleFieldsDiff = (
     // only for fields of a single rule type, and need to calculate it for all fields
     // of all the rule types we have.
     // TODO: Try to get rid of "as" casting
-    return calculateAllFieldsDiff({
-      base_version: base_version as DiffableAllFields | MissingVersion,
-      current_version: current_version as DiffableAllFields,
-      target_version: target_version as DiffableAllFields,
-    }) as RuleFieldsDiff;
+    return calculateAllFieldsDiff(
+      {
+        base_version: base_version as DiffableAllFields | MissingVersion,
+        current_version: current_version as DiffableAllFields,
+        target_version: target_version as DiffableAllFields,
+      },
+      isRuleCustomized
+    ) as RuleFieldsDiff;
   }
 
   switch (current_version.type) {
@@ -93,7 +97,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'query', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateCustomQueryFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateCustomQueryFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'saved_query': {
@@ -103,7 +110,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'saved_query', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateSavedQueryFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateSavedQueryFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'eql': {
@@ -113,7 +123,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'eql', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateEqlFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateEqlFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'threat_match': {
@@ -123,7 +136,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'threat_match', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateThreatMatchFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateThreatMatchFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'threshold': {
@@ -133,7 +149,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'threshold', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateThresholdFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateThresholdFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'machine_learning': {
@@ -143,7 +162,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'machine_learning', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateMachineLearningFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateMachineLearningFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'new_terms': {
@@ -153,7 +175,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'new_terms', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateNewTermsFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateNewTermsFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     case 'esql': {
@@ -163,7 +188,10 @@ export const calculateRuleFieldsDiff = (
       invariant(target_version.type === 'esql', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
-        ...calculateEsqlFieldsDiff({ base_version, current_version, target_version }),
+        ...calculateEsqlFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
       };
     }
     default: {
@@ -173,9 +201,10 @@ export const calculateRuleFieldsDiff = (
 };
 
 const calculateCommonFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableCommonFields>
+  ruleVersions: ThreeVersionsOf<DiffableCommonFields>,
+  isRuleCustomized: boolean
 ): CommonFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, commonFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, commonFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> = {
@@ -209,9 +238,10 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
 };
 
 const calculateCustomQueryFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableCustomQueryFields>
+  ruleVersions: ThreeVersionsOf<DiffableCustomQueryFields>,
+  isRuleCustomized: boolean
 ): CustomQueryFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, customQueryFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, customQueryFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQueryFields> = {
@@ -222,9 +252,10 @@ const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQue
 };
 
 const calculateSavedQueryFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableSavedQueryFields>
+  ruleVersions: ThreeVersionsOf<DiffableSavedQueryFields>,
+  isRuleCustomized: boolean
 ): SavedQueryFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, savedQueryFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, savedQueryFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
@@ -235,9 +266,10 @@ const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQuery
 };
 
 const calculateEqlFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableEqlFields>
+  ruleVersions: ThreeVersionsOf<DiffableEqlFields>,
+  isRuleCustomized: boolean
 ): EqlFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, eqlFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, eqlFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
@@ -248,9 +280,10 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
 };
 
 const calculateEsqlFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableEsqlFields>
+  ruleVersions: ThreeVersionsOf<DiffableEsqlFields>,
+  isRuleCustomized: boolean
 ): EsqlFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, esqlFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, esqlFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
@@ -260,9 +293,10 @@ const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
 };
 
 const calculateThreatMatchFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableThreatMatchFields>
+  ruleVersions: ThreeVersionsOf<DiffableThreatMatchFields>,
+  isRuleCustomized: boolean
 ): ThreatMatchFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, threatMatchFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, threatMatchFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMatchFields> = {
@@ -277,9 +311,10 @@ const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMat
 };
 
 const calculateThresholdFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableThresholdFields>
+  ruleVersions: ThreeVersionsOf<DiffableThresholdFields>,
+  isRuleCustomized: boolean
 ): ThresholdFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, thresholdFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, thresholdFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
@@ -291,9 +326,14 @@ const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFi
 };
 
 const calculateMachineLearningFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableMachineLearningFields>
+  ruleVersions: ThreeVersionsOf<DiffableMachineLearningFields>,
+  isRuleCustomized: boolean
 ): MachineLearningFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, machineLearningFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(
+    ruleVersions,
+    machineLearningFieldsDiffAlgorithms,
+    isRuleCustomized
+  );
 };
 
 const machineLearningFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableMachineLearningFields> =
@@ -305,9 +345,10 @@ const machineLearningFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableMachi
   };
 
 const calculateNewTermsFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableNewTermsFields>
+  ruleVersions: ThreeVersionsOf<DiffableNewTermsFields>,
+  isRuleCustomized: boolean
 ): NewTermsFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, newTermsFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, newTermsFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
@@ -320,9 +361,10 @@ const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFiel
 };
 
 const calculateAllFieldsDiff = (
-  ruleVersions: ThreeVersionsOf<DiffableAllFields>
+  ruleVersions: ThreeVersionsOf<DiffableAllFields>,
+  isRuleCustomized: boolean
 ): AllFieldsDiff => {
-  return calculateFieldsDiffFor(ruleVersions, allFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, allFieldsDiffAlgorithms, isRuleCustomized);
 };
 
 const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
