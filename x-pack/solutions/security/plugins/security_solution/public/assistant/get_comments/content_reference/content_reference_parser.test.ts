@@ -71,6 +71,121 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
+  it('eats comma separated reference', () => {
+    const file = unified()
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
+      .parse('There is an empty content reference.{reference(123,345)}') as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: '123',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 2,
+          contentReferenceId: '345',
+        }),
+      ])
+    );
+  });
+
+  it('eats comma separated reference on new line', () => {
+    const file = unified().use([
+      [markdown, {}],
+      contentReferenceParser({
+        contentReferences: {
+          '123': { id: '123', type: 'SecurityAlertsPage' },
+          '345': { id: '345', type: 'SecurityAlertsPage' },
+        },
+      }),
+    ]).parse(`There is an empty content reference.{reference(123,
+345)}`) as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: '123',
+          contentReference: { id: '123', type: 'SecurityAlertsPage' },
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 2,
+          contentReferenceId: '345',
+          contentReference: { id: '345', type: 'SecurityAlertsPage' },
+        }),
+      ])
+    );
+  });
+
+  it('eats multiple comma separated reference', () => {
+    const file = unified()
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
+      .parse(
+        'There is an empty{reference(123 , 789)} content reference.{reference(123,345)}'
+      ) as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'There is an empty' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: '123',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 2,
+          contentReferenceId: '789',
+        }),
+        expect.objectContaining({ type: 'text', value: ' content reference.' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: '123',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 3,
+          contentReferenceId: '345',
+        }),
+      ])
+    );
+  });
+
+  it('eats empty comma separated reference with contentReferences as null', () => {
+    const file = unified()
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
+      .parse('There is an empty content reference.{reference( , 123,)}') as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: '',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 2,
+          contentReferenceId: '123',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: '',
+        }),
+      ])
+    );
+  });
+
   it('invalid content reference has correct contentReferenceCount', () => {
     const file = unified()
       .use([
