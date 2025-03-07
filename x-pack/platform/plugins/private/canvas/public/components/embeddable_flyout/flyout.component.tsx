@@ -30,11 +30,7 @@ export interface Props {
   availableEmbeddables: string[];
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
-  onClose,
-}) => {
+export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
   const libraryTypes = useAddFromLibraryTypes();
 
   const canvasOnlyLibraryTypes = useMemo(() => {
