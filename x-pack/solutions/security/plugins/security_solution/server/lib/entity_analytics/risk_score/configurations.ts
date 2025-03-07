@@ -205,7 +205,7 @@ export const getTransformOptions = ({
     unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
   },
   _meta: {
-    version: 3, // When this field is updated we automatically update the transform
+    version: 4, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
     space_id: namespace, // Metadata that identifies the space where the transform is running. Helps in debugging as the original transformid could be hashed if longer than 36 characters
