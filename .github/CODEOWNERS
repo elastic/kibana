@@ -1844,6 +1844,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.search_ai_lake.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.essentials.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.complete.yml @elastic/kibana-core @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
