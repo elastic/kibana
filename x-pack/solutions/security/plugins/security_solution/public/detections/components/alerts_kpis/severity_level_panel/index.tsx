@@ -26,6 +26,7 @@ export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
   runtimeMappings,
   addFilter,
   skip,
+  showCellActions = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${SEVERITY_DONUT_CHART_ID}-${uuid()}`, []);
 
@@ -50,7 +51,12 @@ export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
           titleSize="xs"
           hideSubtitle
         />
-        <SeverityLevelChart data={data} isLoading={isLoading} addFilter={addFilter} />
+        <SeverityLevelChart
+          data={data}
+          isLoading={isLoading}
+          addFilter={addFilter}
+          showCellActions={showCellActions}
+        />
       </EuiPanel>
     </InspectButtonContainer>
   );

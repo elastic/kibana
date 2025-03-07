@@ -53,7 +53,7 @@ export const IntegrationSection = memo(() => {
           <div>{'hello'}</div>
         </>
       ) : (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
           {installedPackages.map((installedPackage) => (
             <EuiFlexItem grow={false}>
               <IntegrationBadge integration={installedPackage} />

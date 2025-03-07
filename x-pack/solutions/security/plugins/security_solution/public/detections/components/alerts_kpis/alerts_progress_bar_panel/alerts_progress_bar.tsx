@@ -99,6 +99,10 @@ export interface AlertsProcessBarProps {
   isLoading: boolean;
   addFilter?: ({ field, value, negate }: AddFilterProps) => void;
   groupBySelection: GroupBySelection;
+  /**
+   * If true, render the last column for cell actions (like filter for, out, add to timeline, copy...)
+   */
+  showCellActions: boolean;
 }
 
 export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
@@ -106,6 +110,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   isLoading,
   addFilter,
   groupBySelection,
+  showCellActions,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
@@ -187,26 +192,28 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                         <EuiFlexItem>
                           <ProgressBarRow item={item} />
                         </EuiFlexItem>
-                        <EuiFlexItem
-                          grow={false}
-                          data-test-subj={`progress-bar-${item.key}-actions`}
-                        >
-                          {item.key !== 'Other' ? (
-                            <SecurityCellActions
-                              mode={CellActionsMode.INLINE}
-                              visibleCellActions={0}
-                              triggerId={SecurityCellActionsTrigger.DEFAULT}
-                              data={{ field: groupBySelection, value: item.key }}
-                              sourcererScopeId={sourcererScopeId}
-                              metadata={{ scopeId: TableId.alertsOnAlertsPage }}
-                              disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
-                              extraActionsIconType="boxesVertical"
-                              extraActionsColor="text"
-                            />
-                          ) : (
-                            <EmptyAction />
-                          )}
-                        </EuiFlexItem>
+                        {showCellActions && (
+                          <EuiFlexItem
+                            grow={false}
+                            data-test-subj={`progress-bar-${item.key}-actions`}
+                          >
+                            {item.key !== 'Other' ? (
+                              <SecurityCellActions
+                                mode={CellActionsMode.INLINE}
+                                visibleCellActions={0}
+                                triggerId={SecurityCellActionsTrigger.DEFAULT}
+                                data={{ field: groupBySelection, value: item.key }}
+                                sourcererScopeId={sourcererScopeId}
+                                metadata={{ scopeId: TableId.alertsOnAlertsPage }}
+                                disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+                                extraActionsIconType="boxesVertical"
+                                extraActionsColor="text"
+                              />
+                            ) : (
+                              <EmptyAction />
+                            )}
+                          </EuiFlexItem>
+                        )}
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />
                     </div>

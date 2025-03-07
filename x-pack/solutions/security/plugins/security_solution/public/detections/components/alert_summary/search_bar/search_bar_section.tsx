@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  installationStatuses,
+  useGetPackagesQuery,
+  useGetSettingsQuery,
+} from '@kbn/fleet-plugin/public';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { useKibana } from '../../../../common/lib/kibana';
 import { SourceFilterButton } from './sources_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { inputsActions } from '../../../../common/store/inputs';
@@ -92,12 +100,47 @@ export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
     [dispatch]
   );
 
+  const { fleet } = useKibana().services;
+  const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
+  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
+    enabled: isAuthorizedToFetchSettings,
+  });
+  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
+  const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
+  const { data: allPackages, isLoading } = useGetPackagesQuery(
+    {
+      prerelease: prereleaseIntegrationsEnabled,
+    },
+    {
+      enabled: shouldFetchPackages,
+    }
+  );
+  const installedPackages: PackageListItem[] = useMemo(
+    () =>
+      (allPackages?.items || []).filter(
+        (pkg) =>
+          pkg.status === installationStatuses.Installed ||
+          pkg.status === installationStatuses.InstallFailed
+      ),
+    [allPackages]
+  );
+  const sources: EuiSelectableOption[] = useMemo(
+    () =>
+      installedPackages.map((relatedIntegration: PackageListItem) => ({
+        label: relatedIntegration.title,
+        checked: 'on',
+      })),
+    [installedPackages]
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="none" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <SourceFilterButton />
-        </EuiFlexItem>
+        {sources && sources.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <SourceFilterButton sources={sources} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <SearchBar
             dateRangeFrom={dateRange.from}

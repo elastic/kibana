@@ -21,10 +21,17 @@ import { updateFiltersArray } from '../utils/filter';
 import { SOURCES_BUTTON } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
+export interface SourceFilterButtonProps {
+  /**
+   *
+   */
+  sources: EuiSelectableOption[];
+}
+
 /**
  *
  */
-export const SourceFilterButton = memo(() => {
+export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
@@ -38,11 +45,7 @@ export const SourceFilterButton = memo(() => {
     prefix: 'filterGroupPopover',
   });
 
-  const [items, setItems] = useState<EuiSelectableOption[]>([
-    { label: 'Splunk', checked: 'on' },
-    { label: 'Google SecOps', checked: 'on' },
-    { label: 'Third options', checked: 'on' },
-  ]);
+  const [items, setItems] = useState<EuiSelectableOption[]>(sources);
 
   const onChange = useCallback(
     (
@@ -87,7 +90,6 @@ export const SourceFilterButton = memo(() => {
         panelPaddingSize="none"
       >
         <EuiSelectable
-          allowExclusions
           searchable
           searchProps={{
             placeholder: 'Filter list',

@@ -21,9 +21,13 @@ import type {
 } from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-service';
+import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
+import { inputsSelectors } from '../../../../common/store';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { KibanaAlertRelatedIntegrationCellRenderer } from '../cell_renderers/kibana_alert_related_integration';
 import { RELATED_INTEGRATION, RULE_NAME, SEVERITY, TIMESTAMP } from '../constants/fields';
-import type { ESQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useTimelineEvents } from '../../../../timelines/containers';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
@@ -88,16 +92,41 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
   const indexNames = dataView.getIndexPattern();
   const { to, from } = useGlobalTime();
 
-  const filterQuery: ESQuery | string = useMemo(
-    () => (groupingFilters.length === 0 ? '' : groupingFilters[groupingFilters.length - 1].query),
-    [groupingFilters]
-  );
+  const {
+    services: {
+      uiSettings,
+      fieldFormats,
+      storage,
+      dataViewFieldEditor,
+      notifications: { toasts: toastsService },
+      theme,
+      data: dataPluginContract,
+    },
+  } = useKibana();
+
+  const filters = groupingFilters.filter((filter) => filter.meta.type !== 'custom');
+
+  const { browserFields } = getDataViewStateFromIndexFields('', dataView.toSpec().fields);
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+
+  const combinedQuery = useMemo(() => {
+    return combineQueries({
+      config: getEsQueryConfig(uiSettings),
+      dataProviders: [],
+      indexPattern: dataView.toSpec(),
+      browserFields,
+      filters,
+      kqlQuery: globalQuery,
+      kqlMode: globalQuery.language,
+    });
+  }, [browserFields, dataView, filters, globalQuery, uiSettings]);
 
   const [loadingState, { events, totalCount }] = useTimelineEvents({
     dataViewId: dataView.id as string,
     endDate: to,
     fields: COLUMN_IDS,
-    filterQuery,
+    filterQuery: combinedQuery?.filterQuery,
     id: 'alert-summary',
     indexNames: [indexNames],
     limit: SAMPLE_SIZE,
@@ -117,17 +146,6 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
 
   const onUpdateRowsPerPage = useCallback((r) => setRowsPerPage(r), []);
 
-  const {
-    services: {
-      uiSettings,
-      fieldFormats,
-      storage,
-      dataViewFieldEditor,
-      notifications: { toasts: toastsService },
-      theme,
-      data: dataPluginContract,
-    },
-  } = useKibana();
   const services = useMemo(
     () => ({
       theme,
