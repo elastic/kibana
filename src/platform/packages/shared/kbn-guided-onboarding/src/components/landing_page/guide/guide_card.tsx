@@ -40,9 +40,8 @@ export const GuideCard = ({
   card,
   guidesState,
   activateGuide,
-  navigateToApp,
+  navigateToUrl,
   activeFilter,
-  onboardingLocator,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -56,28 +55,16 @@ export const GuideCard = ({
     try {
       if (card.guideId) {
         await activateGuide(card.guideId, guideState);
-      } else if (card.locatorParams) {
-        await onboardingLocator?.navigate(card.locatorParams);
-      } else if (card.navigateTo) {
-        await navigateToApp(card.navigateTo.appId, {
-          path: card.navigateTo.path,
-        });
+      } else if (card.getUrl) {
+        const url = card.getUrl();
+        await navigateToUrl(url);
       } else if (card.openEndpointModal) {
         openWiredConnectionDetails();
       }
     } finally {
       setIsLoading(false);
     }
-  }, [
-    activateGuide,
-    card.guideId,
-    card.navigateTo,
-    guideState,
-    navigateToApp,
-    card.openEndpointModal,
-    onboardingLocator,
-    card.locatorParams,
-  ]);
+  }, [activateGuide, guideState, navigateToUrl, card]);
 
   const isHighlighted = activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';

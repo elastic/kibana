@@ -28,7 +28,7 @@ import {
   GuideCards,
   GuideFilters,
   GuideCardConstants,
-  guideCards,
+  getGuideCards,
 } from '@kbn/guided-onboarding/guide';
 import {
   GuideCardsClassic,
@@ -78,7 +78,10 @@ export const GettingStarted = () => {
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
     classicGuide ? useCase ?? 'all' : useCase ?? 'search'
   );
-
+  const guideCards = React.useMemo(
+    () => getGuideCards(application, onboardingLocator),
+    [application, onboardingLocator] // Only recreate when these change
+  );
   const history = useHistory();
 
   useEffect(() => {
@@ -240,11 +243,10 @@ export const GettingStarted = () => {
   ) : (
     <GuideCards
       activateGuide={activateGuide}
-      navigateToApp={application.navigateToApp}
+      navigateToUrl={application.navigateToUrl}
       activeFilter={filter as GuideFilterValues}
       guidesState={guidesState}
       filteredCards={filteredCards}
-      onboardingLocator={onboardingLocator}
     />
   );
 

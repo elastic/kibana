@@ -13,8 +13,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { GuideId, GuideState } from '../../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
@@ -24,10 +22,9 @@ export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
 export interface GuideCardsProps {
   activateGuide: (guideId: GuideId, guideState?: GuideState) => Promise<void>;
-  navigateToApp: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];
-  onboardingLocator?: LocatorPublic<ObservabilityOnboardingLocatorParams>;
   filteredCards?: GuideCardConstants[];
 }
 export const GuideCards = (props: GuideCardsProps) => {
