@@ -174,8 +174,15 @@ export interface Signature {
   returnType: FunctionReturnType;
 }
 
+export enum FunctionDefinitionTypes {
+  AGG = 'agg',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  GROUPING = 'grouping',
+}
+
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'scalar' | 'operator' | 'grouping';
+  type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -187,6 +194,7 @@ export interface FunctionDefinition {
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
+  customParametersSnippet?: string;
 }
 
 export interface CommandSuggestParams<CommandName extends string> {

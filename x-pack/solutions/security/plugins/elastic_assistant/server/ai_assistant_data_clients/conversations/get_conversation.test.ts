@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getConversation } from './get_conversation';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from './types';
 import { authenticatedUser } from '../../__mocks__/user';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

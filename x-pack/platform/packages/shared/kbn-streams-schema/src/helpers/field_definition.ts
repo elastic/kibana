@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { FieldDefinitionConfig } from '../models';
+import { FieldDefinitionConfig, InheritedFieldDefinition, WiredStreamDefinition } from '../models';
 
 // Parameters that we consider first class and provide a curated experience for
 const FIRST_CLASS_PARAMETERS = ['type', 'format'];
@@ -16,4 +16,13 @@ export const getAdvancedParameters = (fieldName: string, fieldConfig: FieldDefin
   // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
   const additionalOmissions = fieldName === '@timestamp' ? ['ignore_malformed'] : [];
   return omit(fieldConfig, FIRST_CLASS_PARAMETERS.concat(additionalOmissions));
+};
+
+export const getInheritedFieldsFromAncestors = (ancestors: WiredStreamDefinition[]) => {
+  return ancestors.reduce<InheritedFieldDefinition>((acc, def) => {
+    Object.entries(def.ingest.wired.fields).forEach(([key, fieldDef]) => {
+      acc[key] = { ...fieldDef, from: def.name };
+    });
+    return acc;
+  }, {});
 };

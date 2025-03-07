@@ -71,7 +71,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
-  const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
+  const navIcon = solutionNavIcon ?? 'logoElasticsearch';
 
   useLayoutEffect(() => {
     if (useEndpointHeaderActions) {

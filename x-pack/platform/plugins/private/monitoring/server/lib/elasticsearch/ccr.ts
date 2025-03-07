@@ -33,18 +33,16 @@ export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
     index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric: metricFields,
-      }),
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-    },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric: metricFields,
+    }),
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     filter_path: [
       'hits.hits._source.stack_stats.xpack.ccr',
       'hits.hits._source.elasticsearch.cluster.stats.stack.xpack.ccr',

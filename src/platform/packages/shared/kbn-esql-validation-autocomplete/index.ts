@@ -68,7 +68,7 @@ export {
 } from './src/shared/helpers';
 export { ENRICH_MODES } from './src/definitions/settings';
 export { timeUnits } from './src/definitions/literals';
-export { aggregationFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
+export { aggFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
 export { getFunctionSignatures } from './src/definitions/helpers';
 
 export {

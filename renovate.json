@@ -123,8 +123,6 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
-        "@smithy/protocol-http",
-        "@smithy/signature-v4",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -3613,13 +3611,13 @@
       "enabled": true
     },
     {
-      "groupName": "Profiling",
+      "groupName": "Peggy",
       "matchDepNames": [
-        "peggy",
-        "@types/dagre"
+        "peggy"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:kibana-visualizations",
+        "team:kibana-data-discovery"
       ],
       "matchBaseBranches": [
         "main"
@@ -3737,67 +3735,15 @@
         "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
-        "@langchain/openai"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@google/generative-ai",
-      "matchDepNames": [
-        "@google/generative-ai"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@smithy",
-      "matchDepNames": [
+        "@langchain/openai",
+        "@google/generative-ai",
         "@smithy/eventstream-codec",
         "@smithy/middleware-stack",
-        "@smithy/node-http-handler",
-        "@smithy/util-utf8"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@aws-sdk/client-bedrock-runtime",
-      "matchDepNames": [
-        "@aws-sdk/client-bedrock-runtime"
+        "@smithy/util-utf8",
+        "@aws-sdk/client-bedrock-agent-runtime",
+        "@aws-sdk/client-bedrock-runtime",
+        "@aws-sdk/client-kendra",
+        "@aws-sdk/credential-provider-node"
       ],
       "reviewers": [
         "team:security-generative-ai"
@@ -4003,11 +3949,30 @@
       "enabled": true
     },
     {
-      "groupName": "XState",
+      "groupName": "XState4",
       "matchDepNames": [
         "xstate",
+        "@xstate/react"
+      ],
+      "reviewers": [
+        "team:obs-ux-logs-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ux-logs",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "separateMajorMinor": true,
+      "enabled": true
+    },
+    {
+      "groupName": "XState5",
+      "matchDepNames": [
         "xstate5",
-        "@xstate/react",
         "@xstate5/react"
       ],
       "reviewers": [
@@ -4017,11 +3982,12 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
+      "separateMajorMinor": true,
       "enabled": true
     },
     {
@@ -4036,7 +4002,7 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],

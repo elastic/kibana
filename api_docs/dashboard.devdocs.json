@@ -987,15 +987,7 @@
             "section": "def-common.DashboardPanelState",
             "text": "DashboardPanelState"
           },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          ">; hasOverlays$: ",
+          "<object>; hasOverlays$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1589,15 +1581,7 @@
           },
           ", removeLegacyVersion?: boolean | undefined) => { panelRefName?: string | undefined; id?: string | undefined; title?: string | undefined; type: string; gridData: ",
           "GridData",
-          "; panelIndex: string; panelConfig: _.Omit<Partial<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          "> & { id: string; }, \"id\" | \"title\" | \"savedObjectId\">; version?: string | undefined; }[]"
+          "; panelIndex: string; panelConfig: object; version?: string | undefined; }[]"
         ],
         "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
         "deprecated": false,
@@ -2196,7 +2180,7 @@
             "id": "def-common.DashboardPanelMap.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: DashboardPanelState<SavedObjectEmbeddableInput>",
+            "label": "[key: string]: DashboardPanelState<object>",
             "description": [],
             "signature": [
               "[key: string]:  ",
@@ -2207,15 +2191,7 @@
                 "section": "def-common.DashboardPanelState",
                 "text": "DashboardPanelState"
               },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.SavedObjectEmbeddableInput",
-                "text": "SavedObjectEmbeddableInput"
-              },
-              ">"
+              "<object>"
             ],
             "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
@@ -2239,20 +2215,37 @@
             "section": "def-common.DashboardPanelState",
             "text": "DashboardPanelState"
           },
-          "<TEmbeddableInput> extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.PanelState",
-            "text": "PanelState"
-          },
-          "<TEmbeddableInput>"
+          "<PanelState>"
         ],
         "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.DashboardPanelState.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.DashboardPanelState.explicitInput",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "explicitInput",
+            "description": [],
+            "signature": [
+              "PanelState"
+            ],
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "dashboard",
             "id": "def-common.DashboardPanelState.gridData",

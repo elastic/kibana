@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS, useAssistantContext } from '@kbn/elastic-assistant';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 
 import React from 'react';
 
@@ -32,10 +32,6 @@ const LoadingMessagesComponent: React.FC<Props> = ({
   localStorageAttackDiscoveryMaxAlerts,
   start,
 }) => {
-  const {
-    assistantFeatures: { attackDiscoveryAlertFiltering },
-  } = useAssistantContext();
-
   const { theme } = useKibana().services;
   const dateFormat = useDateFormat();
 
@@ -55,13 +51,11 @@ const LoadingMessagesComponent: React.FC<Props> = ({
     localStorageAttackDiscoveryMaxAlerts,
   });
 
-  const loadingMessage = attackDiscoveryAlertFiltering
-    ? getLoadingMessage({
-        alertsCount,
-        end: formattedEnd,
-        start: formattedStart,
-      })
-    : getLoadingMessage({ alertsCount }); // <-- NO time range, feature flag is off
+  const loadingMessage = getLoadingMessage({
+    alertsCount,
+    end: formattedEnd,
+    start: formattedStart,
+  });
 
   const isDarkMode = theme.getTheme().darkMode === true;
 

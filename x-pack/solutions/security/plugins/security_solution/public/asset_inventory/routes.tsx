@@ -16,6 +16,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
 import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
+import { ASSET_INVENTORY_INDEX_PATTERN } from './constants';
 
 const AllAssetsLazy = lazy(() => import('./pages/all_assets'));
 
@@ -29,8 +30,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_inventory-*';
 
 export const AssetInventoryRoutes = () => {
   const dataViewQuery = useDataView(ASSET_INVENTORY_INDEX_PATTERN);
@@ -49,7 +48,7 @@ export const AssetInventoryRoutes = () => {
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllAssetsLazy rows={[]} isLoading={false} loadMore={() => {}} />
+                <AllAssetsLazy />
               </Suspense>
             </SecuritySolutionPageWrapper>
           </DataViewContext.Provider>

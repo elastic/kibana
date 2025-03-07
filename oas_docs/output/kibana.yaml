@@ -12083,16 +12083,41 @@ paths:
       operationId: GetEndpointMetadataList
       parameters:
         - in: query
-          name: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_PageSize'
+        - in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_Kuery'
+        - in: query
+          name: hostStatuses
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_ListRequestQuery'
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_HostStatuses'
+        - in: query
+          name: sortField
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_SortField'
+        - in: query
+          name: sortDirection
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_MetadataListResponse'
           description: OK
       summary: Get a metadata list
       tags:
@@ -12105,13 +12130,14 @@ paths:
           name: id
           required: true
           schema:
+            example: ed518850-681a-4d60-bb98-e22640cae2a8
             type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointMetadataResponse'
           description: OK
       summary: Get metadata
       tags:
@@ -12250,6 +12276,8 @@ paths:
                   succeeded:
                     type: boolean
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize the Entity Store
       tags:
         - Security Entity Analytics API
@@ -12383,6 +12411,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
@@ -20008,6 +20038,22 @@ paths:
                                   proxy_headers: {}
                                   proxy_url:
                                     type: string
+                                  secrets:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      ssl:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   ssl:
                                     additionalProperties: false
                                     type: object
@@ -23897,20 +23943,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -24158,20 +24206,22 @@ paths:
                                     originId:
                                       type: string
                                     type:
-                                      enum:
-                                        - dashboard
-                                        - lens
-                                        - visualization
-                                        - search
-                                        - index-pattern
-                                        - map
-                                        - ml-module
-                                        - security-rule
-                                        - csp-rule-template
-                                        - osquery-pack-asset
-                                        - osquery-saved-query
-                                        - tag
-                                      type: string
+                                      anyOf:
+                                        - enum:
+                                            - dashboard
+                                            - lens
+                                            - visualization
+                                            - search
+                                            - index-pattern
+                                            - map
+                                            - ml-module
+                                            - security-rule
+                                            - csp-rule-template
+                                            - osquery-pack-asset
+                                            - osquery-saved-query
+                                            - tag
+                                          type: string
+                                        - type: string
                                   required:
                                     - id
                                     - type
@@ -24253,20 +24303,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -24393,11 +24445,17 @@ paths:
                         title:
                           type: string
                         type:
-                          enum:
-                            - integration
-                            - input
-                            - content
-                          type: string
+                          anyOf:
+                            - enum:
+                                - integration
+                              type: string
+                            - enum:
+                                - input
+                              type: string
+                            - enum:
+                                - content
+                              type: string
+                            - type: string
                         vars:
                           items:
                             additionalProperties: {}
@@ -24490,20 +24548,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -24633,20 +24693,22 @@ paths:
                                           originId:
                                             type: string
                                           type:
-                                            enum:
-                                              - dashboard
-                                              - lens
-                                              - visualization
-                                              - search
-                                              - index-pattern
-                                              - map
-                                              - ml-module
-                                              - security-rule
-                                              - csp-rule-template
-                                              - osquery-pack-asset
-                                              - osquery-saved-query
-                                              - tag
-                                            type: string
+                                            anyOf:
+                                              - enum:
+                                                  - dashboard
+                                                  - lens
+                                                  - visualization
+                                                  - search
+                                                  - index-pattern
+                                                  - map
+                                                  - ml-module
+                                                  - security-rule
+                                                  - csp-rule-template
+                                                  - osquery-pack-asset
+                                                  - osquery-saved-query
+                                                  - tag
+                                                type: string
+                                              - type: string
                                         required:
                                           - id
                                           - type
@@ -24778,20 +24840,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -25006,20 +25070,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -25101,20 +25167,22 @@ paths:
                                 originId:
                                   type: string
                                 type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
                               required:
                                 - id
                                 - type
@@ -25267,11 +25335,17 @@ paths:
                       title:
                         type: string
                       type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
                       vars:
                         items:
                           additionalProperties: {}
@@ -25394,20 +25468,22 @@ paths:
                             originId:
                               type: string
                             type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
                           required:
                             - id
                             - type
@@ -25621,20 +25697,22 @@ paths:
                                   originId:
                                     type: string
                                   type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
                                 required:
                                   - id
                                   - type
@@ -25716,20 +25794,22 @@ paths:
                                 originId:
                                   type: string
                                 type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
                               required:
                                 - id
                                 - type
@@ -25882,11 +25962,17 @@ paths:
                       title:
                         type: string
                       type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
                       vars:
                         items:
                           additionalProperties: {}
@@ -27196,6 +27282,24 @@ paths:
                             proxy_id:
                               nullable: true
                               type: string
+                            secrets:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             shipper:
                               additionalProperties: true
                               nullable: true
@@ -27347,6 +27451,20 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             service_token:
                               nullable: true
                               type: string
@@ -27942,6 +28060,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -28093,6 +28229,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -28649,6 +28799,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -28800,6 +28968,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -29456,6 +29638,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -29607,6 +29807,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -30195,6 +30409,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -30340,6 +30572,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -30883,6 +31129,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -31034,6 +31298,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -39040,16 +39318,36 @@ paths:
       operationId: OsqueryFindLiveQueries
       parameters:
         - in: query
-          name: query
-          required: true
+          name: kuery
+          required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryRequestQuery'
+            $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryResponse'
           description: OK
       summary: Get live queries
       tags:
@@ -39068,7 +39366,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_CreateLiveQueryResponse'
           description: OK
       summary: Create a live query
       tags:
@@ -39082,18 +39380,15 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_Id'
-        - in: query
-          name: query
-          schema:
-            additionalProperties: true
-            type: object
+            description: The ID of the live query result you want to retrieve.
+            example: 3c42c847-eb30-4452-80e0-728584042334
+            type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryDetailsResponse'
           description: OK
       summary: Get live query details
       tags:
@@ -39107,23 +39402,47 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_Id'
+            description: The ID of the live query result you want to retrieve.
+            example: 3c42c847-eb30-4452-80e0-728584042334
+            type: string
         - in: path
           name: actionId
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_Id'
+            description: The ID of the query action that generated the live query results.
+            example: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            type: string
         - in: query
-          name: query
-          required: true
+          name: kuery
+          required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsRequestQuery'
+            $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
+        - in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsResponse'
           description: OK
       summary: Get live query results
       tags:
@@ -39134,16 +39453,31 @@ paths:
       operationId: OsqueryFindPacks
       parameters:
         - in: query
-          name: query
-          required: true
+          name: page
+          required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_FindPacksRequestQuery'
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_FindPacksResponse'
           description: OK
       summary: Get packs
       tags:
@@ -39162,7 +39496,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_CreatePacksResponse'
           description: OK
       summary: Create a pack
       tags:
@@ -39182,7 +39516,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                example: {}
+                type: object
+                properties: {}
           description: OK
       summary: Delete a pack
       tags:
@@ -39201,7 +39537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_FindPackResponse'
           description: OK
       summary: Get pack details
       tags:
@@ -39229,7 +39565,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_UpdatePacksResponse'
           description: OK
       summary: Update a pack
       tags:
@@ -39240,16 +39576,31 @@ paths:
       operationId: OsqueryFindSavedQueries
       parameters:
         - in: query
-          name: query
-          required: true
+          name: page
+          required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_FindSavedQueryRequestQuery'
+            $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
+        - in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_FindSavedQueryResponse'
           description: OK
       summary: Get saved queries
       tags:
@@ -39268,7 +39619,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_CreateSavedQueryResponse'
           description: OK
       summary: Create a saved query
       tags:
@@ -39307,7 +39658,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_FindSavedQueryDetailResponse'
           description: OK
       summary: Get saved query details
       tags:
@@ -39335,7 +39686,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Osquery_API_DefaultSuccessResponse'
+                $ref: '#/components/schemas/Security_Osquery_API_UpdateSavedQueryResponse'
           description: OK
       summary: Update a saved query
       tags:
@@ -40913,7 +41264,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps'
         required: true
       responses:
         '200':
@@ -51248,6 +51599,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -51262,6 +51616,7 @@ components:
           required:
             - name
             - namespace
+            - global
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryResponseFields'
@@ -51269,6 +51624,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -51296,8 +51654,7 @@ components:
       type: object
       properties:
         kbResource:
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResource'
         source:
           description: Source document name or filepath
           type: string
@@ -51322,6 +51679,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
@@ -51402,6 +51762,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -51416,6 +51779,7 @@ components:
           required:
             - name
             - namespace
+            - global
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryResponseFields'
@@ -51423,6 +51787,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -51482,6 +51849,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
@@ -51661,6 +52031,18 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
         propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
+      anyOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
+      discriminator:
+        propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseResource:
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+      enum:
+        - security_labs
+        - user
+      type: string
     Security_AI_Assistant_API_KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
       type: object
@@ -58217,6 +58599,92 @@ components:
         type: string
       minItems: 1
       type: array
+    Security_Endpoint_Management_API_EndpointMetadataResponse:
+      example:
+        host_status: healthy
+        last_checkin: '2023-07-04T15:48:57.360Z'
+        metadata:
+          '@timestamp': '2023-07-04T15:48:57.3609346Z'
+          agent:
+            build:
+              original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
+            id: abb8a826-6812-448c-a571-6d8269b51449
+            type: endpoint
+            version: 7.16.0
+          data_stream:
+            dataset: endpoint.metadata
+            namespace: default
+            type: metrics
+          ecs:
+            version: 1.11.0
+          elastic:
+            agent:
+              id: abb8a826-6812-448c-a571-6d8269b51449
+          Endpoint:
+            capabilities:
+              - isolation
+            configuration:
+              isolation: false
+            policy:
+              applied:
+                endpoint_policy_version: '2'
+                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                name: test
+                status: success
+                version: '3'
+            state:
+              isolation: false
+            status: enrolled
+          event:
+            action: endpoint_metadata
+            agent_id_status: verified
+            category:
+              - host
+            created: '2023-07-04T15:48:57.3609346Z'
+            dataset: endpoint.metadata
+            id: MNtRc++KoKHXXwlj+++++OhZ
+            ingested: '2023-07-04T15:48:58Z'
+            kind: metric
+            module: endpoint
+            sequence: 43757
+            type:
+              - info
+          host:
+            architecture: x86_64
+            hostname: WinDev2104Eval
+            id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
+            ip:
+              - 10.0.2.15
+              - fe80::21a6:63d3:d70e:e3ad
+              - 127.0.0.1
+              - '::1'
+            mac:
+              - 08:00:27:b1:1d:5a
+            name: WinDev2104Eval
+            os:
+              Ext:
+                variant: Windows 10 Enterprise Evaluation
+              family: windows
+              full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+              kernel: 20H2 (10.0.19042.906)
+              name: Windows
+              platform: windows
+              type: windows
+              version: 20H2 (10.0.19042.906)
+          message: Endpoint metadata
+          policy_info:
+            agent:
+              applied:
+                id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                revision: 3
+              configured:
+                id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                revision: 3
+            endpoint:
+              id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+              revision: 2
+      type: object
+      properties: {}
     Security_Endpoint_Management_API_EntityId:
       type: object
       properties:
@@ -58344,6 +58812,20 @@ components:
           type: integer
       required:
         - hostPath
+    Security_Endpoint_Management_API_HostStatuses:
+      description: A set of agent health statuses to filter by.
+      example:
+        - healthy
+        - updating
+      items:
+        enum:
+          - healthy
+          - offline
+          - updating
+          - inactive
+          - unenrolled
+        type: string
+      type: array
     Security_Endpoint_Management_API_IsolateRouteRequestBody:
       type: object
       properties:
@@ -58393,56 +58875,195 @@ components:
                       type: string
           required:
             - parameters
-    Security_Endpoint_Management_API_ListRequestQuery:
+    Security_Endpoint_Management_API_Kuery:
+      description: A KQL string.
+      example: 'united.endpoint.host.os.name : ''Windows'''
+      type: string
+    Security_Endpoint_Management_API_MetadataListResponse:
+      example:
+        data:
+          - host_status: healthy
+            last_checkin: '2023-07-04T15:47:57.432Z'
+            metadata:
+              '@timestamp': '2023-07-04T15:47:57.432173535Z'
+              agent:
+                build:
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch: 7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
+                id: 285297c6-3bff-4b83-9a07-f3e749801123
+                type: endpoint
+                version: 7.16.0
+              data_stream:
+                dataset: endpoint.metadata
+                namespace: default
+                type: metrics
+              ecs:
+                version: 1.11.0
+              elastic:
+                agent:
+                  id: 285297c6-3bff-4b83-9a07-f3e749801123
+              Endpoint:
+                capabilities:
+                  - isolation
+                configuration:
+                  isolation: false
+                policy:
+                  applied:
+                    endpoint_policy_version: '2'
+                    id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                    name: test
+                    status: success
+                    version: '3'
+                state:
+                  isolation: false
+                status: enrolled
+              event:
+                action: endpoint_metadata
+                agent_id_status: verified
+                category:
+                  - host
+                created: '2023-07-04T15:47:57.432173535Z'
+                dataset: endpoint.metadata
+                id: MNtSXK/SkhEBnmgt++++++7S
+                ingested: '2023-07-04T15:47:58Z'
+                kind: metric
+                module: endpoint
+                sequence: 400
+                type:
+                  - info
+              host:
+                architecture: x86_64
+                hostname: david-Xubuntu
+                id: 0cfead88e2024bd8a27476352b5ab264
+                ip:
+                  - 127.0.0.1
+                  - '::1'
+                  - 10.0.2.15
+                  - fe80::2ac7:8e15:b957:2fa1
+                mac:
+                  - 08:00:27:e6:78:8b
+                name: david-Xubuntu
+                os:
+                  Ext:
+                    variant: Ubuntu
+                  family: ubuntu
+                  full: Ubuntu 20.04.2
+                  kernel: '5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021'
+                  name: Linux
+                  platform: ubuntu
+                  type: linux
+                  version: 20.04.2
+              message: Endpoint metadata
+            policy_info:
+              agent:
+                applied:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 0
+                configured:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 3
+              endpoint:
+                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                revision: 2
+          - host_status: healthy
+            last_checkin: '2023-07-04T15:44:31.491Z'
+            metadata:
+              '@timestamp': '2023-07-04T15:44:31.4917849Z'
+              agent:
+                build:
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
+                id: abb8a826-6812-448c-a571-6d8269b51449
+                type: endpoint
+                version: 7.16.0
+              data_stream:
+                dataset: endpoint.metadata
+                namespace: default
+                type: metrics
+              ecs:
+                version: 1.11.0
+              elastic:
+                agent:
+                  id: abb8a826-6812-448c-a571-6d8269b51449
+              Endpoint:
+                capabilities:
+                  - isolation
+                configuration:
+                  isolation: false
+                policy:
+                  applied:
+                    endpoint_policy_version: '2'
+                    id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                    name: test
+                    status: success
+                    version: '3'
+                state:
+                  isolation: false
+                status: enrolled
+              event:
+                action: endpoint_metadata
+                agent_id_status: verified
+                category:
+                  - host
+                created: '2023-07-04T15:44:31.4917849Z'
+                dataset: endpoint.metadata
+                id: MNtRc++KoKHXXwlj+++++/N9
+                ingested: '2023-07-04T15:44:33Z'
+                kind: metric
+                module: endpoint
+                sequence: 5159
+                type:
+                  - info
+              host:
+                architecture: x86_64
+                hostname: WinDev2104Eval
+                id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
+                ip:
+                  - 10.0.2.15
+                  - fe80::21a6:63d3:d70e:e3ad
+                  - 127.0.0.1
+                  - '::1'
+                mac:
+                  - 08:00:27:b1:1d:5a
+                name: WinDev2104Eval
+                os:
+                  Ext:
+                    variant: Windows 10 Enterprise Evaluation
+                  family: windows
+                  full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+                  kernel: 20H2 (10.0.19042.906)
+                  name: Windows
+                  platform: windows
+                  type: windows
+                  version: 20H2 (10.0.19042.906)
+              message: Endpoint metadata
+            policy_info:
+              agent:
+                applied:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 0
+                configured:
+                  id: ed7e3720-4bad-11ec-a2a8-fb22e62a5753
+                  revision: 3
+              endpoint:
+                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                revision: 2
+        page: 0
+        pageSize: 10
+        sortDirection: desc
+        sortField: enrolled_at
+        total: 2
       type: object
-      properties:
-        hostStatuses:
-          items:
-            enum:
-              - healthy
-              - offline
-              - updating
-              - inactive
-              - unenrolled
-            type: string
-          type: array
-        kuery:
-          nullable: true
-          type: string
-        page:
-          default: 0
-          description: Page number
-          minimum: 0
-          type: integer
-        pageSize:
-          default: 10
-          description: Number of items per page
-          maximum: 10000
-          minimum: 1
-          type: integer
-        sortDirection:
-          enum:
-            - asc
-            - desc
-          nullable: true
-          type: string
-        sortField:
-          enum:
-            - enrolled_at
-            - metadata.host.hostname
-            - host_status
-            - metadata.Endpoint.policy.applied.name
-            - metadata.Endpoint.policy.applied.status
-            - metadata.host.os.name
-            - metadata.host.ip
-            - metadata.agent.version
-            - last_checkin
-          type: string
-      required:
-        - hostStatuses
+      properties: {}
     Security_Endpoint_Management_API_Page:
       default: 1
       description: Page number
+      example: 1
+      minimum: 1
+      type: integer
+    Security_Endpoint_Management_API_PageSize:
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 100
       minimum: 1
       type: integer
     Security_Endpoint_Management_API_Parameters:
@@ -58542,6 +59163,27 @@ components:
                 - path
           required:
             - parameters
+    Security_Endpoint_Management_API_SortDirection:
+      description: Determines the sort order.
+      enum:
+        - asc
+        - desc
+      example: desc
+      type: string
+    Security_Endpoint_Management_API_SortField:
+      description: Determines which field is used to sort the results.
+      enum:
+        - enrolled_at
+        - metadata.host.hostname
+        - host_status
+        - metadata.Endpoint.policy.applied.name
+        - metadata.Endpoint.policy.applied.status
+        - metadata.host.os.name
+        - metadata.host.ip
+        - metadata.agent.version
+        - last_checkin
+      example: enrolled_at
+      type: string
     Security_Endpoint_Management_API_StartDate:
       description: Start date
       type: string
@@ -58877,6 +59519,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Metadata'
         resource:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
       required:
@@ -59129,6 +59773,8 @@ components:
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Security_Entity_Analytics_API_Metadata:
+      $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -59243,6 +59889,59 @@ components:
       required:
         - status_code
         - message
+    Security_Entity_Analytics_API_TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
@@ -60190,6 +60889,7 @@ components:
         - status_code
         - message
     Security_Osquery_API_ArrayQueries:
+      description: An array of queries to run.
       items:
         $ref: '#/components/schemas/Security_Osquery_API_ArrayQueriesItem'
       type: array
@@ -60199,7 +60899,7 @@ components:
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
-          $ref: '#/components/schemas/Security_Osquery_API_Id'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
@@ -60211,37 +60911,51 @@ components:
         version:
           $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CreateLiveQueryRequestBody:
+      example:
+        agent_all: true
+        ecs_mapping:
+          host.uptime:
+            field: total_seconds
+        query: select * from uptime;
       type: object
       properties:
         agent_all:
+          description: When `true`, the query runs on all agents.
           type: boolean
         agent_ids:
+          description: A list of agent IDs to run the query on.
           items:
             type: string
           type: array
         agent_platforms:
+          description: A list of agent platforms to run the query on.
           items:
             type: string
           type: array
         agent_policy_ids:
+          description: A list of agent policy IDs to run the query on.
           items:
             type: string
           type: array
         alert_ids:
+          description: A list of alert IDs associated with the live query.
           items:
             type: string
           type: array
         case_ids:
+          description: A list of case IDs associated with the live query.
           items:
             type: string
           type: array
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         event_ids:
+          description: A list of event IDs associated with the live query.
           items:
             type: string
           type: array
         metadata:
+          description: Custom metadata object associated with the live query.
           nullable: true
           type: object
         pack_id:
@@ -60252,11 +60966,64 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         saved_query_id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+    Security_Osquery_API_CreateLiveQueryResponse:
+      example:
+        data:
+          '@timestamp': '2022-07-26T09:59:32.220Z'
+          action_id: 3c42c847-eb30-4452-80e0-728584042334
+          agent_all: true
+          agent_ids: []
+          agent_platforms: []
+          agent_policy_ids: []
+          agents:
+            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          expiration: '2022-07-26T10:04:32.220Z'
+          input_type: osquery
+          metadata:
+            execution_context:
+              name: osquery
+              url: /app/osquery/live_queries/new
+          queries:
+            - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+              agents:
+                - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+              query: select * from uptime;
+              timeout: 120
+          type: INPUT_ACTION
+          user_id: elastic
+      type: object
+      properties: {}
     Security_Osquery_API_CreatePacksRequestBody:
+      example:
+        description: My pack
+        enabled: true
+        name: my_pack
+        policy_ids:
+          - my_policy_id
+          - fleet-server-policy
+        queries:
+          my_query:
+            ecs_mapping:
+              client.port:
+                field: port
+              tags:
+                value:
+                  - tag1
+                  - tag2
+            interval: 60
+            query: SELECT * FROM listening_ports;
+            timeout: 120
+        shards:
+          fleet-server-policy: 58
+          my_policy_id: 35
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_DescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         name:
@@ -60267,11 +61034,50 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
+    Security_Osquery_API_CreatePacksResponse:
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: true
+          name: my_pack
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards:
+            - key: 47638692-7c4c-4053-aa3e-7186f28df349
+              value: 35
+            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+              value: 58
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+      type: object
+      properties: {}
     Security_Osquery_API_CreateSavedQueryRequestBody:
+      example:
+        description: Saved query description
+        ecs_mapping:
+          host.uptime:
+            field: total_seconds
+        id: saved_query_id
+        interval: '60'
+        platform: linux,darwin
+        query: select * from uptime;
+        timeout: 120
+        version: 2.8.0
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_DescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
@@ -60279,7 +61085,7 @@ components:
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_DescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
@@ -60288,24 +61094,32 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_CreateSavedQueryResponse:
+      example:
+        data: {}
+      type: object
+      properties: {}
     Security_Osquery_API_DefaultSuccessResponse:
       type: object
       properties: {}
-    Security_Osquery_API_Description:
-      type: string
-    Security_Osquery_API_DescriptionOrUndefined:
-      $ref: '#/components/schemas/Security_Osquery_API_Description'
-      nullable: true
     Security_Osquery_API_ECSMapping:
       additionalProperties:
         $ref: '#/components/schemas/Security_Osquery_API_ECSMappingItem'
+      description: Map osquery results columns or static values to Elastic Common Schema (ECS) fields
+      example:
+        host.uptime:
+          field: total_seconds
       type: object
     Security_Osquery_API_ECSMappingItem:
       type: object
       properties:
         field:
+          description: The ECS field to map to.
+          example: host.uptime
           type: string
         value:
+          description: The value to map to the ECS field.
+          example: total_seconds
           oneOf:
             - type: string
             - items:
@@ -60315,71 +61129,197 @@ components:
       $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
       nullable: true
     Security_Osquery_API_Enabled:
+      description: Enables the pack.
+      example: true
       type: boolean
     Security_Osquery_API_EnabledOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Enabled'
       nullable: true
-    Security_Osquery_API_FindLiveQueryRequestQuery:
+    Security_Osquery_API_FindLiveQueryDetailsResponse:
+      example:
+        data:
+          '@timestamp': '2022-07-26T09:59:32.220Z'
+          action_id: 3c42c847-eb30-4452-80e0-728584042334
+          agents:
+            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          expiration: '2022-07-26T10:04:32.220Z'
+          queries:
+            - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+              agents:
+                - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+              docs: 0
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              failed: 1
+              id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+              pending: 0
+              query: select * from uptime;
+              responded: 1
+              saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+              status: completed
+              successful: 0
+          status: completed
+          user_id: elastic
       type: object
-      properties:
-        kuery:
-          $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
-        page:
-          $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
-        pageSize:
-          $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
-        sort:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
-        sortOrder:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
-    Security_Osquery_API_FindPacksRequestQuery:
+      properties: {}
+    Security_Osquery_API_FindLiveQueryResponse:
+      example:
+        data:
+          items:
+            - fields:
+                '@timestamp': '2023-10-31T00:00:00Z'
+                action_id: 3c42c847-eb30-4452-80e0-728584042334
+                agents:
+                  - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                expiration: '2023-10-31T00:00:00Z'
+                queries:
+                  - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                    agents:
+                      - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                    ecs_mapping:
+                      host.uptime:
+                        field: total_seconds
+                    id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+                    query: select * from uptime;
+                    saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                user_id: elastic
       type: object
-      properties:
-        page:
-          $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
-        pageSize:
-          $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
-        sort:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
-        sortOrder:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
-    Security_Osquery_API_FindSavedQueryRequestQuery:
+      properties: {}
+    Security_Osquery_API_FindPackResponse:
+      example:
+        data:
+          created_at: '2022-07-25T19:41:10.263Z'
+          created_by: elastic
+          description: ''
+          enabled: true
+          id: 3c42c847-eb30-4452-80e0-728584042334
+          name: test_pack
+          namespaces:
+            - default
+          policy_ids: []
+          queries:
+            uptime:
+              ecs_mapping:
+                message:
+                  field: days
+              interval: 3600
+              query: select * from uptime
+          read_only: false
+          type: osquery-pack
+          updated_at: '2022-07-25T20:12:01.455Z'
+          updated_by: elastic
       type: object
-      properties:
-        page:
-          $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
-        pageSize:
-          $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
-        sort:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
-        sortOrder:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
-    Security_Osquery_API_GetLiveQueryResultsRequestQuery:
+      properties: {}
+    Security_Osquery_API_FindPacksResponse:
+      example:
+        data:
+          - attributes:
+              created_at: '2023-10-31T00:00:00Z'
+              created_by: elastic
+              description: My pack description
+              enabled: true
+              name: My Pack
+              queries:
+                - ecs_mapping:
+                    - host.uptime:
+                        field: total_seconds
+                  id: uptime
+                  interval: '3600'
+                  query: select * from uptime;
+              updated_at: '2023-10-31T00:00:00Z'
+              updated_by: elastic
+            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            namespaces:
+              - default
+            type: osquery-pack
+        page: 1
+        pageSize: 10
+        policy_ids: []
+        total: 1
       type: object
-      properties:
-        kuery:
-          $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
-        page:
-          $ref: '#/components/schemas/Security_Osquery_API_PageOrUndefined'
-        pageSize:
-          $ref: '#/components/schemas/Security_Osquery_API_PageSizeOrUndefined'
-        sort:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
-        sortOrder:
-          $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
-    Security_Osquery_API_Id:
-      type: string
+      properties: {}
+    Security_Osquery_API_FindSavedQueryDetailResponse:
+      example:
+        data:
+          attributes:
+            created_at: '2022-07-26T09:28:08.597Z'
+            created_by: elastic
+            description: Saved query description
+            ecs_mapping:
+              host.uptime:
+                field: total_seconds
+            id: saved_query_id
+            interval: '60'
+            platform: linux,darwin
+            prebuilt: false
+            query: select * from uptime;
+            updated_at: '2022-07-26T09:28:08.597Z'
+            updated_by: elastic
+            version: 2.8.0
+          coreMigrationVersion: 8.4.0
+          id: 3c42c847-eb30-4452-80e0-728584042334
+          namespaces:
+            - default
+          references: []
+          type: osquery-saved-query
+          updated_at: '2022-07-26T09:28:08.600Z'
+          version: WzQzMTcsMV0=
+      type: object
+      properties: {}
+    Security_Osquery_API_FindSavedQueryResponse:
+      example:
+        data:
+          - attributes:
+              created_at: '2022-07-26T09:28:08.597Z'
+              created_by: elastic
+              description: Saved query description
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              id: saved_query_id
+              interval: '60'
+              platform: linux,darwin
+              prebuilt: false
+              query: select * from uptime;
+              updated_at: '2022-07-26T09:28:08.597Z'
+              updated_by: elastic
+              version: 2.8.0
+            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            namespaces:
+              - default
+            type: osquery-saved-query
+        page: 1
+        per_page: 100
+        total: 11
+      type: object
+      properties: {}
+    Security_Osquery_API_GetLiveQueryResultsResponse:
+      description: The response for getting live query results.
+      example:
+        data:
+          edges:
+            - {}
+            - {}
+          total: 2
+      type: object
+      properties: {}
     Security_Osquery_API_Interval:
+      description: An interval, in seconds, on which to run the query.
+      example: '60'
       type: string
     Security_Osquery_API_IntervalOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Interval'
       nullable: true
     Security_Osquery_API_KueryOrUndefined:
+      description: The kuery to filter the results by.
+      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
       nullable: true
       type: string
     Security_Osquery_API_ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItem'
+      description: An object of queries.
       type: object
     Security_Osquery_API_ObjectQueriesItem:
       type: object
@@ -60387,7 +61327,7 @@ components:
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
-          $ref: '#/components/schemas/Security_Osquery_API_Id'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
@@ -60400,25 +61340,45 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_PackDescription:
+      description: The pack description.
+      example: Pack description
+      type: string
+    Security_Osquery_API_PackDescriptionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+      nullable: true
     Security_Osquery_API_PackId:
+      description: The ID of the pack you want to run, retrieve, update, or delete.
+      example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     Security_Osquery_API_PackIdOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_PackId'
       nullable: true
     Security_Osquery_API_PackName:
+      description: The pack name.
       type: string
     Security_Osquery_API_PageOrUndefined:
+      description: The page number to return. The default is 1.
+      example: 1
       nullable: true
       type: integer
     Security_Osquery_API_PageSizeOrUndefined:
+      description: The number of results to return per page. The default is 20.
+      example: 20
       nullable: true
       type: integer
     Security_Osquery_API_Platform:
+      description: Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
+      example: linux,darwin
       type: string
     Security_Osquery_API_PlatformOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Platform'
       nullable: true
     Security_Osquery_API_PolicyIds:
+      description: A list of agents policy IDs.
+      example:
+        - policyId1
+        - policyId2
       items:
         type: string
       type: array
@@ -60426,16 +61386,33 @@ components:
       $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
       nullable: true
     Security_Osquery_API_Query:
+      description: The SQL query you want to run.
+      example: select * from uptime;
+      type: string
+    Security_Osquery_API_QueryId:
+      description: The ID of the query.
+      example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     Security_Osquery_API_QueryOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Query'
       nullable: true
     Security_Osquery_API_Removed:
+      description: Indicates whether the query is removed.
+      example: false
       type: boolean
     Security_Osquery_API_RemovedOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Removed'
       nullable: true
+    Security_Osquery_API_SavedQueryDescription:
+      description: The saved query description.
+      example: Saved query description
+      type: string
+    Security_Osquery_API_SavedQueryDescriptionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+      nullable: true
     Security_Osquery_API_SavedQueryId:
+      description: The ID of a saved query.
+      example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     Security_Osquery_API_SavedQueryIdOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
@@ -60443,42 +61420,82 @@ components:
     Security_Osquery_API_Shards:
       additionalProperties:
         type: number
+      description: An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
+      example:
+        policy_id: 50
       type: object
     Security_Osquery_API_Snapshot:
+      description: Indicates whether the query is a snapshot.
+      example: true
       type: boolean
     Security_Osquery_API_SnapshotOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
       nullable: true
     Security_Osquery_API_SortOrderOrUndefined:
-      oneOf:
-        - nullable: true
-          type: string
-        - enum:
-            - asc
-            - desc
+      description: Specifies the sort order.
+      enum:
+        - asc
+        - desc
+      example: desc
+      type: string
     Security_Osquery_API_SortOrUndefined:
+      default: createdAt
+      description: The field that is used to sort the results.
+      example: createdAt
       nullable: true
       type: string
     Security_Osquery_API_UpdatePacksRequestBody:
+      example:
+        name: updated_my_pack_name
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_DescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
-        id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackId'
+        name:
+          $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
+    Security_Osquery_API_UpdatePacksResponse:
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: true
+          name: updated_my_pack_name
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards:
+            - key: 47638692-7c4c-4053-aa3e-7186f28df349
+              value: 35
+            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+              value: 58
+          updated_at: '2025-02-26T13:40:16.297Z'
+          updated_by: elastic
+      type: object
+      properties: {}
     Security_Osquery_API_UpdateSavedQueryRequestBody:
+      example:
+        id: updated_my_saved_query_name
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_DescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
@@ -60486,7 +61503,7 @@ components:
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_DescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
@@ -60495,7 +61512,14 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+    Security_Osquery_API_UpdateSavedQueryResponse:
+      example:
+        data: {}
+      type: object
+      properties: {}
     Security_Osquery_API_Version:
+      description: Uses the Osquery versions greater than or equal to the specified version string.
+      example: 1.0.0
       type: string
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'

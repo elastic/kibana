@@ -18,6 +18,11 @@ export interface RuleMigrationsRetrieverClients {
   savedObjects: SavedObjectsClientContract;
 }
 
+/**
+ * RuleMigrationsRetriever is a class that is responsible for retrieving all the necessary data during the rule migration process.
+ * It is composed of multiple retrievers that are responsible for retrieving specific types of data.
+ * Such as rule integrations, prebuilt rules, and rule resources.
+ */
 export class RuleMigrationsRetriever {
   public readonly resources: RuleResourceRetriever;
   public readonly integrations: IntegrationRetriever;

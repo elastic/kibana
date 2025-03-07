@@ -26,7 +26,7 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;
   dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
-  id: DashboardPanelState['explicitInput']['id'];
+  id: string;
   index?: number;
   type: DashboardPanelState['type'];
   key: string;

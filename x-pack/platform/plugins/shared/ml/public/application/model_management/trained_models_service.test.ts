@@ -31,6 +31,40 @@ describe('TrainedModelsService', () => {
   let scheduledDeploymentsSubject: BehaviorSubject<StartAllocationParams[]>;
   let mockSetScheduledDeployments: jest.Mock<any, any>;
 
+  const startModelAllocationResponseMock = {
+    assignment: {
+      task_parameters: {
+        model_id: 'deploy-model',
+        model_bytes: 1000,
+        allocation_id: 'test-allocation',
+        priority: 'normal',
+        number_of_allocations: 1,
+        threads_per_allocation: 1,
+        queue_capacity: 1024,
+        deployment_id: 'my-deployment-id',
+        cache_size: '1mb',
+        per_deployment_memory_bytes: '1mb',
+        per_allocation_memory_bytes: '1mb',
+      },
+      node_count: 1,
+      routing_table: {
+        'node-1': {
+          routing_state: 'started',
+          reason: '',
+          current_allocations: 1,
+          target_allocations: 1,
+        },
+      },
+      assignment_state: 'started',
+      start_time: 1234567890,
+      adaptive_allocations: {
+        enabled: true,
+        min_number_of_allocations: 1,
+        max_number_of_allocations: 4,
+      },
+    } as const,
+  };
+
   const mockDisplayErrorToast = jest.fn();
   const mockDisplaySuccessToast = jest.fn();
 
@@ -50,6 +84,7 @@ describe('TrainedModelsService', () => {
       startModelAllocation: jest.fn(),
       updateModelDeployment: jest.fn(),
       getModelsDownloadStatus: jest.fn(),
+      deleteTrainedModel: jest.fn(),
     } as unknown as jest.Mocked<TrainedModelsApiService>;
 
     mockSavedObjectsApiService = {
@@ -189,37 +224,7 @@ describe('TrainedModelsService', () => {
     mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([mockModel]);
 
     mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(
-      of({
-        assignment: {
-          task_parameters: {
-            model_id: 'deploy-model',
-            model_bytes: 1000,
-            allocation_id: 'test-allocation',
-            priority: 'normal',
-            number_of_allocations: 1,
-            threads_per_allocation: 1,
-            queue_capacity: 1024,
-            deployment_id: 'my-deployment-id',
-            cache_size: '1mb',
-          },
-          node_count: 1,
-          routing_table: {
-            'node-1': {
-              routing_state: 'started',
-              reason: '',
-              current_allocations: 1,
-              target_allocations: 1,
-            },
-          },
-          assignment_state: 'started',
-          start_time: 1234567890,
-          adaptive_allocations: {
-            enabled: true,
-            min_number_of_allocations: 1,
-            max_number_of_allocations: 4,
-          },
-        },
-      })
+      of(startModelAllocationResponseMock)
     );
 
     // Start deployment
@@ -343,6 +348,106 @@ describe('TrainedModelsService', () => {
         defaultMessage: 'Failed to update "{deploymentId}"',
         values: { deploymentId: 'my-deployment-id' },
       })
+    );
+  });
+
+  it('allows new deployments after a failed deployment', async () => {
+    const mockModel = {
+      model_id: 'test-model',
+      state: MODEL_STATE.DOWNLOADED,
+      type: ['pytorch'],
+    } as unknown as TrainedModelUIItem;
+
+    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValue([mockModel]);
+
+    mockTrainedModelsApiService.startModelAllocation
+      .mockReturnValueOnce(throwError(() => new Error('First deployment failed')))
+      .mockReturnValueOnce(of(startModelAllocationResponseMock));
+
+    // First deployment
+    trainedModelsService.startModelDeployment('test-model', {
+      deployment_id: 'first-deployment',
+      priority: 'low',
+      threads_per_allocation: 1,
+    });
+
+    jest.advanceTimersByTime(100);
+    await flushPromises();
+
+    expect(mockDisplayErrorToast).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.stringContaining('first-deployment')
+    );
+
+    jest.advanceTimersByTime(100);
+    await flushPromises();
+
+    // Second deployment
+    trainedModelsService.startModelDeployment('test-model', {
+      deployment_id: 'second-deployment',
+      priority: 'low',
+      threads_per_allocation: 1,
+    });
+
+    jest.advanceTimersByTime(100);
+    await flushPromises();
+
+    expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledTimes(2);
+    expect(mockDisplaySuccessToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining('second-deployment'),
+      })
+    );
+  });
+
+  it('deletes multiple models successfully', async () => {
+    const modelIds = ['model-1', 'model-2'];
+
+    mockTrainedModelsApiService.deleteTrainedModel.mockResolvedValue({ acknowledge: true });
+
+    await trainedModelsService.deleteModels(modelIds, {
+      with_pipelines: false,
+      force: false,
+    });
+
+    expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledTimes(2);
+    expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
+      modelId: 'model-1',
+      options: {
+        with_pipelines: false,
+        force: false,
+      },
+    });
+    expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
+      modelId: 'model-2',
+      options: {
+        with_pipelines: false,
+        force: false,
+      },
+    });
+  });
+
+  it('handles deleteModels error', async () => {
+    const modelIds = ['model-1', 'model-2'];
+    const error = new Error('Deletion failed');
+
+    mockTrainedModelsApiService.deleteTrainedModel.mockRejectedValue(error);
+
+    await trainedModelsService.deleteModels(modelIds, {
+      with_pipelines: false,
+      force: false,
+    });
+
+    expect(mockDisplayErrorToast).toHaveBeenCalledWith(
+      error,
+      i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorTitle', {
+        defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+        values: {
+          modelsCount: modelIds.length,
+        },
+      }),
+      undefined,
+      modelIds.join(', ')
     );
   });
 });

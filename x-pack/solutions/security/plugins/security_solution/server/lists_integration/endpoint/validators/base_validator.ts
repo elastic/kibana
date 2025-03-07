@@ -11,7 +11,12 @@ import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
-import { setArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import { i18n } from '@kbn/i18n';
+import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
+import {
+  getArtifactOwnerSpaceIds,
+  setArtifactOwnerSpaceId,
+} from '../../../../common/endpoint/service/artifacts/utils';
 import type { FeatureKeys } from '../../../endpoint/services';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
@@ -23,6 +28,14 @@ import {
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
+
+const NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE = i18n.translate(
+  'xpack.securitySolution.baseValidator.noGlobalArtifactAuthzApiMessage',
+  {
+    defaultMessage:
+      'Management of "ownerSpaceId" tag requires global artifact management privilege',
+  }
+);
 
 export const BasicEndpointExceptionDataSchema = schema.object(
   {
@@ -87,7 +100,7 @@ export class BaseValidator {
 
   protected async validateHasPrivilege(privilege: keyof EndpointAuthz): Promise<void> {
     if (!(await this.endpointAuthzPromise)[privilege]) {
-      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
+      throw new EndpointArtifactExceptionValidationError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
     }
   }
 
@@ -101,13 +114,13 @@ export class BaseValidator {
 
   protected async validateCanManageEndpointArtifacts(): Promise<void> {
     if (!(await this.endpointAuthzPromise).canAccessEndpointManagement) {
-      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
+      throw new EndpointArtifactExceptionValidationError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
     }
   }
 
   protected async validateCanIsolateHosts(): Promise<void> {
     if (!(await this.endpointAuthzPromise).canIsolateHost) {
-      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
+      throw new EndpointArtifactExceptionValidationError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
     }
   }
 
@@ -198,6 +211,65 @@ export class BaseValidator {
     return false;
   }
 
+  protected async validateUpdateOwnerSpaceIds(
+    updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+    currentItem: Pick<ExceptionListItemSchema, 'tags'>
+  ): Promise<void> {
+    if (
+      this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
+      this.wasOwnerSpaceIdTagsChanged(updatedItem, currentItem) &&
+      !(await this.endpointAuthzPromise).canManageGlobalArtifacts
+    ) {
+      throw new EndpointArtifactExceptionValidationError(
+        `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+        403
+      );
+    }
+  }
+
+  protected async validateCreateOwnerSpaceIds(item: ExceptionItemLikeOptions): Promise<void> {
+    if (
+      this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
+      item.tags &&
+      item.tags.length > 0
+    ) {
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        return;
+      }
+
+      const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
+      const activeSpaceId = await this.getActiveSpaceId();
+
+      if (
+        ownerSpaceIds.length > 1 ||
+        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== activeSpaceId)
+      ) {
+        throw new EndpointArtifactExceptionValidationError(
+          `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+          403
+        );
+      }
+    }
+  }
+
+  protected wasOwnerSpaceIdTagsChanged(
+    updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+    currentItem: Pick<ExceptionListItemSchema, 'tags'>
+  ): boolean {
+    return !isEqual(getArtifactOwnerSpaceIds(updatedItem), getArtifactOwnerSpaceIds(currentItem));
+  }
+
+  protected async getActiveSpaceId(): Promise<string> {
+    if (!this.request) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Unable to determine space id. Missing HTTP Request object',
+        500
+      );
+    }
+
+    return (await this.endpointAppContext.getActiveSpace(this.request)).id;
+  }
+
   /**
    * Update the artifact item (if necessary) with a `ownerSpaceId` tag using the HTTP request's active space
    * @param item
@@ -207,15 +279,7 @@ export class BaseValidator {
     item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
   ): Promise<void> {
     if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      if (!this.request) {
-        throw new EndpointArtifactExceptionValidationError(
-          'Unable to determine space id. Missing HTTP Request object',
-          500
-        );
-      }
-
-      const spaceId = (await this.endpointAppContext.getActiveSpace(this.request)).id;
-      setArtifactOwnerSpaceId(item, spaceId);
+      setArtifactOwnerSpaceId(item, await this.getActiveSpaceId());
     }
   }
 }

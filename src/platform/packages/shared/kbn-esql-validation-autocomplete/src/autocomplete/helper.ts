@@ -22,6 +22,7 @@ import {
   type FunctionReturnType,
   type SupportedDataType,
   isReturnType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import {
   findFinalWord,
@@ -56,7 +57,10 @@ function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
 
 function checkContent(fn: ESQLFunction): boolean {
   const fnDef = getFunctionDefinition(fn.name);
-  return (!!fnDef && fnDef.type === 'agg') || extractFunctionArgs(fn.args).some(checkContent);
+  return (
+    (!!fnDef && fnDef.type === FunctionDefinitionTypes.AGG) ||
+    extractFunctionArgs(fn.args).some(checkContent)
+  );
 }
 
 export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number) {
@@ -291,7 +295,9 @@ export function getValidSignaturesAndTypesToSuggestNext(
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
   const shouldAddComma =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
+    !alreadyHasComma;
   const currentArg = enrichedArgs[argIndex];
   return {
     shouldAddComma,
@@ -610,7 +616,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
         // technically another boolean value should be suggested, but it is a better experience
         // to actually suggest a wider set of fields/functions
         const typeToUse =
-          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'builtin'
+          finalType === 'boolean' &&
+          getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
             ? ['any']
             : (supportedTypes as string[]);
 
