@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiIconTip,
   UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -33,7 +34,7 @@ import { iconChoices } from '../../helpers/style_choices';
 import { UpdateableFieldProperties } from './field_manager';
 import { isEqual } from '../helpers';
 import { IconRenderer } from '../icon_renderer';
-import { gphFieldBadgeSize } from '../../styles';
+import { gphFieldBadgeSizeStyles } from '../../styles';
 
 export interface FieldPickerProps {
   field: WorkspaceField;
@@ -54,8 +55,9 @@ export function FieldEditor({
   allFields,
 }: FieldPickerProps) {
   const [open, setOpen] = useState(false);
-
   const [currentField, setCurrentField] = useState(initialField);
+
+  const euiThemeContext = useEuiTheme();
 
   const { color, hopSize, lastValidHopSize, icon, name: fieldName } = currentField;
 
@@ -142,26 +144,23 @@ export function FieldEditor({
               setOpen(true);
             }
           }}
-          css={(euiThemeContext: UseEuiTheme) =>
-            css([
-              gphFieldBadgeSize(euiThemeContext),
-              {
-                ...(isDisabled
-                  ? {
-                      '&, &:hover, &:focus, &:not(:disabled):hover, &:not(:disabled):focus': {
-                        opacity: 0.7,
-                        textDecoration: 'line-through',
-                      },
+          css={[
+            gphFieldBadgeSizeStyles(euiThemeContext),
+            {
+              ...(isDisabled &&
+                css({
+                  '&, &:hover, &:focus, &:not(:disabled):hover, &:not(:disabled):focus': {
+                    opacity: 0.7,
+                    textDecoration: 'line-through',
+                  },
 
-                      '&:hover:not(:focus-visible), &:focus:not(:focus-visible)': {
-                        opacity: 0.7,
-                        textDecoration: 'line-through',
-                      },
-                    }
-                  : {}),
-              },
-            ])
-          }
+                  '&:hover:not(:focus-visible), &:focus:not(:focus-visible)': {
+                    opacity: 0.7,
+                    textDecoration: 'line-through',
+                  },
+                })),
+            },
+          ]}
         >
           <IconRenderer icon={initialField.icon} css={styles.badgeIcon} color={color} />
           {initialField.name}

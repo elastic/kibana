@@ -6,12 +6,12 @@
  */
 
 import React, { useState, useEffect, ReactNode } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge, UseEuiTheme } from '@elastic/eui';
+import { EuiPopover, EuiSelectable, EuiBadge, UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { WorkspaceField } from '../../types';
-import { gphFieldBadgeSize } from '../../styles';
+import { gphFieldBadgeSizeStyles } from '../../styles';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
@@ -28,6 +28,8 @@ export function FieldPicker({
   open,
   setOpen,
 }: FieldPickerProps) {
+  const euiThemeContext = useEuiTheme();
+
   const allFields = Object.values(fieldMap);
 
   const hasFields = allFields.length > 0;
@@ -65,36 +67,30 @@ export function FieldPicker({
             }
           }}
           onClickAriaLabel={badgeDescription}
-          css={(euiThemeContext: UseEuiTheme) =>
-            css([
-              gphFieldBadgeSize(euiThemeContext),
-              {
-                color: euiThemeContext.euiTheme.colors.primary,
-                ...(!hasFields
-                  ? {
-                      color: euiThemeContext.euiTheme.colors.mediumShade,
+          css={[
+            gphFieldBadgeSizeStyles(euiThemeContext),
+            css({
+              color: euiThemeContext.euiTheme.colors.primary,
+              ...(!hasFields && {
+                color: euiThemeContext.euiTheme.colors.mediumShade,
 
-                      '&, span': {
-                        cursor: 'not-allowed !important',
-                      },
+                '&, span': {
+                  cursor: 'not-allowed !important',
+                },
 
-                      '&:hover, &:focus': {
-                        textDecoration: 'none !important',
-                      },
-                    }
-                  : {}),
-              },
-            ])
-          }
+                '&:hover, &:focus': {
+                  textDecoration: 'none !important',
+                },
+              }),
+            }),
+          ]}
         >
           {badgeDescription}
         </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
-      panelProps={{
-        css: styles.popoverPanel,
-      }}
+      panelProps={{ css: styles.popoverPanel }}
     >
       {open && (
         <EuiSelectable
@@ -105,9 +101,7 @@ export function FieldPicker({
             compressed: true,
             'data-test-subj': 'graph-field-search',
           }}
-          listProps={{
-            css: styles.selectableList,
-          }}
+          listProps={{ css: styles.selectableList }}
           searchable
           options={fieldOptions}
           onChange={(newOptions) => {
