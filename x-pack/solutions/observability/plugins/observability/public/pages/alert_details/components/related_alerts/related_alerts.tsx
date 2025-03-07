@@ -16,6 +16,7 @@ import {
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { i18n } from '@kbn/i18n';
 import { ALERT_GROUP, ALERT_RULE_UUID, AlertStatus, TAGS } from '@kbn/rule-data-utils';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { ObservabilityAlertsTable, TopAlert } from '../../../..';
 import {
@@ -54,6 +55,7 @@ export function RelatedAlerts({ alert }: Props) {
   const ruleCheckboxId = useGeneratedHtmlId({ prefix: 'rule' });
 
   const [ruleChecked, setRuleChecked] = useState(false);
+  const [timeChecked, setTimeChecked] = useState(false);
 
   const [range, setRange] = useState({ from: 'now-24h', to: 'now' });
   const [status, setStatus] = useState<AlertStatus | undefined>('active');
@@ -98,11 +100,38 @@ export function RelatedAlerts({ alert }: Props) {
           <EuiFormRow label="Same rule">
             <EuiCheckbox
               id={ruleCheckboxId}
-              label={i18n.translate('xpack.observability.relatedAlerts.useRuleLabel', {
+              label={i18n.translate('xpack.observability.relatedAlerts.useSameRuleDimensionLabel', {
                 defaultMessage: 'Yes',
               })}
               checked={ruleChecked}
               onChange={(e) => setRuleChecked(e.target.checked)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow>
+          <EuiFormRow label="Same time">
+            <EuiCheckbox
+              id={ruleCheckboxId}
+              label={i18n.translate('xpack.observability.relatedAlerts.useSameTimeDimensionLabel', {
+                defaultMessage: 'Yes',
+              })}
+              checked={timeChecked}
+              onChange={(e) => {
+                const alertStart = moment(new Date(alert.fields['kibana.alert.start']!));
+
+                // TODO: Should we always use the alertStart + 5 minutes?
+                // const alertEndField = alert.fields['kibana.alert.end'];
+                // const alertEnd = alertEndField ? moment(alertEndField) : alertStart.clone();
+                const alertEnd = alertStart.clone();
+
+                const heuristicRange = {
+                  from: alertStart.subtract(5, 'minutes').toISOString(),
+                  to: alertEnd.add(5, 'minutes').toISOString(),
+                };
+                setRange(heuristicRange);
+                setTimeChecked(true);
+              }}
             />
           </EuiFormRow>
         </EuiFlexItem>
