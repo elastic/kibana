@@ -11,9 +11,28 @@ import {
   MessageRole as InferenceMessageRole,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
+import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
 
-export function convertMessagesForInference(messages: Message[]): InferenceMessage[] {
+function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
+  try {
+    return JSON.parse(jsonString ?? '{}');
+  } catch (error) {
+    logger.error(
+      `Failed to parse function call arguments when converting messages for inference: ${error}`
+    );
+    // if the LLM returns invalid JSON, it is likley because it is hallucinating
+    // the function. We don't want to propogate the error about invalid JSON here.
+    // Any errors related to the function call will be caught when the function and
+    // it's arguments are validated
+    return {};
+  }
+}
+
+export function convertMessagesForInference(
+  messages: Message[],
+  logger: Pick<Logger, 'error'>
+): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
   messages.forEach((message) => {
@@ -27,7 +46,7 @@ export function convertMessagesForInference(messages: Message[]): InferenceMessa
                 {
                   function: {
                     name: message.message.function_call.name,
-                    arguments: JSON.parse(message.message.function_call.arguments || '{}'),
+                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },

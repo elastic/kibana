@@ -34,7 +34,6 @@ import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
@@ -54,6 +53,7 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useCurrentDataView, useInternalStateSelector } from '../../state_management/redux';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -89,7 +89,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
-
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -98,15 +97,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
-    state.dataView!,
-    state.isDataViewLoading,
-  ]);
-  const customFilters = useInternalStateSelector((state) => state.customFilters);
-
+  const dataView = useCurrentDataView();
+  const dataViewLoading = useInternalStateSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
-
   const fetchCounter = useRef<number>(0);
 
   useEffect(() => {
@@ -196,21 +190,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     },
     [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
   );
-
-  const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
-    if (fieldName === '_exists_') {
-      return 'is_not_null';
-    }
-    if (values == null && operation === '-') {
-      return 'is_not_null';
-    }
-
-    if (values == null && operation === '+') {
-      return 'is_null';
-    }
-
-    return operation;
-  };
 
   const onPopulateWhereClause = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
@@ -430,7 +409,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                additionalFilters={customFilters}
                 columns={currentColumns}
                 documents$={stateContainer.dataState.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
@@ -503,3 +481,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     </EuiPage>
   );
 }
+
+const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
+  if (fieldName === '_exists_') {
+    return 'is_not_null';
+  }
+  if (values == null && operation === '-') {
+    return 'is_not_null';
+  }
+
+  if (values == null && operation === '+') {
+    return 'is_null';
+  }
+
+  return operation;
+};
