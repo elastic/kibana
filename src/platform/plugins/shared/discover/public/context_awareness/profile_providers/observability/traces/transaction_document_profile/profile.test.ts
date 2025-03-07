@@ -20,6 +20,7 @@ import { createObservabilityTracesTransactionDocumentProfileProvider } from './p
 import { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import { ProfileProviderServices } from '../../../profile_provider_services';
+import { applicationMock } from '../__mocks__/application_mock';
 
 describe('transactionDocumentProfileProvider', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
@@ -43,7 +44,7 @@ describe('transactionDocumentProfileProvider', () => {
   describe('when apm is enabled', () => {
     const mockServices: ProfileProviderServices = {
       ...createContextAwarenessMocks().profileProviderServices,
-      ...createContextAwarenessMocks().applicationMock({ apm: { show: true } }),
+      ...applicationMock({ apm: { show: true } }),
     };
 
     const transactionDocumentProfileProvider =
@@ -76,7 +77,7 @@ describe('transactionDocumentProfileProvider', () => {
   describe('when apm is NOT enabled', () => {
     const mockServices: ProfileProviderServices = {
       ...createContextAwarenessMocks().profileProviderServices,
-      ...createContextAwarenessMocks().applicationMock({}),
+      ...applicationMock({}),
     };
 
     const transactionDocumentProfileProvider =

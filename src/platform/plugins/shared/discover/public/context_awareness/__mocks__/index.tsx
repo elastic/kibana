@@ -26,7 +26,6 @@ import { ProfilesManager } from '../profiles_manager';
 import { DiscoverEBTManager } from '../../services/discover_ebt_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
-import { of } from 'rxjs';
 
 export const createContextAwarenessMocks = ({
   shouldRegisterProviders = true,
@@ -165,32 +164,6 @@ export const createContextAwarenessMocks = ({
 
   const profileProviderServices = createProfileProviderServicesMock();
 
-  const applicationMock = (capabilities: {
-    [x: string]:
-      | boolean
-      | Readonly<{
-          [x: string]: boolean;
-        }>;
-  }): {} => {
-    return {
-      application: {
-        capabilities: {
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          ...capabilities,
-        },
-        applications$: of(),
-        navigateToApp: jest.fn(),
-        navigateToUrl: jest.fn(),
-        isAppRegistered: jest.fn(),
-        getUrlForApp: jest.fn(),
-        currentAppId$: of(),
-        currentLocation$: of(),
-      },
-    };
-  };
-
   return {
     rootProfileProviderMock,
     dataSourceProfileProviderMock,
@@ -203,7 +176,6 @@ export const createContextAwarenessMocks = ({
     profilesManagerMock,
     profileProviderServices,
     ebtManagerMock,
-    applicationMock,
   };
 };
 
