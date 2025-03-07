@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiSpacer,
   useEuiTheme,
+  tint,
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { PanelText } from '../../../../common/components/panel_text';
@@ -68,7 +69,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
               value={progressValue}
               valueText={`${Math.floor(progressValue)}%`}
               max={100}
-              color={euiTheme.colors.vis.euiColorVis0}
+              color={tint(euiTheme.colors.success, 0.25)}
             />
             <EuiSpacer size="xs" />
             <RuleMigrationsReadMore />
