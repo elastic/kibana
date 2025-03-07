@@ -15,10 +15,7 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, page, pageObjects: { serviceMapPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceMapPage.gotoWithDateSelected(start, end);
-    await page.waitForSelector(
-      '[data-test-subj="kbnAppWrapper visibleChrome"] [aria-busy="false"]',
-      { state: 'visible' }
-    );
+    await serviceMapPage.waitForPageToLoad();
   });
   test('shows the service map', async ({ page, pageObjects: { serviceMapPage } }) => {
     await serviceMapPage.gotoWithDateSelected(start, end);
