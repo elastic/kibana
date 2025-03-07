@@ -20,10 +20,10 @@ import {
   EuiText,
   formatDate,
 } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import * as i18n from '../translations';
 import { MAINTENANCE_WINDOW_DATE_FORMAT, MaintenanceWindow } from '../../../../common';
 import { useUiSetting } from '../../../utils/kibana_react';
-import { DATE_FORMAT_UI_SETTING } from '../constants';
 import { recurringSummary } from '../helpers/recurring_summary';
 import { getPresets } from '../helpers/get_presets';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
@@ -35,7 +35,7 @@ interface UpcomingEventsPopoverProps {
 export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React.memo(
   ({ maintenanceWindowFindResponse }) => {
     const systemDateFormat = useUiSetting<string>(
-      DATE_FORMAT_UI_SETTING,
+      UI_SETTINGS.DATE_FORMAT,
       MAINTENANCE_WINDOW_DATE_FORMAT
     );
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);

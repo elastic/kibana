@@ -13,10 +13,10 @@ import {
   useFormContext,
   FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../../common';
 import { useUiSetting } from '../../../../utils/kibana_react';
-import { DATE_FORMAT_UI_SETTING } from '../../constants';
 import { getSelectedForDatePicker as getSelected } from '../../helpers/get_selected_for_date_picker';
 import * as i18n from '../../translations';
 
@@ -31,7 +31,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
   ({ fields, timezone, showTimeSelect = true, ...rest }) => {
     const [today] = useState<Moment>(moment());
     const systemDateFormat = useUiSetting<string>(
-      DATE_FORMAT_UI_SETTING,
+      UI_SETTINGS.DATE_FORMAT,
       MAINTENANCE_WINDOW_DATE_FORMAT
     );
 

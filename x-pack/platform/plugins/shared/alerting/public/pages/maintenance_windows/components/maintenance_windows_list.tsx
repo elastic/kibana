@@ -17,10 +17,11 @@ import {
   EuiFieldSearch,
   EuiSpacer,
 } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
-import { DATE_FORMAT_UI_SETTING, STATUS_DISPLAY, STATUS_SORT } from '../constants';
+import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import {
   MaintenanceWindowStatus,
@@ -117,7 +118,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   }) => {
     const [search, setSearch] = useState<string>('');
     const systemDateFormat = useUiSetting<string>(
-      DATE_FORMAT_UI_SETTING,
+      UI_SETTINGS.DATE_FORMAT,
       MAINTENANCE_WINDOW_DATE_FORMAT
     );
 
