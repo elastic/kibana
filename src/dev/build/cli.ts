@@ -47,6 +47,7 @@ if (showHelp) {
         --serverless                         {dim Only build the serverless packages}
         --skip-archives                      {dim Don't produce tar/zip archives}
         --skip-canvas-shareable-runtime      {dim Don't build the Canvas shareable runtime}
+        --skip-cloud-dependencies-download   {dim Don't download cloud dependencies (beats)}
         --skip-cdn-assets                    {dim Don't build CDN assets}
         --skip-docker-cloud                  {dim Don't build the docker cloud image}
         --skip-docker-cloud-fips             {dim Don't build the docker cloud fips image}
