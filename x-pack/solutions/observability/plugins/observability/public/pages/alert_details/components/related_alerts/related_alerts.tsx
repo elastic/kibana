@@ -118,19 +118,28 @@ export function RelatedAlerts({ alert }: Props) {
               })}
               checked={timeChecked}
               onChange={(e) => {
-                const alertStart = moment(new Date(alert.fields['kibana.alert.start']!));
+                if (!timeChecked) {
+                  const alertStart = moment(new Date(alert.fields['kibana.alert.start']!));
 
-                // TODO: Should we always use the alertStart + 5 minutes?
-                // const alertEndField = alert.fields['kibana.alert.end'];
-                // const alertEnd = alertEndField ? moment(alertEndField) : alertStart.clone();
-                const alertEnd = alertStart.clone();
+                  // TODO: Should we always use the alertStart + 5 minutes?
+                  // const alertEndField = alert.fields['kibana.alert.end'];
+                  // const alertEnd = alertEndField ? moment(alertEndField) : alertStart.clone();
+                  const alertEnd = alertStart.clone();
 
-                const heuristicRange = {
-                  from: alertStart.subtract(5, 'minutes').toISOString(),
-                  to: alertEnd.add(5, 'minutes').toISOString(),
-                };
-                setRange(heuristicRange);
-                setTimeChecked(true);
+                  const heuristicRange = {
+                    from: alertStart.subtract(5, 'minutes').toISOString(),
+                    to: alertEnd.add(5, 'minutes').toISOString(),
+                  };
+                  setRange(heuristicRange);
+                  setTimeChecked(true);
+                } else {
+                  const heuristicRange = {
+                    from: 'now-24h',
+                    to: 'now',
+                  };
+                  setRange(heuristicRange);
+                  setTimeChecked(false);
+                }
               }}
             />
           </EuiFormRow>
