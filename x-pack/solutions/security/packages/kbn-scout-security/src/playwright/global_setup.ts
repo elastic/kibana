@@ -7,12 +7,12 @@
 
 import { ingestTestDataHook } from '@kbn/scout';
 import { type FullConfig } from '@playwright/test';
-import { testData } from './fixtures';
+import { archives } from './constants';
 
 async function globalSetup(config: FullConfig) {
-  const archives = [testData.ES_ARCHIVES.AUDITBEAT];
+  const data = [archives.ES.AUDITBEAT];
 
-  return ingestTestDataHook(config, archives);
+  return ingestTestDataHook(config, data);
 }
 
 // eslint-disable-next-line import/no-default-export

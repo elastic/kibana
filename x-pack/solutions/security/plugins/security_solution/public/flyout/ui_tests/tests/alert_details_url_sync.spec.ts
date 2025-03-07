@@ -6,7 +6,7 @@
  */
 
 import { expect, test } from '@kbn/scout-security';
-import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/fixtures/test_data';
+import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
 const RIGHT = 'right';
 

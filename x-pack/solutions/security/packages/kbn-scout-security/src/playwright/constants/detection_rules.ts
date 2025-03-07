@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export const ES_ARCHIVES = {
-  AUDITBEAT: 'x-pack/test/security_solution_cypress/es_archives/auditbeat_single',
-};
-
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
   'apm-*-transaction*',
   'auditbeat-*',

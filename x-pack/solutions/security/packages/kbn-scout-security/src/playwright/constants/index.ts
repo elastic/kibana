@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { test } from './single_thread_fixtures';
-export { spaceTest } from './parallel_run_fixtures';
-export * from './types';
+export * as archives from './archives';
+export * as detection_rules from './detection_rules';

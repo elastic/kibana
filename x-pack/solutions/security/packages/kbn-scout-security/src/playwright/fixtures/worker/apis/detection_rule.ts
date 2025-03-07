@@ -6,7 +6,7 @@
  */
 
 import { KbnClient } from '@kbn/scout';
-import { CUSTOM_QUERY_RULE } from '../../test_data';
+import { CUSTOM_QUERY_RULE } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
