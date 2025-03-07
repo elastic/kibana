@@ -266,7 +266,7 @@ export interface ITelemetryReceiver {
   getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
   getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
 
-  getIngestPipelinesStats(): Promise<NodeIngestPipelinesStats[]>;
+  getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
