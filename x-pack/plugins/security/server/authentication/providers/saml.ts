@@ -349,7 +349,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     const isIdPInitiatedLogin = !stateRequestId;
     this.logger.debug(
       !isIdPInitiatedLogin
-        ? 'Login has been previously initiated by Kibana.'
+        ? `Login has been previously initiated by Kibana, request id ${stateRequestId}.`
         : 'Login has been initiated by Identity Provider.'
     );
 
@@ -376,7 +376,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
-      this.logger.error(`Failed to log in with SAML response: ${getDetailedErrorMessage(err)}`);
+      this.logger.error(
+        `Failed to log in with SAML response, ${
+          !isIdPInitiatedLogin ? `request id: ${stateRequestId}, ` : ''
+        }error: ${getDetailedErrorMessage(err)}`
+      );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
       // there is a chance that it failed because of realm mismatch and hence we should return
@@ -587,7 +591,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         body: preparePayload,
       })) as any;
 
-      this.logger.debug('Redirecting to Identity Provider with SAML request.');
+      this.logger.debug(
+        `Redirecting to Identity Provider with SAML request, request id: ${requestId}`
+      );
 
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
       return AuthenticationResult.redirectTo(redirect, {

@@ -18,11 +18,12 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('API /metrics/process_list/chart', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm'));
-    after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm')
+    before(() =>
+      esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes')
     );
-
+    after(() =>
+      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes')
+    );
     it('works', async () => {
       const response = await supertest
         .post('/api/metrics/process_list/chart')
@@ -35,8 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
             indexPattern: 'metrics-*,metricbeat-*',
-            to: 1564432800000,
-            command: '/usr/lib/systemd/systemd-journald',
+            to: 1680027660000,
+            command:
+              '/System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter',
           })
         )
         .expect(200);

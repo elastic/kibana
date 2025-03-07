@@ -250,6 +250,7 @@ export function getPageApi() {
           children$.next(children);
         }
         newPanels = {};
+        return true;
       },
       timeRange$,
       unsavedChanges: unsavedChanges$ as PublishingSubject<object | undefined>,

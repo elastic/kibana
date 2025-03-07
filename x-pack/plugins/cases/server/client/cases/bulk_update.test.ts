@@ -314,6 +314,29 @@ describe('update', () => {
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
       );
     });
+
+    it('should filter out empty user profiles', async () => {
+      const casesWithEmptyAssignee = {
+        cases: [
+          {
+            ...cases.cases[0],
+            assignees: [{ uid: '' }, { uid: '2' }],
+          },
+        ],
+      };
+      await bulkUpdate(casesWithEmptyAssignee, clientArgs, casesClientMock);
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: expect.arrayContaining([
+            expect.objectContaining({
+              updatedAttributes: expect.objectContaining({
+                assignees: [{ uid: '2' }],
+              }),
+            }),
+          ]),
+        })
+      );
+    });
   });
 
   describe('Category', () => {

@@ -119,13 +119,21 @@ export function outputIdToUuid(id: string) {
   return uuidv5(id, uuidv5.DNS);
 }
 
-function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
+export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
+  const logger = appContextService.getLogger();
   const { output_id: outputId, ssl, proxy_id: proxyId, ...atributes } = so.attributes;
 
+  let parsedSsl;
+  try {
+    parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
+  } catch (e) {
+    logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
+    logger.warn(`ssl value: ${ssl}`);
+  }
   return {
     id: outputId ?? so.id,
     ...atributes,
-    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...(parsedSsl ? { ssl: parsedSsl } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
 }

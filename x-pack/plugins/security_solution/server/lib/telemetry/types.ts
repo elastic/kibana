@@ -281,6 +281,22 @@ export interface EndpointMetrics {
     active_global_count: number;
     active_user_count: number;
   };
+  top_process_trees: {
+    values: Event[];
+  };
+}
+
+interface Event {
+  event_count: number;
+  last_seen: string;
+  sample: Sample;
+}
+
+interface Sample {
+  command_line: string;
+  entity_id: string;
+  executable: string;
+  parent_command_line: string;
 }
 
 interface EndpointMetricOS {
@@ -465,6 +481,15 @@ export interface TelemetryConfiguration {
     [key: string]: TelemetrySenderChannelConfiguration;
   };
   pagination_config?: PaginationConfiguration;
+  indices_metadata_config?: IndicesMetadataConfiguration;
+}
+
+export interface IndicesMetadataConfiguration {
+  indices_threshold: number;
+  datastreams_threshold: number;
+  max_prefixes: number;
+  max_group_size: number;
+  min_group_size: number;
 }
 
 export interface PaginationConfiguration {

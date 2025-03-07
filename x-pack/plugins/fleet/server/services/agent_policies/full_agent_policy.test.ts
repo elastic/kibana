@@ -564,6 +564,126 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchSnapshot();
   });
 
+  it('should return the right outputs and permissions when package policies use their own outputs (with default output)', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'elastic_agent.metricbeat',
+        },
+        {
+          type: 'metrics',
+          dataset: 'elastic_agent.metricbeat',
+        },
+        {
+          type: 'logs',
+          dataset: 'elastic_agent.filebeat',
+        },
+        {
+          type: 'metrics',
+          dataset: 'elastic_agent.filebeat',
+        },
+      ],
+    } as PackageInfo);
+    mockAgentPolicy({
+      id: 'integration-output-policy',
+      status: 'active',
+      package_policies: [
+        {
+          id: 'package-policy-using-output',
+          name: 'test-policy-1',
+          namespace: 'policyspace',
+          enabled: true,
+          package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+          output_id: 'test-id',
+          inputs: [
+            {
+              type: 'test-logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'some-logs' },
+                },
+              ],
+            },
+            {
+              type: 'test-metrics',
+              enabled: false,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: false,
+                  data_stream: { type: 'metrics', dataset: 'some-metrics' },
+                },
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+        {
+          id: 'package-policy-no-output',
+          name: 'test-policy-2',
+          namespace: '',
+          enabled: true,
+          package: { name: 'system', version: '1.0.0', title: 'System' },
+          inputs: [
+            {
+              type: 'test-logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'some-logs' },
+                },
+              ],
+            },
+            {
+              type: 'test-metrics',
+              enabled: false,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: false,
+                  data_stream: { type: 'metrics', dataset: 'some-metrics' },
+                },
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ],
+      is_managed: false,
+      namespace: 'defaultspace',
+      revision: 1,
+      name: 'Policy',
+      updated_at: '2020-01-01',
+      updated_by: 'qwerty',
+      is_protected: false,
+      data_output_id: 'data-output-id',
+    });
+
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsClientMock.create(),
+      'integration-output-policy'
+    );
+    expect(agentPolicy).toMatchSnapshot();
+  });
+
   it('should return the sourceURI from the agent policy', async () => {
     mockAgentPolicy({
       namespace: 'default',

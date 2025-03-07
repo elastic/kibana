@@ -16,3 +16,4 @@ export * from './src/required_optional';
 export * from './src/safe_parse_result';
 export * from './src/stringify_zod_error';
 export * from './src/build_route_validation_with_zod';
+export * from './src/non_empty_string';

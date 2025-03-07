@@ -12,20 +12,23 @@ import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
 import { RRuleParams } from '../../../../common';
+import { parseSchedule } from './parse_schedule';
 
 export const convertToRRule = (
   startDate: Moment,
   timezone: string,
-  recurringForm?: RecurringScheduleFormProps
+  recurringSchedule?: RecurringScheduleFormProps
 ): RRuleParams => {
   const presets = getPresets(startDate);
+
+  const parsedSchedule = parseSchedule(recurringSchedule);
 
   const rRule: RRuleParams = {
     dtstart: startDate.toISOString(),
     tzid: timezone,
   };
 
-  if (!recurringForm)
+  if (!parsedSchedule)
     return {
       ...rRule,
       // default to yearly and a count of 1
@@ -34,9 +37,9 @@ export const convertToRRule = (
       count: 1,
     };
 
-  let form = recurringForm;
-  if (recurringForm.frequency !== 'CUSTOM') {
-    form = { ...recurringForm, ...presets[recurringForm.frequency] };
+  let form = parsedSchedule;
+  if (parsedSchedule.frequency !== 'CUSTOM') {
+    form = { ...parsedSchedule, ...presets[parsedSchedule.frequency] };
   }
 
   const frequency = form.customFrequency ?? (form.frequency as Frequency);

@@ -2,6 +2,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 SRCS = glob(
   [
+    "**/*.js",
     "**/*.ts",
   ],
   exclude = [

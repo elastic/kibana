@@ -143,7 +143,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       if (cy) {
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', deselect);
-        cy.removeListener('viewport', undefined, deselect);
+        cy.removeListener('viewport', deselect);
         cy.removeListener('drag', 'node', deselect);
         cy.removeListener('select', 'edge', selectHandler);
         cy.removeListener('unselect', 'edge', deselect);

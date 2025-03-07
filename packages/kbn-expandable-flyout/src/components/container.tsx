@@ -19,7 +19,6 @@ import {
   useDispatch,
   useSelector,
 } from '../store/redux';
-import { RightSection } from './right_section';
 import { useSections } from '../hooks/use_sections';
 import { useExpandableFlyoutState } from '../hooks/use_expandable_flyout_state';
 import { useExpandableFlyoutApi } from '../hooks/use_expandable_flyout_api';
@@ -214,15 +213,12 @@ export const Container: React.FC<ContainerProps> = memo(
         onResize={onResize}
         minWidth={minFlyoutWidth}
       >
-        {showCollapsed && <RightSection component={rightComponent as React.ReactElement} />}
-
-        {showExpanded && (
-          <ResizableContainer
-            leftComponent={leftComponent as React.ReactElement}
-            rightComponent={rightComponent as React.ReactElement}
-            showPreview={showPreview}
-          />
-        )}
+        <ResizableContainer
+          leftComponent={leftComponent as React.ReactElement}
+          rightComponent={rightComponent as React.ReactElement}
+          showLeft={showExpanded}
+          showPreview={showPreview}
+        />
 
         {showPreview && (
           <PreviewSection

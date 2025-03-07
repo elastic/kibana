@@ -32,9 +32,7 @@ type EmbedProps = Pick<
   | 'shareableUrl'
   | 'embedUrlParamExtensions'
   | 'objectType'
-> & {
-  setIsNotSaved: () => void;
-};
+>;
 
 interface UrlParams {
   [extensionName: string]: {
@@ -52,7 +50,6 @@ export const EmbedContent = ({
   shareableUrlForSavedObject,
   shareableUrl,
   objectType,
-  setIsNotSaved,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -62,10 +59,6 @@ export const EmbedContent = ({
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (objectType !== 'dashboard') setIsNotSaved();
-  }, [url, setIsNotSaved, objectType]);
 
   const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
     const embedParam = '?embed=true';

@@ -40,6 +40,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+     * Create a new value list.
+     */
     createList(props: CreateListProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/lists', kibanaSpace))
@@ -48,6 +51,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create `.lists` and `.items` data streams in the relevant space.
+     */
     createListIndex(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/lists/index', kibanaSpace))
@@ -55,6 +61,14 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Create a value list item and associate it with the specified value list.
+
+All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+> info
+> Before creating a list item, you must create a list.
+
+      */
     createListItem(props: CreateListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/lists/items', kibanaSpace))
@@ -63,6 +77,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Delete a value list using the list ID.
+> info
+> When you delete a list, all of its list items are also deleted.
+
+      */
     deleteList(props: DeleteListProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(routeWithNamespace('/api/lists', kibanaSpace))
@@ -71,6 +91,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete the `.lists` and `.items` data streams.
+     */
     deleteListIndex(kibanaSpace: string = 'default') {
       return supertest
         .delete(routeWithNamespace('/api/lists/index', kibanaSpace))
@@ -78,6 +101,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Delete a value list item using its `id`, or its `list_id` and `value` fields.
+     */
     deleteListItem(props: DeleteListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(routeWithNamespace('/api/lists/items', kibanaSpace))
@@ -87,7 +113,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Exports list item values from the specified list
+     * Export list item values from the specified value list.
      */
     exportListItems(props: ExportListItemsProps, kibanaSpace: string = 'default') {
       return supertest
@@ -97,6 +123,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get all value list items in the specified list.
+     */
     findListItems(props: FindListItemsProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/lists/items/_find', kibanaSpace))
@@ -105,6 +134,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
+     */
     findLists(props: FindListsProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/lists/_find', kibanaSpace))
@@ -114,7 +146,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-      * Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+      * Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
@@ -127,6 +159,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Update specific fields of an existing list using the list `id`.
+     */
     patchList(props: PatchListProps, kibanaSpace: string = 'default') {
       return supertest
         .patch(routeWithNamespace('/api/lists', kibanaSpace))
@@ -135,6 +170,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Update specific fields of an existing value list item using the item `id`.
+     */
     patchListItem(props: PatchListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .patch(routeWithNamespace('/api/lists/items', kibanaSpace))
@@ -143,6 +181,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Get the details of a value list using the list ID.
+     */
     readList(props: ReadListProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/lists', kibanaSpace))
@@ -151,6 +192,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Verify that `.lists` and `.items` data streams exist.
+     */
     readListIndex(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/lists/index', kibanaSpace))
@@ -158,6 +202,9 @@ You can import items to a new or existing list.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get the details of a value list item.
+     */
     readListItem(props: ReadListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/lists/items', kibanaSpace))
@@ -173,6 +220,12 @@ You can import items to a new or existing list.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+      */
     updateList(props: UpdateListProps, kibanaSpace: string = 'default') {
       return supertest
         .put(routeWithNamespace('/api/lists', kibanaSpace))
@@ -181,6 +234,12 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+      */
     updateListItem(props: UpdateListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .put(routeWithNamespace('/api/lists/items', kibanaSpace))

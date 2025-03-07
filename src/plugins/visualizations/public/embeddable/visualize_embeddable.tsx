@@ -53,7 +53,6 @@ import {
   VisualizeOutputState,
   VisualizeRuntimeState,
   VisualizeSerializedState,
-  isVisualizeSavedObjectState,
 } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 
@@ -66,15 +65,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
 }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
-  buildEmbeddable: async (initialState: unknown, buildApi, uuid, parentApi) => {
-    // Handle state transfer from legacy visualize editor, which uses the legacy visualize embeddable and doesn't
-    // produce a snapshot state. If buildEmbeddable is passed only a savedObjectId in the state, this means deserializeState
-    // was never run, and it needs to be invoked manually
-    const state = isVisualizeSavedObjectState(initialState)
-      ? await deserializeState({
-          rawState: initialState,
-        })
-      : (initialState as VisualizeRuntimeState);
+  buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
+    const state = {
+      ...initialState,
+      linkedToLibrary: Boolean(initialState.savedObjectId),
+    };
 
     // Initialize dynamic actions
     const dynamicActionsApi = embeddableEnhancedStart?.initializeReactEmbeddableDynamicActions(
@@ -311,7 +306,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
           },
         ],
         savedObjectProperties: getUnchangingComparator(),
-        linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
+        linkedToLibrary: [
+          linkedToLibrary$,
+          (value) => linkedToLibrary$.next(value),
+          (a, b) => {
+            return a === undefined || b === undefined ? true : a === b;
+          },
+        ],
       }
     );
 

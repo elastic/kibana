@@ -151,9 +151,12 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
-        autoFocus: true,
         placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
+        autoFocus: false, // focused manually below - see https://github.com/elastic/eui/issues/8287
+        inputRef: (ref) => {
+          ref?.focus({ preventScroll: true });
+        },
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
     >

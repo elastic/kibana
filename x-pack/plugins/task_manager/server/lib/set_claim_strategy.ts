@@ -68,13 +68,32 @@ export function setClaimStrategy(opts: SetClaimStrategyOpts): TaskManagerConfig 
     return {
       ...opts.config,
       claim_strategy: CLAIM_STRATEGY_MGET,
-      poll_interval: MGET_DEFAULT_POLL_INTERVAL,
+      poll_interval: maybeSetDefaultInterval(opts.config, MGET_DEFAULT_POLL_INTERVAL),
     };
   }
 
   return {
     ...opts.config,
     claim_strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
-    poll_interval: DEFAULT_POLL_INTERVAL,
+    poll_interval: maybeSetDefaultInterval(opts.config, DEFAULT_POLL_INTERVAL),
   };
+}
+
+/**
+ * If the poll interval is not overridden by the user, return the specified default.
+ *
+ * @param config Current config
+ * @param defaultPollInterval Default to set
+ */
+function maybeSetDefaultInterval(config: TaskManagerConfig, defaultPollInterval: number) {
+  if (config.claim_strategy) {
+    return config.poll_interval;
+  }
+
+  // Our default when there's no claim_strategy is DEFAULT_POLL_INTERVAL
+  if (config.poll_interval === DEFAULT_POLL_INTERVAL) {
+    return defaultPollInterval;
+  }
+
+  return config.poll_interval;
 }

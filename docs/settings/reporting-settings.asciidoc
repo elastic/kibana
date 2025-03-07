@@ -271,7 +271,7 @@ The maximum {byte-units}[byte size] of a CSV file before being truncated. This s
 exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
 
 `xpack.reporting.csv.scroll.size`::
-Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
+Number of documents retrieved from {es} for each scroll iteration during a CSV export. The maximum value is `10000`. Defaults to `500`.
 [NOTE]
 ============
 You may need to lower this setting if the default number of documents creates a strain on network resources.

@@ -71,4 +71,22 @@ describe('EntityStoreEnablementModal', () => {
     const enableButton = screen.getByRole('button', { name: /Enable/i });
     expect(enableButton).toBeDisabled();
   });
+
+  it('should show proceed warning when riskScore is enabled but entityStore is disabled and unchecked', () => {
+    renderComponent({
+      ...defaultProps,
+      riskScore: { disabled: false, checked: false }, // Enabled & Checked
+      entityStore: { disabled: true, checked: false }, // Disabled & Unchecked
+    });
+    expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+  });
+
+  it('should show proceed warning when entityStore is enabled but riskScore is disabled and unchecked', () => {
+    renderComponent({
+      ...defaultProps,
+      entityStore: { disabled: false, checked: false }, // Enabled & Checked
+      riskScore: { disabled: true, checked: false }, // Disabled & Unchecked
+    });
+    expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
+  });
 });

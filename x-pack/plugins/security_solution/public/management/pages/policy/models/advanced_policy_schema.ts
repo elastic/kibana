@@ -384,6 +384,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.malware.max_file_size_bytes',
+    first_supported_version: '8.16.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.max_file_size_bytes',
+      {
+        defaultMessage:
+          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -609,6 +620,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.malware.max_file_size_bytes',
+    first_supported_version: '8.16.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.max_file_size_bytes',
+      {
+        defaultMessage:
+          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -824,6 +846,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.ransomware.dump_process',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.dump_process',
+      {
+        defaultMessage:
+          "A value of 'false' disables the generation of a memory dump of the Ransomware process. This is ignored if the canary protection is off. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.shellcode',
     first_supported_version: '7.15',
     documentation: i18n.translate(
@@ -853,6 +886,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.max_file_size_bytes',
+    first_supported_version: '8.16.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.max_file_size_bytes',
+      {
+        defaultMessage:
+          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
       }
     ),
   },

@@ -126,6 +126,7 @@ export const createCustomThresholdExecutor = ({
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
+    const runtimeMappings = dataView.getRuntimeMappings();
     const dataViewIndexPattern = dataView.getIndexPattern();
     const dataViewName = dataView.getName();
     if (!dataViewIndexPattern) {
@@ -147,6 +148,7 @@ export const createCustomThresholdExecutor = ({
       logger,
       { end: dateEnd, start: dateStart },
       esQueryConfig,
+      runtimeMappings,
       state.lastRunTimestamp,
       previousMissingGroups
     );

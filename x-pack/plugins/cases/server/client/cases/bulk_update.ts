@@ -60,6 +60,7 @@ import type {
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
+import { emptyCasesAssigneesSanitizer } from './sanitizers';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -328,7 +329,8 @@ export const bulkUpdate = async (
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const query = emptyCasesAssigneesSanitizer(rawQuery);
     const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
       caseIds,

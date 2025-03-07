@@ -42,7 +42,8 @@
       "observabilityAIAssistant",
       "aiops",
       "fieldsMetadata",
-      "logsDataAccess"
+      "logsDataAccess",
+      "embeddableEnhanced"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]

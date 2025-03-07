@@ -224,6 +224,114 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
   });
 
+  it('renders entries in correct order', async () => {
+    (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '1',
+            createdAt: '2024-10-21T18:54:14.773Z',
+            createdBy: 'u_user_id_1',
+            updatedAt: '2024-10-23T17:33:15.933Z',
+            updatedBy: 'u_user_id_1',
+            users: [{ name: 'Test User 1' }],
+            name: 'A',
+            namespace: 'default',
+            type: 'document',
+            kbResource: 'user',
+            source: 'user',
+            text: 'Very nice text',
+          },
+          {
+            id: '2',
+            createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_2',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_2',
+            users: [],
+            name: 'b',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-1',
+            field: 'semantic_field1',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+          {
+            id: '3',
+            createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_2',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_2',
+            users: [],
+            name: 'B',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-1',
+            field: 'semantic_field1',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+          {
+            id: '4',
+            createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_1',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_1',
+            users: [{ name: 'Test User 1' }],
+            name: 'a',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-2',
+            field: 'semantic_field2',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+        ],
+      },
+      isFetching: false,
+      refetch: jest.fn(),
+    });
+
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('B')).toBeInTheDocument();
+      expect(screen.getByText('a')).toBeInTheDocument();
+      expect(screen.getByText('b')).toBeInTheDocument();
+    });
+
+    // Order ascending
+    await userEvent.click(screen.getByText('Name'));
+
+    await waitFor(() => {
+      // Upper case letters should come before lower case letters
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('a'))).toBe(4);
+      expect(screen.getByText('B').compareDocumentPosition(screen.getByText('b'))).toBe(4);
+
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('B'))).toBe(4);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('B'))).toBe(4);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('b'))).toBe(4);
+    });
+
+    // Order decending
+    await userEvent.click(screen.getByText('Name'));
+
+    await waitFor(() => {
+      // Lower case letters should come before upper case letters
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('a'))).toBe(2);
+      expect(screen.getByText('B').compareDocumentPosition(screen.getByText('b'))).toBe(2);
+
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('B'))).toBe(2);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('B'))).toBe(2);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('b'))).toBe(2);
+    });
+  });
+
   it('opens the flyout when add document button is clicked', async () => {
     const openFlyoutMock = jest.fn();
     (useFlyoutModalVisibility as jest.Mock).mockReturnValue({

@@ -10,52 +10,8 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { storybookAliases } from '../../../../src/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
-
-// TODO - how to generate this dynamically?
-const STORYBOOKS = [
-  'apm',
-  'canvas',
-  'cases',
-  'cell_actions',
-  'coloring',
-  'chart_icons',
-  'content_management_examples',
-  'custom_integrations',
-  'dashboard_enhanced',
-  'dashboard',
-  'data',
-  'logs_explorer',
-  'embeddable',
-  'expression_error',
-  'expression_image',
-  'expression_metric',
-  'expression_repeat_image',
-  'expression_reveal_image',
-  'expression_shape',
-  'expression_tagcloud',
-  'management',
-  'fleet',
-  'grouping',
-  'home',
-  'infra',
-  'kibana_react',
-  'lists',
-  'observability',
-  'observability_ai_assistant',
-  'observability_shared',
-  'presentation',
-  'security_solution',
-  'security_solution_packages',
-  'serverless',
-  'shared_ux',
-  'triggers_actions_ui',
-  'ui_actions_enhanced',
-  'language_documentation_popover',
-  'unified_search',
-  'random_sampling',
-  'esql_editor',
-];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 
@@ -82,8 +38,12 @@ const ghStatus = (state: string, description: string) =>
 const build = () => {
   console.log('--- Building Storybooks');
 
-  for (const storybook of STORYBOOKS) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
+  for (const storybook of Object.keys(storybookAliases)) {
+    exec(
+      `STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`,
+      `NODE_OPTIONS=--max-old-space-size=6144`,
+      `yarn storybook --site ${storybook}`
+    );
   }
 };
 

@@ -239,15 +239,22 @@ This step is required to use OAuth for authentication between Elastic and {sn}.
 // tag::servicenow-rsa-key[]
 *Create an RSA keypair:*
 
-. Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key:
+. Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key.
+** To create a private key with a password, use the `passout` option. For example:
++
+--
+[source,sh]
+----
+openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3072
+----
+--
+** To create a private key without a password, omit the `passout` option. For example:
 +
 --
 [source,sh]
 ----
 openssl genrsa -out example-private-key.pem 3072
-openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3072 <1>
 ----
-<1> Use the `passout` option to set a password on your private key. This is optional but remember your password if you set one.
 --
 
 . Use https://www.openssl.org/docs/man1.0.2/man1/req.html[OpenSSL] to generate the matching public key:

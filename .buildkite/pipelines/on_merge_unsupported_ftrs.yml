@@ -37,6 +37,8 @@ steps:
       machineType: n2-standard-4
       preemptible: true
     depends_on: build
+    env:
+      PING_SLACK_TEAM: "@obs-ux-infra_services-team"
     timeout_in_minutes: 120
     retry:
       automatic:
@@ -54,6 +56,8 @@ steps:
       machineType: n2-standard-4
       preemptible: true
     depends_on: build
+    env:
+      PING_SLACK_TEAM: "@obs-ux-infra_services-team"
     timeout_in_minutes: 120
     retry:
       automatic:

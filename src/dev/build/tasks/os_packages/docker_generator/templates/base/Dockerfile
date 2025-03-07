@@ -59,7 +59,7 @@ RUN set -e ; \
  make install > /dev/null ; \
  rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
  chown -R 1000:0 "${OPENSSL_PATH}";
- 
+
 {{/fips}}
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
@@ -114,7 +114,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       microdnf update --setopt=tsflags=nodocs -y && \
       microdnf install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils && \
+      fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
       microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
       sleep 10; \
     done; \
@@ -126,7 +126,7 @@ RUN for iter in {1..10}; do \
       apt-get update  && \
       apt-get upgrade -y  && \
       apt-get install -y --no-install-recommends \
-       fontconfig libnss3 curl ca-certificates && \
+      fontconfig fonts-liberation libnss3 curl ca-certificates && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
       sleep 10; \
@@ -134,7 +134,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ libnss findutils shadow
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -152,8 +152,8 @@ WORKDIR /usr/share/kibana
 {{#fips}}
 
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN /bin/echo -e '\n--enable-fips' >> config/node.options
-RUN echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
+RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
+RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
 ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
@@ -231,7 +231,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    /bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

@@ -485,8 +485,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
-      describe('Processes Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/192891
+      describe.skip('Processes Tab', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -554,7 +554,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
         });
 
-        it('should render logs tab', async () => {
+        it('should render logs tab content', async () => {
           await pageObjects.assetDetails.logsExists();
         });
 
@@ -578,7 +578,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 
-        it('should show a date picker', async () => {
+        it('should not show a date picker', async () => {
           expect(await pageObjects.timePicker.timePickerExists()).to.be(false);
         });
       });

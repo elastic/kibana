@@ -61,11 +61,14 @@ export interface AddPrebuiltRulesTableState {
    * package in background
    */
   isUpgradingSecurityPackages: boolean;
-
   /**
    * Is true when performing Install All Rules mutation
    */
   isInstallingAllRules: boolean;
+  /**
+   * Is true when any rule is currently being installed
+   */
+  isAnyRuleInstalling: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -144,6 +147,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       prebuiltRulesStatus,
     }),
   });
+
+  const isAnyRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
@@ -281,6 +286,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isRefetching,
         isUpgradingSecurityPackages,
         isInstallingAllRules,
+        isAnyRuleInstalling,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -297,6 +303,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isRefetching,
     isUpgradingSecurityPackages,
     isInstallingAllRules,
+    isAnyRuleInstalling,
     selectedRules,
     dataUpdatedAt,
     actions,

@@ -24,7 +24,7 @@ export const DashboardDrilldownOptionsComponent = ({
 }: DashboardDrilldownOptionsProps) => {
   return (
     <>
-      <EuiFormRow hasChildLabel={false}>
+      <EuiFormRow hasChildLabel={false} data-test-subj="dashboardDrillDownOptions">
         <EuiSwitch
           name="useCurrentFilters"
           label={dashboardDrilldownConfigStrings.component.getUseCurrentFiltersLabel()}

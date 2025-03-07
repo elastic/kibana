@@ -10,7 +10,6 @@ import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
@@ -40,12 +39,20 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
 import { userEvent } from '@testing-library/user-event';
 import * as notesApi from '../../../../../notes/api/api';
+import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
+import * as useTimelineEventsModule from '../../../../containers';
+
+jest.mock('../../../../../common/utils/route/use_route_spy', () => {
+  return {
+    useRouteSpy: jest.fn().mockReturnValue([
+      {
+        pageName: 'timeline',
+      },
+    ]),
+  };
+});
 
 jest.mock('../../../../../common/components/user_privileges');
-
-jest.mock('../../../../containers', () => ({
-  useTimelineEvents: jest.fn(),
-}));
 
 jest.mock('../../../../containers/details');
 
@@ -62,8 +69,6 @@ jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
-jest.mock('../../../../../common/lib/kuery');
-
 jest.mock('../../../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => ({
@@ -73,6 +78,8 @@ jest.mock('react-router-dom', () => ({
     search: '',
   })),
 }));
+
+const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 
 // These tests can take more than standard timeout of 5s
 // that is why we are increasing it.
@@ -130,8 +137,32 @@ const customColumnOrder = [
   },
 ];
 
-const mockState = {
-  ...structuredClone(mockGlobalState),
+const mockBaseState = structuredClone(mockGlobalState);
+
+const mockState: typeof mockGlobalState = {
+  ...mockBaseState,
+  timeline: {
+    ...mockBaseState.timeline,
+    timelineById: {
+      [TimelineId.test]: {
+        ...mockBaseState.timeline.timelineById[TimelineId.test],
+        /* 1 record for each page */
+        itemsPerPage: 1,
+        itemsPerPageOptions: [1, 2, 3, 4, 5],
+        /* Returns 1 records in one query */
+        sampleSize: 1,
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              kind: 'kuery',
+              expression: '*',
+            },
+            serializedQuery: '*',
+          },
+        },
+      },
+    },
+  },
 };
 
 mockState.timeline.timelineById[TimelineId.test].columns = customColumnOrder;
@@ -146,20 +177,18 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const loadPageMock = jest.fn();
-
 const useSourcererDataViewMocked = jest.fn().mockReturnValue({
   ...mockSourcererScope,
 });
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-let useTimelineEventsMock = jest.fn();
+const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
 
 describe('query tab with unified timeline', () => {
-  const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
+  const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
   beforeAll(() => {
-    fetchNotesMock.mockImplementation(jest.fn());
+    fetchNotesSpy.mockImplementation(jest.fn());
     jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
@@ -173,34 +202,30 @@ describe('query tab with unified timeline', () => {
       },
     });
   });
+
+  const baseKibanaServicesMock = createStartServicesMock();
+
   const kibanaServiceMock: StartServices = {
-    ...createStartServicesMock(),
+    ...baseKibanaServicesMock,
     storage: storageMock,
+    data: {
+      ...baseKibanaServicesMock.data,
+      search: {
+        ...baseKibanaServicesMock.data.search,
+        search: mockTimelineSearchSubscription,
+      },
+    },
   };
 
   afterEach(() => {
     jest.clearAllMocks();
     storageMock.clear();
-    fetchNotesMock.mockClear();
+    fetchNotesSpy.mockClear();
     cleanup();
     localStorage.clear();
   });
 
   beforeEach(() => {
-    useTimelineEventsMock = jest.fn(() => [
-      false,
-      {
-        events: structuredClone(mockTimelineData.slice(0, 1)),
-        pageInfo: {
-          activePage: 0,
-          totalPages: 3,
-        },
-        refreshedAt: Date.now(),
-        totalCount: 3,
-        loadPage: loadPageMock,
-      },
-    ]);
-
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
@@ -215,8 +240,6 @@ describe('query tab with unified timeline', () => {
         services: kibanaServiceMock,
       };
     });
-
-    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
@@ -299,33 +322,24 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('pagination', () => {
-    beforeEach(() => {
-      // pagination tests need more than 1 record so here
-      // we return 5 records instead of just 1.
-      useTimelineEventsMock = jest.fn(() => [
-        false,
-        {
-          events: structuredClone(mockTimelineData.slice(0, 5)),
-          pageInfo: {
-            activePage: 0,
-            totalPages: 5,
+    const mockStateWithNoteInTimeline = {
+      ...mockState,
+      timeline: {
+        ...mockState.timeline,
+        timelineById: {
+          [TimelineId.test]: {
+            ...mockState.timeline.timelineById[TimelineId.test],
+            /* 1 record for each page */
+            itemsPerPage: 1,
+            itemsPerPageOptions: [1, 2, 3, 4, 5],
+            savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+            pinnedEventIds: { '1': true },
+            /* Returns 3 records */
+            sampleSize: 3,
           },
-          refreshedAt: Date.now(),
-          /*
-           * `totalCount` could be any number w.r.t this test
-           * and actually means total hits on elastic search
-           * and not the fecthed number of records.
-           *
-           * This helps in testing `sampleSize` and `loadMore`
-           */
-          totalCount: 50,
-          loadPage: loadPageMock,
         },
-      ]);
-
-      (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
-    });
-
+      },
+    };
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -333,23 +347,6 @@ describe('query tab with unified timeline', () => {
     it(
       'should paginate correctly',
       async () => {
-        const mockStateWithNoteInTimeline = {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                /* 1 record for each page */
-                itemsPerPage: 1,
-                itemsPerPageOptions: [1, 2, 3, 4, 5],
-                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
-                pinnedEventIds: { '1': true },
-              },
-            },
-          },
-        };
-
         render(
           <TestProviders
             store={createMockStore({
@@ -368,13 +365,13 @@ describe('query tab with unified timeline', () => {
         );
 
         expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-        expect(screen.getByTestId('pagination-button-4')).toBeVisible();
-        expect(screen.queryByTestId('pagination-button-5')).toBeNull();
+        expect(screen.getByTestId('pagination-button-2')).toBeVisible();
+        expect(screen.queryByTestId('pagination-button-3')).toBeNull();
 
-        fireEvent.click(screen.getByTestId('pagination-button-4'));
+        fireEvent.click(screen.getByTestId('pagination-button-2'));
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-4')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
         });
       },
       SPECIAL_TEST_TIMEOUT
@@ -383,27 +380,6 @@ describe('query tab with unified timeline', () => {
     it(
       'should load more records according to sample size correctly',
       async () => {
-        const mockStateWithNoteInTimeline = {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                itemsPerPage: 1,
-                /*
-                 * `sampleSize` is the max number of records that are fetched from elasticsearch
-                 * in one request. If hits > sampleSize, you can fetch more records ( <= sampleSize)
-                 */
-                sampleSize: 5,
-                itemsPerPageOptions: [1, 2, 3, 4, 5],
-                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
-                pinnedEventIds: { '1': true },
-              },
-            },
-          },
-        };
-
         render(
           <TestProviders
             store={createMockStore({
@@ -418,15 +394,18 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-          expect(screen.getByTestId('pagination-button-4')).toBeVisible();
+          expect(screen.getByTestId('pagination-button-2')).toBeVisible();
         });
         // Go to last page
-        fireEvent.click(screen.getByTestId('pagination-button-4'));
+        fireEvent.click(screen.getByTestId('pagination-button-2'));
         await waitFor(() => {
           expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         });
         fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
-        expect(loadPageMock).toHaveBeenNthCalledWith(1, 1);
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-5')).toBeVisible();
+        });
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -434,24 +413,6 @@ describe('query tab with unified timeline', () => {
     it(
       'should load notes for current page only',
       async () => {
-        const mockStateWithNoteInTimeline = {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                /* 1 record for each page */
-                itemsPerPage: 1,
-                pageIndex: 0,
-                itemsPerPageOptions: [1, 2, 3, 4, 5],
-                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
-                pinnedEventIds: { '1': true },
-              },
-            },
-          },
-        };
-
         render(
           <TestProviders
             store={createMockStore({
@@ -467,11 +428,11 @@ describe('query tab with unified timeline', () => {
         expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
         expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-        expect(fetchNotesMock).toHaveBeenCalledWith(['1']);
+        expect(fetchNotesSpy).toHaveBeenCalledWith(['1']);
 
         // Page : 2
 
-        fetchNotesMock.mockClear();
+        fetchNotesSpy.mockClear();
         expect(screen.getByTestId('pagination-button-1')).toBeVisible();
 
         fireEvent.click(screen.getByTestId('pagination-button-1'));
@@ -479,19 +440,19 @@ describe('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-1')).toHaveAttribute('aria-current', 'true');
 
-          expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
+          expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
         });
 
         // Page : 3
 
-        fetchNotesMock.mockClear();
+        fetchNotesSpy.mockClear();
         expect(screen.getByTestId('pagination-button-2')).toBeVisible();
         fireEvent.click(screen.getByTestId('pagination-button-2'));
 
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
 
-          expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
+          expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
         });
       },
       SPECIAL_TEST_TIMEOUT
@@ -500,24 +461,6 @@ describe('query tab with unified timeline', () => {
     it(
       'should load notes for correct page size',
       async () => {
-        const mockStateWithNoteInTimeline = {
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                /* 1 record for each page */
-                itemsPerPage: 1,
-                pageIndex: 0,
-                itemsPerPageOptions: [1, 2, 3, 4, 5],
-                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
-                pinnedEventIds: { '1': true },
-              },
-            },
-          },
-        };
-
         render(
           <TestProviders
             store={createMockStore({
@@ -542,14 +485,61 @@ describe('query tab with unified timeline', () => {
           expect(screen.getByTestId('tablePagination-2-rows')).toBeVisible();
         });
 
-        fetchNotesMock.mockClear();
+        fetchNotesSpy.mockClear();
         fireEvent.click(screen.getByTestId('tablePagination-2-rows'));
 
         await waitFor(() => {
-          expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [
+          expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [
             mockTimelineData[0]._id,
             mockTimelineData[1]._id,
           ]);
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+  });
+
+  const openDisplaySettings = async () => {
+    expect(screen.getByTestId('dataGridDisplaySelectorButton')).toBeVisible();
+
+    fireEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByTestId('unifiedDataTableSampleSizeInput')
+          .find((el) => el.getAttribute('type') === 'number')
+      ).toBeVisible();
+    });
+  };
+
+  const updateSampleSize = async (sampleSize: number) => {
+    const sampleSizeInput = screen
+      .getAllByTestId('unifiedDataTableSampleSizeInput')
+      .find((el) => el.getAttribute('type') === 'number');
+
+    expect(sampleSizeInput).toBeVisible();
+
+    fireEvent.change(sampleSizeInput as HTMLElement, {
+      target: { value: sampleSize },
+    });
+  };
+
+  describe('controls', () => {
+    it(
+      'should reftech on sample size change',
+      async () => {
+        renderTestComponents();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+        expect(screen.queryByTestId('pagination-button-1')).not.toBeInTheDocument();
+
+        await openDisplaySettings();
+        await updateSampleSize(2);
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-1')).toBeVisible();
         });
       },
       SPECIAL_TEST_TIMEOUT
@@ -642,12 +632,11 @@ describe('query tab with unified timeline', () => {
         });
         expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
 
-        useTimelineEventsMock.mockClear();
-
+        useTimelineEventsSpy.mockClear();
         fireEvent.click(screen.getByTitle('Sort Old-New'));
 
         await waitFor(() => {
-          expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({
               sort: [
@@ -686,12 +675,12 @@ describe('query tab with unified timeline', () => {
         expect(screen.getByTitle('Sort A-Z')).toBeVisible();
         expect(screen.getByTitle('Sort Z-A')).toBeVisible();
 
-        useTimelineEventsMock.mockClear();
+        useTimelineEventsSpy.mockClear();
 
         fireEvent.click(screen.getByTitle('Sort A-Z'));
 
         await waitFor(() => {
-          expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({
               sort: [
@@ -741,12 +730,12 @@ describe('query tab with unified timeline', () => {
         expect(screen.getByTitle('Sort Low-High')).toBeVisible();
         expect(screen.getByTitle('Sort High-Low')).toBeVisible();
 
-        useTimelineEventsMock.mockClear();
+        useTimelineEventsSpy.mockClear();
 
         fireEvent.click(screen.getByTitle('Sort Low-High'));
 
         await waitFor(() => {
-          expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+          expect(useTimelineEventsSpy).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({
               sort: [
@@ -1214,12 +1203,12 @@ describe('query tab with unified timeline', () => {
         'should disable pinning when event has notes attached in timeline',
         async () => {
           const mockStateWithNoteInTimeline = {
-            ...mockGlobalState,
+            ...mockState,
             timeline: {
-              ...mockGlobalState.timeline,
+              ...mockState.timeline,
               timelineById: {
                 [TimelineId.test]: {
-                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                  ...mockState.timeline.timelineById[TimelineId.test],
                   savedObjectId: 'timeline-1', // match timelineId in mocked notes data
                   pinnedEventIds: { '1': true },
                 },

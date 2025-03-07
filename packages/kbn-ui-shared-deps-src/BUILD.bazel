@@ -15,7 +15,6 @@ webpack_cli(
     "@npm//moment",
     "@npm//babel-loader",
     "@npm//css-loader",
-    "@npm//url-loader",
     "@npm//@babel/plugin-transform-numeric-separator",
     "//packages/kbn-ui-shared-deps-npm",
     "//packages/kbn-babel-register",
@@ -51,11 +50,9 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
   }),
   visibility = ["//visibility:public"],

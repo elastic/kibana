@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
@@ -16,7 +15,7 @@ import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { TriggersAndActionsUiServices } from '../../..';
+import { useKibana } from '../../../common/lib/kibana';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
@@ -54,7 +53,7 @@ export function AlertsSearchBar({
       ui: { SearchBar },
     },
     data: dataService,
-  } = useKibana<TriggersAndActionsUiServices>().services;
+  } = useKibana().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({

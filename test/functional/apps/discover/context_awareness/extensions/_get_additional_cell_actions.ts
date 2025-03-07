@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
 
-  describe('extension getAdditionalCellActions', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/213300
+  describe.skip('extension getAdditionalCellActions', () => {
     describe('ES|QL mode', () => {
       it('should render additional cell actions for logs data source', async () => {
         const state = kbnRison.encode({

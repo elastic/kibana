@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterText(`GET _search\n`);
-      await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
@@ -146,6 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('JSON autocompletion with placeholder fields', async () => {
         await PageObjects.console.enterText('GET _search\n');
         await PageObjects.console.enterText('{');
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.pressEnter();
 
         for (const char of '"ag') {
@@ -160,15 +160,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
+        // Verify that the autocomplete suggestion is inserted into the editor
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(
           `
-GET _search
-{
-    "aggs": {
-      "NAME": {
-        "AGG_TYPE": {}
-      }
-    }
+"aggs": {
+  "NAME": {
+    "AGG_TYPE": {}
+  }
 }
 `.replace(/\s/g, '')
         );

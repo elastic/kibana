@@ -1165,7 +1165,7 @@ const updateExistingDataStream = async ({
   }
 
   try {
-    logger.debug(`Updating settings for ${dataStreamName}`);
+    logger.debug(`Updating index settings of data stream  ${dataStreamName}`);
 
     await retryTransientEsErrors(
       () =>
@@ -1176,8 +1176,11 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
+    logger.error(`Error updating index settings of data stream ${dataStreamName}: ${err}`);
     // Same as above - Check if this error can happen because of invalid settings;
     // We are returning a 500 but in that case it should be a 400 instead
-    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
+    throw new PackageESError(
+      `Could not update index settings of data stream ${dataStreamName}: ${err.message}`
+    );
   }
 };

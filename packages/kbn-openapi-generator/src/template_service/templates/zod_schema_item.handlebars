@@ -124,5 +124,8 @@ z.unknown()
   {{~#if (eq format 'date-math')}}.superRefine(isValidDateMath){{/if~}}
   {{~#if (eq format 'uuid')}}.uuid(){{/if~}}
   {{~#if pattern}}.regex(/{{pattern}}/){{/if~}}
+  {{~#if (eq format 'trim')}}.trim(){{/if~}}
+  {{~#if (eq format 'nonempty')}}.superRefine(isNonEmptyString){{/if~}}
+
   {{~/if~}}
 {{~/inline~}}

@@ -33,10 +33,8 @@ import type {
 
 // @ts-expect-error
 import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
-// @ts-expect-error
-import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
-// @ts-expect-error
-import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
+import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
+import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?asUrl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const maplibregl: any = maplibreglDist;

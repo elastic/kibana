@@ -7,56 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment, { Moment } from 'moment-timezone';
+import moment, { type Moment } from 'moment-timezone';
 
-export enum Frequency {
-  YEARLY = 0,
-  MONTHLY = 1,
-  WEEKLY = 2,
-  DAILY = 3,
-  HOURLY = 4,
-  MINUTELY = 5,
-}
-
-export enum Weekday {
-  MO = 1,
-  TU = 2,
-  WE = 3,
-  TH = 4,
-  FR = 5,
-  SA = 6,
-  SU = 7,
-}
-
-export type WeekdayStr = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
-interface IterOptions {
-  refDT: Moment;
-  wkst?: Weekday | number | null;
-  byyearday?: number[] | null;
-  bymonth?: number[] | null;
-  bysetpos?: number[] | null;
-  bymonthday?: number[] | null;
-  byweekday?: Weekday[] | null;
-  byhour?: number[] | null;
-  byminute?: number[] | null;
-  bysecond?: number[] | null;
-}
-
-type Options = Omit<IterOptions, 'refDT'> & {
-  dtstart: Date;
-  freq?: Frequency;
-  interval?: number;
-  until?: Date | null;
-  count?: number;
-  tzid: string;
-};
-
-type ConstructorOptions = Omit<Options, 'byweekday' | 'wkst'> & {
-  byweekday?: Array<string | number> | null;
-  wkst?: Weekday | WeekdayStr | number | null;
-};
-
-export type { ConstructorOptions as Options };
+import {
+  Frequency,
+  Weekday,
+  type WeekdayStr,
+  type Options,
+  type IterOptions,
+  ConstructorOptions,
+} from './types';
+import { sanitizeOptions } from './sanitize';
+import { validateOptions } from './validate';
 
 const ISO_WEEKDAYS = [
   Weekday.MO,
@@ -73,19 +35,16 @@ type AllResult = Date[] & {
 };
 
 const ALL_LIMIT = 10000;
+const TIMEOUT_LIMIT = 100000;
 
 export class RRule {
   private options: Options;
+
   constructor(options: ConstructorOptions) {
-    this.options = options as Options;
-    if (isNaN(options.dtstart.getTime())) {
-      throw new Error('Cannot create RRule: dtstart is an invalid date');
-    }
-    if (options.until && isNaN(options.until.getTime())) {
-      throw new Error('Cannot create RRule: until is an invalid date');
-    }
+    this.options = sanitizeOptions(options as Options);
     if (typeof options.wkst === 'string') {
       this.options.wkst = Weekday[options.wkst];
+      if (!this.options.wkst) delete this.options.wkst;
     }
     const weekdayParseResult = parseByWeekdayPos(options.byweekday);
     if (weekdayParseResult) {
@@ -111,12 +70,17 @@ export class RRule {
       .toDate();
 
     const nextRecurrences: Moment[] = [];
+    let iters = 0;
 
     while (
       (!count && !until) ||
       (count && yieldedRecurrenceCount < count) ||
-      (until && current.getTime() < new Date(until).getTime())
+      (until && current.getTime() < until.getTime())
     ) {
+      iters++;
+      if (iters > TIMEOUT_LIMIT) {
+        throw new Error('RRule iteration limit exceeded');
+      }
       const next = nextRecurrences.shift()?.toDate();
       if (next) {
         current = next;
@@ -172,6 +136,16 @@ export class RRule {
     else {
       dates.hasMore = true;
       return dates;
+    }
+  }
+
+  static isValid(options: ConstructorOptions): boolean {
+    try {
+      validateOptions(options);
+
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }
@@ -305,6 +279,7 @@ const getYearOfRecurrences = function ({
       return getMonthOfRecurrences({
         refDT: currentMonth,
         wkst,
+        bymonth,
         bymonthday,
         byweekday,
         byhour,
@@ -319,6 +294,7 @@ const getYearOfRecurrences = function ({
 
   return derivedByyearday.flatMap((dayOfYear) => {
     const currentDate = moment(refDT).dayOfYear(dayOfYear);
+    if (currentDate.year() !== refDT.year()) return [];
     if (!derivedByweekday.includes(currentDate.isoWeekday())) return [];
     return getDayOfRecurrences({ refDT: currentDate, byhour, byminute, bysecond });
   });
@@ -337,7 +313,7 @@ const getMonthOfRecurrences = function ({
 }: IterOptions) {
   const derivedByweekday = byweekday ?? ISO_WEEKDAYS;
   const currentMonth = refDT.month();
-  if (bymonth && !bymonth.includes(currentMonth)) return [];
+  if (bymonth && !bymonth.includes(currentMonth + 1)) return [];
 
   let derivedBymonthday = bymonthday ?? [refDT.date()];
   if (bysetpos) {
@@ -384,6 +360,7 @@ const getMonthOfRecurrences = function ({
 
   return derivedBymonthday.flatMap((date) => {
     const currentDate = moment(refDT).date(date);
+    if (bymonth && !bymonth.includes(currentDate.month() + 1)) return [];
     if (!derivedByweekday.includes(currentDate.isoWeekday())) return [];
     return getDayOfRecurrences({ refDT: currentDate, byhour, byminute, bysecond });
   });

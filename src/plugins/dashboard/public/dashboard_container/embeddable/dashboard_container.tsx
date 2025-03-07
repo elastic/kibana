@@ -68,6 +68,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
 import {
   DashboardAttributes,
@@ -238,6 +239,11 @@ export class DashboardContainer
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
     async function untilContainerInitialized(): Promise<void> {
       return new Promise((resolve) => {
+        if (initialInput.viewMode === ViewMode.PRINT) {
+          // control group is not created in print mode
+          resolve();
+          return;
+        }
         controlGroupApi$
           .pipe(
             skipWhile((controlGroupApi) => !controlGroupApi),
@@ -957,7 +963,16 @@ export class DashboardContainer
     for (const panelId of Object.keys(currentChildren)) {
       if (this.getInput().panels[panelId]) {
         const child = currentChildren[panelId];
-        if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        if (apiPublishesUnsavedChanges(child)) {
+          const success = child.resetUnsavedChanges();
+          if (!success) {
+            coreServices.notifications.toasts.addWarning(
+              i18n.translate('dashboard.reset.panelError', {
+                defaultMessage: 'Unable to reset panel changes',
+              })
+            );
+          }
+        }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
         delete currentChildren[panelId];

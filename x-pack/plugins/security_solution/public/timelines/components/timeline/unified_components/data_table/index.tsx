@@ -135,7 +135,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     } = useKibana();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
-    const [fetchedPage, setFechedPage] = useState<number>(0);
 
     const onCloseExpandableFlyout = useCallback((id: string) => {
       setExpandedDoc((prev) => (!prev ? prev : undefined));
@@ -236,9 +235,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const handleFetchMoreRecords = useCallback(() => {
-      onFetchMoreRecords(fetchedPage + 1);
-      setFechedPage(fetchedPage + 1);
-    }, [fetchedPage, onFetchMoreRecords]);
+      onFetchMoreRecords();
+    }, [onFetchMoreRecords]);
 
     const additionalControls = useMemo(
       () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
@@ -251,10 +249,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       (newSampleSize: number) => {
         if (newSampleSize !== sampleSize) {
           dispatch(timelineActions.updateSampleSize({ id: timelineId, sampleSize: newSampleSize }));
-          refetch();
         }
       },
-      [dispatch, sampleSize, timelineId, refetch]
+      [dispatch, sampleSize, timelineId]
     );
 
     const onUpdateRowHeight = useCallback(

@@ -32,7 +32,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     /**
-     * Creates an endpoint list or does nothing if the list already exists
+     * Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
      */
     createEndpointList(kibanaSpace: string = 'default') {
       return supertest
@@ -41,6 +41,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Create an endpoint exception list item, and associate it with the endpoint exception list.
+     */
     createEndpointListItem(props: CreateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
@@ -49,6 +52,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Delete an endpoint exception list item using the `id` or `item_id` field.
+     */
     deleteEndpointListItem(props: DeleteEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
@@ -57,6 +63,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all endpoint exception list items.
+     */
     findEndpointListItems(props: FindEndpointListItemsProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/endpoint_list/items/_find', kibanaSpace))
@@ -65,6 +74,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of an endpoint exception list item using the `id` or `item_id` field.
+     */
     readEndpointListItem(props: ReadEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
@@ -73,6 +85,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Update an endpoint exception list item using the `id` or `item_id` field.
+     */
     updateEndpointListItem(props: UpdateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
         .put(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))

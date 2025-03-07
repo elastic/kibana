@@ -118,6 +118,7 @@ export const OptionsListPopoverSuggestions = ({
     if (canLoadMoreSuggestions) {
       options.push({
         key: 'loading-option',
+        'data-test-subj': 'optionslist--canLoadMore',
         className: 'optionslist--loadingMoreGroupLabel',
         label: OptionsListStrings.popover.getLoadingMoreMessage(),
         isGroupLabel: true,
@@ -150,8 +151,8 @@ export const OptionsListPopoverSuggestions = ({
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
       // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
       // have to scroll **all the way** to the bottom in order to load more options
-      stateManager.requestSize.next(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
-      api.loadMoreSubject.next(null); // trigger refetch with loadMoreSubject
+      stateManager.requestSize.next(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
+      api.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
     }
   }, [api.loadMoreSubject, stateManager.requestSize, totalCardinality]);
 
@@ -186,7 +187,7 @@ export const OptionsListPopoverSuggestions = ({
 
   return (
     <>
-      <div ref={listRef}>
+      <div data-test-subj="optionsList--scrollListener" ref={listRef}>
         <EuiSelectable
           options={selectableOptions}
           renderOption={(option) => renderOption(option, searchString)}
@@ -196,7 +197,7 @@ export const OptionsListPopoverSuggestions = ({
             selectableOptions.length
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
-          onChange={(newSuggestions, _, changedOption) => {
+          onChange={(newSuggestions, event, changedOption) => {
             api.makeSelection(changedOption.key, showOnlySelected);
           }}
         >

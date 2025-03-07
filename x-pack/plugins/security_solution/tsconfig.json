@@ -232,5 +232,6 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
+    "@kbn/core-chrome-browser-mocks",
   ]
 }

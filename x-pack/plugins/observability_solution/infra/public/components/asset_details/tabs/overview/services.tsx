@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ServicesAPIResponseRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { Section } from '../../components/section';
@@ -44,13 +45,18 @@ export const ServicesContent = ({
     app: 'apm',
     pathname: '/onboarding',
   });
+
+  const parsedDateRange = useTimeRange({
+    rangeFrom: dateRange.from,
+    rangeTo: dateRange.to,
+  });
+
   const params = useMemo(
     () => ({
       filters: { [HOST_NAME_FIELD]: hostName },
-      from: dateRange.from,
-      to: dateRange.to,
+      ...parsedDateRange,
     }),
-    [hostName, dateRange.from, dateRange.to]
+    [hostName, parsedDateRange]
   );
 
   const query = useMemo(() => ({ ...params, filters: JSON.stringify(params.filters) }), [params]);

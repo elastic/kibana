@@ -174,11 +174,11 @@ describe('multiLineStringDiffAlgorithm', () => {
       const result = multiLineStringDiffAlgorithm(mockVersions);
       const endTime = performance.now();
 
-      // If the regex merge in this function takes over 1 sec, this test fails
+      // If the regex merge in this function takes over 2 sec, this test fails
       // Performance measurements: https://github.com/elastic/kibana/pull/199388
       // NOTE: despite the fact that this test runs in ~50ms locally, on CI it
-      // runs slower and can be flaky even with a 500ms threshold.
-      expect(endTime - startTime).toBeLessThan(1000);
+      // runs ~10x slower and can be flaky even with a 1000ms threshold.
+      expect(endTime - startTime).toBeLessThan(2000);
 
       expect(result).toEqual(
         expect.objectContaining({

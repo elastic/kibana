@@ -8,7 +8,7 @@
 export const ADD_NEW_CONNECTOR = '[data-test-subj="addNewConnectorButton"]';
 export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
 export const ASSISTANT_SETTINGS_BUTTON = 'button[data-test-subj="settings"]';
-export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantHeaderLink"]';
+export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantNavLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
 export const CHAT_ICON = '[data-test-subj="newChat"]';

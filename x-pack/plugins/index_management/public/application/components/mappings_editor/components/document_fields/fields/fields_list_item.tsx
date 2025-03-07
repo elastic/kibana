@@ -64,6 +64,8 @@ interface Props {
   treeDepth: number;
   state: State;
   isAddingFields?: boolean;
+  createFieldFormRef?: React.RefObject<HTMLDivElement>;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 function FieldListItemComponent(
@@ -85,6 +87,7 @@ function FieldListItemComponent(
     state,
     isAddingFields,
     setPreviousState,
+    pendingFieldsRef,
   }: Props,
   ref: React.Ref<HTMLLIElement>
 ) {
@@ -141,7 +144,6 @@ function FieldListItemComponent(
 
     const { addMultiFieldButtonLabel, addPropertyButtonLabel, editButtonLabel, deleteButtonLabel } =
       i18nTexts;
-
     return (
       <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
         {canHaveMultiFields && (
@@ -321,6 +323,7 @@ function FieldListItemComponent(
           state={state}
           isAddingFields={isAddingFields}
           setPreviousState={setPreviousState}
+          pendingFieldsRef={pendingFieldsRef}
         />
       )}
 

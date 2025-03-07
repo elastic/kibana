@@ -22,7 +22,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const DOC_LINK_VERSION = meta.version;
   const ECS_VERSION = meta.ecs_version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
-  const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
 
@@ -38,7 +37,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
-  const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
+  const SEARCH_UI_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/search-ui/current/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
@@ -471,7 +470,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
-      avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-av-comparatives-business-security-test`,
+      avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-security-av-comparatives-business-test`,
+      bidirectionalIntegrations: `${SECURITY_SOLUTION_DOCS}third-party-actions.html`,
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,

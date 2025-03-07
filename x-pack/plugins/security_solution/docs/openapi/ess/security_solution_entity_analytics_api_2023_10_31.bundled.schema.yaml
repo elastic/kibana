@@ -13,10 +13,11 @@ servers:
 paths:
   /api/asset_criticality:
     delete:
-      description: Delete the asset criticality record for a specific asset if it exists.
+      description: Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -57,14 +58,15 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Delete Criticality Record
+      summary: Delete an asset criticality record
       tags:
         - Security Entity Analytics API
     get:
-      description: Get the criticality record for a specific asset.
+      description: Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -88,11 +90,17 @@ paths:
           description: Invalid request
         '404':
           description: Criticality record not found
-      summary: Get Criticality Record
+      summary: Get an asset criticality record
       tags:
         - Security Entity Analytics API
     post:
-      description: Create or update a criticality record for a specific asset.
+      description: >
+        Create or update an asset criticality record for a specific entity.
+
+
+        If a record already exists for the specified entity, that record is
+        overwritten with the specified value. If a record doesn't exist for the
+        specified entity, a new record is created.
       operationId: CreateAssetCriticalityRecord
       requestBody:
         content:
@@ -109,6 +117,10 @@ paths:
                       enum:
                         - wait_for
                       type: string
+              example:
+                criticality_level: high_impact
+                id_field: host.name
+                id_value: my_host
         required: true
       responses:
         '200':
@@ -119,14 +131,19 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Upsert Criticality Record
+      summary: Upsert an asset criticality record
       tags:
         - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
-      description: >-
-        Bulk upsert up to 1000 asset criticality records, creating or updating
-        them as needed.
+      description: >
+        Bulk upsert up to 1000 asset criticality records.
+
+
+        If asset criticality records already exist for the specified entities,
+        those records are overwritten with the specified values. If asset
+        criticality records don't exist for the specified entities, new records
+        are created.
       operationId: BulkUpsertAssetCriticalityRecords
       requestBody:
         content:
@@ -177,7 +194,7 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
-      summary: Bulk Upsert Asset Criticality Records
+      summary: Bulk upsert asset criticality records
       tags:
         - Security Entity Analytics API
   /api/asset_criticality/list:
@@ -231,6 +248,31 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  page: 1
+                  per_page: 10
+                  records:
+                    - '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
+                      criticality_level: medium_impact
+                      host:
+                        asset:
+                          criticality: medium_impact
+                        name: my_other_host
+                      id_field: host.name
+                      id_value: my_other_host
+                    - '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
+                      criticality_level: high_impact
+                      host:
+                        asset:
+                          criticality: high_impact
+                        name: my_host
+                      id_field: host.name
+                      id_value: my_host
+                  total: 2
                 type: object
                 properties:
                   page:
@@ -252,8 +294,8 @@ paths:
                   - page
                   - per_page
                   - total
-          description: Bulk upload successful
-      summary: List Asset Criticality Records
+          description: Successfully retrieved asset criticality records
+      summary: List asset criticality records
       tags:
         - Security Entity Analytics API
   /api/entity_store/engines:
@@ -598,6 +640,10 @@ paths:
         - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
+      description: >-
+        Schedule the risk scoring engine to run as soon as possible. You can use
+        this to recalculate entity risk scores after updating their asset
+        criticality.
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
@@ -621,7 +667,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
-      summary: Schedule the risk engine to run as soon as possible
+      summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
 components:
@@ -670,6 +716,17 @@ components:
               type: string
           required:
             - '@timestamp'
+      example:
+        '@timestamp': '2024-08-02T11:15:34.290Z'
+        asset:
+          criticality: high_impact
+        criticality_level: high_impact
+        host:
+          asset:
+            criticality: high_impact
+          name: my_host
+        id_field: host.name
+        id_value: my_host
     AssetCriticalityRecordEcsParts:
       type: object
       properties:

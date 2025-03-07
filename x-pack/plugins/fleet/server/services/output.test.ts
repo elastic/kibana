@@ -21,6 +21,7 @@ import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
+import { outputSavedObjectToOutput } from './output';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -33,13 +34,14 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
+const mockedLogger = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+} as unknown as Logger;
 mockedAppContextService.getLogger.mockImplementation(() => {
-  return {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  } as unknown as Logger;
+  return mockedLogger;
 });
 
 mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
@@ -2166,6 +2168,44 @@ describe('Output Service', () => {
       const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
 
       await expect(promise).resolves.not.toThrow();
+    });
+  });
+
+  describe('outputSavedObjectToOutput', () => {
+    it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
+      const so = mockOutputSO('output-test', {
+        ssl: '{ "certificate": "cert", "key": "key" }',
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.ssl).toEqual({ certificate: 'cert', key: 'key' });
+    });
+
+    it('should return output object with no SSL field when SSL is an invalid JSON string', () => {
+      const so = mockOutputSO('output-test', {
+        ssl: 'invalid-json',
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.ssl).toEqual(undefined);
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Unable to parse ssl for output ${so.id}`)
+      );
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`ssl value: invalid-json`)
+      );
+    });
+
+    it('should return output object with no SSL field when SSL is not a string', () => {
+      const so = mockOutputSO('output-test', {
+        ssl: { certificate: 'cert', key: 'key' },
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.ssl).toEqual(undefined);
     });
   });
 });
