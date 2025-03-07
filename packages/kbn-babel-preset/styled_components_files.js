@@ -20,14 +20,15 @@ module.exports = {
    * Used by `kbn-babel-preset` and `kbn-eslint-config`.
    */
   USES_STYLED_COMPONENTS: [
-    /packages[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
-    /packages[\/\\]kbn-ui-shared-deps-src[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-src[\/\\]/,
 
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]assistant_overlay[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]data_anonymization_editor[\/\\]context_editor[\/\\]get_columns[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]components[\/\\]fleet_server_hosts_form.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]index.tsx/,
+    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]steps[\/\\]add_fleet_server_host.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]steps[\/\\]create_service_token.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]generate_service_token.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]search_bar.tsx/,
