@@ -10,10 +10,11 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty, orderBy, compact } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { RecalledEntry } from '.';
+import { KnowledgeBaseQueryContainer, RecalledEntry } from '.';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { getElserModelId } from './get_elser_model_id';
+import { kbQueryToDsl } from './kb_query_to_dsl';
 
 export async function recallFromSearchConnectors({
   queries,
@@ -22,12 +23,12 @@ export async function recallFromSearchConnectors({
   logger,
   core,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
+  queries: KnowledgeBaseQueryContainer[];
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-}): Promise<RecalledEntry[]> {
+}): Promise<Array<Omit<RecalledEntry, 'tokens'>>> {
   const connectorIndices = await getConnectorIndices(esClient, uiSettingsClient, logger);
   logger.debug(`Found connector indices: ${connectorIndices}`);
 
@@ -61,13 +62,13 @@ async function recallFromSemanticTextConnectors({
   core,
   connectorIndices,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
+  queries: KnowledgeBaseQueryContainer[];
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   connectorIndices: string[] | undefined;
-}): Promise<RecalledEntry[]> {
+}): Promise<Array<Omit<RecalledEntry, 'tokens'>>> {
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
     index: connectorIndices,
     fields: `*`,
@@ -80,17 +81,20 @@ async function recallFromSemanticTextConnectors({
   if (!semanticTextFields.length) {
     return [];
   }
-  logger.debug(`Semantic text field for search connectors: ${semanticTextFields}`);
+  logger.debug(
+    () =>
+      `Semantic text field for search connectors: ${semanticTextFields}, queries: ${JSON.stringify(
+        queries.map((query) => kbQueryToDsl(query, semanticTextFields))
+      )}`
+  );
 
   const params = {
     index: connectorIndices,
     size: 20,
     query: {
       bool: {
-        should: semanticTextFields.flatMap((field) => {
-          return queries.map(({ text, boost = 1 }) => ({
-            bool: { filter: [{ semantic: { field, query: text, boost } }] },
-          }));
+        should: queries.map((query) => {
+          return kbQueryToDsl(query, semanticTextFields);
         }),
         minimum_should_match: 1,
       },
@@ -109,6 +113,8 @@ async function recallFromSemanticTextConnectors({
   return results;
 }
 
+export const ML_INFERENCE_PREFIX = 'ml.inference.';
+
 async function recallFromLegacyConnectors({
   queries,
   esClient,
@@ -116,15 +122,13 @@ async function recallFromLegacyConnectors({
   core,
   connectorIndices,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
+  queries: KnowledgeBaseQueryContainer[];
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   connectorIndices: string[] | undefined;
-}): Promise<RecalledEntry[]> {
-  const ML_INFERENCE_PREFIX = 'ml.inference.';
-
+}): Promise<Array<Omit<RecalledEntry, 'tokens'>>> {
   const modelIdPromise = getElserModelId({ core, logger }); // pre-fetch modelId in parallel with fieldCaps
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
     index: connectorIndices,
@@ -144,31 +148,8 @@ async function recallFromLegacyConnectors({
 
   const modelId = await modelIdPromise;
   const esQueries = fieldsWithVectors.flatMap((field) => {
-    const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
-    const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
-
-    return queries.map(({ text, boost = 1 }) => {
-      return {
-        bool: {
-          should: [
-            {
-              sparse_vector: {
-                field: vectorField,
-                query: text,
-                inference_id: modelId,
-                boost,
-              },
-            },
-          ],
-          filter: [
-            {
-              term: {
-                [modelField]: modelId,
-              },
-            },
-          ],
-        },
-      };
+    return queries.map((query) => {
+      return kbQueryToDsl(query, field, modelId);
     });
   });
 

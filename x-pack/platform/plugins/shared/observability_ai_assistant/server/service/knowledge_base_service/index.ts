@@ -33,6 +33,7 @@ import {
   isSemanticTextUnsupportedError,
 } from './reindex_knowledge_base';
 import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { kbQueryToDsl } from './kb_query_to_dsl';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -49,11 +50,30 @@ export interface RecalledEntry {
   score: number | null;
   is_correction?: boolean;
   labels?: Record<string, string>;
+  tokens: number;
 }
 
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
+
+export interface KnowledgeBaseKeywordQueryContainer {
+  keyword: {
+    value: string[];
+    boost?: number;
+  };
+}
+
+export interface KnowledgeBaseSemanticTextContainer {
+  semantic: {
+    query: string;
+    boost?: number;
+  };
+}
+
+export type KnowledgeBaseQueryContainer =
+  | KnowledgeBaseKeywordQueryContainer
+  | KnowledgeBaseSemanticTextContainer;
 
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
@@ -86,24 +106,27 @@ export class KnowledgeBaseService {
     namespace,
     user,
   }: {
-    queries: Array<{ text: string; boost?: number }>;
+    queries: KnowledgeBaseQueryContainer[];
     categories?: string[];
     namespace: string;
     user?: { name: string };
-  }): Promise<RecalledEntry[]> {
+  }): Promise<Array<Omit<RecalledEntry, 'tokens'>>> {
+    this.dependencies.logger.debug(() =>
+      JSON.stringify({
+        queries: queries.map((query) => {
+          return kbQueryToDsl(query, ['semantic_text']);
+        }),
+      })
+    );
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.aliases.kb],
       query: {
         bool: {
-          should: queries.map(({ text, boost = 1 }) => ({
-            semantic: {
-              field: 'semantic_text',
-              query: text,
-              boost,
-            },
-          })),
+          should: queries.map((query) => {
+            return kbQueryToDsl(query, ['semantic_text']);
+          }),
           filter: [
             ...getAccessQuery({
               user,
@@ -141,13 +164,13 @@ export class KnowledgeBaseService {
     uiSettingsClient,
     limit = {},
   }: {
-    queries: Array<{ text: string; boost?: number }>;
+    queries: KnowledgeBaseQueryContainer[];
     categories?: string[];
     user?: { name: string };
     namespace: string;
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
-    limit?: { tokens?: number; size?: number };
+    limit?: { size?: number };
   }): Promise<RecalledEntry[]> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
@@ -183,10 +206,11 @@ export class KnowledgeBaseService {
     ]);
 
     this.dependencies.logger.debug(
-      `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
+      () => `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
     );
     this.dependencies.logger.debug(
-      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+      () =>
+        `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
     );
 
     const sortedEntries = orderBy(
@@ -195,24 +219,10 @@ export class KnowledgeBaseService {
       'desc'
     ).slice(0, limit.size ?? 20);
 
-    const maxTokens = limit.tokens ?? 4_000;
-
-    let tokenCount = 0;
-
-    const returnedEntries: RecalledEntry[] = [];
-
-    for (const entry of sortedEntries) {
-      returnedEntries.push(entry);
-      tokenCount += encode(entry.text).length;
-      if (tokenCount >= maxTokens) {
-        break;
-      }
-    }
-
-    const droppedEntries = sortedEntries.length - returnedEntries.length;
-    if (droppedEntries > 0) {
-      this.dependencies.logger.info(`Dropped ${droppedEntries} entries because of token limit`);
-    }
+    const returnedEntries: RecalledEntry[] = sortedEntries.map((entry) => ({
+      ...entry,
+      tokens: encode(entry.text).length,
+    }));
 
     return returnedEntries;
   };

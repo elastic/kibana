@@ -33,7 +33,7 @@ export function registerContextFunction({
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.Internal,
     },
-    async ({ messages, screenContexts, chat }, signal) => {
+    async ({ messages, screenContexts, chat, connectorId, simulateFunctionCalling }, signal) => {
       const { analytics } = await resources.plugins.core.start();
 
       async function getContext() {
@@ -64,7 +64,15 @@ export function registerContextFunction({
 
         const userPrompt = userMessage?.message.content!;
 
-        const { scores, relevantDocuments, suggestions } = await recallAndScore({
+        const inferenceClient = (await resources.plugins.inference.start()).getClient({
+          bindTo: {
+            connectorId,
+            functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+          },
+          request: resources.request,
+        });
+
+        const { scores, relevantDocuments, suggestions, queries } = await recallAndScore({
           recall: client.recall,
           chat,
           logger: resources.logger,
@@ -73,6 +81,7 @@ export function registerContextFunction({
           messages,
           signal,
           analytics,
+          inferenceClient,
         });
 
         return {
@@ -80,6 +89,7 @@ export function registerContextFunction({
           data: {
             scores,
             suggestions,
+            queries,
           },
         };
       }
