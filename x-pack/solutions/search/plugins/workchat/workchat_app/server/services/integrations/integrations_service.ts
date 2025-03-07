@@ -1,6 +1,6 @@
 import { Logger } from "@kbn/logging";
 import { IntegrationPlugin, IntegrationTypes, InternalIntegrationServices } from "@kbn/wci-common";
-import { Integration, InternalIntegration } from "./integration";
+import { ExternalIntegration, Integration, InternalIntegration } from "./integration";
 import { IntergrationsSession } from "./integrations_session";
 
 interface IntegrationsServiceOptions {
@@ -8,23 +8,44 @@ interface IntegrationsServiceOptions {
     integrationPlugins: IntegrationPlugin[];
 }
 
-export interface IntegrationModel {
+export interface ExternalIntegrationModel {
     id: string;
-    type: IntegrationTypes;
     configuration: Record<string, any>;
+    isInternal: false;
 }
+
+export interface InternalIntegrationModel {
+    id: string;
+    configuration: Record<string, any>;
+    type?: IntegrationTypes;
+    isInternal: true;
+}
+
+type IntegrationModel = ExternalIntegrationModel | InternalIntegrationModel;
 
 // TODO: move to reading from saved objects
 const IntegrationsSO: IntegrationModel[] = [
     {
-        id: '123',
+        id: '1',
         type: 'salesforce' as IntegrationTypes,
-        configuration: {}
+        configuration: {},
+        isInternal: true
     },
-
+    {
+        id: '2',
+        configuration: {
+            url: "http://127.0.0.1:3001/sse",
+        },
+        isInternal: false
+    }
 ]
 
 function getIntegration(integrationModel: IntegrationModel, integrationPlugins: IntegrationPlugin[]): Integration {
+
+    if (!integrationModel.isInternal) {
+        return new ExternalIntegration(integrationModel.id, integrationModel.configuration);
+    }
+
     const plugin = integrationPlugins.find(plugin => plugin.name === integrationModel.type);
     if (!plugin) {
         throw new Error(`Integration plugin for ${integrationModel.type} not found`);

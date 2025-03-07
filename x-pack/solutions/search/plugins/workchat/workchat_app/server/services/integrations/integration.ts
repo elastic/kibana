@@ -2,11 +2,11 @@ import { IntegrationPlugin } from "@kbn/wci-common";
 import { InternalIntegrationServices } from "@kbn/wci-common";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { SSEClientTransport } from "./mcp/sse_client";
 
 
 export interface Integration {
     id: string;
-    typeInstance: IntegrationPlugin;
     configuration: Record<string, any>;
     
     connect(services: InternalIntegrationServices): Client;
@@ -44,4 +44,41 @@ export class InternalIntegration implements Integration {
         return client;
     }
 
+}
+
+export class ExternalIntegration implements Integration {
+    public id: string;
+    configuration: Record<string, any>;
+    
+    constructor(
+        id: string,
+        configuration: Record<string, any>
+    ) {
+        this.id = id;
+        this.configuration = configuration;
+    }
+
+    connect(): Client {
+        const transport = new SSEClientTransport(new URL(this.configuration.url));
+
+          const client = new Client(
+            {
+              name: this.id,
+              version: "1.0.0"
+            },
+            {
+              capabilities: {
+                prompts: {},
+                resources: {},
+                tools: {}
+              }
+            }
+          );
+
+          client.connect(transport);
+
+          return client;
+    }
+    
+    
 }
