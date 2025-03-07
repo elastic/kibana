@@ -331,15 +331,13 @@ export class KnowledgeBaseService {
       });
 
       return {
-        entries: response.hits.hits.map((hit) => {
-          return {
-            ...hit._source!,
-            title: hit._source!.title ?? hit._source!.doc_id, // use `doc_id` as fallback title for backwards compatibility
-            role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
-            score: hit._score,
-            id: hit._id!,
-          };
-        }),
+        entries: response.hits.hits.map((hit) => ({
+          ...hit._source!,
+          title: hit._source!.title ?? hit._source!.doc_id, // use `doc_id` as fallback title for backwards compatibility
+          role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
+          score: hit._score,
+          id: hit._id!,
+        })),
       };
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
