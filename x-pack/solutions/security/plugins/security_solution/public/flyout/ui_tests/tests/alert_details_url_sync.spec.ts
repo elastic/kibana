@@ -10,7 +10,7 @@ import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/
 
 const RIGHT = 'right';
 
-test.describe('Expandable flyout state sync', { tag: ['@svlSecurity'] }, () => {
+test.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
   test.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
     await detectionRuleApi.deleteAll();
     await detectionRuleApi.createCustomQueryRule();
