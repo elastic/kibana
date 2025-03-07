@@ -20,6 +20,7 @@ export interface TabMenuItemWithClick {
 }
 
 export interface TabsSizeConfig {
+  isScrollable: boolean;
   isRegularTabLimitedInWidth: boolean;
   regularTabMaxWidth: number;
   regularTabMinWidth: number;
