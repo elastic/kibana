@@ -13,8 +13,8 @@ import { installationStatuses } from '../../../../../../../common/constants';
 
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { isPackageUpdatable } from '../../../../services';
-
+import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
+import { InstalledIntegrationsPage } from '../installed_integrations';
 import { useAuthz, useGetPackagesQuery, useGetSettingsQuery } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
@@ -47,6 +47,9 @@ export const EPMHomePage: React.FC = () => {
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
     enabled: isAuthorizedToFetchSettings,
   });
+
+  const installedIntegrationsTabularUI =
+    ExperimentalFeaturesService.get()?.installedIntegrationsTabularUI ?? false;
 
   const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
   const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
@@ -97,7 +100,11 @@ export const EPMHomePage: React.FC = () => {
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
-          <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
+          {installedIntegrationsTabularUI ? (
+            <InstalledIntegrationsPage />
+          ) : (
+            <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
+          )}
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>

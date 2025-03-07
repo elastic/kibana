@@ -126,6 +126,8 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export type PackagePolicyAssetsMap = AssetsMap & { __brand: 'PackagePolicyAssetsMap' };
+
 export interface ArchiveEntry {
   path: string;
   buffer?: Buffer;
@@ -582,6 +584,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
+  packagePoliciesInfo?: { count: number };
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -722,6 +725,7 @@ export interface EsAssetReference {
 
 export interface PackageAssetReference {
   id: string;
+  path?: string; // Package installed prior to 9.1.0 will not have that property
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 }
 

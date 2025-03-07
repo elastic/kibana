@@ -31,6 +31,7 @@ import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -59,6 +60,7 @@ describe('Import rules route', () => {
     clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
     clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
       isRulesCustomizationEnabled: false,
+      customizationDisabledReason: PrebuiltRulesCustomizationDisabledReason.FeatureFlag,
     });
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -71,7 +73,6 @@ describe('Import rules route', () => {
   describe('status codes', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
-
       expect(response.status).toEqual(200);
     });
 

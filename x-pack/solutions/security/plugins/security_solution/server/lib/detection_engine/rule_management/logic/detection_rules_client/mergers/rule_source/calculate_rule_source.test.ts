@@ -48,7 +48,8 @@ describe('calculateRuleSource', () => {
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
-      rule,
+      nextRule: rule,
+      currentRule: undefined,
       ruleCustomizationStatus,
     });
     expect(result).toEqual({
@@ -65,7 +66,8 @@ describe('calculateRuleSource', () => {
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
-      rule,
+      nextRule: rule,
+      currentRule: rule,
       ruleCustomizationStatus,
     });
     expect(result).toEqual(
@@ -86,7 +88,8 @@ describe('calculateRuleSource', () => {
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
-      rule,
+      nextRule: rule,
+      currentRule: rule,
       ruleCustomizationStatus,
     });
     expect(result).toEqual(
@@ -109,7 +112,8 @@ describe('calculateRuleSource', () => {
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
-      rule,
+      nextRule: rule,
+      currentRule: rule,
       ruleCustomizationStatus,
     });
     expect(result).toEqual(
@@ -130,7 +134,8 @@ describe('calculateRuleSource', () => {
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
-      rule,
+      nextRule: rule,
+      currentRule: rule,
       ruleCustomizationStatus: {
         isRulesCustomizationEnabled: false,
         customizationDisabledReason: PrebuiltRulesCustomizationDisabledReason.FeatureFlag,
@@ -154,7 +159,8 @@ describe('calculateRuleSource', () => {
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
-      rule,
+      nextRule: rule,
+      currentRule: rule,
       ruleCustomizationStatus: {
         isRulesCustomizationEnabled: false,
         customizationDisabledReason: PrebuiltRulesCustomizationDisabledReason.License,
@@ -166,5 +172,108 @@ describe('calculateRuleSource', () => {
         is_customized: true,
       })
     );
+  });
+
+  describe('missing base versions', () => {
+    it('return is_customized false when the base version and current version are missing', async () => {
+      const rule = getSampleRule();
+      rule.immutable = true;
+
+      // No base version
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: undefined,
+        ruleCustomizationStatus,
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: false,
+        })
+      );
+    });
+
+    it('returns is_customized true when the current version is already customized', async () => {
+      const rule = getSampleRule();
+      rule.immutable = true;
+      rule.rule_source = {
+        type: 'external',
+        is_customized: true,
+      };
+
+      // No base version
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: rule,
+        ruleCustomizationStatus,
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: true,
+        })
+      );
+    });
+
+    it('returns is_customized false when the current version is not customized and the next version has no changes', async () => {
+      const rule = getSampleRule();
+      rule.immutable = true;
+      rule.rule_source = {
+        type: 'external',
+        is_customized: false,
+      };
+
+      // No base version
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: rule,
+        ruleCustomizationStatus,
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: false,
+        })
+      );
+    });
+
+    it('returns is_customized true when the current version is not customized and the next version has changes', async () => {
+      const rule = getSampleRule();
+      rule.immutable = true;
+      rule.rule_source = {
+        type: 'external',
+        is_customized: false,
+      };
+
+      const nextRule = {
+        ...rule,
+        name: 'Updated name',
+      };
+
+      // No base version
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule,
+        currentRule: rule,
+        ruleCustomizationStatus,
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: true,
+        })
+      );
+    });
   });
 });

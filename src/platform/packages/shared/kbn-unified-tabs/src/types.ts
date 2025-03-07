@@ -11,3 +11,13 @@ export interface TabItem {
   id: string;
   label: string;
 }
+
+export interface TabMenuItemWithClick {
+  'data-test-subj': string;
+  name: string;
+  label: string;
+  onClick: () => void;
+}
+export type TabMenuItem = TabMenuItemWithClick | 'divider';
+
+export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];

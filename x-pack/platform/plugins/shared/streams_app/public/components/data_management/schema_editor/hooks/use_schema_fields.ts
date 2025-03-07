@@ -120,6 +120,7 @@ export const useSchemaFields = ({
               ingest: {
                 ...definition.stream.ingest,
                 wired: {
+                  ...definition.stream.ingest.wired,
                   fields: {
                     ...definition.stream.ingest.wired.fields,
                     [field.name]: nextFieldDefinitionConfig,
@@ -171,6 +172,7 @@ export const useSchemaFields = ({
               ingest: {
                 ...definition.stream.ingest,
                 wired: {
+                  ...definition.stream.ingest.wired,
                   fields: omit(definition.stream.ingest.wired.fields, fieldName),
                 },
               },

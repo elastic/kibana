@@ -40,6 +40,7 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
       ...packageAssetRefs,
       ...packageAssetResults.saved_objects.map((result) => ({
         id: result.id,
+        path: result.attributes?.asset_path,
         type: ASSETS_SAVED_OBJECT_TYPE as typeof ASSETS_SAVED_OBJECT_TYPE,
       })),
     ];
