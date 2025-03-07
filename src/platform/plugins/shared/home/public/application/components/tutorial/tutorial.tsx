@@ -195,12 +195,13 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
         ? StatusCheckStates.HAS_DATA
         : StatusCheckStates.NO_DATA;
 
-    this.setState((prevState) => ({
-      statusCheckStates: {
-        ...prevState.statusCheckStates,
-        [instructionSetIndex]: nextStatusCheckState,
-      },
-    }));
+    this.setState((prevState) => {
+      const newStatusCheckStates = [...prevState.statusCheckStates];
+      newStatusCheckStates[instructionSetIndex] = nextStatusCheckState;
+      return {
+        statusCheckStates: newStatusCheckStates,
+      };
+    });
   };
 
   fetchCustomStatusCheck = async (customStatusCheckCallback: CustomStatusCheckCallback) => {
@@ -217,9 +218,12 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   ): Promise<StatusCheckStatesType> => {
     const { http } = getServices();
     try {
+      const index = Array.isArray(esHitsCheckConfig.index)
+        ? esHitsCheckConfig.index.join(',')
+        : esHitsCheckConfig.index;
       const response: { count: number } = await http.post('/api/home/hits_status', {
         body: JSON.stringify({
-          index: esHitsCheckConfig.index,
+          index,
           query: esHitsCheckConfig.query,
         }),
       });
@@ -272,16 +276,16 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       );
     }
   };
-
   onStatusCheck = (instructionSetIndex: number) => {
     this.setState(
       (prevState) => ({
-        statusCheckStates: {
-          ...prevState.statusCheckStates,
-          [instructionSetIndex]: StatusCheckStates.FETCHING,
-        },
+        statusCheckStates: [
+          ...prevState.statusCheckStates.slice(0, instructionSetIndex),
+          StatusCheckStates.FETCHING,
+          ...prevState.statusCheckStates.slice(instructionSetIndex + 1),
+        ],
       }),
-      this.checkInstructionSetStatus.bind(null, instructionSetIndex)
+      () => this.checkInstructionSetStatus(instructionSetIndex)
     );
   };
 
