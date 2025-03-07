@@ -21,8 +21,7 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/alerts/suggested_dashboards',
   security: {
     authz: {
-      enabled: false,
-      reason: 'TODO: This endpoint returns related dashboards requires no specific authorization',
+      requiredPrivileges: ['dashboard_v2'],
     },
   },
   options: { access: 'internal' },
