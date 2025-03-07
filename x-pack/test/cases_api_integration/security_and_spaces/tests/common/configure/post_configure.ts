@@ -101,6 +101,27 @@ export default ({ getService }: FtrProviderContext): void => {
             required: true,
             defaultValue: 2,
           },
+          {
+            key: 'list_1',
+            label: 'list 1',
+            type: CustomFieldTypes.LIST,
+            required: false,
+            options: [
+              { key: '0', label: 'A' },
+              { key: '1', label: 'B' },
+            ],
+          },
+          {
+            key: 'list_2',
+            label: 'list 2',
+            type: CustomFieldTypes.LIST,
+            required: true,
+            options: [
+              { key: '0', label: 'A' },
+              { key: '1', label: 'B' },
+            ],
+            defaultValue: '1',
+          },
         ],
       };
 
