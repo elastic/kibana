@@ -16,12 +16,10 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EnrichedDeprecationInfo,
@@ -31,7 +29,7 @@ import {
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { useAppContext } from '../../../../../../../app_context';
-import { getReindexButtonLabel } from './messages';
+import { getDefaultGuideanceText, getReindexButtonLabel } from './messages';
 import { FrozenCallOut } from '../frozen_callout';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
@@ -76,6 +74,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
   const isESTransformTarget = !!correctiveAction?.transformIds?.length;
   const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
+  const { excludedActions = [] } = (deprecation.correctiveAction as ReindexAction) || {};
+  const readOnlyExcluded = excludedActions.includes('readOnly');
+  const reindexExcluded = excludedActions.includes('reindex');
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -191,85 +192,14 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
               <EuiDescriptionList
                 rowGutterSize="m"
-                listItems={[
-                  {
-                    title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
-                      {
-                        defaultMessage: 'Option 1: Reindex data',
-                      }
-                    ),
-                    description: (
-                      <EuiText size="m">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
-                          defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                        />
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title',
-                      {
-                        defaultMessage: 'Option 2: Mark as read-only',
-                      }
-                    ),
-                    description: (
-                      <EuiText size="m">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.description"
-                          defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
-                          values={{
-                            docsLink: (
-                              <EuiLink
-                                target="_blank"
-                                href={docLinks.links.upgradeAssistant.indexBlocks}
-                              >
-                                {i18n.translate(
-                                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
-                                  {
-                                    defaultMessage: 'Learn more',
-                                  }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.title',
-                      {
-                        defaultMessage: 'Option 3: Delete index',
-                      }
-                    ),
-                    description: (
-                      <EuiText size="m">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.description"
-                          defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
-                          values={{
-                            indexManagementLinkHtml: (
-                              <EuiLink
-                                href={`${http.basePath.prepend(
-                                  `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
-                                )}`}
-                              >
-                                <FormattedMessage
-                                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
-                                  defaultMessage="Index Management"
-                                />
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                    ),
-                  },
-                ]}
+                listItems={getDefaultGuideanceText({
+                  readOnlyExcluded,
+                  reindexExcluded,
+                  indexManagementUrl: `${http.basePath.prepend(
+                    `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
+                  )}`,
+                  indexBlockUrl: docLinks.links.upgradeAssistant.indexBlocks,
+                })}
               />
             </Fragment>
           )}
@@ -292,11 +222,14 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                 !hasFetchFailed &&
                 !isCompleted &&
                 hasRequiredPrivileges &&
-                !isESTransformTarget && (
+                !isESTransformTarget &&
+                !readOnlyExcluded && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       onClick={startReadonly}
                       disabled={loading}
+                      color={reindexExcluded ? 'primary' : 'accent'}
+                      fill={reindexExcluded}
                       data-test-subj="startIndexReadonlyButton"
                     >
                       <FormattedMessage
@@ -306,7 +239,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill

@@ -48,6 +48,8 @@ const getMigrationState = (
 ) => {
   const newMigrationState: MigrationState = {
     ...migrationState,
+    // @ts-expect-error - resolutionType does non exist in all migration states.
+    resolutionType: migrationOp?.resolutionType || migrationState.resolutionType,
     meta: updatedMeta || migrationState.meta,
     loadingState: LoadingState.Success,
   };
@@ -180,6 +182,7 @@ export const useMigrationStatus = ({
         });
       }
     },
+
     [clearPollInterval, api, dataStreamName, migrationState.resolutionType]
   );
 

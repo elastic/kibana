@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 import * as esMigrationsMock from '../__fixtures__/es_deprecations';
-import type { FeatureSet } from '../../../common/types';
+import type { DataSourceExclusions, FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
 import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
@@ -24,6 +24,7 @@ describe('getESUpgradeStatus', () => {
     mlSnapshots: true,
     migrateDataStreams: true,
   };
+  const dataSourceExclusions: DataSourceExclusions = {};
 
   const resolvedIndices = {
     indices: fakeIndexNames.map((indexName) => {
@@ -65,12 +66,12 @@ describe('getESUpgradeStatus', () => {
   esClient.asCurrentUser.indices.resolveIndex.mockResponse(resolvedIndices);
 
   it('calls /_migration/deprecations', async () => {
-    await getESUpgradeStatus(esClient, featureSet);
+    await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getESUpgradeStatus(esClient, featureSet);
+    const resp = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     expect(resp).toMatchSnapshot();
   });
 
@@ -86,10 +87,9 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
-      'totalCriticalDeprecations',
-      1
-    );
+    await expect(
+      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions })
+    ).resolves.toHaveProperty('totalCriticalDeprecations', 1);
   });
 
   it('returns totalCriticalDeprecations === 0 when no critical issues found', async () => {
@@ -104,10 +104,9 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
-      'totalCriticalDeprecations',
-      0
-    );
+    await expect(
+      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions })
+    ).resolves.toHaveProperty('totalCriticalDeprecations', 0);
   });
 
   it('filters out system indices returned by upgrade system indices API', async () => {
@@ -132,7 +131,7 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
+    const upgradeStatus = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     const {
       totalCriticalDeprecations,
       migrationsDeprecations,
@@ -152,7 +151,10 @@ describe('getESUpgradeStatus', () => {
     // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
     esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
 
-    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      featureSet,
+      dataSourceExclusions,
+    });
     expect([
       ...enabledUpgradeStatus.migrationsDeprecations,
       ...enabledUpgradeStatus.enrichedHealthIndicators,
@@ -160,8 +162,11 @@ describe('getESUpgradeStatus', () => {
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
     const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
-      mlSnapshots: false,
+      featureSet: {
+        ...featureSet,
+        mlSnapshots: false,
+      },
+      dataSourceExclusions,
     });
 
     expect([
@@ -178,7 +183,10 @@ describe('getESUpgradeStatus', () => {
     } as MigrationDeprecationsResponse;
     esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
 
-    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      featureSet,
+      dataSourceExclusions,
+    });
     expect([
       ...enabledUpgradeStatus.migrationsDeprecations,
       ...enabledUpgradeStatus.enrichedHealthIndicators,
@@ -186,8 +194,11 @@ describe('getESUpgradeStatus', () => {
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
     const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
-      migrateDataStreams: false,
+      featureSet: {
+        ...featureSet,
+        migrateDataStreams: false,
+      },
+      dataSourceExclusions,
     });
 
     expect([
@@ -227,8 +238,11 @@ describe('getESUpgradeStatus', () => {
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
-      reindexCorrectiveActions: false,
+      dataSourceExclusions,
+      featureSet: {
+        ...featureSet,
+        reindexCorrectiveActions: false,
+      },
     });
 
     expect([
@@ -299,7 +313,8 @@ describe('getESUpgradeStatus', () => {
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
+      featureSet,
+      dataSourceExclusions: {},
     });
 
     expect(upgradeStatus.migrationsDeprecations).toHaveLength(2);
@@ -357,7 +372,8 @@ describe('getESUpgradeStatus', () => {
     esClient.asCurrentUser.indices.resolveIndex.mockResponse(resolvedIndices);
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
+      featureSet,
+      dataSourceExclusions: {},
     });
 
     expect([
@@ -397,7 +413,7 @@ describe('getESUpgradeStatus', () => {
       },
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
+    const upgradeStatus = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     expect(upgradeStatus.totalCriticalHealthIssues + upgradeStatus.totalCriticalDeprecations).toBe(
       2
     );
@@ -433,6 +449,7 @@ describe('getESUpgradeStatus', () => {
         },
         Object {
           "correctiveAction": Object {
+            "excludedActions": Array [],
             "type": "reindex",
           },
           "details": "This index was created using version: 6.8.13",

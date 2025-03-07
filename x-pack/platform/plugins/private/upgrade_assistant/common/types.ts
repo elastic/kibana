@@ -208,6 +208,11 @@ export interface ReindexAction {
    * The transform IDs that are currently targeting this index
    */
   transformIds?: string[];
+
+  /**
+   * The actions that should be excluded from the reindex corrective action.
+   */
+  excludedActions?: string[];
 }
 
 export interface UnfreezeAction {
@@ -334,3 +339,5 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
+
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
