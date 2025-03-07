@@ -62,9 +62,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
     - [Scenario: Importing a new custom rule missing a `version` field](#scenario-importing-a-new-custom-rule-missing-a-version-field)
     - [Scenario: Importing an existing custom rule missing a `version` field](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
-  - [Handling request parameters: `overwrite` flag](#handling-request-parameters-overwrite-flag)
-    - [Scenario: Importing a rule with `overwrite` flag set to true](#scenario-importing-a-rule-with-overwrite-flag-set-to-true)
-    - [Scenario: Importing a rule with `overwrite` flag set to false](#scenario-importing-a-rule-with-overwrite-flag-set-to-false)
   - [Licensing](#licensing)
 
 ## Useful information
@@ -543,35 +540,6 @@ When the user imports the rule
 Then the rule should be updated
 And the updated rule should be custom
 And the updated rule's "version" field should stay unchanged
-```
-
-### Handling request parameters: `overwrite` flag
-
-#### Scenario: Importing a rule with `overwrite` flag set to true
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the import payload contains a rule
-And its rule_id matches a rule_id of one of the installed rules
-And the overwrite flag is set to true
-When the user imports the rule
-Then the rule should be overwritten
-And the ruleSource should be based on rule_id and version
-```
-
-#### Scenario: Importing a rule with `overwrite` flag set to false
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the import payload contains a rule
-And its rule_id matches a rule_id of one of the installed rules
-And the overwrite flag is set to false
-When the user imports the rule
-Then the import should be rejected with a message "rule_id already exists"
-
-CASE: should have the same outcome for all rule types
 ```
 
 ### Licensing
