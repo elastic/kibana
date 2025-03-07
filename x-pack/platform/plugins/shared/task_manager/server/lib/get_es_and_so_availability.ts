@@ -46,7 +46,9 @@ export function getElasticsearchAndSOAvailability({
           result.next(isEsHealthy && isEsServiceAvailable && isSoServiceAvailable);
         })
         .catch((e) => {
-          logger.error(`Failed to load cluster health: ${e.message}`);
+          logger.error(
+            `Error loading the cluster health. The task poller will start regardless. Error: ${e.message}`
+          );
           // Even if we can't load the cluster health, we should start the task
           // poller in case the issue is unrelated.
           isEsHealthy = true;
@@ -54,7 +56,9 @@ export function getElasticsearchAndSOAvailability({
         });
     })
     .catch((e) => {
-      logger.error(`Failed to load cluster client to fetch cluster health: ${e.message}`);
+      logger.error(
+        `Error loading the cluster client to fetch cluster health. The task poller will start regardless. Error: ${e.message}`
+      );
       // Even if we can't load the cluster health, we should start the task
       // poller in case the issue is unrelated.
       isEsHealthy = true;

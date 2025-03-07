@@ -74,6 +74,9 @@ describe('getElasticsearchAndSOAvailability', () => {
     core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
 
     expect(await availability).toEqual([false, false, true]);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error loading the cluster health. The task poller will start regardless. Error: Request timed out'
+    );
     core$.complete();
   });
 
@@ -155,6 +158,9 @@ describe('getElasticsearchAndSOAvailability', () => {
     core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
 
     expect(await availability).toEqual([false, false, true]);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error loading the cluster client to fetch cluster health. The task poller will start regardless. Error: Failed to load'
+    );
     core$.complete();
   });
 });
