@@ -24,6 +24,7 @@ node scripts/build \
     --skip-docker-ubi \
     --skip-docker-wolfi \
     --skip-docker-cloud \
+    --skip-docker-cloud-fips \
     --skip-docker-serverless \
     --skip-docker-contexts
 
