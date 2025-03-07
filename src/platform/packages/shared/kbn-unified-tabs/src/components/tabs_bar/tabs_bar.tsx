@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
@@ -53,10 +53,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [tabsContainerWithPlus, setTabsContainerWithPlus] = React.useState<HTMLDivElement | null>(
-    null
-  );
+  const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
+    useState<HTMLDivElement | null>(null);
+  const [tabsContainerElement, setTabsContainerElement] = useState<HTMLDivElement | null>(null);
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+  tabsContainerRef.current = tabsContainerElement;
   const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
@@ -66,8 +67,8 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   const { tabsSizeConfig, scrollRightButton, scrollLeftButton } = useResponsiveTabs({
     items,
     hasReachedMaxItemsCount,
-    tabsContainerWithPlus,
-    tabsContainerRef,
+    tabsContainerWithPlusElement,
+    tabsContainerElement,
   });
 
   useEffect(() => {
@@ -93,11 +94,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
         padding-right: ${euiTheme.size.xs};
       `}
     >
-      <EuiFlexItem ref={setTabsContainerWithPlus} grow css={growingFlexItemCss}>
+      <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false} css={growingFlexItemCss}>
             <EuiFlexGroup
-              ref={tabsContainerRef}
+              ref={setTabsContainerElement}
               direction="row"
               gutterSize="none"
               alignItems="center"
