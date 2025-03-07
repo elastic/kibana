@@ -102,6 +102,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
@@ -617,6 +618,7 @@ describe('Task Runner', () => {
               [ALERT_INSTANCE_ID]: '1',
               [ALERT_SEVERITY_IMPROVING]: false,
               [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+              [ALERT_PENDING_RECOVERED_COUNT]: 0,
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
               [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
