@@ -62,7 +62,6 @@ export const getComments: GetAssistantMessages = ({
   setIsStreaming,
   systemPromptContent,
   contentReferencesVisible,
-  contentReferencesEnabled,
 }) => {
   if (!currentConversation) return [];
 
@@ -87,7 +86,9 @@ export const getComments: GetAssistantMessages = ({
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
               setIsStreaming={setIsStreaming}
+              contentReferencesVisible={contentReferencesVisible}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              contentReferences={null}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}
@@ -131,6 +132,8 @@ export const getComments: GetAssistantMessages = ({
                 refetchCurrentConversation={refetchCurrentConversation}
                 regenerateMessage={regenerateMessageOfConversation}
                 setIsStreaming={setIsStreaming}
+                contentReferences={null}
+                contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                 // we never need to append to a code block in the system comment, which is what this index is used for
                 index={999}
@@ -176,9 +179,8 @@ export const getComments: GetAssistantMessages = ({
           children: (
             <StreamComment
               abortStream={abortStream}
-              contentReferences={message.metadata?.contentReferences}
+              contentReferences={null}
               contentReferencesVisible={contentReferencesVisible}
-              contentReferencesEnabled={contentReferencesEnabled}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
@@ -204,7 +206,6 @@ export const getComments: GetAssistantMessages = ({
             content={transformedMessage.content}
             contentReferences={message.metadata?.contentReferences}
             contentReferencesVisible={contentReferencesVisible}
-            contentReferencesEnabled={contentReferencesEnabled}
             index={index}
             isControlsEnabled={isControlsEnabled}
             isError={message.isError}

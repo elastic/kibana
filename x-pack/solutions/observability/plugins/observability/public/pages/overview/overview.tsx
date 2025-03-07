@@ -9,8 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getColumns } from '../../components/alerts_table/common/get_columns';
+import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
@@ -45,19 +46,17 @@ import {
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
+const tableColumns = getColumns({ showRuleName: true });
+
 export function OverviewPage() {
   const {
     http,
     observabilityAIAssistant,
-    triggersActionsUi: {
-      alertsTableConfigurationRegistry,
-      getAlertsStateTable: AlertsStateTable,
-      getAlertSummaryWidget: AlertSummaryWidget,
-    },
+    triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
     kibanaVersion,
   } = useKibana().services;
 
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   useBreadcrumbs(
     [
@@ -244,17 +243,14 @@ export function OverviewPage() {
               fullSize
               timeRange={alertSummaryTimeRange}
             />
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
+            <ObservabilityAlertsTable
+              id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
               consumers={observabilityAlertFeatureIds}
-              hideLazyLoader
-              id={ALERTS_TABLE_ID}
-              initialPageSize={ALERTS_PER_PAGE}
               query={esQuery}
-              showAlertStatusWithFlapping
-              cellContext={{ observabilityRuleTypeRegistry }}
+              initialPageSize={ALERTS_PER_PAGE}
+              columns={tableColumns}
+              showInspectButton
             />
           </SectionContainer>
         </EuiFlexItem>

@@ -10,7 +10,6 @@ import {
   putSLOServerlessSettingsParamsSchema,
   putSLOSettingsParamsSchema,
 } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { storeSloSettings } from '../../services/slo_settings';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -29,8 +28,6 @@ export const putSloSettings = (isServerless?: boolean) =>
       await assertPlatinumLicense(plugins);
 
       const soClient = (await context.core).savedObjects.client;
-      return await executeWithErrorHandler(() =>
-        storeSloSettings(soClient, params.body as PutSLOSettingsParams)
-      );
+      return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
     },
   });

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
-import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
+import { EsQueryRuleState } from './rule_type_params';
 import { ActionGroupId } from './constants';
 import { StackAlertType } from '../types';
 

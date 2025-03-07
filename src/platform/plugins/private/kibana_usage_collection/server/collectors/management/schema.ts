@@ -138,6 +138,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableAssetInventory': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:includeFrozen': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -491,13 +495,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:aiAssistantSearchConnectorIndexPattern': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:logsExplorer:allowedDataViews': {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'Non-default value of setting.' },
-    },
   },
   'observability:logSources': {
     type: 'array',

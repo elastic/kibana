@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
@@ -479,7 +479,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           const body = await mlClient.getBuckets({
             job_id: request.params.jobId,
             timestamp: request.params.timestamp,
-            body: request.body,
+            ...request.body,
           });
           return response.ok({
             body,
@@ -666,7 +666,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           const body = await mlClient.updateModelSnapshot({
             job_id: request.params.jobId,
             snapshot_id: request.params.snapshotId,
-            body: request.body,
+            ...request.body,
           });
           return response.ok({
             body,

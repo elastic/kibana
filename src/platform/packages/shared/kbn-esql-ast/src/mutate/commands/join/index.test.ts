@@ -14,7 +14,7 @@ describe('commands.where', () => {
   describe('.list()', () => {
     it('lists all "JOIN" commands', () => {
       const src =
-        'FROM index | LIMIT 1 | JOIN join_index1 ON join_field1 | WHERE b == 2 | JOIN join_index2 ON join_field2 | LIMIT 1';
+        'FROM index | LIMIT 1 | LOOKUP JOIN join_index1 ON join_field1 | WHERE b == 2 | LOOKUP JOIN join_index2 ON join_field2 | LIMIT 1';
       const query = EsqlQuery.fromSrc(src);
 
       const nodes = [...commands.join.list(query.ast)];
@@ -49,7 +49,7 @@ describe('commands.where', () => {
   describe('.byIndex()', () => {
     it('retrieves the specific "WHERE" command by index', () => {
       const src =
-        'FROM index | LIMIT 1 | JOIN join_index1 ON join_field1 | WHERE b == 2 | JOIN join_index2 ON join_field2 | LIMIT 1';
+        'FROM index | LIMIT 1 | LOOKUP JOIN join_index1 ON join_field1 | WHERE b == 2 | LOOKUP JOIN join_index2 ON join_field2 | LIMIT 1';
       const query = EsqlQuery.fromSrc(src);
 
       const node1 = commands.join.byIndex(query.ast, 1);
@@ -83,7 +83,7 @@ describe('commands.where', () => {
   describe('.summarize', () => {
     it('returns target index fields', () => {
       const src =
-        'FROM index | LIMIT 1 | JOIN join_index1 ON join_field1 | WHERE b == 2 | JOIN join_index2 ON join_field2 | LIMIT 1';
+        'FROM index | LIMIT 1 | LOOKUP JOIN join_index1 ON join_field1 | WHERE b == 2 | LOOKUP JOIN join_index2 ON join_field2 | LIMIT 1';
       const query = EsqlQuery.fromSrc(src);
       const summary = commands.join.summarize(query.ast);
 
@@ -107,35 +107,9 @@ describe('commands.where', () => {
       ]);
     });
 
-    it('returns target aliases', () => {
-      const src =
-        'FROM index | LIMIT 1 | JOIN join_index1 AS a ON join_field1 | WHERE b == 2 | JOIN join_index2 AS b ON join_field2 | LIMIT 1';
-      const query = EsqlQuery.fromSrc(src);
-      const summary = commands.join.summarize(query.ast);
-
-      expect(summary).toMatchObject([
-        {
-          target: {
-            alias: {
-              type: 'identifier',
-              name: 'a',
-            },
-          },
-        },
-        {
-          target: {
-            alias: {
-              type: 'identifier',
-              name: 'b',
-            },
-          },
-        },
-      ]);
-    });
-
     it('captures join conditions', () => {
       const src =
-        'FROM index | LIMIT 1 | JOIN join_index1 AS a ON join_field1 | WHERE b == 2 | JOIN join_index2 AS b ON join_field2, join_field3 | LIMIT 1';
+        'FROM index | LIMIT 1 | LOOKUP JOIN join_index1 ON join_field1 | WHERE b == 2 | LOOKUP JOIN join_index2 ON join_field2, join_field3 | LIMIT 1';
       const query = EsqlQuery.fromSrc(src);
       const summary = commands.join.summarize(query.ast);
 

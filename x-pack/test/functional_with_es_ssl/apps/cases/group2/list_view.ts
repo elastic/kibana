@@ -740,7 +740,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.goToFirstListedCase();
 
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.click('backToCases');
+        await testSubjects.click('breadcrumb');
 
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();

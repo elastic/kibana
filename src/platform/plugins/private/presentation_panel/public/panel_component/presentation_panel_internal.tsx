@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_presentation_panel.scss';
-
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiHasParentApi,
@@ -129,6 +128,7 @@ export const PresentationPanelInternal = <
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
+        css={styles.embPanel}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader
@@ -156,7 +156,10 @@ export const PresentationPanelInternal = <
           </EuiFlexGroup>
         )}
         {!initialLoadComplete && <PanelLoader />}
-        <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+        <div
+          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
+          css={styles.embPanelContent}
+        >
           <EuiErrorBoundary>
             <Component
               {...(componentProps as React.ComponentProps<typeof Component>)}
@@ -169,4 +172,32 @@ export const PresentationPanelInternal = <
       </EuiPanel>
     </PresentationPanelHoverActions>
   );
+};
+
+/**
+ * if there is no reliance on EUI theme, then it is more performant to store styles as minimizable objects
+ * outside of the React component so that it is not parsed on every render
+ */
+const styles = {
+  embPanel: css({
+    zIndex: 'auto',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    position: 'relative',
+  }),
+  embPanelContent: css({
+    '&.embPanel__content': {
+      display: 'flex',
+      flex: '1 1 100%',
+      zIndex: 1,
+      minHeight: 0, // Absolute must for Firefox to scroll contents
+      borderRadius: '4px',
+      overflow: 'hidden',
+    },
+    '&.embPanel__content--hidden, &[data-error]': {
+      display: 'none',
+    },
+  }),
 };

@@ -14,6 +14,7 @@ import type {
 } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
+import { OptionalFieldLabel } from '../../optional_field_label';
 import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<
@@ -45,6 +46,7 @@ const ConfigureComponent: CustomFieldType<
         config={config}
         componentProps={{
           label: i18n.DEFAULT_VALUE,
+          labelAppend: OptionalFieldLabel,
           euiFieldProps: {
             'data-test-subj': 'text-custom-field-default-value',
           },
