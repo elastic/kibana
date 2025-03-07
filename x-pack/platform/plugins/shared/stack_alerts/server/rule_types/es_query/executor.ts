@@ -15,6 +15,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_URL,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
@@ -38,6 +39,7 @@ import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
+import { getGroupByObject } from './util';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
@@ -123,6 +125,14 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateStart,
         dateEnd,
       });
+
+  const resultGroupSet = new Set<string>();
+  for (const result of parsedResults.results) {
+    resultGroupSet.add(result.group);
+  }
+
+  const groupingObject = getGroupByObject(params.termField, resultGroupSet);
+
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
@@ -143,6 +153,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: result.hits,
       link,
       sourceFields: result.sourceFields,
+      grouping: groupingObject[result.group],
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -196,8 +207,28 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   alertsClient.setAlertLimitReached(parsedResults.truncated);
 
   const { getRecoveredAlerts } = alertsClient;
-  for (const recoveredAlert of getRecoveredAlerts()) {
+
+  const recoveredAlerts = getRecoveredAlerts() ?? [];
+  let groupingObjectForRecovered: Record<string, object> = {};
+
+  // extracing group by fields from kibana.alert.rule.params,
+  // since all recovered alert documents will have same group by fields,
+  // we are only checking first recovered alert document
+  if (recoveredAlerts.length > 0) {
+    const alertHit = recoveredAlerts[0].hit;
+    const ruleParams = alertHit?.[ALERT_RULE_PARAMETERS] as EsQueryRuleParams;
+    const groupByFields = ruleParams?.termField;
+
+    groupingObjectForRecovered = getGroupByObject(
+      groupByFields,
+      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
+    );
+  }
+
+  for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
+    const grouping = groupingObjectForRecovered[alertId];
+
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
       date: currentTimestamp,
@@ -214,6 +245,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
       sourceFields: [],
+      grouping,
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
