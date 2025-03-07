@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+
 import { Page } from '../../../../../../../common/types/pagination';
 import { EnterpriseSearchApplication } from '../../../../../../../common/types/search_applications';
 
@@ -28,7 +30,6 @@ import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { FormattedDateTime } from '../../../../../shared/formatted_date_time';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { pageToPagination } from '../../../../../shared/pagination/page_to_pagination';
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../../shared/telemetry/telemetry_logic';
 
 import { SEARCH_APPLICATION_PATH } from '../../../../routes';

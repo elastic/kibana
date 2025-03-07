@@ -11,11 +11,11 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { LICENSED_SUPPORT_URL } from '../../../../common/constants';
 import { LicensingLogic } from '../licensing';
-import { EuiButtonTo } from '../react_router_helpers';
 
 interface Props {
   productSupportUrl: string;
@@ -59,7 +59,11 @@ export const NotFoundPrompt: React.FC<Props> = ({
             </EuiButtonTo>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton href={supportUrl} target="_blank">
+            <EuiButton
+              data-test-subj="enterpriseSearchNotFoundPromptContactSupportButton"
+              href={supportUrl}
+              target="_blank"
+            >
               {i18n.translate('xpack.enterpriseSearch.notFound.action2', {
                 defaultMessage: 'Contact support',
               })}

@@ -9,11 +9,19 @@ import type { HttpResponse } from '@kbn/core/public';
 
 import { ErrorCode } from './error_codes';
 
+export interface APIKeyResponse {
+  apiKey: {
+    api_key: string;
+    encoded: string;
+    id: string;
+    name: string;
+  };
+}
+
 /**
  * These types track an API call's status and result
  * Each Status string corresponds to a possible status in a request's lifecycle
  */
-
 export enum Status {
   IDLE,
   LOADING,

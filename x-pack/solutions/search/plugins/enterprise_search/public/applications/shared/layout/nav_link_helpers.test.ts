@@ -8,11 +8,11 @@
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 import '../../__mocks__/react_router';
 
-jest.mock('../react_router_helpers/link_events', () => ({
+jest.mock('@kbn/search-connectors-plugin/public', () => ({
   letBrowserHandleEvent: jest.fn(),
 }));
 
-import { letBrowserHandleEvent } from '../react_router_helpers/link_events';
+import { letBrowserHandleEvent } from '@kbn/search-connectors-plugin/public';
 
 import { generateNavLink, getNavLinkActive } from './nav_link_helpers';
 

@@ -21,9 +21,10 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+
 import { ANALYTICS_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
@@ -103,6 +104,7 @@ export const MeasurePerformanceSection: React.FC = () => (
                 values={{
                   behavioralAnalytics: (
                     <EuiLink
+                      data-test-subj="enterpriseSearchMeasurePerformanceSectionBehavioralAnalyticsLink"
                       data-telemetry-id="entSearch-aiSearch-measurePerformance-behavioralAnalyticsDocsLink"
                       target="_blank"
                       href={docLinks.behavioralAnalytics}

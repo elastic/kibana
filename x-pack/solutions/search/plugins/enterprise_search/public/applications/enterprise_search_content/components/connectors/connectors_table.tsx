@@ -21,11 +21,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+
 import { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers/eui_components';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../routes';
 import {
   connectorStatusToColor,

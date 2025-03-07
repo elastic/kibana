@@ -25,9 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
+import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
+
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { SyncsContextMenu } from '../../shared/header_actions/syncs_context_menu';
 

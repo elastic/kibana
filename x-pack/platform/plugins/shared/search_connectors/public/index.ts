@@ -13,3 +13,22 @@ export function plugin() {
 }
 
 export type { SearchConnectorsPluginSetup, SearchConnectorsPluginStart } from './types';
+
+export type {
+  CreateHrefOptions,
+  ReactRouterProps,
+  GeneratedReactRouterProps,
+} from './components/shared/react_router_helpers';
+export {
+  letBrowserHandleEvent,
+  createHref,
+  generateReactRouterProps,
+  EuiLinkTo,
+  EuiButtonTo,
+  EuiButtonEmptyTo,
+  EuiButtonIconTo,
+  EuiListGroupItemTo,
+  EuiPanelTo,
+  EuiCardTo,
+  EuiBadgeTo,
+} from './components/shared/react_router_helpers';

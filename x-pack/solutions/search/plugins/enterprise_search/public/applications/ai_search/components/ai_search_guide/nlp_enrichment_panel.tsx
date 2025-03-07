@@ -22,9 +22,10 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
@@ -35,6 +36,7 @@ const steps: EuiContainedStepProps[] = [
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiLink
+            data-test-subj="enterpriseSearchSupportedNlpModelsLink"
             data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-supportedNlpModelsLink"
             href={docLinks.supportedNlpModels}
             target="_blank"
@@ -48,6 +50,7 @@ const steps: EuiContainedStepProps[] = [
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiLink
+            data-test-subj="enterpriseSearchGuideToTrainedModelsLink"
             data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-trainedModelsLink"
             href={docLinks.trainedModels}
             target="_blank"
@@ -65,7 +68,7 @@ const steps: EuiContainedStepProps[] = [
             to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)}
             shouldNotCreateHref
           >
-            <EuiButton iconType="eye">
+            <EuiButton data-test-subj="enterpriseSearchViewTrainedModelsButton" iconType="eye">
               {i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.buttonLabel',
                 {
@@ -89,7 +92,7 @@ const steps: EuiContainedStepProps[] = [
         to={generatePath('/app/elasticsearch/indices/create')}
         shouldNotCreateHref
       >
-        <EuiButton iconType="plusInCircle">
+        <EuiButton data-test-subj="enterpriseSearchCreateAnIndexButton" iconType="plusInCircle">
           {i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step2.buttonLabel', {
             defaultMessage: 'Create an index',
           })}
@@ -143,6 +146,7 @@ export const NlpEnrichmentPanel: React.FC = () => (
               values={{
                 supportedMlModels: (
                   <EuiLink
+                    data-test-subj="enterpriseSearchNlpEnrichmentPanelSupportedMlModelsLink"
                     data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-supportedMlModelsLink"
                     target="_blank"
                     href={docLinks.supportedNlpModels}

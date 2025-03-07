@@ -7,6 +7,8 @@
 
 import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
+import { ReactRouterProps } from '@kbn/search-connectors-plugin/public';
+
 import { ADD, UPDATE } from './constants/operations';
 
 export type TOperation = typeof ADD | typeof UPDATE;
@@ -54,16 +56,6 @@ export interface SingleUserRoleMapping<T> {
   elasticsearchUser: ElasticsearchUser;
   roleMapping: T;
   hasEnterpriseSearchRole?: boolean;
-}
-
-export interface ReactRouterProps {
-  to: string;
-  onClick?(): void;
-  // Used to navigate outside of the React Router plugin basename but still within Kibana,
-  // e.g. if we need to go from Enterprise Search to App Search
-  shouldNotCreateHref?: boolean;
-  // Used if to is already a fully qualified URL that doesn't need basePath prepended
-  shouldNotPrepend?: boolean;
 }
 
 export type GenerateNavLinkParameters = {

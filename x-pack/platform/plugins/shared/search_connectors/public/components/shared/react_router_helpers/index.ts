@@ -9,6 +9,7 @@ export { letBrowserHandleEvent } from './link_events';
 export type { CreateHrefOptions } from './create_href';
 export { createHref } from './create_href';
 export { generateReactRouterProps } from './generate_react_router_props';
+export type { GeneratedReactRouterProps } from './generate_react_router_props';
 export {
   EuiLinkTo,
   EuiButtonTo,
@@ -17,4 +18,7 @@ export {
   EuiListGroupItemTo,
   EuiPanelTo,
   EuiCardTo,
+  EuiBadgeTo,
 } from './eui_components';
+
+export * from './types';

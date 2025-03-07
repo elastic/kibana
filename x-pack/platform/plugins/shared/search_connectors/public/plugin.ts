@@ -7,6 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import {
   SearchConnectorsPluginSetup,
@@ -14,6 +15,8 @@ import {
   SearchConnectorsPluginStart,
   SearchConnectorsPluginStartDependencies,
 } from './types';
+import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN_NAME } from './translations';
 
 export class SearchConnectorsPlugin
   implements
@@ -28,7 +31,24 @@ export class SearchConnectorsPlugin
     core: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
     dependencies: SearchConnectorsPluginSetupDependencies
   ): SearchConnectorsPluginSetup {
+    const { management } = dependencies;
     const connectorTypes = getConnectorTypes(core.http.staticAssets);
+
+    management.sections.section.data.registerApp({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      order: 6,
+      keywords: ['search connectors', 'search'],
+      async mount(params: ManagementAppMountParams) {
+        const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
+          import('./app'),
+          core.getStartServices(),
+        ]);
+
+        const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
+        return renderApp(coreStart, pluginsStartDeps, pluginStart, params, connectorsDefinitions);
+      },
+    });
     return {
       getConnectorTypes: () => connectorTypes,
     };
@@ -42,11 +62,6 @@ export class SearchConnectorsPlugin
     docLinks.setDocLinks(core.docLinks.links);
     const connectorTypes = getConnectorFullTypes(http.staticAssets);
 
-    const isServerless = !!services.cloud?.isServerlessEnabled;
-    const isCloud = !!services.cloud?.isCloudEnabled;
-
-    const isAgentlessEnabled =
-      (isCloud || isServerless) && services.fleet?.config.agentless?.enabled === true;
     return {
       getConnectorTypes: () => connectorTypes,
     };

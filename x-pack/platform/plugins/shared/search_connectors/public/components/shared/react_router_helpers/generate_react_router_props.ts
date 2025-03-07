@@ -9,8 +9,7 @@ import React from 'react';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
-import { letBrowserHandleEvent, createHref } from '.';
-import { ReactRouterProps } from '../../../types';
+import { letBrowserHandleEvent, createHref, ReactRouterProps } from '.';
 
 /**
  * Generates the `href` and `onClick` props for React-Router-friendly links

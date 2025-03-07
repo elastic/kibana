@@ -16,6 +16,7 @@ import {
   SyncStatus,
   IngestionStatus,
   IngestionMethod,
+  ElasticsearchViewIndex,
 } from '@kbn/search-connectors';
 
 import {
@@ -54,7 +55,6 @@ import { IndexNameLogic } from './index_name_logic';
 import { Actions } from '../../api/api_logic/create_api_logic';
 import { Status } from '../../../common/types/api';
 import { flashSuccessToast } from '../flash_messages';
-import { ElasticsearchViewIndex } from '../../types';
 
 type StartSyncApiActions = Actions<StartSyncArgs, {}>;
 type StartIncrementalSyncApiActions = Actions<StartIncrementalSyncArgs, {}>;

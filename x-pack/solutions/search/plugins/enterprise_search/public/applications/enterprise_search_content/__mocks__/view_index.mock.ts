@@ -14,9 +14,8 @@ import {
   ConnectorViewIndex,
   IngestionStatus,
   IngestionMethod,
+  ApiViewIndex,
 } from '@kbn/search-connectors';
-
-import { ApiViewIndex } from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,

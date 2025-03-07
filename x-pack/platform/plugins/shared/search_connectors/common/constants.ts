@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { IngestPipelineParams } from '@kbn/search-connectors';
 import dedent from 'dedent';
 
+export const PLUGIN_ID = 'search_connectors';
 export const DEFAULT_PIPELINE_NAME = 'search-default-ingestion';
 export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,

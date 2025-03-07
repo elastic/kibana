@@ -18,8 +18,8 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
 
-import { EuiLinkTo } from '../../react_router_helpers';
 import { TruncatedContent } from '../../truncate';
 
 import { Schema, FieldCoercionErrors } from '../types';
