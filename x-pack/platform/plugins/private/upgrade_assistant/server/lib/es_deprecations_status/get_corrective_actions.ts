@@ -30,6 +30,8 @@ interface IndexActionMetadata {
 
 interface DataStreamActionMetadata {
   actions?: Action[];
+
+  excludedActions?: Array<'readOnly' | 'reindex'>;
   total_backing_indices: number;
   reindex_required: boolean;
 
