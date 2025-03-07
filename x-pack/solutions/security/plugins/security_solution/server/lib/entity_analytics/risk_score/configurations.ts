@@ -164,9 +164,11 @@ export type TransformOptions = Omit<TransformPutTransformRequest, 'transform_id'
 export const getTransformOptions = ({
   dest,
   source,
+  namespace,
 }: {
   dest: string;
   source: string[];
+  namespace: string;
 }): Omit<TransformPutTransformRequest, 'transform_id'> => ({
   dest: {
     index: dest,
@@ -206,5 +208,6 @@ export const getTransformOptions = ({
     version: 3, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
+    space_id: namespace, // Metadata that identifies the space where the transform is running. Helps in debugging as the original tranformid could be hashed if longer than 36 characters
   },
 });

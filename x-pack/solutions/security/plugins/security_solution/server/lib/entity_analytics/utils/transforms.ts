@@ -182,6 +182,7 @@ export const upgradeLatestTransformIfNeeded = async ({
   const newConfig = getTransformOptions({
     dest: latestIndex,
     source: [timeSeriesIndex],
+    namespace,
   });
 
   if (isTransformOutdated(response.transforms[0], newConfig)) {

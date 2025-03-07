@@ -49,6 +49,7 @@ const timeSeriesIndex = getRiskScoreTimeSeriesIndex('tests');
 const transformConfig = getTransformOptions({
   dest: latestIndex,
   source: [timeSeriesIndex],
+  namespace: 'tests',
 });
 
 const updatedTransformsMock = {
