@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { FC } from 'react';
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { type NavigateToApp, getStackManagementBreadcrumb } from '../breadcrumbs';
@@ -16,6 +16,10 @@ import type { MlRoute, PageProps } from '../router';
 import { PageLoader } from '../router'; // createPath,
 import { useRouteResolver } from '../use_resolver';
 import { initSavedObjects } from '../resolvers';
+import { useEnabledFeatures } from '../../contexts/ml';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
+import { AccessDeniedCallout } from '../../access_denied';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
@@ -46,6 +50,28 @@ const PageWrapper: FC<PageProps> = () => {
   });
 
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+
+  const redirectToTrainedModels = useCreateAndNavigateToManagementMlLink(
+    '',
+    ML_PAGES.TRAINED_MODELS_MANAGE
+  );
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
+
+  useEffect(
+    function redirectToTrainedModelsManagementPageIfEnabled() {
+      if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === true) {
+        // if only NLP is enabled, redirect to the trained models page.
+        // in the search serverless project, the overview page is blank, so we
+        // need to redirect to the trained models page instead
+        redirectToTrainedModels();
+      }
+    },
+    [isADEnabled, isDFAEnabled, isNLPEnabled, redirectToTrainedModels]
+  );
+
+  if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === false) {
+    return <AccessDeniedCallout missingCapabilities={['contact']} />;
+  }
 
   return (
     <PageLoader context={context}>
