@@ -70,7 +70,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs,logstash*');
+
+        await dataViews.createFromSearchBar({
+          name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
+          adHoc: true,
+          hasTimeField: true,
+        });
+
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('tablePaginationPopoverButton');
         await testSubjects.existOrFail('pagination-button-previous');
