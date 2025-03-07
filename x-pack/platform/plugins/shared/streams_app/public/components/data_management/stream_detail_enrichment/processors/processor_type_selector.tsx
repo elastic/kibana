@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { getDefaultFormState } from '../utils';
+import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
 
 interface TAvailableProcessor {
@@ -38,7 +38,7 @@ export const ProcessorTypeSelector = ({
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
 
   const handleChange = (type: ProcessorType) => {
-    const formState = getDefaultFormState(type);
+    const formState = getDefaultFormStateByType(type);
     reset(formState);
   };
 

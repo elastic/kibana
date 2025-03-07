@@ -5277,7 +5277,7 @@
         "tags": [],
         "label": "LogsLocatorParams",
         "description": [
-          "\nAccepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewSpec` param to all log sources."
+          "\nAccepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewId` param to all log sources."
         ],
         "signature": [
           {
