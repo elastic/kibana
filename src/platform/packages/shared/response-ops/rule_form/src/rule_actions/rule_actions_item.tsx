@@ -557,7 +557,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   }, []);
 
   const accordionIcon = useMemo(() => {
-    if (!connector) {
+    if (!connector || !actionType) {
       return (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE}>
@@ -585,34 +585,23 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           </EuiToolTip>
         ) : (
           <Suspense fallback={null}>
-            <EuiIcon size="l" type={actionTypeModel.iconClass} />
+            <EuiToolTip content={actionType.name}>
+              <EuiIcon size="l" type={actionTypeModel.iconClass} />
+            </EuiToolTip>
           </Suspense>
         )}
       </EuiFlexItem>
     );
-  }, [connector, showActionGroupErrorIcon, actionTypeModel]);
+  }, [connector, showActionGroupErrorIcon, actionType, actionTypeModel.iconClass]);
 
   const connectorTitle = useMemo(() => {
     const title = connector ? ACTION_TITLE(connector) : actionTypeModel.actionTypeTitle;
     return (
-      <EuiFlexItem grow={false}>
-        <EuiText>{title}</EuiText>
+      <EuiFlexItem grow={false} className=".eui-textBreakWord">
+        <EuiText size="s">{title}</EuiText>
       </EuiFlexItem>
     );
   }, [connector, actionTypeModel]);
-
-  const actionTypeTitle = useMemo(() => {
-    if (!connector || !actionType) {
-      return null;
-    }
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <strong>{actionType.name}</strong>
-        </EuiText>
-      </EuiFlexItem>
-    );
-  }, [connector, actionType]);
 
   const runWhenTitle = useMemo(() => {
     if (!connector) {
@@ -624,11 +613,15 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     if (selectedActionGroup || action.frequency?.summary) {
       return (
         <EuiFlexItem grow={false}>
-          <EuiBadge iconType="clock">
-            {action.frequency?.summary
-              ? SUMMARY_GROUP_TITLE
-              : RUN_WHEN_GROUP_TITLE(selectedActionGroup!.name.toLocaleLowerCase())}
-          </EuiBadge>
+          <EuiToolTip
+            content={
+              action.frequency?.summary
+                ? SUMMARY_GROUP_TITLE
+                : RUN_WHEN_GROUP_TITLE(selectedActionGroup!.name.toLocaleLowerCase())
+            }
+          >
+            <EuiBadge iconType="clock" />
+          </EuiToolTip>
         </EuiFlexItem>
       );
     }
@@ -644,9 +637,9 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     if (warning) {
       return (
         <EuiFlexItem grow={false}>
-          <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
-            {ACTION_WARNING_TITLE}
-          </EuiBadge>
+          <EuiToolTip content={ACTION_WARNING_TITLE}>
+            <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning" />
+          </EuiToolTip>
         </EuiFlexItem>
       );
     }
@@ -695,20 +688,23 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         <EuiPanel color="subdued" paddingSize="m">
           <EuiFlexGroup alignItems="center" responsive={false}>
             {accordionIcon}
-            {connectorTitle}
-            {actionTypeTitle}
-            {runWhenTitle}
-            {warningIcon}
-            {actionTypeModel.isExperimental && (
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  alignment="middle"
-                  data-test-subj="ruleActionsSystemActionsItemBetaBadge"
-                  label={TECH_PREVIEW_LABEL}
-                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              {connectorTitle}
+              {actionTypeModel.isExperimental && (
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    alignment="middle"
+                    data-test-subj="ruleActionsSystemActionsItemBetaBadge"
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" responsive={false}>
+              {runWhenTitle}
+              {warningIcon}
+            </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiPanel>
       }

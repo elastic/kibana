@@ -27,15 +27,7 @@ import type {
   TooltipProps,
   TooltipValue,
 } from '@elastic/charts';
-import {
-  Chart,
-  Heatmap,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { Chart, Heatmap, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -198,6 +190,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   yAxisWidth,
   onRenderComplete,
 }) => {
+  const {
+    theme: { useChartsBaseTheme },
+  } = chartsService;
+
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const {
@@ -219,6 +215,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
   );
+
+  const baseTheme = useChartsBaseTheme();
 
   const swimLanePoints = useMemo(() => {
     const showFilterContext = filterActive === true && swimlaneType === SWIMLANE_TYPE.OVERALL;
@@ -458,8 +456,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       <Tooltip {...tooltipOptions} />
                       <Settings
                         theme={themeOverrides}
-                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                        baseTheme={LEGACY_LIGHT_THEME}
+                        baseTheme={baseTheme}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}

@@ -9,12 +9,11 @@
 
 import { Capabilities } from '@kbn/core/public';
 import { convertPanelMapToPanelsArray } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container/types';
 
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { DashboardState } from '../../../dashboard_api/types';
+import { DashboardLocatorParams, DashboardState } from '../../../dashboard_api/types';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {

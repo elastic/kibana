@@ -702,6 +702,13 @@ export const COLUMN_MODIFIED = i18n.translate(
   }
 );
 
+export const COLUMN_CONFLICT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.conflictTitle',
+  {
+    defaultMessage: 'Conflict',
+  }
+);
+
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -860,6 +867,36 @@ export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
+export const SOLVABLE_CONFLICT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictLabel',
+  {
+    defaultMessage: 'Auto-resolved conflict',
+  }
+);
+
+export const SOLVABLE_CONFLICT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictTooltipDescription',
+  {
+    defaultMessage:
+      'This Elastic rule has auto-resolved conflicts that require review before upgrade.',
+  }
+);
+
+export const NON_SOLVABLE_CONFLICT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.nonSolvableConflictLabel',
+  {
+    defaultMessage: 'Unresolved conflict',
+  }
+);
+
+export const NON_SOLVABLE_CONFLICT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.nonSolvableConflictTooltipDescription',
+  {
+    defaultMessage:
+      'This Elastic rule has unresolved conflicts that require editing before upgrade.',
   }
 );
 
@@ -1451,14 +1488,14 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
 export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',
   {
-    defaultMessage: 'Update rule',
+    defaultMessage: 'Update',
   }
 );
 
 export const REVIEW_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.reviewRuleButton',
   {
-    defaultMessage: 'Review rule',
+    defaultMessage: 'Review',
   }
 );
 

@@ -89,7 +89,10 @@ export function ControlBar({
     const request = {
       ingest: {
         ...stream.ingest,
-        routing,
+        wired: {
+          ...stream.ingest.wired,
+          routing,
+        },
       },
     } as IngestUpsertRequest;
 

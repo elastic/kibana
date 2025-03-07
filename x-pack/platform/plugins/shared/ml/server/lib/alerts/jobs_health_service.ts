@@ -204,7 +204,7 @@ export function jobsHealthServiceProvider(
         // match datafeed stats with the job ids
         return (datafeedsStats as DatafeedStats[])
           .map((datafeedStats) => {
-            const jobId = datafeedStats.timing_stats.job_id;
+            const jobId = datafeedStats.timing_stats?.job_id ?? 'unknown_job_id';
             const jobState =
               jobsStats.find((jobStats) => jobStats.job_id === jobId)?.state ?? 'failed';
             return {

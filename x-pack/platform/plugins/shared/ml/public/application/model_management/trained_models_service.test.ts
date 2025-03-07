@@ -34,7 +34,7 @@ describe('TrainedModelsService', () => {
   let mockTelemetryService: jest.Mocked<ITelemetryClient>;
   let mockDeploymentParamsMapper: jest.Mocked<DeploymentParamsMapper>;
 
-  const startModelAllocationResponseMock = {
+  const startModelAllocationResponseMock: StartTrainedModelDeploymentResponse = {
     assignment: {
       task_parameters: {
         model_id: 'deploy-model',
@@ -47,6 +47,7 @@ describe('TrainedModelsService', () => {
         deployment_id: 'my-deployment-id',
         cache_size: '1mb',
       },
+      // @ts-expect-error `node_count` not available in the types. Is it removed?
       node_count: 1,
       routing_table: {
         'node-1': {

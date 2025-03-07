@@ -70,6 +70,13 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_non_customized_prebuilt_rules/feature_enabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_non_customized_prebuilt_rules/feature_disabled/configs/ess_feature_flag_disabled.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_customized_prebuilt_rules/feature_enabled/configs/ess_enterprise_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_customized_prebuilt_rules/feature_disabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_customized_prebuilt_rules/feature_disabled/configs/ess_feature_flag_disabled.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/export_prebuilt_rules/feature_enabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/export_prebuilt_rules/feature_disabled/configs/ess_feature_flag_disabled.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/basic_license_essentials_tier/configs/ess.config.ts

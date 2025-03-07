@@ -19,7 +19,8 @@
       "dataViewEditor",
       "unifiedSearch",
       "fieldFormats",
-      "licensing"
+      "licensing",
+      "fieldsMetadata"
     ],
     "optionalPlugins": ["spaces"]
   }

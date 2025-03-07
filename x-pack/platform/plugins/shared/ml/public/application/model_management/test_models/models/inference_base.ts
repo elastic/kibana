@@ -325,7 +325,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   protected async runPipelineSimulate(
-    processResponse: (d: estypes.IngestSimulateDocumentSimulation) => TInferResponse
+    processResponse: (d: estypes.IngestDocumentSimulation) => TInferResponse
   ): Promise<TInferResponse[]> {
     try {
       this.setRunning();
@@ -376,10 +376,10 @@ export abstract class InferenceBase<TInferResponse> {
     };
   }
 
-  protected getDocFromResponse({ doc, error }: estypes.IngestSimulatePipelineSimulation) {
+  protected getDocFromResponse({ doc, error }: estypes.IngestPipelineSimulation) {
     if (doc === undefined) {
       if (error) {
-        // @ts-expect-error Error is now typed in estypes. However, I doubt that it doesn't get the HTTP wrapper expected.
+        // @ts-expect-error Error is now typed in estypes. However, I doubt that it doesn't get the expected HTTP wrapper.
         this.setFinishedWithErrors(error);
         throw Error(error.reason);
       }
