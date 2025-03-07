@@ -70,10 +70,10 @@ const DurationIcon = () => {
   );
 };
 
-/**
- * createResourceFields definitions
- */
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
+
+const EventOutcomeBadge = (props: FieldBadgeWithActionsProps) =>
+  props.rawValue === 'failure' ? <FieldBadgeWithActions {...props} color="danger" /> : null;
 
 export interface ResourceFieldDescriptor {
   ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
@@ -88,13 +88,16 @@ const getResourceBadgeComponent = (
   core: CoreStart,
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
-  if (name === SERVICE_NAME_FIELD) {
-    return (props: FieldBadgeWithActionsProps) => (
-      <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-    );
+  switch (name) {
+    case SERVICE_NAME_FIELD:
+      return (props: FieldBadgeWithActionsProps) => (
+        <ServiceNameBadgeWithActions {...props} share={share} core={core} />
+      );
+    case EVENT_OUTCOME_FIELD:
+      return EventOutcomeBadge;
+    default:
+      return FieldBadgeWithActions;
   }
-
-  return FieldBadgeWithActions;
 };
 
 const getResourceBadgeIcon = (
@@ -109,25 +112,6 @@ const getResourceBadgeIcon = (
           <AgentIcon
             agentName={fields[AGENT_NAME_FIELD] as AgentName}
             size="m"
-            css={css`
-              margin-right: ${euiTheme.size.xs};
-            `}
-          />
-        );
-      };
-    case EVENT_OUTCOME_FIELD:
-      return () => {
-        const { euiTheme } = useEuiTheme();
-
-        const value = fields[name];
-
-        const color = value === 'failure' ? 'danger' : value === 'success' ? 'success' : 'subdued';
-
-        return (
-          <EuiIcon
-            color={color}
-            type="dot"
-            size="s"
             css={css`
               margin-right: ${euiTheme.size.xs};
             `}

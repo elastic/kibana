@@ -18992,6 +18992,11 @@ paths:
                             type: string
                           nullable: true
                           type: array
+                        upgrade_attempts:
+                          items:
+                            type: string
+                          nullable: true
+                          type: array
                         upgrade_details:
                           additionalProperties: false
                           nullable: true
@@ -19447,6 +19452,11 @@ paths:
                           type: string
                         nullable: true
                         type: array
+                      upgrade_attempts:
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
                       upgrade_details:
                         additionalProperties: false
                         nullable: true
@@ -19787,6 +19797,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -22139,6 +22154,11 @@ paths:
           required: false
           schema:
             type: boolean
+        - in: query
+          name: withPackagePoliciesCount
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -22367,9 +22387,6 @@ paths:
                                   type: string
                                 started_at:
                                   type: string
-                              required:
-                                - name
-                                - started_at
                             latest_install_failed_attempts:
                               items:
                                 additionalProperties: true
@@ -23235,9 +23252,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -23864,9 +23878,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -38863,14 +38874,12 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
                     type: boolean
-                  pipeline_exists:
-                    type: boolean
+                  product_documentation_status:
+                    type: string
                   security_labs_exists:
                     type: boolean
                   user_data_exists:
@@ -45263,7 +45272,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
@@ -45351,9 +45360,6 @@ components:
         id:
           description: The conversation id.
           type: string
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -45376,16 +45382,13 @@ components:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
         createdAt:
-          description: The last time conversation was updated.
+          description: The time conversation was created.
           type: string
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -45612,7 +45615,6 @@ components:
     Security_AI_Assistant_API_FindConversationsSortField:
       enum:
         - created_at
-        - is_default
         - title
         - updated_at
       type: string
