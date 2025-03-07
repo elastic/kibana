@@ -1,10 +1,1 @@
 # Security Search AI Lake tier config
-
-## Disable plugins
-# xpack.osquery.enabled: false
-
-## Fine-tune the security solution feature privileges. Also, refer to `serverless.security.yml` for the tier-agnostic overrides.
-# xpack.features.overrides:
-  ### The following features are Security features hidden in Role management UI for this specific tier.
-  # securitySolutionTimeline.hidden: true
-  # securitySolutionNotes.hidden: true
