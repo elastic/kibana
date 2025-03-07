@@ -83,6 +83,7 @@ import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
+import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -105,12 +106,25 @@ export const getListHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
-  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
   const res = await getPackages({
     savedObjectsClient,
     ...request.query,
   });
   const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+
+  if (request.query.withPackagePoliciesCount) {
+    const countByPackage = await getPackagePoliciesCountByPackageName(
+      appContextService.getInternalUserSOClientForSpaceId(fleetContext.spaceId)
+    );
+    for (const item of flattenedRes) {
+      item.packagePoliciesInfo = {
+        count: countByPackage[item.name] ?? 0,
+      };
+    }
+  }
+
   const body: GetPackagesResponse = {
     items: flattenedRes,
   };

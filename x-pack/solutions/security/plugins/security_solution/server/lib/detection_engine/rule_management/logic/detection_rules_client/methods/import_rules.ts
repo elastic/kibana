@@ -19,6 +19,7 @@ import {
 import { checkRuleExceptionReferences } from '../../import/check_rule_exception_references';
 import { getReferencedExceptionLists } from '../../import/gather_referenced_exceptions';
 import type { IDetectionRulesClient } from '../detection_rules_client_interface';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 /**
  * Imports rules
@@ -39,6 +40,8 @@ export const importRules = async ({
   rules: RuleToImport[];
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
+  const ruleCustomizationStatus = detectionRulesClient.getRuleCustomizationStatus();
+
   const existingLists = await getReferencedExceptionLists({
     rules,
     savedObjectsClient,
@@ -69,6 +72,25 @@ export const importRules = async ({
         }
 
         const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
+        const isCustomized = (ruleSource.type === 'external' && ruleSource.is_customized) ?? false;
+
+        if (
+          isCustomized &&
+          ruleCustomizationStatus.customizationDisabledReason ===
+            PrebuiltRulesCustomizationDisabledReason.License
+        ) {
+          return createRuleImportErrorObject({
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.rules.licenseInsufficientToImportCustomizedPrebuiltRule',
+              {
+                defaultMessage:
+                  'Importing prebuilt rules is not supported if the they were modified. Upgrade your license to import modified prebuilt rules [rule_id: {ruleId}].',
+                values: { ruleId: rule.rule_id },
+              }
+            ),
+            ruleId: rule.rule_id,
+          });
+        }
 
         const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
           rule,
