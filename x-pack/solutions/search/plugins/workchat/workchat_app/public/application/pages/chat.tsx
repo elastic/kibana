@@ -15,6 +15,7 @@ import { Chat } from '../components/chat';
 import { ChatHeader } from '../components/chat_header';
 import { ConversationList } from '../components/conversation_list';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { useCurrentUser } from '../hooks/use_current_user';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -35,6 +36,8 @@ export const WorkchatChatPage: React.FC<{}> = () => {
   const {
     services: { application },
   } = useKibana();
+
+  const currentUser = useCurrentUser();
 
   const { conversations, refresh: refreshConversations } = useConversationList();
 
@@ -86,7 +89,11 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           responsive={false}
         >
           <ChatHeader />
-          <Chat conversationId={conversationId} onConversationUpdate={onConversationUpdate} />
+          <Chat
+            conversationId={conversationId}
+            currentUser={currentUser}
+            onConversationUpdate={onConversationUpdate}
+          />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

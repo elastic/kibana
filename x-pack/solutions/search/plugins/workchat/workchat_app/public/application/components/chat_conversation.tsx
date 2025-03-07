@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiCommentList } from '@elastic/eui';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import type { ConversationEvent } from '../../../common/conversations';
 import { getChartConversationItems } from '../utils/get_chart_conversation_items';
 import { ChatMessage } from './chat_message';
@@ -15,11 +16,13 @@ import type { ChatStatus } from '../hooks/use_chat';
 interface ChatConversationProps {
   conversationEvents: ConversationEvent[];
   chatStatus: ChatStatus;
+  currentUser: AuthenticatedUser | undefined;
 }
 
 export const ChatConversation: React.FC<ChatConversationProps> = ({
   conversationEvents,
   chatStatus,
+  currentUser,
 }) => {
   const conversationItems = useMemo(() => {
     return getChartConversationItems({ conversationEvents, chatStatus });
@@ -28,7 +31,7 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({
   return (
     <EuiCommentList>
       {conversationItems.map((message) => {
-        return <ChatMessage message={message} />;
+        return <ChatMessage message={message} currentUser={currentUser} />;
       })}
     </EuiCommentList>
   );

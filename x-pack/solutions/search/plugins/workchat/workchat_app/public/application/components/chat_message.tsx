@@ -8,12 +8,14 @@
 import React, { useMemo } from 'react';
 import { EuiComment, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import { ChatMessageText } from './chat_message_text';
 import { ChatMessageAvatar } from './chat_message_avatar';
 import type { ConversationItem } from '../utils/get_chart_conversation_items';
 
 interface ChatMessageProps {
   message: ConversationItem;
+  currentUser: AuthenticatedUser | undefined;
 }
 
 const getUserLabel = (message: ConversationItem) => {
@@ -27,7 +29,7 @@ const getUserLabel = (message: ConversationItem) => {
   });
 };
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
   const isUserMessage = useMemo(() => {
     return message.user === 'user';
   }, [message]);
@@ -35,7 +37,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   return (
     <EuiComment
       username={getUserLabel(message)}
-      timelineAvatar={<ChatMessageAvatar role={message.user} loading={message.loading} />}
+      timelineAvatar={
+        <ChatMessageAvatar
+          role={message.user}
+          loading={message.loading}
+          currentUser={currentUser}
+        />
+      }
       event=""
       eventColor={isUserMessage ? 'primary' : 'subdued'}
       actions={<></>}

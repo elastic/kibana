@@ -8,6 +8,7 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import { ConversationEventChanges } from '../../../common/chat_events';
 import { useConversation } from '../hooks/use_conversation';
 import { useStickToBottom } from '../hooks/use_stick_to_bottom';
@@ -16,6 +17,7 @@ import { ChatConversation } from './chat_conversation';
 
 interface ChatProps {
   conversationId: string | undefined;
+  currentUser: AuthenticatedUser | undefined;
   onConversationUpdate: (changes: ConversationEventChanges) => void;
 }
 
@@ -32,7 +34,11 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
   ${scrollBarStyles}
 `;
 
-export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate }) => {
+export const Chat: React.FC<ChatProps> = ({
+  conversationId,
+  currentUser,
+  onConversationUpdate,
+}) => {
   const { sendMessage, conversationEvents, chatStatus } = useConversation({
     conversationId,
     agentId: 'default',
@@ -66,7 +72,11 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
-            <ChatConversation conversationEvents={conversationEvents} chatStatus={chatStatus} />
+            <ChatConversation
+              conversationEvents={conversationEvents}
+              chatStatus={chatStatus}
+              currentUser={currentUser}
+            />
           </EuiPanel>
         </div>
       </EuiFlexItem>
