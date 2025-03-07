@@ -59,7 +59,6 @@ import {
   getFunctionSuggestions,
   getCompatibleLiterals,
   buildConstantsDefinitions,
-  buildVariablesDefinitions,
   buildOptionDefinition,
   buildValueDefinitions,
   getDateLiterals,
@@ -172,13 +171,7 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (
-    astContext.type === 'expression' ||
-    (astContext.type === 'option' && astContext.command?.name === 'join') ||
-    (astContext.type === 'option' && astContext.command?.name === 'dissect') ||
-    (astContext.type === 'option' && astContext.command?.name === 'from') ||
-    (astContext.type === 'option' && astContext.command?.name === 'enrich')
-  ) {
+  if (astContext.type === 'expression') {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
@@ -193,20 +186,6 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
-  }
-  if (astContext.type === 'option') {
-    // need this wrap/unwrap thing to make TS happy
-    const { option, ...rest } = astContext;
-    if (option && isOptionItem(option)) {
-      return getOptionArgsSuggestions(
-        innerText,
-        ast,
-        { option, ...rest },
-        getFieldsByType,
-        getFieldsMap,
-        getPolicyMetadata
-      );
-    }
   }
   if (astContext.type === 'function') {
     return getFunctionArgsSuggestions(
@@ -1219,15 +1198,6 @@ async function getOptionArgsSuggestions(
   const { nodeArg, lastArg } = extractArgMeta(option, node);
   const suggestions = [];
   const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
-
-  const fieldsMap = await getFieldsMaps();
-  const anyVariables = collectVariables(commands, fieldsMap, innerText);
-
-  if (command.name === 'rename') {
-    if (option.args.length < 2) {
-      suggestions.push(...buildVariablesDefinitions([findNewVariable(anyVariables)]));
-    }
-  }
 
   if (optionDef) {
     if (!suggestions.length) {
