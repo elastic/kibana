@@ -92,6 +92,7 @@ export type Tls = t.TypeOf<typeof TlsType>;
 
 export const MonitorType = t.intersection([
   t.type({
+    name: t.string,
     id: t.string,
     status: t.string,
     type: t.string,
@@ -106,7 +107,6 @@ export const MonitorType = t.intersection([
       us: t.number,
     }),
     ip: t.string,
-    name: t.string,
 
     fleet_managed: t.boolean,
     project: t.type({
@@ -163,9 +163,9 @@ export const PingType = t.intersection([
     monitor: MonitorType,
     docId: t.string,
     observer: ObserverCodec,
+    '@timestamp': t.string,
   }),
   t.partial({
-    '@timestamp': t.string,
     agent: AgentType,
     container: t.partial({
       id: t.string,

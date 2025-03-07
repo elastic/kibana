@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import {
   isGroupStreamDefinitionBase,
+  isUnwiredStreamDefinition,
   StreamGetResponse,
   WiredStreamGetResponse,
 } from '@kbn/streams-schema';
@@ -40,8 +41,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('checks whether deeply nested stream is created correctly', async () => {
       function getChildNames(stream: StreamGetResponse['stream']): string[] {
-        if (isGroupStreamDefinitionBase(stream)) return [];
-        return stream.ingest.routing.map((r) => r.destination);
+        if (isGroupStreamDefinitionBase(stream) || isUnwiredStreamDefinition(stream)) return [];
+        return stream.ingest.wired.routing.map((r) => r.destination);
       }
       const logs = await apiClient.fetch('GET /api/streams/{name}', {
         params: {

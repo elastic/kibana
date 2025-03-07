@@ -63,11 +63,7 @@ export const useChatSend = ({
   const { clearConversation, createConversation, getConversation, removeLastMessage } =
     useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
-  const isSetupComplete =
-    kbStatus?.elser_exists &&
-    kbStatus?.index_exists &&
-    kbStatus?.pipeline_exists &&
-    kbStatus?.security_labs_exists;
+  const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(

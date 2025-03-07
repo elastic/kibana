@@ -148,6 +148,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -254,7 +255,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<RuleResponse | null>(null);
-  const isLoading = ruleLoading && rule == null;
+  const isLoading = useMemo(() => ruleLoading && rule == null, [rule, ruleLoading]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
@@ -393,6 +394,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionStatus = lastExecution?.status;
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
+
+  const upgradeCallout = useRuleUpdateCallout({
+    rule,
+    message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
+    onUpgrade: refreshRule,
+  });
 
   const ruleStatusInfo = useMemo(() => {
     return (
@@ -556,6 +563,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
+      {upgradeCallout}
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
@@ -567,7 +575,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiConfirmModal
           title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"

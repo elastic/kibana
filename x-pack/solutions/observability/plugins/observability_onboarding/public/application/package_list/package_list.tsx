@@ -17,9 +17,10 @@ export const LazyPackageList = lazy(async () => ({
 interface Props {
   list: IntegrationCardItem[];
   searchTerm?: string;
+  showCardLabels?: boolean;
 }
 
-export function PackageList({ list, searchTerm = '' }: Props) {
+export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
   return (
     /**
      * Suspense wrapper is required by PackageListGrid, but
@@ -40,7 +41,7 @@ export function PackageList({ list, searchTerm = '' }: Props) {
         categories={[]}
         setUrlandReplaceHistory={() => {}}
         setUrlandPushHistory={() => {}}
-        showCardLabels={true}
+        showCardLabels={showCardLabels}
       />
     </Suspense>
   );

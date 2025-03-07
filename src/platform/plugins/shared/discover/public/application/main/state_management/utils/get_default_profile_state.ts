@@ -16,8 +16,8 @@ import {
   getMergedAccessor,
   ProfilesManager,
 } from '../../../../context_awareness';
-import type { InternalState } from '../discover_internal_state_container';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
+import type { DiscoverInternalState } from '../redux';
 
 export const getDefaultProfileState = ({
   profilesManager,
@@ -25,7 +25,7 @@ export const getDefaultProfileState = ({
   dataView,
 }: {
   profilesManager: ProfilesManager;
-  resetDefaultProfileState: InternalState['resetDefaultProfileState'];
+  resetDefaultProfileState: DiscoverInternalState['resetDefaultProfileState'];
   dataView: DataView;
 }) => {
   const defaultState = getDefaultState(profilesManager, dataView);

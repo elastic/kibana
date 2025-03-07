@@ -325,7 +325,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             </strong>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <PackageList list={featuredCardsForCategory} />
+          <PackageList list={featuredCardsForCategory} showCardLabels={true} />
         </div>
       </div>
 

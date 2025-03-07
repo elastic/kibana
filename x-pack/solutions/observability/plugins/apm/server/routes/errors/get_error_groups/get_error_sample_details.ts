@@ -29,6 +29,12 @@ import {
   ERROR_STACK_TRACE,
   SPAN_ID,
   SERVICE_LANGUAGE_NAME,
+  URL_FULL,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_PAGE_URL,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -42,6 +48,7 @@ export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;
   error: Omit<APMError, 'transaction' | 'error'> & {
     transaction?: { id?: string; type?: string };
+    user_agent?: { name?: string; version?: string };
     error: {
       id: string;
     } & Omit<APMError['error'], 'exception' | 'log'> & {
@@ -90,6 +97,12 @@ export async function getErrorSampleDetails({
     ERROR_EXC_MESSAGE,
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
+    URL_FULL,
+    HTTP_REQUEST_METHOD,
+    HTTP_RESPONSE_STATUS_CODE,
+    TRANSACTION_PAGE_URL,
+    USER_AGENT_NAME,
+    USER_AGENT_VERSION,
   ] as const);
 
   const params = {

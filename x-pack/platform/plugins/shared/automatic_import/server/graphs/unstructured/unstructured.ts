@@ -17,18 +17,20 @@ export async function handleUnstructured({
 }: HandleUnstructuredNodeParams): Promise<Partial<UnstructuredLogState>> {
   const grokMainGraph = GROK_MAIN_PROMPT.pipe(model).pipe(new JsonOutputParser());
 
-  // Pick logSamples if there was no header detected.
-  const samples = state.logSamples;
+  const samples = state.isFirst ? state.logSamples : state.unParsedSamples;
 
+  const limitedSamples = samples.slice(0, 5);
   const pattern = (await grokMainGraph.invoke({
     packageName: state.packageName,
     dataStreamName: state.dataStreamName,
-    samples: samples[0],
+    samples: limitedSamples,
+    errors: state.errors,
     ex_answer: JSON.stringify(GROK_EXAMPLE_ANSWER, null, 2),
   })) as GrokResult;
 
   return {
-    grokPatterns: pattern.grok_patterns,
+    isFirst: false,
+    currentPattern: pattern.grok_pattern,
     lastExecutedChain: 'handleUnstructured',
   };
 }

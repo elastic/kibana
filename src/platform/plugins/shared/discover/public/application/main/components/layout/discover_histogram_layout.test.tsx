@@ -34,6 +34,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
@@ -46,17 +47,19 @@ function getStateContainer(savedSearch?: SavedSearch) {
 
   stateContainer.appState.update(appState);
 
-  stateContainer.internalState.transitions.setDataView(dataView);
-  stateContainer.internalState.transitions.setDataRequestParams({
-    timeRangeAbsolute: {
-      from: '2020-05-14T11:05:13.590',
-      to: '2020-05-14T11:20:13.590',
-    },
-    timeRangeRelative: {
-      from: '2020-05-14T11:05:13.590',
-      to: '2020-05-14T11:20:13.590',
-    },
-  });
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
+  stateContainer.internalState.dispatch(
+    internalStateActions.setDataRequestParams({
+      timeRangeAbsolute: {
+        from: '2020-05-14T11:05:13.590',
+        to: '2020-05-14T11:20:13.590',
+      },
+      timeRangeRelative: {
+        from: '2020-05-14T11:05:13.590',
+        to: '2020-05-14T11:20:13.590',
+      },
+    })
+  );
 
   return stateContainer;
 }
@@ -142,7 +145,9 @@ const mountComponent = async ({
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
-          <DiscoverHistogramLayout {...props} />
+          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+            <DiscoverHistogramLayout {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

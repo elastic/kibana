@@ -302,10 +302,11 @@ export function threatIndexField({ getService }: FtrProviderContext): void {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'threat_index',
             expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            isMergableField: true,
             expectedFieldDiffValues: {
               current: ['indexD'],
               target: ['indexB', 'indexC'],
-              merged: ['indexB', 'indexC'],
+              merged: ['indexD', 'indexB', 'indexC'],
             },
           },
           getService

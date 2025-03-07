@@ -10,10 +10,10 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
-import { EventsChartPanel } from './events_chart_panel';
+import { EventsChartPanel } from './events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
 import { SLODetailsHistory } from './history/slo_details_history';
-import { Overview } from './overview/overview';
+import { Definition } from './overview/definition';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 import { SloHealthCallout } from './slo_health_callout';
 import { SloRemoteCallout } from './slo_remote_callout';
@@ -21,9 +21,14 @@ import { SloRemoteCallout } from './slo_remote_callout';
 export const TAB_ID_URL_PARAM = 'tabId';
 export const OVERVIEW_TAB_ID = 'overview';
 export const HISTORY_TAB_ID = 'history';
+export const DEFINITION_TAB_ID = 'definition';
 export const ALERTS_TAB_ID = 'alerts';
 
-export type SloTabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID | typeof HISTORY_TAB_ID;
+export type SloTabId =
+  | typeof OVERVIEW_TAB_ID
+  | typeof ALERTS_TAB_ID
+  | typeof HISTORY_TAB_ID
+  | typeof DEFINITION_TAB_ID;
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -57,6 +62,10 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
     );
   }
 
+  if (selectedTabId === DEFINITION_TAB_ID) {
+    return <Definition slo={slo} />;
+  }
+
   if (selectedTabId === ALERTS_TAB_ID) {
     return <SloDetailsAlerts slo={slo} />;
   }
@@ -65,7 +74,6 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
     <EuiFlexGroup direction="column" gutterSize="xl">
       <SloRemoteCallout slo={slo} />
       <SloHealthCallout slo={slo} />
-      <Overview slo={slo} />
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
@@ -76,7 +84,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
           isAutoRefreshing={isAutoRefreshing}
         />
 
-        <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
+        <EventsChartPanel slo={slo} range={range} />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
