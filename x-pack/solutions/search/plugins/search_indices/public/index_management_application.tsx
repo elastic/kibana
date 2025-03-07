@@ -6,10 +6,8 @@
  */
 
 import { CoreSetup, ScopedHistory } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { IndexManagementApp } from './components/index_management/index_management_app';
@@ -29,13 +27,9 @@ export const renderIndexManagementApp = async (
     history,
   };
   ReactDOM.render(
-    <KibanaRenderContextProvider {...coreStart}>
-      <KibanaContextProvider services={{ ...coreStart, ...services }}>
-        <I18nProvider>
-          <IndexManagementApp indexManagement={indexManagement} />
-        </I18nProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    <KibanaContextProvider services={{ ...coreStart, ...services }}>
+      <IndexManagementApp indexManagement={indexManagement} />
+    </KibanaContextProvider>,
     element
   );
 
