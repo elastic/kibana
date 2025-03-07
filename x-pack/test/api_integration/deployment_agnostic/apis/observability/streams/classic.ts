@@ -12,7 +12,7 @@ import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
-import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
+import { fetchDocument, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -27,11 +27,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      await enableStreams(apiClient);
-    });
-
-    after(async () => {
-      await disableStreams(apiClient);
     });
 
     it('non-wired data streams', async () => {
@@ -55,7 +50,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
-          routing: [],
           unwired: {},
         },
       });
@@ -72,7 +66,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
-                routing: [],
                 processing: [
                   {
                     grok: {
@@ -127,7 +120,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           ],
-          routing: [],
           unwired: {},
         },
       });
@@ -193,7 +185,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                routing: [],
                 unwired: {},
               },
             },
@@ -250,18 +241,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         await esClient.indices.putIndexTemplate({
           name: TEMPLATE_NAME,
-          body: {
-            index_patterns: ['mytest*'],
-            priority: 1000,
-            template: {
-              lifecycle: {
-                data_retention: '7d',
-              },
+          index_patterns: ['mytest*'],
+          priority: 1000,
+          template: {
+            lifecycle: {
+              data_retention: '7d',
             },
-            data_stream: {
-              allow_custom_routing: false,
-              hidden: false,
-            },
+          },
+          data_stream: {
+            allow_custom_routing: false,
+            hidden: false,
           },
         });
 
@@ -291,7 +280,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               stream: {
                 ingest: {
                   lifecycle: { inherit: {} },
-                  routing: [],
                   processing: [
                     {
                       grok: {

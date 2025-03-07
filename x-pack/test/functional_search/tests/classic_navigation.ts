@@ -19,8 +19,7 @@ export default function searchSolutionNavigation({
   const spaces = getService('spaces');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/203607
-  describe.skip('Search Classic Navigation', () => {
+  describe('Search Classic Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -54,7 +53,6 @@ export default function searchSolutionNavigation({
         { id: 'Build', label: 'Build' },
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
-        { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'GettingStarted', label: 'Getting started' },
@@ -91,11 +89,6 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectNavItemActive('SearchApplications');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Search Applications');
-      // > BehavioralAnalytics
-      await searchClassicNavigation.clickNavItem('BehavioralAnalytics');
-      await searchClassicNavigation.expectNavItemActive('BehavioralAnalytics');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Behavioral Analytics');
 
       // Check Relevance
       // > InferenceEndpoints

@@ -141,7 +141,37 @@
               "section": "def-common.GroupObjectGetResponse",
               "text": "GroupObjectGetResponse"
             },
-            ", undefined>; \"PUT /api/streams/{name}/_ingest\": ",
+            ", undefined>; \"GET /api/streams/{name}/lifecycle/_explain\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{name}/lifecycle/_explain\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "IlmExplainLifecycleResponse",
+            ", undefined>; \"GET /api/streams/{name}/lifecycle/_stats\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{name}/lifecycle/_stats\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { phases: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.IlmPolicyPhases",
+              "text": "IlmPolicyPhases"
+            },
+            "; }, undefined>; \"PUT /api/streams/{name}/_ingest\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -255,7 +285,7 @@
             "SimulationDocReport",
             "[]; processors_metrics: Record<string, ",
             "ProcessorMetrics",
-            ">; failure_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
+            ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -846,7 +876,37 @@
             "section": "def-common.GroupObjectGetResponse",
             "text": "GroupObjectGetResponse"
           },
-          ", undefined>; \"PUT /api/streams/{name}/_ingest\": ",
+          ", undefined>; \"GET /api/streams/{name}/lifecycle/_explain\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{name}/lifecycle/_explain\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "IlmExplainLifecycleResponse",
+          ", undefined>; \"GET /api/streams/{name}/lifecycle/_stats\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{name}/lifecycle/_stats\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { phases: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IlmPolicyPhases",
+            "text": "IlmPolicyPhases"
+          },
+          "; }, undefined>; \"PUT /api/streams/{name}/_ingest\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -960,7 +1020,7 @@
           "SimulationDocReport",
           "[]; processors_metrics: Record<string, ",
           "ProcessorMetrics",
-          ">; failure_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
+          ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"POST /api/streams/{name}/schema/fields_simulation\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

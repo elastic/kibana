@@ -8,7 +8,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
@@ -19,14 +19,14 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
-interface UseFindingsOptions extends FindingsBaseEsQuery {
+interface UseFindingsOptions extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;

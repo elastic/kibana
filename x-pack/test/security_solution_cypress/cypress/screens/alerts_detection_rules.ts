@@ -110,6 +110,8 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
+export const RULE_ROW_MODIFIED_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
+
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
@@ -192,6 +194,10 @@ export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
 
 export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const getReviewSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="reviewSinglePrebuiltRuleButton-${ruleId}"]`;
 };
 
 export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =

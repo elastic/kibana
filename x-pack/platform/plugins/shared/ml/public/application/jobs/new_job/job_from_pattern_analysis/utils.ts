@@ -6,7 +6,7 @@
  */
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { ML_PAGES } from '../../../../locator';
