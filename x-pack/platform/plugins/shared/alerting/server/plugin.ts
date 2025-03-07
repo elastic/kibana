@@ -278,9 +278,12 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
-
-    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    if (!this.config.rulesSettings?.disabled) {
+      plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
+    }
+    if (!this.config.maintenanceWindow?.disabled) {
+      plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    }
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
