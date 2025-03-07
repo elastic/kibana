@@ -54,7 +54,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  describe('Basic functionality', () => {
+  describe.only('Basic functionality', () => {
     async function getEnabled() {
       const response = await apiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body.enabled;
@@ -352,6 +352,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         await indexAndAssertTargetStream(esClient, 'logs.weird-characters', doc1);
         await indexAndAssertTargetStream(esClient, 'logs', doc2);
+      });
+
+      it('should not roll over more often than necessary', async () => {
+        const expectedIndexCounts: Record<string, number> = {
+          logs: 1,
+          'logs.nginx': 1,
+          'logs.nginx.access': 1,
+          'logs.nginx.error': 1,
+          'logs.number-test': 1,
+          'logs.string-test': 1,
+          'logs.weird-characters': 1,
+        };
+        const dataStreams = await esClient.indices.getDataStream({
+          name: Object.keys(expectedIndexCounts).join(','),
+        });
+        for (const dataStream of dataStreams.data_streams) {
+          expect(dataStream.indices.length).to.eql(expectedIndexCounts[dataStream.name]);
+        }
       });
     });
   });
