@@ -68,7 +68,12 @@ export const EsQueryExpression: React.FC<
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
+      size:
+        size !== undefined
+          ? size
+          : isServerless
+          ? SERVERLESS_DEFAULT_VALUES.SIZE
+          : DEFAULT_VALUES.SIZE,
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
       aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
