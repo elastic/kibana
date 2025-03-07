@@ -179,6 +179,90 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DependencyOverviewParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DependencyOverviewParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.DependencyOverviewParams",
+            "text": "DependencyOverviewParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DependencyOverviewParams.dependencyName",
+            "type": "string",
+            "tags": [],
+            "label": "dependencyName",
+            "description": [],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DependencyOverviewParams.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DependencyOverviewParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DependencyOverviewParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.ObservabilityLogsExplorerLocationState",
         "type": "Interface",
         "tags": [],
@@ -277,6 +361,87 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.TransactionDetailsByNameParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TransactionDetailsByNameParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.TransactionDetailsByNameParams",
+            "text": "TransactionDetailsByNameParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByNameParams.serviceName",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByNameParams.transactionName",
+            "type": "string",
+            "tags": [],
+            "label": "transactionName",
+            "description": [],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByNameParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByNameParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -600,6 +765,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DEPENDENCY_OVERVIEW_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEPENDENCY_OVERVIEW_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"dependencyOverviewLocator\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.LAST_USED_LOGS_VIEWER_APP_ID",
         "type": "string",
         "tags": [],
@@ -729,6 +909,21 @@
           "\"observability-overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.TRANSACTION_DETAILS_BY_NAME_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DETAILS_BY_NAME_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"TransactionDetailsByNameLocator\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

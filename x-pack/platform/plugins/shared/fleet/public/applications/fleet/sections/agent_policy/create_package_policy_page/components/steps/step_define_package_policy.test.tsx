@@ -159,10 +159,9 @@ describe('StepDefinePackagePolicy', () => {
       await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
-          'placeholder',
-          'ns'
-        );
+        expect(
+          renderResult.getByTestId('packagePolicyNamespaceInput').querySelector('input')
+        ).toHaveAttribute('placeholder', 'ns');
       });
     });
 
@@ -175,10 +174,9 @@ describe('StepDefinePackagePolicy', () => {
       await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
-          'placeholder',
-          'default'
-        );
+        expect(
+          renderResult.getByTestId('packagePolicyNamespaceInput').querySelector('input')
+        ).toHaveAttribute('placeholder', 'default');
       });
     });
   });

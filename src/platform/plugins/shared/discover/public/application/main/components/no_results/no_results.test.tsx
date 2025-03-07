@@ -314,17 +314,15 @@ describe('DiscoverNoResults', () => {
         expect(services.data.search.search).toHaveBeenLastCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
-              body: expect.objectContaining({
-                aggs: expect.objectContaining({
-                  earliest_timestamp: expect.objectContaining({
-                    min: expect.objectContaining({
-                      format: 'strict_date_optional_time',
-                    }),
+              aggs: expect.objectContaining({
+                earliest_timestamp: expect.objectContaining({
+                  min: expect.objectContaining({
+                    format: 'strict_date_optional_time',
                   }),
-                  latest_timestamp: expect.objectContaining({
-                    max: expect.objectContaining({
-                      format: 'strict_date_optional_time',
-                    }),
+                }),
+                latest_timestamp: expect.objectContaining({
+                  max: expect.objectContaining({
+                    format: 'strict_date_optional_time',
                   }),
                 }),
               }),

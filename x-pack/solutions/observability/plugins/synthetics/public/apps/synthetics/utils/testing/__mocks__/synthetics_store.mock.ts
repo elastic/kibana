@@ -198,6 +198,9 @@ function getBrowserJourneyMockSlice() {
 
 function getMonitorDetailsMockSlice() {
   return {
+    lastErrorRun: {
+      loading: false,
+    },
     lastRun: {
       loading: false,
       loaded: true,
@@ -238,6 +241,7 @@ function getMonitorDetailsMockSlice() {
           full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
         },
         observer: {
+          name: 'us-central',
           geo: {
             continent_name: 'North America',
             city_name: 'Iowa',
@@ -304,6 +308,7 @@ function getMonitorDetailsMockSlice() {
             full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
           },
           observer: {
+            name: 'us-central',
             geo: {
               continent_name: 'North America',
               city_name: 'Iowa',
@@ -359,6 +364,7 @@ function getMonitorDetailsMockSlice() {
             full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
           },
           observer: {
+            name: 'us-central',
             geo: {
               continent_name: 'North America',
               city_name: 'Iowa',
@@ -414,6 +420,7 @@ function getMonitorDetailsMockSlice() {
             full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
           },
           observer: {
+            name: 'us-central',
             geo: {
               continent_name: 'North America',
               city_name: 'Iowa',
