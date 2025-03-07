@@ -276,10 +276,12 @@ describe('logs_layer', () => {
         {
           ...mockStreamDefinition,
           ingest: {
-            wired: { fields: {} },
+            wired: {
+              fields: {},
+              routing: [],
+            },
             lifecycle: { inherit: {} },
             processing: [],
-            routing: [],
           },
         },
         conflictingFields

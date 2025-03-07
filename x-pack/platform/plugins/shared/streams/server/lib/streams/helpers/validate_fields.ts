@@ -6,9 +6,9 @@
  */
 
 import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
-import { keepFields } from '@kbn/streams-schema/src/helpers/namespaced_ecs';
+import { keepFields, namespacePrefixes } from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
-import { baseMappings, namespacePrefixes } from '../component_templates/logs_layer';
+import { baseMappings } from '../component_templates/logs_layer';
 
 export function validateAncestorFields({
   ancestors,
