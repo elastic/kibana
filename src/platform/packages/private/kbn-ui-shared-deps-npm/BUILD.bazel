@@ -55,12 +55,10 @@ RUNTIME_DEPS = [
   "@npm//moment-timezone",
   "@npm//node-libs-browser",
   "@npm//react-dom",
-  "@npm//react-dom-18",
   "@npm//react-router-dom",
   "@npm//react-router-dom-v5-compat",
   "@npm//react-router",
   "@npm//react",
-  "@npm//react-18",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//tslib",
@@ -100,7 +98,6 @@ webpack_cli(
     },
     "//conditions:default": {
       "NODE_ENV": "development",
-      "REACT_18": "$(REACT_18)",
     },
   })
 )
