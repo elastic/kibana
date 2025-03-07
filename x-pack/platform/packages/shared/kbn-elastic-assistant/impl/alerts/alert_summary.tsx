@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   Replacements,
 } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
 import { getCombinedMessage } from '../assistant/prompt/helpers';
 import type { PromptContext } from '../..';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
@@ -28,7 +37,7 @@ interface OwnProps {
 type Props = OwnProps;
 const notActualPromptJustForTesting =
   ' Highlight any host names or user names at the top of your summary.';
-const prompt = `Give a brief analysis of the event from the context above and format your output neatly in markdown syntax. Give only key observations in paragraph format. Highlight any host or user names at the top of your summary. ${notActualPromptJustForTesting}`;
+const prompt = `Give a brief analysis of the event from the context above and format your output neatly in markdown syntax. Give only key observations in paragraph format. ${notActualPromptJustForTesting}`;
 
 export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext }) => {
   const { abortStream, isLoading, sendMessage } = useChatComplete();
@@ -42,6 +51,7 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
     message: string;
     replacements: Replacements;
   } | null>(null);
+  const [didFetch, setDidFetch] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -73,9 +83,9 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
 
     if (isFetchedAnonymizationFields && isReady) fetchContext();
   }, [anonymizationFields, isFetchedAnonymizationFields, isReady, promptContext]);
-
-  useEffect(() => {
+  const fetchAISummary = useCallback(() => {
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
+      setDidFetch(true);
       const rawResponse = await sendMessage(content);
       setChatCompletionResponse({
         ...rawResponse,
@@ -87,8 +97,7 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
     };
 
     if (messageAndReplacements !== null) fetchSummary(messageAndReplacements);
-  }, [abortStream, messageAndReplacements, sendMessage]);
-
+  }, [messageAndReplacements, sendMessage]);
   useEffect(() => {
     return () => {
       abortStream();
@@ -99,14 +108,39 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
       <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
         <h2>{i18n.AI_SUMMARY}</h2>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      {isLoading ? (
-        <EuiLoadingSpinner size="m" />
+      <EuiSpacer size="s" />
+      {didFetch ? (
+        isLoading ? (
+          <>
+            <EuiText
+              color="subdued"
+              css={css`
+                font-style: italic;
+              `}
+              size="s"
+            >
+              {i18n.GENERATING}
+            </EuiText>
+            <EuiSkeletonText lines={3} size="s" />
+          </>
+        ) : (
+          <MessageText
+            content={chatCompletionResponse.response}
+            contentReferences={chatCompletionResponse.metadata?.contentReferences}
+          />
+        )
       ) : (
-        <MessageText
-          content={chatCompletionResponse.response}
-          contentReferences={chatCompletionResponse.metadata?.contentReferences}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={fetchAISummary}
+              iconType="sparkles"
+              isLoading={messageAndReplacements == null}
+            >
+              {i18n.GENERATE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </>
   );

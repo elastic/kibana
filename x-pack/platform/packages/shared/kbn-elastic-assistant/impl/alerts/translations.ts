@@ -17,3 +17,11 @@ export const NO_SUMMARY_AVAILABLE = i18n.translate(
     defaultMessage: 'No summary available',
   }
 );
+
+export const GENERATING = i18n.translate('xpack.elasticAssistant.assistant.alerts.generating', {
+  defaultMessage: 'Generating AI description and recommended actions.',
+});
+
+export const GENERATE = i18n.translate('xpack.elasticAssistant.assistant.alerts.generate', {
+  defaultMessage: 'Generate AI Summary',
+});
