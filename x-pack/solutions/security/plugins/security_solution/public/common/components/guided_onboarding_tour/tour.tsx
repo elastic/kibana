@@ -110,7 +110,6 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = memo(({ chil
     let ignore = false;
     const complete = async () => {
       await guidedOnboarding?.guidedOnboardingApi?.completeGuideStep(siemGuideId, completeStep);
-      console.log('wtf is this dog shit');
       if (!ignore) {
         setCompleteStep(null);
         _setActiveStep(1);

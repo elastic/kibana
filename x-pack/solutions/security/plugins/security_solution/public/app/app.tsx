@@ -7,7 +7,7 @@
 
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -48,9 +48,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
   } = services;
 
   const darkMode = useDarkMode();
-  useEffect(() => {
-    return () => console.log('StartAppComponent unmounted');
-  }, []);
+
   return (
     <KibanaRenderContextProvider {...services}>
       <ManageGlobalToaster>
