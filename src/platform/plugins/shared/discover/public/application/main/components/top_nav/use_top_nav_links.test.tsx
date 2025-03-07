@@ -15,6 +15,7 @@ import { useTopNavLinks } from './use_top_nav_links';
 import { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 
 describe('useTopNavLinks', () => {
   const services = {
@@ -33,7 +34,11 @@ describe('useTopNavLinks', () => {
   state.actions.setDataView(dataViewMock);
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+    return (
+      <KibanaContextProvider services={services}>
+        <DiscoverMainProvider value={state}>{children}</DiscoverMainProvider>
+      </KibanaContextProvider>
+    );
   };
 
   test('useTopNavLinks result', () => {
