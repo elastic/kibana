@@ -24,6 +24,7 @@ import {
   DataTableRecord,
   getFieldValue,
   INDEX_FIELD,
+  TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
@@ -32,6 +33,7 @@ import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import { TransactionNameIcon } from './icons/transaction_name_icon';
 
 type FieldKey = keyof DataTableRecord['flattened'];
 type FieldValue = NonNullable<DataTableRecord['flattened'][FieldKey]>;
@@ -121,6 +123,8 @@ const getResourceBadgeIcon = (
     case TRANSACTION_DURATION_FIELD:
     case SPAN_DURATION_FIELD:
       return DurationIcon;
+    case TRANSACTION_NAME_FIELD:
+      return () => TransactionNameIcon(fields[AGENT_NAME_FIELD] as AgentName);
   }
 };
 
