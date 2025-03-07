@@ -19,10 +19,10 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiCopy,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -36,10 +36,6 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-
-const codeFontCSS = css`
-  font-family: ${euiThemeVars.euiCodeFontFamily};
-`;
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -69,6 +65,7 @@ export function CellActionsPopover({
   renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
@@ -97,7 +94,13 @@ export function CellActionsPopover({
         data-test-subj="dataTableCellActionPopoverTitle"
       >
         <EuiFlexItem style={{ maxWidth: '200px' }}>
-          <EuiText size="s" css={codeFontCSS}>
+          <EuiText
+            size="s"
+            className="eui-textBreakWord"
+            css={css`
+              font-family: ${euiTheme.font.familyCode};
+            `}
+          >
             <strong>{property}</strong>{' '}
             {typeof renderValue === 'function'
               ? renderValue(value)
