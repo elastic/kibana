@@ -18,6 +18,7 @@ const Template = (args: ESQLEditorProps) => (
     services={{
       settings: { client: { get: () => {} } },
       uiSettings: { get: () => {} },
+      data: { query: { timefilter: { timefilter: { getTime: () => {} } } } },
     }}
   >
     <ESQLEditor {...args} />
@@ -37,7 +38,6 @@ export const ExpandedMode: StoryObj<typeof ESQLEditor> = {
     query: {
       esql: 'from dataview | keep field1, field2',
     },
-    dataTestSubj: 'test-id',
   },
 
   argTypes: {
