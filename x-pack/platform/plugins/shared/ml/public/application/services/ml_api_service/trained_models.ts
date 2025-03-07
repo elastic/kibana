@@ -298,10 +298,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    trainedModelPipelineSimulate(
-      pipeline: estypes.IngestPipeline,
-      docs: estypes.IngestSimulateDocument[]
-    ) {
+    trainedModelPipelineSimulate(pipeline: estypes.IngestPipeline, docs: estypes.IngestDocument[]) {
       const body = JSON.stringify({
         pipeline,
         docs,

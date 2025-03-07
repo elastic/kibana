@@ -28,6 +28,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { ApplicationStart } from '@kbn/core/public';
 import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
 import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list_types';
 import { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
 
@@ -69,7 +70,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
     color: 'default',
     label: ilm.phase,
   };
-  const lifecycleProperties = [
+  const lifecycleProperties: EuiDescriptionListProps['listItems'] = [
     {
       title: i18n.translate(
         'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.policyNameTitle',
@@ -77,7 +78,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
           defaultMessage: 'Policy name',
         }
       ),
-      description: ilm.policy,
+      description: ilm.policy!,
     },
     {
       title: i18n.translate(
@@ -147,7 +148,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
                 <EuiLink
                   color="primary"
                   href={getUrlForApp('management', {
-                    path: `data/index_lifecycle_management/${getPolicyEditPath(ilm.policy)}`,
+                    path: `data/index_lifecycle_management/${getPolicyEditPath(ilm.policy!)}`,
                   })}
                   target="_blank"
                 >
