@@ -68,6 +68,16 @@ export const ProcessorTypeSelector = ({
 };
 
 const availableProcessors: TAvailableProcessors = {
+  date: {
+    value: 'date',
+    inputDisplay: 'Date',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectHelpText"
+        defaultMessage="Converts a date to a document timestamp."
+      />
+    ),
+  },
   dissect: {
     value: 'dissect',
     inputDisplay: 'Dissect',

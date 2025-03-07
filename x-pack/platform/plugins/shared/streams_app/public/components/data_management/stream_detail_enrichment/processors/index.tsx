@@ -166,8 +166,9 @@ export function AddProcessorPanel() {
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
-            {type === 'grok' && <GrokProcessorForm />}
+            {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
+            {type === 'grok' && <GrokProcessorForm />}
           </EuiForm>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
             <ProcessorErrors metrics={processorMetrics} />
@@ -351,6 +352,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
+            {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>

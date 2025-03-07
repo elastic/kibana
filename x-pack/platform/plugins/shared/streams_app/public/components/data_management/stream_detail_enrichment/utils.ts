@@ -21,16 +21,19 @@ import {
   GrokFormState,
   ProcessorFormState,
   WithUIAttributes,
+  DateFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 
-const defaultGrokProcessorFormState: GrokFormState = {
-  type: 'grok',
-  field: 'message',
-  patterns: [{ value: '' }],
-  pattern_definitions: {},
+const defaultDateProcessorFormState: DateFormState = {
+  type: 'date',
+  field: '',
+  formats: [],
+  locale: '',
+  target_field: '',
+  timezone: '',
+  output_format: '',
   ignore_failure: true,
-  ignore_missing: true,
   if: ALWAYS_CONDITION,
 };
 
@@ -43,7 +46,18 @@ const defaultDissectProcessorFormState: DissectFormState = {
   if: ALWAYS_CONDITION,
 };
 
+const defaultGrokProcessorFormState: GrokFormState = {
+  type: 'grok',
+  field: 'message',
+  patterns: [{ value: '' }],
+  pattern_definitions: {},
+  ignore_failure: true,
+  ignore_missing: true,
+  if: ALWAYS_CONDITION,
+};
+
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
+  date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
 };
@@ -72,6 +86,15 @@ export const getFormStateFrom = (
     return structuredClone({
       ...dissect,
       type: 'dissect',
+    });
+  }
+
+  if (isDateProcessor(processor)) {
+    const { date } = processor;
+
+    return structuredClone({
+      ...date,
+      type: 'date',
     });
   }
 
@@ -109,6 +132,24 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
     };
   }
 
+  if (formState.type === 'date') {
+    const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
+      formState;
+
+    return {
+      date: {
+        if: formState.if,
+        field,
+        formats,
+        ignore_failure,
+        locale: isEmpty(locale) ? undefined : locale,
+        target_field: isEmpty(target_field) ? undefined : target_field,
+        timezone: isEmpty(timezone) ? undefined : timezone,
+        output_format: isEmpty(output_format) ? undefined : output_format,
+      },
+    };
+  }
+
   throw new Error('Cannot convert form state to processing: unknown type.');
 };
 
@@ -121,8 +162,9 @@ const createProcessorGuardByType =
   > =>
     processor.type === type;
 
-export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
+export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(

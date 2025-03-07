@@ -68,7 +68,37 @@ export const dissectProcessorDefinitionSchema = z.strictObject({
   ),
 }) satisfies z.Schema<DissectProcessorDefinition>;
 
-export type ProcessorDefinition = DissectProcessorDefinition | GrokProcessorDefinition;
+export interface DateProcessorConfig extends ProcessorBase {
+  field: string;
+  formats: string[];
+  locale?: string;
+  target_field?: string;
+  timezone?: string;
+  output_format?: string;
+}
+
+export interface DateProcessorDefinition {
+  date: DateProcessorConfig;
+}
+
+export const dateProcessorDefinitionSchema = z.strictObject({
+  date: z.intersection(
+    processorBaseSchema,
+    z.object({
+      field: NonEmptyString,
+      formats: z.array(NonEmptyString),
+      locale: z.optional(NonEmptyString),
+      target_field: z.optional(NonEmptyString),
+      timezone: z.optional(NonEmptyString),
+      output_format: z.optional(NonEmptyString),
+    })
+  ),
+}) satisfies z.Schema<DateProcessorDefinition>;
+
+export type ProcessorDefinition =
+  | DateProcessorDefinition
+  | DissectProcessorDefinition
+  | GrokProcessorDefinition;
 export type ProcessorDefinitionWithId = ProcessorDefinition & { id: string };
 
 type UnionKeysOf<T extends Record<string, any>> = T extends T ? keyof T : never;
@@ -82,13 +112,15 @@ export type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
   UnionKeysOf<TProcessorDefinition> & ProcessorType;
 
 export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union([
-  grokProcessorDefinitionSchema,
+  dateProcessorDefinitionSchema,
   dissectProcessorDefinitionSchema,
+  grokProcessorDefinitionSchema,
 ]);
 
 export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
-  grokProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  dateProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   dissectProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  grokProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(
@@ -99,6 +131,11 @@ export const isGrokProcessorDefinition = createIsNarrowSchema(
 export const isDissectProcessorDefinition = createIsNarrowSchema(
   processorDefinitionSchema,
   dissectProcessorDefinitionSchema
+);
+
+export const isDateProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  dateProcessorDefinitionSchema
 );
 
 const processorTypes: ProcessorType[] = (processorDefinitionSchema as z.ZodUnion<any>).options.map(
