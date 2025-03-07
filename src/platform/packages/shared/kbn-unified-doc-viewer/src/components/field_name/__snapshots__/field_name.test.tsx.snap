@@ -33,7 +33,7 @@ exports[`FieldName renders a custom description icon 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
@@ -82,7 +82,7 @@ exports[`FieldName renders a geo field 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
@@ -131,7 +131,7 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
@@ -180,7 +180,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
@@ -229,7 +229,7 @@ exports[`FieldName renders unknown field 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
@@ -278,7 +278,7 @@ exports[`FieldName renders when mapping is provided 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
@@ -327,7 +327,7 @@ exports[`FieldName renders with a search highlight 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span

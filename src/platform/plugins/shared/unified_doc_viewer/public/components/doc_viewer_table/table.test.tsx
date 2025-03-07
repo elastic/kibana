@@ -14,6 +14,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { EuiThemeProvider } from '@elastic/eui';
 import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS } from './table';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
@@ -80,6 +81,14 @@ const dataView = createStubDataView({
 });
 const hit = buildDataTableRecord(generateEsHits(dataView, 1)[0], dataView);
 
+import { ReactNode } from 'react';
+
+const Providers = ({ children }: { children: ReactNode }) => (
+  <IntlProvider locale="en">
+    <EuiThemeProvider>{children}</EuiThemeProvider>
+  </IntlProvider>
+);
+
 describe('DocViewerTable', () => {
   afterEach(() => {
     storage.clear();
@@ -88,9 +97,9 @@ describe('DocViewerTable', () => {
   describe('table cells', () => {
     it('should render cells', async () => {
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
+        </Providers>
       );
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -109,9 +118,9 @@ describe('DocViewerTable', () => {
 
     it('should find by field name', async () => {
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
+        </Providers>
       );
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -131,9 +140,9 @@ describe('DocViewerTable', () => {
 
     it('should find by field value', async () => {
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
+        </Providers>
       );
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -155,9 +164,9 @@ describe('DocViewerTable', () => {
   describe('switch - show only selected fields', () => {
     it('should disable the switch if columns is empty', async () => {
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
+        </Providers>
       );
 
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
@@ -170,9 +179,9 @@ describe('DocViewerTable', () => {
       storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
+        </Providers>
       );
 
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
@@ -185,9 +194,9 @@ describe('DocViewerTable', () => {
       storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={['extension.keyword']} />
-        </IntlProvider>
+        </Providers>
       );
 
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeEnabled();
@@ -198,9 +207,9 @@ describe('DocViewerTable', () => {
 
     it('should allow toggling the switch', async () => {
       render(
-        <IntlProvider locale="en">
+        <Providers>
           <DocViewerTable dataView={dataView} hit={hit} columns={['bytes']} />
-        </IntlProvider>
+        </Providers>
       );
 
       const showOnlySelectedFieldsSwitch = screen.getByTestId(
