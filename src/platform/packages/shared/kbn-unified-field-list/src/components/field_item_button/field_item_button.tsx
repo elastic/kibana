@@ -96,6 +96,52 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
 }: FieldItemButtonProps<T>) {
   const euiShadow = useEuiShadow('xs');
 
+  const fieldButtonCss = ({ euiTheme }: UseEuiTheme) => css`
+    width: 100%;
+    background: ${euiTheme.colors.emptyShade};
+    border-radius: ${euiTheme.border.radius};
+    color: ${isEmpty ? euiTheme.colors.darkShade : undefined};
+    ${euiShadow}
+
+    &.kbnFieldButton {
+      &:focus-within,
+      &-isActive {
+        ${removeEuiFocusRing};
+      }
+    }
+
+    .kbnFieldButton__button:focus {
+      ${passDownFocusRing(euiTheme, '.kbnFieldButton__nameInner')};
+    }
+
+    & button .kbnFieldButton__nameInner:hover {
+      text-decoration: underline;
+    }
+
+    &:hover,
+    &[class*='-isActive'] {
+      .unifiedFieldListItemButton__action {
+        opacity: 1;
+      }
+    }
+
+    .unifiedFieldListItemButton__fieldIconDrag {
+      visibility: visible;
+      opacity: 0;
+    }
+
+    &:hover,
+    &[class*='-isActive'],
+    .domDraggable__keyboardHandler:focus + & {
+      .unifiedFieldListItemButton__fieldIcon {
+        opacity: 0;
+      }
+      .unifiedFieldListItemButton__fieldIconDrag {
+        opacity: 1;
+      }
+    }
+  `;
+
   const displayName = field.displayName || field.name;
   const title =
     displayName !== field.name && field.name !== '___records___'
@@ -203,7 +249,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       dataTestSubj={dataTestSubj || `field-${field.name}-showDetails`}
       size={size || 's'}
       className={classes}
-      css={({ euiTheme }) => fieldButtonCss(euiTheme, isEmpty, euiShadow)}
+      css={fieldButtonCss}
       isActive={isActive}
       buttonProps={{
         ['aria-label']: i18n.translate('unifiedFieldList.fieldItemButton.ariaLabel', {
@@ -321,52 +367,6 @@ const passDownFocusRing = (euiTheme: UseEuiTheme['euiTheme'], target: string) =>
 
   &:not(:focus-visible) ${target} {
     outline: none;
-  }
-`;
-
-const fieldButtonCss = (euiTheme: UseEuiTheme['euiTheme'], isEmpty: boolean, shadow: string) => css`
-  width: 100%;
-  background: ${euiTheme.colors.emptyShade};
-  border-radius: ${euiTheme.border.radius};
-  color: ${isEmpty ? euiTheme.colors.darkShade : undefined};
-  ${shadow}
-
-  &.kbnFieldButton {
-    &:focus-within,
-    &-isActive {
-      ${removeEuiFocusRing};
-    }
-  }
-
-  .kbnFieldButton__button:focus {
-    ${passDownFocusRing(euiTheme, '.kbnFieldButton__nameInner')};
-  }
-
-  & button .kbnFieldButton__nameInner:hover {
-    text-decoration: underline;
-  }
-
-  &:hover,
-  &[class*='-isActive'] {
-    .unifiedFieldListItemButton__action {
-      opacity: 1;
-    }
-  }
-
-  .unifiedFieldListItemButton__fieldIconDrag {
-    visibility: visible;
-    opacity: 0;
-  }
-
-  &:hover,
-  &[class*='-isActive'],
-  .domDraggable__keyboardHandler:focus + & {
-    .unifiedFieldListItemButton__fieldIcon {
-      opacity: 0;
-    }
-    .unifiedFieldListItemButton__fieldIconDrag {
-      opacity: 1;
-    }
   }
 `;
 
