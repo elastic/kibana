@@ -241,7 +241,6 @@ export const migrations = {
             'labs:dashboard:deferBelowFold',
             'labs:dashboard:enable_ui',
             'labs:presentation:timeToPresent',
-            
           ].includes(key)
             ? {
                 ...acc,
