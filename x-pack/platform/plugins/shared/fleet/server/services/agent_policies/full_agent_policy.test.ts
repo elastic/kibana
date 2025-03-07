@@ -24,6 +24,7 @@ import {
   getFullAgentPolicy,
   getFullMonitoringSettings,
   transformOutputToFullPolicyOutput,
+  generateFleetServerOutputSSLConfig,
 } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
 
@@ -1656,20 +1657,14 @@ describe('generateFleetConfig', () => {
       outputs
     );
 
-    expect(res).toMatchInlineSnapshot(`
-      Object {
-        "hosts": Array [
-          "https://test.fr",
-        ],
-        "ssl": Object {
-          "certificate": "my-cert",
-          "certificate_authorities": Array [
-            "/tmp/ssl/ca.crt",
-          ],
-          "key": "my-key",
-        },
-      }
-  `);
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+        key: 'my-key',
+      },
+    });
   });
 
   it('should generate ssl config when a default remote_elasticsearch output has ssl options', () => {
@@ -1706,20 +1701,14 @@ describe('generateFleetConfig', () => {
       outputs
     );
 
-    expect(res).toMatchInlineSnapshot(`
-      Object {
-        "hosts": Array [
-          "https://test.fr",
-        ],
-        "ssl": Object {
-          "certificate": "my-cert",
-          "certificate_authorities": Array [
-            "/tmp/ssl/ca.crt",
-          ],
-          "key": "my-key",
-        },
-      }
-  `);
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+        key: 'my-key',
+      },
+    });
   });
 
   it('should generate ssl config when a ES custom output has ssl options', () => {
@@ -1744,7 +1733,7 @@ describe('generateFleetConfig', () => {
         },
         secrets: {
           ssl: {
-            key: 'my-key',
+            key: { id: 'my-key' },
           },
         },
       },
@@ -1760,24 +1749,18 @@ describe('generateFleetConfig', () => {
       outputs
     );
 
-    expect(res).toMatchInlineSnapshot(`
-      Object {
-        "hosts": Array [
-          "https://test.fr",
-        ],
-        "secrets": Object {
-          "ssl": Object {
-            "key": "my-key",
-          },
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      secrets: {
+        ssl: {
+          key: { id: 'my-key' },
         },
-        "ssl": Object {
-          "certificate": "my-cert",
-          "certificate_authorities": Array [
-            "/tmp/ssl/ca.crt",
-          ],
-        },
-      }
-  `);
+      },
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+    });
   });
 
   it('should generate ssl config when a remote_elasticsearch custom output has ssl options', () => {
@@ -1802,7 +1785,7 @@ describe('generateFleetConfig', () => {
         },
         secrets: {
           ssl: {
-            key: 'my-key',
+            key: { id: 'my-key' },
           },
         },
       },
@@ -1818,24 +1801,205 @@ describe('generateFleetConfig', () => {
       outputs
     );
 
-    expect(res).toMatchInlineSnapshot(`
-      Object {
-        "hosts": Array [
-          "https://test.fr",
-        ],
-        "secrets": Object {
-          "ssl": Object {
-            "key": "my-key",
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      secrets: {
+        ssl: {
+          key: {
+            id: 'my-key',
           },
         },
-        "ssl": Object {
-          "certificate": "my-cert",
-          "certificate_authorities": Array [
-            "/tmp/ssl/ca.crt",
-          ],
+      },
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+    });
+  });
+
+  it('should use secrets key if both keys are present', () => {
+    const outputs = [
+      {
+        id: 'output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: true,
+        hosts: ['http://test.fr:9200'],
+      },
+      {
+        id: 'output-2',
+        name: 'Output 2',
+        type: 'remote_elasticsearch',
+        is_default_monitoring: false,
+        hosts: ['http://test.fr:9200'],
+        is_default: false,
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+          key: { id: 'my-key' },
         },
-      }
-  `);
+        secrets: {
+          ssl: {
+            key: { id: 'my-secret-key' },
+          },
+        },
+      },
+    ] as any;
+
+    const agentPolicyWithCustomOutput = { ...agentPolicy, data_output_id: 'output-2' };
+    const res = generateFleetConfig(
+      agentPolicyWithCustomOutput,
+      {
+        host_urls: ['https://test.fr'],
+      } as any,
+      [],
+      outputs
+    );
+
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      secrets: {
+        ssl: {
+          key: {
+            id: 'my-secret-key',
+          },
+        },
+      },
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+    });
+  });
+});
+
+describe('generateFleetServerOutputSSLConfig', () => {
+  const baseFleetServerHost = {
+    name: 'default Fleet Server',
+    id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+    is_default: true,
+    host_urls: ['http://fleetserver:8220'],
+    is_preconfigured: false,
+  } as any;
+
+  it('should return undefined if no fleetServerHost is passed', () => {
+    const res = generateFleetServerOutputSSLConfig(undefined);
+    expect(res).toEqual(undefined);
+  });
+
+  it('should return undefined if fleetServerHost has no ssl and no secrets', () => {
+    const res = generateFleetServerOutputSSLConfig(baseFleetServerHost);
+    expect(res).toEqual(undefined);
+  });
+
+  it('should generate a bootstrap output if there are ES ssl fields', () => {
+    const fleetServerHost = {
+      ...baseFleetServerHost,
+      ssl: {
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+        certificate: 'my-cert',
+        key: 'my-key',
+        es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        es_certificate: 'my-es-cert',
+        es_key: 'my-es-key',
+      },
+    };
+    const res = generateFleetServerOutputSSLConfig(fleetServerHost);
+    expect(res).toEqual({
+      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+        ssl: {
+          certificate: 'my-es-cert',
+          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+          key: 'my-es-key',
+        },
+        type: 'elasticsearch',
+      },
+    });
+  });
+
+  it('should generate a bootstrap output if there are ES secrets fields', () => {
+    const fleetServerHost = {
+      ...baseFleetServerHost,
+      secrets: {
+        ssl: {
+          key: 'my-key',
+          es_key: 'my-es-key',
+        },
+      },
+    };
+    const res = generateFleetServerOutputSSLConfig(fleetServerHost);
+    expect(res).toEqual({
+      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+        secrets: {
+          ssl: {
+            key: 'my-es-key',
+          },
+        },
+        type: 'elasticsearch',
+      },
+    });
+  });
+
+  it('should generate a bootstrap output if there are both secrets and ES ssl fields', () => {
+    const fleetServerHost = {
+      ...baseFleetServerHost,
+      ssl: {
+        es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        es_certificate: 'my-es-cert',
+      },
+      secrets: {
+        ssl: {
+          key: { id: 'my-key' },
+          es_key: { id: 'my-es-key' },
+        },
+      },
+    };
+    const res = generateFleetServerOutputSSLConfig(fleetServerHost);
+    expect(res).toEqual({
+      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+          certificate: 'my-es-cert',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'my-es-key' },
+          },
+        },
+        type: 'elasticsearch',
+      },
+    });
+  });
+  it('should use secrets key if the key is present in both ways', () => {
+    const fleetServerHost = {
+      ...baseFleetServerHost,
+      ssl: {
+        es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        es_certificate: 'my-es-cert',
+        es_key: { id: 'my-es-key' },
+      },
+      secrets: {
+        ssl: {
+          key: { id: 'my-key' },
+          es_key: { id: 'my-secret-es-key' },
+        },
+      },
+    };
+    const res = generateFleetServerOutputSSLConfig(fleetServerHost);
+    expect(res).toEqual({
+      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+          certificate: 'my-es-cert',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'my-secret-es-key' },
+          },
+        },
+        type: 'elasticsearch',
+      },
+    });
   });
 });
 
@@ -1920,6 +2084,33 @@ describe('getBinarySourceSettings', () => {
       secrets: {
         ssl: {
           key: { id: 'keyid' },
+        },
+      },
+    });
+  });
+  it('should return agent download config using secrets key if both keys are present', () => {
+    const downloadSourceSecrets = {
+      ...downloadSource,
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: ['ca'],
+        key: { id: 'keyid' },
+      },
+      secrets: {
+        ssl: {
+          key: { id: 'secretkeyid' },
+        },
+      },
+    };
+    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: ['ca'],
+      },
+      secrets: {
+        ssl: {
+          key: { id: 'secretkeyid' },
         },
       },
     });

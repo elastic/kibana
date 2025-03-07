@@ -383,14 +383,13 @@ export function generateFleetConfig(
           }),
       };
     }
-
+    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
     if (output?.secrets) {
       config.secrets = {
         ssl: {
-          ...(output.secrets?.ssl?.key &&
-            !output?.ssl?.key && {
-              key: output.secrets.ssl.key,
-            }),
+          ...(output.secrets?.ssl?.key && {
+            key: output.secrets.ssl.key,
+          }),
         },
       };
     }
@@ -446,13 +445,12 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
       }),
     };
   }
-
+  // if both ssl.key and secrets.ssl.key are present, prefer the secrets'
   if (fleetServerHost?.secrets) {
     inputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.key &&
-        !fleetServerHost?.ssl?.key && {
-          ssl: { key: fleetServerHost.secrets?.ssl?.key },
-        }),
+      ...(fleetServerHost?.secrets?.ssl?.key && {
+        ssl: { key: fleetServerHost.secrets?.ssl?.key },
+      }),
     };
   }
   return inputConfig;
@@ -639,7 +637,7 @@ export function transformOutputToFullPolicyOutput(
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
-function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
   | {
       [key: string]: FullAgentPolicyOutput;
     }
@@ -661,12 +659,12 @@ function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | u
         }),
     };
   }
+  // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
   if (fleetServerHost?.secrets) {
     outputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.es_key &&
-        !fleetServerHost?.ssl?.es_key && {
-          ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-        }),
+      ...(fleetServerHost?.secrets?.ssl?.es_key && {
+        ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
+      }),
     };
   }
 
@@ -823,14 +821,13 @@ export function getBinarySourceSettings(
         }),
     };
   }
-
+  // if both ssl.es_key and secrets.ssl.key are present, prefer the secrets'
   if (downloadSource?.secrets) {
     config.secrets = {
       ssl: {
-        ...(downloadSource.secrets?.ssl?.key &&
-          !downloadSource?.ssl?.key && {
-            key: downloadSource.secrets.ssl.key,
-          }),
+        ...(downloadSource.secrets?.ssl?.key && {
+          key: downloadSource.secrets.ssl.key,
+        }),
       },
     };
   }
