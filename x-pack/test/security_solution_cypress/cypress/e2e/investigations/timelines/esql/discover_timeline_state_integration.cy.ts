@@ -171,7 +171,7 @@ describe(
       });
     });
 
-    describe('Discover saved search state for ESQL tab', () => {
+    describe.only('Discover saved search state for ESQL tab', () => {
       it('should save esql tab saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
@@ -189,7 +189,7 @@ describe(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved Discover session timeline - ${timelineName}`
+          `Saved Discover session for timeline - ${timelineName}`
         );
       });
 
