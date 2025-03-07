@@ -28,12 +28,8 @@ export function dispatch(action: Action) {
 }
 
 // Plugins or components can subscribe to events
-eventBus$.subscribe((action) => {
-  if (action.type === 'search-query-updated') {
-    // eslint-disable-next-line no-console
-    console.log('Received updated search query:', action.payload);
-  }
-});
+export const subscribe = (cb: any) => eventBus$.subscribe(cb);
+export type Subscribe = typeof subscribe;
 
 // Publishing an event
 dispatch(setSearchQuery('new search term'));
