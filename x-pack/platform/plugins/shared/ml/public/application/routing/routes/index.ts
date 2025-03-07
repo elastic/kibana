@@ -7,7 +7,6 @@
 
 export * from './datavisualizer';
 export * from './overview_ml';
-// export * from './new_job';
 export * from './data_frame_analytics';
 export * from './aiops';
 export { timeSeriesExplorerRouteFactory } from './timeseriesexplorer';
