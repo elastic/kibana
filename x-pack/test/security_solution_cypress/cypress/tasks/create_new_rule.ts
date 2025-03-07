@@ -463,7 +463,9 @@ export const removeAlertsIndex = () => {
 export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
+    cy.get(DATA_VIEW_COMBO_BOX).should('not.be.disabled');
+    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{downArrow}{enter}`);
+    cy.get(DATA_VIEW_COMBO_BOX).should('contain', rule.data_view_id);
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
