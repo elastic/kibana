@@ -7,22 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  useResizeObserver,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
-import { calculateResponsiveTabs } from '../../utils/calculate_responsive_tabs';
-
-const SCROLL_STEP = 200;
+import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -66,42 +58,17 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   );
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
   const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
-  const dimensions = useResizeObserver(tabsContainerWithPlus);
-  const tabsSizeConfig = useMemo(
-    () =>
-      calculateResponsiveTabs({ items, containerWidth: dimensions.width, hasReachedMaxItemsCount }),
-    [items, dimensions.width, hasReachedMaxItemsCount]
-  );
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
     defaultMessage: 'New session',
   });
 
-  const scrollLeftButtonLabel = i18n.translate('unifiedTabs.scrollLeftButton', {
-    defaultMessage: 'Scroll left',
+  const { tabsSizeConfig, scrollRightButton, scrollLeftButton } = useResponsiveTabs({
+    items,
+    hasReachedMaxItemsCount,
+    tabsContainerWithPlus,
+    tabsContainerRef,
   });
-
-  const scrollRightButtonLabel = i18n.translate('unifiedTabs.scrollRightButton', {
-    defaultMessage: 'Scroll right',
-  });
-
-  const scrollLeft = useCallback(() => {
-    if (tabsContainerRef.current) {
-      tabsContainerRef.current.scrollLeft = Math.max(
-        tabsContainerRef.current.scrollLeft - SCROLL_STEP,
-        0
-      );
-    }
-  }, []);
-
-  const scrollRight = useCallback(() => {
-    if (tabsContainerRef.current) {
-      tabsContainerRef.current.scrollLeft = Math.min(
-        tabsContainerRef.current.scrollLeft + SCROLL_STEP,
-        tabsContainerRef.current.scrollWidth
-      );
-    }
-  }, []);
 
   useEffect(() => {
     if (selectedItem && tabsContainerRef.current) {
@@ -153,30 +120,8 @@ export const TabsBar: React.FC<TabsBarProps> = ({
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {tabsSizeConfig.isScrollable && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
-                  iconType="arrowLeft"
-                  color="text"
-                  aria-label={scrollLeftButtonLabel}
-                  title={scrollLeftButtonLabel}
-                  onClick={scrollLeft}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
-                  iconType="arrowRight"
-                  color="text"
-                  aria-label={scrollRightButtonLabel}
-                  title={scrollRightButtonLabel}
-                  onClick={scrollRight}
-                />
-              </EuiFlexItem>
-            </>
-          )}
+          {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
+          {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
           {!hasReachedMaxItemsCount && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
