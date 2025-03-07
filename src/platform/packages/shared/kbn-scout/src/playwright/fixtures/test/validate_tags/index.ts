@@ -10,7 +10,7 @@
 import { test as base } from '@playwright/test';
 import { tags } from '../../../tags';
 
-const supportedTags = [...tags.DEPLOYMENT_AGNOSTIC, '@perf'];
+const supportedTags = [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE];
 
 export const validateTagsFixture = base.extend<{ validateTags: void }>({
   validateTags: [
