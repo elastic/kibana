@@ -48,11 +48,8 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   solutionId: {
-    validations: [
-      {
-        validator: emptyField(i18n.CREATE_FORM_SOLUTION_IDS_REQUIRED),
-      },
-    ],
+    type: FIELD_TYPES.TEXT,
+    validations: [],
   },
   scopedQuery: {
     defaultValue: {

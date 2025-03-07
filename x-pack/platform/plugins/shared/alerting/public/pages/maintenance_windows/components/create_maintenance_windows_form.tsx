@@ -166,7 +166,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           formData.timezone ? formData.timezone[0] : defaultTimezone,
           formData.recurringSchedule
         ),
-        categoryIds: formData.solutionId ? [formData.solutionId] : undefined,
+        ...(formData.solutionId ? { categoryIds: [formData.solutionId] } : {}),
         scopedQuery: scopedQueryPayload,
       };
 
