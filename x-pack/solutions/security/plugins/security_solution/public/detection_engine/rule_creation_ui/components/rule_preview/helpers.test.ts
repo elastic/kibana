@@ -399,7 +399,7 @@ describe('query_preview/helpers', () => {
 
     test('enabled when threshold rule with non empty query', () => {
       const isDisabled = getIsRulePreviewDisabled({
-        ruleType: 'eql',
+        ruleType: 'threshold',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
         isThresholdValid: true,
@@ -421,7 +421,7 @@ describe('query_preview/helpers', () => {
 
     test('disabled when threshold rule with empty query', () => {
       const isDisabled = getIsRulePreviewDisabled({
-        ruleType: 'eql',
+        ruleType: 'threshold',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
         isThresholdValid: true,
@@ -443,7 +443,7 @@ describe('query_preview/helpers', () => {
 
     test('disabled when threshold rule with invalid threshold', () => {
       const isDisabled = getIsRulePreviewDisabled({
-        ruleType: 'eql',
+        ruleType: 'threshold',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
         isThresholdValid: false,
