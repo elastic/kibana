@@ -39,10 +39,7 @@ import {
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import {
-  selectDataViewsForPicker,
-  useInternalStateSelector,
-} from '../../state_management/discover_internal_state_container';
+import { useDataViewsForPicker } from '../../state_management/redux';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -178,8 +175,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const { savedDataViews, managedDataViews, adHocDataViews } =
-    useInternalStateSelector(selectDataViewsForPicker);
+  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {

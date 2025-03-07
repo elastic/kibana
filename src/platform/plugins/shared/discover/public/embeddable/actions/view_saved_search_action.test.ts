@@ -8,7 +8,6 @@
  */
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 
@@ -54,7 +53,7 @@ describe('view saved search action', () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     expect(
       await action.isCompatible({
-        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject(ViewMode.EDIT) },
+        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject('edit') },
       })
     ).toBe(false);
   });

@@ -30,7 +30,7 @@ import { isEqualFilters } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from './utils/get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import { InternalStateStore } from './redux';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -139,11 +139,11 @@ export interface DiscoverSavedSearchContainer {
 export function getSavedSearchContainer({
   services,
   globalStateContainer,
-  internalStateContainer,
+  internalState,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -183,7 +183,7 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
 
     const dataView = nextSavedSearch.searchSource.getField('index');
-    const profileDataViewIds = internalStateContainer.getState().defaultProfileAdHocDataViewIds;
+    const profileDataViewIds = internalState.getState().defaultProfileAdHocDataViewIds;
     let replacementDataView: DataView | undefined;
 
     // If the Discover session is using a default profile ad hoc data view,

@@ -225,24 +225,22 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const results = await infraMetricsClient.search({
           allow_no_indices: true,
           ignore_unavailable: true,
-          body: {
-            track_total_hits: true,
-            terminate_after: 1,
-            size: 0,
-            ...(modules.length > 0
-              ? {
-                  query: {
-                    bool: {
-                      should: [
-                        ...termsQuery(EVENT_MODULE, ...modules),
-                        ...termsQuery(METRICSET_MODULE, ...modules),
-                      ],
-                      minimum_should_match: 1,
-                    },
+          track_total_hits: true,
+          terminate_after: 1,
+          size: 0,
+          ...(modules.length > 0
+            ? {
+                query: {
+                  bool: {
+                    should: [
+                      ...termsQuery(EVENT_MODULE, ...modules),
+                      ...termsQuery(METRICSET_MODULE, ...modules),
+                    ],
+                    minimum_should_match: 1,
                   },
-                }
-              : {}),
-          },
+                },
+              }
+            : {}),
         });
 
         return response.ok({

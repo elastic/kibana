@@ -29,6 +29,8 @@ import type { InspectorAdapters } from '../../hooks/use_inspector';
 import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {
@@ -121,7 +123,11 @@ describe('useDiscoverHistogram', () => {
     };
 
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
+      <DiscoverMainProvider value={stateContainer}>
+        <RuntimeStateProvider currentDataView={dataViewMockWithTimeField} adHocDataViews={[]}>
+          {children as ReactElement}
+        </RuntimeStateProvider>
+      </DiscoverMainProvider>
     );
 
     const hook = renderHook(
@@ -379,15 +385,17 @@ describe('useDiscoverHistogram', () => {
       expect(hook.result.current.isChartLoading).toBe(true);
     });
 
-    it('should use timerange + timeRangeRelative + query given by the internalState container', async () => {
+    it('should use timerange + timeRangeRelative + query given by the internalState', async () => {
       const fetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
       const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
       const timeRangeRel = { from: 'now-15m', to: 'now' };
-      stateContainer.internalState.transitions.setDataRequestParams({
-        timeRangeAbsolute: timeRangeAbs,
-        timeRangeRelative: timeRangeRel,
-      });
+      stateContainer.internalState.dispatch(
+        internalStateActions.setDataRequestParams({
+          timeRangeAbsolute: timeRangeAbs,
+          timeRangeRelative: timeRangeRel,
+        })
+      );
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
         fetch$.next();

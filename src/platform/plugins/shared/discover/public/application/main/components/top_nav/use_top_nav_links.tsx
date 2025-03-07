@@ -30,6 +30,7 @@ import {
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
+import { internalStateActions, useInternalStateDispatch } from '../../state_management/redux';
 
 /**
  * Helper function to build the top nav links
@@ -53,6 +54,7 @@ export const useTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
+  const dispatch = useInternalStateDispatch();
   const [newSearchUrl, setNewSearchUrl] = useState<string | undefined>(undefined);
   useEffect(() => {
     const fetchData = async () => {
@@ -69,10 +71,10 @@ export const useTopNavLinks = ({
       adHocDataViews,
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
         await state.actions.loadDataViewList();
-        state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
+        dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
       },
     }),
-    [isEsqlMode, dataView, adHocDataViews, state]
+    [isEsqlMode, dataView, adHocDataViews, state.actions, dispatch]
   );
 
   const defaultMenu = topNavCustomization?.defaultMenu;
@@ -181,7 +183,7 @@ export const useTopNavLinks = ({
                 shouldShowESQLToDataViewTransitionModal &&
                 !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
               ) {
-                state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
+                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
                 state.actions.transitionFromESQLToDataView(dataView.id ?? '');
               }
@@ -224,12 +226,13 @@ export const useTopNavLinks = ({
 
     return entries;
   }, [
-    services,
     appMenuRegistry,
-    state,
-    dataView,
+    services,
+    defaultMenu?.saveItem?.disabled,
     isEsqlMode,
+    dataView,
     shouldShowESQLToDataViewTransitionModal,
-    defaultMenu,
+    dispatch,
+    state,
   ]);
 };

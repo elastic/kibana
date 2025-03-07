@@ -11,8 +11,7 @@ import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -60,10 +59,10 @@ import type {
   SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
+  SecuritySharedParams,
 } from '../types';
 import type { ShardError } from '../../../types';
 import type {
-  CompleteRule,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -84,7 +83,6 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { ConfigType } from '../../../../config';
 import type {
   ExtraFieldsForShellAlert,
   WrappedEqlShellOptionalSubAlertsType,
@@ -1075,33 +1073,15 @@ export const getDisabledActionsWarningText = ({
   }
 };
 
-export interface SharedParams {
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  intendedTimestamp: Date | undefined;
-}
-
 export type RuleWithInMemorySuppression =
   | ThreatRuleParams
   | EqlRuleParams
   | MachineLearningRuleParams;
 
 export interface SequenceSuppressionTermsAndFieldsParams {
+  sharedParams: SecuritySharedParams<EqlRuleParams>;
   shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
   buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
@@ -1127,18 +1107,16 @@ export const stringifyAfterKey = (afterKey: Record<string, string | number | nul
 };
 
 export const buildShellAlertSuppressionTermsAndFields = ({
+  sharedParams,
   shellAlert,
   buildingBlockAlerts,
-  spaceId,
-  completeRule,
-  alertTimestampOverride,
-  primaryTimestamp,
-  secondaryTimestamp,
 }: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
   EqlShellFieldsLatest & SuppressionFieldsLatest
 > & {
   subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
 } => {
+  const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
+    sharedParams;
   const suppressionTerms = getSuppressionTerms({
     alertSuppression: completeRule?.ruleParams?.alertSuppression,
     input: shellAlert._source,

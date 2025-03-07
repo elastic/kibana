@@ -17,6 +17,7 @@ import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { omit } from 'lodash';
 import { createSavedSearchAdHocMock, createSavedSearchMock } from '../../../__mocks__/saved_search';
+import { internalStateActions } from '../state_management/redux';
 
 const renderUrlTracking = ({
   services,
@@ -55,9 +56,11 @@ describe('useUrlTracking', () => {
     const services = createDiscoverServicesMock();
     const savedSearch = omit(createSavedSearchAdHocMock(), 'id');
     const stateContainer = getDiscoverStateMock({ savedSearch });
-    stateContainer.internalState.transitions.setDefaultProfileAdHocDataViews([
-      savedSearch.searchSource.getField('index')!,
-    ]);
+    stateContainer.internalState.dispatch(
+      internalStateActions.setDefaultProfileAdHocDataViews([
+        savedSearch.searchSource.getField('index')!,
+      ])
+    );
     expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
     renderUrlTracking({ services, stateContainer });
     expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
