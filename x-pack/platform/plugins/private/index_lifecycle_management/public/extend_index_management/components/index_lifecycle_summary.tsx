@@ -22,7 +22,7 @@ import {
   EuiBadgeProps,
   EuiBadge,
   EuiCode,
-  useEuiTheme,
+  EuiThemeComputed,
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core/public';
@@ -33,15 +33,17 @@ import { getPolicyEditPath } from '../../application/services/navigation';
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  euiTheme: EuiThemeComputed;
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({
+  index,
+  getUrlForApp,
+  euiTheme,
+}) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
-
-  const { euiTheme } = useEuiTheme();
-
   const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
 
   // Changing the mappings for the phases in Borealis as a mid-term solution. See https://github.com/elastic/kibana/issues/203664#issuecomment-2536593361.

@@ -10,11 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getDataViewsService } from '../kibana_services';
-import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
+import type { OnFileSelectParameters } from './geo_upload_form';
+import { GeoUploadForm } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
-import { ImportResults } from '../importer';
-import { GeoFileImporter } from '../importer/geo';
+import type { ImportResults } from '../importer';
+import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
 import { getPartialImportMessage } from './utils';
 
