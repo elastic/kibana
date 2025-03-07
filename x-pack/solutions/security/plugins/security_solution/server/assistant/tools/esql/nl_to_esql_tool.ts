@@ -56,7 +56,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     return tool(
       async ({ question }) => {
         const humanMessage = new HumanMessage({ content: question })
-        const result = await selfHealingGraph.invoke({ messages: [humanMessage] })
+        const result = await selfHealingGraph.invoke({ messages: [humanMessage]})
         const { messages } = result
         const lastMessage = messages[messages.length - 1]
         return lastMessage.content

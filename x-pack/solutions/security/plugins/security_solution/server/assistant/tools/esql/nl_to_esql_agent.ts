@@ -37,7 +37,8 @@ export const getNlToEsqlAgent = ({
 
         return new Command({
             update:{
-                messages : [nlToEsqlTaskEventToLangchainMessage(result)]
+                messages : [nlToEsqlTaskEventToLangchainMessage(result)],
+                maximumLLMCalls: state.maximumLLMCalls - 1
             }
         })
     }
