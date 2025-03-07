@@ -78,7 +78,7 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
+import { getIsRulePreviewDisabled, isEveryThresholdFieldValid } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
@@ -86,7 +86,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 
-const MyEuiPanel = styled(EuiPanel)<{
+const MyEuiPanel = styled(EuiPanel) <{
   zindex?: number;
 }>`
   position: relative;
@@ -227,6 +227,7 @@ const CreateRulePageComponent: React.FC = () => {
       defineStepFormFields.threatIndex?.isValid &&
       defineStepFormFields.threatQueryBar?.isValid &&
       defineStepFormFields.threatMapping?.isValid,
+    isThresholdValid: isEveryThresholdFieldValid(defineStepFormFields),
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
@@ -490,8 +491,8 @@ const CreateRulePageComponent: React.FC = () => {
     activeStep === RuleStep.scheduleRule
       ? 'active'
       : scheduleStepForm.isValid
-      ? 'valid'
-      : 'passive';
+        ? 'valid'
+        : 'passive';
   const scheduleRuleButton = useMemo(
     () => <AccordionTitle name="3" title={RuleI18n.SCHEDULE_RULE} type={scheduleRuleButtonType} />,
     [scheduleRuleButtonType]

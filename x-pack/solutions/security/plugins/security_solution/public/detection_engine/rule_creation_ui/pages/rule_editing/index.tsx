@@ -27,7 +27,7 @@ import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_co
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
+import { getIsRulePreviewDisabled, isEveryThresholdFieldValid } from '../../components/rule_preview/helpers';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -162,6 +162,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       defineStepFormFields.threatIndex?.isValid &&
       defineStepFormFields.threatQueryBar?.isValid &&
       defineStepFormFields.threatMapping?.isValid,
+    isThresholdValid: isEveryThresholdFieldValid(defineStepFormFields),
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
