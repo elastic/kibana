@@ -535,7 +535,7 @@ export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeInge
     schema: {
       name: {
         type: 'keyword',
-        _meta: { description: 'The naem of the node' },
+        _meta: { description: 'The name of the node' },
       },
       pipelines: {
         type: 'array',

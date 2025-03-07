@@ -46,9 +46,9 @@ export function createIngestStatsTaskConfig() {
       try {
         logger.info('Running ingest stats task');
 
-        const ingestStats = await receiver.getIngestPipelinesStats();
+        const ingestStats = await receiver.getIngestPipelinesStats('1m');
 
-        logger.info('Got ingest stats, about to publissh EBT events', {
+        logger.info('Got ingest stats, about to publish EBT events', {
           count: ingestStats.length,
         } as LogMeta);
 
