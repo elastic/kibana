@@ -22,6 +22,7 @@ interface Props {
    * list functionality.
    */
   customCards?: CustomCard[];
+  showCardLabels?: boolean;
   /**
    * Override the default `observability` option.
    */
@@ -54,6 +55,7 @@ const PackageListGridWrapper = ({
   searchQuery,
   setSearchQuery,
   customCards,
+  showCardLabels,
   flowCategory,
   flowSearch,
   joinCardLists = false,
@@ -83,6 +85,7 @@ const PackageListGridWrapper = ({
   if (isLoading) return <Loading />;
 
   const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
+  const shouldShowCardLabels = showCardLabels ?? (showSearchBar && !!searchQuery);
 
   return (
     <Suspense fallback={<Loading />}>
@@ -114,7 +117,7 @@ const PackageListGridWrapper = ({
             categories={[]}
             setUrlandReplaceHistory={() => {}}
             setUrlandPushHistory={() => {}}
-            showCardLabels={true}
+            showCardLabels={shouldShowCardLabels}
           />
         )}
       </div>
