@@ -55,8 +55,6 @@ jest.mock('@elastic/eui', () => ({
   }),
 }));
 
-const { euiTheme } = useEuiTheme();
-
 const indexWithoutLifecyclePolicy: Index = {
   health: 'yellow',
   status: 'open',
@@ -352,6 +350,11 @@ describe('extend index management', () => {
     const policyErrorPanel = 'policyErrorPanel';
     const phaseDefinitionPanel = 'phaseDefinitionPanel';
 
+    const IlmContentComponent = ({ index }: { index: Index }) => {
+      const { euiTheme } = useEuiTheme();
+      return <IlmComponent index={index} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />;
+    };
+
     test('should not render the tab when index has no index lifecycle policy', () => {
       const shouldRenderTab =
         indexLifecycleTab.shouldRenderTab &&
@@ -368,14 +371,7 @@ describe('extend index management', () => {
           index: indexWithLifecyclePolicy,
         });
       expect(shouldRenderTab).toBeTruthy();
-      const ilmContent = (
-        <IlmComponent
-          index={indexWithLifecyclePolicy}
-          getUrlForApp={getUrlForApp}
-          euiTheme={euiTheme}
-        />
-      );
-      const rendered = mountWithIntl(ilmContent);
+      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecyclePolicy} />);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
@@ -384,14 +380,7 @@ describe('extend index management', () => {
     });
 
     test('should render an error panel when index has lifecycle error', () => {
-      const ilmContent = (
-        <IlmComponent
-          index={indexWithLifecycleError}
-          getUrlForApp={getUrlForApp}
-          euiTheme={euiTheme}
-        />
-      );
-      const rendered = mountWithIntl(ilmContent);
+      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleError} />);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
@@ -400,14 +389,9 @@ describe('extend index management', () => {
     });
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
-      const ilmContent = (
-        <IlmComponent
-          index={indexWithLifecyclePhaseDefinition}
-          getUrlForApp={getUrlForApp}
-          euiTheme={euiTheme}
-        />
+      const rendered = mountWithIntl(
+        <IlmContentComponent index={indexWithLifecyclePhaseDefinition} />
       );
-      const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeTruthy();
@@ -416,14 +400,7 @@ describe('extend index management', () => {
     });
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
-      const ilmContent = (
-        <IlmComponent
-          index={indexWithLifecycleWaitingStep}
-          getUrlForApp={getUrlForApp}
-          euiTheme={euiTheme}
-        />
-      );
-      const rendered = mountWithIntl(ilmContent);
+      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleWaitingStep} />);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
