@@ -24,22 +24,20 @@ import {
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
 import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
+import { embeddableService } from '../../../services/kibana_services';
 
 const { actionsElements: strings } = ErrorStrings;
 
 export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
-  const labsService = presentationUtilService.labsService;
   const dispatch = useDispatch();
   const notifyService = useNotifyService();
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const stateTransferService = embeddableService.getStateTransfer();
 
   // fetch incoming embeddable from state transfer service.
   const incomingEmbeddable = stateTransferService.getIncomingEmbeddablePackage(CANVAS_APP, true);
 
   useEffect(() => {
-    if (isByValueEnabled && incomingEmbeddable) {
+    if (incomingEmbeddable) {
       const { embeddableId, input: incomingInput, type } = incomingEmbeddable;
 
       // retrieve existing element
@@ -103,5 +101,5 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         dispatch(addElement(selectedPage.id, { expression }));
       }
     }
-  }, [dispatch, notifyService, selectedPage, incomingEmbeddable, isByValueEnabled]);
+  }, [dispatch, notifyService, selectedPage, incomingEmbeddable]);
 };
