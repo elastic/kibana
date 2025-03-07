@@ -33,3 +33,9 @@ export const gphSidebarPanel = ({ euiTheme }: UseEuiTheme) =>
     maxHeight: `calc(${euiTheme.size.l} * 10)`,
     overflowY: 'hidden', // Invalid property hidden auto;
   });
+
+export const noUserSelectStyles = css({
+  userSelect: 'none',
+  WebkitTouchCallout: 'none', // invalid property value: https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-touch-callout
+  WebkitTapHighlightColor: 'transparent',
+});

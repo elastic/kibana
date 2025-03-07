@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
-import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
+import { gphSidebarHeaderStyles, gphSidebarPanel, noUserSelectStyles } from '../../styles';
 
 interface DrillDownsProps {
   urlTemplates: UrlTemplate[];
@@ -44,7 +44,12 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
               <li className="list-group-item">
                 {urlTemplate.icon && (
                   <>
-                    <IconRenderer icon={urlTemplate.icon} className="gphNoUserSelect" />{' '}
+                    <IconRenderer
+                      icon={urlTemplate.icon}
+                      // TODO: Delete gphNoUserSelect className
+                      className="gphNoUserSelect"
+                      css={noUserSelectStyles}
+                    />{' '}
                   </>
                 )}
                 <a aria-hidden="true" onClick={onOpenUrlTemplate}>

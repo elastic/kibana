@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -223,7 +224,7 @@ export const WorkspaceLayoutComponent = ({
 
       {isInitialized && workspace && (
         <div id="GraphSvgContainer" css={styles.container}>
-          <div className="gphVisualization">
+          <div css={styles.visualization}>
             <GraphVisualization
               workspace={workspace}
               selectSelected={selectSelected}
@@ -259,6 +260,11 @@ const styles = {
     position: relative;
     background: ${euiTheme.colors.emptyShade};
   `,
+  visualization: css({
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  }),
 };
 
 export const WorkspaceLayout = connect<WorkspaceLayoutStateProps, {}, {}, GraphState>(
