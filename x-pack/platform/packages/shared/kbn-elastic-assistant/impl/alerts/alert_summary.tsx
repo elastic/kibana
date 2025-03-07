@@ -20,6 +20,7 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { getCombinedMessage } from '../assistant/prompt/helpers';
 import type { PromptContext } from '../..';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
@@ -29,12 +30,11 @@ import { useChatComplete } from '../assistant/api/chat_complete/use_chat_complet
 import * as i18n from './translations';
 import { ChatCompleteResponse } from '../assistant/api/chat_complete/post_chat_complete';
 
-interface OwnProps {
+interface Props {
   isReady: boolean;
   promptContext: PromptContext;
 }
 
-type Props = OwnProps;
 const notActualPromptJustForTesting =
   ' Highlight any host names or user names at the top of your summary.';
 const prompt = `Give a brief analysis of the event from the context above and format your output neatly in markdown syntax. Give only key observations in paragraph format. ${notActualPromptJustForTesting}`;
@@ -134,10 +134,17 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={fetchAISummary}
-              iconType="sparkles"
+              color="primary"
+              size="m"
+              data-test-subj="generateInsights"
               isLoading={messageAndReplacements == null}
             >
-              {i18n.GENERATE}
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <AssistantIcon size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{i18n.GENERATE}</EuiFlexItem>
+              </EuiFlexGroup>
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
