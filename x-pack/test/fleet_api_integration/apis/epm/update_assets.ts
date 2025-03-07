@@ -430,7 +430,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
-            id: 'package@custom',
+            id: 'all_assets@custom',
             type: 'component_template',
           },
           {
