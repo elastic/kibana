@@ -154,6 +154,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.original_event.start': schemaDate,
   'kibana.alert.original_event.timezone': schemaString,
   'kibana.alert.original_event.url': schemaString,
+  'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.risk_score': schemaNumber,
