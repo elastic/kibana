@@ -194,6 +194,7 @@ export const FileUploadLiteView: FC<Props> = ({
                     index={i}
                     showFileContentPreview={flyoutContent?.showFileContentPreview}
                     showFileSummary={flyoutContent?.showFileSummary}
+                    autoExpand={filesStatus.length === 1}
                   />
                 ))}
 
