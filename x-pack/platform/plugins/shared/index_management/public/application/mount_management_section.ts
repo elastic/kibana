@@ -9,7 +9,6 @@ import '../index.scss';
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
 import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';

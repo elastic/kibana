@@ -21,7 +21,10 @@ import {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
-import { IndexManagementLocator, IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
+import {
+  IndexManagementLocator,
+  IndexManagementAppMountParams,
+} from '@kbn/index-management-shared-types';
 import { Subscription } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
@@ -34,7 +37,6 @@ import { IndexMapping } from './application/sections/home/index_list/details_pag
 import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
 import { IndexManagementLocatorDefinition } from './locator';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 export class IndexMgmtUIPlugin
   implements
