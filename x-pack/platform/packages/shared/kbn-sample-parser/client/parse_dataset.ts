@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
+import moment from 'moment';
 import { LoghubSystem } from '../src/read_loghub_system_files';
 import { LoghubParser } from '../src/types';
 
@@ -17,11 +17,26 @@ export function parseDataset({ system, parser }: { parser: LoghubParser; system:
       message: line,
     };
   });
-  const sortedLogLines = orderBy(parsedLogLines, (line) => line.timestamp, 'asc');
-  const min = sortedLogLines[0].timestamp;
-  const max = sortedLogLines[parsedLogLines.length - 1].timestamp;
 
-  const count = sortedLogLines.length;
+  const min = parsedLogLines[0].timestamp;
+
+  let minTimestamp = min;
+  let years = 0;
+
+  // add years for timestamps without years
+  parsedLogLines.forEach((logLine) => {
+    if (logLine.timestamp < minTimestamp) {
+      minTimestamp = logLine.timestamp;
+      years++;
+    }
+    if (years >= 0) {
+      logLine.timestamp = moment(logLine.timestamp).add(years, 'years').valueOf();
+    }
+  });
+
+  const max = parsedLogLines[parsedLogLines.length - 1].timestamp;
+
+  const count = parsedLogLines.length;
 
   const range = max - min;
 

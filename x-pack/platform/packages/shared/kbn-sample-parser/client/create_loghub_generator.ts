@@ -63,6 +63,7 @@ export function createLoghubGenerator({
 
         // ES likes its timestamp to be an integer
         const simulatedTimestamp = Math.floor(start + delta);
+
         if (simulatedTimestamp > timestamp) {
           break;
         }
