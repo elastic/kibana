@@ -34,8 +34,8 @@ export const calculateResponsiveTabs = ({
   }
 
   return {
+    isRegularTabLimitedInWidth: calculatedTabWidth <= MAX_TAB_WIDTH,
     regularTabMaxWidth: calculatedTabWidth,
     regularTabMinWidth: MIN_TAB_WIDTH,
-    isRegularTabLimitedInWidth: calculatedTabWidth <= MAX_TAB_WIDTH,
   };
 };

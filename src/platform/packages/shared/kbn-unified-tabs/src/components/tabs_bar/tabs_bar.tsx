@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
+import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { calculateResponsiveTabs } from '../../utils/calculate_responsive_tabs';
 
 const growingFlexItemCss = css`
@@ -30,7 +31,6 @@ const tabsContainerCss = css`
   max-width: 100%;
   user-select: none;
   scrollbar-width: none; // hide the scrollbar
-  scroll-behavior: smooth;
   &:::-webkit-scrollbar {
     display: none;
   }
@@ -59,6 +59,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   const [tabsContainerWithPlus, setTabsContainerWithPlus] = React.useState<HTMLDivElement | null>(
     null
   );
+  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
   const dimensions = useResizeObserver(tabsContainerWithPlus);
   const tabsSizeConfig = useMemo(
     () => calculateResponsiveTabs({ items, containerWidth: dimensions.width }),
@@ -68,6 +69,17 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
     defaultMessage: 'New session',
   });
+
+  useEffect(() => {
+    if (selectedItem && tabsContainerRef.current) {
+      const selectedTab = tabsContainerRef.current.querySelector(
+        `#${getTabIdAttribute(selectedItem)}`
+      );
+      if (selectedTab) {
+        selectedTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [selectedItem]);
 
   return (
     <EuiFlexGroup
@@ -85,6 +97,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false} css={growingFlexItemCss}>
             <EuiFlexGroup
+              ref={tabsContainerRef}
               direction="row"
               gutterSize="none"
               alignItems="center"
