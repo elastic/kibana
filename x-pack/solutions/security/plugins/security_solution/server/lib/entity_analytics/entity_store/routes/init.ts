@@ -12,14 +12,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { EntityType } from '../../../../../common/search_strategy';
 import type { InitEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
-import {
-  InitEntityEngineRequestBody,
-  InitEntityEngineRequestParams,
-} from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import { InitEntityEngineRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
-import { validateInitializationRequestBody } from './validation';
+import { buildInitRequestBodyValidation } from './validation';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -42,7 +39,7 @@ export const initEntityEngineRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(InitEntityEngineRequestParams),
-            body: buildRouteValidationWithZod(InitEntityEngineRequestBody),
+            body: buildInitRequestBodyValidation,
           },
         },
       },
@@ -60,8 +57,6 @@ export const initEntityEngineRoute = (
             .init(EntityType[request.params.entityType], request.body, {
               pipelineDebugMode,
             });
-
-          validateInitializationRequestBody(request.body);
 
           return response.ok({ body });
         } catch (e) {
