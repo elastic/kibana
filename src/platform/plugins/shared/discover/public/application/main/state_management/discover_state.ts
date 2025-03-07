@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { History } from 'history';
 import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
@@ -51,10 +50,6 @@ import type { DiscoverSavedSearchContainer } from './discover_saved_search_conta
 import { getDefaultAppState, getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
-  /**
-   * Browser history
-   */
-  history: History;
   /**
    * The current savedSearch
    */
@@ -227,7 +222,6 @@ export interface DiscoverStateContainer {
  * Used to sync URL with UI state
  */
 export function getDiscoverStateContainer({
-  history,
   services,
   customizationContext,
   stateStorageContainer,
@@ -243,7 +237,7 @@ export function getDiscoverStateContainer({
     stateStorageContainer ??
     createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
-      history,
+      history: services.history,
       useHashQuery: customizationContext.displayMode !== 'embedded',
       ...(toasts && withNotifyOnErrors(toasts)),
     });
@@ -252,7 +246,7 @@ export function getDiscoverStateContainer({
    * Search session logic
    */
   const searchSessionManager = new DiscoverSearchSessionManager({
-    history,
+    history: services.history,
     session: services.data.search.session,
   });
 

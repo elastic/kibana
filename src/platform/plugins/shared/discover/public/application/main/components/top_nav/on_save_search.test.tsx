@@ -21,13 +21,13 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 import { createRuntimeStateManager } from '../../state_management/redux';
+import { HistoryLocationState } from '../../../../build_services';
 
 function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const savedSearch = savedSearchMock;
-  const history = createBrowserHistory();
+  const history = createBrowserHistory<HistoryLocationState>();
   const stateContainer = getDiscoverStateContainer({
-    services: discoverServiceMock,
-    history,
+    services: { ...discoverServiceMock, history },
     customizationContext: mockCustomizationContext,
     runtimeStateManager: createRuntimeStateManager(),
   });

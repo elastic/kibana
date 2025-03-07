@@ -84,7 +84,6 @@ export function DiscoverMainRoute({
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
-    history,
     services,
     customizationContext,
     stateStorageContainer,
