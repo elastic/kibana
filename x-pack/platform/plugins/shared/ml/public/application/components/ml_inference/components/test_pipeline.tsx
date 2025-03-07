@@ -30,7 +30,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import type { IngestSimulateDocument } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestDocument } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { i18n } from '@kbn/i18n';
@@ -90,7 +90,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
     try {
       const result = await mlApi.trainedModels.trainedModelPipelineSimulate(
         pipelineConfig,
-        JSON.parse(sampleDocsString) as IngestSimulateDocument[]
+        JSON.parse(sampleDocsString) as IngestDocument[]
       );
       setSimulatePipelineResult(result);
     } catch (error) {
@@ -124,7 +124,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
 
   const getDocs = useCallback(
     async (body: any) => {
-      let records: IngestSimulateDocument[] = [];
+      let records: IngestDocument[] = [];
       let resp;
       try {
         resp = await mlApi.esSearch(body);
