@@ -193,7 +193,6 @@ export class ObservabilityPlugin
     });
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
-      console.log('pluginStart', pluginStart);
       registerRoutes({
         core,
         dependencies: {
