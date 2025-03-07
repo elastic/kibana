@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import {
-  IEvent,
-  IEventLogger,
-  millisToNanos,
-  SAVED_OBJECT_REL_PRIMARY,
-  InternalFields,
-} from '@kbn/event-log-plugin/server';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
+import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import { AlertInstanceState, RuleExecutionStatus } from '../../types';
+import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
+import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
-import { RuleRunMetrics } from '../rule_run_metrics_store';
+import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
-import { GapBase } from '../rule_gaps/types';
+import type { GapBase } from '../rule_gaps/types';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;

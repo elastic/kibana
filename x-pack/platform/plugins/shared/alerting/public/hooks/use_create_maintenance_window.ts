@@ -11,7 +11,8 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../utils/kibana_react';
-import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
+import type { CreateParams } from '../services/maintenance_windows_api/create';
+import { createMaintenanceWindow } from '../services/maintenance_windows_api/create';
 
 const onErrorWithMessage = (message: string) =>
   i18n.translate('xpack.alerting.maintenanceWindowsCreateFailureWithMessage', {

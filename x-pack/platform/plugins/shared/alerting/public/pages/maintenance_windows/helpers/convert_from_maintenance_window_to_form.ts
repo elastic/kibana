@@ -10,7 +10,8 @@ import { Frequency } from '@kbn/rrule';
 import { has } from 'lodash';
 import type { FormProps, RecurringScheduleFormProps } from '../components/schema';
 import type { RRuleParams, MaintenanceWindow } from '../../../../common';
-import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
+import type { MaintenanceWindowFrequency } from '../constants';
+import { EndsOptions } from '../constants';
 import { getInitialByWeekday } from './get_initial_by_weekday';
 
 export const convertFromMaintenanceWindowToForm = (

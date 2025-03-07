@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { nodeBuilder } from '@kbn/es-query';
 
 const INTERNAL_FIND_RULES_URL = '/internal/alerting/rules/_find';

@@ -16,7 +16,7 @@ import {
   denormalizeInterval,
   clipInterval,
 } from './interval_utils';
-import { Interval, StringInterval } from '../types';
+import type { Interval, StringInterval } from '../types';
 
 describe('interval_utils', () => {
   describe('getOverlap', () => {

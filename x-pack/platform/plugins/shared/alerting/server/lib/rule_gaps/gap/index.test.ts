@@ -7,7 +7,7 @@
 
 import { Gap } from '.'; // Adjust this import path as needed
 import { gapStatus } from '../../../../common/constants'; // Adjust as needed
-import { Interval, StringInterval } from '../types'; // Adjust as needed
+import type { Interval, StringInterval } from '../types'; // Adjust as needed
 
 // Helper function to create Interval objects from ISO strings
 function toInterval(gte: string, lte: string): Interval {

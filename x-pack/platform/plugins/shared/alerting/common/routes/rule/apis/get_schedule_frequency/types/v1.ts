@@ -6,7 +6,10 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { getScheduleFrequencyResponseSchemaV1, getScheduleFrequencyResponseBodySchemaV1 } from '..';
+import type {
+  getScheduleFrequencyResponseSchemaV1,
+  getScheduleFrequencyResponseBodySchemaV1,
+} from '..';
 
 export type GetScheduleFrequencyResponseBody = TypeOf<
   typeof getScheduleFrequencyResponseBodySchemaV1

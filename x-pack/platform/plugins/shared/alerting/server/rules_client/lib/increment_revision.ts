@@ -6,9 +6,9 @@
  */
 
 import { get, isEqual } from 'lodash';
-import { RuleTypeParams, RawRule } from '../../types';
+import type { RuleTypeParams, RawRule } from '../../types';
 import { fieldsToExcludeFromRevisionUpdates } from '..';
-import { UpdateRuleData } from '../../application/rule/methods/update';
+import type { UpdateRuleData } from '../../application/rule/methods/update';
 
 export function incrementRevision<Params extends RuleTypeParams>({
   originalRule,
