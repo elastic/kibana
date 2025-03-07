@@ -238,16 +238,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               inputIndex = index ?? [];
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
-              const errorMessage =
-                exc instanceof DataViewError
-                  ? `Data View not found ${exc}`
-                  : `Check for indices to search failed ${exc}`;
-
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.failed,
-                message: errorMessage,
-                userError: true,
-              });
+              if (exc instanceof DataViewError) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum.failed,
+                  message: `Data View not found ${exc}`,
+                  userError: true,
+                });
+              } else {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum.failed,
+                  message: `Check for indices to search failed ${exc}`,
+                });
+              }
 
               return { state: result.state };
             }
