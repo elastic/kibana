@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -33,6 +33,7 @@ import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_c
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
+import { SearchIndexTabId } from '../search_index';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
@@ -65,6 +66,29 @@ export const SearchIndexPipelines: React.FC = () => {
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
+  const [isRevertPipeline, setRevertPipeline] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!isDeleteModalOpen) {
+      if (isRevertPipeline) {
+        const pipelinesButton = document.querySelector<HTMLDivElement>(
+          `[id="${SearchIndexTabId.PIPELINES}"]`
+        );
+        if (pipelinesButton) {
+          pipelinesButton.focus();
+        }
+        setRevertPipeline(false);
+      } else if (buttonRef.current) {
+        buttonRef.current.focus();
+      }
+    }
+  }, [isDeleteModalOpen]);
+
+  const onDeletePipeline = useCallback(() => {
+    revertPipeline({ indexName });
+    setRevertPipeline(true);
+  }, [indexName, revertPipeline]);
 
   useEffect(() => {
     if (index) {
@@ -193,7 +217,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManageCustomPipelineActions />
+                    <ManageCustomPipelineActions buttonRef={buttonRef} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -280,7 +304,7 @@ export const SearchIndexPipelines: React.FC = () => {
           )}
           isLoading={revertStatus === Status.LOADING}
           onCancel={closeDeleteModal}
-          onConfirm={() => revertPipeline({ indexName })}
+          onConfirm={onDeletePipeline}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.deleteModal.confirmButton',

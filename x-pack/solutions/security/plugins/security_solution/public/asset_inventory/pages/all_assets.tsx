@@ -146,12 +146,19 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
 });
 
 // TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (row: DataTableRecord): EntityEcs => {
+const getEntity = (record: DataTableRecord) => {
+  const { _source } = record.raw;
+
+  const entityMock = {
+    tags: ['infrastructure', 'linux', 'admin', 'active'],
+    labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
+    id: 'mock-entity-id',
+    criticality: 'low_impact',
+  } as unknown as EntityEcs;
+
   return {
-    id: (row.flattened['asset.name'] as string) || '',
-    name: (row.flattened['asset.name'] as string) || '',
-    timestamp: row.flattened['@timestamp'] as Date,
-    type: 'universal',
+    entity: { ...(_source?.entity || {}), ...entityMock },
+    source: _source || {},
   };
 };
 
@@ -181,12 +188,13 @@ export const AllAssets = () => {
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  const onExpandDocClick = (doc?: DataTableRecord | undefined) => {
-    if (doc) {
-      const entity = getEntity(doc);
-      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
+  const onExpandDocClick = (record?: DataTableRecord | undefined) => {
+    if (record) {
+      const { entity, source } = getEntity(record);
+      setExpandedDoc(record); // Table is expecting the same record ref to highlight the selected row
       openDynamicFlyout({
         entity,
+        source,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
