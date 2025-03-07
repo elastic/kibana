@@ -114,3 +114,7 @@ export const RULE_MIGRATION_COLLAPSE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.collapse',
   { defaultMessage: 'Collapse rule migration' }
 );
+export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.error',
+  { defaultMessage: 'The last execution of this migration failed with the following message:' }
+);

@@ -65,3 +65,7 @@ export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
   showFindingFlyoutEvidence: true,
 } as const;
+
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
+
+export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';

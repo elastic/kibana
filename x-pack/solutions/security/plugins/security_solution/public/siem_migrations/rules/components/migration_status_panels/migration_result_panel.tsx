@@ -18,8 +18,9 @@ import {
   EuiText,
   EuiAccordion,
   EuiButtonIcon,
-  type EuiBasicTableColumn,
+  EuiSpacer,
   EuiBadge,
+  type EuiBasicTableColumn,
   useEuiTheme,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
@@ -41,6 +42,7 @@ import type { RuleMigrationStats } from '../../types';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
+import { RuleMigrationsLastError } from './last_error';
 
 const headerStyle = css`
   &:hover {
@@ -116,6 +118,12 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
+            {migrationStats.last_error && (
+              <>
+                <RuleMigrationsLastError message={migrationStats.last_error} />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">

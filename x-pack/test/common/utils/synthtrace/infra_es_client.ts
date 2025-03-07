@@ -8,7 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { InfraSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 
-export async function getInfraSynthtraceEsClient(client: Client) {
+export function getInfraSynthtraceEsClient(client: Client) {
   return new InfraSynthtraceEsClient({
     client,
     logger: createLogger(LogLevel.info),

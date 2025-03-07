@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const DEFAULT_PAGE_SIZE = 50;
+import { RuleCreateProps } from './create_detection_rule';
+
+export interface RuleResponse extends RuleCreateProps {
+  id: string;
+}
