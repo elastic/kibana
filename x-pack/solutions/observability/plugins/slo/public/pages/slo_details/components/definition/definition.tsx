@@ -23,10 +23,10 @@ import {
   toDurationLabel,
   toIndicatorTypeLabel,
 } from '../../../../utils/slo/labels';
-import { ApmIndicatorOverview } from './apm_indicator_overview';
-import { DisplayQuery } from './display_query';
+import { ApmIndicatorOverview } from '../overview/apm_indicator_overview';
+import { DisplayQuery } from '../overview/display_query';
 import { DefinitionItem } from './definition_item';
-import { SyntheticsIndicatorOverview } from './synthetics_indicator_overview';
+import { SyntheticsIndicatorOverview } from '../overview/synthetics_indicator_overview';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
