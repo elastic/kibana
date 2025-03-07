@@ -22,15 +22,27 @@ export type PersistPinnedEventResponse = z.infer<typeof PersistPinnedEventRespon
 export const PersistPinnedEventResponse = z.union([
   PinnedEvent,
   z.object({
+    /**
+     * Indicates whether the event was successfully unpinned
+     */
     unpinned: z.boolean(),
   }),
 ]);
 
 export type PersistPinnedEventRouteRequestBody = z.infer<typeof PersistPinnedEventRouteRequestBody>;
 export const PersistPinnedEventRouteRequestBody = z.object({
+  /**
+   * The `_id` of the associated event for this Pinned Event.
+   */
   eventId: z.string(),
-  pinnedEventId: z.string().nullable().optional(),
+  /**
+   * The `savedObjectId` of the timeline that you want this Pinned Event unpinned from.
+   */
   timelineId: z.string(),
+  /**
+   * The `savedObjectId` of the Pinned Event you want to unpin.
+   */
+  pinnedEventId: z.string().nullable().optional(),
 });
 export type PersistPinnedEventRouteRequestBodyInput = z.input<
   typeof PersistPinnedEventRouteRequestBody

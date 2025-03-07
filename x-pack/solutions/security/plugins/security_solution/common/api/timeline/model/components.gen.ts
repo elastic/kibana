@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 /**
- * The type of timeline to create. Valid values are `default` and `template`.
+ * The type of Timeline.
  */
 export type TimelineType = z.infer<typeof TimelineType>;
 export const TimelineType = z.enum(['default', 'template']);
@@ -25,7 +25,7 @@ export type TimelineTypeEnum = typeof TimelineType.enum;
 export const TimelineTypeEnum = TimelineType.enum;
 
 /**
- * The type of data provider to create. Valid values are `default` and `template`.
+ * The type of data provider.
  */
 export type DataProviderType = z.infer<typeof DataProviderType>;
 export const DataProviderType = z.enum(['default', 'template']);
@@ -184,7 +184,7 @@ export type Sort = z.infer<typeof Sort>;
 export const Sort = z.union([SortObject, z.array(SortObject)]);
 
 /**
- * The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
+ * The status of the Timeline.
  */
 export type TimelineStatus = z.infer<typeof TimelineStatus>;
 export const TimelineStatus = z.enum(['active', 'draft', 'immutable']);
@@ -335,7 +335,7 @@ export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The id of the associated event for this Note.
+     * The `_id` of the associated event for this Note.
      */
     eventId: z.string().nullable().optional(),
     /**
@@ -343,7 +343,7 @@ export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
      */
     note: z.string().nullable().optional(),
     /**
-     * The `savedObjectId` of the timeline that this Note is associated with
+     * The `savedObjectId` of the Timeline that this Note is associated with
      */
     timelineId: z.string(),
   })
@@ -353,11 +353,11 @@ export type Note = z.infer<typeof Note>;
 export const Note = BareNote.merge(
   z.object({
     /**
-     * The `savedObjectId` of the note
+     * The `savedObjectId` of the Note
      */
     noteId: z.string(),
     /**
-     * The version of the note
+     * The version of the Note
      */
     version: z.string(),
   })
@@ -389,7 +389,7 @@ export type BarePinnedEvent = z.infer<typeof BarePinnedEvent>;
 export const BarePinnedEvent = PinnedEventCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The id of the associated event for this Pinned Event.
+     * The `_id` of the associated event for this Pinned Event.
      */
     eventId: z.string(),
     /**
@@ -416,6 +416,9 @@ export const PinnedEvent = BarePinnedEvent.merge(
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
 export const TimelineResponse = SavedTimeline.merge(SavedTimelineWithSavedObjectId).merge(
   z.object({
+    /**
+     * A list of all the Notes that are associated to this Timeline.
+     */
     eventIdToNoteIds: z.array(Note).nullable().optional(),
     /**
      * A list of all the Notes that are associated to this Timeline.
@@ -487,7 +490,7 @@ export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternal
 export const BareNoteWithoutExternalRefs = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The id of the associated event for this Note.
+     * The `_id` of the associated event for this Note.
      */
     eventId: z.string().nullable().optional(),
     /**
@@ -527,17 +530,44 @@ export const ImportTimelines = SavedTimeline.merge(
 
 export type ImportTimelineResult = z.infer<typeof ImportTimelineResult>;
 export const ImportTimelineResult = z.object({
+  /**
+   * Indicates whether any of the Timelines were successfully imports
+   */
   success: z.boolean().optional(),
+  /**
+   * The amount of successfully imported/updated Timelines
+   */
   success_count: z.number().optional(),
+  /**
+   * The amount of successfully installed Timelines
+   */
   timelines_installed: z.number().optional(),
+  /**
+   * The amount of successfully updated Timelines
+   */
   timelines_updated: z.number().optional(),
+  /**
+   * The list of failed Timeline imports
+   */
   errors: z
     .array(
       z.object({
+        /**
+         * The ID of the timeline that failed to import
+         */
         id: z.string().optional(),
+        /**
+         * The error containing the reason why the timeline could not be imported
+         */
         error: z
           .object({
+            /**
+             * The reason why the timeline could not be imported
+             */
             message: z.string().optional(),
+            /**
+             * The HTTP status code of the error
+             */
             status_code: z.number().optional(),
           })
           .optional(),

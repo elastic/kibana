@@ -12,7 +12,7 @@ components:
         - template
       # enum default value is temporarily unsupported by the code generator
       # default: default
-      description: The type of timeline to create. Valid values are `default` and `template`.
+      description: The type of Timeline.
     DataProviderType:
       type: string
       enum:
@@ -20,7 +20,7 @@ components:
         - template
       # enum default value is temporarily unsupported by the code generator
       # default: default
-      description: The type of data provider to create. Valid values are `default` and `template`.
+      description: The type of data provider.
     TemplateTimelineType:
       type: string
       enum:
@@ -256,6 +256,8 @@ components:
               description: A list of all the ids of Pinned Events that are associated to this Timeline.
               items:
                 type: string
+              example:
+                - 983f99c6-89b6-4953-9160-35945c8a194f
             pinnedEventsSaveObject:
               type: array
               nullable: true
@@ -452,7 +454,7 @@ components:
             eventId:
               type: string
               nullable: true
-              description: The id of the associated event for this Note.
+              description: The `_id` of the associated event for this Note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             note:
               type: string
@@ -472,7 +474,7 @@ components:
             eventId:
               type: string
               nullable: true
-              description: The id of the associated event for this Note.
+              description: The `_id` of the associated event for this Note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             note:
               type: string
@@ -481,7 +483,7 @@ components:
               example: This is an example text
             timelineId:
               type: string
-              description: The `savedObjectId` of the timeline that this Note is associated with
+              description: The `savedObjectId` of the Timeline that this Note is associated with
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     Note:
       allOf:
@@ -491,11 +493,11 @@ components:
           properties:
             noteId:
               type: string
-              description: The `savedObjectId` of the note
+              description: The `savedObjectId` of the Note
               example: 709f99c6-89b6-4953-9160-35945c8e174e
             version:
               type: string
-              description: The version of the note
+              description: The version of the Note
               example: WzQ2LDFd
     RowRendererId:
       type: string
@@ -661,7 +663,7 @@ components:
           properties:
             eventId:
               type: string
-              description: The id of the associated event for this Pinned Event.
+              description: The `_id` of the associated event for this Pinned Event.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             timelineId:
               type: string
@@ -676,6 +678,7 @@ components:
             pinnedEventId:
               type: string
               description: The `savedObjectId` of this Pinned Event
+              example: '10r1929b-0af7-42bd-85a8-56e234f98h2f3'
             version:
               type: string
               description: The version of this Pinned Event
@@ -717,7 +720,7 @@ components:
         - desc
     TimelineStatus:
       type: string
-      description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
+      description: The status of the Timeline.
       enum:
         - active
         - draft
@@ -791,26 +794,41 @@ components:
       properties:
         success:
           type: boolean
+          description: Indicates whether any of the Timelines were successfully imports
         success_count:
           type: number
+          description: The amount of successfully imported/updated Timelines
+          example: 99
         timelines_installed:
           type: number
+          description: The amount of successfully installed Timelines
+          example: 80
         timelines_updated:
           type: number
+          description: The amount of successfully updated Timelines
+          example: 19
         errors:
+          description: The list of failed Timeline imports
           type: array
           items:
             type: object
             properties:
               id:
                 type: string
+                description: The ID of the timeline that failed to import
+                example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
               error:
                 type: object
+                description: The error containing the reason why the timeline could not be imported
                 properties:
                   message:
                     type: string
+                    description: The reason why the timeline could not be imported
+                    example: Malformed JSON
                   status_code:
                     type: number
+                    description: The HTTP status code of the error
+                    example: 400
     TimelineErrorResponse:
       oneOf:
         - type: object
