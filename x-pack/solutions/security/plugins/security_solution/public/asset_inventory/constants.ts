@@ -19,9 +19,11 @@ export const LOCAL_STORAGE_COLUMNS_KEY = `${LOCAL_STORAGE_PREFIX}:columns`;
 export const LOCAL_STORAGE_COLUMNS_SETTINGS_KEY = `${LOCAL_STORAGE_COLUMNS_KEY}:settings`;
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = `${LOCAL_STORAGE_PREFIX}:dataTable:pageSize`;
 export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = `${LOCAL_STORAGE_PREFIX}:dataTable:columns`;
+export const LOCAL_STORAGE_ASSET_INVENTORY_ENABLED_CALLOUT_KEY = `${LOCAL_STORAGE_PREFIX}:onboarding:assetInventoryEnabledCallout`;
 
 export const TEST_SUBJ_DATA_GRID = 'asset-inventory-test-subj-grid-wrapper';
 export const TEST_SUBJ_PAGE_TITLE = 'asset-inventory-test-subj-page-title';
 export const TEST_SUBJ_EMPTY_STATE = 'asset-inventory-empty-state';
+export const TEST_SUBJ_LOADING = 'asset-inventory-loading';
 
 export const DOCS_URL = 'https://ela.st/asset-inventory';
