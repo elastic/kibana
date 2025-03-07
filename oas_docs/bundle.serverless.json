@@ -17642,20 +17642,7 @@
                             "type": "number"
                           },
                           "sort": {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
+                            "items": {},
                             "type": "array"
                           },
                           "status": {
@@ -17807,6 +17794,9 @@
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "nextSearchAfter": {
+                      "type": "string"
                     },
                     "page": {
                       "type": "number"
@@ -19699,20 +19689,7 @@
                           "type": "number"
                         },
                         "sort": {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "enum": [],
-                                "nullable": true
-                              }
-                            ]
-                          },
+                          "items": {},
                           "type": "array"
                         },
                         "status": {
@@ -20190,20 +20167,7 @@
                           "type": "number"
                         },
                         "sort": {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "enum": [],
-                                "nullable": true
-                              }
-                            ]
-                          },
+                          "items": {},
                           "type": "array"
                         },
                         "status": {
