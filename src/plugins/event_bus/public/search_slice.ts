@@ -21,4 +21,6 @@ export const searchSlice = createSlice({
   },
 });
 
+export type SearchSlice = typeof searchSlice;
+
 export const { setSearchQuery } = searchSlice.actions;
