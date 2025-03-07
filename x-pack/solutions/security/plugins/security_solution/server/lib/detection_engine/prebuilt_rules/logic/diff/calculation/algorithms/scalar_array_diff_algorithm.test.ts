@@ -22,7 +22,7 @@ describe('scalarArrayDiffAlgorithm', () => {
       target_version: ['one', 'two', 'three'],
     };
 
-    const result = scalarArrayDiffAlgorithm(mockVersions);
+    const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -41,7 +41,7 @@ describe('scalarArrayDiffAlgorithm', () => {
       target_version: ['one', 'two', 'three'],
     };
 
-    const result = scalarArrayDiffAlgorithm(mockVersions);
+    const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -60,7 +60,7 @@ describe('scalarArrayDiffAlgorithm', () => {
       target_version: ['one', 'four', 'three'],
     };
 
-    const result = scalarArrayDiffAlgorithm(mockVersions);
+    const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -79,7 +79,7 @@ describe('scalarArrayDiffAlgorithm', () => {
       target_version: ['one', 'four', 'three'],
     };
 
-    const result = scalarArrayDiffAlgorithm(mockVersions);
+    const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -99,7 +99,7 @@ describe('scalarArrayDiffAlgorithm', () => {
     };
     const expectedMergedVersion = ['three', 'four', 'five', 'six'];
 
-    const result = scalarArrayDiffAlgorithm(mockVersions);
+    const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -112,46 +112,94 @@ describe('scalarArrayDiffAlgorithm', () => {
   });
 
   describe('if base_version is missing', () => {
-    it('returns current_version as merged output if current_version and target_version are the same - scenario -AA', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: MissingVersion,
-        current_version: ['one', 'two', 'three'],
-        target_version: ['one', 'two', 'three'],
-      };
+    describe('returns target_version as merged output if current_version and target_version are the same - scenario -AA', () => {
+      it('returns NONE conflict if rule is not customized', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: MissingVersion,
+          current_version: ['one', 'two', 'three'],
+          target_version: ['one', 'two', 'three'],
+        };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
+
+      it('returns NONE conflict if rule is customized', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: MissingVersion,
+          current_version: ['one', 'two', 'three'],
+          target_version: ['one', 'two', 'three'],
+        };
+
+        const result = scalarArrayDiffAlgorithm(mockVersions, true);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
     });
 
-    it('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: MissingVersion,
-        current_version: ['one', 'two', 'three'],
-        target_version: ['one', 'four', 'three'],
-      };
+    describe('if current_version and target_version are different - scenario -AB', () => {
+      it('returns target_version as merged output and NONE conflict if rule is not customized', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: MissingVersion,
+          current_version: ['one', 'two', 'three'],
+          target_version: ['one', 'four', 'three'],
+        };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
+
+      it('returns merged version of current and target as merged output if rule is customized', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: MissingVersion,
+          current_version: ['one', 'two', 'three'],
+          target_version: ['one', 'four', 'three'],
+        };
+
+        const expectedMergedVersion = ['one', 'two', 'three', 'four'];
+
+        const result = scalarArrayDiffAlgorithm(mockVersions, true);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: expectedMergedVersion,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Merged,
+            conflict: ThreeWayDiffConflict.SOLVABLE,
+          })
+        );
+      });
     });
   });
 
@@ -163,7 +211,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         target_version: ['three', 'one', 'two'],
       };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions);
+      const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -184,7 +232,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         };
         const expectedMergedVersion = ['one', 'two'];
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -204,7 +252,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         };
         const expectedMergedVersion = ['one', 'two'];
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -224,7 +272,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         };
         const expectedMergedVersion = ['one', 'two'];
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -244,7 +292,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         };
         const expectedMergedVersion = ['three'];
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -265,7 +313,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           target_version: ['one', 'two'],
         };
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -284,7 +332,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           target_version: ['one', 'two'],
         };
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -303,7 +351,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           target_version: [],
         };
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
@@ -322,7 +370,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           target_version: [],
         };
 
-        const result = scalarArrayDiffAlgorithm(mockVersions);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
         expect(result).toEqual(
           expect.objectContaining({
