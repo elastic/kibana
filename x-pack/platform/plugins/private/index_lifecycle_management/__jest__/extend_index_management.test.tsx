@@ -23,6 +23,7 @@ import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
 import { Index } from '@kbn/index-management-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { useEuiTheme } from '@elastic/eui';
 
 const { httpSetup } = init();
 
@@ -33,6 +34,28 @@ jest.mock('@kbn/index-management-plugin/public', async () => {
   const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
   return indexManagementMock.createSetup();
 });
+
+// Mock useEuiTheme to return the desired theme
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useEuiTheme: () => ({
+    euiTheme: {
+      themeName: 'EUI_THEME_BOREALIS',
+      colors: {
+        vis: {
+          euiColorVis1: '#6092C0',
+          euiColorVis2: '#D36086',
+          euiColorVis4: '#CA8EAE',
+          euiColorVis5: '#D6BF57',
+          euiColorVis6: '#B9A888',
+          euiColorVis9: '#E7664C'
+        },
+      },
+    },
+  }),
+}));
+
+const { euiTheme } = useEuiTheme();
 
 const indexWithoutLifecyclePolicy: Index = {
   health: 'yellow',
@@ -182,19 +205,6 @@ const indexWithLifecycleWaitingStep: Index = {
   },
 };
 
-const euiTheme = {
-  themeName: 'EUI_THEME_BOREALIS',
-  colors: {
-    vis: {
-      euiColorVis1: '#6092C0',
-      euiColorVis2: '#D36086',
-      euiColorVis4: '#CA8EAE',
-      euiColorVis5: '#D6BF57',
-      euiColorVis6: '#B9A888',
-      euiColorVis9: '#E7664C',
-    },
-  },
-};
 
 moment.tz.setDefault('utc');
 
@@ -202,7 +212,7 @@ const getUrlForApp = (appId: string, options: any) => {
   return appId + '/' + (options ? options.path : '');
 };
 
-const reloadIndices = () => {};
+const reloadIndices = () => { };
 
 describe('extend index management', () => {
   describe('retry lifecycle action extension', () => {

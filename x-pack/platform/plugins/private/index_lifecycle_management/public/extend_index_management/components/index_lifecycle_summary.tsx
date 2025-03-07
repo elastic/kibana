@@ -22,6 +22,7 @@ import {
   EuiBadgeProps,
   EuiBadge,
   EuiCode,
+  EuiThemeComputed,
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core/public';
@@ -32,19 +33,7 @@ import { getPolicyEditPath } from '../../application/services/navigation';
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  euiTheme: {
-    themeName: string;
-    colors: {
-      vis: {
-        euiColorVis1: string;
-        euiColorVis2: string;
-        euiColorVis4: string;
-        euiColorVis5: string;
-        euiColorVis6: string;
-        euiColorVis9: string;
-      };
-    };
-  };
+  euiTheme: EuiThemeComputed
 }
 
 export const IndexLifecycleSummary: FunctionComponent<Props> = ({
