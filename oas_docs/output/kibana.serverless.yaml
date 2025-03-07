@@ -53803,7 +53803,7 @@ components:
         - dsl
         - response
     Security_Entity_Analytics_API_Interval:
-      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
