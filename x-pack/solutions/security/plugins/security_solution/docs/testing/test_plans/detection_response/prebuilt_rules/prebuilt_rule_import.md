@@ -60,8 +60,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Handling missing fields in the import request payload](#handling-missing-fields-in-the-import-request-payload)
     - [Scenario: Importing a prebuilt rule without a `rule_id` field](#scenario-importing-a-prebuilt-rule-without-a-rule_id-field)
     - [Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
-    - [Scenario: Importing an existing custom rule missing a `version` field](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
     - [Scenario: Importing a new custom rule missing a `version` field](#scenario-importing-a-new-custom-rule-missing-a-version-field)
+    - [Scenario: Importing an existing custom rule missing a `version` field](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
   - [Handling request parameters: `overwrite` flag](#handling-request-parameters-overwrite-flag)
     - [Scenario: Importing a rule with `overwrite` flag set to true](#scenario-importing-a-rule-with-overwrite-flag-set-to-true)
     - [Scenario: Importing a rule with `overwrite` flag set to false](#scenario-importing-a-rule-with-overwrite-flag-set-to-false)
@@ -498,7 +498,7 @@ And the updated rule's parameters should stay unchanged
 
 #### Scenario: Importing a prebuilt rule without a `rule_id` field
 
-**Automation**: 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a prebuilt rule without a rule_id field
@@ -508,7 +508,7 @@ Then the import should be rejected with a message "rule_id field is required"
 
 #### Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field
 
-**Automation**: 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a prebuilt rule without a version field
@@ -517,32 +517,32 @@ When the user imports the rule
 Then the import should be rejected with a message "version field is required"
 ```
 
-#### Scenario: Importing an existing custom rule missing a `version` field
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the import payload contains a custom rule without a version field
-And its rule_id does NOT match any rule assets from the installed package
-And this custom rule has already been created
-When the user imports the rule
-Then the rule should be updated
-And the ruleSource type should be "internal"
-And the "version" field should be set to the existing rule's "version"
-```
-
 #### Scenario: Importing a new custom rule missing a `version` field
 
-**Automation**: 1 integration test.
+**Automation**: 1 API integration test.
 
 ```Gherkin
 Given the import payload contains a custom rule without a version field
 And its rule_id does NOT match any rule assets from the installed package
-And this custom rule hasn't been created yet
+And this rule is not created yet
 When the user imports the rule
 Then the rule should be created
-And the ruleSource type should be "internal"
-And the "version" field should be set to 1
+And the created rule should be custom
+And the created rule's "version" field should be set to 1
+```
+
+#### Scenario: Importing an existing custom rule missing a `version` field
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given the import payload contains a custom rule without a version field
+And its rule_id does NOT match any rule assets from the installed package
+And this rule is already created and has "version > 1"
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be custom
+And the updated rule's "version" field should stay unchanged
 ```
 
 ### Handling request parameters: `overwrite` flag
