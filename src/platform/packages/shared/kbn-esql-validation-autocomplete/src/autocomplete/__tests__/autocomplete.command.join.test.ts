@@ -72,6 +72,48 @@ describe('autocomplete.suggest', () => {
           'join_index_alias_2',
           'Create lookup index',
         ]);
+
+        const createIndexCommandSuggestion = suggestions.find(
+          (s) => s.label === 'Create lookup index'
+        );
+
+        expect(createIndexCommandSuggestion).toEqual({
+          command: {
+            arguments: [''],
+            id: 'esql.control.lookup_index.create',
+            title: 'Click to create',
+          },
+          detail: 'Click to create',
+          filterText: '',
+          kind: 'Issue',
+          label: 'Create lookup index',
+          sortText: '1',
+          text: '',
+        });
+      });
+
+      test('suggests create index command with the user input', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LEFT JOIN new_join_index/');
+
+        const createIndexCommandSuggestion = suggestions.find(
+          (s) => s.label === 'Create lookup index'
+        );
+
+        expect(createIndexCommandSuggestion).toEqual({
+          command: {
+            arguments: ['new_join_index'],
+            id: 'esql.control.lookup_index.create',
+            title: 'Click to create',
+          },
+          detail: 'Click to create',
+          filterText: 'new_join_index',
+          kind: 'Issue',
+          label: 'Create lookup index',
+          sortText: '1',
+          text: '',
+        });
       });
 
       test('discriminates between indices and aliases', async () => {
