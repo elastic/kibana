@@ -40,7 +40,7 @@ import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
 
-import { ErrorLayout, PermissionsError } from '../fleet/layouts';
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
@@ -153,7 +153,7 @@ export const AppRoutes = memo(() => {
   useEffect(() => {
     (async () => {
       setPermissionsErrors(undefined);
-      if (!allowedToAccess) {
+      if (allowedToAccess) {
         setPermissionsErrors('MISSING_PRIVILEGES');
       }
     })();
@@ -162,7 +162,7 @@ export const AppRoutes = memo(() => {
   if (permissionsErrors) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
-        <PermissionsError error={permissionsErrors!} />
+        <PermissionsError callingApplication="Integrations" error={permissionsErrors!} />
       </ErrorLayout>
     );
   }

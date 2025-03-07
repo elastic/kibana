@@ -66,7 +66,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { PermissionsError } from '../../../../../fleet/layouts';
+import { PermissionsError } from '../../../../layouts';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
@@ -846,6 +846,7 @@ export function Detail() {
               <PermissionsError
                 error="MISSING_PRIVILEGES"
                 requiredFleetRole="Agent Policies Read and Integrations Read"
+                callingApplication="Integrations"
               />
             )}
           </Route>
