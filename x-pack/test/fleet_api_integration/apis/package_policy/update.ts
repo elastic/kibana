@@ -993,7 +993,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'logs-somedataset@package', type: 'component_template' },
           { id: 'logs-somedataset@custom', type: 'component_template' },
           { id: 'logs@custom', type: 'component_template' },
-          { id: 'package@custom', type: 'component_template' },
+          { id: 'integration_to_input@custom', type: 'component_template' },
         ]);
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');
