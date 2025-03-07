@@ -28,6 +28,15 @@ export function LayerConfiguration({
   setIsInlineFlyoutVisible,
   getUserMessages,
   onlyAllowSwitchToSubtypes,
+  lensAdapters,
+  dataLoading$,
+  setCurrentAttributes,
+  updateSuggestion,
+  parentApi,
+  panelId,
+  closeFlyout,
+  canEditTextBasedQuery,
+  editorContainer,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -51,6 +60,9 @@ export function LayerConfiguration({
   );
 
   const layerPanelsProps = {
+    attributes,
+    lensAdapters,
+    dataLoading$,
     framePublicAPI,
     datasourceMap,
     visualizationMap,
@@ -63,6 +75,14 @@ export function LayerConfiguration({
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,
+    data: startDependencies.data,
+    setCurrentAttributes,
+    updateSuggestion,
+    parentApi,
+    panelId,
+    closeFlyout,
+    canEditTextBasedQuery,
+    editorContainer,
   };
   return (
     <div
