@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiResizableContainer,
   EuiSpacer,
   EuiTab,
@@ -78,6 +79,7 @@ import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/lo
 import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -513,6 +515,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [navigateToApp, ruleId]
   );
 
+  const upgradeCallout = useRuleUpdateCallout({
+    rule,
+    message: ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE,
+    actionButton: (
+      <EuiLink onClick={goToDetailsRule} data-test-subj="ruleEditingUpdateRuleCalloutButton">
+        {ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON}
+      </EuiLink>
+    ),
+  });
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -554,6 +566,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
                       />
+                      {upgradeCallout}
                       {invalidSteps.length > 0 && (
                         <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
                           <FormattedMessage
