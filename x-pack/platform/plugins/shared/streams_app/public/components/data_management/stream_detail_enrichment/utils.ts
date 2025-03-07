@@ -48,11 +48,13 @@ const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState>
   grok: defaultGrokProcessorFormState,
 };
 
-export const getDefaultFormState = (
-  type: ProcessorType,
+export const getDefaultFormStateByType = (type: ProcessorType) =>
+  defaultProcessorFormStateByType[type];
+
+export const getFormStateFrom = (
   processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
-  if (!processor) return defaultProcessorFormStateByType[type];
+  if (!processor) return defaultGrokProcessorFormState;
 
   if (isGrokProcessor(processor)) {
     const { grok } = processor;
@@ -73,7 +75,7 @@ export const getDefaultFormState = (
     });
   }
 
-  throw new Error(`Default state not found for unsupported processor type: ${type}`);
+  throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
 };
 
 export const convertFormStateToProcessor = (formState: ProcessorFormState): ProcessorDefinition => {
@@ -124,25 +126,22 @@ export const isDissectProcessor = createProcessorGuardByType('dissect');
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
-  processor: TProcessorDefinition,
-  uiAttributes: Partial<Pick<WithUIAttributes<TProcessorDefinition>, 'status'>> = {}
+  processor: TProcessorDefinition
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
-  status: 'saved',
   type: getProcessorType(processor),
-  ...uiAttributes,
   ...processor,
 });
 
 const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
-  const { id, status, type, ...processorConfig } = processor;
+  const { id, type, ...processorConfig } = processor;
   return processorConfig;
 };
 
 const toSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
-  const { status, type, ...processorConfig } = processor;
+  const { type, ...processorConfig } = processor;
   return processorConfig;
 };
 
