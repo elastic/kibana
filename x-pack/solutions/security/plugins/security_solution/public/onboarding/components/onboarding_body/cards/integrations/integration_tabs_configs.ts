@@ -18,7 +18,16 @@ export const INTEGRATION_TABS: Tab[] = [
     // Fleet has a default sorting for integrations by category that Security Solution does not want to apply
     // so we need to disable the sorting for the recommended tab to allow static ordering according to the featuredCardIds
     sortByFeaturedIntegrations: false,
-    featuredCardIds: ['epr:aws', 'epr:gcp'],
+    featuredCardIds: [
+      'epr:aws',
+      'epr:gcp',
+      'epr:azure',
+      'epr:endpoint',
+      'epr:crowdstrike',
+      'epr:wiz',
+      'epr:network_traffic',
+      'epr:osquery_manager',
+    ],
   },
   {
     category: 'security',
