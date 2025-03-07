@@ -235,8 +235,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }
 
-          if (dataStreams[0].indices) {
-            const lastBackingIndexName = dataStreams[0].indices.at(-1).index_name;
+          const lastBackingIndexName = dataStreams[0].indices?.at(-1)?.index_name;
+
+          if (lastBackingIndexName) {
             const { [lastBackingIndexName]: lastBackingIndexSettings } =
               await client.asCurrentUser.indices.getSettings({
                 index: lastBackingIndexName,
