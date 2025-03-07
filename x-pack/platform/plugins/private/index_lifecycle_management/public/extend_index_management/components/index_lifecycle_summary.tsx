@@ -33,7 +33,7 @@ import { getPolicyEditPath } from '../../application/services/navigation';
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  euiTheme: EuiThemeComputed
+  euiTheme: EuiThemeComputed;
 }
 
 export const IndexLifecycleSummary: FunctionComponent<Props> = ({

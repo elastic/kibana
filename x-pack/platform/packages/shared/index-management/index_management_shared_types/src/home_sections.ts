@@ -36,7 +36,7 @@ export interface IndexDetailsTab {
   renderTabContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
-    euiTheme: EuiThemeComputed
+    euiTheme: EuiThemeComputed;
   }) => ReturnType<FunctionComponent>;
   // a number to specify the order of the tabs
   order: number;

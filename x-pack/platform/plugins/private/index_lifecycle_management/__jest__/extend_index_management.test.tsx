@@ -48,7 +48,7 @@ jest.mock('@elastic/eui', () => ({
           euiColorVis4: '#CA8EAE',
           euiColorVis5: '#D6BF57',
           euiColorVis6: '#B9A888',
-          euiColorVis9: '#E7664C'
+          euiColorVis9: '#E7664C',
         },
       },
     },
@@ -205,14 +205,13 @@ const indexWithLifecycleWaitingStep: Index = {
   },
 };
 
-
 moment.tz.setDefault('utc');
 
 const getUrlForApp = (appId: string, options: any) => {
   return appId + '/' + (options ? options.path : '');
 };
 
-const reloadIndices = () => { };
+const reloadIndices = () => {};
 
 describe('extend index management', () => {
   describe('retry lifecycle action extension', () => {
