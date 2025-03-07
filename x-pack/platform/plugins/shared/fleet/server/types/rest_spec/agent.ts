@@ -156,9 +156,7 @@ export const AgentResponseSchema = schema.object({
   ),
   status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string()),
-  sort: schema.maybe(
-    schema.arrayOf(schema.oneOf([schema.number(), schema.string(), schema.literal(null)]))
-  ),
+  sort: schema.maybe(schema.arrayOf(schema.any())), // ES can return many different types for `sort` array values, including unsafe numbers
   metrics: schema.maybe(
     schema.object({
       cpu_avg: schema.maybe(schema.number()),

@@ -514,7 +514,7 @@ describe('Agents CRUD test', () => {
       await openPointInTime(esClient);
 
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `User opened point in time query [index=${AGENTS_INDEX}] [pitId=test-pit]`,
+        message: `User opened point in time query [index=${AGENTS_INDEX}] [keepAlive=10m] [pitId=test-pit]`,
       });
     });
   });
