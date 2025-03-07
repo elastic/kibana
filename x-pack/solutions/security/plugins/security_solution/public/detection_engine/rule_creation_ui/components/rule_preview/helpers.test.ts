@@ -7,8 +7,13 @@
 
 import moment from 'moment';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { isNoisy, getTimeframeOptions, getIsRulePreviewDisabled, isEveryThresholdFieldValid } from './helpers';
-import { FieldsMap } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  isNoisy,
+  getTimeframeOptions,
+  getIsRulePreviewDisabled,
+  isEveryThresholdFieldValid,
+} from './helpers';
+import type { FieldsMap } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 describe('query_preview/helpers', () => {
   const timeframeEnd = moment();
@@ -492,7 +497,7 @@ describe('query_preview/helpers', () => {
       'threshold.value',
       'threshold.cardinality.field',
       'threshold.cardinality.value',
-    ]
+    ];
     const allFieldsValid = fieldLabels.reduce((acc, label) => {
       acc[label] = { isValid: true };
       return acc;
@@ -504,7 +509,6 @@ describe('query_preview/helpers', () => {
       expect(isValid).toEqual(true);
     });
 
-
     test.each(fieldLabels)('returns false if a field is invalid', (fieldLabel) => {
       const fields = {
         ...allFieldsValid,
@@ -514,5 +518,5 @@ describe('query_preview/helpers', () => {
 
       expect(isEveryThresholdFieldValid(fields)).toEqual(false);
     });
-  })
+  });
 });

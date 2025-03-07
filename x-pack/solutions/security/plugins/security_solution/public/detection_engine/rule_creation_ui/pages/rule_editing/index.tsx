@@ -27,7 +27,10 @@ import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_co
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled, isEveryThresholdFieldValid } from '../../components/rule_preview/helpers';
+import {
+  getIsRulePreviewDisabled,
+  isEveryThresholdFieldValid,
+} from '../../components/rule_preview/helpers';
 import type {
   RuleResponse,
   RuleUpdateProps,
