@@ -55,16 +55,15 @@ export const GuideCard = ({
     try {
       if (card.guideId) {
         await activateGuide(card.guideId, guideState);
-      } else if (card.getUrl) {
-        const url = card.getUrl();
-        await navigateToUrl(url);
+      } else if (card.url) {
+        await navigateToUrl(card.url);
       } else if (card.openEndpointModal) {
         openWiredConnectionDetails();
       }
     } finally {
       setIsLoading(false);
     }
-  }, [activateGuide, guideState, navigateToUrl, card]);
+  }, [activateGuide, guideState, navigateToUrl, card.url, card.guideId, card.openEndpointModal]);
 
   const isHighlighted = activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';

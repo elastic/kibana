@@ -28,7 +28,7 @@ export interface GuideCardConstants {
   icon: string;
   // the guide will open a specific modal ESApiModal
   openEndpointModal?: boolean;
-  getUrl?: () => string;
+  url?: string;
 }
 
 export const getGuideCards = (
@@ -68,7 +68,7 @@ export const getGuideCards = (
       title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
         defaultMessage: 'Set up vector search',
       }),
-      getUrl: () => application.getUrlForApp('enterpriseSearchVectorSearch'),
+      url: application.getUrlForApp('enterpriseSearchVectorSearch'),
       telemetryId: 'onboarding--search--vector',
       order: 4,
     },
@@ -78,7 +78,7 @@ export const getGuideCards = (
       title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
         defaultMessage: 'Build an AI-powered search experience',
       }),
-      getUrl: () => application.getUrlForApp('enterpriseSearchAISearch'),
+      url: application.getUrlForApp('enterpriseSearchAISearch'),
       telemetryId: 'onboarding--search--ai',
       order: 7,
     },
@@ -101,11 +101,11 @@ export const getGuideCards = (
           defaultMessage: 'Collect and analyze my logs',
         }
       ),
-      getUrl: () =>
+      url:
         locator?.getRedirectUrl({
           source: 'auto-detect',
           category: 'host',
-        }) || '',
+        }) ?? '',
       telemetryId: 'onboarding--observability--logs',
       order: 2,
     },
@@ -121,7 +121,7 @@ export const getGuideCards = (
           }}
         />
       ),
-      getUrl: () => application.getUrlForApp('apm', { path: '/tutorial' }),
+      url: application.getUrlForApp('apm', { path: '/tutorial' }),
       telemetryId: 'onboarding--observability--apm',
       order: 5,
     },
@@ -134,11 +134,11 @@ export const getGuideCards = (
           defaultMessage: 'Monitor my host metrics',
         }
       ),
-      getUrl: () =>
+      url:
         locator?.getRedirectUrl({
           source: 'auto-detect',
           category: 'host',
-        }) || '',
+        }) ?? '',
       telemetryId: 'onboarding--observability--hosts',
       order: 8,
     },
@@ -151,11 +151,11 @@ export const getGuideCards = (
           defaultMessage: 'Monitor Kubernetes clusters',
         }
       ),
-      getUrl: () =>
+      url:
         locator?.getRedirectUrl({
           source: 'kubernetes',
           category: 'host',
-        }) || '',
+        }) ?? '',
       telemetryId: 'onboarding--observability--kubernetes',
       order: 11,
     },
@@ -168,7 +168,7 @@ export const getGuideCards = (
           defaultMessage: 'Create a Synthetic Monitor',
         }
       ),
-      getUrl: () => application.getUrlForApp('synthetics', { path: '/monitors/getting-started' }),
+      url: application.getUrlForApp('synthetics', { path: '/monitors/getting-started' }),
       telemetryId: 'onboarding--observability--synthetics',
       order: 14,
     },
@@ -179,7 +179,7 @@ export const getGuideCards = (
         'guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title',
         { defaultMessage: 'Optimize my workloads with Universal Profiling' }
       ),
-      getUrl: () => application.getUrlForApp('profiling', { path: '/add-data-instructions' }),
+      url: application.getUrlForApp('profiling', { path: '/add-data-instructions' }),
       telemetryId: 'onboarding--observability--profiling',
       order: 15,
     },
@@ -211,7 +211,7 @@ export const getGuideCards = (
           }}
         />
       ),
-      getUrl: () => application.getUrlForApp('integrations', { path: '/detail/endpoint/overview' }),
+      url: application.getUrlForApp('integrations', { path: '/detail/endpoint/overview' }),
       telemetryId: 'onboarding--security--hosts',
       order: 6,
     },
@@ -227,10 +227,9 @@ export const getGuideCards = (
           }}
         />
       ),
-      getUrl: () =>
-        application.getUrlForApp('integrations', {
-          path: '/detail/cloud_security_posture/overview?integration=cspm',
-        }),
+      url: application.getUrlForApp('integrations', {
+        path: '/detail/cloud_security_posture/overview?integration=cspm',
+      }),
       telemetryId: 'onboarding--security--cloud',
       order: 9,
     },
