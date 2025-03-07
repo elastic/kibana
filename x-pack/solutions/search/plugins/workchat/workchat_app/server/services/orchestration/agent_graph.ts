@@ -35,7 +35,8 @@ export const createAgentGraph = async ({
   });
 
   const callModel = async (state: typeof StateAnnotation.State) => {
-    const response = await model.invoke(await basePrompt({ message: state.input }));
+    const systemPrompt = await basePrompt({ message: state.input })
+    const response = await model.invoke([...systemPrompt.toChatMessages(), ...state.messages]);
     return {
       messages: [response],
     }

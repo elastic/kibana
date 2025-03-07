@@ -13,6 +13,7 @@ import { createAgentGraph } from './agent_graph';
 import { IntegrationsService } from '../integrations/integrations_service';
 import { getLCTools } from '../integrations/utils';
 import { langchainToChatEvents } from './utils';
+import { IntergrationsSession } from '../integrations/integrations_session';
 
 interface AgentRunOptions {
   message: string;
@@ -29,15 +30,15 @@ export interface Agent {
 export const createAgent = async ({
   agentId,
   chatModel,
-  integrationsService,
+  integrationsSession,
 }: {
   agentId: string;
   chatModel: InferenceChatModel;
-  integrationsService: IntegrationsService;
+  integrationsSession: IntergrationsSession;
 }): Promise<Agent> => {
   // TODO: everything
 
-  const integrationTools = await getLCTools(integrationsService);
+  const integrationTools = await getLCTools(integrationsSession);
 
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 

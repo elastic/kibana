@@ -47,6 +47,10 @@ export const registerChatRoutes = ({
           agentId: 'TODO',
           // connectorId: 'azure-gpt4',
           connectorId: 'fc721a53-20cb-4aa2-ae67-3e31b379fca8',
+          internalServices: {
+            elasticsearchClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+            logger,
+          }
         });
 
         const { events$ } = await agent.run({ message });

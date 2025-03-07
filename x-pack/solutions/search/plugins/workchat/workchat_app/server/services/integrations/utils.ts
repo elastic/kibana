@@ -1,12 +1,12 @@
 import { IntegrationTool } from "../../types";
 import { StructuredTool, tool } from "@langchain/core/tools";
-import { IntegrationsService } from "./integrations_service";
 import { jsonSchemaToZod } from "@n8n/json-schema-to-zod";
+import { IntergrationsSession } from "./integrations_session";
 
-export async function getLCTools(integrationService: IntegrationsService): Promise<StructuredTool[]> {
-    const tools = await integrationService.getAllTools();
+export async function getLCTools(integrationsSession: IntergrationsSession): Promise<StructuredTool[]> {
+    const tools = await integrationsSession.getAllTools();
     return tools.map(tool => convertToLCTool(tool, async (input) => {
-        const result = await integrationService.executeTool(tool.name, input);
+        const result = await integrationsSession.executeTool(tool.name, input);
         return JSON.stringify(result);
     }));
 }
