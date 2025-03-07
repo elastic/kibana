@@ -72,7 +72,7 @@ describe('parseTestFlags', () => {
     expect(result).toEqual({
       mode: 'serverless=oblt',
       configPath: '/path/to/config',
-      env: 'local',
+      testTarget: 'local',
       headed: false,
       esFrom: undefined,
       installDir: undefined,
@@ -83,7 +83,7 @@ describe('parseTestFlags', () => {
   it(`should parse with correct config and stateful flags`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
-      env: 'local',
+      testTarget: 'local',
       stateful: true,
       logToFile: false,
       headed: true,
@@ -95,11 +95,41 @@ describe('parseTestFlags', () => {
     expect(result).toEqual({
       mode: 'stateful',
       configPath: '/path/to/config',
-      env: 'local',
+      testTarget: 'local',
       headed: true,
       esFrom: 'snapshot',
       installDir: undefined,
       logsDir: undefined,
     });
+  });
+
+  it(`should throw an error with incorrect '--testTarget' flag`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      testTarget: 'a',
+      stateful: true,
+      logToFile: false,
+      headed: true,
+      esFrom: 'snapshot',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      'invalid --testTarget, expected one of "local", "cloud"'
+    );
+  });
+
+  it(`should throw an error with incorrect '--testTarget' flag set to 'cloud'`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      testTarget: 'cloud',
+      stateful: true,
+      logToFile: false,
+      headed: true,
+      esFrom: 'snapshot',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      'Running tests against Cloud / MKI is not supported yet'
+    );
   });
 });

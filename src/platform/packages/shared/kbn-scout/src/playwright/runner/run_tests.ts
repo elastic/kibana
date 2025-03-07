@@ -36,7 +36,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     'test',
     `--config=${playwrightConfigPath}`,
     `--grep=${playwrightGrepTag}`,
-    `--project=${options.env}`,
+    `--project=${options.testTarget}`,
   ];
 
   await withProcRunner(log, async (procs) => {
