@@ -13,7 +13,7 @@ interface Props {
   managedServiceUrl?: string;
 }
 
-export function useIngestEndpointUrl({ elasticsearchUrl, managedServiceUrl }: Props): string {
+export function useOtelIngestEndpointUrl({ elasticsearchUrl, managedServiceUrl }: Props): string {
   const {
     services: {
       context: { isServerless },

@@ -17,6 +17,7 @@ import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { createManagedServiceApiKey } from '../../lib/api_key/create_managed_service_api_key';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -97,8 +98,7 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
     },
   },
   params: t.type({}),
-  async handler(resources): Promise<{ apiKeyEncoded: string }> {
-    const { context } = resources;
+  async handler({ context, config }): Promise<{ apiKeyEncoded: string }> {
     const {
       elasticsearch: { client },
     } = await context.core;
@@ -108,7 +108,10 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
       throw Boom.forbidden('Insufficient permissions to create shipper API key');
     }
 
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
+    const timestamp = new Date().toISOString();
+    const { encoded: apiKeyEncoded } = config.serverless.enabled
+      ? await createManagedServiceApiKey(client.asCurrentUser, `ingest-otel-host-${timestamp}`)
+      : await createShipperApiKey(client.asCurrentUser, `otel-logs-${timestamp}`);
 
     return { apiKeyEncoded };
   },
