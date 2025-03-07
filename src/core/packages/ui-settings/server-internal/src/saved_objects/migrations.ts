@@ -228,4 +228,31 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
+  '9.1.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          [
+            // owner: Team:Presentation
+            'labs:canvas:byValueEmbeddable',
+            'labs:canvas:enable_ui',
+            'labs:canvas:useDataService',
+            'labs:dashboard:deferBelowFold',
+            'labs:dashboard:enable_ui',
+            'labs:presentation:timeToPresent',
+            
+          ].includes(key)
+            ? {
+                ...acc,
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
 };

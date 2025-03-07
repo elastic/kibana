@@ -10,15 +10,11 @@
 import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
 
-export type { PresentationLabsService } from './services/presentation_labs_service';
-
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export type { SaveModalDashboardProps } from './components/types';
 
 export {
   LazyExpressionInput,
-  LazyLabsBeakerButton,
-  LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,

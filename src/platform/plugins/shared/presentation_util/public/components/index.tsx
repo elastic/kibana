@@ -29,10 +29,6 @@ export const withSuspense = <P extends {}, R = {}>(
     );
   });
 
-export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_button'));
-
-export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
-
 export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
 
 export const LazySavedObjectSaveModalDashboard = React.lazy(

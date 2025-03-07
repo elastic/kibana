@@ -16,25 +16,6 @@ export const PLUGIN_NAME = 'presentationUtil';
  */
 export const EXPRESSIONS_LANGUAGE_ID = 'kibana-expressions';
 
-export type {
-  EnvironmentName,
-  EnvironmentStatus,
-  Project,
-  ProjectConfig,
-  ProjectID,
-  ProjectStatus,
-  SolutionName,
-} from './labs';
-
-export {
-  LABS_PROJECT_PREFIX,
-  environmentNames,
-  projectIDs,
-  projects,
-  getProjectIDs,
-  isProjectEnabledByStatus,
-} from './labs';
-
 export {
   getElasticLogo,
   getElasticOutline,

@@ -177,18 +177,6 @@ $$$enableESQL$$$`enableESQL`
 :   This setting enables ES|QL in Kibana.
 
 
-### Presentation Labs [presentation-labs]
-
-$$$labs-canvas-enable-ui$$$`labs:canvas:enable_ui`
-:   When enabled, provides access to the experimental **Labs** features for **Canvas**.
-
-$$$labs-dashboard-defer-below-fold$$$`labs:dashboard:deferBelowFold`
-:   When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard. *Below the fold* refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll.
-
-$$$labs-dashboard-enable-ui$$$`labs:dashboard:enable_ui`
-:   When enabled, provides access to the experimental **Labs** features for **Dashboard**.
-
-
 ### Accessibility [kibana-accessibility-settings]
 
 $$$accessibility-disableanimations$$$`accessibility:disableAnimations`
