@@ -14,10 +14,7 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, page, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(start, end);
-    await page.waitForSelector(
-      '[data-test-subj="kbnAppWrapper visibleChrome"] [aria-busy="false"]',
-      { state: 'visible' }
-    );
+    await serviceInventoryPage.waitForPageToLoad();
   });
 
   test('shows the service inventory', async ({ page, pageObjects: { serviceInventoryPage } }) => {
