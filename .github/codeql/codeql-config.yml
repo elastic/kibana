@@ -33,7 +33,6 @@ paths-ignore:
   - legacy_rfcs
   - oas_docs
   - packages/kbn-babel-*
-  - packages/kbn-bazel-*
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
   - packages/kbn-docs-utils
