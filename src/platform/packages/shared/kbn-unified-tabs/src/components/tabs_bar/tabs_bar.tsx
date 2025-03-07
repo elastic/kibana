@@ -28,6 +28,12 @@ const growingFlexItemCss = css`
 const tabsContainerCss = css`
   overflow-x: auto;
   max-width: 100%;
+  user-select: none;
+  scrollbar-width: none; // hide the scrollbar
+  scroll-behavior: smooth;
+  &:::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export type TabsBarProps = Pick<
@@ -54,11 +60,10 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     null
   );
   const dimensions = useResizeObserver(tabsContainerWithPlus);
-  const responsiveTabs = useMemo(
+  const tabsSizeConfig = useMemo(
     () => calculateResponsiveTabs({ items, containerWidth: dimensions.width }),
     [items, dimensions.width]
   );
-  const { visibleItems, tabsSizeConfig } = responsiveTabs;
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
     defaultMessage: 'New session',
@@ -84,10 +89,9 @@ export const TabsBar: React.FC<TabsBarProps> = ({
               gutterSize="none"
               alignItems="center"
               responsive={false}
-              className="eui-scrollBar"
               css={tabsContainerCss}
             >
-              {visibleItems.map((item) => (
+              {items.map((item) => (
                 <EuiFlexItem key={item.id} grow={false}>
                   <Tab
                     item={item}

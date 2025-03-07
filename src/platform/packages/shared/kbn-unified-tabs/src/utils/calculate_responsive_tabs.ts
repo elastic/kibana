@@ -18,15 +18,10 @@ interface GetTabsSizeConfigProps {
   containerWidth: number | undefined;
 }
 
-interface GetTabsSizeConfigReturn {
-  tabsSizeConfig: TabsSizeConfig;
-  visibleItems: TabItem[];
-}
-
 export const calculateResponsiveTabs = ({
   items,
   containerWidth,
-}: GetTabsSizeConfigProps): GetTabsSizeConfigReturn => {
+}: GetTabsSizeConfigProps): TabsSizeConfig => {
   const availableContainerWidth = (containerWidth || window.innerWidth) - PLUS_BUTTON_SPACE;
 
   let calculatedTabWidth =
@@ -38,15 +33,9 @@ export const calculateResponsiveTabs = ({
     calculatedTabWidth = MIN_TAB_WIDTH;
   }
 
-  const numberOfVisibleItems = Math.floor(availableContainerWidth / calculatedTabWidth);
-  const visibleItems = items.slice(0, numberOfVisibleItems);
-
   return {
-    tabsSizeConfig: {
-      regularTabMaxWidth: calculatedTabWidth,
-      regularTabMinWidth: MIN_TAB_WIDTH,
-      isRegularTabLimitedInWidth: calculatedTabWidth <= MAX_TAB_WIDTH,
-    },
-    visibleItems,
+    regularTabMaxWidth: calculatedTabWidth,
+    regularTabMinWidth: MIN_TAB_WIDTH,
+    isRegularTabLimitedInWidth: calculatedTabWidth <= MAX_TAB_WIDTH,
   };
 };
