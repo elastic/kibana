@@ -18017,6 +18017,13 @@
                             "nullable": true,
                             "type": "array"
                           },
+                          "upgrade_attempts": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
                           "upgrade_details": {
                             "additionalProperties": false,
                             "nullable": true,
@@ -20064,6 +20071,13 @@
                           "nullable": true,
                           "type": "array"
                         },
+                        "upgrade_attempts": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "upgrade_details": {
                           "additionalProperties": false,
                           "nullable": true,
@@ -20543,6 +20557,13 @@
                               "output",
                               "other"
                             ],
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "upgrade_attempts": {
+                          "items": {
                             "type": "string"
                           },
                           "nullable": true,
