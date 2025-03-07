@@ -10,14 +10,11 @@ import {
   PreviewRuleRequestBodyV1,
   previewBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/preview';
-import type { CreateRuleResponseV1 } from '../../../../../common/routes/rule/apis/create';
 import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { transformPreviewBodyV1 } from './transforms';
 
 export const previewRuleRoute = (
@@ -48,16 +45,11 @@ export const previewRuleRoute = (
           const previewRuleData: PreviewRuleRequestBodyV1<RuleParamsV1> = req.body;
 
           try {
-            const createdRule: Rule<RuleParamsV1> = (await rulesClient.preview<RuleParamsV1>({
-              data: transformPreviewBodyV1<RuleParamsV1>(previewRuleData),
-            })) as Rule<RuleParamsV1>;
-
-            // Assert versioned response type
-            const response: CreateRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
-            };
-
-            return res.ok(response);
+            return res.ok({
+              body: await rulesClient.preview({
+                data: transformPreviewBodyV1<RuleParamsV1>(previewRuleData),
+              }),
+            });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);

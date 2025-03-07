@@ -589,7 +589,9 @@ export class AlertsService implements IAlertsService {
     componentTemplateRefs.push(componentTemplate.name);
 
     [...this.registeredContexts.keys()].forEach((ctx: string) => {
-      componentTemplateRefs.push(getComponentTemplateName({ context: ctx }));
+      if (!isEmpty(this.registeredContexts.get(ctx)?.mappings.fieldMap)) {
+        componentTemplateRefs.push(getComponentTemplateName({ context: ctx }));
+      }
     });
 
     componentTemplateRefs.push(getComponentTemplateName({ name: LEGACY_ALERT_CONTEXT }));

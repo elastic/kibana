@@ -151,8 +151,9 @@ export class AlertingEventLogger {
 
     // Populate the "execute" event based on execution type
     switch (type) {
+      case executionType.PREVIEW:
       case executionType.BACKFILL:
-        this.initializeBackfill(ctx);
+        this.initializeAdHoc(ctx, type);
         break;
       default:
         this.initializeStandard(ctx, ruleData);
@@ -162,7 +163,7 @@ export class AlertingEventLogger {
     this.eventLogger.startTiming(this.event, this.startTime);
   }
 
-  private initializeBackfill(ctx: Context) {
+  private initializeAdHoc(ctx: Context, type: ExecutionType) {
     this.relatedSavedObjects = [
       {
         id: ctx.savedObjectId,
@@ -173,7 +174,7 @@ export class AlertingEventLogger {
     ];
 
     // not logging an execute-start event for backfills so just fill in the initial event
-    this.event = initializeExecuteBackfillRecord(ctx, this.relatedSavedObjects);
+    this.event = initializeExecuteAdHocRecord(ctx, type, this.relatedSavedObjects);
   }
 
   private initializeStandard(ctx: Context, ruleData?: RuleContext) {
@@ -585,12 +586,19 @@ export function initializeExecuteRecord(
   });
 }
 
-export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]) {
+export function initializeExecuteAdHocRecord(
+  context: Context,
+  type: ExecutionType,
+  so: SavedObjects[]
+) {
   return createAlertEventLogRecordObject({
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
-    action: EVENT_LOG_ACTIONS.executeBackfill,
+    action:
+      type === executionType.BACKFILL
+        ? EVENT_LOG_ACTIONS.executeBackfill
+        : EVENT_LOG_ACTIONS.executePreview,
     task: {
       scheduled: context.taskScheduledAt.toISOString(),
       scheduleDelay: Millis2Nanos * context.taskScheduleDelay,

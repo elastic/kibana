@@ -12,10 +12,13 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiResizableContainer,
   EuiSpacer,
   EuiSteps,
+  EuiSuperUpdateButton,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -29,20 +32,45 @@ import { RulePageNameInput } from './rule_page_name_input';
 import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import { ConfirmRuleClose } from '../components';
+import { hasRuleErrors } from '../validation';
+import { PreviewResults } from '../common/apis';
+import { ActionPreview } from './action_preview';
 
 export interface RulePageProps {
   isEdit?: boolean;
   isSaving?: boolean;
+  isLoadingPreview?: boolean;
+  previewData: PreviewResults | null;
   onCancel?: () => void;
+  onPreview: (formData: RuleFormData) => void;
   onSave: (formData: RuleFormData) => void;
 }
 
 export const RulePage = (props: RulePageProps) => {
-  const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
+  const {
+    isEdit = false,
+    isSaving = false,
+    isLoadingPreview = false,
+    previewData,
+    onCancel = () => {},
+    onSave,
+    onPreview,
+  } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
 
-  const { formData, multiConsumerSelection, connectorTypes, connectors, touched, onInteraction } =
-    useRuleFormState();
+  const {
+    plugins: { actionTypeRegistry },
+    baseErrors = {},
+    paramsErrors = {},
+    actionsErrors = {},
+    actionsParamsErrors = {},
+    formData,
+    multiConsumerSelection,
+    connectorTypes,
+    connectors,
+    touched,
+    onInteraction,
+  } = useRuleFormState();
 
   const { steps } = useRuleFormSteps();
 
@@ -58,6 +86,13 @@ export const RulePage = (props: RulePageProps) => {
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
     });
   }, [onSave, formData, multiConsumerSelection]);
+
+  const onPreviewInternal = useCallback(() => {
+    onPreview({
+      ...formData,
+      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+    });
+  }, [onPreview, formData, multiConsumerSelection]);
 
   const onCancelInternal = useCallback(() => {
     if (touched) {
@@ -83,6 +118,23 @@ export const RulePage = (props: RulePageProps) => {
       return !actionType.enabled && !checkEnabledResult.isEnabled;
     });
   }, [actions, connectors, connectorTypes]);
+
+  const hasErrors = useMemo(() => {
+    const hasBrokenConnectors = actions.some((action) => {
+      return !connectors.find((connector) => connector.id === action.id);
+    });
+
+    if (hasBrokenConnectors) {
+      return true;
+    }
+
+    return hasRuleErrors({
+      baseErrors,
+      paramsErrors,
+      actionsErrors,
+      actionsParamsErrors,
+    });
+  }, [actions, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   return (
     <>
@@ -156,46 +208,47 @@ export const RulePage = (props: RulePageProps) => {
                       <p>Preview your rule before saving it.</p>
                     </EuiText>
                     <EuiSpacer size="s" />
-                    {/* <EuiFlexGroup>
+                    <EuiFlexGroup>
                       <EuiSuperUpdateButton
-                        isDisabled={!isValidRule(rule, ruleErrors, ruleActionsErrors)}
+                        isDisabled={hasErrors}
                         iconType="refresh"
-                        onClick={async () => {
-                          setIsLoadingPreview(true);
-                          const result = await previewRule({ http, rule: rule as RuleUpdates });
+                        onClick={onPreviewInternal}
+                        // onClick={async () => {
+                        //   setIsLoadingPreview(true);
+                        //   const result = await previewRule({ http, rule: rule as RuleUpdates });
 
-                          if (result.alerts.length > 0) {
-                            setHasPreviewAlertData(true);
-                            setAlertsTableQuery({
-                              bool: {
-                                filter: [
-                                  {
-                                    term: {
-                                      [ALERT_RULE_EXECUTION_UUID]: result.uuid,
-                                    },
-                                  },
-                                  {
-                                    bool: {
-                                      must_not: [
-                                        {
-                                          term: {
-                                            [ALERT_STATUS]: 'preview-complete',
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
-                            });
-                          } else {
-                            setHasPreviewAlertData(false);
-                          }
+                        //   if (result.alerts.length > 0) {
+                        //     setHasPreviewAlertData(true);
+                        //     setAlertsTableQuery({
+                        //       bool: {
+                        //         filter: [
+                        //           {
+                        //             term: {
+                        //               [ALERT_RULE_EXECUTION_UUID]: result.uuid,
+                        //             },
+                        //           },
+                        //           {
+                        //             bool: {
+                        //               must_not: [
+                        //                 {
+                        //                   term: {
+                        //                     [ALERT_STATUS]: 'preview-complete',
+                        //                   },
+                        //                 },
+                        //               ],
+                        //             },
+                        //           },
+                        //         ],
+                        //       },
+                        //     });
+                        //   } else {
+                        //     setHasPreviewAlertData(false);
+                        //   }
 
-                          setPreviewActionData(result.actions ?? []);
-                          setLoadedFirstPreview(true);
-                          setIsLoadingPreview(false);
-                        }}
+                        //   setPreviewActionData(result.actions ?? []);
+                        //   setLoadedFirstPreview(true);
+                        //   setIsLoadingPreview(false);
+                        // }}
                         color="primary"
                         fill={true}
                         data-test-subj="previewSubmitButton"
@@ -203,7 +256,7 @@ export const RulePage = (props: RulePageProps) => {
                       {isLoadingPreview ? <EuiLoadingSpinner size="xl" /> : null}
                     </EuiFlexGroup>
                     <EuiSpacer size="m" />
-                    {hasPreviewAlertData && alertsTableQuery ? (
+                    {/* {hasPreviewAlertData && alertsTableQuery ? (
                       <>
                         <EuiTitle size="s">
                           <h3>Alert preview</h3>
@@ -266,8 +319,8 @@ export const RulePage = (props: RulePageProps) => {
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiPanel>
-                    ) : null}
-                    {actionTypesIndex && previewActionData.length > 0 ? (
+                    ) : null} */}
+                    {connectorTypes && previewData && previewData.actions.length > 0 ? (
                       <>
                         <EuiTitle size="s">
                           <h3>Action preview</h3>
@@ -276,40 +329,42 @@ export const RulePage = (props: RulePageProps) => {
                         <EuiText color="subdued">
                           <p>
                             The following{' '}
-                            {previewActionData.length > 1
-                              ? `${previewActionData.length} notifications`
+                            {previewData.actions.length > 1
+                              ? `${previewData.actions.length} notifications`
                               : `notification`}{' '}
                             would have been sent
                           </p>
                         </EuiText>
                         <EuiSpacer size="m" />
-                        {previewActionData.map((previewAction: RuleAction, index: number) => {
+                        {previewData.actions.map((previewAction: any, index: number) => {
                           const actionConnector = connectors.find(
                             (field) => field.id === previewAction.id
                           );
+                          const connectorType = actionTypeRegistry.get(
+                            actionConnector?.actionTypeId ?? ''
+                          );
 
-                          return (
-                            <ActionTypePreview
+                          return actionConnector && connectorType ? (
+                            <ActionPreview
                               actionItem={previewAction}
-                              actionConnector={actionConnector!}
+                              actionConnector={actionConnector}
+                              connectorType={connectorType}
                               index={index}
                               key={`action-preview-action-at-${index}`}
-                              actionTypesIndex={actionTypesIndex}
                               connectors={connectors}
-                              actionTypeRegistry={actionTypeRegistry}
                             />
-                          );
+                          ) : null;
                         })}
                       </>
                     ) : null}
-                    {loadedFirstPreview && hasPreviewAlertData && !previewActionData.length ? (
+                    {!isLoadingPreview && previewData && !previewData.actions.length ? (
                       <EuiTitle size="xxs">
                         <h5>
                           <EuiIcon type="iInCircle" />
                           Add actions to your rule configuration to preview their contents
                         </h5>
                       </EuiTitle>
-                    ) : null} */}
+                    ) : null}
                   </EuiResizablePanel>
                 </>
               );

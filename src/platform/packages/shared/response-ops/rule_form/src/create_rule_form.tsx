@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
@@ -32,6 +32,8 @@ import {
   parseRuleCircuitBreakerErrorMessage,
 } from './utils';
 import { RULE_CREATE_SUCCESS_TEXT, RULE_CREATE_ERROR_TEXT } from './translations';
+import { usePreviewRule } from './common/hooks/use_preview_rule';
+import { PreviewResults } from './common/apis/create_rule/preview_rule';
 
 export interface CreateRuleFormProps {
   ruleTypeId: string;
@@ -77,8 +79,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const { http, docLinks, notifications, ruleTypeRegistry, fieldsMetadata, ...deps } = plugins;
   const { toasts } = notifications;
+  const [previewData, setPreviewData] = useState<PreviewResults | null>(null);
 
-  const { mutate, isLoading: isSaving } = useCreateRule({
+  const { mutate: mutateSave, isLoading: isSaving } = useCreateRule({
     http,
     onSuccess: ({ name, id }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
@@ -87,6 +90,27 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(
         error.body?.message || RULE_CREATE_ERROR_TEXT
+      );
+      toasts.addDanger({
+        title: message.summary,
+        ...(message.details && {
+          text: toMountPoint(
+            <RuleFormCircuitBreakerError>{message.details}</RuleFormCircuitBreakerError>,
+            deps
+          ),
+        }),
+      });
+    },
+  });
+
+  const { mutate: mutatePreview, isLoading: isLoadingPreview } = usePreviewRule({
+    http,
+    onSuccess: (data: PreviewResults) => {
+      setPreviewData(data);
+    },
+    onError: (error) => {
+      const message = parseRuleCircuitBreakerErrorMessage(
+        error.body?.message || 'Error previewing rule'
       );
       toasts.addDanger({
         title: message.summary,
@@ -126,7 +150,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
-      mutate({
+      mutateSave({
         formData: {
           name: newFormData.name,
           ruleTypeId: newFormData.ruleTypeId!,
@@ -141,7 +165,27 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         },
       });
     },
-    [mutate]
+    [mutateSave]
+  );
+
+  const onPreview = useCallback(
+    (newFormData: RuleFormData) => {
+      mutatePreview({
+        formData: {
+          name: newFormData.name,
+          ruleTypeId: newFormData.ruleTypeId!,
+          enabled: true,
+          consumer: newFormData.consumer,
+          tags: newFormData.tags,
+          params: newFormData.params,
+          schedule: newFormData.schedule,
+          actions: newFormData.actions,
+          alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
+        },
+      });
+    },
+    [mutatePreview]
   );
 
   if (isInitialLoading) {
@@ -219,8 +263,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
       <RuleFormUIComponent
         isEdit={false}
         isSaving={isSaving}
+        isLoadingPreview={isLoadingPreview}
         onCancel={onCancel}
         onSave={onSave}
+        previewData={previewData}
+        onPreview={onPreview}
         onChangeMetaData={onChangeMetaData}
       />
     </RuleFormStateProvider>

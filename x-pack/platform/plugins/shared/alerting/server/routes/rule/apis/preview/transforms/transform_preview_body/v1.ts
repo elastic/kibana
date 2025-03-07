@@ -17,11 +17,12 @@ const transformPreviewBodyActions = (actions: PreviewRuleActionV1[]): ActionRequ
     return [];
   }
 
-  return actions.map(({ group, id, params, uuid }) => {
+  return actions.map(({ group, id, params, uuid, frequency }) => {
     return {
       group: group ?? 'default',
       id,
       params,
+      frequency,
       ...(uuid ? { uuid } : {}),
     };
   });

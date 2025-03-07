@@ -538,19 +538,21 @@ export class AdHocTaskRunner implements CancellableTask {
     this.alertingEventLogger.done({
       status: execStatus,
       metrics: execMetrics,
-      // in the future if we have other types of ad hoc runs (like preview)
-      // we can differentiate and pass in different info
-      backfill: {
-        id: adHocRunParamsId,
-        start:
-          this.scheduleToRunIndex > -1
-            ? this.adHocRunSchedule[this.scheduleToRunIndex].runAt
-            : undefined,
-        interval:
-          this.scheduleToRunIndex > -1
-            ? this.adHocRunSchedule[this.scheduleToRunIndex].interval
-            : undefined,
-      },
+      ...(this.taskInstance.taskType === 'ad_hoc_run-backfill'
+        ? {
+            backfill: {
+              id: adHocRunParamsId,
+              start:
+                this.scheduleToRunIndex > -1
+                  ? this.adHocRunSchedule[this.scheduleToRunIndex].runAt
+                  : undefined,
+              interval:
+                this.scheduleToRunIndex > -1
+                  ? this.adHocRunSchedule[this.scheduleToRunIndex].interval
+                  : undefined,
+            },
+          }
+        : {}),
       timings: this.timer.toJson(),
     });
   }
@@ -626,7 +628,9 @@ export class AdHocTaskRunner implements CancellableTask {
   async cleanup() {
     if (!this.shouldDeleteTask) return;
 
-    await this.updateGapsAfterBackfillComplete();
+    if (this.taskInstance.taskType === 'ad_hoc_run-backfill') {
+      await this.updateGapsAfterBackfillComplete();
+    }
 
     try {
       await this.internalSavedObjectsRepository.delete(

@@ -12,6 +12,7 @@ import {
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
@@ -23,6 +24,7 @@ import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { DistributiveOmit } from '@elastic/eui';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   RuleTypeRegistry,
   IntervalSchedule,
@@ -56,6 +58,7 @@ export type {
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 
 export interface RulesClientContext {
+  readonly actions: ActionsPluginStartContract;
   readonly logger: Logger;
   readonly getUserName: () => Promise<string | null>;
   readonly spaceId: string;
@@ -85,6 +88,8 @@ export interface RulesClientContext {
   readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
+  readonly internalEsClient: ElasticsearchClient;
+  readonly kibanaBaseUrl: string | undefined;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

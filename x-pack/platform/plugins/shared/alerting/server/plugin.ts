@@ -124,6 +124,7 @@ export const EVENT_LOG_ACTIONS = {
   executeStart: 'execute-start',
   executeAction: 'execute-action',
   executeBackfill: 'execute-backfill',
+  executePreview: 'execute-preview',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
@@ -544,6 +545,8 @@ export class AlertingPlugin {
         RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
       ]),
+      internalEsClient: core.elasticsearch.client.asInternalUser,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {

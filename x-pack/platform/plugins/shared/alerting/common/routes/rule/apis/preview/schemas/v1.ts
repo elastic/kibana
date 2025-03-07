@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1 } from '../../../validation';
+import { ruleNotifyWhen } from '../../../common';
 
 export const actionSchema = schema.object({
   group: schema.maybe(schema.string()),
@@ -16,6 +17,17 @@ export const actionSchema = schema.object({
     defaultValue: {},
   }),
   uuid: schema.maybe(schema.string()),
+  frequency: schema.maybe(
+    schema.object({
+      summary: schema.boolean(),
+      notify_when: schema.oneOf([
+        schema.literal(ruleNotifyWhen.CHANGE),
+        schema.literal(ruleNotifyWhen.ACTIVE),
+        schema.literal(ruleNotifyWhen.THROTTLE),
+      ]),
+      throttle: schema.nullable(schema.string()),
+    })
+  ),
 });
 
 export const previewBodySchema = schema.object({

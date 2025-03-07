@@ -36,7 +36,7 @@ import {
   getIndexTemplateAndPattern,
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
-import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import { CreateAlertsClientParams, PREVIEW_CONTEXT } from '../alerts_service/alerts_service';
 import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
 import {
   IAlertsClient,
@@ -139,12 +139,16 @@ export class AlertsClient<
       ruleType: this.options.ruleType,
       spaceId: this.options.spaceId,
     });
-    this.indexTemplateAndPattern = getIndexTemplateAndPattern({
-      context: this.options.ruleType.alerts?.context!,
-      namespace: this.options.ruleType.alerts?.isSpaceAware
-        ? this.options.namespace
-        : DEFAULT_NAMESPACE_STRING,
-    });
+    this.indexTemplateAndPattern = options.isPreview
+      ? getIndexTemplateAndPattern({
+          context: PREVIEW_CONTEXT,
+        })
+      : getIndexTemplateAndPattern({
+          context: this.options.ruleType.alerts?.context!,
+          namespace: this.options.ruleType.alerts?.isSpaceAware
+            ? this.options.namespace
+            : DEFAULT_NAMESPACE_STRING,
+        });
     this.fetchedAlerts = { indices: {}, data: {}, seqNo: {}, primaryTerm: {} };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
@@ -161,7 +165,7 @@ export class AlertsClient<
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    if (!this.ruleType.alerts?.shouldWrite) {
+    if (!this.ruleType.alerts?.shouldWrite || this.options.isPreview) {
       return;
     }
     // Get tracked alert UUIDs to query for
@@ -487,6 +491,7 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              isPreview: this.options.isPreview,
             })
           );
         }
