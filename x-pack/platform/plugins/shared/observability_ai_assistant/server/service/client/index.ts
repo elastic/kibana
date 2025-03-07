@@ -491,15 +491,14 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages),
+      messages: convertMessagesForInference(messages, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
 
     this.dependencies.logger.debug(
-      () =>
-        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+      () => `Calling inference client for name: "${name}" with options: ${JSON.stringify(options)}`
     );
 
     if (stream) {
