@@ -8,15 +8,25 @@
   "visibility": "shared",
   "plugin": {
     "id": "taskManager",
-    "browser": false,
+    "browser": true,
     "server": true,
     "configPath": [
       "xpack",
       "task_manager"
     ],
+    "requiredPlugins": [
+      "eventLog",
+      "kibanaReact",
+      "kibanaUtils",
+      "management"
+    ],
     "optionalPlugins": [
       "cloud",
       "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
     ]
   }
 }

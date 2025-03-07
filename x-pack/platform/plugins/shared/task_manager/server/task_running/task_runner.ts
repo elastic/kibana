@@ -17,6 +17,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { Middleware } from '../lib/middleware';
 import {
   asErr,
@@ -118,6 +119,8 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  taskManagerId: string;
+  eventLogger: IEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -170,7 +173,10 @@ export class TaskManagerRunner implements TaskRunner {
   private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
+  private readonly taskManagerId: string;
   private getPollInterval: () => number;
+  private eventLogger: IEventLogger;
+  private scheduleDelayMs: number = 0;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -197,8 +203,11 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    taskManagerId,
+    eventLogger,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
+    this.taskManagerId = taskManagerId;
     this.definitions = definitions;
     this.logger = logger;
     this.bufferedTaskStore = store;
@@ -210,6 +219,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
     this.config = config;
+    this.eventLogger = eventLogger;
     this.taskValidator = new TaskValidator({
       logger: this.logger,
       definitions: this.definitions,
@@ -345,6 +355,7 @@ export class TaskManagerRunner implements TaskRunner {
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    this.scheduleDelayMs = new Date().getTime() - new Date(this.instance.task.runAt).getTime();
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
     // Validate state
@@ -761,6 +772,30 @@ export class TaskManagerRunner implements TaskRunner {
           // taskRunError contains the "source" (TaskErrorSource) data
           if (!!taskRunError) {
             debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+            this.eventLogger.logEvent({
+              '@timestamp': new Date().toISOString(),
+              event: {
+                action: 'run',
+                outcome: 'failure',
+                duration: taskTiming.stop - taskTiming.start,
+              },
+              kibana: {
+                server_uuid: this.taskManagerId,
+                task: {
+                  id: this.id,
+                  type: this.taskType,
+                  expired: taskHasExpired,
+                  persistence: taskPersistence,
+                  schedule_delay: this.scheduleDelayMs,
+                  event_loop_blockages: taskTiming.eventLoopBlockMs,
+                },
+              },
+              error: {
+                message: taskRunError.message,
+                type: isUserError(taskRunError) ? 'user' : 'framework',
+              },
+            });
+
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
@@ -776,6 +811,26 @@ export class TaskManagerRunner implements TaskRunner {
                 taskTiming
               )
             );
+
+            this.eventLogger.logEvent({
+              '@timestamp': new Date().toISOString(),
+              event: {
+                action: 'run',
+                outcome: 'success',
+                duration: taskTiming.stop - taskTiming.start,
+              },
+              kibana: {
+                server_uuid: this.taskManagerId,
+                task: {
+                  id: this.id,
+                  type: this.taskType,
+                  expired: taskHasExpired,
+                  persistence: taskPersistence,
+                  schedule_delay: this.scheduleDelayMs,
+                  event_loop_blockages: taskTiming.eventLoopBlockMs,
+                },
+              },
+            });
           }
         } catch (err) {
           this.onTaskEvent(
@@ -791,6 +846,29 @@ export class TaskManagerRunner implements TaskRunner {
               taskTiming
             )
           );
+          this.eventLogger.logEvent({
+            '@timestamp': new Date().toISOString(),
+            event: {
+              action: 'run',
+              outcome: 'failure',
+              duration: taskTiming.stop - taskTiming.start,
+            },
+            kibana: {
+              server_uuid: this.taskManagerId,
+              task: {
+                id: this.id,
+                type: this.taskType,
+                expired: taskHasExpired,
+                persistence: taskPersistence,
+                schedule_delay: this.scheduleDelayMs,
+                event_loop_blockages: taskTiming.eventLoopBlockMs,
+              },
+            },
+            error: {
+              message: err.message,
+              type: 'framework',
+            },
+          });
           throw err;
         }
       },
@@ -809,6 +887,30 @@ export class TaskManagerRunner implements TaskRunner {
             taskTiming
           )
         );
+
+        this.eventLogger.logEvent({
+          '@timestamp': new Date().toISOString(),
+          event: {
+            action: 'run',
+            outcome: 'failure',
+            duration: taskTiming.stop - taskTiming.start,
+          },
+          kibana: {
+            server_uuid: this.taskManagerId,
+            task: {
+              id: this.id,
+              type: this.taskType,
+              expired: this.isExpired,
+              persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
+              schedule_delay: this.scheduleDelayMs,
+              event_loop_blockages: taskTiming.eventLoopBlockMs,
+            },
+          },
+          error: {
+            message: error.message,
+            type: isUserError(error) ? 'user' : 'framework',
+          },
+        });
       }
     );
 

@@ -13,7 +13,7 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
-import { BulkResponse, long } from '@elastic/elasticsearch/lib/api/types';
+import { BulkResponse, QueryDslQueryContainer, long } from '@elastic/elasticsearch/lib/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import {
   AggregateOptionsType,
@@ -105,6 +105,11 @@ export type FindEventsOptionsSearchAfter = QueryOptionsEventsBySavedObjectFilter
 export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
   aggregateOptions: AggregateOptionsType;
 };
+
+export interface AggregateEventsByTaskManagerProviderFilter {
+  index: string;
+  aggregateOptions: AggregateOptionsType;
+}
 
 export interface AggregateEventsBySavedObjectResult {
   hits?: estypes.SearchHitsMetadata<unknown>;
@@ -641,6 +646,63 @@ export class ClusterClientAdapter<
     } catch (err) {
       throw new Error(
         `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
+  public async aggregateTaskManagerEvents(
+    queryOptions: AggregateEventsByTaskManagerProviderFilter
+  ): Promise<AggregateEventsBySavedObjectResult> {
+    const { index, aggregateOptions } = queryOptions;
+    const { aggs, start, end, filter } = aggregateOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    let filterKueryNode;
+    try {
+      filterKueryNode = JSON.parse(filter ?? '');
+    } catch (e) {
+      filterKueryNode = filter ? fromKueryExpression(filter) : null;
+    }
+    let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+    try {
+      dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
+    } catch (err) {
+      throw err;
+    }
+
+    const filters: QueryDslQueryContainer[] = [{ term: { 'event.provider': 'taskManager' } }];
+
+    if (dslFilterQuery) {
+      filters.push(dslFilterQuery);
+    }
+    if (start) {
+      filters.push({ range: { '@timestamp': { gte: start } } });
+    }
+    if (end) {
+      filters.push({ range: { '@timestamp': { lte: end } } });
+    }
+
+    const query = { bool: { filter: filters } };
+
+    const body: estypes.SearchRequest['body'] = {
+      size: 0,
+      query,
+      aggs,
+    };
+
+    try {
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
+        index,
+        body,
+      });
+      return {
+        aggregations,
+        hits,
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for task manager events failed with: ${err.message}`
       );
     }
   }

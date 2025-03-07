@@ -197,6 +197,21 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async aggregateTaskManagerEvents(options?: AggregateOptionsType) {
+    const aggs = options?.aggs;
+    if (!aggs) {
+      throw new Error('No aggregation defined!');
+    }
+
+    // validate other query options separately from
+    const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
+
+    return await this.esContext.esAdapter.aggregateTaskManagerEvents({
+      index: this.esContext.esNames.indexPattern,
+      aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
+    });
+  }
+
   public async aggregateEventsWithAuthFilter(
     type: string,
     authFilter: KueryNode,

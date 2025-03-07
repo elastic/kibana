@@ -17,16 +17,38 @@ exports.EcsCustomPropertyMappings = {
         type: 'keyword',
         ignore_above: 1024,
       },
+      task_claim: {
+        properties: {
+          conflicts: {
+            type: 'long',
+          },
+          load: {
+            type: 'long',
+          },
+        },
+      },
       // task specific fields
       task: {
         properties: {
           id: {
             type: 'keyword',
           },
+          type: {
+            type: 'keyword',
+          },
+          expired: {
+            type: 'boolean',
+          },
+          persistence: {
+            type: 'keyword',
+          },
           scheduled: {
             type: 'date',
           },
           schedule_delay: {
+            type: 'long',
+          },
+          event_loop_blockages: {
             type: 'long',
           },
         },
