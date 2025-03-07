@@ -155,7 +155,7 @@ function mapNodes({
   const mappedNodes = new Map<string, ConnectionNode>();
   for (const [id, node] of nodes.entries()) {
     if (mappedNodes.has(id)) {
-      return mappedNodes;
+      continue;
     }
 
     const isMessagingSpan = messagingSpanIds.has(node.id);
