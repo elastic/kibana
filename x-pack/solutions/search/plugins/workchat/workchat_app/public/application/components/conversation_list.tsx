@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, type MouseEvent } from 'react';
+import React, { useCallback, useMemo, type MouseEvent } from 'react';
 import { css } from '@emotion/css';
 import {
   EuiText,
@@ -17,9 +17,11 @@ import {
   EuiButton,
   useEuiTheme,
   euiScrollBarStyles,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Conversation } from '../../../common/conversations';
+import { sortAndGroupConversations } from '../utils/sort_and_group_conversations';
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -39,6 +41,7 @@ const fullHeightClassName = css`
 
 const containerClassName = css`
   height: 100%;
+  width: 100%;
 `;
 
 const pageSectionContentClassName = css`
@@ -68,6 +71,15 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
 
+  const titleClassName = css`
+    text-transform: uppercase;
+    font-weight: ${theme.euiTheme.font.weight.bold};
+  `;
+
+  const conversationGroups = useMemo(() => {
+    return sortAndGroupConversations(conversations);
+  }, [conversations]);
+
   return (
     <EuiPanel
       paddingSize="m"
@@ -82,28 +94,45 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <h4>
-              {i18n.translate('xpack.workchatApp.conversationList.conversationTitle', {
-                defaultMessage: 'Conversations',
-              })}
-            </h4>
+          <EuiText size="s" className={titleClassName}>
+            {i18n.translate('xpack.workchatApp.conversationList.conversationTitle', {
+              defaultMessage: 'Conversations',
+            })}
           </EuiText>
+          <EuiSpacer size="s" />
         </EuiFlexItem>
         <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
-          <EuiListGroup flush={false} gutterSize="none" className={fullHeightClassName}>
-            {conversations.map((conversation) => (
-              <EuiListGroupItem
-                key={conversation.id}
-                onClick={(event) => handleConversationClick(event, conversation.id)}
-                label={conversation.title}
-                size="s"
-                isActive={conversation.id === activeConversationId}
-                wrapText
-                showToolTip
-              />
-            ))}
-          </EuiListGroup>
+          <EuiFlexGroup
+            direction="column"
+            className={containerClassName}
+            gutterSize="none"
+            responsive={false}
+          >
+            {conversationGroups.map(({ conversations: groupConversations, dateLabel }) => {
+              return (
+                <EuiFlexItem grow={false} key={dateLabel}>
+                  <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
+                    <EuiText size="s">
+                      <h4>{dateLabel}</h4>
+                    </EuiText>
+                  </EuiPanel>
+                  <EuiListGroup flush={false} gutterSize="none" className={fullHeightClassName}>
+                    {groupConversations.map((conversation) => (
+                      <EuiListGroupItem
+                        key={conversation.id}
+                        onClick={(event) => handleConversationClick(event, conversation.id)}
+                        label={conversation.title}
+                        size="s"
+                        isActive={conversation.id === activeConversationId}
+                        showToolTip
+                      />
+                    ))}
+                  </EuiListGroup>
+                  <EuiSpacer size="s" />
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
