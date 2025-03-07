@@ -155,12 +155,10 @@ export const GettingStarted = () => {
     },
     [guidedOnboardingService]
   );
-
   useEffect(() => {
     const guide = classicGuide ? guideCardsClassic : guideCards;
-    const tempFiltered = guide.filter(
-      ({ solution }: { solution: GuideFilterValues | GuideFilterValuesClassic }) =>
-        solution === filter
+    const tempFiltered = (guide as GuideCardConstants[]).filter(
+      (card: GuideCardConstants) => card.solution === filter
     );
     setFilteredCards(tempFiltered);
   }, [filter, guideCards, classicGuide]);
