@@ -28,6 +28,8 @@ export interface BrowserAuthFixture {
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginAsPrivilegedUser: () => Promise<void>;
+
+  loginAs: (role: string) => Promise<void>;
 }
 
 /**
@@ -64,6 +66,6 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
     };
 
     log.serviceLoaded('browserAuth');
-    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
+    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser, loginAs });
   },
 });

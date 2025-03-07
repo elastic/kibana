@@ -989,6 +989,7 @@ x-pack/solutions/security/packages/features @elastic/security-threat-hunting-exp
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/kbn-scout-security @elastic/security-solution
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
