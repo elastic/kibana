@@ -20,56 +20,60 @@ describe('entity store initialization request validation', () => {
     enrichPolicyExecutionInterval: '1h',
   };
   it('should allow the default values (24 hour lookback period, 1 hour enrich policy interval)', () => {
-    validateInitializationRequestBody(defaultRequestBody);
+    expect(validateInitializationRequestBody(defaultRequestBody)).toBeUndefined();
   });
   it('should allow the enrich policy interval to be exactly half the lookback period', () => {
-    validateInitializationRequestBody({
-      ...defaultRequestBody,
-      lookbackPeriod: '24h',
-      enrichPolicyExecutionInterval: '12h',
-    });
+    expect(
+      validateInitializationRequestBody({
+        ...defaultRequestBody,
+        lookbackPeriod: '24h',
+        enrichPolicyExecutionInterval: '12h',
+      })
+    ).toBeUndefined();
   });
   it('should allow the enrich policy interval to be barely less than half the lookback period', () => {
-    validateInitializationRequestBody({
-      ...defaultRequestBody,
-      lookbackPeriod: '24h',
-      enrichPolicyExecutionInterval: '11h',
-    });
+    expect(
+      validateInitializationRequestBody({
+        ...defaultRequestBody,
+        lookbackPeriod: '24h',
+        enrichPolicyExecutionInterval: '11h',
+      })
+    ).toBeUndefined();
   });
   it('should not allow the lookback period and enrich policy interval to be the same', () => {
-    expect(() =>
+    expect(
       validateInitializationRequestBody({
         ...defaultRequestBody,
         lookbackPeriod: '1h',
         enrichPolicyExecutionInterval: '1h',
       })
-    ).toThrow(
+    ).toEqual(
       new BadRequestError(
         'The enrich policy execution interval must be less than or equal to half the duration of the lookback period.'
       )
     );
   });
   it('should not allow the enrich policy interval to be greater than the lookback period', () => {
-    expect(() =>
+    expect(
       validateInitializationRequestBody({
         ...defaultRequestBody,
         lookbackPeriod: '1h',
         enrichPolicyExecutionInterval: '2h',
       })
-    ).toThrow(
+    ).toEqual(
       new BadRequestError(
         'The enrich policy execution interval must be less than or equal to half the duration of the lookback period.'
       )
     );
   });
   it('should not allow the enrich policy interval to be more than half the lookback period', () => {
-    expect(() =>
+    expect(
       validateInitializationRequestBody({
         ...defaultRequestBody,
         lookbackPeriod: '24h',
         enrichPolicyExecutionInterval: '13h',
       })
-    ).toThrow(
+    ).toEqual(
       new BadRequestError(
         'The enrich policy execution interval must be less than or equal to half the duration of the lookback period.'
       )

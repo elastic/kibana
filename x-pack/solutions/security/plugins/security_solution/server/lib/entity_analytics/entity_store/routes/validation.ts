@@ -32,7 +32,7 @@ export const buildInitRequestBodyValidation = (
  * as the execution policy must run successfully at least once within the lookback period in order to ensure no loss of
  * data
  */
-const validateInitializationRequestBody = (requestBody: InitEntityEngineRequestBody) => {
+export const validateInitializationRequestBody = (requestBody: InitEntityEngineRequestBody) => {
   const { lookbackPeriod, enrichPolicyExecutionInterval } = requestBody;
   if (!lookbackPeriod || !enrichPolicyExecutionInterval) return;
   const lookbackPeriodMillis = parseDuration(lookbackPeriod);
