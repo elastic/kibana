@@ -81,6 +81,31 @@ describe('Popularize field', () => {
     expect(field.count).toEqual(1);
   });
 
+  test('should increment', async () => {
+    const field = {
+      count: 5,
+    };
+    const dataView = {
+      id: 'id',
+      fields: {
+        getByName: () => field,
+      },
+      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+        field.count = count;
+      }),
+      isPersisted: () => true,
+    } as unknown as DataView;
+    const fieldName = '@timestamp';
+    const updateSavedObjectMock = jest.fn();
+    const dataViewsService = {
+      updateSavedObject: updateSavedObjectMock,
+    } as unknown as DataViewsContract;
+    const result = await popularizeField(dataView, fieldName, dataViewsService, capabilities);
+    expect(result).toBeUndefined();
+    expect(updateSavedObjectMock).toHaveBeenCalled();
+    expect(field.count).toEqual(6);
+  });
+
   test('hides errors', async () => {
     const field = {
       count: 0,

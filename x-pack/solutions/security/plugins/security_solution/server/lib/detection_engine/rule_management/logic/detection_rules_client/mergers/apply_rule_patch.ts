@@ -123,7 +123,8 @@ export const applyRulePatch = async ({
   };
 
   nextRule.rule_source = await calculateRuleSource({
-    rule: nextRule,
+    nextRule,
+    currentRule: existingRule,
     prebuiltRuleAssetClient,
     ruleCustomizationStatus,
   });
