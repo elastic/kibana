@@ -7,11 +7,11 @@
 
 import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { lastValueFrom } from 'rxjs';
-import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod';
+import { HumanMessage } from '@langchain/core/messages';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './common';
+import { getEsqlSelfHealingGraph } from './graph';
 
 // select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
@@ -29,7 +29,7 @@ const toolDetails = {
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
 
-  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer. The tool will validate the query.`,
 };
 
 export const NL_TO_ESQL_TOOL: AssistantTool = {
@@ -42,28 +42,25 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
+    const { connectorId, inference, logger, request, isOssModel, esClient } =
+      params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
-    const callNaturalLanguageToEsql = async (question: string) => {
-      return lastValueFrom(
-        naturalLanguageToEsql({
-          client: inference.getClient({ request }),
-          connectorId,
-          input: question,
-          functionCalling: 'auto',
-          logger,
-        })
-      );
-    };
+    const selfHealingGraph = getEsqlSelfHealingGraph({
+      esClient,
+      connectorId,
+      inference,
+      logger,
+      request,
+    });
 
     return tool(
-      async (input) => {
-        const generateEvent = await callNaturalLanguageToEsql(input.question);
-        const answer = generateEvent.content ?? 'An error occurred in the tool';
-
-        logger.debug(`Received response from NL to ESQL tool: ${answer}`);
-        return answer;
+      async ({ question }) => {
+        const humanMessage = new HumanMessage({ content: question });
+        const result = await selfHealingGraph.invoke({ messages: [humanMessage] });
+        const { messages } = result;
+        const lastMessage = messages[messages.length - 1];
+        return lastMessage.content;
       },
       {
         name: toolDetails.name,
