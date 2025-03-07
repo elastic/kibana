@@ -19,16 +19,13 @@ export class EventBus {
   public subject: BehaviorSubject<any>;
   private reducer: any;
   private initialState: any;
+  public actions: any;
 
-  constructor(reducer: any, initialState: any) {
+  constructor(slice: any) {
     this.subject = new BehaviorSubject<Action>({ type: 'init', payload: null });
-    this.reducer = reducer;
-    this.initialState = initialState;
-  }
-
-  // Dispatch an action to this event bus
-  dispatch(action: Action) {
-    this.subject.next(action);
+    this.reducer = slice.reducer;
+    this.initialState = slice.getInitialState();
+    this.actions = this.wrapActions(slice.actions);
   }
 
   // Subscribe to this event bus
@@ -36,5 +33,17 @@ export class EventBus {
     return this.subject
       .pipe(scan(this.reducer, this.initialState), distinctUntilChanged(isEqual))
       .subscribe(cb);
+  }
+
+  // Wrap actions to automatically dispatch through the event bus
+  private wrapActions(actions: any) {
+    const wrappedActions: any = {};
+    for (const [key, actionCreator] of Object.entries(actions)) {
+      wrappedActions[key] = (...args: any[]) => {
+        const action = actionCreator(...args);
+        this.subject.next(action);
+      };
+    }
+    return wrappedActions;
   }
 }

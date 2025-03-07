@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { setSearchQuery, searchSlice } from './search_slice';
+import { searchSlice } from './search_slice';
 import { EventBus } from './event_bus';
 
 export class NamespacedEventBus {
@@ -18,9 +18,9 @@ export class NamespacedEventBus {
   } = {};
 
   // Register a namespaced event bus with reducer and initial state
-  registerNamespace(namespace: string, reducer: any, initialState: any) {
+  registerNamespace(namespace: string, slice: any) {
     if (!this.buses[namespace]) {
-      this.buses[namespace] = new EventBus(reducer, initialState);
+      this.buses[namespace] = new EventBus(slice);
     } else {
       // eslint-disable-next-line no-console
       console.warn(`Namespace ${namespace} is already registered.`);
@@ -69,7 +69,7 @@ export class NamespacedEventBus {
 export const nameSpacedEventBus = new NamespacedEventBus();
 
 // Register a namespace
-nameSpacedEventBus.registerNamespace('search', searchSlice.reducer, searchSlice.getInitialState());
+nameSpacedEventBus.registerNamespace('search', searchSlice);
 
 // Publishing an event
-nameSpacedEventBus.getEventBus('search').dispatch(setSearchQuery('new search term'));
+nameSpacedEventBus.getEventBus('search').actions.setSearchQuery('new search term');
