@@ -3996,6 +3996,14 @@
             "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections/cell_value_context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections/cell_value_context.tsx"
+          },
+          {
             "plugin": "@kbn/securitysolution-data-table",
             "path": "x-pack/solutions/security/packages/data-table/mock/mock_source.ts"
           },

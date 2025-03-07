@@ -14,21 +14,21 @@ import {
   createKbnUrl,
   getEsClient,
   getKbnClient,
-  getLogger,
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
+  getLogger,
+  ScoutLogger,
 } from '../../../common/services';
-import { ScoutTestOptions } from '../../types';
-import { ScoutTestConfig } from '.';
-import { ScoutLogger } from '../../../common';
+import type { ScoutTestOptions } from '../../types';
+import type { ScoutTestConfig } from '.';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';
-export type { ScoutLogger } from '../../../common';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../types';
+export type { ScoutLogger } from '../../../common/services/logger';
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
@@ -48,23 +48,25 @@ export const coreWorkerFixtures = base.extend<
     samlAuth: SamlSessionManager;
   }
 >({
-  // Provides a scoped logger instance for each worker. This logger is shared across
-  // all other fixtures within the worker scope.
+  // Provides a scoped logger instance for each worker to use in fixtures and tests.
+  // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [
-    ({}, use) => {
-      use(getLogger());
+    ({}, use, workerInfo) => {
+      const workersCount = workerInfo.config.workers;
+      const loggerContext =
+        workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
+      use(getLogger(loggerContext));
     },
     { scope: 'worker' },
   ],
-
   /**
    * Loads the test server configuration from the source file based on local or cloud
    * target, located by default in '.scout/servers' directory. It supplies Playwright
    * with all server-related information including hosts, credentials, type of deployment, etc.
    */
   config: [
-    ({ log }, use, testInfo) => {
-      const projectUse = testInfo.project.use as ScoutTestOptions;
+    ({ log }, use, workerInfo) => {
+      const projectUse = workerInfo.project.use as ScoutTestOptions;
       if (!projectUse.configName) {
         throw new Error(
           'Invalid Playwright project configuration. Make sure to set "configName" property'
