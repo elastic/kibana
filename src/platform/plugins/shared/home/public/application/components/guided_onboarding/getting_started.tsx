@@ -156,12 +156,14 @@ export const GettingStarted = () => {
     [guidedOnboardingService]
   );
 
-  // filter cards for solution and based on classic or new format
-  const guide = classicGuide ? guideCardsClassic : guideCards;
   useEffect(() => {
-    const tempFiltered = guide.filter(({ solution }) => solution === filter);
+    const guide = classicGuide ? guideCardsClassic : guideCards;
+    const tempFiltered = guide.filter(
+      ({ solution }: { solution: GuideFilterValues | GuideFilterValuesClassic }) =>
+        solution === filter
+    );
     setFilteredCards(tempFiltered);
-  }, [filter, guide]);
+  }, [filter, guideCards, classicGuide]);
 
   if (isLoading) {
     return (
