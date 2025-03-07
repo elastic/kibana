@@ -7,17 +7,11 @@
 
 import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { lastValueFrom } from 'rxjs';
-import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod';
 import { APP_UI_ID } from '../../../../common';
-import { getEsqlFromContent, getPromptSuffixForOssModel } from './common';
-import { NlToEsqlTaskEvent } from '@kbn/inference-plugin/server/tasks/nl_to_esql';
-import { ToolOptions } from '@kbn/inference-common';
-import { parse } from '@kbn/esql-ast';
-import isEmpty from 'lodash/isEmpty';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { NaturalLanguageToEsqlValidator } from './natual_language_to_esql_validator';
+import { getPromptSuffixForOssModel } from './common';
+import { HumanMessage } from '@langchain/core/messages';
+import { getEsqlSelfHealingGraph } from './graph';
 
 // select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
@@ -51,22 +45,21 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     const { connectorId, inference, logger, request, isOssModel, esClient } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
-    const naturalLanguageToEsqlValidator = new NaturalLanguageToEsqlValidator({
-      inference,
+    const selfHealingGraph = getEsqlSelfHealingGraph({
+      esClient,
       connectorId,
+      inference,
       logger,
       request,
-      esClient,
     })
 
     return tool(
-      async (input) => {
-
-        const answer = await naturalLanguageToEsqlValidator.generateEsqlFromNaturalLanguage(input.question);
-
-        console.log(`Received response from NL to ESQL tool: ${answer}`)
-        logger.debug(`Received response from NL to ESQL tool: ${answer}`);
-        return answer;
+      async ({ question }) => {
+        const humanMessage = new HumanMessage({ content: question })
+        const result = await selfHealingGraph.invoke({ messages: [humanMessage] })
+        const { messages } = result
+        const lastMessage = messages[messages.length - 1]
+        return lastMessage.content
       },
       {
         name: toolDetails.name,
