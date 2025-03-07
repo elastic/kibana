@@ -1525,9 +1525,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async getIngestPipelinesStats(
-    timeout: Duration = '1m'
-  ): Promise<NodeIngestPipelinesStats[]> {
+  public async getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]> {
     const es = this.esClient();
 
     this.logger.l('Fetching ingest pipelines stats');
