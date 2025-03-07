@@ -31,37 +31,37 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Importing single prebuilt non-customized rules](#importing-single-prebuilt-non-customized-rules)
-    - [Scenario: Importing a non-customized rule when it's not installed](#scenario-importing-a-non-customized-rule-when-its-not-installed)
-    - [Scenario: Importing a non-customized rule on top of an installed non-customized rule](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
-    - [Scenario: Importing a non-customized rule on top of an installed customized rule](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
+    - [**Scenario: Importing a non-customized rule when it's not installed**](#scenario-importing-a-non-customized-rule-when-its-not-installed)
+    - [**Scenario: Importing a non-customized rule on top of an installed non-customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
+    - [**Scenario: Importing a non-customized rule on top of an installed customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing single prebuilt customized rules](#importing-single-prebuilt-customized-rules)
-    - [Scenario: Importing a customized rule when it's not installed](#scenario-importing-a-customized-rule-when-its-not-installed)
-    - [Scenario: Importing a customized rule on top of an installed non-customized rule](#scenario-importing-a-customized-rule-on-top-of-an-installed-non-customized-rule)
-    - [Scenario: Importing a customized rule on top of an installed customized rule](#scenario-importing-a-customized-rule-on-top-of-an-installed-customized-rule)
+    - [**Scenario: Importing a customized rule when it's not installed**](#scenario-importing-a-customized-rule-when-its-not-installed)
+    - [**Scenario: Importing a customized rule on top of an installed non-customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-non-customized-rule)
+    - [**Scenario: Importing a customized rule on top of an installed customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing single custom rules](#importing-single-custom-rules)
-    - [Scenario: Importing a new custom rule](#scenario-importing-a-new-custom-rule)
-    - [Scenario: Importing a custom rule on top of an existing custom rule](#scenario-importing-a-custom-rule-on-top-of-an-existing-custom-rule)
+    - [**Scenario: Importing a new custom rule**](#scenario-importing-a-new-custom-rule)
+    - [**Scenario: Importing a custom rule on top of an existing custom rule**](#scenario-importing-a-custom-rule-on-top-of-an-existing-custom-rule)
   - [Importing multiple rules in bulk](#importing-multiple-rules-in-bulk)
-    - [Scenario: Importing a mixture of new prebuilt and custom rules](#scenario-importing-a-mixture-of-new-prebuilt-and-custom-rules)
-    - [Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules](#scenario-importing-a-mixture-of-prebuilt-and-custom-rules-on-top-of-existing-rules)
+    - [**Scenario: Importing a mixture of new prebuilt and custom rules**](#scenario-importing-a-mixture-of-new-prebuilt-and-custom-rules)
+    - [**Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules**](#scenario-importing-a-mixture-of-prebuilt-and-custom-rules-on-top-of-existing-rules)
   - [Importing prebuilt rules when the package is not installed](#importing-prebuilt-rules-when-the-package-is-not-installed)
-    - [Scenario: Importing new prebuilt rules when the package is not installed](#scenario-importing-new-prebuilt-rules-when-the-package-is-not-installed)
-    - [Scenario: Importing prebuilt rules on top of existing rules when the package is not installed](#scenario-importing-prebuilt-rules-on-top-of-existing-rules-when-the-package-is-not-installed)
+    - [**Scenario: Importing new prebuilt rules when the package is not installed**](#scenario-importing-new-prebuilt-rules-when-the-package-is-not-installed)
+    - [**Scenario: Importing prebuilt rules on top of existing rules when the package is not installed**](#scenario-importing-prebuilt-rules-on-top-of-existing-rules-when-the-package-is-not-installed)
   - [Converting between prebuilt and custom rules](#converting-between-prebuilt-and-custom-rules)
-    - [Scenario: Converting a custom rule to a customized prebuilt rule on import](#scenario-converting-a-custom-rule-to-a-customized-prebuilt-rule-on-import)
-    - [Scenario: Converting a custom rule to a non-customized prebuilt rule on import](#scenario-converting-a-custom-rule-to-a-non-customized-prebuilt-rule-on-import)
-    - [Scenario: Converting a prebuilt rule to a custom rule on import](#scenario-converting-a-prebuilt-rule-to-a-custom-rule-on-import)
-    - [Scenario: Making an imported custom rule upgradeable to a prebuilt rule](#scenario-making-an-imported-custom-rule-upgradeable-to-a-prebuilt-rule)
+    - [**Scenario: Converting a custom rule to a customized prebuilt rule on import**](#scenario-converting-a-custom-rule-to-a-customized-prebuilt-rule-on-import)
+    - [**Scenario: Converting a custom rule to a non-customized prebuilt rule on import**](#scenario-converting-a-custom-rule-to-a-non-customized-prebuilt-rule-on-import)
+    - [**Scenario: Converting a prebuilt rule to a custom rule on import**](#scenario-converting-a-prebuilt-rule-to-a-custom-rule-on-import)
+    - [**Scenario: Making an imported custom rule upgradeable to a prebuilt rule**](#scenario-making-an-imported-custom-rule-upgradeable-to-a-prebuilt-rule)
   - [Handling missing base versions](#handling-missing-base-versions)
-    - [Scenario: Importing a prebuilt rule with a missing base version when it's not installed](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-not-installed)
-    - [Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-but-not-equal-to-the-import-payload)
-    - [Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-is-not-customized-and-is-equal-to-the-import-payload)
-    - [Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is customized, and is equal to the import payload](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-is-customized-and-is-equal-to-the-import-payload)
+    - [**Scenario: Importing a prebuilt rule with a missing base version when it's not installed**](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-not-installed)
+    - [**Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload**](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-but-not-equal-to-the-import-payload)
+    - [**Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload**](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-is-not-customized-and-is-equal-to-the-import-payload)
+    - [**Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is customized, and is equal to the import payload**](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-is-customized-and-is-equal-to-the-import-payload)
   - [Handling missing fields in the import request payload](#handling-missing-fields-in-the-import-request-payload)
-    - [Scenario: Importing a prebuilt rule without a `rule_id` field](#scenario-importing-a-prebuilt-rule-without-a-rule_id-field)
-    - [Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
-    - [Scenario: Importing a new custom rule missing a `version` field](#scenario-importing-a-new-custom-rule-missing-a-version-field)
-    - [Scenario: Importing an existing custom rule missing a `version` field](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
+    - [**Scenario: Importing a prebuilt rule without a `rule_id` field**](#scenario-importing-a-prebuilt-rule-without-a-rule_id-field)
+    - [**Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field**](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
+    - [**Scenario: Importing a new custom rule missing a `version` field**](#scenario-importing-a-new-custom-rule-missing-a-version-field)
+    - [**Scenario: Importing an existing custom rule missing a `version` field**](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
   - [Licensing](#licensing)
 
 ## Useful information
@@ -121,7 +121,7 @@ User stories:
 
 ### Importing single prebuilt non-customized rules
 
-#### Scenario: Importing a non-customized rule when it's not installed
+#### **Scenario: Importing a non-customized rule when it's not installed**
 
 **Automation**: 1 API integration test.
 
@@ -137,7 +137,7 @@ And the created rule should be marked as non-customized
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a non-customized rule on top of an installed non-customized rule
+#### **Scenario: Importing a non-customized rule on top of an installed non-customized rule**
 
 **Automation**: 1 API integration test.
 
@@ -153,7 +153,7 @@ And the updated rule should be marked as non-customized
 And the updated rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a non-customized rule on top of an installed customized rule
+#### **Scenario: Importing a non-customized rule on top of an installed customized rule**
 
 **Automation**: 1 API integration test.
 
@@ -171,7 +171,7 @@ And the updated rule's parameters should match the import payload
 
 ### Importing single prebuilt customized rules
 
-#### Scenario: Importing a customized rule when it's not installed
+#### **Scenario: Importing a customized rule when it's not installed**
 
 **Automation**: 1 API integration test.
 
@@ -187,7 +187,7 @@ And the created rule should be marked as customized
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a customized rule on top of an installed non-customized rule
+#### **Scenario: Importing a customized rule on top of an installed non-customized rule**
 
 **Automation**: 1 API integration test.
 
@@ -203,7 +203,7 @@ And the updated rule should be marked as customized
 And the updated rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a customized rule on top of an installed customized rule
+#### **Scenario: Importing a customized rule on top of an installed customized rule**
 
 **Automation**: 1 API integration test.
 
@@ -221,7 +221,7 @@ And the updated rule's parameters should match the import payload
 
 ### Importing single custom rules
 
-#### Scenario: Importing a new custom rule
+#### **Scenario: Importing a new custom rule**
 
 **Automation**: 1 API integration test.
 
@@ -235,7 +235,7 @@ And the created rule should be custom
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a custom rule on top of an existing custom rule
+#### **Scenario: Importing a custom rule on top of an existing custom rule**
 
 **Automation**: 1 API integration test.
 
@@ -251,7 +251,7 @@ And the updated rule's parameters should match the import payload
 
 ### Importing multiple rules in bulk
 
-#### Scenario: Importing a mixture of new prebuilt and custom rules
+#### **Scenario: Importing a mixture of new prebuilt and custom rules**
 
 This scenario is a "smoke test" for all the user stories from the [Product requirements](#product-requirements) section.
 
@@ -269,7 +269,7 @@ And the created rules' is_customized field should be correctly calculated
 And the created rules' parameters should match the import payload
 ```
 
-#### Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules
+#### **Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules**
 
 This scenario is a "smoke test" for all the user stories from the [Product requirements](#product-requirements) section.
 
@@ -289,7 +289,7 @@ And the updated rules' parameters should match the import payload
 
 ### Importing prebuilt rules when the package is not installed
 
-#### Scenario: Importing new prebuilt rules when the package is not installed
+#### **Scenario: Importing new prebuilt rules when the package is not installed**
 
 **Automation**: 1 API integration test.
 
@@ -306,7 +306,7 @@ And the created rules should be correctly marked as non-customized or customized
 And the created rules' parameters should match the import payload
 ```
 
-#### Scenario: Importing prebuilt rules on top of existing rules when the package is not installed
+#### **Scenario: Importing prebuilt rules on top of existing rules when the package is not installed**
 
 **Automation**: 1 API integration test.
 
@@ -325,7 +325,7 @@ And the updated rules' parameters should match the import payload
 
 ### Converting between prebuilt and custom rules
 
-#### Scenario: Converting a custom rule to a customized prebuilt rule on import
+#### **Scenario: Converting a custom rule to a customized prebuilt rule on import**
 
 This is an edge case that can happen when the user manually edits an ndjson file and:
 
@@ -345,7 +345,7 @@ And the created rule should be marked as customized
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Converting a custom rule to a non-customized prebuilt rule on import
+#### **Scenario: Converting a custom rule to a non-customized prebuilt rule on import**
 
 This is an edge case that can happen when the user manually edits an ndjson file and:
 
@@ -365,7 +365,7 @@ And the created rule should be marked as non-customized
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Converting a prebuilt rule to a custom rule on import
+#### **Scenario: Converting a prebuilt rule to a custom rule on import**
 
 This is an edge case that can happen when the user manually edits an ndjson file and:
 
@@ -383,7 +383,7 @@ And the created rule should be custom
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Making an imported custom rule upgradeable to a prebuilt rule
+#### **Scenario: Making an imported custom rule upgradeable to a prebuilt rule**
 
 This is an edge case that can happen when Elastic ships a new prebuilt rule with a `rule_id` accidentally matching the `rule_id` of a user's custom rule.
 
@@ -412,7 +412,7 @@ NOTE: These are not edge cases but rather normal cases. In many package upgrade 
 
 **When the base version** of a prebuilt rule that is being imported **is missing** among the `security-rule` asset saved objects, and the user imports this rule, the following scenarios apply.
 
-#### Scenario: Importing a prebuilt rule with a missing base version when it's not installed
+#### **Scenario: Importing a prebuilt rule with a missing base version when it's not installed**
 
 If this rule is not installed, it should be created with `is_customized` field set to `false`.
 
@@ -431,7 +431,7 @@ And the created rule's version should match the import payload
 And the created rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload
+#### **Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload**
 
 If this rule is already installed, it should be updated. Its `is_customized` field should be set to `true` if the rule from the import payload is not equal to the installed rule.
 
@@ -451,7 +451,7 @@ And the updated rule's version should match the import payload
 And the updated rule's parameters should match the import payload
 ```
 
-#### Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload
+#### **Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload**
 
 If this rule is already installed, it should be updated. Its `is_customized` field should stay unchanged (`false` or `true`) if the rule from the import payload is equal to the installed rule.
 
@@ -471,7 +471,7 @@ And the updated rule's version should stay unchanged
 And the updated rule's parameters should stay unchanged
 ```
 
-#### Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is customized, and is equal to the import payload
+#### **Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is customized, and is equal to the import payload**
 
 If this rule is already installed, it should be updated. Its `is_customized` field should stay unchanged (`false` or `true`) if the rule from the import payload is equal to the installed rule.
 
@@ -493,7 +493,7 @@ And the updated rule's parameters should stay unchanged
 
 ### Handling missing fields in the import request payload
 
-#### Scenario: Importing a prebuilt rule without a `rule_id` field
+#### **Scenario: Importing a prebuilt rule without a `rule_id` field**
 
 **Automation**: 1 API integration test.
 
@@ -503,7 +503,7 @@ When the user imports the rule
 Then the import should be rejected with a message "rule_id field is required"
 ```
 
-#### Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field
+#### **Scenario: Importing a prebuilt rule with a matching `rule_id` but missing a `version` field**
 
 **Automation**: 1 API integration test.
 
@@ -514,7 +514,7 @@ When the user imports the rule
 Then the import should be rejected with a message "version field is required"
 ```
 
-#### Scenario: Importing a new custom rule missing a `version` field
+#### **Scenario: Importing a new custom rule missing a `version` field**
 
 **Automation**: 1 API integration test.
 
@@ -528,7 +528,7 @@ And the created rule should be custom
 And the created rule's "version" field should be set to 1
 ```
 
-#### Scenario: Importing an existing custom rule missing a `version` field
+#### **Scenario: Importing an existing custom rule missing a `version` field**
 
 **Automation**: 1 API integration test.
 
