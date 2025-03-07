@@ -8,9 +8,9 @@
 import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { z } from '@kbn/zod';
+import { HumanMessage } from '@langchain/core/messages';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './common';
-import { HumanMessage } from '@langchain/core/messages';
 import { getEsqlSelfHealingGraph } from './graph';
 
 // select only some properties of AssistantToolParams
@@ -42,7 +42,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request, isOssModel, esClient } = params as ESQLToolParams;
+    const { connectorId, inference, logger, request, isOssModel, esClient } =
+      params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
     const selfHealingGraph = getEsqlSelfHealingGraph({
@@ -51,7 +52,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
       inference,
       logger,
       request,
-    })
+    });
 
     return tool(
       async ({ question }) => {
@@ -74,5 +75,3 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     );
   },
 };
-
-
