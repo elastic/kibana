@@ -30,7 +30,7 @@ import { isEqualFilters } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from './utils/get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
-import { InternalStateStore } from './redux';
+import type { InternalStateStore } from './redux';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,

@@ -15,11 +15,11 @@ import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,

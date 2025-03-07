@@ -22,7 +22,8 @@ import type { DiscoverSavedSearchContainer } from './discover_saved_search_conta
 import { getSavedSearchContainer } from './discover_saved_search_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
-import { createInternalStateStore, createRuntimeStateManager, InternalStateStore } from './redux';
+import type { InternalStateStore } from './redux';
+import { createInternalStateStore, createRuntimeStateManager } from './redux';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;

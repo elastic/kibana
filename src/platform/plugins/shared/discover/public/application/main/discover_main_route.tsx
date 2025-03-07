@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, memo, useCallback, useMemo, lazy, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo, lazy } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -44,8 +45,8 @@ import {
 import type { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
+import type { RuntimeStateManager } from './state_management/redux';
 import {
-  RuntimeStateManager,
   RuntimeStateProvider,
   createRuntimeStateManager,
   useRuntimeState,

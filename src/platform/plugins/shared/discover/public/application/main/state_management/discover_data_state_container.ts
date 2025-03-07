@@ -31,7 +31,8 @@ import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
-import { internalStateActions, InternalStateStore, RuntimeStateManager } from './redux';
+import type { InternalStateStore, RuntimeStateManager } from './redux';
+import { internalStateActions } from './redux';
 
 export interface SavedSearchData {
   main$: DataMain$;

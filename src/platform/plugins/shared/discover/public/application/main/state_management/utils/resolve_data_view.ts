@@ -12,7 +12,7 @@ import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-p
 import type { ToastsStart } from '@kbn/core/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
-import { InternalStateStore, RuntimeStateManager } from '../redux';
+import type { InternalStateStore, RuntimeStateManager } from '../redux';
 
 interface DataViewData {
   /**

@@ -39,7 +39,8 @@ import {
   isDataSourceType,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { internalStateActions, InternalStateStore } from './redux';
+import type { InternalStateStore } from './redux';
+import { internalStateActions } from './redux';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {

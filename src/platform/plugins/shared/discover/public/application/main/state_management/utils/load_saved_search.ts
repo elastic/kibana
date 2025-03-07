@@ -23,7 +23,8 @@ import { getInitialState } from '../discover_app_state_container';
 import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { InternalStateStore, RuntimeStateManager, internalStateActions } from '../redux';
+import type { InternalStateStore, RuntimeStateManager } from '../redux';
+import { internalStateActions } from '../redux';
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;

@@ -35,8 +35,6 @@ import type { DiscoverAppLocatorParams } from '../../../../common';
 import { DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import { getDiscoverAppStateContainer } from './discover_app_state_container';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
-import { getInternalStateContainer } from './discover_internal_state_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
@@ -46,12 +44,8 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import {
-  createInternalStateStore,
-  internalStateActions,
-  InternalStateStore,
-  RuntimeStateManager,
-} from './redux';
+import type { InternalStateStore, RuntimeStateManager } from './redux';
+import { createInternalStateStore, internalStateActions } from './redux';
 
 export interface DiscoverStateContainerParams {
   /**
