@@ -68,7 +68,7 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      rendering.renderElement(
+      rendering.addContext(
         <>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
@@ -99,7 +99,7 @@ export function showErrorDialog({
 }
 
 export function ErrorToast({ title, error, toastMessage, openModal, rendering }: ErrorToastProps) {
-  return rendering.renderElement(
+  return rendering.addContext(
     <>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">

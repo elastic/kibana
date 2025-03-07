@@ -29,7 +29,7 @@ export type ToMountPointParams = ToMountPointParamsDeprecated | RenderContextSer
 function isParamsUsingPreferred(params?: ToMountPointParams): params is RenderContextService {
   return (
     typeof params !== 'undefined' &&
-    typeof (params as RenderContextService).renderElement !== 'undefined'
+    typeof (params as RenderContextService).addContext !== 'undefined'
   );
 }
 
@@ -46,7 +46,7 @@ export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams):
 
   if (isParamsUsingPreferred(params)) {
     mount = (element: HTMLElement) => {
-      ReactDOM.render(params.renderElement(node), element);
+      ReactDOM.render(params.addContext(node), element);
       return () => ReactDOM.unmountComponentAtNode(element);
     };
   } else {

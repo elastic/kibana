@@ -42,7 +42,7 @@ export class ToastsService {
     this.targetDomElement = targetDomElement;
 
     render(
-      rendering.renderElement(
+      rendering.addContext(
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}

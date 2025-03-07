@@ -10,5 +10,5 @@
 import React from 'react';
 
 export interface RenderContextService {
-  renderElement: (element: React.ReactNode) => React.ReactElement;
+  addContext: (element: React.ReactNode) => React.ReactElement;
 }

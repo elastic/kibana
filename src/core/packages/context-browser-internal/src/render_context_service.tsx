@@ -39,7 +39,7 @@ interface RenderingServiceDeps {
  *
  * export const renderApp = (core: CoreStart, props: Props, element: HTMLElement) => {
  *   const { rendering } = core; // obtain instance of RenderContextService from CoreStart
- *   ReactDOM.render(rendering.renderElement(<MyApp {...props} />), element);
+ *   ReactDOM.render(rendering.addContext(<MyApp {...props} />), element);
  *   return () => ReactDOM.unmountComponentAtNode(element);
  * };
  *
@@ -52,7 +52,7 @@ export class RenderContextService implements IRenderContextService {
     return this;
   }
 
-  public renderElement(element: React.ReactNode) {
+  public addContext(element: React.ReactNode) {
     const Component: React.FC = () => {
       const props = useObservable(this.props, null);
 

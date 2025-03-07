@@ -11,7 +11,7 @@ import { RenderContextService } from '@kbn/core-render-context-browser';
 
 const createStartMock = (): jest.Mocked<RenderContextService> => {
   return {
-    renderElement: jest.fn().mockImplementation((element) => element),
+    addContext: jest.fn().mockImplementation((element) => element),
   };
 };
 
