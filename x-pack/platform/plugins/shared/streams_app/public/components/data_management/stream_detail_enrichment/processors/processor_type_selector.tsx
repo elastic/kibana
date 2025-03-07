@@ -73,7 +73,7 @@ const availableProcessors: TAvailableProcessors = {
     inputDisplay: 'Date',
     getDocUrl: () => (
       <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectHelpText"
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateHelpText"
         defaultMessage="Converts a date to a document timestamp."
       />
     ),
