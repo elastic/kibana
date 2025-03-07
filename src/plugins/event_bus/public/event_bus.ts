@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, scan, BehaviorSubject } from 'rxjs';
+import { isEqual } from 'lodash';
 
-import { setSearchQuery } from './search_slice';
+import { setSearchQuery, searchSlice } from './search_slice';
 
 export interface Action {
   type: string;
@@ -28,7 +29,10 @@ export function dispatch(action: Action) {
 }
 
 // Plugins or components can subscribe to events
-export const subscribe = (cb: any) => eventBus$.subscribe(cb);
+export const subscribe = (cb: any) =>
+  eventBus$
+    .pipe(scan(searchSlice.reducer, { query: '' }), distinctUntilChanged(isEqual))
+    .subscribe(cb);
 export type Subscribe = typeof subscribe;
 
 // Publishing an event
