@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import React, { useState } from 'react';
 
 interface Props {
@@ -18,17 +18,19 @@ export function TagsFilter({ availableTags, tags, onChange }: Props) {
   const [selected, setSelected] = useState<string[]>(tags);
 
   return (
-    <EuiComboBox<string>
-      compressed
-      placeholder="Select any tags"
-      selectedOptions={selected.map((tag) => ({ label: tag, value: tag }))}
-      options={availableTags.map((tag) => ({ label: tag, value: tag }))}
-      onChange={(selectedOptions) => {
-        const newTags = selectedOptions.map((opt) => opt.value!);
-        setSelected(newTags);
-        onChange(newTags);
-      }}
-      isClearable={true}
-    />
+    <EuiFormRow label="Tags">
+      <EuiComboBox<string>
+        compressed
+        placeholder="Select related tags"
+        selectedOptions={selected.map((tag) => ({ label: tag, value: tag }))}
+        options={availableTags.map((tag) => ({ label: tag, value: tag }))}
+        onChange={(selectedOptions) => {
+          const newTags = selectedOptions.map((opt) => opt.value!);
+          setSelected(newTags);
+          onChange(newTags);
+        }}
+        isClearable={true}
+      />
+    </EuiFormRow>
   );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import {
   ALERT_STATUS,
@@ -73,21 +73,23 @@ const options: Array<EuiComboBoxOptionOption<AlertStatus>> = STATUSES.map(({ val
 export function StatusFilter({ status, onChange }: Props) {
   const [selected, setSelected] = useState<AlertStatus | undefined>(status);
   return (
-    <EuiComboBox
-      prepend="Status"
-      compressed
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      selectedOptions={options.filter((opt) => opt.value === selected)}
-      onChange={(selectedOptions: Array<EuiComboBoxOptionOption<AlertStatus>>) => {
-        if (selectedOptions.length) {
-          setSelected(selectedOptions[0].value!);
-          onChange(selectedOptions[0].value!);
-        } else {
-          setSelected(undefined);
-          onChange(undefined);
-        }
-      }}
-    />
+    <EuiFormRow label="Status">
+      <EuiComboBox
+        compressed
+        isClearable
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={options.filter((opt) => opt.value === selected)}
+        onChange={(selectedOptions: Array<EuiComboBoxOptionOption<AlertStatus>>) => {
+          if (selectedOptions.length) {
+            setSelected(selectedOptions[0].value!);
+            onChange(selectedOptions[0].value!);
+          } else {
+            setSelected(undefined);
+            onChange(undefined);
+          }
+        }}
+      />
+    </EuiFormRow>
   );
 }

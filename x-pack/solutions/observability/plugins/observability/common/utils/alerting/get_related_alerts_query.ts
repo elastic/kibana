@@ -103,5 +103,5 @@ export const getRelatedAlertKuery = ({
   const groupKueriesStr = groupKueries.length > 0 ? [`${groupKueries.join(' or ')}`] : [];
   const kueries = [...tagKueriesStr, ...groupKueriesStr, ...sharedFieldsKueries, ...ruleKueries];
 
-  return kueries.length ? kueries.join(' or ') : '';
+  return kueries.length ? kueries.join(' and ') : '';
 };
