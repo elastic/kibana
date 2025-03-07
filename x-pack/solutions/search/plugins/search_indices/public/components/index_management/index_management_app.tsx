@@ -21,9 +21,9 @@ const breadcrumb = {
   text: breadcrumbText,
 };
 
-export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPluginSetup }> = ({
-  indexManagement,
-}) => {
+export const SearchIndexManagementApp: React.FC<{
+  indexManagement: IndexManagementPluginSetup;
+}> = ({ indexManagement }) => {
   const { history, searchNavigation, cloud } = useKibana().services;
   const indexManagementRef = useRef<HTMLDivElement>(null);
   const setBreadcrumbs = useCallback(
