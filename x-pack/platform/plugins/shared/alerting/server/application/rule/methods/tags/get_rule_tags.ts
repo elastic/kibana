@@ -6,6 +6,11 @@
  */
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import {
+  buildRuleTypeIdsFilter,
+  combineFilters,
+  combineFilterWithAuthorizationFilter,
+} from '../../../../rules_client/common/filters';
 import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
 import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
@@ -29,7 +34,7 @@ export async function getRuleTags(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
-  const { page, perPage = DEFAULT_TAGS_PER_PAGE, search = '' } = validatedParams;
+  const { page, perPage = DEFAULT_TAGS_PER_PAGE, search = '', ruleTypeIds } = validatedParams;
 
   let authorizationTuple;
   try {
@@ -48,14 +53,16 @@ export async function getRuleTags(
   }
 
   const { filter: authorizationFilter } = authorizationTuple;
+  const ruleTypeIdsFilter = buildRuleTypeIdsFilter(ruleTypeIds);
+  const searchFilter = !!search
+    ? nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(`${search}*`))
+    : null;
+  const combinedFilters = combineFilters([ruleTypeIdsFilter, searchFilter]);
 
-  const filter =
-    authorizationFilter && search
-      ? nodeBuilder.and([
-          nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(`${search}*`)),
-          authorizationFilter as KueryNode,
-        ])
-      : authorizationFilter;
+  const filter = combineFilterWithAuthorizationFilter(
+    combinedFilters,
+    authorizationFilter as KueryNode
+  );
 
   const response = await findRulesSo<RuleTagsAggregationResult>({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
