@@ -51,7 +51,6 @@ describe('Config.getScoutTestConfig', () => {
       isCloud: false,
       license: 'trial',
       cloudUsersFilePath: expect.stringContaining('.ftr/role_users.json'),
-      distName: 'stateful',
       hosts: {
         kibana: 'http://localhost:5620',
         elasticsearch: 'http://localhost:9220',
@@ -110,7 +109,6 @@ describe('Config.getScoutTestConfig', () => {
       isCloud: false,
       license: 'trial',
       cloudUsersFilePath: expect.stringContaining('.ftr/role_users.json'),
-      distName: 'serverless-es',
       hosts: {
         kibana: 'http://localhost:5620',
         elasticsearch: 'https://localhost:9220',

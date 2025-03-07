@@ -10,7 +10,6 @@
 import { ServerlessProjectType } from '@kbn/es';
 
 export interface ScoutTestConfig {
-  distName: string;
   serverless: boolean;
   projectType?: ServerlessProjectType;
   isCloud: boolean;

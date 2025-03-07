@@ -106,9 +106,6 @@ export class Config {
 
   public getScoutTestConfig(): ScoutTestConfig {
     return {
-      distName: this.get('serverless')
-        ? `serverless-${getProjectType(this.get('kbnTestServer.serverArgs'))}`
-        : 'stateful',
       serverless: this.get('serverless'),
       projectType: this.get('serverless')
         ? getProjectType(this.get('kbnTestServer.serverArgs'))
