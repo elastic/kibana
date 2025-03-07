@@ -43,7 +43,7 @@ export type IndexManagementAppMountParams = Pick<
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
-  indexManagementApp: (params: IndexManagementAppMountParams) => Promise<() => void>;
+  renderIndexManagementApp: (params: IndexManagementAppMountParams) => Promise<() => void>;
   locator?: IndexManagementLocator;
 }
 

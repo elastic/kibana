@@ -51,7 +51,7 @@ export const IndexManagementApp: React.FC<{ indexManagement: IndexManagementPlug
     // mount
     let indexManagementUnmount: () => void | undefined;
     indexManagement
-      .indexManagementApp({
+      .renderIndexManagementApp({
         element: indexManagementRef.current!,
         setBreadcrumbs,
         history,

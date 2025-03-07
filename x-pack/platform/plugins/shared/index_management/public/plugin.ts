@@ -147,7 +147,7 @@ export class IndexMgmtUIPlugin
     return {
       apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
-      indexManagementApp: async (params: IndexManagementAppMountParams) => {
+      renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         return mountManagementSection({
           coreSetup,
