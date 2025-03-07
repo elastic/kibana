@@ -241,9 +241,6 @@ export async function syncUnwiredStreamDefinitionObjects({
   dataStream: IndicesDataStream;
   definition: UnwiredStreamDefinition;
 }) {
-  if (definition.ingest.routing.length) {
-    throw new Error('Unmanaged streams cannot have managed children, coming soon');
-  }
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
     dataStream,
     scopedClusterClient,

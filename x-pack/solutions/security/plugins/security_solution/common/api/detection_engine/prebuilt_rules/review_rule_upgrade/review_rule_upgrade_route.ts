@@ -10,7 +10,7 @@ import { SortOrder, type RuleObjectId, type RuleSignatureId, type RuleTagArray }
 import type { PartialRuleDiff } from '../model';
 import type { RuleResponse, RuleVersion } from '../../model/rule_schema';
 import { FindRulesSortField } from '../../rule_management';
-import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
+import { ReviewPrebuiltRuleUpgradeFilter } from '../common/review_prebuilt_rules_upgrade_filter';
 
 export type ReviewRuleUpgradeSort = z.infer<typeof ReviewRuleUpgradeSort>;
 export const ReviewRuleUpgradeSort = z.object({
@@ -27,7 +27,7 @@ export const ReviewRuleUpgradeSort = z.object({
 export type ReviewRuleUpgradeRequestBody = z.infer<typeof ReviewRuleUpgradeRequestBody>;
 export const ReviewRuleUpgradeRequestBody = z
   .object({
-    filter: PrebuiltRulesFilter.optional(),
+    filter: ReviewPrebuiltRuleUpgradeFilter.optional(),
     sort: ReviewRuleUpgradeSort.optional(),
 
     page: z.coerce.number().int().min(1).optional().default(1),
@@ -89,4 +89,5 @@ export interface RuleUpgradeInfoForReview {
   target_rule: RuleResponse;
   diff: PartialRuleDiff;
   revision: number;
+  has_base_version: boolean;
 }

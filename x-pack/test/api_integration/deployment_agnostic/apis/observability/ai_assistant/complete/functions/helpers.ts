@@ -13,6 +13,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../../services/observability_ai_assistant_api';
 
 function decodeEvents(body: Readable | string) {
@@ -48,6 +49,13 @@ export async function invokeChatCompleteWithFunctionRequest({
           {
             '@timestamp': new Date().toISOString(),
             message: {
+              role: MessageRole.User,
+              content: 'Hello from user',
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
               role: MessageRole.Assistant,
               content: '',
               function_call: functionCall,
@@ -65,4 +73,65 @@ export async function invokeChatCompleteWithFunctionRequest({
   expect(status).to.be(200);
 
   return body;
+}
+
+export async function chatComplete({
+  userPrompt,
+  connectorId,
+  observabilityAIAssistantAPIClient,
+}: {
+  userPrompt: string;
+  connectorId: string;
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+}) {
+  const { status, body } = await observabilityAIAssistantAPIClient.editor({
+    endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+    params: {
+      body: {
+        messages: [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: userPrompt,
+            },
+          },
+        ],
+        connectorId,
+        persist: false,
+        screenContexts: [],
+        scopes: ['observability' as const],
+      },
+    },
+  });
+
+  expect(status).to.be(200);
+  const messageAddedEvents = getMessageAddedEvents(body);
+
+  return { messageAddedEvents, body, status };
+}
+
+// order of instructions can vary, so we sort to compare them
+export function systemMessageSorted(message: string) {
+  return message
+    .split('\n\n')
+    .map((line) => line.trim())
+    .sort();
+}
+
+export async function getSystemMessage(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const apiClient = getService('observabilityAIAssistantApi');
+
+  const { body } = await apiClient.editor({
+    endpoint: 'GET /internal/observability_ai_assistant/functions',
+    params: {
+      query: {
+        scopes: ['observability'],
+      },
+    },
+  });
+
+  return body.systemMessage;
 }

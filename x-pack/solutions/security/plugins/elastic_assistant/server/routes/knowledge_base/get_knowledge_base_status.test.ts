@@ -55,10 +55,8 @@ describe('Get Knowledge Base Status Route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         elser_exists: true,
-        index_exists: true,
         is_setup_in_progress: false,
         is_setup_available: true,
-        pipeline_exists: true,
         security_labs_exists: true,
         user_data_exists: true,
         product_documentation_status: 'installed',

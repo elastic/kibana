@@ -21951,6 +21951,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.upgrade_attempts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "upgrade_attempts",
+            "description": [
+              "\nList of timestamps of attempts of Elastic Agent automatic upgrades"
+            ],
+            "signature": [
+              "string[] | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FleetServerAgent.access_api_key_id",
             "type": "string",
             "tags": [],
@@ -25019,6 +25035,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.PackageAssetReference.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.PackageAssetReference.type",
             "type": "string",
             "tags": [],
@@ -27632,7 +27662,7 @@
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"index-pattern\" | \"ingest_pipeline\" | \"lens\" | \"visualization\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\")[]"
+          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"lens\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -28681,7 +28711,7 @@
           "InstallableSavedObject",
           " | undefined; installationInfo?: ",
           "InstallationInfo",
-          " | undefined; }"
+          " | undefined; packagePoliciesInfo?: { count: number; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,

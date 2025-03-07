@@ -34,5 +34,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/licensing-plugin",
     "@kbn/response-ops-rule-form",
+    "@kbn/fields-metadata-plugin",
   ]
 }

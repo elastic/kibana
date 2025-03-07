@@ -14,8 +14,8 @@ export const rootStreamDefinition: WiredStreamDefinition = {
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
-    routing: [],
     wired: {
+      routing: [],
       fields: {
         '@timestamp': {
           type: 'date',

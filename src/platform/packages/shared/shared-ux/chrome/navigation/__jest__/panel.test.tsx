@@ -8,8 +8,11 @@
  */
 
 import './setup_jest_mocks';
+
+import { userEvent } from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+
 import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
@@ -110,9 +113,105 @@ describe('Panel', () => {
     expect(queryByTestId(/panelOpener-root.group2/)).toBeVisible();
   });
 
+  describe('toggle the panel open and closed', () => {
+    let navigationTree: NavigationTreeDefinitionUI;
+    beforeAll(() => {
+      navigationTree = {
+        id: 'es',
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                renderAs: 'panelOpener',
+                children: [
+                  { id: 'item1', title: 'Item 1', href: '/app/item1', path: 'root.group1.item1' },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    });
+
+    test('should allow button to toggle', async () => {
+      const { findByTestId, queryByTestId } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel
+      (await findByTestId(/nav-item-id-group1/)).click();
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // close the panel
+      await userEvent.click(await findByTestId(/nav-item-id-group1/));
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    });
+
+    test('should allow the button label to toggle', async () => {
+      const { findByTestId, queryByTestId, container } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel via the button
+      (await findByTestId(/nav-item-id-group1/)).click();
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // click the label element
+      const buttonLabel = container.querySelectorAll('span span')[0];
+      expect(buttonLabel).toBeInTheDocument();
+      await userEvent.click(buttonLabel!);
+
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    });
+
+    test('should allow the button icon to toggle', async () => {
+      const { findByTestId, queryByTestId, container } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel via the button
+      (await findByTestId(/nav-item-id-group1/)).click();
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // click the label element
+      const buttonIcon = container.querySelectorAll('span span')[1];
+      expect(buttonIcon).toBeInTheDocument();
+      await userEvent.click(buttonIcon!);
+
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    });
+
+    test('should allow outside click to close the panel', async () => {
+      const { findByTestId, queryByTestId } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel via the button
+      (await findByTestId(/nav-item-id-group1/)).click();
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // click an element outside of the panel
+      const navRoot = await findByTestId(/nav-item-id-root/);
+      expect(navRoot).toBeInTheDocument();
+
+      const navRootParent = navRoot!.parentNode! as Element;
+      expect(navRootParent).toBeInTheDocument();
+      await userEvent.click(navRootParent);
+
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    });
+  });
+
   describe('custom content', () => {
     test('should render custom component inside the panel', async () => {
-      const panelContentProvider: PanelContentProvider = (id) => {
+      const panelContentProvider: PanelContentProvider = (_id) => {
         return {
           content: ({ closePanel, selectedNode, activeNodes }) => {
             const [path0 = []] = activeNodes;

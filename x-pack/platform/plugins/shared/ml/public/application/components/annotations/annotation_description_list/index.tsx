@@ -114,7 +114,6 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
   return (
     <EuiDescriptionList
       data-test-subj={'mlAnnotationDescriptionList'}
-      className="ml-annotation-description-list"
       type="column"
       columnWidths={[3, 7]}
       listItems={listItems}

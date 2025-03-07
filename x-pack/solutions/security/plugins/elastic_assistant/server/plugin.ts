@@ -24,7 +24,7 @@ import { AIAssistantService } from './ai_assistant_service';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
-import { appContextService } from './services/app_context';
+import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 
 export class ElasticAssistantPlugin
@@ -133,6 +133,9 @@ export class ElasticAssistantPlugin
       },
       registerTools: (pluginName: string, tools: AssistantTool[]) => {
         return appContextService.registerTools(pluginName, tools);
+      },
+      registerCallback: (callbackId: CallbackIds, callback: Function) => {
+        return appContextService.registerCallback(callbackId, callback);
       },
     };
   }

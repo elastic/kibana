@@ -10,14 +10,29 @@ import {
   ActionConnectorFieldsProps,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { EuiSpacer } from '@elastic/eui';
 import {
+  SelectField,
+  TextField,
+  ToggleField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import {
+  UseArray,
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
@@ -26,17 +41,21 @@ import {
   azureAiSecrets,
   otherOpenAiConfig,
   otherOpenAiSecrets,
-  openAiConfig,
   openAiSecrets,
   providerOptions,
+  getOpenAiConfig,
 } from './constants';
-const { emptyField } = fieldValidators;
 
+const { emptyField } = fieldValidators;
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+  const { euiTheme } = useEuiTheme();
   const { getFieldDefaultValue } = useFormContext();
-  const [{ config, id, name }] = useFormData({
-    watch: ['config.apiProvider'],
+  const [{ config, __internal__, id, name }] = useFormData({
+    watch: ['config.apiProvider', '__internal__.hasHeaders'],
   });
+  const enabledAdditionalHeaders = ExperimentalFeaturesService.get().openAIAdditionalHeadersOn;
+  const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
+  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
   const selectedProviderDefaultValue = useMemo(
     () =>
@@ -74,7 +93,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         <SimpleConnectorForm
           isEdit={isEdit}
           readOnly={readOnly}
-          configFormSchema={openAiConfig}
+          configFormSchema={getOpenAiConfig(enabledAdditionalHeaders)}
           secretsFormSchema={openAiSecrets}
         />
       )}
@@ -94,6 +113,86 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           configFormSchema={otherOpenAiConfig}
           secretsFormSchema={otherOpenAiSecrets}
         />
+      )}
+      <UseField
+        path="__internal__.hasHeaders"
+        component={ToggleField}
+        config={{
+          defaultValue: hasHeadersDefaultValue,
+          label: i18nAuth.HEADERS_SWITCH,
+        }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'openAIViewHeadersSwitch',
+          },
+        }}
+      />
+      {hasHeaders && (
+        <UseArray path="config.headers" initialNumberOfItems={1}>
+          {({ items, addItem, removeItem }) => {
+            return (
+              <>
+                <EuiSpacer size="s" />
+                <EuiTitle size="xxs" data-test-subj="openAIHeaderText">
+                  <h5>{i18nAuth.HEADERS_TITLE}</h5>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                {items.map((item) => (
+                  <EuiFlexGroup key={item.id} css={{ marginTop: euiTheme.size.s }}>
+                    <EuiFlexItem>
+                      <UseField
+                        path={`${item.path}.key`}
+                        config={{
+                          label: i18nAuth.KEY_LABEL,
+                        }}
+                        component={TextField}
+                        // This is needed because when you delete
+                        // a row and add a new one, the stale values will appear
+                        readDefaultValueOnForm={!item.isNew}
+                        componentProps={{
+                          euiFieldProps: { readOnly, ['data-test-subj']: 'openAIHeadersKeyInput' },
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UseField
+                        path={`${item.path}.value`}
+                        config={{ label: i18nAuth.VALUE_LABEL }}
+                        component={TextField}
+                        readDefaultValueOnForm={!item.isNew}
+                        componentProps={{
+                          euiFieldProps: {
+                            readOnly,
+                            ['data-test-subj']: 'openAIHeadersValueInput',
+                          },
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        color="danger"
+                        onClick={() => removeItem(item.id)}
+                        iconType="minusInCircle"
+                        aria-label={i18nAuth.DELETE_BUTTON}
+                        style={{ marginTop: '28px' }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))}
+                <EuiSpacer size="m" />
+                <EuiButtonEmpty
+                  iconType="plusInCircle"
+                  onClick={addItem}
+                  data-test-subj="openAIAddHeaderButton"
+                >
+                  {i18nAuth.ADD_BUTTON}
+                </EuiButtonEmpty>
+                <EuiSpacer />
+              </>
+            );
+          }}
+        </UseArray>
       )}
       {isEdit && (
         <DashboardLink

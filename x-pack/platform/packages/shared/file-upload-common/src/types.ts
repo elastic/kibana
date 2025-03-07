@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { ReactNode } from 'react';
 
 export interface FileUploadResults {
   index: string;
@@ -19,4 +20,13 @@ export interface OpenFileUploadLiteContext {
   indexSettings?: IndicesIndexSettings;
   autoAddInference?: string;
   autoCreateDataView?: boolean;
+  initialIndexName?: string;
+  flyoutContent?: FlyoutContent;
+}
+
+export interface FlyoutContent {
+  title?: string | ReactNode;
+  description?: string | ReactNode;
+  showFileContentPreview?: boolean;
+  showFileSummary?: boolean;
 }

@@ -7,6 +7,8 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
+
 import { prepareToInstallPipelines } from './install';
 
 jest.mock('../../archive/cache');
@@ -25,10 +27,10 @@ describe('Install pipeline tests', () => {
               path: '/datasettest',
             },
           ],
-        },
+        } as any,
         paths: [],
-        assetsMap: new Map(),
-      } as any);
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+      });
 
       expect(res.assetsToAdd).toEqual([{ id: 'logs-datasettest-1.0.0', type: 'ingest_pipeline' }]);
       const esClient = elasticsearchClientMock.createInternalClient();
@@ -64,16 +66,18 @@ describe('Install pipeline tests', () => {
           'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/default.yml',
           'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/standard.yml',
         ],
-        assetsMap: new Map([
-          [
-            'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/default.yml',
-            Buffer.from('description: test'),
-          ],
-          [
-            'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/standard.yml',
-            Buffer.from('description: test'),
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/default.yml',
+              Buffer.from('description: test'),
+            ],
+            [
+              'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/standard.yml',
+              Buffer.from('description: test'),
+            ],
+          ])
+        ),
       } as any);
       expect(res.assetsToAdd).toEqual([
         { id: 'logs-datasettest-1.0.0', type: 'ingest_pipeline' },

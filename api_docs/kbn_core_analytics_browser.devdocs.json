@@ -783,6 +783,14 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
               },
@@ -1577,6 +1585,22 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
               },
               {
                 "plugin": "@kbn/core",
