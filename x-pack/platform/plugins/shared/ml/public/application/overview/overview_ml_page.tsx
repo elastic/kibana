@@ -122,32 +122,35 @@ export const OverviewPage: FC = () => {
         <UpgradeWarning />
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="m" direction="column">
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>
-                  {i18n.translate('xpack.ml.overview.analyzeYourDataTitle', {
-                    defaultMessage: 'Analyze your data',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexGroup gutterSize="m" responsive={true} wrap={true}>
-              {isADEnabled ? (
+          {isADEnabled || isDFAEnabled ? (
+            <>
+              <EuiFlexGroup direction="column">
                 <EuiFlexItem>
-                  <AnomalyDetectionOverviewCard />
+                  <EuiTitle size="s">
+                    <h2>
+                      {i18n.translate('xpack.ml.overview.analyzeYourDataTitle', {
+                        defaultMessage: 'Analyze your data',
+                      })}
+                    </h2>
+                  </EuiTitle>
                 </EuiFlexItem>
-              ) : null}
-              {isDFAEnabled ? (
-                <EuiFlexItem>
-                  <DataFrameAnalyticsOverviewCard />
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexGroup>
+                <EuiFlexGroup gutterSize="m" responsive={true} wrap={true}>
+                  {isADEnabled ? (
+                    <EuiFlexItem>
+                      <AnomalyDetectionOverviewCard />
+                    </EuiFlexItem>
+                  ) : null}
+                  {isDFAEnabled ? (
+                    <EuiFlexItem>
+                      <DataFrameAnalyticsOverviewCard />
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
-
+              <EuiSpacer size="s" />
+            </>
+          ) : null}
           <EuiFlexGroup direction="column">
             <EuiTitle size="s">
               <h2>
