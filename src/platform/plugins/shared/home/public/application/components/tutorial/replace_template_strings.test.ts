@@ -42,13 +42,13 @@ describe('replaceTemplateStrings', () => {
     });
   });
   describe('should replace template strings with:', () => {
-    it('provided variables', () => {
+    test('provided variables', () => {
       const text = 'Kibana version: {config.kibana.version}';
       const result = replaceTemplateStrings(text);
       expect(result).toBe('Kibana version: 8.0.0');
     });
 
-    it('doc links', () => {
+    test('doc links', () => {
       const text = 'Filebeat docs: {config.docs.beats.filebeat}';
       const result = replaceTemplateStrings(text);
       expect(result).toBe(
@@ -57,13 +57,13 @@ describe('replaceTemplateStrings', () => {
     });
   });
 
-  it('should handle {curlyOpen} {curlyClose} correctly', () => {
+  test('should handle {curlyOpen} {curlyClose} correctly', () => {
     const text = 'Curly braces: {curlyOpen}escaped{curlyClose}';
     const result = replaceTemplateStrings(text);
     expect(result).toBe('Curly braces: {escaped}');
   });
 
-  it('should handle unknown variables gracefully', () => {
+  test('should handle unknown variables gracefully', () => {
     const text = 'Unknown variable: {config.unknown}';
     const result = replaceTemplateStrings(text);
     expect(result).toBe('Unknown variable: ');
