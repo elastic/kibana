@@ -33,7 +33,7 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
 
     useEffect(() => {
       // Set card complete if any migration is finished
-      if (!isCardComplete(OnboardingCardId.siemMigrationsStart) && migrationsStats) {
+      if (!isCardComplete(OnboardingCardId.siemMigrationsRules) && migrationsStats) {
         if (migrationsStats.some(({ status }) => status === SiemMigrationTaskStatus.FINISHED)) {
           setComplete(true);
         }

@@ -79,9 +79,9 @@ export const RULE_MIGRATION_TRANSLATION_FAILED = i18n.translate(
   { defaultMessage: 'Failed' }
 );
 
-export const RULE_MIGRATION_TABLE_COLUMN_RESULT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.result',
-  { defaultMessage: 'Result' }
+export const RULE_MIGRATION_TABLE_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.status',
+  { defaultMessage: 'Status' }
 );
 export const RULE_MIGRATION_TABLE_COLUMN_RULES = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.rules',
@@ -90,12 +90,16 @@ export const RULE_MIGRATION_TABLE_COLUMN_RULES = i18n.translate(
 
 export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources',
-  { defaultMessage: 'Upload missing Macros and Lookups.' }
+  { defaultMessage: 'Upload missing macros and lookup lists.' }
 );
-export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
-  { defaultMessage: 'Click upload for step-by-step guidance to finish partially translated rules.' }
-);
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = (partialRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
+    {
+      defaultMessage: 'Click Upload to continue translating {partialRulesCount} rules',
+      values: { partialRulesCount },
+    }
+  );
 
 export const RULE_MIGRATION_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button',

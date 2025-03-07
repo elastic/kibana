@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type PropsWithChildren } from 'react';
+import React, { useMemo, type PropsWithChildren } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiPanel,
@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { OnboardingCardId } from '../../constants';
 import type { CheckCompleteResult, CardBadge } from '../../types';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
@@ -28,6 +29,7 @@ interface OnboardingCardPanelProps {
   id: OnboardingCardId;
   title: string;
   icon: IconType;
+  iconDark: IconType | undefined;
   badge: CardBadge | undefined;
   isExpanded: boolean;
   isComplete: boolean;
@@ -40,6 +42,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
     id,
     title,
     icon,
+    iconDark,
     badge,
     isExpanded,
     isComplete,
@@ -52,6 +55,12 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
       'onboardingCardPanel-expanded': isExpanded,
       'onboardingCardPanel-completed': isComplete,
     });
+    const isDarkMode = useDarkMode();
+    const iconType = useMemo(
+      () => (iconDark && isDarkMode ? iconDark : icon),
+      [isDarkMode, iconDark, icon]
+    );
+
     const isContentVisible = useDelayedVisibility({ isExpanded });
 
     return (
@@ -73,7 +82,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
         >
           <EuiFlexItem grow={false}>
             <span className="onboardingCardIcon">
-              <EuiIcon type={icon} size="l" />
+              <EuiIcon type={iconType} size="l" />
             </span>
           </EuiFlexItem>
           <EuiFlexItem>

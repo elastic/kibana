@@ -179,22 +179,22 @@ const TranslationResultsChart = React.memo<{
   const translationResultColors = useResultVisColors();
   const data = [
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(RuleTranslationResult.FULL),
       value: translationStats.rules.success.result.full,
     },
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
       value: translationStats.rules.success.result.partial,
     },
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
       value: translationStats.rules.success.result.untranslatable,
     },
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
       value: translationStats.rules.failed,
     },
@@ -212,7 +212,7 @@ const TranslationResultsChart = React.memo<{
       <Settings showLegend={false} rotation={90} baseTheme={baseTheme} />
       <BarSeries
         id="results"
-        name="Results"
+        name={i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS}
         data={data}
         xAccessor="category"
         yAccessors={['value']}
@@ -236,7 +236,7 @@ interface TranslationResultsTableItem {
 const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
   {
     field: 'title',
-    name: i18n.RULE_MIGRATION_TABLE_COLUMN_RESULT,
+    name: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
     render: (title: string, { color }) => (
       <EuiHealth color={color} textSize="xs">
         {title}

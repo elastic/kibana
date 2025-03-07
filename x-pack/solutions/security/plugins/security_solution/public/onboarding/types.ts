@@ -132,9 +132,9 @@ export interface OnboardingCardConfig<TMetadata extends {} = {}>
    * @returns Promise for the complete status
    */
   checkComplete?: OnboardingCardCheckComplete<TMetadata>;
-  /**
-   * Optional badge to display on the card.
-   */
+  /** Optional icon for dark mode */
+  iconDark?: IconType;
+  /** Optional badge to display on the card. */
   badge?: CardBadge;
 }
 
