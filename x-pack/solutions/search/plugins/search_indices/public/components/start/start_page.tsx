@@ -17,7 +17,7 @@ import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 import { usePageChrome } from '../../hooks/use_page_chrome';
 
 const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
@@ -33,8 +33,9 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
 
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
   usePageChrome(PageTitle, [
-    ...IndexManagementBreadcrumbs(),
+    ...indexManagementBreadcrumbs,
     {
       text: PageTitle,
     },

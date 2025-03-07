@@ -17,7 +17,7 @@ import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 
 import { CreateIndex } from './create_index';
 import { usePageChrome } from '../../hooks/use_page_chrome';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 
 const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitle', {
   defaultMessage: 'Create Index',
@@ -36,8 +36,9 @@ export const CreateIndexPage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
   usePageChrome(CreateIndexLabel, [
-    ...IndexManagementBreadcrumbs(),
+    ...indexManagementBreadcrumbs,
     {
       text: CreateIndexLabel,
     },
