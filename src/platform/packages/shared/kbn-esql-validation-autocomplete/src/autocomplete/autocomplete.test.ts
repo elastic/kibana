@@ -396,13 +396,13 @@ describe('autocomplete', () => {
     );
 
     // LIMIT argument
-    // Here we actually test that the invoke trigger kind does NOT work
-    // the assumption is that it isn't very useful to see literal suggestions when already typing a number
-    // I'm not sure if this is true or not, but it's the current behavior
-    testSuggestions('FROM a | LIMIT 1/', ['| ']);
+    testSuggestions('FROM a | LIMIT 1/', ['10 ', '100 ', '1000 ']);
 
     // MV_EXPAND field
-    testSuggestions('FROM index1 | MV_EXPAND f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | MV_EXPAND f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field
     testSuggestions('FROM index1 | RENAME f/', getFieldNamesByType('any'));
