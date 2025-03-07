@@ -13,27 +13,24 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import apm, { Logger } from 'elastic-apm-node';
-import { Subject } from 'rxjs';
+import type { Logger } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
+import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import {
-  TaskClaimerOpts,
-  ClaimOwnershipResult,
-  getEmptyClaimOwnershipResult,
-  getExcludedTaskTypes,
-} from '.';
-import {
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
+import { getEmptyClaimOwnershipResult, getExcludedTaskTypes } from '.';
+import type {
   ConcreteTaskInstance,
-  TaskStatus,
   ConcreteTaskInstanceVersion,
-  TaskCost,
   PartialConcreteTaskInstance,
 } from '../task';
+import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
-import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
+import type { TaskClaim } from '../task_events';
+import { asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
 import {
@@ -47,10 +44,10 @@ import {
   tasksWithPartitions,
 } from '../queries/mark_available_tasks_as_claimed';
 
-import { TaskStore, SearchOpts } from '../task_store';
+import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
-import { TaskPartitioner } from '../lib/task_partitioner';
+import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 
 interface OwnershipClaimingOpts {

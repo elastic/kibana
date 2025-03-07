@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { IResourceInstaller, ResourceInstaller } from './resource_installer';
+import type { IResourceInstaller, ResourceInstaller } from './resource_installer';
 
 type Schema = PublicMethodsOf<ResourceInstaller>;
 export type ResourceInstallerMock = jest.Mocked<Schema>;

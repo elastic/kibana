@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { isUserError } from '../task_running';
-import { isOk, Ok, unwrap } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import {
-  ErroredTask,
-  isTaskManagerStatEvent,
-  isTaskRunEvent,
-  RanTask,
-  TaskManagerStat,
-  TaskRun,
-} from '../task_events';
+import type { Ok } from '../lib/result_type';
+import { isOk, unwrap } from '../lib/result_type';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { ErroredTask, RanTask, TaskManagerStat, TaskRun } from '../task_events';
+import { isTaskManagerStatEvent, isTaskRunEvent } from '../task_events';
 import type { SerializedHistogram } from './lib';
 import { getTaskTypeGroup, MetricCounterService, SimpleHistogram } from './lib';
-import { ITaskMetricsAggregator } from './types';
+import type { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds

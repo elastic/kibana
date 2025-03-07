@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IClusterClientAdapter } from './cluster_client_adapter';
+import type { IClusterClientAdapter } from './cluster_client_adapter';
 
 const createClusterClientMock = () => {
   const mock: jest.Mocked<IClusterClientAdapter> = {
