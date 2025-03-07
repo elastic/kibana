@@ -224,7 +224,7 @@ export const useColumns = (
     earliest,
     latest,
     documentStats: { documentCountStats },
-  } = logRateAnalysis.useState((state) => ({
+  } = logRateAnalysis.useEventBusState((state) => ({
     earliest: state.earliest,
     latest: state.latest,
     documentStats: state.documentStats,
