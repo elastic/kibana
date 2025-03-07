@@ -16,10 +16,8 @@ import {
   EuiToolTip,
   EuiButton,
   type EuiButtonColor,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
@@ -36,7 +34,6 @@ import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -59,6 +56,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
+import { useCreateLookupIndexCommand } from './custom_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -125,7 +123,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     uiSettings,
     uiActions,
     data,
-    docLinks,
   } = kibana.services;
 
   const variablesService = kibana.services?.esql?.variablesService;
@@ -522,50 +519,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     variablesService?.areSuggestionsEnabled,
   ]);
 
-  const onUploadComplete = useCallback(() => {
-    esqlCallbacks.getJoinIndices?.();
-  }, [esqlCallbacks]);
-
-  monaco.editor.registerCommand('esql.control.lookup_index.create', async (_, initialIndexName) => {
-    await uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
-      onUploadComplete,
-      autoCreateDataView: false,
-      initialIndexName,
-      indexSettings: {
-        'index.mode': 'lookup',
-      },
-      flyoutContent: {
-        showFileSummary: true,
-        showFileContentPreview: true,
-        title: i18n.translate('esqlEditor.lookupJoin.title', {
-          defaultMessage: 'Create lookup index',
-        }),
-        description: (
-          <FormattedMessage
-            id="esqlEditor.lookupJoin.description"
-            defaultMessage={
-              'Lookup indices can be created by uploading data from a file, below, or through the {docUrl}'
-            }
-            values={{
-              docUrl: (
-                <EuiLink
-                  href={docLinks?.links.apis.createIndex}
-                  target="_blank"
-                  rel="noopener nofollow noreferrer"
-                  data-test-subj="lookupIndexDocLink"
-                >
-                  <FormattedMessage
-                    id="esqlEditor.lookupJoin.docUrl"
-                    defaultMessage={'Elasticsearch API.'}
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
-      },
-    } as OpenFileUploadLiteContext);
-  });
+  useCreateLookupIndexCommand(esqlCallbacks);
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
