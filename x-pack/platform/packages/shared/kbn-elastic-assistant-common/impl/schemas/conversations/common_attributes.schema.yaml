@@ -316,7 +316,7 @@ components:
           description: The last time conversation was updated.
           type: string
         createdAt:
-          description: The last time conversation was updated.
+          description: The time conversation was created.
           type: string
         replacements:
           $ref: '#/components/schemas/Replacements'
@@ -332,9 +332,6 @@ components:
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
@@ -393,9 +390,6 @@ components:
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
