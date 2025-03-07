@@ -10,7 +10,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConversationCreatedEventPayload } from '../../../common/chat_events';
+import { ConversationEventChanges } from '../../../common/chat_events';
 import { Chat } from '../components/chat';
 import { ChatHeader } from '../components/chat_header';
 import { ConversationList } from '../components/conversation_list';
@@ -47,7 +47,7 @@ export const WorkchatChatPage: React.FC<{}> = () => {
   }, [conversationIdFromParams]);
 
   const onConversationUpdate = useCallback(
-    (changes: ConversationCreatedEventPayload) => {
+    (changes: ConversationEventChanges) => {
       if (!conversationId) {
         application.navigateToApp('workchat', { path: `/chat/${changes.id}` });
       }

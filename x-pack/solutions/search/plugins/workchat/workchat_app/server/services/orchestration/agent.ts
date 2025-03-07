@@ -8,7 +8,7 @@
 import { Observable, from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ChatEvent, ConversationCreatedEvent } from '../../../common/chat_events';
+import type { ChatEvent } from '../../../common/chat_events';
 import type { Conversation } from '../../../common/conversations';
 import { IntegrationsService } from '../integrations/integrations_service';
 import { getLCTools } from '../integrations/utils';

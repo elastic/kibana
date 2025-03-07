@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ChatEvent, MessageEvent, ChunkEvent, ConversationCreatedEvent } from '../chat_events';
+import type {
+  ChatEvent,
+  MessageEvent,
+  ChunkEvent,
+  ConversationCreatedEvent,
+  ConversationUpdatedEvent,
+} from '../chat_events';
 
 export const conversationCreatedEvent = ({
   id,
@@ -16,6 +22,19 @@ export const conversationCreatedEvent = ({
 }): ConversationCreatedEvent => {
   return {
     type: 'conversation_created',
+    conversation: { id, title },
+  };
+};
+
+export const conversationUpdatedEvent = ({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): ConversationUpdatedEvent => {
+  return {
+    type: 'conversation_updated',
     conversation: { id, title },
   };
 };

@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { ConversationCreatedEventPayload } from '../../../common/chat_events';
+import type { ConversationEventChanges } from '../../../common/chat_events';
 import { useChat } from './use_chat';
 import { useWorkChatServices } from './use_workchat_service';
 
@@ -18,12 +18,12 @@ export const useConversation = ({
 }: {
   agentId: string;
   conversationId: string | undefined;
-  onConversationUpdate: (update: ConversationCreatedEventPayload) => void;
+  onConversationUpdate: (update: ConversationEventChanges) => void;
 }) => {
   const { conversationService } = useWorkChatServices();
 
   const onConversationUpdateInternal = useCallback(
-    (update: ConversationCreatedEventPayload) => {
+    (update: ConversationEventChanges) => {
       onConversationUpdate(update);
     },
     [onConversationUpdate]
