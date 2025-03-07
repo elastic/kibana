@@ -83,10 +83,10 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader hasBorder>
         {flyoutMode === 'edit' ? (
-          <EuiText>
+          <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutEditModeRuleIdText">
             <b>
               {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.title.ruleId', {
                 defaultMessage: 'Rule ID: {ruleId}',
@@ -101,8 +101,9 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
             })}
           >
             <EuiFieldText
-              data-test-subj="searchSynonymsSynonymsRuleFlyoutFieldText"
+              data-test-subj="searchSynonymsSynonymRuleFlyoutGeneratedIdText"
               value={synonymsRule.id}
+              readOnly
             />
           </EuiFormRow>
         )}
@@ -116,6 +117,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         banner={
           backendError && (
             <EuiCallOut
+              data-test-subj="searchSynonymsSynonymsRuleFlyoutErrorBanner"
               color="danger"
               title={i18n.translate(
                 'xpack.searchSynonyms.synonymsSetRuleFlyout.errorCallout.title',
@@ -145,9 +147,13 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
               error={fromTermErrors || null}
             >
               <EuiComboBox
+                data-test-subj="searchSynonymsSynonymsRuleFlyoutFromTermsInput"
                 isInvalid={isFromTermsInvalid}
                 noSuggestions
-                placeholder="Add terms to match against"
+                placeholder={i18n.translate(
+                  'xpack.searchSynonyms.synonymsSetRuleFlyout.synonyms.inputPlaceholder',
+                  { defaultMessage: 'Add terms to match against' }
+                )}
                 onCreateOption={onCreateOption}
                 delimiter=","
                 onSearchChange={onSearchChange}
@@ -159,7 +165,11 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
+                    <EuiText
+                      size="s"
+                      color="subdued"
+                      data-test-subj="searchSynonymsSynonymsRuleFlyoutTermCountLabel"
+                    >
                       <p>
                         {fromTerms.length <= 1 ? (
                           <FormattedMessage
@@ -222,8 +232,9 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
             >
               <EuiSpacer size="xs" />
               {fromTerms.map((opt, index) => (
-                <span key={index}>
+                <span key={index + '-' + opt.label.trim()}>
                   <EuiBadge
+                    data-test-subj="searchSynonymsSynonymsRuleFlyoutFromTermBadge"
                     color="hollow"
                     iconSide="left"
                     iconType="cross"
@@ -238,7 +249,12 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                 </span>
               ))}
               {fromTerms.length === 0 && (
-                <EuiText color="subdued" textAlign="center" size="s">
+                <EuiText
+                  color="subdued"
+                  textAlign="center"
+                  size="s"
+                  data-test-subj="searchSynonymsSynonymsRuleFlyoutNoTermsText"
+                >
                   <p>
                     <FormattedMessage
                       id="xpack.searchSynonyms.synonymsSetRuleFlyout.noTerms"
@@ -261,7 +277,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                 error={mapToTermErrors || null}
               >
                 <EuiFieldText
-                  data-test-subj="searchSynonymsSynonymsRuleFlyoutFieldText"
+                  data-test-subj="searchSynonymsSynonymsRuleFlyoutMapToTermsInput"
                   fullWidth
                   value={mapToTerms}
                   isInvalid={mapToTerms !== '' && isMapToTermsInvalid}
@@ -278,7 +294,10 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             {hasChanges && (
-              <EuiHealth color="primary">
+              <EuiHealth
+                color="primary"
+                data-test-subj="searchSynonymsSynonymsRuleFlyoutHasChangesBadge"
+              >
                 {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.unsavedChanges', {
                   defaultMessage: 'Synonym rule has unsaved changes',
                 })}
