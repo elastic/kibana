@@ -9,46 +9,39 @@
 
 import { distinctUntilChanged, scan, BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
-import { Slice, CaseReducerActions } from '@reduxjs/toolkit';
+import { Slice } from '@reduxjs/toolkit';
 
 export interface Action<T = any> {
   type: string;
   payload: T;
 }
 
-export class EventBus<
-  Namespace extends string,
-  State,
-  Actions extends CaseReducerActions<any, Namespace>
-> {
+export class EventBus<S extends Slice> {
   public subject: BehaviorSubject<Action>;
-  private reducer: (state: State, action: Action) => State;
-  private initialState: State;
-  public actions: Actions;
+  private slice: S;
+  public actions: S['actions'];
 
-  constructor(slice: Slice) {
+  constructor(slice: S) {
     this.subject = new BehaviorSubject<Action>({ type: 'init', payload: null });
-    this.reducer = slice.reducer;
-    this.initialState = slice.getInitialState();
+    this.slice = slice;
     this.actions = this.wrapActions(slice.actions);
   }
 
   // Subscribe to this event bus
-  subscribe(cb: (state: State) => void) {
+  subscribe(cb: (state: ReturnType<S['reducer']>) => void) {
     return this.subject
-      .pipe(scan(this.reducer, this.initialState), distinctUntilChanged(isEqual))
+      .pipe(scan(this.slice.reducer, this.slice.getInitialState()), distinctUntilChanged(isEqual))
       .subscribe(cb);
   }
 
   // Wrap actions to automatically dispatch through the event bus
-  private wrapActions(actions: Actions): Actions {
-    const wrappedActions: Partial<Actions> = {};
-    for (const [key, actionCreator] of Object.entries(actions)) {
-      wrappedActions[key as keyof Actions] = ((...args: any[]) => {
-        const action = actionCreator(...args);
-        this.subject.next(action);
+  private wrapActions(actions: S['actions']) {
+    return Object.entries(actions).reduce((p, [key, actionCreator]) => {
+      p[key as any as keyof S['actions']] = ((...args: any[]) => {
+        const actionObj = actionCreator.apply(null, [args[0]]);
+        this.subject.next(actionObj);
       }) as any;
-    }
-    return wrappedActions as Actions;
+      return p;
+    }, {} as S['actions']);
   }
 }
