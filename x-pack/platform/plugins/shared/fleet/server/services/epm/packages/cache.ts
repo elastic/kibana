@@ -27,7 +27,7 @@ class CacheSession {
 
   private _agentTemplateAssetsMap?: LRUCache<string, PackagePolicyAssetsMap>;
 
-  private _handlebarsCpomiledTemplate?: LRUCache<string, HandlebarsTemplateDelegate>;
+  private _handlebarsCompiledTemplate?: LRUCache<string, HandlebarsTemplateDelegate>;
 
   private _isSpaceAwarenessEnabledCache?: boolean;
 
@@ -59,12 +59,12 @@ class CacheSession {
   }
 
   getHandlebarsCompiledTemplateCache() {
-    if (!this._handlebarsCpomiledTemplate) {
-      this._handlebarsCpomiledTemplate = new LRUCache<string, HandlebarsTemplateDelegate>({
+    if (!this._handlebarsCompiledTemplate) {
+      this._handlebarsCompiledTemplate = new LRUCache<string, HandlebarsTemplateDelegate>({
         max: HANDLEBARS_COMPILE_TEMPLATE_CACHE_SIZE,
       });
     }
-    return this._handlebarsCpomiledTemplate;
+    return this._handlebarsCompiledTemplate;
   }
 
   getIsSpaceAwarenessEnabledCache() {
