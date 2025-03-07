@@ -57,33 +57,31 @@ async function getSpacesUsage(
 
   const resp = (await esClient.search({
     index: kibanaIndex,
-    body: {
-      track_total_hits: true,
-      query: {
-        term: {
-          type: {
-            value: 'space',
-          },
+    track_total_hits: true,
+    query: {
+      term: {
+        type: {
+          value: 'space',
         },
       },
-      aggs: {
-        disabledFeatures: {
-          terms: {
-            field: 'space.disabledFeatures',
-            include: knownFeatureIds,
-            size: knownFeatureIds.length,
-          },
-        },
-        solution: {
-          terms: {
-            field: 'space.solution',
-            size: knownSolutions.length,
-            missing: 'unset',
-          },
-        },
-      },
-      size: 0,
     },
+    aggs: {
+      disabledFeatures: {
+        terms: {
+          field: 'space.disabledFeatures',
+          include: knownFeatureIds,
+          size: knownFeatureIds.length,
+        },
+      },
+      solution: {
+        terms: {
+          field: 'space.solution',
+          size: knownSolutions.length,
+          missing: 'unset',
+        },
+      },
+    },
+    size: 0,
   })) as SpacesAggregationResponse;
 
   const { hits, aggregations } = resp;

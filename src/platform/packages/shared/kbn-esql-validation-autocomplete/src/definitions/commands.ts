@@ -27,7 +27,6 @@ import {
   isFunctionOperatorParam,
   isLiteralItem,
 } from '../shared/helpers';
-import { ENRICH_MODES } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -36,13 +35,21 @@ import {
   onOption,
   withOption,
 } from './options';
-import type { CommandDefinition } from './types';
+import { ENRICH_MODES } from './settings';
+
+import { type CommandDefinition, FunctionDefinitionTypes } from './types';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
+import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -76,10 +83,14 @@ const statsValidator = (command: ESQLCommand) => {
 
   if (statsArg.length) {
     function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+      return (
+        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG
+      );
     }
     function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+      return (
+        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== FunctionDefinitionTypes.AGG
+      );
     }
 
     function checkAggExistence(arg: ESQLFunction): boolean {
@@ -138,12 +149,13 @@ const statsValidator = (command: ESQLCommand) => {
       }
       // now check that:
       // * the agg function is at root level
-      // * or if it's a builtin function, then all operands are agg functions or literals
+      // * or if it's a operators function, then all operands are agg functions or literals
       // * or if it's a eval function then all arguments are agg functions or literals
+      // * or if a named param is used
       function checkFunctionContent(arg: ESQLFunction) {
         // TODO the grouping function check may not
         // hold true for all future cases
-        if (isAggFunction(arg)) {
+        if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
           return true;
         }
         return (arg as ESQLFunction).args.every(
@@ -190,12 +202,13 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
-    examples: ['row a=1', 'row a=1, b=2'],
+    examples: ['ROW a=1', 'ROW a=1, b=2'],
     signature: {
       multipleParams: true,
       // syntax check already validates part of this
       params: [{ name: 'assignment', type: 'any' }],
     },
+    suggest: suggestForRow,
     options: [],
     modes: [],
   },
@@ -208,24 +221,25 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
-    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    suggest: suggestForFrom,
   },
   {
     name: 'show',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show info'],
+    examples: ['SHOW INFO'],
     options: [],
     modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
     },
+    suggest: suggestForShow,
   },
   {
     name: 'metrics',
@@ -449,7 +463,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}"'],
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
     modes: [],
     signature: {
@@ -459,6 +473,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForDissect,
   },
   {
     name: 'grok',
@@ -466,7 +481,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
+    examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
     modes: [],
     signature: {
@@ -476,6 +491,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForGrok,
   },
   {
     name: 'mv_expand',
@@ -508,14 +524,15 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
+    suggest: suggestForEnrich,
   },
   {
     name: 'hidden_command',
     description: 'A test fixture to test hidden-ness',
     hidden: true,
     examples: [],
-    modes: [],
     options: [],
+    modes: [],
     signature: {
       params: [],
       multipleParams: false,

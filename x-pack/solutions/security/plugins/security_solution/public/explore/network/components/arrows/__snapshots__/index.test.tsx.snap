@@ -10,15 +10,15 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
         "compat": true,
         "insert": [Function],
         "inserted": Object {
-          "4ieeuw-euiColorMode-LIGHT": true,
-          "4rtwwc": true,
+          "10uvw04": true,
+          "vzhe8z-euiColorMode-LIGHT": true,
         },
         "key": "css",
         "nonce": undefined,
         "registered": Object {
-          "css-4ieeuw-euiColorMode-LIGHT": "
+          "css-vzhe8z-euiColorMode-LIGHT": "
         label: euiColorMode-LIGHT;
-        color: #343741;
+        color: #1D2A3E;
       ",
         },
         "sheet": StyleSheet {
@@ -199,7 +199,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              html{scrollbar-width:auto;scrollbar-color:rgba(105,112,125,0.5) #f0f1f4;font-family:'Inter',BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:0.875rem;line-height:1.1428571428571428;font-weight:400;-webkit-text-size-adjust:100%;text-size-adjust:100%;font-kerning:normal;block-size:100%;background-color:#f7f8fc;color:#343741;}
+              html{scrollbar-width:auto;scrollbar-color:rgba(90,109,140,0.5) #ECF1F9;font-family:'Inter',BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:0.875rem;line-height:1.1428571428571428;font-weight:400;-webkit-text-size-adjust:100%;text-size-adjust:100%;font-kerning:normal;block-size:100%;background-color:#F6F9FC;color:#1D2A3E;}
             </style>
             <style
               data-emotion="css-global"
@@ -213,14 +213,14 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              html::-webkit-scrollbar-thumb{background-color:rgba(105,112,125,0.5);background-clip:content-box;border-radius:16px;border:4px solid #f0f1f4;}
+              html::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:4px solid #ECF1F9;}
             </style>
             <style
               data-emotion="css-global"
               data-s=""
             >
               
-              html::-webkit-scrollbar-corner,html::-webkit-scrollbar-track{background-color:#f0f1f4;}
+              html::-webkit-scrollbar-corner,html::-webkit-scrollbar-track{background-color:#ECF1F9;}
             </style>
             <style
               data-emotion="css-global"
@@ -262,14 +262,14 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              strong{font-weight:700;}
+              strong{font-weight:600;}
             </style>
             <style
               data-emotion="css-global"
               data-s=""
             >
               
-              *:focus{outline:2px solid currentColor;outline-offset:-1px;}
+              *:focus{outline:2px solid #1750BA;outline-offset:-1px;}
             </style>
             <style
               data-emotion="css-global"
@@ -290,14 +290,14 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              ::selection{background:rgba(0,119,204,0.1);}
+              ::selection{background:rgba(11,100,221,0.1);}
             </style>
             <style
               data-emotion="css-global"
               data-s=""
             >
               
-              a{color:#006bb8;}
+              a{color:#1750BA;}
             </style>
             <style
               data-emotion="css-global"
@@ -458,7 +458,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-scrollBar{scrollbar-width:thin;scrollbar-color:rgba(105,112,125,0.5) transparent;}
+              .eui-scrollBar{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;}
             </style>
             <style
               data-emotion="css-global"
@@ -472,7 +472,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-scrollBar::-webkit-scrollbar-thumb{background-color:rgba(105,112,125,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+              .eui-scrollBar::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
             </style>
             <style
               data-emotion="css-global"
@@ -486,7 +486,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-yScroll{scrollbar-width:thin;scrollbar-color:rgba(105,112,125,0.5) transparent;block-size:100%;overflow-y:auto;overflow-block:auto;overflow-x:hidden;overflow-inline:hidden;}
+              .eui-yScroll{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;block-size:100%;overflow-y:auto;overflow-block:auto;overflow-x:hidden;overflow-inline:hidden;}
             </style>
             <style
               data-emotion="css-global"
@@ -500,7 +500,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-yScroll::-webkit-scrollbar-thumb{background-color:rgba(105,112,125,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+              .eui-yScroll::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
             </style>
             <style
               data-emotion="css-global"
@@ -521,7 +521,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-xScroll{scrollbar-width:thin;scrollbar-color:rgba(105,112,125,0.5) transparent;overflow-x:auto;overflow-inline:auto;}
+              .eui-xScroll{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;overflow-x:auto;overflow-inline:auto;}
             </style>
             <style
               data-emotion="css-global"
@@ -535,7 +535,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-xScroll::-webkit-scrollbar-thumb{background-color:rgba(105,112,125,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+              .eui-xScroll::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
             </style>
             <style
               data-emotion="css-global"
@@ -556,7 +556,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-yScrollWithShadows{scrollbar-width:thin;scrollbar-color:rgba(105,112,125,0.5) transparent;block-size:100%;overflow-y:auto;overflow-block:auto;overflow-x:hidden;overflow-inline:hidden;-webkit-mask-image:linear-gradient(to bottom, 
+              .eui-yScrollWithShadows{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;block-size:100%;overflow-y:auto;overflow-block:auto;overflow-x:hidden;overflow-inline:hidden;-webkit-mask-image:linear-gradient(to bottom, 
   rgba(255,0,0,0.1) 0%,
   rgb(255,0,0) 8px
   , 
@@ -582,7 +582,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-yScrollWithShadows::-webkit-scrollbar-thumb{background-color:rgba(105,112,125,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+              .eui-yScrollWithShadows::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
             </style>
             <style
               data-emotion="css-global"
@@ -603,7 +603,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-xScrollWithShadows{scrollbar-width:thin;scrollbar-color:rgba(105,112,125,0.5) transparent;overflow-x:auto;overflow-inline:auto;-webkit-mask-image:linear-gradient(to right, 
+              .eui-xScrollWithShadows{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;overflow-x:auto;overflow-inline:auto;-webkit-mask-image:linear-gradient(to right, 
   rgba(255,0,0,0.1) 0%,
   rgb(255,0,0) 8px
   , 
@@ -629,7 +629,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .eui-xScrollWithShadows::-webkit-scrollbar-thumb{background-color:rgba(105,112,125,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+              .eui-xScrollWithShadows::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
             </style>
             <style
               data-emotion="css-global"
@@ -1007,30 +1007,30 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .css-4ieeuw-euiColorMode-LIGHT{color:#343741;}
+              .css-vzhe8z-euiColorMode-LIGHT{color:#1D2A3E;}
             </style>
             <style
               data-emotion="css"
               data-s=""
             >
               
-              .css-4rtwwc{background-color:#D3DAE6;height:3px;width:25px;}
+              .css-10uvw04{background-color:#CAD3E2;height:3px;width:25px;}
             </style>
             <style
-              data-rfd-always="0"
+              data-rfd-always=":r0:"
               type="text/css"
             >
-               [data-rfd-drag-handle-context-id="0"] { 
+               [data-rfd-drag-handle-context-id=":r0:"] { 
           -webkit-touch-callout: none;
           -webkit-tap-highlight-color: rgba(0,0,0,0);
           touch-action: manipulation;
-         } [data-rfd-droppable-context-id="0"] { overflow-anchor: none; } 
+         } [data-rfd-droppable-context-id=":r0:"] { overflow-anchor: none; } 
             </style>
             <style
-              data-rfd-dynamic="0"
+              data-rfd-dynamic=":r0:"
               type="text/css"
             >
-               [data-rfd-drag-handle-context-id="0"] { 
+               [data-rfd-drag-handle-context-id=":r0:"] { 
       cursor: -webkit-grab;
       cursor: grab;
      }  
@@ -1053,14 +1053,14 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .css-4ieeuw-euiColorMode-LIGHT{color:#343741;}
+              .css-vzhe8z-euiColorMode-LIGHT{color:#1D2A3E;}
             </style>,
             <style
               data-emotion="css"
               data-s=""
             >
               
-              .css-4rtwwc{background-color:#D3DAE6;height:3px;width:25px;}
+              .css-10uvw04{background-color:#CAD3E2;height:3px;width:25px;}
             </style>,
           ],
         },
@@ -1070,10 +1070,10 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
     serialized={
       Object {
         "map": undefined,
-        "name": "4rtwwc",
+        "name": "10uvw04",
         "next": undefined,
         "styles": "
-  background-color: #D3DAE6;
+  background-color: #CAD3E2;
   height: 3px;
   width: 25px;
 ",
@@ -1082,7 +1082,7 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
     }
   />
   <span
-    className="css-4rtwwc"
+    className="css-10uvw04"
     height={3}
   />
 </ArrowBody>

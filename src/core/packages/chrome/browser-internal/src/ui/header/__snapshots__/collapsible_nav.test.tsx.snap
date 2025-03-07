@@ -140,6 +140,7 @@ Array [
         <button
           aria-controls="generated-id"
           aria-expanded="true"
+          aria-hidden="true"
           aria-labelledby="generated-id"
           class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
           tabindex="-1"
@@ -155,7 +156,7 @@ Array [
       </div>
       <div
         aria-labelledby="generated-id"
-        class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+        class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
         id="generated-id"
         role="group"
         style="block-size: 0;"
@@ -263,6 +264,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -278,7 +280,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -393,6 +395,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -408,7 +411,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -506,6 +509,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -521,7 +525,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -602,6 +606,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -617,7 +622,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"

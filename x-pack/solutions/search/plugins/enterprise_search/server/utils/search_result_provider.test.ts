@@ -74,13 +74,25 @@ describe('Search search provider', () => {
     title: 'Customized connector',
     type: 'Elasticsearch',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=connector_client&service_type=`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
+      prependBasePath: true,
+    },
+  };
+
+  const mongodbConnectorResult = {
+    icon: 'mongodb.svg',
+    id: 'mongodb',
+    score: 75,
+    title: 'MongoDB',
+    type: 'Elasticsearch',
+    url: {
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
       prependBasePath: true,
     },
   };
 
   const searchAIResult = {
-    icon: 'logoEnterpriseSearch',
+    icon: 'logoElasticsearch',
     id: 'ai_search',
     score: 80,
     title: 'Search AI',
@@ -95,8 +107,7 @@ describe('Search search provider', () => {
     {
       hasConnectors: true,
     } as any,
-    connectors,
-    false
+    connectors
   );
 
   beforeEach(() => {});
@@ -132,7 +143,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([{ ...customizedConnectorResult, score: 80 }]),
+          a: expect.arrayContaining([{ ...mongodbConnectorResult, score: 80 }]),
         });
       });
     });
@@ -142,8 +153,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -203,8 +213,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -223,8 +232,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -244,8 +252,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: true,
         } as any,
-        connectors,
-        true
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(

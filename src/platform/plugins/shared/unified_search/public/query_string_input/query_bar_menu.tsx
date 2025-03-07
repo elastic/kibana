@@ -75,6 +75,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
+  showSavedQueryControls?: boolean;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   indexPatterns?: Array<DataView | string>;
@@ -110,6 +111,7 @@ function QueryBarMenuComponent({
   showQueryInput,
   showFilterBar,
   showSaveQuery,
+  showSavedQueryControls,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   filtersForSuggestions,
@@ -176,6 +178,7 @@ function QueryBarMenuComponent({
     timeFilter,
     query,
     showSaveQuery,
+    showSavedQueryControls,
     showFilterBar,
     showQueryInput,
     savedQueryService,

@@ -63,7 +63,8 @@ export const findExistingIndices = async (
         if ([apmIndexPattern, apmDataStreamsPattern].includes(index)) {
           const searchResponse = await esClient.search({
             index,
-            body: { query: { match_all: {} }, size: 0 },
+            query: { match_all: {} },
+            size: 0,
           });
           return get(searchResponse, 'hits.total.value', 0) > 0;
         }

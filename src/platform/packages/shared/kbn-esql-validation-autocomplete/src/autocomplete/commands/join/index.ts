@@ -8,14 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ESQLAstItem, ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
+import { ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from '../../../shared/types';
 import {
   CommandBaseDefinition,
   CommandDefinition,
+  CommandSuggestParams,
   CommandTypeDefinition,
-  type SupportedDataType,
 } from '../../../definitions/types';
 import {
   getPosition,
@@ -96,18 +96,13 @@ const suggestFields = async (
   return [...intersection, ...union];
 };
 
-export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
-  innerText: string,
-  command: ESQLCommand<'join'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  columnExists: (column: string) => boolean,
-  getSuggestedVariableName: () => string,
-  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  previousCommands?: ESQLCommand[],
-  definition?: CommandDefinition<'join'>,
-  callbacks?: ESQLCallbacks
-): Promise<SuggestionRawDefinition[]> => {
+export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
+  innerText,
+  command,
+  getColumnsByType,
+  definition,
+  callbacks,
+}: CommandSuggestParams<'join'>): Promise<SuggestionRawDefinition[]> => {
   let commandText: string = innerText;
 
   if (command.location) {

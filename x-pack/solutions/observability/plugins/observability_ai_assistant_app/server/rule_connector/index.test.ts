@@ -24,13 +24,6 @@ const buildConversation = (contentMessage: string) => [
   {
     '@timestamp': expect.any(String),
     message: {
-      role: MessageRole.System,
-      content: '',
-    },
-  },
-  {
-    '@timestamp': expect.any(String),
-    message: {
       role: MessageRole.User,
       content: contentMessage,
     },

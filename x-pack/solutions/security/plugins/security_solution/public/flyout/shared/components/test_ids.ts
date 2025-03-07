@@ -41,6 +41,7 @@ export const TITLE_LINK_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj
 
 /* History */
 export const FLYOUT_HISTORY_TEST_ID = `${PREFIX}History` as const;
+export const HISTORY_ROW_LOADING_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}RowLoading` as const;
 export const FLYOUT_HISTORY_BUTTON_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}Button` as const;
 export const FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID =
   `${FLYOUT_HISTORY_TEST_ID}ContextPanel` as const;
