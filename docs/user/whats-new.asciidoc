@@ -20,7 +20,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt30bf5f8b9
 [discrete]
 ==== Renaming Saved search to Discover session
 
-We’ve changed Saved search to Discover session for improved clarity and to better reflect Discover’s expanding capabilities. With this updated terminology, we’re setting the stage for more powerful data exploration with Discover, where you'll soon be able to include a broader scope of saved objects and assets, such as tabs, in a Discover session. 
+We’ve changed Saved search to Discover session for improved clarity and to better reflect Discover’s expanding capabilities. With this updated terminology, we’re setting the stage for more powerful data exploration with Discover. 
 
 image::images/open-discover-session.png[Open Discover session flyout, width=90%]
 
