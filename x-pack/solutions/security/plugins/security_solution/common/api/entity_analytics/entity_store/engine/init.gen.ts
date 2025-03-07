@@ -21,7 +21,7 @@ import { EntityType, IndexPattern, Interval, EngineDescriptor } from '../common.
 export type InitEntityEngineRequestParams = z.infer<typeof InitEntityEngineRequestParams>;
 export const InitEntityEngineRequestParams = z.object({
   /**
-   * The entity type of the engine (e.g., 'user' 'host', 'service', etc.).
+   * The entity type of the engine (either 'user' or 'host').
    */
   entityType: EntityType,
 });
