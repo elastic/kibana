@@ -18,7 +18,7 @@ export interface ServiceMapTelemetry {
   nodesCount?: number;
 }
 
-type GroupedConnection = ConnectionNode | ConnectionEdge;
+export type GroupedConnection = { label: string } & (ConnectionNode | ConnectionEdge);
 
 export interface GroupedNode {
   data: {

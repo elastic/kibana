@@ -26,7 +26,7 @@ import type {
 } from './types';
 
 import { groupResourceNodes } from './group_resource_nodes';
-import { getConnectionId, isExitSpan } from './utils';
+import { getConnectionId, getEdgeId, isExitSpan } from './utils';
 
 const FORBIDDEN_SERVICE_NAMES = ['constructor'];
 
@@ -71,14 +71,12 @@ function getAllNodes(services: ServicesResponse[], connections: Connection[]) {
 
   // Derive the rest of the map nodes from the connections and add the services
   // from the services data query
-  services
-    .filter((service) => !FORBIDDEN_SERVICE_NAMES.includes(service[SERVICE_NAME]))
-    .forEach((service) => {
-      const id = service[SERVICE_NAME];
-      if (!allNodesMap.has(id)) {
-        allNodesMap.set(id, { ...service, id });
-      }
-    });
+  services.forEach((service) => {
+    const id = service[SERVICE_NAME];
+    if (!allNodesMap.has(id) && !FORBIDDEN_SERVICE_NAMES.includes(service[SERVICE_NAME])) {
+      allNodesMap.set(id, { ...service, id });
+    }
+  });
 
   return allNodesMap;
 }
@@ -87,41 +85,38 @@ function getAllServices(
   allNodes: Map<string, ConnectionNode>,
   destinationServices: ExitSpanDestination[]
 ) {
-  const connectionFromDiscoveredServices: ServiceConnectionNode[] = [];
+  const serviceNodes = new Map<string, ServiceConnectionNode>();
 
   for (const { from, to } of destinationServices) {
     const fromId = from.id;
     const toId = to.id;
 
     if (allNodes.has(fromId) && !allNodes.has(toId)) {
-      connectionFromDiscoveredServices.push({ ...to, id: toId });
+      serviceNodes.set(toId, { ...to, id: toId });
     }
   }
 
-  // List of nodes that are services
-  const serviceNodes = new Map(
-    [...Array.from(allNodes.values()), ...connectionFromDiscoveredServices]
-      .filter((node): node is ServiceConnectionNode => !isExitSpan(node))
-      .map((node) => [node.id, node])
-  );
+  for (const node of allNodes.values()) {
+    if (!isExitSpan(node)) {
+      serviceNodes.set(node.id, node);
+    }
+  }
 
   return serviceNodes;
 }
 
 function getExitSpans(allNodes: Map<string, ConnectionNode>) {
-  return new Map(
-    Array.from(allNodes.values()).reduce((acc, node) => {
-      if (!isExitSpan(node)) {
-        return acc;
-      }
+  const exitSpans = new Map<string, ExternalConnectionNode[]>();
 
-      const nodes = acc.get(node.id) ?? [];
+  for (const node of allNodes.values()) {
+    if (isExitSpan(node)) {
+      const nodes = exitSpans.get(node.id) ?? [];
       nodes.push(node as ExternalConnectionNode);
-      acc.set(node.id, nodes);
+      exitSpans.set(node.id, nodes);
+    }
+  }
 
-      return acc;
-    }, new Map<string, ExternalConnectionNode[]>())
-  );
+  return exitSpans;
 }
 
 function exitSpanDestinationsToMap(destinationServices: ExitSpanDestination[]) {
@@ -157,9 +152,10 @@ function mapNodes({
   // 1. Map external nodes to internal services
   // 2. Collapse external nodes into one node based on span.destination.service.resource
   // 3. Pick the first available span.type/span.subtype in an alphabetically sorted list
-  return Array.from(nodes.entries()).reduce((map, [id, node]) => {
-    if (map.has(id)) {
-      return map;
+  const mappedNodes = new Map<string, ConnectionNode>();
+  for (const [id, node] of nodes.entries()) {
+    if (mappedNodes.has(id)) {
+      return mappedNodes;
     }
 
     const isMessagingSpan = messagingSpanIds.has(node.id);
@@ -173,7 +169,7 @@ function mapNodes({
       if (serviceNode) {
         const serviceAnomalyStats = anomaliesByServiceName.get(serviceNode.id);
 
-        map.set(node.id, {
+        mappedNodes.set(node.id, {
           ...serviceNode,
           ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
         });
@@ -182,7 +178,7 @@ function mapNodes({
       const exitSpanNodes = exitSpans.get(id) ?? [];
       if (exitSpanNodes.length > 0) {
         const exitSpanSample = exitSpanNodes[0];
-        map.set(id, {
+        mappedNodes.set(id, {
           ...exitSpanSample,
           label: exitSpanSample[SPAN_DESTINATION_SERVICE_RESOURCE],
           [SPAN_TYPE]: exitSpanNodes.map((n) => n[SPAN_TYPE]).sort()[0],
@@ -190,9 +186,9 @@ function mapNodes({
         });
       }
     }
+  }
 
-    return map;
-  }, new Map<string, ConnectionNode>());
+  return mappedNodes;
 }
 
 function mapEdges({
@@ -227,22 +223,25 @@ function mapEdges({
     return acc;
   }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
 
-  return Array.from(connections.values());
+  return [...connections.values()];
 }
 
 function markBidirectionalConnections({ connections }: { connections: ConnectionEdge[] }) {
-  return connections.reduce<ConnectionEdge[]>((prev, connection) => {
-    const reversedConnection = prev.find(
-      (c) => c.target === connection.source && c.source === connection.target
-    );
+  const targets = new Map<string, ConnectionEdge>();
+
+  for (const connection of connections) {
+    const edgeId = getEdgeId(connection);
+    const reversedConnection = targets.get(edgeId);
 
     if (reversedConnection) {
       reversedConnection.bidirectional = true;
       connection.isInverseEdge = true;
     }
 
-    return prev.concat(connection);
-  }, []);
+    targets.set(edgeId, connection);
+  }
+
+  return targets.values();
 }
 
 export function getServiceMapNodes({
@@ -268,7 +267,7 @@ export function getServiceMapNodes({
 
   const uniqueNodes = mappedEdges
     .flatMap((connection) => [connection.sourceData, connection.targetData])
-    .concat(Array.from(allServices.values()))
+    .concat(...allServices.values())
     .reduce((acc, node) => {
       if (!acc.has(node.id)) {
         acc.set(node.id, node);

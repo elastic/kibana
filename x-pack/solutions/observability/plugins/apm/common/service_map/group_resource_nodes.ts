@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { compact, groupBy } from 'lodash';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../es_fields/apm';
 import type {
   ConnectionEdge,
   ConnectionElement,
   ConnectionNode,
   GroupResourceNodesResponse,
+  GroupedConnection,
   GroupedEdge,
   GroupedNode,
 } from './types';
@@ -37,33 +37,25 @@ function groupConnections({
   edgesMap: Map<string, ConnectionElement>;
   groupableNodeIds: Set<string>;
 }) {
-  const groupedTargets = Array.from(edgesMap.values()).reduce(
-    (acc, { data: { source, target } }) => {
-      if (groupableNodeIds.has(target)) {
-        const sources = acc.get(target) ?? [];
-        sources.push(source);
-        acc.set(target, sources);
-      }
+  const sourcesByTarget = new Map<string, string[]>();
+  for (const { data } of edgesMap.values()) {
+    const { source, target } = data;
+    if (groupableNodeIds.has(target)) {
+      const sources = sourcesByTarget.get(target) ?? [];
+      sources.push(source);
+      sourcesByTarget.set(target, sources);
+    }
+  }
 
-      return acc;
-    },
-    new Map<string, string[]>()
-  );
+  const groups = new Map<string, { id: string; sources: string[]; targets: string[] }>();
+  for (const [target, sources] of sourcesByTarget) {
+    const groupId = `resourceGroup{${[...sources].sort().join(';')}}`;
+    const group = groups.get(groupId) ?? { id: groupId, sources, targets: [] };
+    group.targets.push(target);
+    groups.set(groupId, group);
+  }
 
-  const adjacencyList = Array.from(groupedTargets.entries()).map(([target, sources]) => ({
-    target,
-    sources,
-    groupId: `resourceGroup{${[...sources].sort().join(';')}}`,
-  }));
-
-  const grouped = groupBy(adjacencyList, 'groupId');
-  return Object.entries(grouped)
-    .map(([id, group]) => ({
-      id,
-      sources: group[0].sources,
-      targets: group.map(({ target }) => target),
-    }))
-    .filter(({ targets }) => targets.length >= MINIMUM_GROUP_SIZE);
+  return Array.from(groups.values()).filter(({ targets }) => targets.length >= MINIMUM_GROUP_SIZE);
 }
 
 function getUngroupedNodesAndEdges({
@@ -78,18 +70,18 @@ function getUngroupedNodesAndEdges({
   const ungroupedEdges = new Map(edgesMap);
   const ungroupedNodes = new Map(nodesMap);
 
-  groupedConnections.forEach(({ sources, targets }) => {
+  for (const { sources, targets } of groupedConnections) {
     targets.forEach((target) => {
       ungroupedNodes.delete(target);
       sources.forEach((source) => {
         ungroupedEdges.delete(getEdgeId({ source, target }));
       });
     });
-  });
+  }
 
   return {
-    ungroupedNodes: Array.from(ungroupedNodes.values()),
-    ungroupedEdges: Array.from(ungroupedEdges.values()),
+    ungroupedNodes,
+    ungroupedEdges,
   };
 }
 
@@ -109,14 +101,17 @@ function groupNodes({
           defaultMessage: '{count} resources',
           values: { count: targets.length },
         }),
-        groupedConnections: compact(
-          targets.map((target) => {
+        groupedConnections: targets
+          .map((target) => {
             const targetElement = nodesMap.get(target);
             return targetElement
-              ? { label: targetElement.data.label || targetElement.data.id, ...targetElement.data }
+              ? {
+                  ...targetElement.data,
+                  label: targetElement.data.label || targetElement.data.id,
+                }
               : undefined;
           })
-        ),
+          .filter((target): target is GroupedConnection => !!target),
       },
     })
   );
@@ -162,7 +157,12 @@ export function groupResourceNodes({
   const groupedEdges = groupEdges({ groupedConnections });
 
   return {
-    elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
-    nodesCount: ungroupedNodes.length,
+    elements: [
+      ...ungroupedNodes.values(),
+      ...groupedNodes,
+      ...ungroupedEdges.values(),
+      ...groupedEdges,
+    ],
+    nodesCount: ungroupedNodes.size,
   };
 }
