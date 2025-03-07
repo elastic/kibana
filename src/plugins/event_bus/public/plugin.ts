@@ -11,14 +11,18 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import { dispatch, subscribe } from './event_bus';
 import type { EventBusPluginSetup, EventBusPluginStart } from './types';
+import { useEventBus } from './use_event_bus';
+
+const api = { dispatch, subscribe, useEventBus };
+export type EventBusApi = typeof api;
 
 export class EventBusPlugin implements Plugin<EventBusPluginSetup, EventBusPluginStart> {
   public setup(core: CoreSetup): EventBusPluginSetup {
-    return { dispatch, subscribe };
+    return api;
   }
 
   public start(core: CoreStart): EventBusPluginStart {
-    return { dispatch, subscribe };
+    return api;
   }
 
   public stop() {}
