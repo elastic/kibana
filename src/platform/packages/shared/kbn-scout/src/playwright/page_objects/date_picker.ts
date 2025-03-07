@@ -15,7 +15,7 @@ export class DatePicker {
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton', {
-      timeout: 20000,
+      timeout: 10000,
     });
     const isShowDateBtnVisible = await this.page.testSubj.isVisible(
       'superDatePickerShowDatesButton',
