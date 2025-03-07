@@ -44,24 +44,32 @@ describe('SynonymRuleFlyout', () => {
   };
   const ACTIONS = {
     AddFromTerm: (term: string) => {
-      fireEvent.change(getByRole(screen.getByTestId(TEST_IDS.AddFromTermsInput), 'combobox'), {
-        target: { value: term },
-      });
-      fireEvent.keyDown(getByRole(screen.getByTestId(TEST_IDS.AddFromTermsInput), 'combobox'), {
-        key: 'Enter',
-        code: 'Enter',
+      act(() => {
+        fireEvent.change(getByRole(screen.getByTestId(TEST_IDS.AddFromTermsInput), 'combobox'), {
+          target: { value: term },
+        });
+        fireEvent.keyDown(getByRole(screen.getByTestId(TEST_IDS.AddFromTermsInput), 'combobox'), {
+          key: 'Enter',
+          code: 'Enter',
+        });
       });
     },
     AddMapToTerm: (term: string) => {
-      fireEvent.change(screen.getByTestId(TEST_IDS.MapToTermsInput), {
-        target: { value: term },
+      act(() => {
+        fireEvent.change(screen.getByTestId(TEST_IDS.MapToTermsInput), {
+          target: { value: term },
+        });
       });
     },
     PressSaveChangesButton: () => {
-      fireEvent.click(screen.getByTestId(TEST_IDS.SaveChangesButton));
+      act(() => {
+        fireEvent.click(screen.getByTestId(TEST_IDS.SaveChangesButton));
+      });
     },
     PressSortAZButton: () => {
-      fireEvent.click(screen.getByTestId(TEST_IDS.FromTermsSortAZButton));
+      act(() => {
+        fireEvent.click(screen.getByTestId(TEST_IDS.FromTermsSortAZButton));
+      });
     },
   };
 
@@ -154,17 +162,13 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
-      act(() => {
-        ACTIONS.AddFromTerm('from1');
-      });
+      ACTIONS.AddFromTerm('from1');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
-      act(() => {
-        ACTIONS.AddFromTerm('from2');
-      });
+
+      ACTIONS.AddFromTerm('from2');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
-      act(() => {
-        ACTIONS.PressSaveChangesButton();
-      });
+
+      ACTIONS.PressSaveChangesButton();
       expect(mutateMock).toHaveBeenCalledWith({
         synonymsSetId: 'my_synonyms_set',
         ruleId: 'generated-id',
@@ -187,22 +191,19 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
-      act(() => {
-        ACTIONS.AddFromTerm('from1');
-      });
+      ACTIONS.AddFromTerm('from1');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
-      act(() => {
-        ACTIONS.AddMapToTerm('to1');
-      });
-      act(() => {
-        ACTIONS.PressSaveChangesButton();
-      });
+
+      ACTIONS.AddMapToTerm('to1');
+      ACTIONS.PressSaveChangesButton();
+
       expect(mutateMock).toHaveBeenCalledWith({
         synonymsSetId: 'my_synonyms_set',
         ruleId: 'generated-id',
         synonyms: 'from1 => to1',
       });
     });
+
     it('should sort items in the flyout', () => {
       render(
         <Wrapper>
@@ -218,18 +219,14 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
-      act(() => {
-        ACTIONS.AddFromTerm('b');
-      });
-      act(() => {
-        ACTIONS.AddFromTerm('a');
-      });
+      ACTIONS.AddFromTerm('b');
+      ACTIONS.AddFromTerm('a');
+
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('b');
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('a');
-      act(() => {
-        ACTIONS.PressSortAZButton();
-      });
+
+      ACTIONS.PressSortAZButton();
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');
     });
@@ -288,13 +285,11 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
-      act(() => {
-        ACTIONS.AddFromTerm('synonym3');
-      });
+
+      ACTIONS.AddFromTerm('synonym3');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('3 terms');
-      act(() => {
-        ACTIONS.PressSaveChangesButton();
-      });
+
+      ACTIONS.PressSaveChangesButton();
       expect(mutateMock).toHaveBeenCalledWith({
         synonymsSetId: 'my_synonyms_set',
         ruleId: 'rule_id_3',
@@ -353,12 +348,10 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
-      act(() => {
-        ACTIONS.AddMapToTerm('explicit-to-2');
-      });
-      act(() => {
-        ACTIONS.PressSaveChangesButton();
-      });
+
+      ACTIONS.AddMapToTerm('explicit-to-2');
+      ACTIONS.PressSaveChangesButton();
+
       expect(mutateMock).toHaveBeenCalledWith({
         synonymsSetId: 'my_synonyms_set',
         ruleId: 'rule_id_3',
