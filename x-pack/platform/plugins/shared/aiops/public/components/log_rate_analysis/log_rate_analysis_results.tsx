@@ -115,7 +115,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     stickyHistogram,
     isBrushCleared,
     groupResults,
-  } = logRateAnalysis.useState();
+  } = logRateAnalysis.useEventBusState();
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.stream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);

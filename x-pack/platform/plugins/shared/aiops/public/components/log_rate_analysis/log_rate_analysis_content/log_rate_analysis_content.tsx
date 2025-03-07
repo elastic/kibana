@@ -91,7 +91,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     earliest,
     latest,
     isBrushCleared,
-  } = logRateAnalysis.useState();
+  } = logRateAnalysis.useEventBusState();
 
   // Window parameters stored in the url state use this components
   // `initialAnalysisStart` prop to set the initial params restore from url state.

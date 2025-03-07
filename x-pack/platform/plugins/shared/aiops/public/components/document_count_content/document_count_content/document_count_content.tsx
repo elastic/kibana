@@ -44,7 +44,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     useAiopsAppContext();
 
   const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
-  const { sampleProbability, totalCount, documentCountStats } = logRateAnalysis.useState(
+  const { sampleProbability, totalCount, documentCountStats } = logRateAnalysis.useEventBusState(
     (state) => state.documentStats
   );
 

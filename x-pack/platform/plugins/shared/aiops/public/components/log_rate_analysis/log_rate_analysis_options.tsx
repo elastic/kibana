@@ -95,7 +95,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   const dispatch = useAppDispatch();
 
   const { setGroupResults } = logRateAnalysis.actions;
-  const groupResults = logRateAnalysis.useState((s) => s.groupResults);
+  const groupResults = logRateAnalysis.useEventBusState((s) => s.groupResults);
   const { isRunning } = useAppSelector((s) => s.stream);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
   const { skippedColumns } = useAppSelector((s) => s.logRateAnalysisTable);
