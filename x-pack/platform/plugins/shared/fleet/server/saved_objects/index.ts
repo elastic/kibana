@@ -1311,5 +1311,7 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
   });
 }

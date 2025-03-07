@@ -477,9 +477,7 @@ export async function isOutputSecretStorageEnabled(
     return true;
   }
 
-  logger.info(
-    'Output secrets storage is disabled as minimum fleet server version has not been met'
-  );
+  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
   return false;
 }
 
