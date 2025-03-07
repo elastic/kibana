@@ -297,10 +297,10 @@ export function DiscoverMainRoute({
   useUrl({
     history,
     savedSearchId,
-    onNewUrl: useCallback(() => {
+    onNewUrl: () => {
       // restore the previously selected data view for a new state
       loadSavedSearch(getLoadParamsForNewSearch({ stateContainer, runtimeStateManager }));
-    }, [loadSavedSearch, runtimeStateManager, stateContainer]),
+    },
   });
 
   const onDataViewCreated = useCallback(

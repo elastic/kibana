@@ -15,7 +15,7 @@ import {
   redirectWhenMissing,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, useEffect, useMemo, useState } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -351,10 +351,10 @@ const DiscoverSessionView = ({
   useUrl({
     history,
     savedSearchId: discoverSessionId,
-    onNewUrl: useCallback(() => {
+    onNewUrl: () => {
       const scopedHistory = getScopedHistory<{ initialState?: DiscoverAppState }>();
       initializeSession(scopedHistory?.location.state?.initialState);
-    }, [getScopedHistory, initializeSession]),
+    },
   });
 
   if (initializeSessionState.loading) {
