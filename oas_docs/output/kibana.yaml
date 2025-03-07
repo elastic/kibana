@@ -132,10 +132,20 @@ tags:
     x-displayName: Security AI assistant
   - description: |
       Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
+
+      This API supports both key-based authentication and basic authentication.
+
+      To use key-based authentication, create an API key, then specify the key in the header of your API calls.
+
+      To use basic authentication, provide a username and password; this automatically creates an API key that matches the current user’s privileges.
+
+      In both cases, the API key is subsequently used for authorization when the rule runs.
       > warn
       > If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.
 
       > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
+
+      To create and run rules, the user must meet specific requirements for the Kibana space. Refer to the [Detections requirements](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html) for a complete list of requirements.
     name: Security Detections API
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
