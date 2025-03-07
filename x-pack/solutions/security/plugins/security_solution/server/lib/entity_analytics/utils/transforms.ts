@@ -121,12 +121,9 @@ export const getLatestTransformId = (namespace: string): string => {
   const maxNamespaceLength = 36;
   const prefix = `risk_score_latest_transform_`;
   const fullName = `${prefix}${namespace}`;
-  const maxAllowedNamespaceLength = maxNamespaceLength - prefix.length;
 
   const processedNamespace =
-    fullName.length > maxNamespaceLength
-      ? murmurhash.v3(namespace).toString().slice(0, maxAllowedNamespaceLength)
-      : namespace.slice(0, maxAllowedNamespaceLength);
+    fullName.length > maxNamespaceLength ? murmurhash.v3(namespace).toString(36) : namespace;
   return `${prefix}${processedNamespace}`;
 };
 

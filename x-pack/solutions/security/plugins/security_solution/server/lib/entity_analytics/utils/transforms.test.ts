@@ -209,13 +209,10 @@ describe('transforms utils', () => {
   });
 
   describe('checkTransformNameLength', () => {
-    it('should throw an error when the transform name is longer than 36 chars', async () => {
-      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-      esClient.transform.getTransform.mockResolvedValueOnce(outdatedTransformsMock);
-
-      const longTransformId = 'a'.repeat(50);
+    it('should limit the length of tranformId to less than or equal 36 characters', async () => {
+      const longTransformId = 'a_a-'.repeat(1000);
       const response = await getLatestTransformId(longTransformId);
-      expect(response.length).toEqual(36);
+      expect(response.length).toBeLessThanOrEqual(36);
     });
   });
 });
