@@ -525,6 +525,7 @@
     "@kbn/expression-reveal-image-plugin": "link:src/platform/plugins/shared/expression_reveal_image",
     "@kbn/expression-shape-plugin": "link:src/platform/plugins/shared/expression_shape",
     "@kbn/expression-tagcloud-plugin": "link:src/platform/plugins/shared/chart_expressions/expression_tagcloud",
+    "@kbn/expression-utils": "link:src/platform/packages/private/kbn-expression-utils",
     "@kbn/expression-xy-plugin": "link:src/platform/plugins/shared/chart_expressions/expression_xy",
     "@kbn/expressions-explorer-plugin": "link:examples/expressions_explorer",
     "@kbn/expressions-plugin": "link:src/platform/plugins/shared/expressions",

@@ -10,18 +10,12 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
-import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { elasticOutline, elasticLogo } from '@kbn/expression-utils';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
 
-const Renderer = ({
-  elasticLogo,
-  elasticOutline,
-}: {
-  elasticLogo: string;
-  elasticOutline: string;
-}) => {
+const Renderer = () => {
   const config = {
     image: elasticLogo,
     emptyImage: elasticOutline,
@@ -35,7 +29,7 @@ const Renderer = ({
 storiesOf('renderers/revealImage', module).add(
   'default',
   (_, props) => (
-    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
+    <Renderer />
   ),
-  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
+  { decorators: [] }
 );

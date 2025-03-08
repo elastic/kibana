@@ -8,11 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  getElasticOutline,
-  isValidUrl,
-  resolveWithMissingImage,
-} from '@kbn/presentation-util-plugin/common';
 import { CONTEXT, BASE64, URL } from '../constants';
 import { ExpressionRepeatImageFunction } from '../types';
 
@@ -97,10 +92,14 @@ export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
       },
     },
     fn: async (count, args) => {
+      const {
+        elasticOutline,
+        isValidUrl,
+        resolveWithMissingImage,
+      } = await import('@kbn/expression-utils');
       if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
         throw new Error(errors.getMissingMaxArgumentErrorMessage());
       }
-      const { elasticOutline } = await getElasticOutline();
       return {
         type: 'render',
         as: 'repeatImage',
