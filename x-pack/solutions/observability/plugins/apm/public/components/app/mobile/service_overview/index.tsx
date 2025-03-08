@@ -20,6 +20,7 @@ import { ServiceOverviewThroughputChart } from '../../service_overview/service_o
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { MostUsedCharts } from './most_used_charts';
 import { GeoMap } from './geo_map';
+import { isAndroidAgentName } from '../../../../../common/agent_name';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
@@ -35,9 +36,10 @@ import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 export const chartHeight = 288;
 
 export function MobileServiceOverview() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, agentName } = useApmServiceContext();
   const router = useApmRouter();
   const { dataView } = useAdHocApmDataView();
+  const isAndroidAgent = isAndroidAgentName(agentName);
 
   const {
     query,
@@ -100,32 +102,35 @@ export function MobileServiceOverview() {
             <MobileStats start={start} end={end} kuery={kueryWithMobileFilters} />
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={8}>
-                  <GeoMap
-                    start={start}
-                    end={end}
-                    kuery={kueryWithMobileFilters}
-                    filters={embeddableFilters}
-                    dataView={dataView}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={3}>
-                  <MobileLocationStats
-                    start={start}
-                    end={end}
-                    kuery={kueryWithMobileFilters}
-                    environment={environment}
-                    offset={offset}
-                    serviceName={serviceName}
-                    comparisonEnabled={comparisonEnabled}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
+
+          {!isAndroidAgent && (
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={8}>
+                    <GeoMap
+                      start={start}
+                      end={end}
+                      kuery={kueryWithMobileFilters}
+                      filters={embeddableFilters}
+                      dataView={dataView}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={3}>
+                    <MobileLocationStats
+                      start={start}
+                      end={end}
+                      kuery={kueryWithMobileFilters}
+                      environment={environment}
+                      offset={offset}
+                      serviceName={serviceName}
+                      comparisonEnabled={comparisonEnabled}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
