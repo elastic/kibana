@@ -187,13 +187,15 @@ export function MobileServiceOverview() {
 
           <EuiFlexItem>
             <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={3}>
-                <FailedTransactionRateChart
-                  height={nonLatencyChartHeight}
-                  showAnnotations={false}
-                  kuery={kueryWithMobileFilters}
-                />
-              </EuiFlexItem>
+              {!isAndroidAgent && (
+                <EuiFlexItem grow={3}>
+                  <FailedTransactionRateChart
+                    height={nonLatencyChartHeight}
+                    showAnnotations={false}
+                    kuery={kueryWithMobileFilters}
+                  />
+                </EuiFlexItem>
+              )}
 
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
