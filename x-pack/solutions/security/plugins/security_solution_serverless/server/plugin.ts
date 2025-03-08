@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { getProductProductFeatures } from '../common/pli/pli_features';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
@@ -71,7 +71,7 @@ export class SecuritySolutionServerlessPlugin
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
     // Register product features
-    const enabledProductFeatures = getProductProductFeatures(this.config.productTypes);
+    const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
     registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
 
