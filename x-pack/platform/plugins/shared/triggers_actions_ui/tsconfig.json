@@ -70,7 +70,6 @@
     "@kbn/visualization-utils",
     "@kbn/core-ui-settings-browser",
     "@kbn/alerting-rule-utils",
-    "@kbn/core-application-browser",
     "@kbn/cloud-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/core-user-profile-browser-mocks",
