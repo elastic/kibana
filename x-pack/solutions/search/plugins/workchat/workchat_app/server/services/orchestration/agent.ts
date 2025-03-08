@@ -9,14 +9,14 @@ import { Observable, from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ChatEvent } from '../../../common/chat_events';
-import type { Conversation } from '../../../common/conversations';
+import type { ConversationEvent } from '../../../common/conversations';
 import { IntegrationsService } from '../integrations/integrations_service';
 import { getLCTools } from '../integrations/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
 
 interface AgentRunOptions {
-  conversation: Conversation;
+  previousEvents: ConversationEvent[];
 }
 
 interface AgentRunResult {
@@ -44,8 +44,8 @@ export const createAgent = async ({
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
-    run: async ({ conversation }): Promise<AgentRunResult> => {
-      const initialMessages = conversationEventsToMessages(conversation.events);
+    run: async ({ previousEvents }): Promise<AgentRunResult> => {
+      const initialMessages = conversationEventsToMessages(previousEvents);
 
       const runName = 'defaultAgentGraph';
 

@@ -35,7 +35,7 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
       });
 
       try {
-        const events$ = await chatService.converse({
+        const events$ = chatService.converse({
           request,
           connectorId: connectorId ?? 'azure-gpt4', // TODO: auto-select on server-side when not present
           agentId,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   filter,
   map,
@@ -18,18 +19,21 @@ import {
   merge,
   catchError,
   throwError,
+  Observable,
 } from 'rxjs';
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { Conversation } from '../../../common/conversations';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   conversationCreatedEvent,
   conversationUpdatedEvent,
+  isMessageEvent,
 } from '../../../common/utils/chat_events';
 import { userMessageEvent, messageEvent } from '../../../common/utils/conversation';
-import { isMessageEvent } from '../../../common/utils/chat_events';
+import { ChatEvent } from '../../../common/chat_events';
+import { Conversation, ConversationEvent } from '../../../common/conversations';
 import { AgentFactory } from '../orchestration';
-import { ConversationService } from '../conversations';
+import { ConversationService, ConversationClient } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
 
 interface ChatServiceOptions {
@@ -52,7 +56,7 @@ export class ChatService {
     this.agentFactory = agentFactory;
   }
 
-  async converse({
+  converse({
     agentId,
     conversationId,
     connectorId,
@@ -69,81 +73,223 @@ export class ChatService {
       this.logger.error(`Error during converse from ${source}: ${err.message}`);
     };
 
-    const conversationClient = await this.conversationService.getScopedClient({ request });
+    const isNewConversation = !conversationId;
+    const nextUserEvent = userMessageEvent(nextUserMessage);
 
-    let conversation: Conversation;
-    if (conversationId) {
-      conversation = await conversationClient.get({ conversationId });
-    } else {
-      conversation = await conversationClient.create({
-        agentId,
-        title: 'New conversation', // TODO: translate default
-        events: [],
-      });
-    }
-
-    conversation.events.push(userMessageEvent(nextUserMessage));
-
-    const title$ =
-      // conversationId ? of(conversation.title) :
-      defer(async () =>
-        generateConversationTitle({
-          conversationEvents: conversation.events,
-          chatModel: await this.inference.getChatModel({
-            request,
-            connectorId,
-            chatModelOptions: {},
-          }),
+    return forkJoin({
+      agent: defer(() => this.agentFactory.getAgent({ request, connectorId, agentId })),
+      conversationClient: defer(() => this.conversationService.getScopedClient({ request })),
+      chatModel: defer(() =>
+        this.inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {},
         })
-      ).pipe(
-        catchError((err) => {
-          logError('title$', err);
-          return throwError(() => err);
-        }),
-        shareReplay()
-      );
-
-    const agent = await this.agentFactory.getAgent({ request, connectorId, agentId });
-    const agentOutput = await agent.run({ conversation });
-
-    const agentEvents$ = agentOutput.events$;
-
-    const newConversationEvents$ = agentEvents$.pipe(
-      filter(isMessageEvent),
-      map((event) => event.message),
-      toArray(),
-      mergeMap((newMessages) => {
-        const newEvents = newMessages.map((message) => messageEvent(message));
-
-        return of(newEvents);
-      })
-    );
-
-    const updateConversation$ = forkJoin({
-      title: title$,
-      newConversationEvents: newConversationEvents$,
+      ),
     }).pipe(
-      switchMap(({ title, newConversationEvents }) => {
-        return conversationClient.update(conversation.id, {
-          title,
-          events: [...conversation.events, ...newConversationEvents],
+      switchMap(({ conversationClient, chatModel, agent }) => {
+        const conversation$ = getConversation$({
+          agentId,
+          conversationId,
+          conversationClient,
         });
-      }),
-      switchMap((updatedConversation) => {
-        return of(
-          conversationId
-            ? conversationUpdatedEvent({
-                title: updatedConversation.title,
-                id: updatedConversation.id,
+
+        const conversationEvents$ = conversation$.pipe(
+          map((conversation) => {
+            return [...conversation.events, nextUserEvent];
+          }),
+          shareReplay()
+        );
+
+        const agentEvents$ = conversationEvents$.pipe(
+          switchMap((conversationEvents) => {
+            return defer(() => agent.run({ previousEvents: conversationEvents }));
+          }),
+          switchMap((agentRunResult) => {
+            return agentRunResult.events$;
+          }),
+          shareReplay()
+        );
+
+        // generate a title for the new conversations
+        const title$ = isNewConversation
+          ? generatedTitle$({ chatModel, conversationEvents$ })
+          : conversation$.pipe(
+              switchMap((conversation) => {
+                return conversation.title;
               })
-            : conversationCreatedEvent({
-                title: updatedConversation.title,
-                id: updatedConversation.id,
-              })
+            );
+
+        // extract new conversation events from the agent output
+        const newConversationEvents$ = extractNewConversationEvents$({ agentEvents$ }).pipe(
+          map((events) => {
+            return [nextUserEvent, ...events];
+          })
+        );
+
+        // save or update the conversation and emit the corresponding chat event
+        const saveOrUpdateAndEmit$ = isNewConversation
+          ? createConversation$({ agentId, title$, newConversationEvents$, conversationClient })
+          : updateConversation$({
+              title$,
+              conversation$,
+              conversationClient,
+              newConversationEvents$,
+            });
+
+        return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+          shareReplay(),
+          catchError((err) => {
+            logError('[main]', err);
+            return throwError(() => err);
+          })
         );
       })
     );
-
-    return merge(agentEvents$, updateConversation$).pipe(shareReplay());
   }
 }
+
+const generatedTitle$ = ({
+  chatModel,
+  conversationEvents$,
+}: {
+  chatModel: InferenceChatModel;
+  conversationEvents$: Observable<ConversationEvent[]>;
+}) => {
+  return conversationEvents$.pipe(
+    switchMap((conversationEvents) => {
+      return defer(async () =>
+        generateConversationTitle({
+          conversationEvents,
+          chatModel,
+        })
+      ).pipe(shareReplay());
+    })
+  );
+};
+
+const getConversation$ = ({
+  agentId,
+  conversationId,
+  conversationClient,
+}: {
+  agentId: string;
+  conversationId: string | undefined;
+  conversationClient: ConversationClient;
+}) => {
+  return defer(() => {
+    if (conversationId) {
+      return conversationClient.get({ conversationId });
+    } else {
+      return of(placeholderConversation({ agentId }));
+    }
+  }).pipe(shareReplay());
+};
+
+const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
+  return {
+    id: uuidv4(),
+    title: 'New conversation', // TODO: translate default
+    agentId,
+    events: [],
+    lastUpdated: new Date().toISOString(),
+    user: {
+      id: 'unknown',
+      name: 'unknown',
+    },
+  };
+};
+
+/**
+ * Extract the new conversation events from the output of the agent.
+ *
+ * Emits only once with an array of event when the agent events observable completes.
+ */
+const extractNewConversationEvents$ = ({
+  agentEvents$,
+}: {
+  agentEvents$: Observable<ChatEvent>;
+}) => {
+  return agentEvents$.pipe(
+    filter(isMessageEvent),
+    map((event) => event.message),
+    toArray(),
+    mergeMap((newMessages) => {
+      const newEvents = newMessages.map((message) => messageEvent(message));
+      return of(newEvents);
+    }),
+    shareReplay()
+  );
+};
+
+/**
+ * Persist a new conversation and emit the corresponding event
+ */
+const createConversation$ = ({
+  agentId,
+  conversationClient,
+  title$,
+  newConversationEvents$,
+}: {
+  agentId: string;
+  conversationClient: ConversationClient;
+  title$: Observable<string>;
+  newConversationEvents$: Observable<ConversationEvent[]>;
+}) => {
+  return forkJoin({
+    title: title$,
+    newConversationEvents: newConversationEvents$,
+  }).pipe(
+    switchMap(({ title, newConversationEvents }) => {
+      return conversationClient.create({
+        title,
+        agentId,
+        events: [...newConversationEvents],
+      });
+    }),
+    switchMap((updatedConversation) => {
+      return of(
+        conversationCreatedEvent({
+          title: updatedConversation.title,
+          id: updatedConversation.id,
+        })
+      );
+    })
+  );
+};
+
+/**
+ * Update an existing conversation and emit the corresponding event
+ */
+const updateConversation$ = ({
+  conversationClient,
+  conversation$,
+  title$,
+  newConversationEvents$,
+}: {
+  title$: Observable<string>;
+  conversation$: Observable<Conversation>;
+  newConversationEvents$: Observable<ConversationEvent[]>;
+  conversationClient: ConversationClient;
+}) => {
+  return forkJoin({
+    conversation: conversation$,
+    title: title$,
+    newConversationEvents: newConversationEvents$,
+  }).pipe(
+    switchMap(({ conversation, title, newConversationEvents }) => {
+      return conversationClient.update(conversation.id, {
+        title,
+        events: [...conversation.events, ...newConversationEvents],
+      });
+    }),
+    switchMap((updatedConversation) => {
+      return of(
+        conversationUpdatedEvent({
+          title: updatedConversation.title,
+          id: updatedConversation.id,
+        })
+      );
+    })
+  );
+};

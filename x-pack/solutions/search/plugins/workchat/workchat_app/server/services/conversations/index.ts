@@ -6,3 +6,4 @@
  */
 
 export { ConversationServiceImpl, type ConversationService } from './conversation_service';
+export type { ConversationClient } from './conversation_client';

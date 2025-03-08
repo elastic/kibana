@@ -32,4 +32,6 @@ export interface ConversationMessageEvent extends EventBase<'message'> {
 // only one type of event for now
 export type ConversationEvent = ConversationMessageEvent;
 
-export type ConversationCreateRequest = Omit<Conversation, 'id' | 'lastUpdated' | 'user'>;
+export type ConversationCreateRequest = Omit<Conversation, 'id' | 'lastUpdated' | 'user'> & {
+  id?: string;
+};

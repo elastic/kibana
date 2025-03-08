@@ -45,6 +45,7 @@ export class ConversationClientImpl implements ConversationClient {
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
       filter: `${conversationTypeName}.attributes.user_id: ${this.user.id}`,
+      perPage: 1000,
     });
 
     return results.map(savedObjectToModel);
@@ -57,7 +58,7 @@ export class ConversationClientImpl implements ConversationClient {
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
     const now = new Date();
-    const id = uuidv4();
+    const id = conversation.id ?? uuidv4();
     const attributes = createRequestToRaw({
       conversation,
       id,
