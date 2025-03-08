@@ -18758,7 +18758,6 @@ paths:
           name: page
           required: false
           schema:
-            default: 1
             type: number
         - in: query
           name: perPage
@@ -18807,6 +18806,26 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+        - in: query
+          name: searchAfter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: openPit
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: pitId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pitKeepAlive
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -18985,12 +19004,7 @@ paths:
                           nullable: true
                           type: number
                         sort:
-                          items:
-                            anyOf:
-                              - type: number
-                              - type: string
-                              - enum: []
-                                nullable: true
+                          items: {}
                           type: array
                         status:
                           enum:
@@ -19104,10 +19118,14 @@ paths:
                         - enrolled_at
                         - local_metadata
                     type: array
+                  nextSearchAfter:
+                    type: string
                   page:
                     type: number
                   perPage:
                     type: number
+                  pit:
+                    type: string
                   statusSummary:
                     additionalProperties:
                       type: number
@@ -19445,12 +19463,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -19793,12 +19806,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
