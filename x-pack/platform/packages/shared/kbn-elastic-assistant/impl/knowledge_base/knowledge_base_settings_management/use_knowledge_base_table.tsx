@@ -42,15 +42,15 @@ const useUserProfile = ({ username, enabled = true }: { username: string; enable
         dataPath: 'avatar',
       });
 
-      return data;
+      return data ?? null;
     },
     select: (profile) => {
       return {
-        username: profile?.[0].user.username ?? 'Unknown',
-        avatar: profile?.[0].data.avatar,
+        username: profile?.[0]?.user.username ?? 'Unknown',
+        avatar: profile?.[0]?.data.avatar,
       };
     },
-    enabled,
+    enabled: !!(enabled && username?.length),
   });
 };
 

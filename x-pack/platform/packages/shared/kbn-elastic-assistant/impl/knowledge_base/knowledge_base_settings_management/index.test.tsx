@@ -27,6 +27,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -39,6 +40,7 @@ const mockContext = {
     isAssistantEnabled: true,
     hasManageGlobalKnowledgeBase: true,
   },
+  userProfileService: userProfileServiceMock.createStart(),
 };
 jest.mock('../../assistant_context');
 jest.mock('../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry');
@@ -454,9 +456,11 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
 
     const updatedName = 'New Entry Name';
-    await waitFor(() => {
+
+    await waitFor(async () => {
       const nameInput = screen.getByTestId('entryNameInput');
-      fireEvent.change(nameInput, { target: { value: updatedName } });
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, updatedName);
     });
 
     await waitFor(() => {
@@ -472,7 +476,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
     expect(mockCreateEntry).toHaveBeenCalledTimes(0);
     expect(mockUpdateEntry).toHaveBeenCalledWith([{ ...mockData[0], name: updatedName }]);
-  }, 100000000);
+  });
 
   it('does not create a duplicate index entry when switching sharing option twice', async () => {
     (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
