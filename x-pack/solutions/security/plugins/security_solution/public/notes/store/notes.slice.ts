@@ -332,7 +332,6 @@ const selectIds = (state: State) => state.notes.ids;
 const selectEntities = (state: State) => state.notes.entities;
 
 export const selectAllReversed = createSelector(selectIds, selectEntities, (ids, entities) =>
-  // this is how redux-toolkit does it, I can change if we want ha
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   [...ids].reverse().map((id) => entities[id]!)
 );
