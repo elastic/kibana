@@ -52,11 +52,15 @@ import {
   createRuntimeStateManager,
   internalStateActions,
   useInternalStateDispatch,
+  useInternalStateSelector,
   useRuntimeState,
 } from './state_management/redux';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { RootProfileState, useRootProfile } from '../../context_awareness';
-import { useDefaultAdHocDataViews2 } from '../../context_awareness/hooks/use_default_ad_hoc_data_views';
+import {
+  RootProfileState,
+  useRootProfile,
+  useDefaultAdHocDataViews,
+} from '../../context_awareness';
 import { DiscoverError } from '../../components/common/error_alert';
 import { MainHistoryLocationState } from '../../../common';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
@@ -92,9 +96,7 @@ interface MainInitializationState {
 }
 
 type InitializeMain = (
-  overrides?: MainInitializationState & {
-    dataView?: DataView;
-  }
+  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
 ) => Promise<MainInitializationState>;
 
 type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
@@ -102,9 +104,11 @@ type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
   { error?: undefined; value?: undefined }
 >;
 
+const defaultCustomizationCallbacks: CustomizationCallback[] = [];
+
 export const DiscoverMainRoute2 = ({
   customizationContext,
-  customizationCallbacks = [],
+  customizationCallbacks = defaultCustomizationCallbacks,
   stateStorageContainer,
 }: MainRoute2Props) => {
   const services = useDiscoverServices();
@@ -124,21 +128,16 @@ export const DiscoverMainRoute2 = ({
   const [internalState] = useState(() =>
     createInternalStateStore({ services, runtimeStateManager })
   );
-  const initialize = useLatest<InitializeMain>(async (overrides) => {
+  const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
+  const initialize = useLatest<InitializeMain>(async (loadedRootProfileState) => {
     const { dataViews } = services;
-    const shouldRefreshDataViews = !overrides || Boolean(overrides.dataView);
-    const [hasESData, hasUserDataView, defaultDataViewExists, savedDataViews] = await Promise.all([
-      overrides?.hasESData ?? dataViews.hasData.hasESData().catch(() => false),
-      overrides?.hasUserDataView ?? dataViews.hasData.hasUserDataView().catch(() => false),
-      overrides?.hasUserDataView ?? dataViews.defaultDataViewExists().catch(() => false),
-      services.dataViews.getIdsWithTitle(shouldRefreshDataViews).catch(() => []),
+    const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
+      dataViews.hasData.hasESData().catch(() => false),
+      dataViews.hasData.hasUserDataView().catch(() => false),
+      dataViews.defaultDataViewExists().catch(() => false),
+      internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+      initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
     ]);
-
-    internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
-
-    if (overrides?.dataView) {
-      internalState.dispatch(internalStateActions.setDataView(overrides.dataView));
-    }
 
     return {
       hasESData,
@@ -154,9 +153,11 @@ export const DiscoverMainRoute2 = ({
     typeof initializationState
   >;
 
-  useMount(() => {
-    initializeMain();
-  });
+  useEffect(() => {
+    if (!rootProfileState.rootProfileLoading) {
+      initializeMain(rootProfileState);
+    }
+  }, [initializeMain, rootProfileState]);
 
   if (rootProfileState.rootProfileLoading || mainInitializationState.loading) {
     return <BrandedLoadingIndicator />;
@@ -241,7 +242,9 @@ const DiscoverSessionView = ({
   const [historyLocationState] = useState(
     () => getScopedHistory<MainHistoryLocationState>()?.location.state
   );
-  const { initializeProfileDataViews } = useDefaultAdHocDataViews2({ rootProfileState });
+  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
+    (state) => state.defaultProfileAdHocDataViewIds
+  );
   const initialize = useLatest<InitializeSession>(async (initialUrlState = {}) => {
     const discoverSessionLoadTracker = ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
@@ -257,7 +260,9 @@ const DiscoverSessionView = ({
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
     );
-    const profileDataViews = await initializeProfileDataViews();
+    const profileDataViews = runtimeStateManager.adHocDataViews$
+      .getValue()
+      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
     const profileDataViewsExist = profileDataViews.length > 0;
     const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
     const canAccessWithoutPersistedDataView =
@@ -292,8 +297,6 @@ const DiscoverSessionView = ({
 
       setBreadcrumbs({ services, titleBreadcrumbText: discoverSession.title });
     }
-
-    dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
 
     let dataView: DataView;
 
@@ -404,7 +407,9 @@ const DiscoverSessionView = ({
     //   nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
     // }
 
-    // internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+    internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+    internalState.dispatch(internalStateActions.setDataView(dataView));
+    stateContainer.appState.set(initialState);
 
     discoverSessionLoadTracker.reportEvent();
 
@@ -472,7 +477,8 @@ const DiscoverSessionView = ({
     return (
       <NoDataPage
         {...mainInitializationState}
-        onDataViewCreated={(dataViewUnknown) => {
+        onDataViewCreated={async (dataViewUnknown) => {
+          await dispatch(internalStateActions.loadDataViewList());
           const dataView = dataViewUnknown as DataView;
           initializeSession({
             dataSource: dataView.id
