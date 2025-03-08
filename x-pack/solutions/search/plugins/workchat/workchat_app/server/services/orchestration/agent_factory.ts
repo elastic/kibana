@@ -36,7 +36,7 @@ export class AgentFactory {
     request: KibanaRequest;
     connectorId: string;
   }): Promise<Agent> {
-    this.logger.debug(`getAgent [agentId=${agentId}] [cnnectorId=${connectorId}]`);
+    this.logger.debug(`getAgent [agentId=${agentId}] [connectorId=${connectorId}]`);
 
     const chatModel = await this.inference.getChatModel({
       request,
