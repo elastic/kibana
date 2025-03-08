@@ -77,6 +77,7 @@ export type Config = BaseConfig & {
 };
 
 export type Assignment = Config['assignments'][number];
+export type SpecialAssignment = BaseConfig['specialAssignments'][number];
 
 export * from './colors';
 export * from './rules';

@@ -52,6 +52,7 @@ import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { useESQLVariables } from './use_esql_variables';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { useCurrentAttributes } from './use_current_attributes';
+import { getDatasourceLayers } from '../../../state_management/utils';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -172,6 +173,25 @@ export function LensEditConfigurationFlyout({
           )
         : false;
 
+    const datasourceLayers1 = getDatasourceLayers(
+      Object.fromEntries(
+        Object.entries(previousAttrs.state.datasourceStates).map(([id, state]) => [
+          id,
+          { isLoading: false, state },
+        ])
+      ),
+      datasourceMap,
+      framePublicAPI.dataViews.indexPatterns
+    );
+    const datasourceLayers2 = datasourceStatesAreSame
+      ? datasourceLayers1
+      : getDatasourceLayers(
+          Object.fromEntries(
+            Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
+          ),
+          datasourceMap,
+          framePublicAPI.dataViews.indexPatterns
+        );
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
     const visualizationStateIsEqual = customIsEqual
@@ -180,8 +200,10 @@ export function LensEditConfigurationFlyout({
             return customIsEqual(
               previousAttrs.state.visualization,
               previousAttrs.references,
+              datasourceLayers1,
               visualizationState,
               attributes.references,
+              datasourceLayers2,
               annotationGroups
             );
           } catch (err) {
@@ -192,13 +214,14 @@ export function LensEditConfigurationFlyout({
 
     return !visualizationStateIsEqual || !datasourceStatesAreSame;
   }, [
-    attributes.references,
+    datasourceStates,
     datasourceId,
     datasourceMap,
-    datasourceStates,
+    attributes.references,
+    framePublicAPI.dataViews.indexPatterns,
+    visualization.state,
     visualizationMap,
     annotationGroups,
-    visualization.state,
   ]);
 
   const onCancel = useCallback(() => {

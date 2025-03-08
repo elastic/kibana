@@ -8,8 +8,9 @@
 import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { LensDocument } from '../persistence/saved_object_store';
-import { AnnotationGroups, DatasourceMap, VisualizationMap } from '../types';
+import { AnnotationGroups, DatasourceMap, IndexPatternMap, VisualizationMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';
+import { getDatasourceLayers } from '../state_management/utils';
 
 const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>
   JSON.parse(JSON.stringify(obj));
@@ -19,6 +20,7 @@ export const isLensEqual = (
   doc2In: LensDocument | undefined,
   injectFilterReferences: FilterManager['inject'],
   datasourceMap: DatasourceMap,
+  indexPatterns: IndexPatternMap,
   visualizationMap: VisualizationMap,
   annotationGroups: AnnotationGroups
 ) => {
@@ -37,7 +39,26 @@ export const isLensEqual = (
   if (!isEqual(doc1.state.query, doc2.state.query)) {
     return false;
   }
-
+  const datasourceLayers1 = getDatasourceLayers(
+    Object.fromEntries(
+      Object.entries(doc1.state.datasourceStates).map(([id, state]) => [
+        id,
+        { isLoading: false, state },
+      ])
+    ),
+    datasourceMap,
+    indexPatterns
+  );
+  const datasourceLayers2 = getDatasourceLayers(
+    Object.fromEntries(
+      Object.entries(doc2.state.datasourceStates).map(([id, state]) => [
+        id,
+        { isLoading: false, state },
+      ])
+    ),
+    datasourceMap,
+    indexPatterns
+  );
   const isEqualFromVis = visualizationMap[doc1.visualizationType]?.isEqual;
   const visualizationStateIsEqual = isEqualFromVis
     ? (() => {
@@ -45,8 +66,10 @@ export const isLensEqual = (
           return isEqualFromVis(
             doc1.state.visualization,
             doc1.references,
+            datasourceLayers1,
             doc2.state.visualization,
             doc2.references,
+            datasourceLayers2,
             annotationGroups
           );
         } catch (err) {

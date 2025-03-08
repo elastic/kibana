@@ -163,7 +163,8 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange, params } =
+    column;
 
   return {
     dataType: normalizeOperationDataType(dataType),
@@ -174,6 +175,7 @@ export function columnToOperation(
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
+    params,
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,

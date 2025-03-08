@@ -54,6 +54,8 @@ const getRangeFromBucket = (bucket: unknown): BucketLike => {
   };
 };
 
+const regex = /^from:(-?\d+?|undefined),to:(-?\d+?|undefined)$/;
+
 export class RangeKey extends SerializableField<SerializedRangeKey> {
   static isInstance(field: unknown): field is RangeKey {
     return field instanceof RangeKey;
@@ -67,6 +69,22 @@ export class RangeKey extends SerializableField<SerializedRangeKey> {
   static idBucket(bucket: unknown): string {
     const { from, to } = getRangeFromBucket(bucket);
     return `from:${from},to:${to}`;
+  }
+
+  static isRangeKeyString(rangeKey: string): boolean {
+    return regex.test(rangeKey);
+  }
+
+  /**
+   * Returns `RangeKey` from stringified form. Cannot extract labels from stringified form.
+   */
+  static fromString(rangeKey: string): RangeKey {
+    const [from, to] = (regex.exec(rangeKey) ?? [])
+      .slice(1)
+      .map(Number)
+      .map((n) => (isNaN(n) ? undefined : n));
+
+    return new RangeKey({ from, to });
   }
 
   gte: string | number;

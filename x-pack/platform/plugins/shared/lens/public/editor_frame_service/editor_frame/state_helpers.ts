@@ -31,6 +31,7 @@ import type {
   VisualizationMap,
   VisualizeEditorContext,
   SuggestionRequest,
+  DatasourceLayers,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { LensDocument } from '../../persistence/saved_object_store';
@@ -267,21 +268,30 @@ export async function initializeSources(
     options
   );
 
+  const initializedDatasourceStates = initializeDatasources({
+    datasourceMap,
+    datasourceStates,
+    initialContext,
+    indexPatternRefs,
+    indexPatterns,
+    references,
+  });
+
+  const datasourceLayers = getDatasourceLayers(
+    initializedDatasourceStates,
+    datasourceMap,
+    indexPatterns
+  );
+
   return {
     indexPatterns,
     indexPatternRefs,
     annotationGroups,
-    datasourceStates: initializeDatasources({
-      datasourceMap,
-      datasourceStates,
-      initialContext,
-      indexPatternRefs,
-      indexPatterns,
-      references,
-    }),
+    datasourceStates: initializedDatasourceStates,
     visualizationState: initializeVisualization({
       visualizationMap,
       visualizationState,
+      datasourceLayers,
       references,
       initialContext,
       annotationGroups,
@@ -292,11 +302,13 @@ export async function initializeSources(
 export function initializeVisualization({
   visualizationMap,
   visualizationState,
+  datasourceLayers,
   references,
   annotationGroups,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
+  datasourceLayers: DatasourceLayers;
   references?: SavedObjectReference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   annotationGroups: Record<string, EventAnnotationGroupConfig>;
@@ -306,6 +318,7 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
+        datasourceLayers,
         // initialize a new visualization with the color mapping off
         COLORING_METHOD,
         annotationGroups,
@@ -398,15 +411,6 @@ export async function persistedStateToExpression(
   );
 
   const visualization = visualizations[visualizationType!];
-  const activeVisualizationState = initializeVisualization({
-    visualizationMap: visualizations,
-    visualizationState: {
-      state: persistedVisualizationState,
-      activeId: visualizationType,
-    },
-    annotationGroups,
-    references: [...references, ...(internalReferences || [])],
-  });
   const datasourceStatesFromSO = Object.fromEntries(
     Object.entries(persistedDatasourceStates).map(([id, state]) => [
       id,
@@ -435,6 +439,17 @@ export async function persistedStateToExpression(
   });
 
   const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
+
+  const activeVisualizationState = initializeVisualization({
+    visualizationMap: visualizations,
+    visualizationState: {
+      state: persistedVisualizationState,
+      activeId: visualizationType,
+    },
+    datasourceLayers,
+    annotationGroups,
+    references: [...references, ...(internalReferences || [])],
+  });
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {

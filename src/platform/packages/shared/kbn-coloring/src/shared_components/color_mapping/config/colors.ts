@@ -20,7 +20,6 @@ export interface ColorCode {
  */
 export interface CategoricalColor {
   type: 'categorical';
-  // TODO: see why this is needed in addition to the top-level paletteId from the assignment
   paletteId: string;
   colorIndex: number;
 }

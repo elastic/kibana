@@ -9,9 +9,8 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
 
-import { LegendValue } from '@elastic/charts';
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
+import { AnnotationGroups, DatasourceLayers } from '../../types';
 import {
   XYLayerConfig,
   XYDataLayerConfig,
@@ -24,6 +23,7 @@ import {
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
+import { convertToRuntimeState } from './runtime_state';
 
 export const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
@@ -85,12 +85,12 @@ export type XYPersistedState = Omit<XYState, 'layers'> & {
 
 export function convertToRuntime(
   state: XYPersistedState,
+  datasourceLayers: DatasourceLayers,
   annotationGroups?: AnnotationGroups,
   references?: SavedObjectReference[]
 ) {
-  let newState = cloneDeep(injectReferences(state, annotationGroups, references));
-  newState = convertToLegendStats(newState);
-  return newState;
+  const newState = cloneDeep(injectReferences(state, annotationGroups, references));
+  return convertToRuntimeState(newState, datasourceLayers);
 }
 
 export function convertToPersistable(state: XYState) {
@@ -275,26 +275,4 @@ function injectReferences(
       })
       .filter(nonNullable),
   };
-}
-
-function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
-  if ('valuesInLegend' in state) {
-    const valuesInLegend = state.valuesInLegend;
-    delete state.valuesInLegend;
-    const result: XYState = {
-      ...state,
-      legend: {
-        ...state.legend,
-        legendStats: [
-          ...new Set([
-            ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
-            ...(state.legend.legendStats || []),
-          ]),
-        ],
-      },
-    };
-
-    return result;
-  }
-  return state;
 }

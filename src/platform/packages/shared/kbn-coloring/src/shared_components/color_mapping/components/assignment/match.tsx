@@ -146,9 +146,9 @@ export const Match: React.FC<{
                   acc.push({
                     type: 'match',
                     pattern: key,
+                    matchCase: true,
                     matchEntireWord: true,
                   } satisfies RuleMatch);
-                  // TODO: handle remaining rule types
                 }
               }
               return acc;
@@ -169,6 +169,7 @@ export const Match: React.FC<{
                   {
                     type: 'match',
                     pattern: label,
+                    matchCase: true,
                     matchEntireWord: true,
                   } satisfies RuleMatch,
                 ]);

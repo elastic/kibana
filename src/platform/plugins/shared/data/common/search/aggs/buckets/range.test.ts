@@ -46,6 +46,25 @@ describe('Range Agg', () => {
     });
   });
 
+  describe('#fromString', () => {
+    test.each([
+      ['empty range', '', {}],
+      ['bad buckets', 'from:baddd,to:baddd', {}],
+      ['open range', 'from:undefined,to:undefined', {}],
+      ['open upper range', 'from:0,to:undefined', { from: 0 }],
+      ['open lower range', 'from:undefined,to:100', { to: 100 }],
+      ['fully closed range', 'from:0,to:100', { from: 0, to: 100 }],
+      ['mixed closed range', 'from:-100,to:100', { from: -100, to: 100 }],
+      ['mixed open range', 'from:-100,to:undefined', { from: -100 }],
+      ['negative closed range', 'from:-100,to:-50', { from: -100, to: -50 }],
+      ['negative open range', 'from:undefined,to:-50', { to: -50 }],
+    ])('should correctly build RangeKey from string for %s', (_, rangeString, bucket) => {
+      const expected = new RangeKey(bucket);
+
+      expect(RangeKey.fromString(rangeString).toString()).toBe(expected.toString());
+    });
+  });
+
   describe('RangeKey with getAggConfigs', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
