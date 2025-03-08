@@ -41,20 +41,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     notifications: { toasts },
   } = useKibana().services;
   const { updateFieldValues } = useFormContext();
-  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] = useFormData<
-    ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>
-  >({
-    watch: [
-      'id',
-      'isDeprecated',
-      'actionTypeId',
-      'name',
-      'config.apiUrl',
-      'config.isOAuth',
-      'secrets.username',
-      'secrets.password',
-    ],
-  });
+  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] =
+    useFormData<ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>>();
 
   const requiresNewApplication = isDeprecated != null ? !isDeprecated : true;
   const { isOAuth = false } = config ?? {};
