@@ -13,22 +13,27 @@ import type {
   DiscoverStateContainerParams,
 } from '../state_management/discover_state';
 import { getDiscoverStateContainer } from '../state_management/discover_state';
+import { createInternalStateStore } from '../state_management/redux';
 
 /**
  * Creates a state container using the initial params and allows to reset it.
  * The container is recreated only when reset is called. This is useful to reset Discover to its initial state.
  * @param params
  */
-export const useDiscoverStateContainer = (params: DiscoverStateContainerParams) => {
+export const useDiscoverStateContainer = (
+  params: Omit<DiscoverStateContainerParams, 'internalState'>
+) => {
   const [stateContainer, setStateContainer] = useState<DiscoverStateContainer>(() =>
-    getDiscoverStateContainer(params)
+    getDiscoverStateContainer({ ...params, internalState: createInternalStateStore(params) })
   );
 
   return [
     stateContainer,
     {
       reset: () => {
-        setStateContainer(getDiscoverStateContainer(params));
+        setStateContainer(
+          getDiscoverStateContainer({ ...params, internalState: createInternalStateStore(params) })
+        );
       },
     },
   ] as const;

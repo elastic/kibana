@@ -20,16 +20,19 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
-import { createRuntimeStateManager } from '../../state_management/redux';
+import { createInternalStateStore, createRuntimeStateManager } from '../../state_management/redux';
 import { HistoryLocationState } from '../../../../build_services';
 
 function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const savedSearch = savedSearchMock;
   const history = createBrowserHistory<HistoryLocationState>();
+  const services = { ...discoverServiceMock, history };
+  const runtimeStateManager = createRuntimeStateManager();
   const stateContainer = getDiscoverStateContainer({
-    services: { ...discoverServiceMock, history },
+    services,
     customizationContext: mockCustomizationContext,
-    runtimeStateManager: createRuntimeStateManager(),
+    internalState: createInternalStateStore({ services, runtimeStateManager }),
+    runtimeStateManager,
   });
   stateContainer.savedSearchState.set(savedSearch);
   stateContainer.appState.getState = jest.fn(() => ({

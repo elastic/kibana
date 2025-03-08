@@ -65,6 +65,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * SavedSearch dependent initializing
    */
   useEffect(() => {
+    // TODO: This can be moved to Discover session initialization, some of the logic is already duplicated
     if (stateContainer.customizationContext.displayMode === 'standalone') {
       const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -78,6 +79,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     stateContainer.customizationContext.displayMode,
   ]);
 
+  // TODO: Move this higher up in the component tree
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [chrome, docLinks]);
@@ -89,6 +91,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     };
   }, [data.search.session]);
 
+  // TODO: Move this higher up in the component tree
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
