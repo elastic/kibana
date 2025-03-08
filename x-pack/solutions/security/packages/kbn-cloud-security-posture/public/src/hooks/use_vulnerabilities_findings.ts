@@ -24,6 +24,7 @@ import { showErrorToast } from '../..';
 import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
 
 export enum VULNERABILITY {
+  TITLE = 'vulnerability.title',
   ID = 'vulnerability.id',
   SEVERITY = 'vulnerability.severity',
   PACKAGE_NAME = 'vulnerability.package.name',
@@ -42,6 +43,7 @@ export interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export interface VulnerabilitiesFindingTableDetailsFields {
+  [VULNERABILITY.TITLE]: string;
   [VULNERABILITY.ID]: string;
   [VULNERABILITY.SEVERITY]: string;
   [VULNERABILITY.PACKAGE_NAME]: string;

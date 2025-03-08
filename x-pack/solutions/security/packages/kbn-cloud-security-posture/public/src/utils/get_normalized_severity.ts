@@ -10,7 +10,7 @@ import { VALID_SEVERITIES } from '@kbn/cloud-security-posture-common';
 const isVulnSeverity = (severity: string): severity is VulnSeverity =>
   VALID_SEVERITIES.includes(severity as VulnSeverity);
 
-export const normalizeSeverity = (severity?: string): VulnSeverity => {
+export const getNormalizedSeverity = (severity?: string): VulnSeverity => {
   if (!severity) {
     return 'UNKNOWN';
   }
