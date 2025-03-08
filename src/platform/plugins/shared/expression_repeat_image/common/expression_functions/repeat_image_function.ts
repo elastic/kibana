@@ -92,11 +92,9 @@ export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
       },
     },
     fn: async (count, args) => {
-      const {
-        elasticOutline,
-        isValidUrl,
-        resolveWithMissingImage,
-      } = await import('@kbn/expression-utils');
+      const { elasticOutline, isValidUrl, resolveWithMissingImage } = await import(
+        '@kbn/expression-utils'
+      );
       if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
         throw new Error(errors.getMissingMaxArgumentErrorMessage());
       }

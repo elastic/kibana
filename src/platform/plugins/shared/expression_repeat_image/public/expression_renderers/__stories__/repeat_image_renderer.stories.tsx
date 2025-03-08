@@ -32,10 +32,6 @@ const Renderer = () => {
   );
 };
 
-storiesOf('enderers/repeatImage', module).add(
-  'default',
-  (_, props) => (
-    <Renderer />
-  ),
-  { decorators: [] }
-);
+storiesOf('enderers/repeatImage', module).add('default', (_, props) => <Renderer />, {
+  decorators: [],
+});

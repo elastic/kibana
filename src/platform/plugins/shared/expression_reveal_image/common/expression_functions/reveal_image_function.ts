@@ -103,11 +103,9 @@ export const revealImageFunction: ExpressionRevealImageFunction = () => {
         throw errors.invalidPercent(percent);
       }
 
-      const {
-        resolveWithMissingImage,
-        elasticOutline,
-        isValidUrl,
-      } = await import('@kbn/expression-utils');
+      const { resolveWithMissingImage, elasticOutline, isValidUrl } = await import(
+        '@kbn/expression-utils'
+      );
 
       if (args.image && !isValidUrl(args.image)) {
         throw errors.invalidImageUrl(args.image);

@@ -26,10 +26,6 @@ const Renderer = () => {
   return <Render renderer={getRevealImageRenderer(coreMock.createStart())} config={config} />;
 };
 
-storiesOf('renderers/revealImage', module).add(
-  'default',
-  (_, props) => (
-    <Renderer />
-  ),
-  { decorators: [] }
-);
+storiesOf('renderers/revealImage', module).add('default', (_, props) => <Renderer />, {
+  decorators: [],
+});
