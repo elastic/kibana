@@ -9,10 +9,7 @@ import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  buildVulnerabilityEntityFlyoutPreviewQuery,
-  type VulnSeverity,
-} from '@kbn/cloud-security-posture-common';
+import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
   VulnerabilitiesFindingDetailFields,
@@ -26,6 +23,7 @@ import {
   getVulnerabilityStats,
   CVSScoreBadge,
   SeverityStatusBadge,
+  getNormalizedSeverity,
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
@@ -123,14 +121,14 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     }
   };
 
-  const getNavUrlParams = useGetNavigationUrlParams();
+  const getNavUrlParams: ReturnType<typeof useGetNavigationUrlParams> = useGetNavigationUrlParams();
 
   const getVulnerabilityUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
     return getNavUrlParams({ [queryField]: name }, 'vulnerabilities');
   };
 
   const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
-    vulnerabilityId: string,
+    vulnerabilityId: string | string[],
     resourceId: string,
     vulnerabilityPackageName: string,
     vulnerabilityPackageVersion: string
@@ -183,11 +181,21 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       ),
     },
     {
+      field: VULNERABILITY.TITLE,
+      render: (id: string) => <EuiText size="s">{id}</EuiText>,
+      name: i18n.translate(
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityTitleColumnName',
+        { defaultMessage: 'Vulnerability Title' }
+      ),
+      width: '25%',
+      sortable: true,
+    },
+    {
       field: VULNERABILITY.ID,
       render: (id: string) => <EuiText size="s">{id}</EuiText>,
       name: i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
-        { defaultMessage: 'Vulnerability' }
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName',
+        { defaultMessage: 'CVE ID' }
       ),
       width: '20%',
       sortable: true,
@@ -203,7 +211,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'CVSS' }
       ),
-      width: '15%',
+      width: '10%',
       sortable: true,
     },
     {
@@ -211,7 +219,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       render: (severity: string) => (
         <>
           <EuiText size="s">
-            <SeverityStatusBadge severity={severity?.toUpperCase() as VulnSeverity} />
+            <SeverityStatusBadge severity={getNormalizedSeverity(severity)} />
           </EuiText>
         </>
       ),
@@ -219,7 +227,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Severity' }
       ),
-      width: '20%',
+      width: '10%',
       sortable: true,
     },
     {
@@ -229,7 +237,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }
       ),
-      width: '40%',
+      width: '30%',
       sortable: true,
     },
   ];
