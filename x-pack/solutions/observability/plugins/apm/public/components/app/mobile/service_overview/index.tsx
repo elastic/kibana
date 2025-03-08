@@ -98,38 +98,39 @@ export function MobileServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <MobileStats start={start} end={end} kuery={kueryWithMobileFilters} />
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-
           {!isAndroidAgent && (
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={8}>
-                    <GeoMap
-                      start={start}
-                      end={end}
-                      kuery={kueryWithMobileFilters}
-                      filters={embeddableFilters}
-                      dataView={dataView}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={3}>
-                    <MobileLocationStats
-                      start={start}
-                      end={end}
-                      kuery={kueryWithMobileFilters}
-                      environment={environment}
-                      offset={offset}
-                      serviceName={serviceName}
-                      comparisonEnabled={comparisonEnabled}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem>
+                <MobileStats start={start} end={end} kuery={kueryWithMobileFilters} />
+                <EuiSpacer size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasBorder={true}>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={8}>
+                      <GeoMap
+                        start={start}
+                        end={end}
+                        kuery={kueryWithMobileFilters}
+                        filters={embeddableFilters}
+                        dataView={dataView}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={3}>
+                      <MobileLocationStats
+                        start={start}
+                        end={end}
+                        kuery={kueryWithMobileFilters}
+                        environment={environment}
+                        offset={offset}
+                        serviceName={serviceName}
+                        comparisonEnabled={comparisonEnabled}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
+            </>
           )}
 
           <EuiFlexItem>
