@@ -81,7 +81,11 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
       })
     );
 
-    return scheduleBackfill(context, allGapsToSchedule);
+    const scheduleBackfillResponse = await scheduleBackfill(context, allGapsToSchedule);
+
+    await eventLogClient.refreshIndex();
+
+    return scheduleBackfillResponse;
   } catch (err) {
     const errorMessage = `Failed to find gap and schedule manual rule run for ruleId ${params.ruleId}`;
     context.logger.error(`${errorMessage} - ${err}`);
