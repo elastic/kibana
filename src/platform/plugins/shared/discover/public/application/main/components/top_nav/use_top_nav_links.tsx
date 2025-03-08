@@ -75,11 +75,11 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
-        await state.actions.loadDataViewList();
+        await dispatch(internalStateActions.loadDataViewList());
         dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
       },
     }),
-    [isEsqlMode, dataView, adHocDataViews, state.actions, dispatch]
+    [isEsqlMode, dataView, adHocDataViews, dispatch]
   );
 
   const defaultMenu = topNavCustomization?.defaultMenu;

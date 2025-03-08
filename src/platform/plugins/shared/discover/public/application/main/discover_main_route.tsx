@@ -49,6 +49,7 @@ import type { RuntimeStateManager } from './state_management/redux';
 import {
   RuntimeStateProvider,
   createRuntimeStateManager,
+  internalStateActions,
   useRuntimeState,
 } from './state_management/redux';
 
@@ -64,8 +65,10 @@ export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
 }
 
+const defaultCustomizationCallbacks: CustomizationCallback[] = [];
+
 export function DiscoverMainRoute({
-  customizationCallbacks = [],
+  customizationCallbacks = defaultCustomizationCallbacks,
   customizationContext,
   stateStorageContainer,
 }: MainRouteProps) {
@@ -133,7 +136,7 @@ export function DiscoverMainRoute({
         if (savedSearchId || isEsqlQuery || nextDataView) {
           // Although ES|QL doesn't need a data view, we still need to load the data view list to
           // ensure the data view is available for the user to switch to classic mode
-          await stateContainer.actions.loadDataViewList();
+          await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
           return true;
         }
 
@@ -141,7 +144,7 @@ export function DiscoverMainRoute({
           data.dataViews.hasData.hasUserDataView().catch(() => false),
           data.dataViews.hasData.hasESData().catch(() => false),
           data.dataViews.defaultDataViewExists().catch(() => false),
-          stateContainer.actions.loadDataViewList(),
+          stateContainer.internalState.dispatch(internalStateActions.loadDataViewList()),
         ]);
 
         const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
@@ -254,8 +257,7 @@ export function DiscoverMainRoute({
 
   const rootProfileState = useRootProfile();
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({
-    stateContainer,
-    rootProfileState,
+    internalState: stateContainer.internalState,
   });
 
   useEffect(() => {
@@ -272,7 +274,7 @@ export function DiscoverMainRoute({
       });
       setError(undefined);
 
-      await initializeProfileDataViews();
+      await initializeProfileDataViews(rootProfileState);
 
       if (savedSearchId) {
         await loadSavedSearch();
@@ -287,7 +289,7 @@ export function DiscoverMainRoute({
     customizationService,
     initializeProfileDataViews,
     loadSavedSearch,
-    rootProfileState.rootProfileLoading,
+    rootProfileState,
     runtimeStateManager,
     savedSearchId,
     stateContainer,

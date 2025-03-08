@@ -12,7 +12,7 @@ import {
   getDiscoverStateContainer,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
-import { createInternalStateStore } from './redux';
+import { createInternalStateStore, internalStateActions } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -71,7 +71,7 @@ async function getState(
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
-  await nextState.actions.loadDataViewList();
+  await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
   if (savedSearch) {
     nextState.savedSearchState.load = jest.fn(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearch));
@@ -450,7 +450,7 @@ describe('Test discover state actions', () => {
   test('fetchData', async () => {
     const { state } = await getState('/');
     const dataState = state.dataState;
-    await state.actions.loadDataViewList();
+    await state.internalState.dispatch(internalStateActions.loadDataViewList());
     expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     await state.actions.loadSavedSearch();
     const unsubscribe = state.actions.initializeAndSync();
@@ -471,7 +471,7 @@ describe('Test discover state actions', () => {
 
   test('loadSavedSearch with no id given an empty URL', async () => {
     const { state, getCurrentUrl } = await getState('');
-    await state.actions.loadDataViewList();
+    await state.internalState.dispatch(internalStateActions.loadDataViewList());
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();

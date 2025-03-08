@@ -147,10 +147,6 @@ export interface DiscoverStateContainer {
      */
     initializeAndSync: () => () => void;
     /**
-     * Load current list of data views, add them to internal state
-     */
-    loadDataViewList: () => Promise<void>;
-    /**
      * Load a saved search by id or create a new one that's not persisted yet
      * @param LoadParams - optional parameters to load a saved search
      */
@@ -307,11 +303,6 @@ export function getDiscoverStateContainer({
     setDataView,
   });
 
-  const loadDataViewList = async () => {
-    const savedDataViews = await services.dataViews.getIdsWithTitle(true);
-    internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
-  };
-
   /**
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
@@ -402,7 +393,7 @@ export function getDiscoverStateContainer({
     if (!nextDataView.isPersisted()) {
       internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
-      await loadDataViewList();
+      await internalState.dispatch(internalStateActions.loadDataViewList());
     }
     if (nextDataView.id) {
       await onChangeDataView(nextDataView);
@@ -418,7 +409,7 @@ export function getDiscoverStateContainer({
     } else {
       await updateAdHocDataViewId();
     }
-    loadDataViewList();
+    void internalState.dispatch(internalStateActions.loadDataViewList());
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
   };
@@ -606,7 +597,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       fetchData,
-      loadDataViewList,
       loadSavedSearch,
       onChangeDataView,
       createAndAppendAdHocDataView,

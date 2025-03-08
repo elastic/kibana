@@ -31,9 +31,10 @@ describe('DiscoverMainApp', () => {
     const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as DataViewListItem[];
+    jest.spyOn(discoverServiceMock.dataViews, 'getIdsWithTitle').mockResolvedValue(dataViewList);
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.dispatch(internalStateActions.setSavedDataViews(dataViewList));
+    await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
     const props = {
       stateContainer,
     };
