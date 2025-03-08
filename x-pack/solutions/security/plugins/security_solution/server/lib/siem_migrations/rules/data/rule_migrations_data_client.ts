@@ -23,17 +23,15 @@ export class RuleMigrationsDataClient {
   public readonly integrations: RuleMigrationsDataIntegrationsClient;
   public readonly prebuiltRules: RuleMigrationsDataPrebuiltRulesClient;
   public readonly lookups: RuleMigrationsDataLookupsClient;
-  public readonly spaceId: string;
 
   constructor(
     indexNameProviders: IndexNameProviders,
     currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
     logger: Logger,
-    dependencies: SiemRuleMigrationsClientDependencies,
-    spaceId: string
+    spaceId: string,
+    dependencies: SiemRuleMigrationsClientDependencies
   ) {
-    this.spaceId = spaceId;
     this.rules = new RuleMigrationsDataRulesClient(
       indexNameProviders.rules,
       currentUser,
