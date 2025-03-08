@@ -34,10 +34,9 @@ buildkite-agent artifact upload "./*docker-image*.tar.gz"
 
 KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
 
-cat <<EOF | buildkite-agent annotate --style "info" --context fips
-  ### Kibana FIPS Image
+cat <<EOF | buildkite-agent annotate --style "info" --context kibana-fips-image
 
-  Wolfi image: \`$KIBANA_FIPS_IMAGE\`
+  Kibana FIPS image: \`$KIBANA_FIPS_IMAGE\`
 EOF
 
 buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana FIPS Image: \`$KIBANA_FIPS_IMAGE\`"
