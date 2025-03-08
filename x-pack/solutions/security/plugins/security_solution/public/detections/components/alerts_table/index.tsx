@@ -21,7 +21,7 @@ import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { useAlertsContext } from './alerts_context';
-import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
+import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
   SecurityAlertsTableContext,
@@ -357,12 +357,16 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [leadingControlColumn, sourcererScope, tableType, userProfiles]
   );
 
+  const refreshAlertsTable = useCallback(() => {
+    alertsTableRef.current?.refresh();
+  }, [alertsTableRef]);
+
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
     SourcererScopeName.detections,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const getBulkActions = useMemo(() => getBulkActionsByTableType(tableType), [tableType]);
+  const bulkActions = useBulkActionsByTableType(tableType, finalBoolQuery, refreshAlertsTable);
 
   useEffect(() => {
     if (isDataTableInitialized) return;
@@ -475,7 +479,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
                   tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
                 }
                 actionsColumnWidth={leadingControlColumn.width}
-                getBulkActions={getBulkActions}
+                externalBulkActions={bulkActions}
                 fieldsBrowserOptions={
                   tableType === TableId.alertsOnAlertsPage ||
                   tableType === TableId.alertsOnRuleDetailsPage

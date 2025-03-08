@@ -80,9 +80,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, []);
 
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
-  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  // const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
   const globalQuery = useSelector((state: State) => getGlobalQueries(state));
-  const timelineQuery = useSelector((state: State) => getTimelineQuery(state, scopeId));
+  const timelineQuery = useSelector((state: State) =>
+    inputsSelectors.timelineQueryByIdSelectorNew(state, scopeId)
+  );
 
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();

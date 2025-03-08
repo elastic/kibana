@@ -69,6 +69,14 @@ export const globalQueryByIdSelector = () => createSelector(selectGlobalQuery, (
 export const timelineQueryByIdSelector = () =>
   createSelector(selectTimelineQuery, (query) => query);
 
+export const timelineQueryByIdSelectorNew = createSelector(
+  [selectInputs, (_state: State, id: string) => id],
+  (inputs, id) =>
+    inputs.timeline.queries.find((q) => q.id === id) ||
+    inputs.global.queries.find((q) => q.id === id) ||
+    defaultQuery
+);
+
 export const globalSelector = () => createSelector(selectGlobal, (global) => global);
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
