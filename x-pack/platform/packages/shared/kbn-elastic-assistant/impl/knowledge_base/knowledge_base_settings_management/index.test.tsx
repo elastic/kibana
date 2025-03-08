@@ -157,8 +157,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       data: {
         elser_exists: true,
         security_labs_exists: true,
-        index_exists: true,
-        pipeline_exists: true,
       },
       isFetched: true,
     });
@@ -202,8 +200,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       data: {
         elser_exists: false,
         security_labs_exists: false,
-        index_exists: false,
-        pipeline_exists: false,
       },
       isFetched: true,
     });
@@ -553,7 +549,11 @@ describe('KnowledgeBaseSettingsManagement', () => {
       expect(mockCreateEntry).toHaveBeenCalledTimes(1);
     });
     expect(mockUpdateEntry).toHaveBeenCalledTimes(0);
-    expect(mockCreateEntry).toHaveBeenCalledWith({ ...mockData[3], users: undefined });
+    expect(mockCreateEntry).toHaveBeenCalledWith({
+      ...mockData[3],
+      global: false,
+      users: undefined,
+    });
   });
 
   it('does not show duplicate entry modal on new document entry creation', async () => {
