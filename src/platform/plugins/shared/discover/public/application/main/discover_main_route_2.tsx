@@ -31,16 +31,28 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isDataViewSource, isEsqlSource } from '../../../common/data_sources';
+import {
+  createDataViewDataSource,
+  isDataViewSource,
+  isEsqlSource,
+} from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
+import {
+  CustomizationCallback,
+  DiscoverCustomizationContext,
+  DiscoverCustomizationProvider,
+  useDiscoverCustomizationService,
+} from '../../customizations';
 import {
   InternalStateProvider,
+  InternalStateStore,
   RuntimeStateManager,
+  RuntimeStateProvider,
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
   useInternalStateDispatch,
+  useRuntimeState,
 } from './state_management/redux';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { RootProfileState, useRootProfile } from '../../context_awareness';
@@ -58,15 +70,20 @@ import { cleanupUrlState } from './state_management/utils/cleanup_url_state';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUrl } from './hooks/use_url';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../utils/validate_time';
-import { getDiscoverStateContainer } from './state_management/discover_state';
+import {
+  DiscoverStateContainer,
+  getDiscoverStateContainer,
+} from './state_management/discover_state';
 import { getEsqlDataView } from './state_management/utils/get_esql_data_view';
 import { loadAndResolveDataView } from './state_management/utils/resolve_data_view';
 import { updateSavedSearch } from './state_management/utils/update_saved_search';
+import { DiscoverMainProvider } from './state_management/discover_state_provider';
+import { DiscoverMainApp } from './discover_main_app';
 
 export interface MainRoute2Props {
+  customizationContext: DiscoverCustomizationContext;
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  customizationContext: DiscoverCustomizationContext;
 }
 
 interface MainInitializationState {
@@ -86,8 +103,8 @@ type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
 >;
 
 export const DiscoverMainRoute2 = ({
-  customizationCallbacks = [],
   customizationContext,
+  customizationCallbacks = [],
   stateStorageContainer,
 }: MainRoute2Props) => {
   const services = useDiscoverServices();
@@ -167,9 +184,10 @@ export const DiscoverMainRoute2 = ({
           rootProfileState={rootProfileState}
           mainInitializationState={mainInitializationState.value}
           customizationContext={customizationContext}
-          runtimeStateManager={runtimeStateManager}
+          customizationCallbacks={customizationCallbacks}
           urlStateStorage={urlStateStorage}
-          initializeMain={initializeMain}
+          internalState={internalState}
+          runtimeStateManager={runtimeStateManager}
         />
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
@@ -180,14 +198,21 @@ interface DiscoverSessionViewProps {
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>;
   mainInitializationState: MainInitializationState;
   customizationContext: DiscoverCustomizationContext;
-  runtimeStateManager: RuntimeStateManager;
+  customizationCallbacks: CustomizationCallback[];
   urlStateStorage: IKbnUrlStateStorage;
-  initializeMain: InitializeMain;
+  internalState: InternalStateStore;
+  runtimeStateManager: RuntimeStateManager;
 }
 
-interface SessionInitializationState {
-  showNoDataPage: boolean;
-}
+type SessionInitializationState =
+  | {
+      showNoDataPage: true;
+      stateContainer: undefined;
+    }
+  | {
+      showNoDataPage: false;
+      stateContainer: DiscoverStateContainer;
+    };
 
 type InitializeSession = (initialState?: DiscoverAppState) => Promise<SessionInitializationState>;
 
@@ -195,9 +220,10 @@ const DiscoverSessionView = ({
   rootProfileState,
   mainInitializationState,
   customizationContext,
-  runtimeStateManager,
+  customizationCallbacks,
   urlStateStorage,
-  initializeMain,
+  internalState,
+  runtimeStateManager,
 }: DiscoverSessionViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -212,14 +238,6 @@ const DiscoverSessionView = ({
     getScopedHistory,
   } = services;
   const { id: discoverSessionId } = useParams<{ id: string }>();
-  const [stateContainer] = useState(() =>
-    getDiscoverStateContainer({
-      services,
-      customizationContext,
-      stateStorageContainer: urlStateStorage,
-      runtimeStateManager,
-    })
-  );
   const [historyLocationState] = useState(
     () => getScopedHistory<MainHistoryLocationState>()?.location.state
   );
@@ -252,6 +270,14 @@ const DiscoverSessionView = ({
       return { showNoDataPage: true };
     }
 
+    const stateContainer = getDiscoverStateContainer({
+      services,
+      customizationContext,
+      stateStorageContainer: urlStateStorage,
+      internalState,
+      runtimeStateManager,
+    });
+
     if (customizationContext.displayMode === 'standalone' && discoverSession) {
       if (discoverSession.id) {
         chrome.recentlyAccessed.add(
@@ -268,18 +294,6 @@ const DiscoverSessionView = ({
     }
 
     dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
-
-    if (discoverSession?.timeRestore && discoverSessionDataView?.isTimeBased()) {
-      const { timeRange, refreshInterval } = discoverSession;
-
-      if (timeRange && isTimeRangeValid(timeRange)) {
-        services.timefilter.setTime(timeRange);
-      }
-
-      if (refreshInterval && isRefreshIntervalValid(refreshInterval)) {
-        services.timefilter.setRefreshInterval(refreshInterval);
-      }
-    }
 
     let dataView: DataView;
 
@@ -314,9 +328,87 @@ const DiscoverSessionView = ({
     });
 
     stateContainer.savedSearchState.set(updatedDiscoverSession);
+
+    if (discoverSession?.timeRestore && discoverSessionDataView?.isTimeBased()) {
+      const { timeRange, refreshInterval } = discoverSession;
+
+      if (timeRange && isTimeRangeValid(timeRange)) {
+        services.timefilter.setTime(timeRange);
+      }
+
+      if (refreshInterval && isRefreshIntervalValid(refreshInterval)) {
+        services.timefilter.setRefreshInterval(refreshInterval);
+      }
+    }
+
+    // // Cleaning up the previous state
+    // services.filterManager.setAppFilters([]);
+    // services.data.query.queryString.clearQuery();
+
+    // // Sync global filters (coming from URL) to filter manager.
+    // // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is being called after this `loadSavedSearch` function.
+    // const globalFilters = globalStateContainer?.get()?.filters;
+    // const shouldUpdateWithGlobalFilters =
+    //   globalFilters?.length && !services.filterManager.getGlobalFilters()?.length;
+    // if (shouldUpdateWithGlobalFilters) {
+    //   services.filterManager.setGlobalFilters(globalFilters);
+    // }
+
+    // // reset appState in case a saved search with id is loaded and
+    // // the url is empty so the saved search is loaded in a clean
+    // // state else it might be updated by the previous app state
+    // if (!appStateExists) {
+    //   appStateContainer.set({});
+    // }
+
+    // // Update saved search by a given app state (in URL)
+    // if (appState) {
+    //   if (savedSearchId && isDataSourceType(appState.dataSource, DataSourceType.DataView)) {
+    //     // This is for the case appState is overwriting the loaded saved search data view
+    //     const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
+    //     const stateDataView = await getStateDataView(params, {
+    //       dataViewId: appState.dataSource.dataViewId,
+    //       query: appState.query,
+    //       savedSearch: nextSavedSearch,
+    //       services,
+    //       internalState,
+    //       runtimeStateManager,
+    //     });
+    //     const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
+    //     if (
+    //       !nextSavedSearch.isTextBasedQuery &&
+    //       stateDataView &&
+    //       (dataViewDifferentToAppState || !savedSearchDataViewId)
+    //     ) {
+    //       nextSavedSearch.searchSource.setField('index', stateDataView);
+    //     }
+    //   }
+    //   nextSavedSearch = savedSearchContainer.update({
+    //     nextDataView: nextSavedSearch.searchSource.getField('index'),
+    //     nextState: appState,
+    //   });
+    // }
+
+    // // Update app state container with the next state derived from the next saved search
+    // const nextAppState = getInitialState(undefined, nextSavedSearch, services);
+    // const mergedAppState = appState
+    //   ? { ...nextAppState, ...cleanupUrlState({ ...appState }, services.uiSettings) }
+    //   : nextAppState;
+
+    // appStateContainer.resetToState(mergedAppState);
+
+    // // Update all other services and state containers by the next saved search
+    // updateBySavedSearch(nextSavedSearch, deps);
+
+    // if (!appState && shouldUpdateWithGlobalFilters) {
+    //   nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
+    // }
+
+    // internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+
     discoverSessionLoadTracker.reportEvent();
 
-    return { showNoDataPage: false };
+    return { showNoDataPage: false, stateContainer };
   });
   const [initializationState, initializeSession] = useAsyncFn<InitializeSession>(
     (...params) => initialize.current(...params),
@@ -328,6 +420,12 @@ const DiscoverSessionView = ({
   const initializeSessionState = initializationState as NarrowAsyncState<
     typeof initializationState
   >;
+  const customizationService = useDiscoverCustomizationService({
+    customizationCallbacks,
+    stateContainer: initializeSessionState.value?.stateContainer,
+  });
+  const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
+  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   useEffect(() => {
     initializeSession();
@@ -374,25 +472,36 @@ const DiscoverSessionView = ({
     return (
       <NoDataPage
         {...mainInitializationState}
-        onDataViewCreated={(dataView) => {
-          // TODO: Data view needs to reach DiscoverSessionView
-          initializeMain({
-            hasESData: true,
-            hasUserDataView: true,
-            dataView: dataView as DataView,
+        onDataViewCreated={(dataViewUnknown) => {
+          const dataView = dataViewUnknown as DataView;
+          initializeSession({
+            dataSource: dataView.id
+              ? createDataViewDataSource({ dataViewId: dataView.id })
+              : undefined,
           });
         }}
         onESQLNavigationComplete={() => {
-          initializeMain({
-            hasESData: true,
-            hasUserDataView: true,
-          });
+          initializeSession();
         }}
       />
     );
   }
 
-  return <p>HELLO I WORK!</p>;
+  if (!customizationService || !currentDataView) {
+    return <BrandedLoadingIndicator />;
+  }
+
+  return (
+    <DiscoverCustomizationProvider value={customizationService}>
+      <DiscoverMainProvider value={initializeSessionState.value.stateContainer}>
+        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+          <rootProfileState.AppWrapper>
+            <DiscoverMainApp stateContainer={initializeSessionState.value.stateContainer} />
+          </rootProfileState.AppWrapper>
+        </RuntimeStateProvider>
+      </DiscoverMainProvider>
+    </DiscoverCustomizationProvider>
+  );
 };
 
 const importNoData = () => import('@kbn/shared-ux-page-analytics-no-data');

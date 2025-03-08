@@ -63,12 +63,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import {
-  createInternalStateStore,
-  internalStateActions,
-  InternalStateStore,
-  RuntimeStateManager,
-} from './redux';
+import { internalStateActions, InternalStateStore, RuntimeStateManager } from './redux';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -87,6 +82,10 @@ export interface DiscoverStateContainerParams {
    * a custom url state storage
    */
   stateStorageContainer?: IKbnUrlStateStorage;
+  /**
+   * Internal shared state that's used at several places in the UI
+   */
+  internalState: InternalStateStore;
   /**
    * State manager for runtime state that can't be stored in Redux
    */
@@ -246,6 +245,7 @@ export function getDiscoverStateContainer({
   services,
   customizationContext,
   stateStorageContainer,
+  internalState,
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
@@ -275,11 +275,6 @@ export function getDiscoverStateContainer({
    * Global State Container, synced with the _g part URL
    */
   const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
-
-  /**
-   * Internal state store, state that's not persisted and not part of the URL
-   */
-  const internalState = createInternalStateStore({ services, runtimeStateManager });
 
   /**
    * Saved Search State Container, the persisted saved object of Discover
