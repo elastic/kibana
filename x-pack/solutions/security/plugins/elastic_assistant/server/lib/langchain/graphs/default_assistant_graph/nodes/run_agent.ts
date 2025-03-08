@@ -71,7 +71,7 @@ export async function runAgent({
         }`,
         // prepend any user prompt (gemini)
         input: `${userPrompt}${state.input}`,
-        chat_history: sanitizeChatHistory(state.chatHistory),
+        chat_history: sanitizeChatHistory(state.chatHistory), // TODO: Message de-dupe with ...state spread
       },
       config
     );
@@ -79,7 +79,11 @@ export async function runAgent({
   const newMessages: BaseMessage[] = [];
 
   if (result?.[0]?.messageLog && Array.isArray(result[0].messageLog)) {
-    newMessages.push(...result[0].messageLog);
+    const containsUnknownMessage = result[0].messageLog.some((message: unknown) => !(message instanceof BaseMessage))
+    if (containsUnknownMessage) {
+      throw new Error('Invalid message type in messageLog');
+    }
+    newMessages.push(...result[0].messageLog as BaseMessage[]);
   }
 
   if (result?.returnValues?.output) {

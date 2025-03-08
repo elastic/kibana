@@ -48,13 +48,15 @@ export async function persistConversationChanges({
     });
   }
 
-  const lastMessage = state.conversation.messages
-    ? state.conversation.messages[state.conversation.messages.length - 1]
-    : undefined;
+  const lastMessage = state.conversation.messages?.at(-1);
   if (lastMessage && lastMessage.content === state.input && lastMessage.role === 'user') {
     // this is a regenerated message, do not update the conversation again
+    const langChainMessages = getLangChainMessages(state.conversation.messages ?? []);
+    const [_lastMessage, ...chatHistory] = langChainMessages.reverse();
     return {
+      conversation: state.conversation,
       lastNode: NodeType.PERSIST_CONVERSATION_CHANGES,
+      chatHistory,
     };
   }
 
