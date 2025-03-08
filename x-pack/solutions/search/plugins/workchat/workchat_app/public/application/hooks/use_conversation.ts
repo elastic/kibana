@@ -5,52 +5,53 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo, useEffect } from 'react';
-import { useAbortableAsync, AbortableAsyncState } from '@kbn/react-hooks';
-import type { Conversation } from '../../../common/conversations';
-import type { ConversationCreatedEventPayload } from '../../../common/chat_events';
-import { getMessages } from '../../../common/utils/conversation';
+import { useCallback } from 'react';
+import { useAbortableAsync } from '@kbn/react-hooks';
+import type { ConversationEventChanges } from '../../../common/chat_events';
 import { useChat } from './use_chat';
 import { useWorkChatServices } from './use_workchat_service';
 
 export const useConversation = ({
   agentId,
   conversationId,
+  connectorId,
   onConversationUpdate,
 }: {
   agentId: string;
   conversationId: string | undefined;
-  onConversationUpdate: (update: ConversationCreatedEventPayload) => void;
+  connectorId?: string;
+  onConversationUpdate: (update: ConversationEventChanges) => void;
 }) => {
   const { conversationService } = useWorkChatServices();
-  // const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
-
-  // useEffect(() => {
-  //   setConversationId(initialConversationId);
-  // }, [initialConversationId]);
 
   const onConversationUpdateInternal = useCallback(
-    (update: ConversationCreatedEventPayload) => {
+    (update: ConversationEventChanges) => {
       onConversationUpdate(update);
     },
     [onConversationUpdate]
   );
 
-  const { messages, send, setMessages } = useChat({
+  const {
+    conversationEvents,
+    setConversationEvents,
+    sendMessage,
+    status: chatStatus,
+  } = useChat({
     agentId,
     conversationId,
+    connectorId,
     onConversationUpdate: onConversationUpdateInternal,
   });
 
   useAbortableAsync(async () => {
-    // TODO: better init / state management
+    // TODO: better conv state management - only has events atm
     if (conversationId) {
       const conversation = await conversationService.get(conversationId);
-      setMessages(getMessages(conversation.events));
+      setConversationEvents(conversation.events);
     } else {
-      setMessages([]);
+      setConversationEvents([]);
     }
   }, [conversationId, conversationService]);
 
-  return { messages, send };
+  return { conversationEvents, chatStatus, sendMessage };
 };

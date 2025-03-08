@@ -12,6 +12,7 @@ import { ChatEvent } from '../../../common/chat_events';
 
 interface ConverseParams {
   conversationId?: string;
+  connectorId?: string;
   agentId: string;
   nextMessage: string;
 }
@@ -23,13 +24,13 @@ export class ChatService {
     this.http = http;
   }
 
-  async converse({ nextMessage, conversationId, agentId }: ConverseParams) {
+  async converse({ nextMessage, conversationId, agentId, connectorId }: ConverseParams) {
     return (
       defer(() => {
         return this.http.post('/internal/workchat/chat', {
           asResponse: true,
           rawResponse: true,
-          body: JSON.stringify({ nextMessage, conversationId, agentId }),
+          body: JSON.stringify({ nextMessage, conversationId, agentId, connectorId }),
         });
       })
         // @ts-ignore SseEvent mixin issue

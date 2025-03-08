@@ -44,9 +44,13 @@ export class WorkChatAppPlugin
     this.logger = context.logger;
   }
 
-  public setup(core: CoreSetup, pluginsDependencies: WorkChatAppPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<WorkChatAppPluginStartDependencies>,
+    pluginsDependencies: WorkChatAppPluginSetupDependencies
+  ) {
     const router = core.http.createRouter();
     registerRoutes({
+      core,
       router,
       logger: this.logger.get('routes'),
       getServices: () => {

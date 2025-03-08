@@ -7,22 +7,19 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 import { css } from '@emotion/css';
-import {
-  EuiFlexItem,
-  EuiCommentList,
-  EuiPanel,
-  useEuiTheme,
-  euiScrollBarStyles,
-} from '@elastic/eui';
-import { ConversationCreatedEventPayload } from '../../../common/chat_events';
+import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import type { AuthenticatedUser } from '@kbn/core/public';
+import { ConversationEventChanges } from '../../../common/chat_events';
 import { useConversation } from '../hooks/use_conversation';
 import { useStickToBottom } from '../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
-import { ChatMessage } from './chat_message';
+import { ChatConversation } from './chat_conversation';
 
 interface ChatProps {
   conversationId: string | undefined;
-  onConversationUpdate: (changes: ConversationCreatedEventPayload) => void;
+  connectorId: string | undefined;
+  currentUser: AuthenticatedUser | undefined;
+  onConversationUpdate: (changes: ConversationEventChanges) => void;
 }
 
 const fullHeightClassName = css`
@@ -38,9 +35,15 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
   ${scrollBarStyles}
 `;
 
-export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate }) => {
-  const { send, messages } = useConversation({
+export const Chat: React.FC<ChatProps> = ({
+  conversationId,
+  currentUser,
+  onConversationUpdate,
+  connectorId,
+}) => {
+  const { sendMessage, conversationEvents, chatStatus } = useConversation({
     conversationId,
+    connectorId,
     agentId: 'default',
     onConversationUpdate,
   });
@@ -62,9 +65,9 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate
   const onSubmit = useCallback(
     (message: string) => {
       setStickToBottom(true);
-      send(message);
+      sendMessage(message);
     },
-    [send, setStickToBottom]
+    [sendMessage, setStickToBottom]
   );
 
   return (
@@ -72,11 +75,11 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, onConversationUpdate
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
-            <EuiCommentList>
-              {messages.map((message) => {
-                return <ChatMessage message={message} />;
-              })}
-            </EuiCommentList>
+            <ChatConversation
+              conversationEvents={conversationEvents}
+              chatStatus={chatStatus}
+              currentUser={currentUser}
+            />
           </EuiPanel>
         </div>
       </EuiFlexItem>

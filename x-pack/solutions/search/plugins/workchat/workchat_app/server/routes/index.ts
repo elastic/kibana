@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
-import { InternalServices } from '../services';
+import type { RouteDependencies } from './types';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversation';
+import { registerConnectorRoutes } from './connectors';
 
-export const registerRoutes = ({
-  router,
-  logger,
-  getServices,
-}: {
-  router: IRouter;
-  logger: Logger;
-  getServices: () => InternalServices;
-}) => {
-  registerChatRoutes({ router, logger, getServices });
-  registerConversationRoutes({ router, logger, getServices });
+export const registerRoutes = (dependencies: RouteDependencies) => {
+  registerChatRoutes(dependencies);
+  registerConversationRoutes(dependencies);
+  registerConnectorRoutes(dependencies);
 };

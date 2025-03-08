@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationMessageEvent, ConversationEvent } from '../conversations';
 import type { Message } from '../messages';
-import { userMessage } from './messages';
+import { userMessage, assistantMessage } from './messages';
 
 export const messageEvent = (
   message: Message,
@@ -29,10 +29,13 @@ export const userMessageEvent = (
   return messageEvent(userMessage(content), options);
 };
 
-export const isMessageEvent = (event: ConversationEvent): event is ConversationMessageEvent => {
-  return event.type === 'message';
+export const assistantMessageEvent = (
+  content: string,
+  options: { id?: string; createdAt?: string } = {}
+) => {
+  return messageEvent(assistantMessage(content), options);
 };
 
-export const getMessages = (events: ConversationEvent[]): Message[] => {
-  return events.filter(isMessageEvent).map((event) => event.message);
+export const isMessageEvent = (event: ConversationEvent): event is ConversationMessageEvent => {
+  return event.type === 'message';
 };

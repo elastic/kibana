@@ -6,15 +6,16 @@
  */
 
 import { css } from '@emotion/css';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConversationCreatedEventPayload } from '../../../common/chat_events';
+import { ConversationEventChanges } from '../../../common/chat_events';
 import { Chat } from '../components/chat';
 import { ChatHeader } from '../components/chat_header';
 import { ConversationList } from '../components/conversation_list';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { useCurrentUser } from '../hooks/use_current_user';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -36,6 +37,8 @@ export const WorkchatChatPage: React.FC<{}> = () => {
     services: { application },
   } = useKibana();
 
+  const currentUser = useCurrentUser();
+
   const { conversations, refresh: refreshConversations } = useConversationList();
 
   const { conversationId: conversationIdFromParams } = useParams<{
@@ -47,7 +50,7 @@ export const WorkchatChatPage: React.FC<{}> = () => {
   }, [conversationIdFromParams]);
 
   const onConversationUpdate = useCallback(
-    (changes: ConversationCreatedEventPayload) => {
+    (changes: ConversationEventChanges) => {
       if (!conversationId) {
         application.navigateToApp('workchat', { path: `/chat/${changes.id}` });
       }
@@ -55,6 +58,8 @@ export const WorkchatChatPage: React.FC<{}> = () => {
     },
     [application, conversationId, refreshConversations]
   );
+
+  const [connectorId, setConnectorId] = useState<string>();
 
   return (
     <KibanaPageTemplate
@@ -64,7 +69,7 @@ export const WorkchatChatPage: React.FC<{}> = () => {
       grow={false}
       panelled={false}
     >
-      <KibanaPageTemplate.Sidebar>
+      <KibanaPageTemplate.Sidebar paddingSize="none">
         <ConversationList
           conversations={conversations}
           activeConversationId={conversationId}
@@ -85,8 +90,13 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           justifyContent="center"
           responsive={false}
         >
-          <ChatHeader />
-          <Chat conversationId={conversationId} onConversationUpdate={onConversationUpdate} />
+          <ChatHeader connectorId={connectorId} onConnectorChange={setConnectorId} />
+          <Chat
+            conversationId={conversationId}
+            connectorId={connectorId}
+            currentUser={currentUser}
+            onConversationUpdate={onConversationUpdate}
+          />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
