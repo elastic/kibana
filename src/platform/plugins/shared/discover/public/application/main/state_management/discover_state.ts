@@ -22,6 +22,7 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isFunction } from 'lodash';
+import type { DiscoverServices } from '../../..';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -46,6 +47,8 @@ import {
 } from '../../../../common/data_sources';
 import type { InternalStateStore, RuntimeStateManager } from './redux';
 import { createInternalStateStore, internalStateActions } from './redux';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { getDefaultAppState, getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
   /**

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { AppMenuRegistry } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
@@ -18,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { RootProfileProvider } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import type { AppMenuExtensionParams } from '../../../..';
 
 export const createGetAppMenu =
   (services: ProfileProviderServices): RootProfileProvider['profile']['getAppMenu'] =>

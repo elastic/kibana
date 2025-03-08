@@ -8,7 +8,7 @@
  */
 
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory, type DataSourceProfileProvider } from '../../../profiles';
 import { getDocViewer } from './accessors/get_doc_viewer';
 import { getCellRenderers } from './accessors';
 
