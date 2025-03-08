@@ -15,7 +15,7 @@ import { elasticLogo } from '@kbn/expression-utils';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
 
-const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
+const Renderer = () => {
   const config = {
     dataurl: elasticLogo,
     mode: ImageMode.COVER,
@@ -34,7 +34,6 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
 storiesOf('renderers/image', module).add(
   'default',
   (_, props) => {
-    return <Renderer elasticLogo={props?.elasticLogo} />;
-  },
-  { decorators: [elasticLogo] }
+    return <Renderer />;
+  }
 );
