@@ -24,12 +24,6 @@ export const genericEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'entity.category' }),
     newestValue({ source: 'entity.type' }),
     newestValue({ source: 'entity.address' }),
-    newestValue({
-      source: 'entity.raw',
-      mapping: {
-        type: 'flattened',
-      },
-    }),
 
     newestValue({ source: 'cloud.account.id' }),
     newestValue({ source: 'cloud.account.name' }),
