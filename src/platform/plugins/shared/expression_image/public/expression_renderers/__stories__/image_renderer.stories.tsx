@@ -31,9 +31,6 @@ const Renderer = () => {
   );
 };
 
-storiesOf('renderers/image', module).add(
-  'default',
-  (_, props) => {
-    return <Renderer />;
-  }
-);
+storiesOf('renderers/image', module).add('default', (_, props) => {
+  return <Renderer />;
+});
