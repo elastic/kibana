@@ -19,9 +19,13 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
  * @param appStateFromUrl
  */
 export function cleanupUrlState(
-  appStateFromUrl: AppStateUrl,
+  appStateFromUrl: AppStateUrl | undefined,
   uiSettings: IUiSettingsClient
-): DiscoverAppState {
+): DiscoverAppState | undefined {
+  if (!appStateFromUrl) {
+    return;
+  }
+
   const query = appStateFromUrl.query;
   const isEsqlQuery = isOfAggregateQueryType(query);
 

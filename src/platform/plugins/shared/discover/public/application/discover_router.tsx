@@ -14,7 +14,6 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
-import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
@@ -60,13 +59,10 @@ export const DiscoverRoutes = ({
         <ViewAlertRoute />
       </Route>
       <Route path="/view/:id">
-        <DiscoverMainRoute {...routeProps} />
-      </Route>
-      <Route path="/v2">
         <DiscoverMainRoute2 {...routeProps} />
       </Route>
       <Route path="/" exact>
-        <DiscoverMainRoute {...routeProps} />
+        <DiscoverMainRoute2 {...routeProps} />
       </Route>
       <NotFoundRoute />
     </Routes>

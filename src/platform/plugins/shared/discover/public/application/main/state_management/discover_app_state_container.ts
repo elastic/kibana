@@ -354,9 +354,9 @@ export const getDiscoverAppStateContainer = ({
 };
 
 function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
-  return cleanupUrlState(
-    stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
-    services.uiSettings
+  return (
+    cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
+    {}
   );
 }
 
