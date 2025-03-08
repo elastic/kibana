@@ -26,7 +26,6 @@ import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vul
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
-import { normalizeSeverity } from './utils';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
