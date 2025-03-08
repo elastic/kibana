@@ -17,6 +17,7 @@ import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
 
 async function saveDataSource({

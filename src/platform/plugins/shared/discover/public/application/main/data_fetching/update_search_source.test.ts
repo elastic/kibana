@@ -39,11 +39,11 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      customFilters: [],
     });
     expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
+
   test('updates a given search source when showUnmappedFields option is set to true', async () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     discoverServiceMock.uiSettings = getUiSettingsMock(false);
@@ -51,7 +51,6 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      customFilters: [],
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: true },
@@ -66,12 +65,8 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      customFilters: [],
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });
-
-    discoverServiceMock.uiSettings = getUiSettingsMock(false);
-
 });
