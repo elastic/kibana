@@ -56,6 +56,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
+import { useCreateLookupIndexCommand } from './custom_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -505,6 +506,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
   ]);
+
+  useCreateLookupIndexCommand(esqlCallbacks);
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
