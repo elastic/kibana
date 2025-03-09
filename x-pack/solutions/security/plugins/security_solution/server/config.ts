@@ -182,6 +182,7 @@ export const configSchema = schema.object({
         pipelineDebugMode: schema.boolean({ defaultValue: false }),
       }),
     }),
+    privmon: schema.object({}),
   }),
 });
 

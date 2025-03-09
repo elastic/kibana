@@ -25,6 +25,13 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const PRIVILEGED_USER_MONITORING = i18n.translate(
+  'xpack.securitySolution.navigation.privilegedUserMonitoring',
+  {
+    defaultMessage: 'Privileged User Monitoring',
+  }
+);
+
 export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
   defaultMessage: 'Entity Store',
 });
