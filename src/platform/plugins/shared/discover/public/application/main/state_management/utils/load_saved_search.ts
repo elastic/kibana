@@ -130,7 +130,11 @@ export const loadSavedSearch = async (
   }
 
   // Update app state container with the next state derived from the next saved search
-  const nextAppState = getInitialState(undefined, nextSavedSearch, services);
+  const nextAppState = getInitialState({
+    initialUrlState: undefined,
+    savedSearch: nextSavedSearch,
+    services,
+  });
   const mergedAppState = appState
     ? { ...nextAppState, ...cleanupUrlState({ ...appState }, services.uiSettings) }
     : nextAppState;

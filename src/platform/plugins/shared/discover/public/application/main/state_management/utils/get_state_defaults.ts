@@ -17,6 +17,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
@@ -32,14 +33,16 @@ function getDefaultColumns(savedSearch: SavedSearch | undefined, uiSettings: IUi
 
 export function getStateDefaults({
   savedSearch,
+  overrideDataView,
   services,
 }: {
   savedSearch: SavedSearch | undefined;
+  overrideDataView?: DataView;
   services: DiscoverServices;
 }) {
   const searchSource = savedSearch?.searchSource;
   const { data, uiSettings, storage } = services;
-  const dataView = searchSource?.getField('index');
+  const dataView = overrideDataView ?? searchSource?.getField('index');
   const query = searchSource?.getField('query') || data.query.queryString.getDefaultQuery();
   const isEsqlQuery = isOfAggregateQueryType(query);
   const sort = getSortArray(savedSearch?.sort ?? [], dataView!, isEsqlQuery);

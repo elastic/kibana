@@ -32,11 +32,7 @@ import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual } from 'lodash';
-import {
-  createDataViewDataSource,
-  isDataViewSource,
-  isEsqlSource,
-} from '../../../common/data_sources';
+import { createDataViewDataSource, isDataViewSource } from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import {
   CustomizationCallback,
@@ -258,8 +254,9 @@ const DiscoverSessionView = ({
     const persistedDiscoverSession = discoverSessionId
       ? await savedSearch.get(discoverSessionId)
       : undefined;
-    const initialState = getInitialState(urlState, persistedDiscoverSession, services);
-    const isEsqlMode = isEsqlSource(initialState.dataSource);
+    const initialQuery =
+      urlState?.query ?? persistedDiscoverSession?.searchSource.getField('query');
+    const isEsqlMode = isOfAggregateQueryType(initialQuery);
     const discoverSessionDataView = persistedDiscoverSession?.searchSource.getField('index');
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
@@ -296,17 +293,17 @@ const DiscoverSessionView = ({
 
     let dataView: DataView;
 
-    if (isOfAggregateQueryType(initialState.query)) {
+    if (isOfAggregateQueryType(initialQuery)) {
       dataView = await getEsqlDataView(
-        initialState.query,
+        initialQuery,
         runtimeStateManager.currentDataView$.getValue(),
         services
       );
     } else {
       const result = await loadAndResolveDataView({
-        dataViewId: isDataViewSource(initialState.dataSource)
-          ? initialState.dataSource.dataViewId
-          : undefined,
+        dataViewId: isDataViewSource(urlState?.dataSource)
+          ? urlState?.dataSource.dataViewId
+          : discoverSessionDataView?.id,
         dataViewSpec: historyLocationState?.dataViewSpec,
         savedSearch: persistedDiscoverSession,
         isEsqlMode,
@@ -331,7 +328,12 @@ const DiscoverSessionView = ({
       internalState,
       runtimeStateManager,
     });
-
+    const initialState = getInitialState({
+      initialUrlState: urlState,
+      savedSearch: persistedDiscoverSession,
+      overrideDataView: dataView,
+      services,
+    });
     const discoverSession = updateSavedSearch({
       savedSearch: persistedDiscoverSession ?? savedSearch.getNew(),
       dataView,
