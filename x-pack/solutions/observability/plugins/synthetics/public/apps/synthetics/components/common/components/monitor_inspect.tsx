@@ -6,8 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -24,7 +22,6 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { MonitorTypeEnum, SyntheticsMonitor } from '../../../../../../common/runtime_types';
@@ -34,19 +31,8 @@ interface InspectorProps {
   isValid: boolean;
   monitorFields: SyntheticsMonitor;
 }
-export const MonitorInspectWrapper = (props: InspectorProps) => {
-  const {
-    services: { uiSettings },
-  } = useKibana<ClientPluginsStart>();
 
-  const { isDev } = useSyntheticsSettingsContext();
-
-  const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
-
-  return isDev || isInspectorEnabled ? <MonitorInspect {...props} /> : null;
-};
-
-const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
+export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
