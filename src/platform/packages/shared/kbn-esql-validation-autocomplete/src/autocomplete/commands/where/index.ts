@@ -27,23 +27,31 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../../../shared/constants';
 
-export async function suggest({
+export async function suggest(
+  params: CommandSuggestParams<'where'>
+): Promise<SuggestionRawDefinition[]> {
+  const expressionRoot = params.command.args[0] as ESQLSingleAstItem | undefined;
+  return suggestForExpression({
+    ...params,
+    expressionRoot,
+  });
+}
+
+export async function suggestForExpression({
+  expressionRoot,
   innerText,
-  command,
-  getColumnsByType,
   getExpressionType,
+  getColumnsByType,
   previousCommands,
-}: CommandSuggestParams<'where'>): Promise<SuggestionRawDefinition[]> {
+}: {
+  expressionRoot: ESQLSingleAstItem | undefined;
+} & Pick<
+  CommandSuggestParams<string>,
+  'innerText' | 'getExpressionType' | 'getColumnsByType' | 'previousCommands'
+>): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
-  /**
-   * The logic for WHERE suggestions is basically the logic for expression suggestions.
-   * I assume we will eventually extract much of this to be a shared function among WHERE and EVAL
-   * and anywhere else the user can enter a generic expression.
-   */
-  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
-
-  const position = getPosition(innerText, command);
+  const position = getPosition(innerText, expressionRoot);
   switch (position) {
     /**
      * After a column name

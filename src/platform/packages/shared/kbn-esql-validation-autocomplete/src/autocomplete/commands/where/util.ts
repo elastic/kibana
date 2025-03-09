@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-ast';
+import { ESQLSingleAstItem } from '@kbn/esql-ast';
 import { isColumnItem, isFunctionItem } from '../../../shared/helpers';
 
 export type CaretPosition =
@@ -17,9 +17,10 @@ export type CaretPosition =
   | 'after_operator'
   | 'empty_expression';
 
-export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
-  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
-
+export const getPosition = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined
+): CaretPosition => {
   const endsWithNot = / not$/i.test(innerText.trimEnd());
   if (
     endsWithNot &&
