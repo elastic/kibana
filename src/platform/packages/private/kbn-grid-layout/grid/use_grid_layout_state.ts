@@ -16,6 +16,7 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import {
   ActivePanel,
+  ActiveRow,
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -43,6 +44,7 @@ export const useGridLayoutState = ({
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const rowRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
+  const headerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const panelRefs = useRef<{ [rowId: string]: { [panelId: string]: HTMLDivElement | null } }>({});
   const { euiTheme } = useEuiTheme();
 
@@ -93,13 +95,16 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
+    const activeRow$ = new BehaviorSubject<ActiveRow | undefined>(undefined);
 
     return {
       rowRefs,
+      headerRefs,
       panelRefs,
       proposedGridLayout$,
       gridLayout$,
       activePanel$,
+      activeRow$,
       accessMode$,
       gridDimensions$,
       runtimeSettings$,

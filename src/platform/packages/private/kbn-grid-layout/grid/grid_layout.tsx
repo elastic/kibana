@@ -90,6 +90,14 @@ export const GridLayout = ({
         }
       });
 
+    const rowOrderSubscription = combineLatest([
+      gridLayoutStateManager.proposedGridLayout$,
+      gridLayoutStateManager.gridLayout$,
+    ]).subscribe(([proposedGridLayout, gridLayout]) => {
+      const displayedGridLayout = proposedGridLayout ?? gridLayout;
+      setRowIdsInOrder(getRowKeysInOrder(displayedGridLayout));
+    });
+
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
      * mobile view and a static (non-interactable) grid layout
@@ -115,6 +123,7 @@ export const GridLayout = ({
 
     return () => {
       onLayoutChangeSubscription.unsubscribe();
+      rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,7 +169,7 @@ const styles = {
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active)': {
+    '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',
