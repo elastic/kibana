@@ -936,6 +936,8 @@
       "@kbn/expression-shape-plugin/*": ["src/platform/plugins/shared/expression_shape/*"],
       "@kbn/expression-tagcloud-plugin": ["src/platform/plugins/shared/chart_expressions/expression_tagcloud"],
       "@kbn/expression-tagcloud-plugin/*": ["src/platform/plugins/shared/chart_expressions/expression_tagcloud/*"],
+      "@kbn/expression-utils": ["src/platform/packages/private/kbn-expression-utils"],
+      "@kbn/expression-utils/*": ["src/platform/packages/private/kbn-expression-utils/*"],
       "@kbn/expression-xy-plugin": ["src/platform/plugins/shared/chart_expressions/expression_xy"],
       "@kbn/expression-xy-plugin/*": ["src/platform/plugins/shared/chart_expressions/expression_xy/*"],
       "@kbn/expressions-explorer-plugin": ["examples/expressions_explorer"],

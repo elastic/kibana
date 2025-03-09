@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './dataurl';
-export * from './httpurl';
-export * from './resolve_dataurl';
-export * from './url';
-
-export async function getElasticLogo() {
-  return await import('./elastic_logo');
-}
-
-export async function getElasticOutline() {
-  return await import('./elastic_outline');
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-expression-utils'],
+};

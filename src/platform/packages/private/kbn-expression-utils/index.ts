@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './utils';
+export {
+  elasticLogo,
+  elasticOutline,
+  isValidUrl,
+  isValidHttpUrl,
+  resolveWithMissingImage,
+  resolveFromArgs,
+  encode,
+  parseDataUrl,
+} from './src';

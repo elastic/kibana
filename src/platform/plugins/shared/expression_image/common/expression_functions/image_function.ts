@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getElasticLogo, resolveWithMissingImage } from '@kbn/presentation-util-plugin/common';
 import { BASE64, URL } from '../constants';
 import { ExpressionImageFunction, ImageMode } from '../types';
 
@@ -85,8 +84,8 @@ export const imageFunction: ExpressionImageFunction = () => {
         throw new Error(errors.invalidImageMode());
       }
 
+      const { elasticLogo, resolveWithMissingImage } = await import('@kbn/expression-utils');
       const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
-      const { elasticLogo } = await getElasticLogo();
       return {
         type: 'image',
         mode: modeStyle,
