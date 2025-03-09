@@ -23,10 +23,11 @@ describe('observableIntoEventSourceStream', () => {
 
   let controller: AbortController;
 
-  let stream: PassThrough;
+  let stream: PassThrough & { flush: () => void };
   let source$: Subject<ServerSentEvent>;
 
   let data: string[];
+  let streamFlushSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -43,6 +44,7 @@ describe('observableIntoEventSourceStream', () => {
     stream.on('data', (chunk) => {
       data.push(chunk.toString());
     });
+    streamFlushSpy = jest.spyOn(stream, 'flush');
   });
 
   afterEach(() => {
@@ -56,6 +58,7 @@ describe('observableIntoEventSourceStream', () => {
     jest.runAllTimers();
 
     expect(data).toEqual(['event: data\ndata: {"data":{"foo":"bar"}}\n\n']);
+    expect(streamFlushSpy).toHaveBeenCalledTimes(1);
   });
 
   it('handles SSE errors', () => {
@@ -87,6 +90,7 @@ describe('observableIntoEventSourceStream', () => {
         },
       })}\n\n`,
     ]);
+    expect(streamFlushSpy).toHaveBeenCalledTimes(1);
   });
 
   it('handles SSE errors with metadata', () => {
@@ -122,6 +126,7 @@ describe('observableIntoEventSourceStream', () => {
         },
       })}\n\n`,
     ]);
+    expect(streamFlushSpy).toHaveBeenCalledTimes(1);
   });
 
   it('handles non-SSE errors', () => {
@@ -144,10 +149,12 @@ describe('observableIntoEventSourceStream', () => {
 
   it('should send keep-alive comments every 10 seconds', () => {
     jest.advanceTimersByTime(10000);
-    expect(data).toContain(': keep-alive');
+    expect(data.filter((d) => d === ': keep-alive\n')).toHaveLength(1);
+    expect(streamFlushSpy).toHaveBeenCalledTimes(1);
 
     jest.advanceTimersByTime(10000);
-    expect(data.filter((d) => d === ': keep-alive')).toHaveLength(2);
+    expect(data.filter((d) => d === ': keep-alive\n')).toHaveLength(2);
+    expect(streamFlushSpy).toHaveBeenCalledTimes(2);
   });
 
   describe('without fake timers', () => {
@@ -166,6 +173,7 @@ describe('observableIntoEventSourceStream', () => {
       await new Promise((resolve) => process.nextTick(resolve));
 
       expect(endSpy).toHaveBeenCalled();
+      expect(streamFlushSpy).toHaveBeenCalledTimes(0);
     });
 
     it('should end stream when signal is aborted', async () => {
@@ -189,6 +197,7 @@ describe('observableIntoEventSourceStream', () => {
       expect(data).toEqual([
         `event: data\ndata: ${JSON.stringify({ data: { initial: 'data' } })}\n\n`,
       ]);
+      expect(streamFlushSpy).toHaveBeenCalledTimes(1);
     });
 
     afterEach(() => {

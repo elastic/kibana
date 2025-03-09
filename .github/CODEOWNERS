@@ -34,6 +34,7 @@ examples/routing_example @elastic/kibana-core
 examples/screenshot_mode_example @elastic/appex-sharedux
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
+examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
