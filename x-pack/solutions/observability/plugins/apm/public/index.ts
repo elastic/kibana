@@ -12,6 +12,7 @@ import { ApmPlugin } from './plugin';
 export interface ConfigSchema {
   serviceMapEnabled: boolean;
   ui: {
+    serviceMapApiV2Enabled: boolean;
     enabled: boolean;
   };
   latestAgentVersionsUrl: string;
