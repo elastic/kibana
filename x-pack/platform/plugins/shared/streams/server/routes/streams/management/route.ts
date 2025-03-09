@@ -142,9 +142,11 @@ export const sampleStreamRoute = createServerRoute({
       // This can be optimized in the future.
       runtime_mappings: condition
         ? Object.fromEntries(
-            getFields(condition).map((field) => [
-              field.name,
-              { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
+            getFields(condition).flatMap((field) => [
+              [
+                field.name,
+                { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
+              ],
             ])
           )
         : undefined,

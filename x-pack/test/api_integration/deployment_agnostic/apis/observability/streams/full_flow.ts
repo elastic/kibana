@@ -137,10 +137,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(result._index).to.match(/^\.ds\-logs-.*/);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs',
+          body: {
+            text: 'test',
+          },
+          severity_text: 'info',
+          attributes: { 'log.logger': 'nginx' },
+          stream: { name: 'logs' },
         });
       });
 
@@ -157,11 +159,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs',
-          stream: 'somethingelse',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+            stream: 'somethingelse',
+          },
+          stream: { name: 'logs' },
         });
       });
 
@@ -171,7 +175,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx',
           },
           if: {
-            field: 'log.logger',
+            field: 'attributes.log.logger',
             operator: 'eq' as const,
             value: 'nginx',
           },
@@ -192,10 +196,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs.nginx',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx' },
         });
       });
 
@@ -204,7 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          if: { field: 'log.level', operator: 'eq' as const, value: 'info' },
+          if: { field: 'severity_text', operator: 'eq' as const, value: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -222,10 +228,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs.nginx.access',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx.access' },
         });
       });
 
@@ -234,7 +242,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          if: { field: 'log', operator: 'eq' as const, value: 'error' },
+          if: { field: 'attributes.log', operator: 'eq' as const, value: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -252,10 +260,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: 'test',
-          'log.level': 'error',
-          'log.logger': 'nginx',
-          'stream.name': 'logs.nginx',
+          body: { text: 'test' },
+          severity_text: 'error',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx' },
         });
       });
 
@@ -264,7 +274,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          if: { field: 'code', operator: 'gte' as const, value: '500' },
+          if: { field: 'attributes.code', operator: 'gte' as const, value: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -296,8 +306,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             or: [
-              { field: 'message', operator: 'contains' as const, value: '500' },
-              { field: 'message', operator: 'contains' as const, value: 400 },
+              { field: 'body.text', operator: 'contains' as const, value: '500' },
+              { field: 'body.text', operator: 'contains' as const, value: 400 },
             ],
           },
         };
@@ -329,7 +339,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             or: [
-              { field: '@abc.weird fieldname', operator: 'contains' as const, value: 'route_it' },
+              {
+                field: 'attributes.@abc.weird fieldname',
+                operator: 'contains' as const,
+                value: 'route_it',
+              },
             ],
           },
         };

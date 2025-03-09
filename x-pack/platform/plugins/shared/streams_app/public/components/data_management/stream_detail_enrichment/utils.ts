@@ -26,7 +26,7 @@ import { ALWAYS_CONDITION } from '../../../util/condition';
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
-  field: 'message',
+  field: 'body.text',
   patterns: [{ value: '' }],
   pattern_definitions: {},
   ignore_failure: true,
@@ -36,7 +36,7 @@ const defaultGrokProcessorFormState: GrokFormState = {
 
 const defaultDissectProcessorFormState: DissectFormState = {
   type: 'dissect',
-  field: 'message',
+  field: 'body.text',
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,

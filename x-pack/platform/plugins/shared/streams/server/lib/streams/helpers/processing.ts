@@ -18,6 +18,7 @@ export function formatToIngestProcessors(
     return {
       [type]: {
         ...config,
+        field: config.field,
         if: conditionToPainless(config.if),
       },
     };

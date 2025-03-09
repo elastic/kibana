@@ -66,6 +66,7 @@ export const useSchemaFields = ({
         format: field.format,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
+        alias_for: field.alias_for,
         status: 'inherited',
       })
     );
