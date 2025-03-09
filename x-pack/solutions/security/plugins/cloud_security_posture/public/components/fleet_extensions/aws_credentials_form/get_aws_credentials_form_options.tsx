@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { AwsCredentialsType } from '../../../../common/types_old';
 import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form';
+import { getAwsCredentialsType, NewPackagePolicyPostureInput } from '../utils';
 
 const AssumeRoleDescription = (
   <div>
@@ -102,11 +103,24 @@ export type AwsCredentialsTypeOptions = Array<{
   value: AwsCredentialsType;
   text: string;
 }>;
+export const getAgentlessCredentialsType = (
+  postureInput: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>,
+  showCloudConnectors: boolean
+): AwsCredentialsType => {
+  const credentialsType = getAwsCredentialsType(postureInput);
+
+  if (!credentialsType && showCloudConnectors) {
+    return AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+  }
+
+  return credentialsType || AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+};
 
 const getAwsCredentialsTypeSelectorOptions = (
-  filterFn: ({ value }: { value: AwsCredentialsType }) => boolean
+  filterFn: ({ value }: { value: AwsCredentialsType }) => boolean,
+  getFormOptions: () => AwsOptions | Omit<AwsOptions, 'assume_role'> = getAwsCredentialsFormOptions
 ): AwsCredentialsTypeOptions => {
-  return Object.entries(getAwsCredentialsFormOptions())
+  return Object.entries(getFormOptions())
     .map(([key, value]) => ({
       value: key as AwsCredentialsType,
       text: value.label,
@@ -123,13 +137,22 @@ export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptio
   getAwsCredentialsTypeSelectorOptions(
     ({ value }) =>
       value === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
-      value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS
+      value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS,
+    getAwsAgentlessFormOptions
+  );
+export const getAwsCloudConnectorsFormAgentlessOptions = (): AwsCredentialsTypeOptions =>
+  getAwsCredentialsTypeSelectorOptions(
+    ({ value }) =>
+      value === AWS_CREDENTIALS_TYPE.ASSUME_ROLE ||
+      value === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
+      value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS,
+    getAwsCloudConnectorsCredentialsFormOptions
   );
 
 export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.ASSUME_ROLE =
   AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
 
 export const getAwsCredentialsFormOptions = (): AwsOptions => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
@@ -144,8 +167,170 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
         }),
         dataTestSubj: 'awsRoleArnInput',
       },
+      'aws.credentials.external_id': {
+        label: i18n.translate('xpack.csp.awsIntegration.externalId', {
+          defaultMessage: 'External ID',
+        }),
+        dataTestSubj: 'awsExternalId',
+        isSecret: true,
+      },
     },
   },
+  [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
+    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+      defaultMessage: 'Direct access keys',
+    }),
+    info: DirectAccessKeysDescription,
+    fields: {
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'awsDirectAccessKeyId' },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestSubj: 'awsDirectAccessSecretKey',
+        isSecret: true,
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
+    info: TemporaryKeysDescription,
+    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+      defaultMessage: 'Temporary keys',
+    }),
+    fields: {
+      access_key_id: {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestSubj: 'awsTemporaryKeysAccessKeyId',
+      },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
+        isSecret: true,
+      },
+      session_token: {
+        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+          defaultMessage: 'Session Token',
+        }),
+        dataTestSubj: 'awsTemporaryKeysSessionToken',
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
+    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
+      defaultMessage: 'Shared credentials',
+    }),
+    info: SharedCredentialsDescription,
+    fields: {
+      shared_credential_file: {
+        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
+          defaultMessage: 'Shared Credential File',
+        }),
+        dataTestSubj: 'awsSharedCredentialFile',
+      },
+      credential_profile_name: {
+        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
+          defaultMessage: 'Credential Profile Name',
+        }),
+        dataTestSubj: 'awsCredentialProfileName',
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.CLOUD_FORMATION]: {
+    label: 'CloudFormation',
+    info: [],
+    fields: {},
+  },
+});
+
+export const getAwsCloudConnectorsCredentialsFormOptions = (): AwsOptions => ({
+  [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
+    label: i18n.translate('xpack.csp.awsIntegration.cloudConnectorsRoleLabel', {
+      defaultMessage: 'Cloud Connectors (recommended)',
+    }),
+    info: AssumeRoleDescription,
+    fields: {
+      role_arn: {
+        label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
+          defaultMessage: 'Role ARN',
+        }),
+        dataTestSubj: 'awsRoleArnInput',
+      },
+      'aws.credentials.external_id': {
+        label: i18n.translate('xpack.csp.awsIntegration.externalId', {
+          defaultMessage: 'External ID',
+        }),
+        dataTestSubj: 'awsExternalId',
+        isSecret: true,
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
+    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+      defaultMessage: 'Direct access keys',
+    }),
+    info: DirectAccessKeysDescription,
+    fields: {
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'awsDirectAccessKeyId' },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestSubj: 'awsDirectAccessSecretKey',
+        isSecret: true,
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
+    info: TemporaryKeysDescription,
+    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+      defaultMessage: 'Temporary keys',
+    }),
+    fields: {
+      access_key_id: {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestSubj: 'awsTemporaryKeysAccessKeyId',
+      },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
+        isSecret: true,
+      },
+      session_token: {
+        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+          defaultMessage: 'Session Token',
+        }),
+        dataTestSubj: 'awsTemporaryKeysSessionToken',
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
+    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
+      defaultMessage: 'Shared credentials',
+    }),
+    info: SharedCredentialsDescription,
+    fields: {
+      shared_credential_file: {
+        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
+          defaultMessage: 'Shared Credential File',
+        }),
+        dataTestSubj: 'awsSharedCredentialFile',
+      },
+      credential_profile_name: {
+        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
+          defaultMessage: 'Credential Profile Name',
+        }),
+        dataTestSubj: 'awsCredentialProfileName',
+      },
+    },
+  },
+  [AWS_CREDENTIALS_TYPE.CLOUD_FORMATION]: {
+    label: 'CloudFormation',
+    info: [],
+    fields: {},
+  },
+});
+
+export const getAwsAgentlessFormOptions = (): Omit<AwsOptions, 'assume_role'> => ({
   [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
     label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
