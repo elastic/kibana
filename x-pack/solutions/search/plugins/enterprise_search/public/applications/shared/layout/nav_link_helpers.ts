@@ -7,14 +7,15 @@
 
 import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
+import {
+  GeneratedReactRouterProps,
+  generateReactRouterProps,
+  ReactRouterProps,
+} from '@kbn/search-connectors-plugin/public';
+
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
-import {
-  type GeneratedReactRouterProps,
-  generateReactRouterProps,
-} from '../react_router_helpers/generate_react_router_props';
-import { ReactRouterProps } from '../types';
 
 interface Params {
   items?: Array<EuiSideNavItemTypeEnhanced<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper

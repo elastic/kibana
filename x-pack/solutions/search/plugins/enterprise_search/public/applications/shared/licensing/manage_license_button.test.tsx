@@ -13,9 +13,9 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
-import { docLinks } from '../doc_links';
+import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
 
-import { EuiButtonTo } from '../react_router_helpers';
+import { docLinks } from '../doc_links';
 
 import { ManageLicenseButton } from '.';
 

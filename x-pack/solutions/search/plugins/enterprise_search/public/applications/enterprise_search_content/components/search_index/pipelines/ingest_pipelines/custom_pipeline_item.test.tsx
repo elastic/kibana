@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
+import { EuiButtonEmptyTo } from '@kbn/search-connectors-plugin/public';
 
 import { CustomPipelineItem } from './custom_pipeline_item';
 

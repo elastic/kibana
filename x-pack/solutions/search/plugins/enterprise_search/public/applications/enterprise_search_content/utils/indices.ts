@@ -17,12 +17,12 @@ import {
   ElasticsearchIndex,
   IngestionStatus,
   IngestionMethod,
+  ElasticsearchViewIndex,
+  ApiViewIndex,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
-
-import { ApiViewIndex, ElasticsearchViewIndex } from '../types';
 
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | null | undefined

@@ -19,16 +19,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
+import { ElasticsearchViewIndex, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
+
+import { EuiLinkTo, EuiBadgeTo } from '@kbn/search-connectors-plugin/public';
 
 import { Meta } from '../../../../../common/types/pagination';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { SEARCH_INDEX_PATH } from '../../routes';
-import { ElasticsearchViewIndex } from '../../types';
 import { ingestionMethodToText, isConnectorIndex } from '../../utils/indices';
 import {
   ingestionStatusToColor,

@@ -15,9 +15,9 @@ import { i18n } from '@kbn/i18n';
 
 import { IngestionStatus } from '@kbn/search-connectors';
 
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
 
-import { EuiLinkTo } from '../../../../shared/react_router_helpers';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';

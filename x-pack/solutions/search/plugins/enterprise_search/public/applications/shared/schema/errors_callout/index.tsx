@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { EuiButtonTo } from '../../react_router_helpers';
+import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
 
 import { SCHEMA_ERRORS_TITLE, SCHEMA_ERRORS_DESCRIPTION, SCHEMA_ERRORS_BUTTON } from './constants';
 

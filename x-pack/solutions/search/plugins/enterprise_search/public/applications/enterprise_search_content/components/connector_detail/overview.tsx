@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
+
 import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   EXAMPLE_CONNECTOR_SERVICE_TYPES,
@@ -23,7 +25,6 @@ import {
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 
-import { EuiButtonTo } from '../../../shared/react_router_helpers/eui_components';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { ConvertConnectorLogic } from '../search_index/connector/native_connector_configuration/convert_connector_logic';
 import { IndexViewLogic } from '../search_index/index_view_logic';

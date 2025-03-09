@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { ManageCustomPipelineActions } from '@kbn/search-connectors-plugin/public';
 
 import { Status } from '../../../../../../common/types/api';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
@@ -39,7 +40,6 @@ import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipeline_item';
 import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
-import { ManageCustomPipelineActions } from './ingest_pipelines/manage_custom_pipeline_actions';
 import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipeline_flyout';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';

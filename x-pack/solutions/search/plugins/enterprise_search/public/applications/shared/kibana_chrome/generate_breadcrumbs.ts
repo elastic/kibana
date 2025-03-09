@@ -10,6 +10,8 @@ import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { letBrowserHandleEvent, createHref } from '@kbn/search-connectors-plugin/public';
+
 import {
   ANALYTICS_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
@@ -26,7 +28,6 @@ import {
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
 
 import { getHomeURL } from './breadcrumbs_home';
 

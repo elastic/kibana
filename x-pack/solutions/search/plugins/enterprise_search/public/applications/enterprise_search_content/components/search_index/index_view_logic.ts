@@ -16,6 +16,7 @@ import {
   SyncStatus,
   IngestionStatus,
   IngestionMethod,
+  ElasticsearchViewIndex,
 } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
@@ -42,7 +43,6 @@ import {
 } from '../../api/index/cached_fetch_index_api_logic';
 
 import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
 import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,

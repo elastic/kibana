@@ -15,8 +15,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
+
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
-import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { SyncsContextMenu } from '../../../shared/header_actions/syncs_context_menu';

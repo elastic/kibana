@@ -21,7 +21,7 @@
       "logsDataAccess",
       "esUiShared",
       "navigation",
-      "uiActions"
+      "uiActions",
     ],
     "optionalPlugins": [
       "customIntegrations",

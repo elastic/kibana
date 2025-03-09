@@ -1,0 +1,32 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-connectors-plugin",
+  "owner": "@elastic/search-kibana",
+  // TODO this is currently used from Observability too, must be refactored before solution-specific builds
+  // see x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/routes/components/search_connector_tab.tsx
+  // cc sphilipse
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Plugin hosting shared features for connectors",
+  "plugin": {
+    "id": "searchConnectors",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchConnectors"
+    ],
+    "requiredPlugins": [
+      "home",
+      "management",
+      "features",
+      "share",
+      "licensing",
+      "taskManager",
+      "fleet"
+    ],
+    "optionalPlugins": [
+      "cloud"
+    ]
+  }
+}

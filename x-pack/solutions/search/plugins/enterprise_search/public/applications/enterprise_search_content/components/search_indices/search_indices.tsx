@@ -23,9 +23,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { handlePageChange } from '../../../shared/table_pagination';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
