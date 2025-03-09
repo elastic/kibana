@@ -126,6 +126,14 @@ export interface PackagePolicyClient {
     }>;
   }>;
 
+  bulkUpgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser; force?: boolean },
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyResponse>;
+
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
   findAllForAgentPolicy(
@@ -137,7 +145,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     ids: string[],
     options?: { ignoreMissing?: boolean }
-  ): Promise<PackagePolicy[] | null>;
+  ): Promise<PackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
