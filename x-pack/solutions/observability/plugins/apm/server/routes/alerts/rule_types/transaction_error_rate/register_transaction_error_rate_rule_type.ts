@@ -69,6 +69,7 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { unflattenObject } from '../utils/unflatten_object';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -83,6 +84,7 @@ export const transactionErrorRateActionVariables = [
   apmActionVariables.transactionType,
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
+  apmActionVariables.grouping,
 ];
 
 type TransactionErrorRateRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionErrorRate];
@@ -288,6 +290,7 @@ export function registerTransactionErrorRateRuleType({
         );
         const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
 
         const payload = {
           [TRANSACTION_NAME]: ruleParams.transactionName,
@@ -310,6 +313,7 @@ export function registerTransactionErrorRateRuleType({
           transactionName: ruleParams.transactionName,
           triggerValue: asDecimalOrInteger(errorRate),
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 
@@ -347,6 +351,8 @@ export function registerTransactionErrorRateRuleType({
         );
 
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -359,6 +365,7 @@ export function registerTransactionErrorRateRuleType({
           threshold: ruleParams.threshold,
           triggerValue: asDecimalOrInteger(alertHits?.[ALERT_EVALUATION_VALUE]),
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 

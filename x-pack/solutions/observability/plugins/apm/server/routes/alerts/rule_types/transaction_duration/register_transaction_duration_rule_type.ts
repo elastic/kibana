@@ -74,6 +74,7 @@ import {
 import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { unflattenObject } from '../utils/unflatten_object';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -88,6 +89,7 @@ export const transactionDurationActionVariables = [
   apmActionVariables.transactionType,
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
+  apmActionVariables.grouping,
 ];
 
 type TransactionDurationRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionDuration];
@@ -292,6 +294,7 @@ export function registerTransactionDurationRuleType({
           )
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
 
         const context = {
           alertDetailsUrl,
@@ -305,6 +308,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 
@@ -355,6 +359,8 @@ export function registerTransactionDurationRuleType({
           alertHits?.[ALERT_EVALUATION_VALUE]
         ).formatted;
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -367,6 +373,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 
