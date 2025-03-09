@@ -23,9 +23,14 @@ import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
 
 export const readStreamRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}',
+  endpoint: 'GET /api/streams/{name} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get a stream',
+    description: 'Fetches a stream definition and associated dashboards',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -60,7 +65,7 @@ export interface StreamDetailsResponse {
 }
 
 export const streamDetailRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/_details',
+  endpoint: 'GET /internal/streams/{name}/_details',
   options: {
     access: 'internal',
   },
@@ -111,9 +116,14 @@ export const streamDetailRoute = createServerRoute({
 });
 
 export const listStreamsRoute = createServerRoute({
-  endpoint: 'GET /api/streams',
+  endpoint: 'GET /api/streams 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    description: 'Fetches list of all streams',
+    summary: 'Get stream list',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -132,9 +142,15 @@ export const listStreamsRoute = createServerRoute({
 });
 
 export const editStreamRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}',
+  endpoint: 'PUT /api/streams/{name} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Create or update a stream',
+    description:
+      'Creates or updates a stream definition. Classic streams can not be created through this API, only updated',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -185,9 +201,14 @@ export const editStreamRoute = createServerRoute({
 });
 
 export const deleteStreamRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{name}',
+  endpoint: 'DELETE /api/streams/{name} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Delete a stream',
+    description: 'Deletes a stream definition and the underlying data stream',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {

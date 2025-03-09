@@ -13,7 +13,7 @@ import { getEffectiveLifecycle } from '../../../lib/streams/lifecycle/get_effect
 import { StatusError } from '../../../lib/streams/errors/status_error';
 
 const lifecycleStatsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/lifecycle/_stats',
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_stats',
   options: {
     access: 'internal',
   },
@@ -56,7 +56,7 @@ const lifecycleStatsRoute = createServerRoute({
 });
 
 const lifecycleIlmExplainRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/lifecycle/_explain',
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_explain',
   options: {
     access: 'internal',
   },

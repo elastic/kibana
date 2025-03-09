@@ -17,9 +17,14 @@ import { z } from '@kbn/zod';
 import { createServerRoute } from '../../create_server_route';
 
 const readIngestRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/_ingest',
+  endpoint: 'GET /api/streams/{name}/_ingest 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get ingest stream settings',
+    description: 'Fetches the ingest settings of an ingest stream definition',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -53,9 +58,14 @@ const readIngestRoute = createServerRoute({
 });
 
 const upsertIngestRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/_ingest',
+  endpoint: 'PUT /api/streams/{name}/_ingest 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Update ingest stream settings',
+    description: 'Upserts the ingest settings of an ingest stream definition',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {

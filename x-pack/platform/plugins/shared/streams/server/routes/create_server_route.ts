@@ -20,6 +20,10 @@ export const createServerRoute: CreateServerRouteFactory<
 > = ({ handler, ...config }) => {
   return createPlainStreamsServerRoute({
     ...config,
+    options: {
+      ...config.options,
+      tags: [...(config.options?.tags ?? []), 'oas-tag:streams'],
+    },
     handler: (options) => {
       return handler(options).catch((error) => {
         if (error instanceof StatusError || error instanceof errors.ResponseError) {

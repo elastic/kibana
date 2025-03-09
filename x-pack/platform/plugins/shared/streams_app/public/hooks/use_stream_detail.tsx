@@ -39,7 +39,7 @@ export function StreamDetailContextProvider({
   } = useStreamsAppFetch(
     async ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('GET /api/streams/{name}', {
+        .fetch('GET /api/streams/{name} 2023-10-31', {
           signal,
           params: {
             path: {

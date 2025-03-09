@@ -53,23 +53,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function linkDashboard(id: string) {
-    const response = await apiClient.fetch('PUT /api/streams/{name}/dashboards/{dashboardId}', {
-      params: { path: { name: 'logs', dashboardId: id } },
-    });
+    const response = await apiClient.fetch(
+      'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+      {
+        params: { path: { name: 'logs', dashboardId: id } },
+      }
+    );
 
     expect(response.status).to.be(200);
   }
 
   async function unlinkDashboard(id: string) {
-    const response = await apiClient.fetch('DELETE /api/streams/{name}/dashboards/{dashboardId}', {
-      params: { path: { name: 'logs', dashboardId: id } },
-    });
+    const response = await apiClient.fetch(
+      'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+      {
+        params: { path: { name: 'logs', dashboardId: id } },
+      }
+    );
 
     expect(response.status).to.be(200);
   }
 
   async function bulkLinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
       params: {
         path: { name: 'logs' },
         body: {
@@ -88,7 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function bulkUnlinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
       params: {
         path: { name: 'logs' },
         body: {
@@ -134,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}', {
+        const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
@@ -144,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the dashboards get response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
@@ -161,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('dropped all dashboards', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -174,7 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await unlinkDashboard(SEARCH_DASHBOARD_ID);
           await linkDashboard(SEARCH_DASHBOARD_ID);
 
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -190,7 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('no longer lists the dashboard as a linked asset', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -214,7 +220,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('shows the linked dashboards', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
@@ -227,7 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('only shows the remaining linked dashboard', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -253,7 +259,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       describe('after creating multiple dashboards', () => {
         it('suggests dashboards to link', async () => {
           const response = await apiClient.fetch(
-            'POST /api/streams/{name}/dashboards/_suggestions',
+            'POST /internal/streams/{name}/dashboards/_suggestions',
             {
               params: { path: { name: 'logs' }, body: { tags: [] }, query: { query: '' } },
             }
@@ -265,7 +271,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('filters suggested dashboards based on tags', async () => {
           const response = await apiClient.fetch(
-            'POST /api/streams/{name}/dashboards/_suggestions',
+            'POST /internal/streams/{name}/dashboards/_suggestions',
             {
               params: { path: { name: 'logs' }, body: { tags: [TAG_ID] }, query: { query: '' } },
             }
@@ -277,7 +283,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('filters suggested dashboards based on the query', async () => {
           const response = await apiClient.fetch(
-            'POST /api/streams/{name}/dashboards/_suggestions',
+            'POST /internal/streams/{name}/dashboards/_suggestions',
             {
               params: {
                 path: { name: 'logs' },

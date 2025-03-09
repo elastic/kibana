@@ -23,12 +23,12 @@ async function simulateProcessingForStream(
   name: string,
   body: ClientRequestParamsOf<
     StreamsRouteRepository,
-    'POST /api/streams/{name}/processing/_simulate'
+    'POST /internal/streams/{name}/processing/_simulate'
   >['params']['body'],
   statusCode = 200
 ) {
   return client
-    .fetch('POST /api/streams/{name}/processing/_simulate', {
+    .fetch('POST /internal/streams/{name}/processing/_simulate', {
       params: {
         path: { name },
         body,

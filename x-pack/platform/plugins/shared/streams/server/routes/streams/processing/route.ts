@@ -28,7 +28,7 @@ const paramsSchema = z.object({
 }) satisfies z.Schema<ProcessingSimulationParams>;
 
 export const simulateProcessorRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/processing/_simulate',
+  endpoint: 'POST /internal/streams/{name}/processing/_simulate',
   options: {
     access: 'internal',
   },
@@ -70,7 +70,7 @@ const suggestionsParamsSchema = z.object({
 });
 
 export const processingSuggestionRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/processing/_suggestions',
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions',
   options: {
     access: 'internal',
   },
