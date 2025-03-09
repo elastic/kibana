@@ -9,6 +9,8 @@
 
 export * from './build_data_record';
 export * from './calc_field_counts';
+export * from './combine_unique';
+export * from './contains_index_pattern';
 export * from './format_hit';
 export * from './format_value';
 export * from './get_doc_id';
@@ -20,6 +22,5 @@ export * from './get_should_show_field_handler';
 export * from './get_stack_trace_fields';
 export * from './nested_fields';
 export * from './get_field_value';
-export * from './calc_field_counts';
 export * from './get_visible_columns';
 export { DiscoverFlyouts, dismissAllFlyoutsExceptFor, dismissFlyouts } from './dismiss_flyouts';
