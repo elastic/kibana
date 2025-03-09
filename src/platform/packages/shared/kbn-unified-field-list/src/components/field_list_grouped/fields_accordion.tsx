@@ -9,6 +9,7 @@
 
 import React, { useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiText,
   EuiNotificationBadge,
@@ -17,10 +18,8 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
-import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
-import './fields_accordion.scss';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
@@ -62,14 +61,15 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   showExistenceFetchTimeout,
 }: FieldsAccordionProps<T>) {
   const renderButton = useMemo(() => {
-    const titleClassname = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      unifiedFieldList__fieldsAccordion__titleTooltip: !!helpTooltip,
-    });
-
     return (
       <EuiText size="xs">
-        <strong className={titleClassname}>{label}</strong>
+        <strong
+          css={({ euiTheme }) => css`
+            margin-right: ${helpTooltip ? euiTheme.size.xs : undefined};
+          `}
+        >
+          {label}
+        </strong>
         {!!helpTooltip && (
           <EuiIconTip
             aria-label={helpTooltip}

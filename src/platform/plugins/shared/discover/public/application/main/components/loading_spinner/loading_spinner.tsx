@@ -8,12 +8,13 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiTitle, EuiSpacer, UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTitle, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 export function LoadingSpinner() {
-  const loadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => css`
+  const { euiTheme } = useEuiTheme();
+  const loadingSpinnerCss = css`
     position: absolute;
     top: 0;
     left: 0;

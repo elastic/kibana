@@ -11,12 +11,6 @@ import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-const containerStyle = css`
-  position: relative;
-  width: 100%;
-  height: 100%;
-`;
-
 /**
  * A top level wrapper props
  * @public
@@ -66,10 +60,24 @@ export const FieldList: FC<PropsWithChildren<FieldListProps>> = ({
         />
       )}
       {!!prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
-      <EuiFlexItem className="unifiedFieldListSidebar__accordionContainer" grow={true}>
+      <EuiFlexItem
+        className="unifiedFieldListSidebar__accordionContainer" // class is used in other dependent styles
+        css={accordionContainerStyle}
+        grow={true}
+      >
         {children}
       </EuiFlexItem>
       {!!append && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };
+
+const containerStyle = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
+
+const accordionContainerStyle = css`
+  padding-inline: 0;
+`;

@@ -8,8 +8,15 @@
  */
 
 import React from 'react';
-import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiHighlight,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
@@ -50,7 +57,7 @@ export function FieldName({
           alignItems="center"
           direction="row"
           wrap={false}
-          className="kbnDocViewer__fieldIconContainer"
+          css={fieldIconContainerCss}
         >
           <EuiFlexItem grow={false}>
             <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
@@ -61,7 +68,8 @@ export function FieldName({
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
           <EuiFlexItem
-            className="kbnDocViewer__fieldName eui-textBreakAll"
+            className="kbnDocViewer__fieldName eui-textBreakAll" // kbnDocViewer__fieldName is used in tests
+            css={fieldNameCss}
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
@@ -88,7 +96,7 @@ export function FieldName({
             >
               <EuiBadge
                 title=""
-                className="kbnDocViewer__multiFieldBadge"
+                css={multiFieldBadgeCss}
                 color="default"
                 data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
               >
@@ -104,3 +112,20 @@ export function FieldName({
     </EuiFlexGroup>
   );
 }
+
+const fieldIconContainerCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding-top: calc(${euiTheme.size.xs} * 1.5);
+  line-height: ${euiTheme.size.base};
+`;
+
+const fieldNameCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.xs};
+  padding-left: 0;
+  line-height: ${euiTheme.font.lineHeightMultiplier};
+`;
+
+const multiFieldBadgeCss = ({ euiTheme }: UseEuiTheme) => css`
+  margin: ${euiTheme.size.xs} 0;
+  font-weight: ${euiTheme.font.weight.regular};
+  font-family: ${euiTheme.font.family};
+`;
