@@ -1,0 +1,111 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user's session cookie and is using it to access the user's account from a different location.",
+        "false_positives": [
+            "A user may have multiple sessions open at the same time, such as on a mobile device and a laptop."
+        ],
+        "from": "now-30m",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Multiple Okta Sessions Detected for a Single User",
+        "note": "",
+        "query": "event.dataset:okta.system and okta.event_type:user.session.start and okta.authentication_context.external_session_id:*\n    and not (okta.actor.id: okta* or okta.actor.display_name: okta*) \n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+            "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.actor.display_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.actor.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.authentication_context.external_session_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.event_type",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "621e92b6-7e54-11ee-bdc0-f661ea17fbcd",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Tactic: Lateral Movement"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1550",
+                        "name": "Use Alternate Authentication Material",
+                        "reference": "https://attack.mitre.org/techniques/T1550/",
+                        "subtechnique": [
+                            {
+                                "id": "T1550.004",
+                                "name": "Web Session Cookie",
+                                "reference": "https://attack.mitre.org/techniques/T1550/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "threshold": {
+            "cardinality": [
+                {
+                    "field": "okta.authentication_context.external_session_id",
+                    "value": 3
+                }
+            ],
+            "field": [
+                "okta.actor.id"
+            ],
+            "value": 1
+        },
+        "timestamp_override": "event.ingested",
+        "type": "threshold",
+        "version": 1
+    },
+    "id": "621e92b6-7e54-11ee-bdc0-f661ea17fbcd_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,91 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule monitors for the execution of commands that enable IPv4 and IPv6 forwarding on Linux systems. Enabling IP forwarding can be used to route network traffic between different network interfaces, potentially allowing attackers to pivot between networks, exfiltrate data, or establish command and control channels.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "IPv4/IPv6 Forwarding Activity",
+    "query": "process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and\nprocess.parent.executable != null and process.command_line like (\n  \"*net.ipv4.ip_forward*\", \"*/proc/sys/net/ipv4/ip_forward*\", \"*net.ipv6.conf.all.forwarding*\",\n  \"*/proc/sys/net/ipv6/conf/all/forwarding*\"\n) and (\n  (process.name == \"sysctl\" and process.args like (\"*-w*\", \"*--write*\", \"*=*\")) or\n  (\n    process.name in (\"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\") and process.args == \"-c\" and\n    process.command_line like \"*echo *\"\n  )\n)\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "5a138e2e-aec3-4240-9843-56825d0bc569",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1572",
+            "name": "Protocol Tunneling",
+            "reference": "https://attack.mitre.org/techniques/T1572/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "5a138e2e-aec3-4240-9843-56825d0bc569_1",
+  "type": "security-rule"
+}

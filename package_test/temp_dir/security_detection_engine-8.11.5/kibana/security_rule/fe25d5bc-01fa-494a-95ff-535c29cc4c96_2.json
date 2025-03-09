@@ -1,0 +1,105 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the use of Cmdlets and methods related to remote execution activities using WinRM. Attackers can abuse WinRM to perform lateral movement using built-in tools.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "PowerShell Script with Password Policy Discovery Capabilities",
+        "note": "",
+        "query": "event.category: \"process\" and host.os.type:windows and\n(\n  powershell.file.script_block_text: (\n    \"Get-ADDefaultDomainPasswordPolicy\" or\n    \"Get-ADFineGrainedPasswordPolicy\" or\n    \"Get-ADUserResultantPasswordPolicy\" or\n    \"Get-DomainPolicy\" or\n    \"Get-GPPPassword\" or\n    \"Get-PassPol\"\n  )\n  or\n  powershell.file.script_block_text: (\n    (\"defaultNamingContext\" or \"ActiveDirectory.DirectoryContext\" or \"ActiveDirectory.DirectorySearcher\") and\n    (\n      (\n        \".MinLengthPassword\" or\n        \".MinPasswordAge\" or\n        \".MaxPasswordAge\"\n      ) or\n      (\n        \"minPwdAge\" or\n        \"maxPwdAge\" or\n        \"minPwdLength\"\n      ) or\n      (\n        \"msDS-PasswordSettings\"\n      )\n    )\n  )\n) and not powershell.file.script_block_text : (\n    \"sentinelbreakpoints\" and \"Set-PSBreakpoint\" and \"PowerSploitIndicators\"\n  )\n  and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "fe25d5bc-01fa-494a-95ff-535c29cc4c96",
+        "setup": "The 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nAdministrative Templates \u003e\nWindows PowerShell \u003e\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Tactic: Execution",
+            "Data Source: PowerShell Logs",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1201",
+                        "name": "Password Policy Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1201/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 2
+    },
+    "id": "fe25d5bc-01fa-494a-95ff-535c29cc4c96_2",
+    "type": "security-rule"
+}

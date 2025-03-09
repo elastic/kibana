@@ -1,0 +1,139 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a user or role has assumed a role in AWS Security Token Service (STS). Users can assume a role to obtain temporary credentials and access AWS resources. Adversaries can use this technique for credential access and privilege escalation. This is a [New Terms](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-new-terms-rule) rule that identifies when a service assumes a role in AWS Security Token Service (STS) to obtain temporary credentials and access AWS resources. While often legitimate, adversaries may use this technique for unauthorized access, privilege escalation, or lateral movement within an AWS environment.",
+    "false_positives": [
+      "AWS administrators or automated processes might regularly assume roles for legitimate administrative purposes.",
+      "Applications integrated with AWS might assume roles to access AWS resources.",
+      "Automated workflows might assume roles to perform periodic tasks such as data backups, updates, or deployments."
+    ],
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "investigation_fields": {
+      "field_names": [
+        "@timestamp",
+        "user.name",
+        "user_agent.original",
+        "source.address",
+        "aws.cloudtrail.user_identity.arn",
+        "aws.cloudtrail.user_identity.type",
+        "aws.cloudtrail.resources.arn",
+        "aws.cloudtrail.resources.type",
+        "aws.cloudtrail.flattened.request_parameters.roleArn",
+        "aws.cloudtrail.flattened.request_parameters.roleSessionName",
+        "event.action",
+        "event.outcome",
+        "cloud.region",
+        "aws.cloudtrail.request_parameters",
+        "aws.cloudtrail.response_elements"
+      ]
+    },
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS STS Role Assumption by User",
+    "new_terms_fields": [
+      "user.name",
+      "aws.cloudtrail.flattened.request_parameters.roleArn"
+    ],
+    "note": "## Triage and Analysis\n\n### Investigating AWS STS Role Assumption by User\n\nThis rule detects when a user assumes a role in AWS Security Token Service (STS), receiving temporary credentials to access AWS resources. While often used for legitimate purposes, this action can be leveraged by adversaries to obtain unauthorized access, escalate privileges, or move laterally within an AWS environment.\n\n#### Possible Investigation Steps\n\n- **Identify the User and Assumed Role**:\n  - **User Identity**: Check `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.type` for details about the initiator of the `AssumeRole` action.\n  - **Role Assumed**: Review `aws.cloudtrail.flattened.request_parameters.roleArn` to confirm the role assumed and ensure it aligns with the user’s standard permissions.\n  - **Session Name**: Note `aws.cloudtrail.flattened.request_parameters.roleSessionName` for context on the purpose of the session.\n\n- **Evaluate Session Context and Credential Duration**:\n  - **Session Details**: Look into `aws.cloudtrail.user_identity.session_context.creation_date` for the start of the session and `aws.cloudtrail.user_identity.session_context.mfa_authenticated` to check for MFA usage.\n  - **Credential Validity**: Examine `aws.cloudtrail.flattened.request_parameters.durationSeconds` for how long the credentials are valid.\n  - **Expiration Time**: Use `aws.cloudtrail.flattened.response_elements.credentials.expiration` to confirm the credential expiration.\n\n- **Inspect User Agent and Source Information**:\n  - **User Agent**: Analyze the `user_agent.original` field to identify if specific tooling or SDKs like AWS CLI, Boto3, or custom agents were used.\n  - **Source IP and Geolocation**: Examine `source.address` and `source.geo` fields to determine the origin of the request, confirming if it aligns with expected locations.\n\n- **Correlate with Related Events**:\n  - **Identify Patterns**: Review related CloudTrail events for unusual access patterns, such as resource access or sensitive actions following this `AssumeRole` action.\n  - **Filter High-Volume Roles**: If this role or user has a high volume of access, evaluate `roleArn` or `user_agent` values for common patterns and add trusted entities as exceptions.\n\n- **Review the Privileges of the Assumed Role**:\n  - **Permissions**: Examine permissions associated with the `roleArn` to assess its access scope.\n  - **Authorized Usage**: Confirm if the role is used frequently for administrative purposes and if this aligns with the user’s regular responsibilities.\n\n### False Positive Analysis\n\n- **Automated Processes and Applications**: Applications or scheduled tasks may assume roles regularly for operational purposes. Validate the consistency of the `user_agent` or `roleArn` with known automated workflows.\n- **Standard IAM Policy Usage**: Confirm if the user or application routinely assumes this specific role for normal operations by reviewing historical activity.\n\n### Response and Remediation\n\n- **Terminate Unauthorized Sessions**: If the role assumption is deemed unauthorized, revoke the session by modifying IAM policies or the permissions associated with the assumed role.\n- **Strengthen Monitoring and Alerts**: Implement additional monitoring for specific high-risk roles, especially those with elevated permissions.\n- **Regularly Manage Exceptions**: Regularly review high-volume roles and user agent patterns to refine alerts, minimizing noise by adding trusted patterns as exceptions.\n- **Incident Response**: If confirmed as malicious, follow incident response protocols for containment, investigation, and remediation.\n\n### Additional Information\n\nFor more details on managing and securing AWS STS in your environment, refer to the [AWS STS documentation](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html).\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"sts.amazonaws.com\"\n    and event.action: \"AssumeRole\"\n    and event.outcome: \"success\"\n    and aws.cloudtrail.user_identity.type: (\"AssumedRole\" or \"IAMUser\")\n",
+    "references": [
+      "https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.user_identity.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "288a198e-9b9b-11ef-a0a8-f661ea17fbcd",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS STS",
+      "Resources: Investigation Guide",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "288a198e-9b9b-11ef-a0a8-f661ea17fbcd_1",
+  "type": "security-rule"
+}

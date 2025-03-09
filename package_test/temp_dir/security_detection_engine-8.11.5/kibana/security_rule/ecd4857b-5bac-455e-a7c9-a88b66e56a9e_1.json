@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the creation or modification of an executable file with an unexpected file extension. Attackers may attempt to evade detection by masquerading files using the file extension values used by image, audio, or document file types.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Executable File with Unusual Extension",
+        "query": "file where host.os.type == \"windows\" and event.action != \"deletion\" and\n\n /* MZ header or its common base64 equivalent TVqQ */\n file.Ext.header_bytes : (\"4d5a*\", \"54567151*\") and\n\n (\n   /* common image file extensions */\n   file.extension : (\"jpg\", \"jpeg\", \"emf\", \"tiff\", \"gif\", \"png\", \"bmp\", \"fpx\", \"eps\", \"svg\", \"inf\") or\n\n   /* common audio and video file extensions */\n   file.extension : (\"mp3\", \"wav\", \"avi\", \"mpeg\", \"flv\", \"wma\", \"wmv\", \"mov\", \"mp4\", \"3gp\") or\n\n   /* common document file extensions */\n   file.extension : (\"txt\", \"pdf\", \"doc\", \"docx\", \"rtf\", \"ppt\", \"pptx\", \"xls\", \"xlsx\", \"hwp\", \"html\")\n  ) and\n  not process.pid == 4 and\n  not process.executable : \"?:\\\\Program Files (x86)\\\\Trend Micro\\\\Client Server Security Agent\\\\Ntrtscan.exe\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.header_bytes",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pid",
+                "type": "long"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "ecd4857b-5bac-455e-a7c9-a88b66e56a9e",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.008",
+                                "name": "Masquerade File Type",
+                                "reference": "https://attack.mitre.org/techniques/T1036/008/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "ecd4857b-5bac-455e-a7c9-a88b66e56a9e_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,125 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when the Windows installer process msiexec.exe creates a new persistence entry via scheduled tasks or startup.",
+    "false_positives": [
+      "Legitimate scheduled tasks may be created during installation of new software."
+    ],
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.registry-*",
+      "logs-endpoint.events.file-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Persistence via a Windows Installer",
+    "query": "any where host.os.type == \"windows\" and \n (process.name : \"msiexec.exe\" or Effective_process.name : \"msiexec.exe\") and\n (\n  (event.category == \"file\" and event.action == \"creation\" and\n   file.path : (\"?:\\\\Windows\\\\System32\\\\Tasks\\\\*\",\n                \"?:\\\\programdata\\\\microsoft\\\\windows\\\\start menu\\\\programs\\\\startup\\\\*\",\n                \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\")) or\n\n  (event.category == \"registry\" and event.action == \"modification\" and\n   registry.path : (\"H*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                    \"H*\\\\Software\\\\WOW6432Node\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                    \"H*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                    \"H*\\\\Software\\\\WOW6432Node\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\"))\n  )\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "Effective_process.name",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "registry.path",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "1719ee47-89b8-4407-9d55-6dff2629dd4c",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1053",
+            "name": "Scheduled Task/Job",
+            "reference": "https://attack.mitre.org/techniques/T1053/",
+            "subtechnique": [
+              {
+                "id": "T1053.005",
+                "name": "Scheduled Task",
+                "reference": "https://attack.mitre.org/techniques/T1053/005/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1218",
+            "name": "System Binary Proxy Execution",
+            "reference": "https://attack.mitre.org/techniques/T1218/",
+            "subtechnique": [
+              {
+                "id": "T1218.007",
+                "name": "Msiexec",
+                "reference": "https://attack.mitre.org/techniques/T1218/007/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "1719ee47-89b8-4407-9d55-6dff2629dd4c_1",
+  "type": "security-rule"
+}

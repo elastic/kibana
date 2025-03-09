@@ -1,0 +1,248 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule is triggered when a hash indicator from the Threat Intel Filebeat module or integrations has a match against an event that contains file hashes, such as antivirus alerts, process creation, library load, and file operation events.",
+        "from": "now-65m",
+        "index": [
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "winlogbeat-*"
+        ],
+        "interval": "1h",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Threat Intel Hash Indicator Match",
+        "query": "file.hash.*:* or file.pe.imphash:*  or process.hash.*:* or process.pe.imphash:* or dll.hash.*:* or dll.pe.imphash:* \n",
+        "references": [
+            "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html",
+            "https://www.elastic.co/guide/en/security/master/es-threat-intel-integrations.html",
+            "https://www.elastic.co/security/tip"
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "dll.hash.*",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "dll.pe.imphash",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.hash.*",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "file.pe.imphash",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.hash.*",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.imphash",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 99,
+        "rule_id": "aab184d3-72b3-4639-b242-6597c99d8bca",
+        "severity": "critical",
+        "tags": [
+            "OS: Windows",
+            "Data Source: Elastic Endgame",
+            "Rule Type: Indicator Match"
+        ],
+        "threat_filters": [
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.category",
+                    "negate": false,
+                    "params": {
+                        "query": "threat"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.category": "threat"
+                    }
+                }
+            },
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.kind",
+                    "negate": false,
+                    "params": {
+                        "query": "enrichment"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.kind": "enrichment"
+                    }
+                }
+            },
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.type",
+                    "negate": false,
+                    "params": {
+                        "query": "indicator"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.type": "indicator"
+                    }
+                }
+            }
+        ],
+        "threat_index": [
+            "filebeat-*",
+            "logs-ti_*"
+        ],
+        "threat_indicator_path": "threat.indicator",
+        "threat_language": "kuery",
+        "threat_mapping": [
+            {
+                "entries": [
+                    {
+                        "field": "file.hash.md5",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.md5"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "file.hash.sha1",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.sha1"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "file.hash.sha256",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.sha256"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "file.pe.imphash",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.pe.imphash"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "dll.hash.md5",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.md5"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "dll.hash.sha1",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.sha1"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "dll.hash.sha256",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.sha256"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "process.hash.md5",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.md5"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "process.hash.sha1",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.sha1"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "process.hash.sha256",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.hash.sha256"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "dll.pe.imphash",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.pe.imphash"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "process.pe.imphash",
+                        "type": "mapping",
+                        "value": "threat.indicator.file.pe.imphash"
+                    }
+                ]
+            }
+        ],
+        "threat_query": "@timestamp \u003e= \"now-30d/d\" and event.module:(threatintel or ti_*) and (threat.indicator.file.hash.*:* or threat.indicator.file.pe.imphash:*) and not labels.is_ioc_transform_source:\"true\"",
+        "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
+        "timeline_title": "Generic Threat Match Timeline",
+        "type": "threat_match",
+        "version": 1
+    },
+    "id": "aab184d3-72b3-4639-b242-6597c99d8bca_1",
+    "type": "security-rule"
+}

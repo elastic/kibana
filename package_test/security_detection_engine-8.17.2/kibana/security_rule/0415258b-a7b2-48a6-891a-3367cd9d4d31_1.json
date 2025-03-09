@@ -1,0 +1,87 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule detects the first time a principal calls AWS Cloudwatch `CreateStack` or `CreateStackSet` API. Cloudformation is used to create a single collection of cloud resources called a stack, via a defined template file. An attacker with the appropriate privileges could leverage Cloudformation to create specific resources needed to further exploit the environment. This is a new terms rule that looks for the first instance of this behavior in the last 10 days for a role or IAM user within a particular account.",
+    "false_positives": [
+      "Verify whether the user identity should be using the `CreateStack` or `CreateStackSet` APIs. If known behavior is causing false positives, it can be exempted from the rule. The \"history_window_start\" value can be modified to reflect the expected frequency of known activity within a particular environment."
+    ],
+    "from": "now-6m",
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Time AWS Cloudformation Stack Creation by User",
+    "new_terms_fields": [
+      "cloud.account.id",
+      "user.name"
+    ],
+    "query": "event.dataset:aws.cloudtrail and event.provider:cloudformation.amazonaws.com and\n    event.action: (CreateStack or CreateStackSet) and event.outcome:success\n",
+    "references": [
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-cli-creating-stack.html/",
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html/",
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html/",
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStackSet.html/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "0415258b-a7b2-48a6-891a-3367cd9d4d31",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: Cloudformation",
+      "Use Case: Asset Visibility",
+      "Tactic: Execution"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": []
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "0415258b-a7b2-48a6-891a-3367cd9d4d31_1",
+  "type": "security-rule"
+}

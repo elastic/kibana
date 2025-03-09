@@ -1,0 +1,97 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "A supervised machine learning model (ProblemChild) has identified a suspicious Windows process event with high probability of it being malicious activity. Alternatively, the model's blocklist identified the event as being malicious.",
+        "from": "now-10m",
+        "index": [
+            "endgame-*",
+            "logs-endpoint.events.process-*",
+            "winlogbeat-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Machine Learning Detected a Suspicious Windows Event with a High Malicious Probability Score",
+        "note": "",
+        "query": "process where ((problemchild.prediction == 1 and problemchild.prediction_probability \u003e 0.98) or\nblocklist_label == 1) and not process.args : (\"*C:\\\\WINDOWS\\\\temp\\\\nessus_*.txt*\", \"*C:\\\\WINDOWS\\\\temp\\\\nessus_*.tmp*\")\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/problemchild",
+            "https://www.elastic.co/security-labs/detecting-living-off-the-land-attacks-with-new-elastic-integration"
+        ],
+        "related_integrations": [
+            {
+                "package": "problemchild",
+                "version": "^2.0.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "blocklist_label",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "problemchild.prediction",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "problemchild.prediction_probability",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "994e40aa-8c85-43de-825e-15f665375ee8",
+        "setup": "The Living-off-the-Land (LotL) Detection integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "OS: Windows",
+            "Data Source: Elastic Endgame",
+            "Use Case: Living off the Land Attack Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.004",
+                                "name": "Masquerade Task or Service",
+                                "reference": "https://attack.mitre.org/techniques/T1036/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "994e40aa-8c85-43de-825e-15f665375ee8_1",
+    "type": "security-rule"
+}

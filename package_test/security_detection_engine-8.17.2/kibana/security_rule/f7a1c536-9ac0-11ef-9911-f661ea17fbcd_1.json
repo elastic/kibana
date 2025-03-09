@@ -1,0 +1,123 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the creation of an AWS Identity and Access Management (IAM) user initiated by an assumed role on an EC2 instance. Assumed roles allow users or services to temporarily adopt different AWS permissions, but the creation of IAM users through these roles—particularly from within EC2 instances—may indicate a compromised instance. Adversaries might exploit such permissions to establish persistence by creating new IAM users under unauthorized conditions.",
+    "false_positives": [
+      "Assumed roles may be used by legitimate automated systems to create IAM users for specific workflows. Verify if this event aligns with known automation activities. If the action is routine for specific roles or user agents (e.g., `aws-cli`, `boto3`), consider adding those roles or user agents to a monitored exception list for streamlined review."
+    ],
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "investigation_fields": {
+      "field_names": [
+        "@timestamp",
+        "user.name",
+        "source.address",
+        "aws.cloudtrail.user_identity.arn",
+        "aws.cloudtrail.user_identity.type",
+        "user_agent.original",
+        "event.action",
+        "event.outcome",
+        "cloud.region",
+        "aws.cloudtrail.request_parameters",
+        "aws.cloudtrail.response_elements"
+      ]
+    },
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS IAM Create User via Assumed Role on EC2 Instance",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn"
+    ],
+    "note": "## Triage and Analysis\n\n### Investigating AWS IAM User Creation via Assumed Role on an EC2 Instance\n\nThis rule detects when an AWS Identity and Access Management (IAM) user is created through an assumed role on an EC2 instance. This action may indicate a potentially compromised instance where an adversary could be using the instance’s permissions to create a new IAM user, enabling persistent unauthorized access.\n\n#### Possible Investigation Steps\n\n- **Identify the Assumed Role and Initiating Instance**:\n  - **Role and Instance**: Examine the `aws.cloudtrail.user_identity.arn` field to determine the specific EC2 instance and role used for this action (e.g., `arn:aws:sts::[account-id]:assumed-role/[role-name]/[instance-id]`). Verify if this behavior aligns with expected usage or represents an anomaly.\n  - **Session Context**: Check the `session_issuer` fields in `aws.cloudtrail.user_identity.session_context` for details about the role assumed by the instance, along with `mfa_authenticated` to determine if Multi-Factor Authentication (MFA) was used.\n\n- **Analyze the Target IAM User**:\n  - **New User Details**: Inspect `aws.cloudtrail.flattened.request_parameters.userName` to see the username that was created. Look at `aws.cloudtrail.flattened.response_elements.user.userName` for confirmation of successful user creation, and validate if the user is expected or authorized.\n  - **Review Creation Time and Context**: Compare the creation time (`@timestamp`) of the user with other activities from the same instance and role to assess if this creation was part of a larger chain of actions.\n\n- **Check User Agent and Tooling**:\n  - **User Agent Analysis**: Review `user_agent.original` to see if AWS CLI, SDK, or other tooling was used for this request. Identifiers such as `aws-cli`, `boto3`, or similar SDK names can indicate the method used, which may differentiate automation from interactive actions.\n  - **Source IP and Location**: Use the `source.address` and `source.geo` fields to identify the IP address and geographic location of the event. Verify if this aligns with expected access patterns for your environment.\n\n- **Evaluate for Persistence Indicators**:\n  - **Role Permissions**: Check the permissions associated with the assumed role (`arn:aws:iam::[account-id]:role/[role-name]`) to determine if creating IAM users is a legitimate activity for this role.\n  - **Automated Role Patterns**: If the assumed role or instance typically creates IAM users for automation purposes, validate this action against historical records to confirm if the event is consistent with normal patterns.\n\n- **Review Related CloudTrail Events**:\n  - **Additional IAM Actions**: Investigate for other recent IAM or CloudTrail events tied to this role or instance, especially `CreateAccessKey` or `AttachUserPolicy` actions. These could signal further attempts to empower or utilize the newly created user.\n  - **Correlate with Other Suspicious Activities**: Determine if other roles or instances recently initiated similar unusual actions, such as privilege escalations or data access.\n\n### False Positive Analysis\n\n- **Expected Automation**: Assumed roles may be used by legitimate automated systems that create users for specific workflows. Confirm if this event aligns with known automation activities.\n- **User Agent and Role Exceptions**: If this action is routine for specific roles or user agents (e.g., `aws-cli`, `boto3`), consider adding those roles or user agents to a monitored exception list for streamlined review.\n\n### Response and Remediation\n\n- **Immediate Access Review**: If user creation was unauthorized, restrict the assumed role’s permissions to prevent further user creation.\n- **Delete Unauthorized Users**: Confirm and remove any unauthorized IAM users, adjusting IAM policies to reduce similar risks.\n- **Enhance Monitoring and Alerts**: Enable enhanced logging or real-time alerts for this role or instance to detect further unauthorized access attempts.\n- **Policy Update**: Consider updating IAM policies associated with roles on EC2 instances to limit sensitive actions like IAM user creation.\n\n### Additional Information\n\nFor further guidance on managing IAM roles and permissions within AWS environments, refer to the [AWS IAM documentation](https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateUser.html) and AWS best practices for security.\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"iam.amazonaws.com\"\n    and event.action: \"CreateUser\"\n    and event.outcome: \"success\"\n    and aws.cloudtrail.user_identity.type: \"AssumedRole\"\n    and aws.cloudtrail.user_identity.arn: *i-*\n",
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateUser.html",
+      "https://www.dionach.com/en-us/breaking-into-the-cloud-red-team-tactics-for-aws-compromise/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.user_identity.arn",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.user_identity.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "f7a1c536-9ac0-11ef-9911-f661ea17fbcd",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Persistence"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1136",
+            "name": "Create Account",
+            "reference": "https://attack.mitre.org/techniques/T1136/",
+            "subtechnique": [
+              {
+                "id": "T1136.003",
+                "name": "Cloud Account",
+                "reference": "https://attack.mitre.org/techniques/T1136/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "f7a1c536-9ac0-11ef-9911-f661ea17fbcd_1",
+  "type": "security-rule"
+}

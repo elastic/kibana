@@ -1,0 +1,119 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This detection rule detects the creation of a shell through a chain consisting of the execution of a suspicious binary (located in a commonly abused location or executed manually) followed by a network event and ending with a shell being spawned. Stageless reverse tcp shells display this behaviour. Attackers may spawn reverse shells to establish persistence onto a target system.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Reverse Shell via Suspicious Binary",
+        "query": "sequence by host.id, process.entity_id with maxspan=1s\n[ process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and\n  process.executable : (\n  \"./*\", \"/tmp/*\", \"/var/tmp/*\", \"/var/www/*\", \"/dev/shm/*\", \"/etc/init.d/*\", \"/etc/rc*.d/*\",\n  \"/etc/crontab\", \"/etc/cron.*\", \"/etc/update-motd.d/*\", \"/usr/lib/update-notifier/*\",\n  \"/boot/*\", \"/srv/*\", \"/run/*\", \"/root/*\", \"/etc/rc.local\"\n   ) and\n  process.parent.name : (\"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\") and not\n  process.name : (\"curl\", \"wget\", \"ping\", \"apt\", \"dpkg\", \"yum\", \"rpm\", \"dnf\", \"dockerd\") ]\n[ network where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"connection_attempted\" and\n  process.executable : (\n  \"./*\", \"/tmp/*\", \"/var/tmp/*\", \"/var/www/*\", \"/dev/shm/*\", \"/etc/init.d/*\", \"/etc/rc*.d/*\",\n  \"/etc/crontab\", \"/etc/cron.*\", \"/etc/update-motd.d/*\", \"/usr/lib/update-notifier/*\",\n  \"/boot/*\", \"/srv/*\", \"/run/*\", \"/root/*\", \"/etc/rc.local\"\n   ) ]\n[ process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \n  process.name : (\"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\") and \n  process.parent.name : (\"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\") ]\n",
+        "references": [
+            "https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "fa3a59dc-33c3-43bf-80a9-e8437a922c7f",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1071",
+                        "name": "Application Layer Protocol",
+                        "reference": "https://attack.mitre.org/techniques/T1071/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "fa3a59dc-33c3-43bf-80a9-e8437a922c7f_1",
+    "type": "security-rule"
+}

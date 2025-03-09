@@ -1,0 +1,125 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule identifies the creation of SSH keys using the ssh-keygen tool, which is the standard utility for generating SSH keys. Users often create SSH keys for authentication with remote services. However, threat actors can exploit this tool to move laterally across a network or maintain persistence by generating unauthorized SSH keys, granting them SSH access to systems.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "SSH Key Generated via ssh-keygen",
+    "query": "file where host.os.type == \"linux\" and event.action in (\"creation\", \"file_create_event\") and\nprocess.executable == \"/usr/bin/ssh-keygen\" and file.path : (\"/home/*/.ssh/*\", \"/root/.ssh/*\", \"/etc/ssh/*\") and\nnot file.name : \"known_hosts.*\"\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "7df3cb8b-5c0c-4228-b772-bb6cd619053c",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Lateral Movement",
+      "Tactic: Persistence",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.004",
+                "name": "SSH Authorized Keys",
+                "reference": "https://attack.mitre.org/techniques/T1098/004/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.004",
+                "name": "SSH",
+                "reference": "https://attack.mitre.org/techniques/T1021/004/"
+              }
+            ]
+          },
+          {
+            "id": "T1563",
+            "name": "Remote Service Session Hijacking",
+            "reference": "https://attack.mitre.org/techniques/T1563/",
+            "subtechnique": [
+              {
+                "id": "T1563.001",
+                "name": "SSH Hijacking",
+                "reference": "https://attack.mitre.org/techniques/T1563/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "7df3cb8b-5c0c-4228-b772-bb6cd619053c_1",
+  "type": "security-rule"
+}
