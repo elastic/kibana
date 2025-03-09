@@ -11,7 +11,10 @@ import React from 'react';
 
 import userEvent from '@testing-library/user-event';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import {
+  LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+} from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
@@ -35,7 +38,13 @@ describe('external link component', () => {
   });
 
   test('by default opens in new tab and renders external icon', async () => {
-    render(<ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={defaultLinkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
+      />
+    );
 
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toBeInTheDocument();
@@ -50,7 +59,13 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={linkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
+      />
+    );
     const link = await screen.findByTestId('externalLink--foo');
     const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
     expect(externalIcon).toBeInTheDocument();
@@ -61,7 +76,13 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={linkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
+      />
+    );
 
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toHaveTextContent('https://example.com');
@@ -76,7 +97,13 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={linkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
+      />
+    );
 
     const link = await screen.findByTestId('externalLink--foo');
     await userEvent.click(link);
@@ -90,7 +117,13 @@ describe('external link component', () => {
       destination: 'file://buzz',
       error: new Error('URL not supported'),
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={linkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
+      />
+    );
 
     const link = screen.getByTestId('externalLink--foo--error');
     expect(link).toBeDisabled();

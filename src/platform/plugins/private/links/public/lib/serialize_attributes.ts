@@ -29,6 +29,7 @@ export const serializeLinksAttributes = (
     description: state.defaultPanelDescription,
     layout: state.layout,
     links: linksToSave,
+    textOverflow: state.textOverflow,
   };
 
   const serializedState = shouldExtractReferences

@@ -13,7 +13,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import LinksEditor, { LinksEditorProps } from './links_editor';
 import { LinksStrings } from '../links_strings';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import {
+  LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+  LINK_TEXT_OVERFLOW_WRAP,
+} from '../../../common/content_management';
 import { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
@@ -96,6 +100,19 @@ describe('LinksEditor', () => {
     });
   });
 
+  test('shows text overflow button group', async () => {
+    renderEditor();
+    expect(
+      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
+    ).toHaveTextContent(LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel());
+    expect(screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`)).toHaveTextContent(
+      LinksStrings.editor.linkEditor.getTextOverflowWrapLabel()
+    );
+  });
+
   test('saving by reference panels calls onSaveToLibrary', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     const onSaveToLibrary = jest.fn().mockImplementation(() => Promise.resolve());
@@ -104,7 +121,13 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    
+    expect(onSaveToLibrary).toHaveBeenCalledWith(
+      orderedLinks,
+      LINKS_VERTICAL_LAYOUT,
+      LINK_TEXT_OVERFLOW_ELLIPSIS
+    );
+
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
@@ -115,6 +138,11 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+
+    expect(onAddToDashboard).toHaveBeenCalledWith(
+      orderedLinks,
+      LINKS_VERTICAL_LAYOUT,
+      LINK_TEXT_OVERFLOW_ELLIPSIS
+    );
   });
 });

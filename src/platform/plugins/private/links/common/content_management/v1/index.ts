@@ -15,6 +15,7 @@ export type {
   LinkOptions,
   LinksLayoutType,
   LinkType,
+  LinksTextOverflowType,
 } from './types';
 export type LinksItem = LinksCrudTypes['Item'];
 export {
@@ -22,4 +23,6 @@ export {
   DASHBOARD_LINK_TYPE,
   LINKS_VERTICAL_LAYOUT,
   LINKS_HORIZONTAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+  LINK_TEXT_OVERFLOW_WRAP,
 } from './constants';

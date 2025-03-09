@@ -131,6 +131,22 @@ export const LinksStrings = {
         i18n.translate('links.linkEditor.linkOptionsLabel', {
           defaultMessage: 'Options',
         }),
+      getLinkTextOverflowLabel: () =>
+        i18n.translate('links.linkEditor.textOverflowLabel', {
+          defaultMessage: 'Text Overflow',
+        }),
+      getLinkTextOverflowLegend: () =>
+        i18n.translate('links.editor.textOverflowLegend', {
+          defaultMessage: 'Text Overflow',
+        }),
+      getTextOverflowWrapLabel: () =>
+        i18n.translate('links.editor.textOverflowWrap', {
+          defaultMessage: 'Wrap',
+        }),
+      getTextOverflowEllipsisLabel: () =>
+        i18n.translate('links.editor.textOverflowEllipsis', {
+          defaultMessage: 'Ellipsis',
+        }),
     },
   },
 };

@@ -23,6 +23,7 @@ import {
 
 import {
   DASHBOARD_LINK_TYPE,
+  LinksTextOverflowType,
   LINKS_VERTICAL_LAYOUT,
   LinksLayoutType,
 } from '../../../common/content_management';
@@ -33,10 +34,16 @@ import { DashboardLinkStrings } from './dashboard_link_strings';
 export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  textOverflow: LinksTextOverflowType;
   parentApi: LinksParentApi;
 }
 
-export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLinkProps) => {
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+  parentApi,
+  textOverflow,
+}: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
@@ -151,6 +158,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   return (
     <EuiListGroupItem
       size="s"
+      wrapText={textOverflow === 'textOverflowWrap'}
       color="text"
       {...onClickProps}
       id={id}

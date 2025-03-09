@@ -27,11 +27,17 @@ export const deserializeLinksSavedObject = async (
 
   const links = await resolveLinks(attributes.links ?? []);
 
-  const { title: defaultPanelTitle, description: defaultPanelDescription, layout } = attributes;
+  const {
+    title: defaultPanelTitle,
+    description: defaultPanelDescription,
+    layout,
+    textOverflow,
+  } = attributes;
 
   return {
     links,
     layout,
+    textOverflow,
     savedObjectId: linksSavedObject.id,
     defaultPanelTitle,
     defaultPanelDescription,
