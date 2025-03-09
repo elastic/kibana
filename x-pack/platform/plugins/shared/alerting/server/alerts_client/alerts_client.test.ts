@@ -61,7 +61,7 @@ import {
   LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
-import { keys, omit, range } from 'lodash';
+import { keys, omit } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { expandFlattenedAlert } from './lib';
@@ -152,15 +152,6 @@ const trackedAlert2Raw = {
     uuid: 'def',
   },
 };
-const trackedAlert2 = new Alert('2', trackedAlert2Raw);
-const trackedRecovered3 = new Alert('3', {
-  state: { foo: false },
-  meta: {
-    flapping: false,
-    flappingHistory: [true, false, false],
-    uuid: 'xyz',
-  },
-});
 
 const fetchedAlert1 = {
   [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
@@ -381,14 +372,19 @@ describe('Alerts Client', () => {
           alertDelay: 0,
         };
         logAlertsOpts = { shouldLogAlerts: false, ruleRunMetricsStore };
+        clusterClient.search.mockResolvedValue({
+          took: 10,
+          timed_out: false,
+          _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+          hits: {
+            total: { relation: 'eq', value: 0 },
+            hits: [],
+          },
+        });
       });
 
       describe('initializeExecution()', () => {
         test('should initialize LegacyAlertsClient', async () => {
-          mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
-            active: {},
-            recovered: {},
-          }));
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
@@ -399,9 +395,6 @@ describe('Alerts Client', () => {
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
             defaultExecutionOpts
           );
-
-          // no alerts to query for
-          expect(clusterClient.search).not.toHaveBeenCalled();
 
           spy.mockRestore();
         });
@@ -427,15 +420,10 @@ describe('Alerts Client', () => {
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
             defaultExecutionOpts
           );
-          expect(mockLegacyAlertsClient.getTrackedAlerts).not.toHaveBeenCalled();
           spy.mockRestore();
         });
 
-        test('should query for alert UUIDs if they exist', async () => {
-          mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
-            active: { '1': trackedAlert1, '2': trackedAlert2 },
-            recovered: { '3': trackedRecovered3 },
-          }));
+        test('should query for alerts', async () => {
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
@@ -450,14 +438,23 @@ describe('Alerts Client', () => {
           expect(clusterClient.search).toHaveBeenCalledWith({
             query: {
               bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': '1' } },
-                  { terms: { 'kibana.alert.uuid': ['abc', 'def', 'xyz'] } },
+                must: {
+                  term: {
+                    [ALERT_RULE_UUID]: '1',
+                  },
+                },
+                must_not: {
+                  term: {
+                    [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
+                  },
+                },
+                should: [
+                  { term: { [ALERT_STATUS]: 'active' } },
+                  { term: { [ALERT_STATUS]: 'recovered' } },
                 ],
               },
             },
             seq_no_primary_term: true,
-            size: 3,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
@@ -467,54 +464,24 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
-        test('should split queries into chunks when there are greater than 10,000 alert UUIDs', async () => {
-          mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
-            active: range(15000).reduce((acc: Record<string, Alert<{}, {}>>, value: number) => {
-              const id: string = `${value}`;
-              acc[id] = new Alert(id, {
-                state: { foo: true },
-                meta: {
-                  flapping: false,
-                  flappingHistory: [true, false],
-                  lastScheduledActions: { group: 'default', date: new Date().toISOString() },
-                  uuid: id,
-                },
-              });
-              return acc;
-            }, {}),
-            recovered: {},
-          }));
-          const spy = jest
-            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
-            .mockImplementation(() => mockLegacyAlertsClient);
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          await alertsClient.initializeExecution(defaultExecutionOpts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            defaultExecutionOpts
-          );
-
-          expect(clusterClient.search).toHaveBeenCalledTimes(2);
-
-          spy.mockRestore();
-        });
-
         test('should log but not throw if query returns error', async () => {
           clusterClient.search.mockImplementation(() => {
             throw new Error('search failed!');
           });
-          mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
-            active: { '1': trackedAlert1 },
-            recovered: {},
-          }));
+
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          await alertsClient.initializeExecution(defaultExecutionOpts);
+          try {
+            await alertsClient.initializeExecution(defaultExecutionOpts);
+          } catch (e) {
+            spy.mockRestore();
+            expect(e.message).toBe(`search failed!`);
+          }
+
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
             defaultExecutionOpts
           );
@@ -522,13 +489,22 @@ describe('Alerts Client', () => {
           expect(clusterClient.search).toHaveBeenCalledWith({
             query: {
               bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': '1' } },
-                  { terms: { 'kibana.alert.uuid': ['abc'] } },
+                must: {
+                  term: {
+                    [ALERT_RULE_UUID]: '1',
+                  },
+                },
+                must_not: {
+                  term: {
+                    [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
+                  },
+                },
+                should: [
+                  { term: { [ALERT_STATUS]: 'active' } },
+                  { term: { [ALERT_STATUS]: 'recovered' } },
                 ],
               },
             },
-            size: 1,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
@@ -1610,6 +1586,15 @@ describe('Alerts Client', () => {
         });
 
         test('should log and swallow error if bulk indexing throws error', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [],
+            },
+          });
           clusterClient.bulk.mockImplementation(() => {
             throw new Error('fail');
           });
@@ -2671,6 +2656,7 @@ describe('Alerts Client', () => {
           const alertSource = {
             ...mockAlertPayload,
             [ALERT_INSTANCE_ID]: alertInstanceId,
+            [ALERT_STATUS]: 'active',
           };
 
           clusterClient.search.mockResolvedValue({
@@ -3162,11 +3148,32 @@ describe('Alerts Client', () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
+                },
+              ],
+            },
           });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
           expect(alertsClient.isTrackedAlert('1')).toBe(true);
           expect(alertsClient.isTrackedAlert('2')).toBe(true);
           expect(alertsClient.isTrackedAlert('3')).toBe(false);
