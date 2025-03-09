@@ -54,68 +54,44 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     () => {
       /** Update the styles of the panel via a subscription to prevent re-renders */
       const activePanelStyleSubscription = combineLatest([
-        gridLayoutStateManager.activePanel$,
+        gridLayoutStateManager.interactionEvent$,
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
       ])
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-        .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
+        .subscribe(([currentInteractionEvent, gridLayout, proposedGridLayout]) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
           const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
           if (!ref || !panel) return;
 
-          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
-
-          if (panelId === activePanel?.id) {
+          if (panelId === currentInteractionEvent?.id) {
             ref.classList.add('kbnGridPanel--active');
-
-            // if the current panel is active, give it fixed positioning depending on the interaction event
-            const { position: draggingPosition } = activePanel;
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-
             ref.style.zIndex = `${euiTheme.levels.modal}`;
+
             if (currentInteractionEvent?.type === 'resize') {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               ref.style.width = `${Math.max(
-                draggingPosition.right - draggingPosition.left,
+                currentInteractionEvent.startingRect.width +
+                  currentInteractionEvent.translateRect.width,
                 runtimeSettings.columnPixelWidth
               )}px`;
               ref.style.height = `${Math.max(
-                draggingPosition.bottom - draggingPosition.top,
+                currentInteractionEvent.startingRect.height +
+                  currentInteractionEvent.translateRect.height,
                 runtimeSettings.rowHeight
               )}px`;
-
-              // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-              ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridRowStart = `${panel.row + 1}`;
-              ref.style.gridColumnEnd = `auto`;
-              ref.style.gridRowEnd = `auto`;
             } else {
-              // if the current panel is being dragged, render it with a fixed position + size
-              ref.style.position = 'fixed';
-
-              ref.style.left = `${draggingPosition.left}px`;
-              ref.style.top = `${draggingPosition.top}px`;
-              ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-              ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
-
-              // undo any "lock to grid" styles
-              ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
+              ref.style.transform = `translate(${currentInteractionEvent.translateRect.left}px, ${currentInteractionEvent.translateRect.top}px)`;
             }
           } else {
             ref.classList.remove('kbnGridPanel--active');
-
-            ref.style.zIndex = `auto`;
-
-            // if the panel is not being dragged and/or resized, undo any fixed position styles
-            ref.style.position = '';
-            ref.style.left = ``;
-            ref.style.top = ``;
+            ref.style.transform = ``;
             ref.style.width = ``;
+            ref.style.zIndex = 'auto';
             // setting the height is necessary for mobile mode
             ref.style.height = `calc(1px * (${panel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
 
-            // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
             ref.style.gridRowStart = `${panel.row + 1}`;

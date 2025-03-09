@@ -11,41 +11,53 @@ import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
 import { GridLayoutStateManager, GridPanelData } from '../types';
-import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './pointer_event_utils';
+import { getDragPreviewRect, getResizePreviewRect } from './pointer_event_utils';
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
 import { UserInteractionEvent } from './types';
+import { getPointerPosition } from './sensors';
 
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   type: 'drag' | 'resize',
   rowId: string,
-  panelId: string
+  panelId: string,
+  startingMouse: MutableRefObject<{
+    x: number;
+    y: number;
+  }>
 ) => {
   const panelRef = gridLayoutStateManager.panelRefs.current[rowId][panelId];
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
 
+  const { clientX, clientY } = getPointerPosition(e);
+  startingMouse.current = { x: clientX, y: clientY };
+
   gridLayoutStateManager.interactionEvent$.next({
     type,
     id: panelId,
-    panelDiv: panelRef,
     targetRow: rowId,
-    pointerOffsets: getPointerOffsets(e, panelRect),
+    panelDiv: panelRef,
+    startingRect: panelRect,
+    // start with no translations
+    translateRect: {
+      top: 0,
+      left: 0,
+      width: 0,
+      height: 0,
+    },
   });
-
   gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
 };
 
 export const commitAction = ({
-  activePanel$,
   interactionEvent$,
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
-  activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   const proposedGridLayoutValue = proposedGridLayout$.getValue();
   if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
@@ -55,15 +67,19 @@ export const commitAction = ({
 };
 
 export const moveAction = (
+  type: 'drag' | 'resize',
   gridLayoutStateManager: GridLayoutStateManager,
   pointerPixel: { clientX: number; clientY: number },
-  lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
+  lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>,
+  startingMouse: MutableRefObject<{
+    x: number;
+    y: number;
+  }>
 ) => {
   const {
     runtimeSettings$: { value: runtimeSettings },
     interactionEvent$,
     proposedGridLayout$,
-    activePanel$,
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
@@ -71,30 +87,29 @@ export const moveAction = (
     // if no interaction event return early
     return;
   }
-
   const currentLayout = proposedGridLayout$.value;
-
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
-
   if (!currentPanelData) {
     return;
   }
 
+  // calculate the translation between th starting mouse position and the current one
+  const translate = {
+    x: pointerPixel.clientX - startingMouse.current.x,
+    y: pointerPixel.clientY - startingMouse.current.y,
+  };
   const isResize = interactionEvent.type === 'resize';
-
   const previewRect = (() => {
     return isResize
       ? getResizePreviewRect({
           interactionEvent,
-          pointerPixel,
+          translate,
         })
       : getDragPreviewRect({
           interactionEvent,
-          pointerPixel,
+          translate,
         });
   })();
-
-  activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
@@ -118,23 +133,28 @@ export const moveAction = (
     });
     return highestOverlapRowId;
   })();
-  const hasChangedGridRow = targetRowId !== lastRowId;
 
-  // re-render when the target row changes
-  if (hasChangedGridRow) {
-    interactionEvent$.next({
-      ...interactionEvent,
-      targetRow: targetRowId,
-    });
-  }
+  // trigger an updated interaction event now that we now which grid row is being targetted
+  interactionEvent$.next({
+    ...interactionEvent,
+    type,
+    targetRow: targetRowId,
+    // resize events only mutate width + height; drag events only mutate top + left
+    translateRect: {
+      top: isResize ? 0 : translate.y,
+      left: isResize ? 0 : translate.x,
+      width: isResize ? translate.x : 0,
+      height: isResize ? translate.y : 0,
+    },
+  });
 
   // calculate the requested grid position
+  const hasChangedGridRow = targetRowId !== lastRowId;
   const targetedGridRow = gridRowElements[targetRowId];
   const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
   const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
-
   const localXCoordinate = isResize
     ? previewRect.right - targetedGridLeft
     : previewRect.left - targetedGridLeft;
