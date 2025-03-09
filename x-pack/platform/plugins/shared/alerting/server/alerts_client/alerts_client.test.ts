@@ -142,7 +142,7 @@ const trackedAlert1Raw = {
     uuid: 'abc',
   },
 };
-const trackedAlert1 = new Alert('1', trackedAlert1Raw);
+
 const trackedAlert2Raw = {
   state: { foo: true, start: '2023-03-28T02:27:28.159Z', duration: '36000000000000' },
   meta: {
