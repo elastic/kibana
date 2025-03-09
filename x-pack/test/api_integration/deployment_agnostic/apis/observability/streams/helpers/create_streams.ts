@@ -33,7 +33,7 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
             'stream.name': {
-              type: 'keyword',
+              type: 'system',
             },
           },
           routing: [
