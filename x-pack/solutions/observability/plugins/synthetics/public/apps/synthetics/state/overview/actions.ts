@@ -31,3 +31,5 @@ export const refreshOverviewTrends = createAsyncAction<void, TrendTable, any>(
 export const trendStatsBatch = createAsyncAction<TrendRequest[], GetTrendPayload, TrendRequest[]>(
   'batchTrendStats'
 );
+
+export const setRollupLocations = createAction<boolean>('setRollupLocations');

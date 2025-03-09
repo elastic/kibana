@@ -35,6 +35,7 @@ export interface SyntheticsUrlParams {
   packagePolicyId?: string;
   cloneId?: string;
   spaceId?: string;
+  rollupLocations?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -91,6 +92,7 @@ export const getSupportedUrlParams = (params: {
     groupOrderBy,
     packagePolicyId,
     spaceId,
+    rollupLocations,
   } = filteredParams;
 
   return {
@@ -123,6 +125,7 @@ export const getSupportedUrlParams = (params: {
     locationId: locationId || undefined,
     cloneId: filteredParams.cloneId,
     spaceId: spaceId || undefined,
+    rollupLocations: rollupLocations || '',
   };
 };
 
