@@ -19,6 +19,8 @@ import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
+import { deleteConnectors } from '../../common/connectors';
+import { deleteConversations } from '../../common/conversations';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -51,36 +53,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       })
       .expect(200);
     return parseCookie(response.headers['set-cookie'][0])!;
-  }
-
-  async function deleteConversations() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/conversations',
-    });
-
-    for (const conversation of response.body.conversations) {
-      await observabilityAIAssistantAPIClient.editor({
-        endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
-        params: {
-          path: {
-            conversationId: conversation.conversation.id,
-          },
-        },
-      });
-    }
-  }
-
-  async function deleteConnectors() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'GET /internal/observability_ai_assistant/connectors',
-    });
-
-    for (const connector of response.body) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    }
   }
 
   async function createOldConversation() {
@@ -154,8 +126,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Conversations', () => {
     let proxy: LlmProxy;
     before(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await createOldConversation();
 
@@ -389,7 +361,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
             describe('and opening an old conversation', () => {
               before(async () => {
-                log.info('SQREN: Opening the old conversation');
                 const conversations = await testSubjects.findAll(
                   ui.pages.conversations.conversationLink
                 );
@@ -408,7 +379,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     'And what are SLIs?'
                   );
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
-                  log.info('SQREN: Waiting for the message to be displayed');
 
                   await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
@@ -418,7 +388,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   before(async () => {
                     await telemetry.setOptIn(true);
 
-                    log.info('SQREN: Clicking on the positive feedback button');
                     const feedbackButtons = await testSubjects.findAll(
                       ui.pages.conversations.positiveFeedbackButton
                     );
@@ -457,8 +426,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     after(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await ui.auth.logout();
       proxy.close();

@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -85,12 +86,18 @@ export function ChatFlyout({
       observabilityAIAssistant: { ObservabilityAIAssistantMultipaneFlyoutContext },
     },
   } = useKibana();
-  const conversationList = useConversationList();
+
+  const {
+    conversations,
+    isLoadingConversationList,
+    setIsUpdatingConversationList,
+    refreshConversations,
+  } = useConversationList();
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
   const onConversationDuplicate = (conversation: Conversation) => {
-    conversationList.conversations.refresh();
+    refreshConversations();
     setInitialMessages([]);
     setConversationId(conversation.conversation.id);
   };
@@ -147,6 +154,10 @@ export function ChatFlyout({
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
     onFlyoutPositionModeChange?.(newFlyoutPositionMode);
+  };
+
+  const updateDisplayedConversation = (id?: string) => {
+    setConversationId(id || undefined);
   };
 
   return isOpen ? (
@@ -223,19 +234,16 @@ export function ChatFlyout({
 
               {conversationsExpanded ? (
                 <ConversationList
-                  conversations={conversationList.conversations}
-                  isLoading={conversationList.isLoading}
+                  conversations={conversations}
+                  isLoading={isLoadingConversationList}
                   selectedConversationId={conversationId}
-                  onConversationDeleteClick={(deletedConversationId) => {
-                    conversationList.deleteConversation(deletedConversationId).then(() => {
-                      if (deletedConversationId === conversationId) {
-                        setConversationId(undefined);
-                      }
-                    });
-                  }}
+                  currentUser={currentUser as AuthenticatedUser}
                   onConversationSelect={(nextConversationId) => {
                     setConversationId(nextConversationId);
                   }}
+                  setIsUpdatingConversationList={setIsUpdatingConversationList}
+                  refreshConversations={refreshConversations}
+                  updateDisplayedConversation={updateDisplayedConversation}
                 />
               ) : (
                 <EuiPopover
@@ -283,7 +291,7 @@ export function ChatFlyout({
                   updateConversationIdInPlace(conversation.conversation.id);
                 }
                 setConversationId(conversation.conversation.id);
-                conversationList.conversations.refresh();
+                refreshConversations();
               }}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
               navigateToConversation={
@@ -294,6 +302,9 @@ export function ChatFlyout({
                     }
                   : undefined
               }
+              setIsUpdatingConversationList={setIsUpdatingConversationList}
+              refreshConversations={refreshConversations}
+              updateDisplayedConversation={updateDisplayedConversation}
               onConversationDuplicate={onConversationDuplicate}
             />
           </EuiFlexItem>
