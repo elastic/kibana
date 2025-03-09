@@ -13,6 +13,7 @@ import {
   RuleNotifyWhenTypeValues,
   ThrottledActions,
 } from '../../../../common';
+import { isAdvancedThrottled } from './advanced_throttle_helper';
 
 export const isSummaryAction = (action?: RuleAction) => {
   return action?.frequency?.summary ?? false;
@@ -59,7 +60,12 @@ export const isSummaryActionThrottled = ({
     logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
   }
 
-  const throttled = new Date(throttledAction.date).getTime() + throttleMills > Date.now();
+  const throttled = isAdvancedThrottled({
+    advancedThrottle: action?.frequency?.advancedThrottle,
+    throttleMills,
+    date: new Date(throttledAction.date),
+    logger,
+  });
 
   if (throttled) {
     logger.debug(

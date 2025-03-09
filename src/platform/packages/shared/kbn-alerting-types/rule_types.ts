@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
+import { Frequency, Weekday } from '@kbn/rrule';
 
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
@@ -26,10 +27,74 @@ export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
 }
 
-export interface RuleActionFrequency extends SavedObjectAttributes {
+interface AdvancedThrottleMonthly {
+  freq: Frequency.MONTHLY;
+  interval: number;
+  bymonthday: number[];
+  byhour: number[];
+  byminute: number[];
+  tzid: string;
+  byweekday?: never;
+}
+interface AdvancedThrottleWeekly {
+  freq: Frequency.WEEKLY;
+  interval: number;
+  byweekday: Weekday[];
+  byhour: number[];
+  byminute: number[];
+  tzid: string;
+  bymonthday?: never;
+}
+interface AdvancedThrottleDaily {
+  freq: Frequency.DAILY;
+  interval: number;
+  byhour: number[];
+  byminute: number[];
+  tzid: string;
+  bymonthday?: never;
+  byweekday?: never;
+}
+interface AdvancedThrottleHourly {
+  freq: Frequency.HOURLY;
+  interval: number;
+  byminute: number[];
+  tzid: string;
+  bymonthday?: never;
+  byweekday?: never;
+  byhour?: never;
+}
+interface AdvancedThrottleMinutely {
+  freq: Frequency.MINUTELY;
+  interval: number;
+  tzid: string;
+  byminute?: never;
+  bymonthday?: never;
+  byweekday?: never;
+  byhour?: never;
+}
+interface AdvancedThrottleSecondly {
+  freq: Frequency.SECONDLY;
+  interval: number;
+  tzid: string;
+  byminute?: never;
+  bymonthday?: never;
+  byweekday?: never;
+  byhour?: never;
+}
+
+export type AdvancedThrottle =
+  | AdvancedThrottleMonthly
+  | AdvancedThrottleWeekly
+  | AdvancedThrottleDaily
+  | AdvancedThrottleHourly
+  | AdvancedThrottleMinutely
+  | AdvancedThrottleSecondly;
+
+export interface RuleActionFrequency {
   summary: boolean;
   notifyWhen: RuleNotifyWhenType;
   throttle: string | null;
+  advancedThrottle?: AdvancedThrottle;
 }
 
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {

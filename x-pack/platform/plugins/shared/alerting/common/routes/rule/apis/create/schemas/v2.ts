@@ -6,35 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { notifyWhenSchema } from './notify_when_schema';
-import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
+import {
+  actionFrequencySchema as actionFrequencySchemav1,
+  actionSchema as actionSchemaV1,
+  actionAlertsFilterSchema as actionAlertsFilterSchemaV1,
+  createBodySchema as createBodySchemaV1,
+  createParamsSchema as createParamsSchemaV1,
+} from './v1';
 import { Frequency } from '@kbn/rrule';
-
-export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
-
-export const actionAlertsFilterTimeFrameSchema = schema.object({
-  days: schema.arrayOf(
-    schema.oneOf([
-      schema.literal(1),
-      schema.literal(2),
-      schema.literal(3),
-      schema.literal(4),
-      schema.literal(5),
-      schema.literal(6),
-      schema.literal(7),
-    ])
-  ),
-  hours: schema.object({
-    start: schema.string(),
-    end: schema.string(),
-  }),
-  timezone: schema.string(),
-});
-
-export const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(alertsFilterQuerySchema),
-  timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
-});
 
 const advancedThrottleMonthly = schema.object({
   freq: schema.literal(Frequency.MONTHLY),
@@ -96,11 +75,8 @@ const advancedThrottleSecondly = schema.object({
   bymonthday: schema.maybe(schema.never()),
 });
 
-export const actionFrequencySchema = schema.object({
-  summary: schema.boolean(),
-  notifyWhen: notifyWhenSchema,
-  throttle: schema.nullable(schema.string()),
-  advancedThrottle: schema.maybe(
+export const actionFrequencySchema = actionFrequencySchemav1.extends({
+  advanced_throttle: schema.maybe(
     schema.oneOf([
       schema.oneOf([
         advancedThrottleMonthly,
@@ -114,45 +90,14 @@ export const actionFrequencySchema = schema.object({
   ),
 });
 
-/**
- * action schema, used by internal rules clients
- */
-export const actionSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
-  group: schema.string(),
-  id: schema.string(),
-  actionTypeId: schema.string(),
-  params: actionParamsSchema,
+export const actionAlertsFilterSchema = actionAlertsFilterSchemaV1.extends({});
+
+export const actionSchema = actionSchemaV1.extends({
   frequency: schema.maybe(actionFrequencySchema),
-  alertsFilter: schema.maybe(actionAlertsFilterSchema),
-  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
-export const systemActionSchema = schema.object({
-  id: schema.string(),
-  actionTypeId: schema.string(),
-  params: actionParamsSchema,
-  uuid: schema.maybe(schema.string()),
+export const createBodySchema = createBodySchemaV1.extends({
+  actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
 });
 
-/**
- * request action schema, actionTypeId field is optional, it really should not be required at all but
- * security solution is passing it in.
- */
-export const actionRequestSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
-  group: schema.string(),
-  id: schema.string(),
-  actionTypeId: schema.maybe(schema.string()),
-  params: actionParamsSchema,
-  frequency: schema.maybe(actionFrequencySchema),
-  alertsFilter: schema.maybe(actionAlertsFilterSchema),
-  useAlertDataForTemplate: schema.maybe(schema.boolean()),
-});
-
-export const systemActionRequestSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
-  actionTypeId: schema.maybe(schema.string()),
-  id: schema.string(),
-  params: actionParamsSchema,
-});
+export const createParamsSchema = createParamsSchemaV1.extends({});

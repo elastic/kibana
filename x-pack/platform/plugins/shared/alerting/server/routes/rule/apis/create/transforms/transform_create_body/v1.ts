@@ -6,8 +6,8 @@
  */
 
 import type {
-  CreateRuleActionV1,
-  CreateRuleRequestBodyV1,
+  CreateRuleActionV2,
+  CreateRuleRequestBodyV2,
 } from '../../../../../../../common/routes/rule/apis/create';
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
 import type {
@@ -16,7 +16,7 @@ import type {
   SystemActionRequest,
 } from '../../../../../../application/rule/types';
 
-const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionRequest[] => {
+const transformCreateBodyActions = (actions: CreateRuleActionV2[]): ActionRequest[] => {
   if (!actions) {
     return [];
   }
@@ -43,6 +43,9 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionReques
                 summary: frequency.summary,
                 throttle: frequency.throttle,
                 notifyWhen: frequency.notify_when,
+                ...(frequency.advanced_throttle && {
+                  advancedThrottle: frequency.advanced_throttle,
+                }),
               },
             }
           : {}),
@@ -52,7 +55,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionReques
   );
 };
 
-const transformCreateBodySystemActions = (actions: CreateRuleActionV1[]): SystemActionRequest[] => {
+const transformCreateBodySystemActions = (actions: CreateRuleActionV2[]): SystemActionRequest[] => {
   if (!actions) {
     return [];
   }
@@ -67,7 +70,7 @@ const transformCreateBodySystemActions = (actions: CreateRuleActionV1[]): System
 };
 
 const transformCreateBodyFlapping = <Params extends RuleParams = never>(
-  flapping: CreateRuleRequestBodyV1<Params>['flapping']
+  flapping: CreateRuleRequestBodyV2<Params>['flapping']
 ) => {
   if (!flapping) {
     return flapping;
@@ -83,9 +86,9 @@ export const transformCreateBody = <Params extends RuleParams = never>({
   actions,
   systemActions,
 }: {
-  createBody: CreateRuleRequestBodyV1<Params>;
-  actions: CreateRuleRequestBodyV1<Params>['actions'];
-  systemActions: CreateRuleRequestBodyV1<Params>['actions'];
+  createBody: CreateRuleRequestBodyV2<Params>;
+  actions: CreateRuleRequestBodyV2<Params>['actions'];
+  systemActions: CreateRuleRequestBodyV2<Params>['actions'];
 }): CreateRuleData<Params> => {
   return {
     name: createBody.name,

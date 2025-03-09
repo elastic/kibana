@@ -330,8 +330,10 @@ export class PerAlertActionScheduler<
             throttle: action.frequency.throttle ?? null,
             actionHash: generateActionHash(action), // generateActionHash must be removed once all the hash identifiers removed from the task state
             uuid: action.uuid,
+            advancedThrottle: action.frequency.advancedThrottle,
+            logger,
           })
-        : alert.isThrottled({ throttle: rule.throttle ?? null });
+        : alert.isThrottled({ throttle: rule.throttle ?? null, logger });
 
       if (throttled) {
         if (
