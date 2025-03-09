@@ -259,14 +259,19 @@ export class KnowledgeBaseService {
     query,
     sortBy,
     sortDirection,
+    namespace,
+    user,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+    namespace: string;
+    user?: { name: string; id?: string };
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
     }
+
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<
         KnowledgeBaseEntry & { doc_id?: string }
@@ -281,8 +286,14 @@ export class KnowledgeBaseService {
                 : []),
               {
                 // exclude user instructions
-                bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } },
+                bool: {
+                  must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
+                },
               },
+              ...getAccessQuery({
+                user,
+                namespace,
+              }),
             ],
           },
         },
@@ -425,6 +436,7 @@ export class KnowledgeBaseService {
         },
         refresh: 'wait_for',
       });
+
       this.dependencies.logger.debug(`Entry added to knowledge base`);
     } catch (error) {
       this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
