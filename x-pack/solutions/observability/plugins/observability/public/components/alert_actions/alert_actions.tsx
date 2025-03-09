@@ -300,6 +300,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
             onClick={onExpandEvent}
             size="s"
             color="text"
+            aria-label="expand"
           />
         </EuiToolTip>
       </EuiFlexItem>
