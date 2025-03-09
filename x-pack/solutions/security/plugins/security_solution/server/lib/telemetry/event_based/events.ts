@@ -213,6 +213,34 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const PRIVMON_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
+  duration: number;
+}> = {
+  eventType: 'privmon_engine_initialization',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the privilege monitoring engine initialization',
+      },
+    },
+  },
+};
+
+export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
+  error: string;
+}> = {
+  eventType: 'privmon_engine_resource_init_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for a resource initialization failure',
+      },
+    },
+  },
+};
+
 export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionAlertsCreated: number;
   suppressionAlertsSuppressed: number;
@@ -994,6 +1022,8 @@ export const events = [
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  PRIVMON_ENGINE_INITIALIZATION_EVENT,
+  PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
