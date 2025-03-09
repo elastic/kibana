@@ -9,6 +9,7 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from 'expect';
 import { serviceMap, timerange } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'node:stream';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { SupertestReturnType } from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -152,5 +153,84 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.elements.length).toBeGreaterThan(0);
       });
     });
+
+    describe('Root transaction with parent.id', () => {
+      let synthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        synthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+        const events = timerange(start, end)
+          .interval('10s')
+          .rate(3)
+          .generator(
+            serviceMap({
+              services: [
+                { 'frontend-rum': 'rum-js' },
+                { 'frontend-node': 'nodejs' },
+                { advertService: 'java' },
+              ],
+              definePaths([rum, node, adv]) {
+                return [
+                  [
+                    [rum, 'fetchAd'],
+                    [node, 'GET /nodejs/adTag'],
+                    [adv, 'APIRestController#getAd'],
+                    ['elasticsearch', 'GET ad-*/_search'],
+                  ],
+                ];
+              },
+              rootWithParent: true,
+            })
+          );
+
+        return synthtraceEsClient.index(Readable.from(Array.from(events)));
+      });
+
+      after(async () => {
+        await synthtraceEsClient.clean();
+      });
+
+      it('returns service map complete path', async () => {
+        const { body, status } = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/service-map',
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              environment: 'ENVIRONMENT_ALL',
+            },
+          },
+        });
+
+        expect(status).toBe(200);
+
+        const { nodes, edges } = partitionElements(body.elements);
+
+        expect(getIds(nodes)).toEqual([
+          '>elasticsearch',
+          'advertService',
+          'frontend-node',
+          'frontend-rum',
+        ]);
+        expect(getIds(edges)).toEqual([
+          'advertService~>elasticsearch',
+          'frontend-node~advertService',
+          'frontend-rum~frontend-node',
+        ]);
+      });
+    });
   });
+}
+
+type ConnectionElements = APIReturnType<'GET /internal/apm/service-map'>['elements'];
+
+function partitionElements(elements: ConnectionElements) {
+  const edges = elements.filter(({ data }) => 'source' in data && 'target' in data);
+  const nodes = elements.filter((element) => !edges.includes(element));
+  return { edges, nodes };
+}
+
+function getIds(elements: ConnectionElements) {
+  return elements.map(({ data }) => data.id).sort();
 }
