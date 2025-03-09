@@ -25,7 +25,7 @@ import {
   ALERT_UUID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { BoolQuery, Filter, type Query } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { GroupingToolbarControls } from '../../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { ObservabilityFields } from '../../../../common/utils/alerting/types';
@@ -48,7 +48,7 @@ import { renderGroupPanel } from '../../../components/alerts_table/grouping/rend
 import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
 import { DEFAULT_GROUPING_OPTIONS } from '../../../components/alerts_table/grouping/constants';
-import { ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
+import { ACTIVE_ALERTS, ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
 import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
 import {
   alertSearchBarStateContainer,
@@ -69,7 +69,8 @@ interface Props {
   alert?: TopAlert<ObservabilityFields>;
 }
 
-const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
+// TODO: Bring back setting default status filter as active
+const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE };
 const DEFAULT_FILTERS: Filter[] = [];
 
 export function InternalRelatedAlerts({ alert }: Props) {
@@ -89,8 +90,17 @@ export function InternalRelatedAlerts({ alert }: Props) {
   const sharedFields = getSharedFields(alert?.fields);
   const kuery = getRelatedAlertKuery({ tags, groups, ruleId, sharedFields });
 
-  const defaultQuery = useRef<Query[]>([
-    { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
+  const defaultFilters = useRef<Filter[]>([
+    {
+      query: {
+        match_phrase: {
+          'kibana.alert.uuid': alertId,
+        },
+      },
+      meta: {
+        negate: true,
+      },
+    },
   ]);
 
   useEffect(() => {
@@ -112,7 +122,8 @@ export function InternalRelatedAlerts({ alert }: Props) {
           appName={RELATED_ALERTS_SEARCH_BAR_ID}
           onEsQueryChange={setEsQuery}
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
-          defaultSearchQueries={defaultQuery.current}
+          defaultFilters={defaultFilters.current}
+          disableLocalStorageSync={true}
           defaultState={{
             ...defaultState,
             kuery,
@@ -124,7 +135,10 @@ export function InternalRelatedAlerts({ alert }: Props) {
           <AlertsGrouping<AlertsByGroupingAgg>
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
-            defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
+            defaultFilters={
+              ALERT_STATUS_FILTER[alertSearchBarStateProps.status ?? ACTIVE_ALERTS.status] ??
+              DEFAULT_FILTERS
+            }
             from={alertSearchBarStateProps.rangeFrom}
             to={alertSearchBarStateProps.rangeTo}
             globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}

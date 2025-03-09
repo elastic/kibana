@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Query, BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
@@ -62,8 +62,15 @@ export function RuleDetailsTabs({
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
 
-  const ruleQuery = useRef<Query[]>([
-    { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
+  const ruleFilters = useRef<Filter[]>([
+    {
+      query: {
+        match_phrase: {
+          'kibana.alert.rule.uuid': ruleId,
+        },
+      },
+      meta: {},
+    },
   ]);
 
   const tabs: EuiTabbedContentTab[] = [
@@ -81,7 +88,8 @@ export function RuleDetailsTabs({
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             onEsQueryChange={onEsQueryChange}
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
-            defaultSearchQueries={ruleQuery.current}
+            defaultFilters={ruleFilters.current}
+            disableLocalStorageSync={true}
           />
           <EuiSpacer size="s" />
 
