@@ -36,6 +36,7 @@ import {
 import { isESQLFunction, isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
 import { monacoPositionToOffset } from '../shared/utils';
 import { monaco } from '../../../../monaco_imports';
+import { getVariablesHoverContent } from './helpers';
 
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
@@ -148,12 +149,19 @@ export async function getHoverItem(
 
   const { ast } = await astProvider(fullText);
   const astContext = getAstContext(fullText, ast, offset);
-
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
-  let hoverContent: monaco.languages.Hover = {
+  const variables = resourceRetriever?.getVariables?.();
+  const variablesContent = getVariablesHoverContent(astContext.node, variables);
+
+  const hoverContent: monaco.languages.Hover = {
     contents: [],
   };
+
+  if (variablesContent.length) {
+    hoverContent.contents.push(...variablesContent);
+  }
+
   const hoverItemsForFunction = await getHoverItemForFunction(
     model,
     position,
@@ -162,7 +170,8 @@ export async function getHoverItem(
     resourceRetriever
   );
   if (hoverItemsForFunction) {
-    hoverContent = hoverItemsForFunction;
+    hoverContent.contents.push(...hoverItemsForFunction.contents);
+    hoverContent.range = hoverItemsForFunction.range;
   }
 
   if (['newCommand', 'list'].includes(astContext.type)) {

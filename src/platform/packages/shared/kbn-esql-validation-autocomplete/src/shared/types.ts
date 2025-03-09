@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
 
 /** @internal **/
@@ -46,7 +46,7 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
 }

@@ -399,7 +399,7 @@ describe('WHERE <expression>', () => {
         const suggestions = await suggest('FROM a | WHERE agent.name == /', {
           callbacks: {
             canSuggestVariables: () => true,
-            getVariablesByType: () => [],
+            getVariables: () => [],
             getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
           },
         });
@@ -421,7 +421,7 @@ describe('WHERE <expression>', () => {
         const suggestions = await suggest('FROM a | WHERE agent.name == /', {
           callbacks: {
             canSuggestVariables: () => true,
-            getVariablesByType: () => [
+            getVariables: () => [
               {
                 key: 'value',
                 value: 'java',
