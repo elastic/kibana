@@ -18137,7 +18137,7 @@ elastic-apm-node@^4.10.0, elastic-apm-node@^4.11.0:
     stream-chopper "^3.0.1"
     unicode-byte-truncate "^1.0.0"
 
-"elasticsearch-8.x@npm:@elastic/elasticsearch@8":
+"elasticsearch-8.x@npm:@elastic/elasticsearch@8.17.1":
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.1.tgz#97baa241f1f7bdd9b9b5c7479c64996e4c54adea"
   integrity sha512-EaDP4/jfNu0nhnHZjxk9bL9ofKWKX9QUdEJ8QsGa+/KMPBEwD+HMyYXH4FSRlg7YONI0UbdO/mMZobvcEnMFBA==
