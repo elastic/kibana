@@ -30,6 +30,8 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { findLast } from 'lodash';
 import { KbnPalettes } from '@kbn/palettes';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
 import { Assignment } from '../assignment/assignment';
 import {
   addNewAssignment,
@@ -39,19 +41,25 @@ import {
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorMapping } from '../../config';
-import { ruleMatch } from '../../color/rule_matching';
+import { getColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
-export function AssignmentsConfig({
+export function Assignments({
   data,
   palettes,
   isDarkMode,
   specialTokens,
+  formatter,
+  allowCustomMatch,
 }: {
   palettes: KbnPalettes;
   data: ColorMappingInputData;
   isDarkMode: boolean;
-  /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
+  /**
+   * map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket
+   */
   specialTokens: Map<string, string>;
+  formatter?: IFieldFormat;
+  allowCustomMatch?: boolean;
 }) {
   const [showOtherActions, setShowOtherActions] = useState<boolean>(false);
 
@@ -59,41 +67,25 @@ export function AssignmentsConfig({
   const palette = useSelector(selectPalette(palettes));
   const colorMode = useSelector(selectColorMode);
   const assignments = useSelector(selectComputedAssignments);
-
+  const assignmentMatcher = useMemo(() => getColorAssignmentMatcher(assignments), [assignments]);
   const unmatchingCategories = useMemo(() => {
     return data.type === 'categories'
       ? data.categories.filter((category) => {
-          return !assignments.some(({ rule }) => ruleMatch(rule, category));
+          const rawValue = deserializeField(category);
+          return !assignmentMatcher.hasMatch(rawValue);
         })
       : [];
-  }, [data, assignments]);
-
-  const assignmentValuesCounter = assignments.reduce<Map<string | string[], number>>(
-    (acc, assignment) => {
-      const values = assignment.rule.type === 'matchExactly' ? assignment.rule.values : [];
-      values.forEach((value) => {
-        acc.set(value, (acc.get(value) ?? 0) + 1);
-      });
-      return acc;
-    },
-    new Map()
-  );
+  }, [data, assignmentMatcher]);
 
   const onClickAddNewAssignment = useCallback(() => {
-    const lastCategorical = findLast(assignments, (d) => {
-      return d.color.type === 'categorical';
+    const lastCategorical = assignments.findLast((a) => {
+      return a.color.type === 'categorical';
     });
     const nextCategoricalIndex =
       lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
     dispatch(
       addNewAssignment({
-        rule:
-          data.type === 'categories'
-            ? {
-                type: 'matchExactly',
-                values: [],
-              }
-            : { type: 'range', min: 0, max: 0, minInclusive: true, maxInclusive: true },
+        rules: [],
         color:
           colorMode.type === 'categorical'
             ? {
@@ -105,7 +97,7 @@ export function AssignmentsConfig({
         touched: false,
       })
     );
-  }, [assignments, colorMode.type, data.type, dispatch, palette]);
+  }, [assignments, colorMode.type, dispatch, palette]);
 
   const onClickAddAllCurrentCategories = useCallback(() => {
     if (data.type === 'categories') {
@@ -115,25 +107,25 @@ export function AssignmentsConfig({
       const nextCategoricalIndex =
         lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
 
-      const newAssignments: ColorMapping.Config['assignments'] = unmatchingCategories.map(
-        (c, i) => {
-          return {
-            rule: {
-              type: 'matchExactly',
-              values: [c],
+      const newAssignments = unmatchingCategories.map((category, i) => {
+        return {
+          rules: [
+            {
+              type: 'raw',
+              value: category,
             },
-            color:
-              colorMode.type === 'categorical'
-                ? {
-                    type: 'categorical',
-                    paletteId: palette.id,
-                    colorIndex: (nextCategoricalIndex + i) % palette.colors().length,
-                  }
-                : { type: 'gradient' },
-            touched: false,
-          };
-        }
-      );
+          ],
+          color:
+            colorMode.type === 'categorical'
+              ? {
+                  type: 'categorical',
+                  paletteId: palette.id,
+                  colorIndex: (nextCategoricalIndex + i) % palette.colors().length,
+                }
+              : { type: 'gradient' },
+          touched: false,
+        } satisfies ColorMapping.Assignment;
+      });
       dispatch(addNewAssignments(newAssignments));
     }
   }, [data.type, assignments, unmatchingCategories, dispatch, colorMode.type, palette]);
@@ -164,7 +156,7 @@ export function AssignmentsConfig({
                 key={i}
                 data={data}
                 index={i}
-                total={assignments.length}
+                assignments={assignments}
                 colorMode={colorMode}
                 palette={palette}
                 palettes={palettes}
@@ -172,7 +164,9 @@ export function AssignmentsConfig({
                 assignment={assignment}
                 disableDelete={false}
                 specialTokens={specialTokens}
-                assignmentValuesCounter={assignmentValuesCounter}
+                formatter={formatter}
+                allowCustomMatch={allowCustomMatch}
+                assignmentMatcher={assignmentMatcher}
               />
             );
           })}
