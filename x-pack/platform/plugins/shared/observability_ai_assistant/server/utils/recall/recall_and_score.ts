@@ -7,17 +7,21 @@
 
 import type { Logger } from '@kbn/logging';
 import { AnalyticsServiceStart } from '@kbn/core/server';
+import { BoundInferenceClient } from '@kbn/inference-plugin/server';
+import { partition } from 'lodash';
 import { scoreSuggestions } from './score_suggestions';
-import type { Message } from '../../../common';
+import { MessageRole, type Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
-import { RecalledEntry } from '../../service/knowledge_base_service';
+import { KnowledgeBaseQueryContainer, RecalledEntry } from '../../service/knowledge_base_service';
+import { rewriteQuery } from '../rewrite_query';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 
 export async function recallAndScore({
   recall,
+  inferenceClient,
   chat,
   analytics,
   userPrompt,
@@ -27,6 +31,7 @@ export async function recallAndScore({
   signal,
 }: {
   recall: ObservabilityAIAssistantClient['recall'];
+  inferenceClient: BoundInferenceClient;
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
@@ -38,11 +43,21 @@ export async function recallAndScore({
   relevantDocuments?: RecalledSuggestion[];
   scores?: Array<{ id: string; score: number }>;
   suggestions: RecalledSuggestion[];
+  queries?: KnowledgeBaseQueryContainer[];
 }> {
-  const queries = [
-    { text: userPrompt, boost: 3 },
-    { text: context, boost: 1 },
-  ].filter((query) => query.text.trim());
+  const [[systemMessage], otherMessages] = partition(
+    messages,
+    (message) => message.message.role === MessageRole.System
+  );
+
+  const { queries } = await rewriteQuery({
+    context,
+    inferenceClient,
+    systemMessage: systemMessage?.message.content,
+    messages: otherMessages,
+  });
+
+  logger.debug(() => `Query rewrite: ${JSON.stringify(queries)}`);
 
   const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
     ({ id, text, score }) => ({ id, text, score })
@@ -53,6 +68,7 @@ export async function recallAndScore({
       relevantDocuments: [],
       scores: [],
       suggestions: [],
+      queries,
     };
   }
 
@@ -68,7 +84,7 @@ export async function recallAndScore({
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      prompt: queries.map((query) => query.text).join('\n\n'),
+      prompt: JSON.stringify(queries),
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = scores.find((score) => score.id === suggestion.id);
         return {
@@ -79,7 +95,7 @@ export async function recallAndScore({
       }),
     });
 
-    return { scores, relevantDocuments, suggestions };
+    return { scores, relevantDocuments, suggestions, queries };
   } catch (error) {
     logger.error(`Error scoring documents: ${error.message}`, { error });
     return {

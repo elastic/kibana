@@ -35,6 +35,14 @@ interface ToolSchemaTypeNumber extends ToolSchemaFragmentBase {
   enum?: string[] | readonly string[];
 }
 
+interface ToolSchemaTypeOneOf {
+  oneOf: ToolSchemaType[];
+}
+
+interface ToolSchemaTypeAnyOf {
+  anyOf: ToolSchemaType[];
+}
+
 interface ToolSchemaTypeArray extends ToolSchemaFragmentBase {
   type: 'array';
   items: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
@@ -48,7 +56,9 @@ export type ToolSchemaType =
   | ToolSchemaTypeString
   | ToolSchemaTypeBoolean
   | ToolSchemaTypeNumber
-  | ToolSchemaTypeArray;
+  | ToolSchemaTypeArray
+  | ToolSchemaTypeOneOf
+  | ToolSchemaTypeAnyOf;
 
 type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
   TToolSchemaObject extends { properties: Record<string, any> }
@@ -67,6 +77,14 @@ type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
 type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> = Array<
   FromToolSchema<TToolSchemaObject['items']>
 >;
+
+type FromToolSchemaAnyOf<TToolSchemaObject extends ToolSchemaTypeAnyOf> = {
+  [K in keyof TToolSchemaObject['anyOf'] & number]: FromToolSchema<TToolSchemaObject['anyOf'][K]>;
+};
+
+type FromToolSchemaOneOf<TToolSchemaObject extends ToolSchemaTypeOneOf> = {
+  [K in keyof TToolSchemaObject['oneOf'] & number]: FromToolSchema<TToolSchemaObject['oneOf'][K]>;
+};
 
 type FromToolSchemaString<TToolSchemaString extends ToolSchemaTypeString> =
   TToolSchemaString extends { const: string }
@@ -94,4 +112,8 @@ export type FromToolSchema<TToolSchema extends ToolSchemaType> =
     ? number
     : TToolSchema extends ToolSchemaTypeString
     ? FromToolSchemaString<TToolSchema>
+    : TToolSchema extends ToolSchemaTypeAnyOf
+    ? FromToolSchemaAnyOf<TToolSchema>
+    : TToolSchema extends ToolSchemaTypeOneOf
+    ? FromToolSchemaOneOf<TToolSchema>
     : never;

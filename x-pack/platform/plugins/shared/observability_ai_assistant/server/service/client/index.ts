@@ -57,7 +57,11 @@ import {
 } from '../../../common/types';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import {
+  KnowledgeBaseQueryContainer,
+  KnowledgeBaseService,
+  RecalledEntry,
+} from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -652,7 +656,7 @@ export class ObservabilityAIAssistantClient {
     categories,
     limit,
   }: {
-    queries: Array<{ text: string; boost?: number }>;
+    queries: KnowledgeBaseQueryContainer[];
     categories?: string[];
     limit?: { size?: number; tokenCount?: number };
   }): Promise<RecalledEntry[]> => {
