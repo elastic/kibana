@@ -65,7 +65,7 @@
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",
-      "stackAlerts",
+      // "stackAlerts",
       "spaces"
     ],
     "extraPublicDirs": [

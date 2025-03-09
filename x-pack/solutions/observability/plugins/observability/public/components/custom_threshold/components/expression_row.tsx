@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState, ReactElement } from 'react';
 import {
@@ -28,7 +20,6 @@ import { convertToBuiltInComparators } from '../../../../common/utils/convert_le
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
-import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 import { isPercent } from '../helpers/threshold_unit';
 
@@ -116,20 +107,21 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     name: f.name,
   }));
 
-  const handleLabelChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLabel(e.target.value);
-      debouncedLabelChange({ ...expression, label: e.target.value });
-    },
-    [debouncedLabelChange, expression]
-  );
+  // const handleLabelChange = useCallback(
+  //   (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     setLabel(e.target.value);
+  //     debouncedLabelChange({ ...expression, label: e.target.value });
+  //   },
+  //   [debouncedLabelChange, expression]
+  // );
+
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow>
-          <EuiTitle size="xs">
+          {/* <EuiTitle size="xs">
             <h5>{title}</h5>
-          </EuiTitle>
+          </EuiTitle> */}
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
@@ -161,9 +153,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               dataView={dataView}
             />
             {criticalThresholdExpression}
-            <EuiSpacer size={'s'} />
+            {/* <EuiSpacer size={'s'} /> */}
             <EuiFlexGroup>
-              <EuiFlexItem>
+              {/* <EuiFlexItem>
                 <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
                   <EuiFieldText
                     data-test-subj="thresholdRuleCustomEquationEditorFieldTextLabel"
@@ -174,9 +166,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     onChange={handleLabelChange}
                   />
                 </EuiFormRow>
-              </EuiFlexItem>
+              </EuiFlexItem> */}
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
+            {/* <EuiSpacer size="s" /> */}
           </>
         </EuiFlexItem>
       </EuiFlexGroup>

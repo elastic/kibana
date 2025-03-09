@@ -34,6 +34,7 @@ interface MetricRowWithAggProps extends MetricRowBaseProps {
   dataView: DataViewBase;
   filter?: string;
   fields: NormalizedFields;
+  isOneRow: boolean;
 }
 
 const DEFAULT_COUNT_FILTER_TITLE = i18n.translate(
@@ -53,6 +54,7 @@ export function MetricRowWithAgg({
   aggregationTypes,
   onChange,
   errors,
+  isOneRow,
 }: MetricRowWithAggProps) {
   const handleDelete = useCallback(() => {
     onDelete(name);
@@ -126,19 +128,21 @@ export function MetricRowWithAgg({
             <EuiFormRow
               fullWidth
               label={
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false} css={{ paddingTop: 2, paddingBottom: 2 }}>
-                    {i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
-                      { defaultMessage: 'Aggregation {name}', values: { name } }
-                    )}
-                  </EuiFlexItem>
-                  {!disableDelete && (
-                    <EuiFlexItem grow={false}>
-                      <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
+                !isOneRow && (
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false} css={{ paddingTop: 2, paddingBottom: 2 }}>
+                      {i18n.translate(
+                        'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                        { defaultMessage: 'Aggregation {name}', values: { name } }
+                      )}
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                    {!disableDelete && (
+                      <EuiFlexItem grow={false}>
+                        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                )
               }
             >
               <EuiExpression
