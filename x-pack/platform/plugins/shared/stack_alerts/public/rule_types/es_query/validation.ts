@@ -93,6 +93,7 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
 
   if (
     groupBy &&
+    builtInGroupByTypes[groupBy] &&
     builtInGroupByTypes[groupBy].validNormalizedTypes &&
     builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
     (!termField || termField.length <= 0)
@@ -106,6 +107,7 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
 
   if (
     groupBy &&
+    builtInGroupByTypes[groupBy] &&
     builtInGroupByTypes[groupBy].validNormalizedTypes &&
     builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
     termField &&
