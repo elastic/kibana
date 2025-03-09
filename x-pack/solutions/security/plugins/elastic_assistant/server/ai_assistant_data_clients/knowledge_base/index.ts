@@ -178,13 +178,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (elasticsearchInference) {
         return ASSISTANT_ELSER_INFERENCE_ID;
       }
-    } catch (error) {
-      this.options.logger.debug(
-        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
-      );
+    } catch (_) {
+      /* empty */
     }
 
-    // Fallback to the dedicated inference endpoint
+    // Fallback to the default inference endpoint
     return ELASTICSEARCH_ELSER_INFERENCE_ID;
   };
 
@@ -233,7 +231,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         ?.some((stats) => isReadyESS(stats) || isReadyServerless(stats));
     } catch (error) {
       this.options.logger.debug(
-        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
+        `Error checking if Inference endpoint ${inferenceId} exists: ${error}`
       );
       return false;
     }
@@ -409,7 +407,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             (await this.isModelInstalled())
               ? Promise.resolve()
               : Promise.reject(new Error('Model not installed')),
-          { minTimeout: 10000, maxTimeout: 10000, retries: 10 }
+          { minTimeout: 30000, maxTimeout: 30000, retries: 10 }
         );
         this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
       } else {
@@ -420,11 +418,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!inferenceExists) {
         await this.createInferenceEndpoint();
 
-        this.options.logger.error(
+        this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
         );
       } else {
-        this.options.logger.error(
+        this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' is already deployed`
         );
       }
@@ -453,7 +451,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           }
 
           this.options.logger.debug(`Loading Security Labs KB docs...`);
-          await loadSecurityLabs(this, this.options.logger);
+          void loadSecurityLabs(this, this.options.logger).then(() => {
+            this.options.setIsKBSetupInProgress(this.spaceId, false);
+          });
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
@@ -473,12 +473,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           );
         }
       }
+
+      // If loading security labs, we need to wait for the docs to be loaded
+      if (ignoreSecurityLabs) {
+        this.options.setIsKBSetupInProgress(this.spaceId, false);
+      }
     } catch (e) {
       this.options.setIsKBSetupInProgress(this.spaceId, false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(`Error setting up Knowledge Base: ${e.message}`);
-    } finally {
-      this.options.setIsKBSetupInProgress(this.spaceId, false);
     }
   };
 
