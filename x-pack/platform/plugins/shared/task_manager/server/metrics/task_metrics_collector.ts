@@ -156,6 +156,7 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
         }) ?? {};
       const byTaskType = ((aggregations.byTaskType.buckets as OverdueTaskAggBucket[]) ?? []).reduce(
         (acc: Record<string, number>, bucket: OverdueTaskAggBucket) => {
+          // @ts-expect-error there's no way that buckets (array) matches `number`
           acc[bucket.key] = bucket?.overdueByHistogram?.buckets ?? [];
           return acc;
         },

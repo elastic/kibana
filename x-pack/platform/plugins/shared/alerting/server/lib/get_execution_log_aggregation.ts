@@ -529,7 +529,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
     : '';
   return {
-    id: bucket?.key ?? '',
+    id: bucket?.key ? `${bucket.key}` : '', // `key` can be a number, this way we stringify it.
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
     status,
