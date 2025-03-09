@@ -9,13 +9,12 @@ import React from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiTextColor,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useQualityIssues } from '../../../../hooks';
 import {
@@ -26,7 +25,6 @@ import {
 } from '../../../../../common/translations';
 
 export const DegradedFieldInfo = () => {
-  const { euiTheme } = useEuiTheme();
   const {
     degradedFieldValues,
     isAnalysisInProgress,
@@ -116,11 +114,7 @@ export const DegradedFieldInfo = () => {
               >
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => (
-                    <EuiBadge color="hollow" key={idx}>
-                      <EuiTextColor color={euiTheme.colors.vis.euiColorVis3}>
-                        <strong>{value}</strong>
-                      </EuiTextColor>
-                    </EuiBadge>
+                    <EuiCode key={idx}>{value}</EuiCode>
                   ))}
                 </EuiBadgeGroup>
               </EuiFlexItem>
