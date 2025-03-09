@@ -82,6 +82,44 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+        },
+        {
+          name: 'buckets',
+          type: 'date_period',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+        {
+          name: 'startDate',
+          type: 'date',
+          constantOnly: true,
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
         },
         {

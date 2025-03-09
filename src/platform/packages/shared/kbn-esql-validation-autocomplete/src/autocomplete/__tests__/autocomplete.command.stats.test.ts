@@ -98,12 +98,16 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats by bucket(/', [
-          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date']).map(
+          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']).map(
             (field) => `${field}, `
           ),
-          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
-            scalar: true,
-          }).map((s) => ({ ...s, text: `${s.text},` })),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+            {
+              scalar: true,
+            }
+          ).map((s) => ({ ...s, text: `${s.text},` })),
         ]);
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
@@ -318,17 +322,25 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?_tstart, ?_tend)', [
           // Note there's no space or comma in the suggested field names
-          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
-          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
-            scalar: true,
-          }),
+          ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+            {
+              scalar: true,
+            }
+          ),
         ]);
         await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?_tstart, ?_tend)', [
           // Note there's no space or comma in the suggested field names
-          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
-          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
-            scalar: true,
-          }),
+          ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+            {
+              scalar: true,
+            }
+          ),
         ]);
 
         await assertSuggestions(
