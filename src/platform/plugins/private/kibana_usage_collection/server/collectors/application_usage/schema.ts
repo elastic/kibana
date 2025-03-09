@@ -140,6 +140,7 @@ export const applicationUsageSchema = {
   searchPlayground: commonSchema,
   elasticsearchIndices: commonSchema,
   elasticsearchStart: commonSchema,
+  elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchAISearch: commonSchema,
