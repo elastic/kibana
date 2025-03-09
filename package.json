@@ -1231,7 +1231,7 @@
     "react-fast-compare": "^2.0.4",
     "react-hook-form": "^7.44.2",
     "react-intl": "6.6.6",
-    "react-markdown": "^6.0.3",
+    "react-markdown": "^10.1.0",
     "react-popper-tooltip": "^4.4.2",
     "react-recompose": "^0.33.0",
     "react-redux": "^7.2.8",
