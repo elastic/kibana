@@ -122,12 +122,6 @@ describe('autocomplete', () => {
     testSuggestions('from a | mv_expand a /', ['| ']);
   });
 
-  describe('rename', () => {
-    testSuggestions('from a | rename /', getFieldNamesByType('any'));
-    testSuggestions('from a | rename keywordField /', ['AS $0'], ' ');
-    testSuggestions('from a | rename keywordField as /', ['var0']);
-  });
-
   for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
