@@ -11,6 +11,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
+  const supertest = getService('supertest');
+
   const pageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -44,6 +46,66 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_compliance_dashboard']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
+    let agentPolicyWithPPId: string;
+
+    async function createAgentPolicyWithPackagePolicy() {
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 1',
+          namespace: 'default',
+          description: '',
+          force: true,
+        })
+        .expect(200);
+      agentPolicyWithPPId = agentPolicyResponse.item.id;
+
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'kspm-test-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyWithPPId,
+          enabled: true,
+          inputs: [
+            {
+              type: 'cloudbeat/cis_k8s',
+              policy_template: 'kspm',
+              enabled: false,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    type: 'logs',
+                    dataset: 'cloud_security_posture.findings',
+                  },
+                  vars: {
+                    condition: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+          package: {
+            name: 'cloud_security_posture',
+            title: 'Security Posture Management',
+            version: '1.12.0',
+          },
+        });
+    }
+
+    async function deletePackagePolicy() {
+      await supertest
+        .post(`/api/fleet/package_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true, packagePolicyIds: [agentPolicyWithPPId] })
+        .expect(200);
+    }
 
     before(async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
@@ -51,6 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
       await cspDashboard.waitForPluginInitialized();
 
+      await createAgentPolicyWithPackagePolicy();
       await cspDashboard.index.add(data);
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
@@ -61,6 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await cspDashboard.index.remove();
+      await deletePackagePolicy();
     });
 
     describe('Kubernetes Dashboard', () => {
