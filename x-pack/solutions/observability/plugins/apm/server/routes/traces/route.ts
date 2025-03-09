@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { nonEmptyStringRt, toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -24,8 +24,6 @@ import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { CriticalPathResponse } from './get_aggregated_critical_path';
-import { getAggregatedCriticalPath } from './get_aggregated_critical_path';
 import { getSpan } from '../transactions/get_span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -247,40 +245,6 @@ const findTracesRoute = createApmServerRoute({
   },
 });
 
-const aggregatedCriticalPathRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/traces/aggregated_critical_path',
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        traceIds: t.array(t.string),
-        serviceName: t.union([nonEmptyStringRt, t.null]),
-        transactionName: t.union([nonEmptyStringRt, t.null]),
-      }),
-      rangeRt,
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ criticalPath: CriticalPathResponse | null }> => {
-    const {
-      params: {
-        body: { traceIds, start, end, serviceName, transactionName },
-      },
-    } = resources;
-
-    const apmEventClient = await getApmEventClient(resources);
-
-    return getAggregatedCriticalPath({
-      traceIds,
-      start,
-      end,
-      apmEventClient,
-      serviceName,
-      transactionName,
-      logger: resources.logger,
-    });
-  },
-});
-
 const transactionFromTraceByIdRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
   params: t.type({
@@ -352,7 +316,6 @@ export const traceRouteRepository = {
   ...rootTransactionByTraceIdRoute,
   ...transactionByIdRoute,
   ...findTracesRoute,
-  ...aggregatedCriticalPathRoute,
   ...transactionFromTraceByIdRoute,
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,
