@@ -24,6 +24,7 @@ import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
+  useStreamsEnrichmentReselectSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -140,7 +141,7 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
+  const previewDocuments = useStreamsEnrichmentReselectSelector('derivedSamples');
 
   const previewColumns = useMemo(
     () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),

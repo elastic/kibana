@@ -23,7 +23,7 @@ import {
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
-  StreamEnrichmentContext,
+  StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
@@ -49,7 +49,7 @@ export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachi
 export const streamEnrichmentMachine = setup({
   types: {
     input: {} as StreamEnrichmentInput,
-    context: {} as StreamEnrichmentContext,
+    context: {} as StreamEnrichmentContextType,
     events: {} as StreamEnrichmentEvent,
   },
   actors: {
@@ -346,7 +346,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   },
 });
 
-function getStagedProcessors(context: StreamEnrichmentContext) {
+function getStagedProcessors(context: StreamEnrichmentContextType) {
   return context.processorsRefs
     .map((proc) => proc.getSnapshot())
     .filter((proc) => proc.context.isNew)
