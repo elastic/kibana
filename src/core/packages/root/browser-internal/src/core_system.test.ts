@@ -466,12 +466,10 @@ describe('#start()', () => {
     await startCore();
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
-      i18n: expect.any(Object),
       overlays: expect.any(Object),
-      theme: expect.any(Object),
-      userProfile: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
       analytics: expect.any(Object),
+      rendering: expect.any(Object),
     });
   });
 

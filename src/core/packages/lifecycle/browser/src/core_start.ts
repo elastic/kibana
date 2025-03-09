@@ -23,6 +23,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-browser';
+import type { RenderContextService } from '@kbn/core-render-context-browser';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
@@ -81,4 +82,6 @@ export interface CoreStart {
   security: SecurityServiceStart;
   /** {@link UserProfileServiceStart} */
   userProfile: UserProfileServiceStart;
+  /** {@link RenderContextService} */
+  rendering: RenderContextService;
 }
