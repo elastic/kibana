@@ -39,7 +39,6 @@ const startMock = (): PluginStart => ({
   setIsSolutionNavigationEnabled: jest.fn(),
   getSolutionNavigation: jest.fn(async () => ({
     navigationTree$: of({ body: [], footer: [] }),
-    panelContentProvider: jest.fn(),
   })),
 });
 
