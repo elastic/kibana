@@ -30,7 +30,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   describe('Ransomware in Alerts Page', () => {
-    beforeEach(() => {
+    before(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
@@ -49,7 +49,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   describe('Ransomware in Timelines', () => {
-    beforeEach(() => {
+    before(() => {
       deleteTimelines();
       login();
       visitWithTimeRange(TIMELINES_URL);
