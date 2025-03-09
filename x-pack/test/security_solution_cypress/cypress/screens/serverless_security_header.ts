@@ -63,8 +63,8 @@ export const CSP_DASHBOARD =
 
 export const HOSTS = '[data-test-subj="solutionSideNavPanelLink-hosts"]';
 
-export const FLEET = '[data-test-subj="solutionSideNavPanelLink-fleet:"]';
-export const ENDPOINTS = '[data-test-subj="solutionSideNavPanelLink-endpoints"]';
+export const FLEET = '[data-test-subj="panelGroupTitleId-fleet:"]';
+export const ENDPOINTS = '[data-test-subj="panelGroupTitleId-endpoints"]';
 
 export const POLICIES = '[data-test-subj="solutionSideNavPanelLink-policy"]';
 
