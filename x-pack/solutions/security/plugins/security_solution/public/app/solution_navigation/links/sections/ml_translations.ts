@@ -48,6 +48,18 @@ export const AIOPS_LABS_CATEGORY = i18n.translate(
 export const OVERVIEW_TITLE = i18n.translate('xpack.securitySolution.navLinks.ml.overview.title', {
   defaultMessage: 'Overview',
 });
+export const DATA_VISUALIZER_TITLE = i18n.translate(
+  'xpack.securitySolution.navLinks.ml.dataVisualizer.title',
+  {
+    defaultMessage: 'Data visualizer',
+  }
+);
+export const DATA_VISUALIZER_DESC = i18n.translate(
+  'xpack.securitySolution.navLinks.ml.dataVisualizer.desc',
+  {
+    defaultMessage: 'Data visualizer page',
+  }
+);
 export const OVERVIEW_DESC = i18n.translate('xpack.securitySolution.navLinks.ml.overview.desc', {
   defaultMessage: 'Overview page',
 });

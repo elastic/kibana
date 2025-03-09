@@ -9,6 +9,7 @@ import { each } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { stringMatch } from '../../../util/string_utils';
@@ -17,7 +18,6 @@ import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { mlCalendarService } from '../../../services/calendar_service';
 import { jobCloningService } from '../../../services/job_cloning_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 
 export function loadFullJob(mlApi, jobId) {
@@ -215,8 +215,13 @@ function showResults(toastNotifications, resp, action) {
   }
 }
 
-export async function cloneJob(toastNotifications, application, mlApi, jobId) {
+export async function cloneJob(toastNotifications, share, mlApi, jobId) {
   try {
+    const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
+    if (!managementLocator) {
+      throw new Error('Could not find management locator');
+    }
+
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
       loadJobForCloning(mlApi, jobId),
       loadFullJob(mlApi, jobId),
@@ -283,7 +288,10 @@ export async function cloneJob(toastNotifications, application, mlApi, jobId) {
 
     jobCloningService.stashJobCloningData(tempJobCloningData);
 
-    application.navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+    await managementLocator.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB}`,
+    });
   } catch (error) {
     toastNotificationServiceProvider(toastNotifications).displayErrorToast(
       error,

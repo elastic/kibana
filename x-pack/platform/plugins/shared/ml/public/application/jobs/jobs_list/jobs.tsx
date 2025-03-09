@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -19,6 +19,7 @@ import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -43,9 +44,13 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
-    services: { docLinks },
+    services: {
+      docLinks,
+      mlServices: { mlApi },
+    },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
+  getMlNodeCount(mlApi);
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
@@ -58,6 +63,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
+      <EuiSpacer size="m" />
       <JobsListView
         euiTheme={euiTheme}
         isMlEnabledInSpace={isMlEnabledInSpace}

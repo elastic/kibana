@@ -12,18 +12,27 @@ import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { useMlManagementLocator } from '../../../../contexts/kibana';
 
 export function NewJobButton() {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const buttonEnabled = canCreateJob && mlNodesAvailable();
-  const newJob = useCreateAndNavigateToMlLink(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX);
+  const mlLocator = useMlManagementLocator();
+
+  const redirectToCreateJobSelectIndexPage = async () => {
+    if (!mlLocator) return;
+
+    await mlLocator.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
+    });
+  };
 
   return (
     <EuiButton
       data-test-subj="mlCreateNewJobButton"
-      onClick={newJob}
+      onClick={redirectToCreateJobSelectIndexPage}
       size="s"
       disabled={buttonEnabled === false}
       fill
