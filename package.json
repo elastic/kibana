@@ -1193,7 +1193,7 @@
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.47",
     "monaco-editor": "^0.44.0",
-    "monaco-yaml": "^5.1.0",
+    "monaco-yaml": "^5.3.1",
     "murmurhash": "^2.0.1",
     "mustache": "^2.3.2",
     "node-diff3": "^3.1.2",
