@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -34,6 +34,7 @@ interface Props {
   index: number;
   showFileContentPreview?: boolean;
   showFileSummary?: boolean;
+  autoExpand?: boolean;
 }
 
 enum TAB {
@@ -48,13 +49,19 @@ export const FileStatus: FC<Props> = ({
   index,
   showFileContentPreview = false,
   showFileSummary = false,
+  autoExpand = false,
 }) => {
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
-
   const [expanded, setExpanded] = useState(false);
   const [selectedTab, setSelectedTab] = useState<TAB>(showFileSummary ? TAB.SUMMARY : TAB.CONTENT);
+
+  useEffect(() => {
+    if (autoExpand && fileStatus.results !== null) {
+      setExpanded(true);
+    }
+  }, [autoExpand, fileStatus.results]);
 
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
@@ -162,7 +169,7 @@ export const FileStatus: FC<Props> = ({
               </>
             ) : null}
 
-            {expanded ? (
+            {expanded && fileStatus.results !== null ? (
               <>
                 <EuiHorizontalRule margin="s" />
                 <EuiTabs size="s">
@@ -195,13 +202,13 @@ export const FileStatus: FC<Props> = ({
                 <EuiSpacer size="s" />
 
                 {selectedTab === TAB.SUMMARY ? (
-                  <AnalysisSummary results={fileStatus.results!} showTitle={false} />
+                  <AnalysisSummary results={fileStatus.results} showTitle={false} />
                 ) : null}
 
                 {selectedTab === TAB.CONTENT ? (
                   <FileContents
                     fileContents={fileStatus.fileContents}
-                    results={fileStatus.results!}
+                    results={fileStatus.results}
                     showTitle={false}
                     disableHighlighting={true}
                   />

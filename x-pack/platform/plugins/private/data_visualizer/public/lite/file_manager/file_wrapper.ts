@@ -92,9 +92,11 @@ export class FileWrapper {
       // analysis will be done in the background
 
       let analysisResults: AnalysisResults;
+      let parsedFileContents = fileContents;
 
       if (isTikaType(this.file.type)) {
         analysisResults = await this.analyzeTika(data);
+        parsedFileContents = analysisResults.fileContents;
       } else {
         analysisResults = await this.analyzeStandardFile(fileContents, {});
       }
@@ -104,7 +106,7 @@ export class FileWrapper {
         ...analysisResults,
         loaded: true,
         fileName: this.file.name,
-        fileContents,
+        fileContents: parsedFileContents,
         data,
         supportedFormat,
       });
