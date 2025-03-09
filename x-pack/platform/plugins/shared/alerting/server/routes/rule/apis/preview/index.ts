@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { rawAdHocRunParamsSchema } from './v3';
-
-export type RawAdHocRunParams = TypeOf<typeof rawAdHocRunParamsSchema>;
+export { previewRuleRoute } from './preview_rule_route';

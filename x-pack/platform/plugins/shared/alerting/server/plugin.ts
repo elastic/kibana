@@ -24,6 +24,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -123,6 +124,7 @@ export const EVENT_LOG_ACTIONS = {
   executeStart: 'execute-start',
   executeAction: 'execute-action',
   executeBackfill: 'execute-backfill',
+  executePreview: 'execute-preview',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
@@ -299,6 +301,14 @@ export class AlertingPlugin {
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
       taskRunnerFactory: this.taskRunnerFactory,
+    });
+
+    // Registers the task that handles previews using the ad hoc task runner
+    plugins.taskManager.registerTaskDefinitions({
+      ['ad_hoc_run-preview']: {
+        title: 'Alerting Preview Rule Run',
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.createAdHoc(context),
+      },
     });
 
     this.eventLogger = plugins.eventLog.getLogger({
@@ -535,6 +545,8 @@ export class AlertingPlugin {
         RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
       ]),
+      internalEsClient: core.elasticsearch.client.asInternalUser,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {

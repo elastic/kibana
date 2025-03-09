@@ -9,4 +9,5 @@
 
 export * from './types';
 export * from './create_rule';
+export * from './preview_rule';
 export * from './transform_create_rule_body';

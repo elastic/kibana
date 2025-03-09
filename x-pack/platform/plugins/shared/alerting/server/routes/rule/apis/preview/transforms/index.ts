@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { rawAdHocRunParamsSchema } from './v3';
+export { transformPreviewBody } from './transform_preview_body/latest';
 
-export type RawAdHocRunParams = TypeOf<typeof rawAdHocRunParamsSchema>;
+export { transformPreviewBody as transformPreviewBodyV1 } from './transform_preview_body/v1';

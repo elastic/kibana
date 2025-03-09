@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { rawAdHocRunParamsSchema } from './v3';
+import { schema } from '@kbn/config-schema';
+import { rawAdHocRunParamsSchema as rawAdHocRunParamsSchemaV2 } from './v2';
 
-export type RawAdHocRunParams = TypeOf<typeof rawAdHocRunParamsSchema>;
+export const rawAdHocRunParamsSchema = rawAdHocRunParamsSchemaV2.extends({
+  executionUuid: schema.maybe(schema.string()),
+});

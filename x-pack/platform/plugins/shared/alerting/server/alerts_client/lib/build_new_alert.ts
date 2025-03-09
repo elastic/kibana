@@ -51,6 +51,7 @@ interface BuildNewAlertOpts<
   runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
+  isPreview: boolean;
 }
 
 /**
@@ -71,6 +72,7 @@ export const buildNewAlert = <
   timestamp,
   payload,
   kibanaVersion,
+  isPreview,
 }: BuildNewAlertOpts<
   AlertData,
   LegacyState,
@@ -98,6 +100,12 @@ export const buildNewAlert = <
         [ALERT_STATUS]: 'active',
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
+        ...(isPreview
+          ? {
+              context: legacyAlert.getContext(),
+              state: legacyAlert.getState(),
+            }
+          : {}),
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
         ...(legacyAlert.getState().duration
           ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }

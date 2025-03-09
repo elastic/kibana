@@ -12,6 +12,7 @@ import {
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
@@ -59,6 +60,8 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
+  internalEsClient: ElasticsearchClient;
+  kibanaBaseUrl: string | undefined;
 }
 
 export class RulesClientFactory {
@@ -85,6 +88,8 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
+  private internalEsClient!: ElasticsearchClient;
+  private kibanaBaseUrl: string | undefined;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -113,6 +118,8 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
+    this.internalEsClient = options.internalEsClient;
+    this.kibanaBaseUrl = options.kibanaBaseUrl;
   }
 
   public async create(
@@ -129,6 +136,8 @@ export class RulesClientFactory {
     const authorization = await this.authorization.create(request);
 
     return new RulesClient({
+      actions: this.actions,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,
@@ -144,6 +153,7 @@ export class RulesClientFactory {
           AD_HOC_RUN_SAVED_OBJECT_TYPE,
         ],
       }),
+      internalEsClient: this.internalEsClient,
       authorization,
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
