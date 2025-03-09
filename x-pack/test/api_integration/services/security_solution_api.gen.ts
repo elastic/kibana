@@ -1289,7 +1289,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Add a note to a Timeline or update an existing note.
+     * Add a Note to a Timeline or update an existing Note.
      */
     persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
       return supertest
@@ -1300,7 +1300,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Pin an event to an existing Timeline.
+     * Pin/unpin an event to/from an existing Timeline.
      */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps, kibanaSpace: string = 'default') {
       return supertest

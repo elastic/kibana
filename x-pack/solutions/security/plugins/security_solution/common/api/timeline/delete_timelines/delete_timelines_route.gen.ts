@@ -18,9 +18,12 @@ import { z } from '@kbn/zod';
 
 export type DeleteTimelinesRequestBody = z.infer<typeof DeleteTimelinesRequestBody>;
 export const DeleteTimelinesRequestBody = z.object({
+  /**
+   * The list of IDs of the Timelines or Timeline templates to delete
+   */
   savedObjectIds: z.array(z.string()),
   /**
-   * Saved search ids that should be deleted alongside the timelines
+   * Saved search IDs that should be deleted alongside the timelines
    */
   searchIds: z.array(z.string()).optional(),
 });
