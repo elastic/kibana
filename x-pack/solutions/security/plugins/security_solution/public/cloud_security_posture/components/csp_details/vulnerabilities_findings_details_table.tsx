@@ -45,7 +45,10 @@ type VulnerabilitySortFieldType =
   | 'resource'
   | VULNERABILITY.SEVERITY
   | VULNERABILITY.ID
-  | VULNERABILITY.PACKAGE_NAME;
+  | VULNERABILITY.PACKAGE_NAME
+  | VULNERABILITY.TITLE;
+
+const EMPTY_VALUE = '-';
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
@@ -186,7 +189,13 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     {
       field: VULNERABILITY.TITLE,
-      render: (id: string) => <EuiText size="s">{id}</EuiText>,
+      render: (title: string) => {
+        if (Array.isArray(title)) {
+          return <EuiText size="s">{title.join(', ')}</EuiText>;
+        }
+
+        return <EuiText size="s">{title || EMPTY_VALUE}</EuiText>;
+      },
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityTitleColumnName',
         { defaultMessage: 'Vulnerability Title' }
@@ -196,7 +205,13 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     {
       field: VULNERABILITY.ID,
-      render: (id: string) => <EuiText size="s">{id}</EuiText>,
+      render: (id: string) => {
+        if (Array.isArray(id)) {
+          return <EuiText size="s">{id.join(', ')}</EuiText>;
+        }
+
+        return <EuiText size="s">{id || EMPTY_VALUE}</EuiText>;
+      },
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName',
         { defaultMessage: 'CVE ID' }
