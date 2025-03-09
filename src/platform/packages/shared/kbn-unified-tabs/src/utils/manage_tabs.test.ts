@@ -13,6 +13,7 @@ import {
   addTab,
   selectTab,
   insertTabAfter,
+  replaceTabWith,
   closeTab,
   closeOtherTabs,
   closeTabsToTheRight,
@@ -77,6 +78,27 @@ describe('manage_tabs', () => {
       const limitedItems = [items[0], items[1]];
       const prevState = { items: limitedItems, selectedItem: items[0] };
       const nextState = selectTab(prevState, items[2]);
+
+      expect(nextState.items).toBe(limitedItems);
+      expect(nextState.selectedItem).toBe(items[0]);
+    });
+  });
+
+  describe('replaceTabWith', () => {
+    it('replaces a tab with another tab', () => {
+      const newItem = { id: 'tab-5', label: 'Tab 5' };
+      const prevState = { items, selectedItem: items[0] };
+      const nextState = replaceTabWith(prevState, items[2], newItem);
+
+      expect(nextState.items).not.toBe(items);
+      expect(nextState.items).toEqual([items[0], items[1], newItem, items[3], items[4]]);
+      expect(nextState.selectedItem).toBe(newItem);
+    });
+
+    it("skips replacing a tab if it's not from the list", () => {
+      const limitedItems = [items[0], items[1]];
+      const prevState = { items: limitedItems, selectedItem: items[0] };
+      const nextState = replaceTabWith(prevState, items[2], items[3]);
 
       expect(nextState.items).toBe(limitedItems);
       expect(nextState.selectedItem).toBe(items[0]);

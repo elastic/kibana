@@ -22,6 +22,7 @@ describe('TabsBar', () => {
   it('renders tabs bar', async () => {
     const onAdd = jest.fn();
     const onSelect = jest.fn();
+    const onLabelEdited = jest.fn();
     const onClose = jest.fn();
 
     const selectedItem = items[0];
@@ -32,6 +33,7 @@ describe('TabsBar', () => {
         items={items}
         selectedItem={selectedItem}
         onAdd={onAdd}
+        onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
       />

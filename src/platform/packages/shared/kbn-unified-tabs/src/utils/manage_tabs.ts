@@ -94,6 +94,29 @@ export const insertTabAfter = (
   };
 };
 
+export const replaceTabWith = (
+  { items, selectedItem }: TabsState,
+  item: TabItem,
+  replaceWithItem: TabItem
+): TabsState => {
+  const itemIndex = items.findIndex((i) => i.id === item.id);
+
+  if (itemIndex === -1) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
+  const nextItems = [...items];
+  nextItems[itemIndex] = replaceWithItem;
+
+  return {
+    items: nextItems,
+    selectedItem: replaceWithItem,
+  };
+};
+
 export const closeOtherTabs = (_: TabsState, item: TabItem): TabsState => {
   return {
     items: [item],
