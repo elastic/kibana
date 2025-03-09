@@ -515,30 +515,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:presentation:timeToPresent': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:enable_ui': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:byValueEmbeddable': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:useDataService': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:enable_ui': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:deferBelowFold': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

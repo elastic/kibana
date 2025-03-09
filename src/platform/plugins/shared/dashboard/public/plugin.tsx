@@ -42,7 +42,6 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type {
@@ -107,7 +106,6 @@ export interface DashboardStartDependencies {
   fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;

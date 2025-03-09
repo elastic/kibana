@@ -15,7 +15,6 @@ import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { State } from '../../../types';
-import { presentationUtilService } from '../../services/kibana_services';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -67,10 +66,6 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   availableEmbeddables,
   ...restProps
 }) => {
-  const isByValueEnabled = presentationUtilService.labsService.isProjectEnabled(
-    'labs:canvas:byValueEmbeddable'
-  );
-
   const dispatch = useDispatch();
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));
 
@@ -88,21 +83,17 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       // If by-value is enabled, we'll handle both by-reference and by-value embeddables
       // with the new generic `embeddable` function.
       // Otherwise we fallback to the embeddable type specific expressions.
-      if (isByValueEnabled) {
-        partialElement.expression = embeddableInputToExpression(
-          { savedObjectId: id },
-          type,
-          undefined,
-          true
-        );
-      } else if (allowedEmbeddables[type]) {
-        partialElement.expression = allowedEmbeddables[type](id);
-      }
+      partialElement.expression = embeddableInputToExpression(
+        { savedObjectId: id },
+        type,
+        undefined,
+        true
+      );
 
       addEmbeddable(pageId, partialElement);
       restProps.onClose();
     },
-    [addEmbeddable, pageId, restProps, isByValueEnabled]
+    [addEmbeddable, pageId, restProps]
   );
 
   return (
@@ -110,7 +101,6 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       {...restProps}
       availableEmbeddables={availableEmbeddables || []}
       onSelect={onSelect}
-      isByValueEnabled={isByValueEnabled}
     />
   );
 };
