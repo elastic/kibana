@@ -28,6 +28,7 @@ import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -194,11 +195,11 @@ export const getDiscoverAppStateContainer = ({
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
-  let initialState = getInitialState(
-    getCurrentUrlState(stateStorage, services),
-    savedSearchContainer.getState(),
-    services
-  );
+  let initialState = getInitialState({
+    initialUrlState: getCurrentUrlState(stateStorage, services),
+    savedSearch: savedSearchContainer.getState(),
+    services,
+  });
   let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
@@ -361,13 +362,20 @@ function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: Discove
   );
 }
 
-export function getInitialState(
-  initialUrlState: DiscoverAppState | undefined,
-  savedSearch: SavedSearch | undefined,
-  services: DiscoverServices
-) {
+export function getInitialState({
+  initialUrlState,
+  savedSearch,
+  overrideDataView,
+  services,
+}: {
+  initialUrlState: DiscoverAppState | undefined;
+  savedSearch: SavedSearch | undefined;
+  overrideDataView?: DataView | undefined;
+  services: DiscoverServices;
+}) {
   const defaultAppState = getStateDefaults({
     savedSearch,
+    overrideDataView,
     services,
   });
   return handleSourceColumnState({ ...defaultAppState, ...initialUrlState }, services.uiSettings);
