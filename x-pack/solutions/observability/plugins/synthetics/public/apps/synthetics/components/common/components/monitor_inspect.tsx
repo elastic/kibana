@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+
 import {
   EuiFlyout,
   EuiButton,
@@ -20,8 +21,11 @@ import {
   EuiFlyoutBody,
   EuiToolTip,
   EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
+import yaml from 'js-yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { MonitorTypeEnum, SyntheticsMonitor } from '../../../../../../common/runtime_types';
@@ -36,6 +40,7 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
+  const [asJson, setAsJson] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const closeFlyout = () => {
@@ -72,22 +77,34 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSwitch
-            label={HIDE_PARAMS}
-            checked={hideParams}
-            onChange={(e) => setHideParams(e.target.checked)}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiSwitch
+                label={HIDE_PARAMS}
+                checked={hideParams}
+                onChange={(e) => setHideParams(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSwitch
+                label={AS_JSON}
+                checked={asJson}
+                onChange={(e) => setAsJson(e.target.checked)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="m" />
           {!loading && data ? (
             <>
               <EuiCodeBlock
-                language="json"
+                language={asJson ? 'json' : 'yaml'}
                 fontSize="m"
                 paddingSize="m"
                 lineNumbers
                 isCopyable={true}
               >
-                {formatContent(data.result)}
+                {formatContent(data.result, asJson)}
               </EuiCodeBlock>
               {data.decodedCode && <MonitorCode code={data.decodedCode} />}
             </>
@@ -143,7 +160,7 @@ const MonitorCode = ({ code }: { code: string }) => (
   </>
 );
 
-const formatContent = (result: MonitorInspectResponse) => {
+const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
   const firstResult = result.publicConfigs?.[0]?.monitors?.[0];
 
   const currentInput = result.privateConfig?.inputs.find((input) => input.enabled);
@@ -151,11 +168,12 @@ const formatContent = (result: MonitorInspectResponse) => {
     Object.values(MonitorTypeEnum).includes(stream.data_stream.dataset as MonitorTypeEnum)
   )?.compiled_stream;
 
-  return JSON.stringify(
-    { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} },
-    null,
-    2
-  );
+  const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
+  if (!asJson) {
+    return yaml.dump(data);
+  }
+
+  return JSON.stringify(data, null, 2);
 };
 
 const CONFIG_LABEL = i18n.translate('xpack.synthetics.monitorInspect.configLabel', {
@@ -192,4 +210,8 @@ export const INSPECT_MONITOR_LABEL = i18n.translate(
 
 const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams', {
   defaultMessage: 'Hide parameter values',
+});
+
+const AS_JSON = i18n.translate('xpack.synthetics.monitorInspect.asJson', {
+  defaultMessage: 'As JSON',
 });
