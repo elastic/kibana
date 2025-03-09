@@ -8,8 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverEnhancedPlugin } from './plugin';
 
-export type { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
-
 export type {
   DiscoverEnhancedPlugin,
   DiscoverEnhancedSetupDependencies,

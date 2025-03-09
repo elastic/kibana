@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './explore_data_context_menu_action';
-export * from './explore_data_chart_action';
+export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
+export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';

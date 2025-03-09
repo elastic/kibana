@@ -7,8 +7,7 @@
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
-
-export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
+import { ACTION_EXPLORE_DATA } from './constants';
 
 /**
  * This is "Explore underlying data" action which appears in the context

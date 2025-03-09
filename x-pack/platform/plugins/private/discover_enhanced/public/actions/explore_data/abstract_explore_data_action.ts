@@ -28,8 +28,6 @@ import { KibanaLocation } from '@kbn/share-plugin/public';
 
 import * as shared from './shared';
 
-export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
-
 export interface PluginDeps {
   discover: Pick<DiscoverStart, 'locator'>;
 }
