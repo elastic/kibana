@@ -22,7 +22,7 @@ export interface FormProps {
   timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringScheduleFormProps;
-  categoryIds?: string[];
+  solutionId?: string;
   scopedQuery?: ScopedQueryAttributes | null;
 }
 
@@ -47,12 +47,9 @@ export const schema: FormSchema<FormProps> = {
       },
     ],
   },
-  categoryIds: {
-    validations: [
-      {
-        validator: emptyField(i18n.CREATE_FORM_CATEGORY_IDS_REQUIRED),
-      },
-    ],
+  solutionId: {
+    type: FIELD_TYPES.TEXT,
+    validations: [],
   },
   scopedQuery: {
     defaultValue: {
