@@ -50,6 +50,8 @@ import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -354,6 +356,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -506,6 +509,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',

@@ -694,7 +694,7 @@ async function getExpressionSuggestionsByType(
           );
           if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
-            suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+            suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
           }
           if (isFunctionItem(rightArg)) {
             if (rightArg.args.some(isTimeIntervalItem)) {
@@ -702,7 +702,7 @@ async function getExpressionSuggestionsByType(
               const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
               if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
-                suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+                suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
             }
           }
         } else {
@@ -738,7 +738,7 @@ async function getExpressionSuggestionsByType(
                 const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
                 if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
-                  suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+                  suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
               }
             }
           }
@@ -763,7 +763,7 @@ async function getExpressionSuggestionsByType(
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
-        suggestions.push(...getCompatibleLiterals(command.name, [argDef.type]));
+        suggestions.push(...getCompatibleLiterals([argDef.type]));
       } else {
         // or it can be anything else as long as it is of the right type and the end (i.e. column or function)
         if (!nodeArg) {
@@ -1031,7 +1031,6 @@ async function getFunctionArgsSuggestions(
     // Literals
     suggestions.push(
       ...getCompatibleLiterals(
-        command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         {
           addComma: shouldAddComma,
@@ -1105,7 +1104,7 @@ async function getFunctionArgsSuggestions(
       if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
-          ...getCompatibleLiterals(command.name, ['time_literal_unit'], {
+          ...getCompatibleLiterals(['time_literal_unit'], {
             addComma: shouldAddComma,
             advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           })
