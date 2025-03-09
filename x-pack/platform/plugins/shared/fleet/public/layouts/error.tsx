@@ -10,11 +10,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
-import { MissingESRequirementsPage } from '../sections/agents/agent_requirements_page';
-import { WithHeaderLayout, WithoutHeaderLayout } from '../../../layouts';
-import { Error } from '../components';
+import { MissingESRequirementsPage } from '../applications/fleet/sections/agents/agent_requirements_page';
 
-import { DefaultLayout, DefaultPageTitle } from './default';
+import { WithHeaderLayout, WithoutHeaderLayout } from '.';
+
+import { Error } from '../applications/fleet/components';
+
+import { DefaultLayout, DefaultPageTitle } from '../applications/fleet/layouts/default';
 
 const Panel = styled(EuiPanel)`
   max-width: 500px;
@@ -40,7 +42,8 @@ export const ErrorLayout: React.FunctionComponent<{
 export const PermissionsError: React.FunctionComponent<{
   error: string;
   requiredFleetRole?: string;
-}> = React.memo(({ error, requiredFleetRole }) => {
+  callingApplication: string;
+}> = React.memo(({ error, requiredFleetRole, callingApplication }) => {
   if (error === 'MISSING_SECURITY') {
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
@@ -71,7 +74,7 @@ export const PermissionsError: React.FunctionComponent<{
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.permissionDeniedErrorMessage"
-                  defaultMessage="You are not authorized to access Fleet. Kibana privileges are required to access Fleet; the {roleName2} or {roleName1} privilege is required to access Integrations."
+                  defaultMessage={`You are not authorized to access ${callingApplication}. Kibana privileges are required to access ${callingApplication}; the {roleName2} or {roleName1} privilege is required to access ${callingApplication}.`}
                   values={{
                     roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
                     roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
