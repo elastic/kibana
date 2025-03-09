@@ -54,7 +54,7 @@ export async function getServiceDependenciesBreakdown({
 
     return {
       title: getNodeName(location),
-      data: stats.totalTime.timeseries,
+      data: stats.totalTime.timeseries || [],
     };
   });
 }
