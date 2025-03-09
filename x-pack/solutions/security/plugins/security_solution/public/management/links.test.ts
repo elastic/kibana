@@ -94,7 +94,6 @@ describe('links', () => {
         SecurityPageName.policies,
         SecurityPageName.responseActionsHistory,
         SecurityPageName.trustedApps,
-        SecurityPageName.cloudDefendPolicies
       )
     );
   });
