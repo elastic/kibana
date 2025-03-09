@@ -8,15 +8,12 @@
 import expect from '@kbn/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getSimpleRule,
-  getSimpleRuleOutput,
   updateUsername,
   getSimpleRuleOutputWithoutRuleId,
-  getSimpleRuleWithoutRuleId,
-  removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
@@ -37,14 +34,16 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  // TODO: https://github.com/elastic/kibana/issues/193184 Unskip and rewrite using the _bulk_action API endpoint
-  describe.skip('@ess @skipInServerlesMKI delete_rules_bulk', () => {
+  describe('@ess @skipInServerlesMKI delete_rules_bulk', () => {
     describe('deprecations', () => {
       it('should return a warning header', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         const { header } = await securitySolutionApi
-          .bulkDeleteRules({ body: [{ rule_id: 'rule-1' }] })
+          .performRulesBulkAction({
+            query: { dry_run: false },
+            body: { ids: [bodyWithCreatedRule.id], action: 'delete' },
+          })
           .expect(200);
 
         expect(header.warning).to.be(
@@ -53,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('deleting rules bulk using DELETE', () => {
+    describe('deleting rules bulk using bulk_action endpoint', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
       });
@@ -63,92 +62,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should delete a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
-
-        // delete the rule in bulk
-        const { body } = await securitySolutionApi
-          .bulkDeleteRules({ body: [{ rule_id: 'rule-1' }] })
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
-
-        expect(bodyToCompare).to.eql(expectedRule);
-      });
-
-      it('should delete a single rule using an auto generated rule_id', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
-
-        // delete that rule by its rule_id
-        const { body } = await securitySolutionApi
-          .bulkDeleteRules({ body: [{ rule_id: bodyWithCreatedRule.rule_id }] })
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        const expectedRule = updateUsername(
-          getSimpleRuleOutputWithoutRuleId(),
-          await utils.getUsername()
-        );
-
-        expect(bodyToCompare).to.eql(expectedRule);
-      });
-
       it('should delete a single rule using an auto generated id', async () => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         // delete that rule by its id
         const { body } = await securitySolutionApi
-          .bulkDeleteRules({ body: [{ id: bodyWithCreatedRule.id }] })
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        const expectedRule = updateUsername(
-          getSimpleRuleOutputWithoutRuleId(),
-          await utils.getUsername()
-        );
-
-        expect(bodyToCompare).to.eql(expectedRule);
-      });
-
-      it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
-        const { body } = await securitySolutionApi
-          .bulkDeleteRules({ body: [{ rule_id: 'fake_id' }] })
-          .expect(200);
-
-        expect(body).to.eql([
-          {
-            error: {
-              message: 'rule_id: "fake_id" not found',
-              status_code: 404,
-            },
-            rule_id: 'fake_id',
-          },
-        ]);
-      });
-
-      it('should return an error if the id does not exist when trying to delete an id', async () => {
-        const { body } = await securitySolutionApi
-          .bulkDeleteRules({ body: [{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }] })
-          .expect(200);
-
-        expect(body).to.eql([
-          {
-            error: {
-              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
-              status_code: 404,
-            },
-            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
-          },
-        ]);
-      });
-
-      it('should delete a single rule using an auto generated rule_id but give an error if the second rule does not exist', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
-
-        const { body } = await securitySolutionApi
-          .bulkDeleteRules({
-            body: [{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }],
+          .performRulesBulkAction({
+            query: { dry_run: false },
+            body: { ids: [bodyWithCreatedRule.id], action: 'delete' },
           })
           .expect(200);
 
@@ -158,112 +79,15 @@ export default ({ getService }: FtrProviderContext): void => {
           await utils.getUsername()
         );
 
-        expect([bodyToCompare, body[1]]).to.eql([
-          expectedRule,
-          {
-            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
-            error: {
-              status_code: 404,
-              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
-            },
-          },
-        ]);
-      });
-    });
-
-    // This is a repeat of the tests above but just using POST instead of DELETE
-    describe('deleting rules bulk using POST', () => {
-      beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
-      it('should delete a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
-
-        // delete the rule in bulk
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([{ rule_id: 'rule-1' }])
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
         expect(bodyToCompare).to.eql(expectedRule);
-      });
-
-      it('should delete a single rule using an auto generated rule_id', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
-
-        // delete that rule by its rule_id
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        const expectedRule = updateUsername(
-          getSimpleRuleOutputWithoutRuleId(),
-          await utils.getUsername()
-        );
-
-        expect(bodyToCompare).to.eql(expectedRule);
-      });
-
-      it('should delete a single rule using an auto generated id', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
-
-        // delete that rule by its id
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([{ id: bodyWithCreatedRule.id }])
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-
-        const expectedRule = updateUsername(
-          getSimpleRuleOutputWithoutRuleId(),
-          await utils.getUsername()
-        );
-
-        expect(bodyToCompare).to.eql(expectedRule);
-      });
-
-      it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([{ rule_id: 'fake_id' }])
-          .expect(200);
-
-        expect(body).to.eql([
-          {
-            error: {
-              message: 'rule_id: "fake_id" not found',
-              status_code: 404,
-            },
-            rule_id: 'fake_id',
-          },
-        ]);
       });
 
       it('should return an error if the id does not exist when trying to delete an id', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: false },
+            body: { ids: ['c4e80a0d-e20f-4efc-84c1-08112da5a612'], action: 'delete' },
+          })
           .expect(200);
 
         expect(body).to.eql([
@@ -273,33 +97,6 @@ export default ({ getService }: FtrProviderContext): void => {
               status_code: 404,
             },
             id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
-          },
-        ]);
-      });
-
-      it('should delete a single rule using an auto generated rule_id but give an error if the second rule does not exist', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        const expectedRule = updateUsername(
-          getSimpleRuleOutputWithoutRuleId(),
-          await utils.getUsername()
-        );
-        expect([bodyToCompare, body[1]]).to.eql([
-          expectedRule,
-          {
-            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
-            error: {
-              status_code: 404,
-              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
-            },
           },
         ]);
       });
@@ -332,35 +129,20 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('DELETE - should delete a single rule with investigation field', async () => {
-        // delete the rule in bulk
-        const { body } = await securitySolutionApi
-          .bulkDeleteRules({
-            body: [
-              { rule_id: 'rule-with-investigation-field' },
-              { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
-              { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
-            ],
-          })
-          .expect(200);
-        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
-        expect(investigationFields).to.eql([
-          { field_names: ['host.name'] },
-          undefined,
-          { field_names: ['client.address', 'agent.name'] },
-        ]);
-      });
-
-      it('POST - should delete a single rule with investigation field', async () => {
-        // delete the rule in bulk
+      it('Should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk using the bulk_actions endpoint
         const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .post(DETECTION_ENGINE_RULES_BULK_ACTION)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send([
-            { rule_id: 'rule-with-investigation-field' },
-            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
-            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
+            {
+              ids: [
+                ruleWithLegacyInvestigationFieldEmptyArray.id,
+                ruleWithLegacyInvestigationField.id,
+              ],
+              action: 'delete',
+            },
           ])
           .expect(200);
         const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
