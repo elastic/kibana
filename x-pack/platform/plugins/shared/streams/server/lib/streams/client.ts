@@ -38,7 +38,7 @@ import {
   findInheritedLifecycle,
   findInheritingStreams,
 } from '@kbn/streams-schema';
-import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
+import { cloneDeep, keyBy, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
 import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {
@@ -67,6 +67,7 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
+import { State } from './state_management/state';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -129,13 +130,19 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    await this.upsertStream({
-      request: {
-        dashboards: [],
-        stream: omit(rootStreamDefinition, 'name'),
-      },
-      name: rootStreamDefinition.name,
-    });
+    await State.attemptChanges(
+      [
+        {
+          target: rootStreamDefinition.name,
+          type: 'wired_upsert',
+          request: {
+            dashboards: [],
+            stream: rootStreamDefinition,
+          },
+        },
+      ],
+      this.dependencies
+    );
 
     return { acknowledged: true, result: 'created' };
   }
@@ -154,9 +161,15 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const definition = await this.getStream(LOGS_ROOT_STREAM_NAME);
-
-    await this.deleteStreamFromDefinition(definition);
+    await State.attemptChanges(
+      [
+        {
+          type: 'delete',
+          target: LOGS_ROOT_STREAM_NAME,
+        },
+      ],
+      this.dependencies
+    );
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([assetClient.clean(), storageClient.clean()]);
