@@ -19,6 +19,11 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_mark
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 
+const scrollable: React.CSSProperties = {
+  overflowX: 'auto',
+  scrollbarWidth: 'thin',
+};
+
 interface Props {
   attackDiscovery: AttackDiscovery;
   replacements?: Replacements;
@@ -66,10 +71,12 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <h2>{i18n.SUMMARY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <AttackDiscoveryMarkdownFormatter
-        disableActions={showAnonymized}
-        markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
-      />
+      <div style={scrollable} data-test-subj="summaryContent">
+        <AttackDiscoveryMarkdownFormatter
+          disableActions={showAnonymized}
+          markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+        />
+      </div>
 
       <EuiSpacer />
 
@@ -77,10 +84,13 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <h2>{i18n.DETAILS}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <AttackDiscoveryMarkdownFormatter
-        disableActions={showAnonymized}
-        markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
-      />
+
+      <div style={scrollable} data-test-subj="detailsContent">
+        <AttackDiscoveryMarkdownFormatter
+          disableActions={showAnonymized}
+          markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+        />
+      </div>
 
       <EuiSpacer />
 
