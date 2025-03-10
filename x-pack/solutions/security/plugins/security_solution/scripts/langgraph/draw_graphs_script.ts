@@ -18,6 +18,9 @@ import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/ta
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import { getEsqlSelfHealingGraph } from '@kbn/security-solution-plugin/server/assistant/tools/esql/graph';
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -47,6 +50,16 @@ async function getAgentGraph(logger: Logger): Promise<Drawable> {
   return graph.getGraphAsync({ xray: true });
 }
 
+async function esqlSelfHealing(logger: Logger): Promise<Drawable> {
+  return getEsqlSelfHealingGraph({
+    esClient: {} as unknown as ElasticsearchClient,
+    connectorId: 'connectorId',
+    inference: {} as unknown as InferenceServerStart,
+    logger,
+    request: {} as unknown as KibanaRequest,
+  }).getGraphAsync({ xray: true });
+}
+
 export const drawGraph = async ({
   getGraphAsync,
   outputFilename,
@@ -61,6 +74,7 @@ export const drawGraph = async ({
   logger.info('Compiling graph');
   const outputPath = path.join(__dirname, outputFilename);
   const graph = await getGraphAsync(logger);
+  logger.info('Drawing graph');
   const output = await graph.drawMermaidPng();
   const buffer = Buffer.from(await output.arrayBuffer());
   logger.info(`Writing graph to ${outputPath}`);
@@ -72,4 +86,10 @@ export const draw = async () => {
     getGraphAsync: getAgentGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
   });
+
+  await drawGraph({
+    getGraphAsync: esqlSelfHealing,
+    outputFilename: '../../docs/esql_self_healing/img/esql_self_healing_graph.png',
+  });
 };
+
