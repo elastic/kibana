@@ -53,10 +53,11 @@ const headerStyle = css`
 
 const useCompleteBadgeStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const successBackgroundColor = euiTheme.colors.backgroundLightSuccess;
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   return css`
-    background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
+    background-color: ${isDarkMode
+      ? euiTheme.colors.success
+      : euiTheme.colors.backgroundBaseSuccess};
     color: ${isDarkMode ? euiTheme.colors.plainDark : euiTheme.colors.textSuccess};
     text-decoration: none;
   `;
