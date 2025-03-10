@@ -29,15 +29,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     sortBy = 'title',
     sortDirection = 'asc',
     spaceId,
-    role = 'editor',
+    user = 'editor',
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
     spaceId?: string;
-    role?: 'admin' | 'editor' | 'viewer';
+    user?: 'admin' | 'editor' | 'viewer';
   } = {}): Promise<KnowledgeBaseEntry[]> {
-    const res = await observabilityAIAssistantAPIClient[role]({
+    const res = await observabilityAIAssistantAPIClient[user]({
       endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
       params: {
         query: { query, sortBy, sortDirection },
@@ -211,9 +211,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when managing multiple entries across spaces', () => {
       const SPACE_A_ID = 'space_a';
-      const SPACE_A_NAME = 'Space A';
       const SPACE_B_ID = 'space_b';
-      const SPACE_B_NAME = 'Space B';
 
       before(async () => {
         await clearKnowledgeBase(es);
@@ -225,14 +223,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               entries: [
                 {
                   id: 'my-doc-1',
-                  title: `Entry in ${SPACE_A_NAME} by Admin 1`,
-                  text: `This is a public entry in ${SPACE_A_NAME} created by Admin`,
+                  title: `Entry in Space A by Admin 1`,
+                  text: `This is a public entry in Space A created by Admin`,
                   public: true,
                 },
                 {
                   id: 'my-doc-2',
-                  title: `Entry in ${SPACE_A_NAME} by Admin 2`,
-                  text: `This is a private entry in ${SPACE_A_NAME} created by Admin`,
+                  title: `Entry in Space A by Admin 2`,
+                  text: `This is a private entry in Space A created by Admin`,
                   public: false,
                 },
               ],
@@ -249,14 +247,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               entries: [
                 {
                   id: 'my-doc-3',
-                  title: `Entry in ${SPACE_B_NAME} by Admin 3`,
-                  text: `This is a public entry in ${SPACE_B_NAME} created by Admin`,
+                  title: `Entry in Space B by Admin 3`,
+                  text: `This is a public entry in Space B created by Admin`,
                   public: true,
                 },
                 {
                   id: 'my-doc-4',
-                  title: `Entry in ${SPACE_B_NAME} by Admin 4`,
-                  text: `This is a private entry in ${SPACE_B_NAME} created by Admin`,
+                  title: `Entry in Space B by Admin 4`,
+                  text: `This is a private entry in Space B created by Admin`,
                   public: false,
                 },
               ],
@@ -274,7 +272,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('ensures users can only access entries relevant to their namespace', async () => {
         // User (admin) in space A should only see entries in space A
         const spaceAEntries = await getEntries({
-          role: 'admin',
+          user: 'admin',
           spaceId: SPACE_A_ID,
         });
 
@@ -290,7 +288,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         // User (admin) in space B should only see entries in space B
         const spaceBEntries = await getEntries({
-          role: 'admin',
+          user: 'admin',
           spaceId: SPACE_B_ID,
         });
 
@@ -308,7 +306,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('should allow a user who is not the owner of the entries to access entries relevant to their namespace', async () => {
         // User (editor) in space B should only see entries in space B
         const spaceBEntries = await getEntries({
-          role: 'editor',
+          user: 'editor',
           spaceId: SPACE_B_ID,
         });
 
