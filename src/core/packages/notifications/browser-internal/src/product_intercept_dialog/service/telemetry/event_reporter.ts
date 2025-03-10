@@ -7,12 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { EventMetric, EventFieldType, eventTypes } from './event_definitions';
 
-export class EventReporter {
-  private readonly reportEvent: AnalyticsServiceStart['reportEvent'];
+export class ProductInterceptTelemetry {
+  private reportEvent?: AnalyticsServiceStart['reportEvent'];
 
-  constructor({ analytics }: { analytics: AnalyticsServiceStart }) {
+  public setup({ analytics }: { analytics: AnalyticsServiceSetup }) {
+    eventTypes.forEach((eventType) => {
+      analytics.registerEventType(eventType);
+    });
+
+    return {};
+  }
+
+  public start({ analytics }: { analytics: AnalyticsServiceStart }) {
     this.reportEvent = analytics.reportEvent;
+
+    return {
+      reportInterceptInteraction: this.reportInterceptInteraction.bind(this),
+    };
+  }
+
+  private reportInterceptInteraction({ interactionType }: { interactionType: string }) {
+    this.reportEvent?.(EventMetric.INTERCEPT_INTERACTION, {
+      [EventFieldType.INTERACTION_TYPE]: interactionType,
+    });
   }
 }

@@ -10,16 +10,19 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
 import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
 
-import { EventReporter as ProductInterceptEventReporter } from './telemetry';
+interface ProductInterceptServiceSetupDeps {
+  analytics: AnalyticsServiceSetup;
+}
 
 interface ProductInterceptServiceStartDeps {
   analytics: AnalyticsServiceStart;
@@ -31,32 +34,37 @@ interface ProductInterceptServiceStartDeps {
 }
 
 export class ProductInterceptDialogService {
-  private api?: ProductInterceptDialogApi;
+  private readonly api = new ProductInterceptDialogApi();
   private targetDomElement?: HTMLElement;
-  private eventReporter?: ProductInterceptEventReporter;
 
-  setup() {
-    this.api = new ProductInterceptDialogApi();
+  setup({ analytics }: ProductInterceptServiceSetupDeps) {
+    this.api.setup({ analytics });
 
-    return this.api!;
+    return {};
   }
 
-  public start({ targetDomElement, ...startDeps }: ProductInterceptServiceStartDeps) {
-    this.api!.init({ ...startDeps });
+  public start({
+    targetDomElement,
+    ...startDeps
+  }: ProductInterceptServiceStartDeps): IProductInterceptPublicApi {
+    const { ack, add, get$ } = this.api.start({ ...startDeps });
     this.targetDomElement = targetDomElement;
-
-    this.eventReporter = new ProductInterceptEventReporter({ analytics: startDeps.analytics });
 
     render(
       <KibanaRenderContextProvider {...startDeps}>
         <ProductInterceptDialogManager
-          {...{ eventReporter: this.eventReporter, productIntercepts$: this.api!.get$() }}
+          {...{
+            productIntercepts$: get$(),
+            ackProductIntercept: ack,
+          }}
         />
       </KibanaRenderContextProvider>,
       this.targetDomElement
     );
 
-    return this.api!;
+    return {
+      add,
+    };
   }
 
   stop() {

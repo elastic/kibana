@@ -55,7 +55,7 @@ export class NotificationsService {
 
     const notificationSetup = {
       toasts: this.toasts.setup({ uiSettings }),
-      productIntercepts: this.productIntercepts.setup(),
+      productIntercepts: this.productIntercepts.setup({ analytics }),
     };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
