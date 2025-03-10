@@ -278,6 +278,30 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
+    const deps = useMemo(() => {
+      return {
+        unifiedSearch,
+        data,
+        storage,
+        usageCollection,
+        notifications,
+        docLinks,
+        http,
+        uiSettings,
+        dataViews,
+      };
+    }, [
+      data,
+      dataViews,
+      docLinks,
+      http,
+      notifications,
+      storage,
+      uiSettings,
+      unifiedSearch,
+      usageCollection,
+    ]);
+
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
@@ -701,17 +725,7 @@ export const QueryBarTopRow = React.memo(
             appName={appName}
             submitOnBlur={props.submitOnBlur}
             bubbleSubmitEvent={props.bubbleSubmitEvent}
-            deps={{
-              unifiedSearch,
-              data,
-              storage,
-              usageCollection,
-              notifications,
-              docLinks,
-              http,
-              uiSettings,
-              dataViews,
-            }}
+            deps={deps}
           />
         </EuiFlexItem>
       );
