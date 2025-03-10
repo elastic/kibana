@@ -1017,20 +1017,20 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               .css-10uvw04{background-color:#CAD3E2;height:3px;width:25px;}
             </style>
             <style
-              data-rfd-always=":r0:"
+              data-rfd-always="0"
               type="text/css"
             >
-               [data-rfd-drag-handle-context-id=":r0:"] { 
+               [data-rfd-drag-handle-context-id="0"] { 
           -webkit-touch-callout: none;
           -webkit-tap-highlight-color: rgba(0,0,0,0);
           touch-action: manipulation;
-         } [data-rfd-droppable-context-id=":r0:"] { overflow-anchor: none; } 
+         } [data-rfd-droppable-context-id="0"] { overflow-anchor: none; } 
             </style>
             <style
-              data-rfd-dynamic=":r0:"
+              data-rfd-dynamic="0"
               type="text/css"
             >
-               [data-rfd-drag-handle-context-id=":r0:"] { 
+               [data-rfd-drag-handle-context-id="0"] { 
       cursor: -webkit-grab;
       cursor: grab;
      }  
