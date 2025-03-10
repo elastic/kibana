@@ -248,12 +248,6 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_BULK_DELETE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
-export const DETECTION_ENGINE_RULES_BULK_CREATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
-export const DETECTION_ENGINE_RULES_BULK_UPDATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
