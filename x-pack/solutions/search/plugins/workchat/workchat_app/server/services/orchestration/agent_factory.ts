@@ -9,6 +9,8 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createAgent, type Agent } from './agent';
 import { IntegrationsService } from '../integrations/integrations_service';
+import { IntergrationsSession } from '../integrations/integrations_session';
+import { InternalIntegrationServices } from '@kbn/wci-common';
 
 interface OrchestrationServiceOptions {
   logger: Logger;
@@ -31,18 +33,23 @@ export class AgentFactory {
     request,
     connectorId,
     agentId,
+    internalServices
   }: {
     agentId: string;
     request: KibanaRequest;
     connectorId: string;
+    internalServices: InternalIntegrationServices;
   }): Promise<Agent> {
-    this.logger.debug(`getAgent [agentId=${agentId}] [cnnectorId=${connectorId}]`);
+    this.logger.debug(`getAgent [agentId=${agentId}] [connectorId=${connectorId}]`);
+
+    const integrationsSession = await this.integrationsService.createSession(internalServices);
 
     const chatModel = await this.inference.getChatModel({
       request,
       connectorId,
       chatModelOptions: {},
     });
-    return await createAgent({ agentId, chatModel, integrationsService: this.integrationsService });
+
+    return await createAgent({ agentId, chatModel, integrationsSession });
   }
 }

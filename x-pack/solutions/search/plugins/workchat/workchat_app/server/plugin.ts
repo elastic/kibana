@@ -83,7 +83,7 @@ export class WorkChatAppPlugin
     const agentFactory = new AgentFactory({
       inference: pluginsDependencies.inference,
       logger: this.logger.get('services.agentFactory'),
-      integrationsService,
+      integrationsService
     });
 
     const chatService = new ChatService({

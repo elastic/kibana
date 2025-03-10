@@ -31,6 +31,7 @@ import { isMessageEvent } from '../../../common/utils/chat_events';
 import { AgentFactory } from '../orchestration';
 import { ConversationService } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
+import { InternalIntegrationServices } from '@kbn/wci-common';
 
 interface ChatServiceOptions {
   logger: Logger;
@@ -58,12 +59,14 @@ export class ChatService {
     connectorId,
     request,
     nextUserMessage,
+    internalServices,
   }: {
     agentId: string;
     connectorId: string;
     conversationId?: string;
     nextUserMessage: string;
     request: KibanaRequest;
+    internalServices: InternalIntegrationServices;
   }) {
     const logError = (source: string, err: Error) => {
       this.logger.error(`Error during converse from ${source}: ${err.message}`);
@@ -103,7 +106,7 @@ export class ChatService {
         shareReplay()
       );
 
-    const agent = await this.agentFactory.getAgent({ request, connectorId, agentId });
+    const agent = await this.agentFactory.getAgent({ request, connectorId, agentId, internalServices });
     const agentOutput = await agent.run({ conversation });
 
     const agentEvents$ = agentOutput.events$;
