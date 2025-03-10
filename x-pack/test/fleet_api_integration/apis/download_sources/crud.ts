@@ -202,6 +202,169 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('POST /agent_download_sources', () => {
+      it('should allow to create a new download source host', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My download source',
+            host: 'http://test.fr:443',
+            is_default: false,
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'My download source',
+          host: 'http://test.fr:443',
+          is_default: false,
+        });
+      });
+
+      it('should toggle default download source when creating a new default one', async function () {
+        await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default download source host 1',
+            host: 'https://test.co',
+            is_default: true,
+          })
+          .expect(200);
+
+        const {
+          body: { item: downloadSource2 },
+        } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default download source host 2',
+            host: 'https://test2.co',
+            is_default: true,
+          })
+          .expect(200);
+
+        const {
+          body: { items: downloadSources },
+        } = await supertest.get(`/api/fleet/agent_download_sources`).expect(200);
+
+        const defaultDownloadSource = downloadSources.filter((item: any) => item.is_default);
+        expect(defaultDownloadSource).to.have.length(1);
+        expect(defaultDownloadSource[0].id).eql(downloadSource2.id);
+      });
+
+      it('should return a 400 when passing a host that is not a valid uri', async function () {
+        await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'new host1',
+            host: 'not a valid uri',
+            is_default: true,
+          })
+          .expect(400);
+      });
+
+      it('should allow to create a new download source host with ssl fields', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My download source with ssl',
+            host: 'http://test.fr:443',
+            is_default: false,
+            ssl: {
+              certificate: 'cert',
+              certificate_authorities: ['ca'],
+              key: 'KEY1',
+            },
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'My download source with ssl',
+          host: 'http://test.fr:443',
+          is_default: false,
+          ssl: {
+            certificate: 'cert',
+            certificate_authorities: ['ca'],
+            key: 'KEY1',
+          },
+        });
+      });
+
+      it('should not allow ssl.key and secrets.ssl.key to be set at the same time', async function () {
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `My download source  ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            ssl: {
+              certificate_authorities: ['cert authorities'],
+              certificate: 'path/to/cert',
+              key: 'KEY',
+            },
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should not store secrets if fleet server does not meet minimum version', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
+
+        const { body: res } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `My download source ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            secrets: {
+              ssl: {
+                key: 'KEY1',
+              },
+            },
+          })
+          .expect(200);
+        expect(Object.keys(res.item)).not.to.contain('secrets');
+        expect(Object.keys(res.item)).to.contain('ssl');
+        expect(Object.keys(res.item.ssl)).to.contain('key');
+        expect(res.item.ssl.key).to.equal('KEY1');
+      });
+
+      it('should store secrets if fleet server meets minimum version', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `My download source ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            ssl: {
+              certificate_authorities: ['cert authorities'],
+              certificate: 'path/to/cert',
+            },
+            secrets: { ssl: { key: 'KEY1' } },
+          })
+          .expect(200);
+
+        expect(Object.keys(res.body.item)).to.contain('secrets');
+        const secretId1 = res.body.item.secrets.ssl.key.id;
+        const secret1 = await getSecretById(secretId1);
+        // @ts-ignore _source unknown type
+        expect(secret1._source.value).to.equal('KEY1');
+      });
+    });
+
     describe('PUT /agent_download_sources/{sourceId}', () => {
       it('should allow to update an existing download source', async function () {
         await supertest
@@ -381,169 +544,6 @@ export default function (providerContext: FtrProviderContext) {
             is_default: true,
           })
           .expect(400);
-      });
-    });
-
-    describe('POST /agent_download_sources', () => {
-      it('should allow to create a new download source host', async function () {
-        const { body: postResponse } = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'My download source',
-            host: 'http://test.fr:443',
-            is_default: false,
-          })
-          .expect(200);
-
-        const { id: _, ...itemWithoutId } = postResponse.item;
-        expect(itemWithoutId).to.eql({
-          name: 'My download source',
-          host: 'http://test.fr:443',
-          is_default: false,
-        });
-      });
-
-      it('should toggle default download source when creating a new default one', async function () {
-        await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'default download source host 1',
-            host: 'https://test.co',
-            is_default: true,
-          })
-          .expect(200);
-
-        const {
-          body: { item: downloadSource2 },
-        } = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'default download source host 2',
-            host: 'https://test2.co',
-            is_default: true,
-          })
-          .expect(200);
-
-        const {
-          body: { items: downloadSources },
-        } = await supertest.get(`/api/fleet/agent_download_sources`).expect(200);
-
-        const defaultDownloadSource = downloadSources.filter((item: any) => item.is_default);
-        expect(defaultDownloadSource).to.have.length(1);
-        expect(defaultDownloadSource[0].id).eql(downloadSource2.id);
-      });
-
-      it('should return a 400 when passing a host that is not a valid uri', async function () {
-        await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'new host1',
-            host: 'not a valid uri',
-            is_default: true,
-          })
-          .expect(400);
-      });
-
-      it('should allow to create a new download source host with ssl fields', async function () {
-        const { body: postResponse } = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'My download source with ssl',
-            host: 'http://test.fr:443',
-            is_default: false,
-            ssl: {
-              certificate: 'cert',
-              certificate_authorities: ['ca'],
-              key: 'KEY1',
-            },
-          })
-          .expect(200);
-
-        const { id: _, ...itemWithoutId } = postResponse.item;
-        expect(itemWithoutId).to.eql({
-          name: 'My download source with ssl',
-          host: 'http://test.fr:443',
-          is_default: false,
-          ssl: {
-            certificate: 'cert',
-            certificate_authorities: ['ca'],
-            key: 'KEY1',
-          },
-        });
-      });
-
-      it('should not allow ssl.key and secrets.ssl.key to be set at the same time', async function () {
-        const res = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `My download source  ${Date.now()}`,
-            host: 'http://test.fr:443',
-            is_default: false,
-            ssl: {
-              certificate_authorities: ['cert authorities'],
-              certificate: 'path/to/cert',
-              key: 'KEY',
-            },
-            secrets: { ssl: { key: 'KEY' } },
-          })
-          .expect(400);
-
-        expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
-      });
-
-      it('should not store secrets if fleet server does not meet minimum version', async function () {
-        await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
-
-        const { body: res } = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `My download source ${Date.now()}`,
-            host: 'http://test.fr:443',
-            is_default: false,
-            secrets: {
-              ssl: {
-                key: 'KEY1',
-              },
-            },
-          })
-          .expect(200);
-        expect(Object.keys(res.item)).not.to.contain('secrets');
-        expect(Object.keys(res.item)).to.contain('ssl');
-        expect(Object.keys(res.item.ssl)).to.contain('key');
-        expect(res.item.ssl.key).to.equal('KEY1');
-      });
-
-      it('should store secrets if fleet server meets minimum version', async function () {
-        await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
-        const res = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `My download source ${Date.now()}`,
-            host: 'http://test.fr:443',
-            is_default: false,
-            ssl: {
-              certificate_authorities: ['cert authorities'],
-              certificate: 'path/to/cert',
-            },
-            secrets: { ssl: { key: 'KEY1' } },
-          })
-          .expect(200);
-
-        expect(Object.keys(res.body.item)).to.contain('secrets');
-        const secretId1 = res.body.item.secrets.ssl.key.id;
-        const secret1 = await getSecretById(secretId1);
-        // @ts-ignore _source unknown type
-        expect(secret1._source.value).to.equal('KEY1');
       });
     });
 
