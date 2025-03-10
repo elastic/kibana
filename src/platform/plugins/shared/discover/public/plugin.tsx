@@ -21,23 +21,23 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { type SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DISCOVER_APP_LOCATOR, PLUGIN_ID } from '../common';
+import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
+import {
+  DISCOVER_CONTEXT_APP_LOCATOR,
+  type DiscoverContextAppLocator,
+} from './application/context/services/locator';
+import {
+  DISCOVER_SINGLE_DOC_LOCATOR,
+  type DiscoverSingleDocLocator,
+} from './application/doc/locator';
 import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import {
-  type DiscoverContextAppLocator,
-  DISCOVER_CONTEXT_APP_LOCATOR,
-} from './application/context/services/locator';
-import {
-  type DiscoverSingleDocLocator,
-  DISCOVER_SINGLE_DOC_LOCATOR,
-} from './application/doc/locator';
-import { type DiscoverAppLocator } from '../common';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,

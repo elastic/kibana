@@ -15,7 +15,7 @@ import {
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '@kbn/es-query';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from './app_locator';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { appLocatorGetLocationCommon } from './app_locator_get_location';
 

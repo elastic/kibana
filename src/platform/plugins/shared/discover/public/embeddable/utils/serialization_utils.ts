@@ -16,9 +16,9 @@ import type {
   SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import {
+  toSavedSearchAttributes,
   type SavedSearch,
   type SavedSearchAttributes,
-  toSavedSearchAttributes,
 } from '@kbn/saved-search-plugin/common';
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';

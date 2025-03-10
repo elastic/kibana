@@ -9,10 +9,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DiscoverEBTContextProps, DiscoverEBTManager } from './discover_ebt_manager';
+import { type DiscoverEBTContextProps, DiscoverEBTManager } from './discover_ebt_manager';
 import { registerDiscoverAnalytics } from './register_discover_analytics';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 describe('DiscoverEBTManager', () => {
   let discoverEBTContextManager: DiscoverEBTManager;
