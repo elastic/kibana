@@ -12,11 +12,10 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { Redirect, RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { DiscoverRoutes } from './discover_router';
-import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import { MainRouteProps } from './main/discover_main_route';
+import { DiscoverMainRoute2, MainRoute2Props } from './main/discover_main_route_2';
 
 let pathMap: Record<string, never> = {};
 
@@ -32,7 +31,7 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
-const props: MainRouteProps = {
+const props: MainRoute2Props = {
   customizationContext: mockCustomizationContext,
 };
 
@@ -44,11 +43,11 @@ describe('DiscoverRouter', () => {
   });
 
   it('should show DiscoverMainRoute component for / route', () => {
-    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
+    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute2 {...props} />);
   });
 
   it('should show DiscoverMainRoute component for /view/:id route', () => {
-    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
+    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute2 {...props} />);
   });
 
   it('should show Redirect component for /doc/:dataView/:index/:type route', () => {
