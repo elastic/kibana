@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCard, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/public';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -27,6 +27,8 @@ export interface IntegrationProps {
  *
  */
 export const IntegrationBadge = memo(({ integration }: IntegrationProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const icons = useMemo(
     () => (!integration.icons || !integration.icons.length ? [] : integration.icons),
     [integration]
@@ -45,32 +47,46 @@ export const IntegrationBadge = memo(({ integration }: IntegrationProps) => {
   );
 
   return (
-    <EuiCard
+    <EuiPanel
       css={css`
         min-width: ${MIN_WIDTH}px;
       `}
-      description={
-        <EuiText size="xs" color="subdued">
-          {LAST_SYNCED}
-          <FormattedRelativePreferenceDate value={new Date().getTime()} />
-        </EuiText>
-      }
-      display="plain"
       hasBorder={true}
-      icon={
-        <CardIcon
-          icons={icons}
-          integrationName={integrationName}
-          packageName={packageName}
-          size="xl"
-          version={version}
-        />
-      }
-      layout="horizontal"
+      hasShadow={false}
       paddingSize="s"
-      title={integration.title}
-      titleSize="xs"
-    />
+    >
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <CardIcon
+            icons={icons}
+            integrationName={integrationName}
+            packageName={packageName}
+            size="xl"
+            version={version}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiText
+                css={css`
+                  font-weight: ${euiTheme.font.weight.medium};
+                `}
+                size="xs"
+              >
+                {integration.title}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                {LAST_SYNCED}
+                <FormattedRelativePreferenceDate value={new Date().getTime()} />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 });
 

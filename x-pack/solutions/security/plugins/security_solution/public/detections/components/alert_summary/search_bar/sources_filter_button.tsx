@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelectable,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -32,6 +33,8 @@ export interface SourceFilterButtonProps {
  *
  */
 export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
@@ -68,13 +71,16 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
-      badgeColor="success"
-      onClick={togglePopover}
-      isSelected={isPopoverOpen}
-      numFilters={items.filter((item) => item.checked !== 'off').length}
+      badgeColor="accent"
+      css={css`
+        background-color: ${euiTheme.colors.backgroundBasePrimary};
+      `}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
+      iconType="arrowDown"
+      isSelected={isPopoverOpen}
       numActiveFilters={items.filter((item) => item.checked === 'on').length}
+      numFilters={items.filter((item) => item.checked !== 'off').length}
+      onClick={togglePopover}
     >
       {SOURCES_BUTTON}
     </EuiFilterButton>
@@ -83,31 +89,20 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
   return (
     <EuiFilterGroup>
       <EuiPopover
-        id={filterGroupPopoverId}
         button={button}
-        isOpen={isPopoverOpen}
         closePopover={togglePopover}
+        id={filterGroupPopoverId}
+        isOpen={isPopoverOpen}
         panelPaddingSize="none"
       >
         <EuiSelectable
-          searchable
-          searchProps={{
-            placeholder: 'Filter list',
-            compressed: true,
-          }}
-          aria-label="Composers"
           options={items}
           onChange={onChange}
-          loadingMessage="Loading filters"
-          emptyMessage="No filters available"
-          noMatchesMessage="No filters found"
+          css={css`
+            min-width: 200px;
+          `}
         >
-          {(list, search) => (
-            <div style={{ width: 300 }}>
-              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-              {list}
-            </div>
-          )}
+          {(list) => list}
         </EuiSelectable>
       </EuiPopover>
     </EuiFilterGroup>
