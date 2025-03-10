@@ -50,6 +50,7 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyPackage,
   DeletePackagePoliciesResponse,
+  PackagePolicyAssetsMap,
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
@@ -120,7 +121,7 @@ const ASSETS_MAP_FIXTURES = new Map([
   {{/each}}
   `),
   ],
-]);
+]) as PackagePolicyAssetsMap;
 
 async function mockedGetInstallation(params: any) {
   let pkg;
@@ -188,6 +189,7 @@ jest.mock('./epm/registry', () => ({
 
 jest.mock('./epm/packages/get', () => ({
   getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
+  getAgentTemplateAssetsMap: jest.fn().mockResolvedValue(new Map()),
 }));
 
 jest.mock('./agent_policy');
