@@ -75,6 +75,7 @@ export class State {
       const changedStreams = desiredState.changedStreams();
       const elasticsearchActions = desiredState.determineElasticsearchActions(
         changedStreams,
+        desiredState,
         startingState
       );
       return {
@@ -83,7 +84,7 @@ export class State {
       };
     } else {
       try {
-        await desiredState.commitChanges(startingState);
+        await desiredState.commitChanges(desiredState, startingState);
       } catch (error) {
         await desiredState.attemptRollback(startingState);
       }
@@ -129,36 +130,28 @@ export class State {
   ) {
     const cascadingChanges = await this.applyChange(requestedChange, desiredState, startingState);
 
-    const excessiveCascadingChanges = await this.applyCascadingChanges(
-      cascadingChanges,
-      desiredState,
-      startingState
-    );
-
-    // We only allow one round of cascading changes
-    if (excessiveCascadingChanges.length !== 0) {
-      this.dependencies.logger.warn(
-        `A requested change lead to multiple levels of cascading changes:`
-      );
-      this.dependencies.logger.warn(`Requested change: ${requestedChange}`);
-      this.dependencies.logger.warn(`Cascading changes: ${cascadingChanges}`);
-      this.dependencies.logger.warn(`Excessive cascading changes: ${excessiveCascadingChanges}`);
-    }
+    await this.applyCascadingChanges(cascadingChanges, desiredState, startingState);
   }
 
   async applyCascadingChanges(
     cascadingChanges: StreamChange[],
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]> {
-    const excessiveCascadingChanges: StreamChange[][] = [];
+  ) {
+    let iterationCounter = 0;
+    let currentCascadingChanges: StreamChange[] = [...cascadingChanges];
 
-    for (const cascadingChange of cascadingChanges) {
-      const newChanges = await this.applyChange(cascadingChange, desiredState, startingState);
-      excessiveCascadingChanges.push(newChanges);
+    while (currentCascadingChanges.length !== 0) {
+      const newCascadingChanges: StreamChange[] = [];
+      for (const cascadingChange of currentCascadingChanges) {
+        const newChanges = await this.applyChange(cascadingChange, desiredState, startingState);
+        newCascadingChanges.push(...newChanges);
+      }
+      currentCascadingChanges = newCascadingChanges;
+      if (++iterationCounter > 10) {
+        throw new Error('Excessive cascading changes');
+      }
     }
-
-    return excessiveCascadingChanges.flat();
   }
 
   async applyChange(
@@ -203,14 +196,18 @@ export class State {
     return this.all().filter((stream) => stream.hasChanged());
   }
 
-  async commitChanges(startingState: State) {
+  async commitChanges(desiredState: State, startingState: State) {
     const executionPlan = new ExecutionPlan(this.dependencies);
-    executionPlan.plan(this.determineElasticsearchActions(this.changedStreams(), startingState));
+    executionPlan.plan(
+      await this.determineElasticsearchActions(this.changedStreams(), desiredState, startingState)
+    );
     executionPlan.execute();
   }
 
   async attemptRollback(startingState: State) {
     const brokenState = this;
+    // TODO: I don't think this fully works, we might need to go through a proper planning cycle here again
+    // or somehow signal that it shouldn't do change detection but play it save
     const rollbackTargets = brokenState.changedStreams().map((stream) => {
       if (startingState.has(stream.definition.name)) {
         return startingState.get(stream.definition.name)!;
@@ -222,16 +219,27 @@ export class State {
     });
 
     const executionPlan = new ExecutionPlan(this.dependencies);
-    executionPlan.plan(this.determineElasticsearchActions(rollbackTargets, brokenState));
+    executionPlan.plan(
+      await this.determineElasticsearchActions(rollbackTargets, startingState, brokenState)
+    );
     executionPlan.execute();
   }
 
-  determineElasticsearchActions(changedStreams: StreamActiveRecord[], startingState: State) {
-    return changedStreams
-      .map((stream) =>
-        stream.determineElasticsearchActions(startingState.get(stream.definition.name))
+  async determineElasticsearchActions(
+    changedStreams: StreamActiveRecord[],
+    desiredState: State,
+    startingState: State
+  ) {
+    const actions = await Promise.all(
+      changedStreams.map((stream) =>
+        stream.determineElasticsearchActions(
+          desiredState,
+          startingState,
+          startingState.get(stream.definition.name)
+        )
       )
-      .flat();
+    );
+    return actions.flat();
   }
 
   get(name: string) {

@@ -28,17 +28,17 @@ export interface ValidationResult {
 type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
-  protected _definition: TDefinition;
+  protected _updated_definition: TDefinition;
   protected dependencies: StreamDependencies;
   private changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StreamDependencies) {
-    this._definition = definition;
+    this._updated_definition = definition;
     this.dependencies = dependencies;
   }
 
   public get definition(): TDefinition {
-    return this._definition;
+    return this._updated_definition;
   }
 
   async applyChange(
@@ -101,11 +101,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
   }
 
   determineElasticsearchActions(
+    desiredState: State,
+    startingState: State,
     startingStateStream?: StreamActiveRecord<TDefinition>
-  ): ElasticsearchAction[] {
+  ): Promise<ElasticsearchAction[]> {
     if (this.changeStatus === 'upserted') {
       if (startingStateStream) {
-        return this.doDetermineUpdateActions(startingStateStream);
+        return this.doDetermineUpdateActions(desiredState, startingState, startingStateStream);
       } else {
         return this.doDetermineCreateActions();
       }
@@ -118,6 +120,10 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   hasChanged(): boolean {
     return this.changeStatus !== 'unchanged';
+  }
+
+  isDeleted(): boolean {
+    return this.changeStatus === 'deleted';
   }
 
   abstract clone(): StreamActiveRecord;
@@ -135,9 +141,11 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<ValidationResult>;
 
-  protected abstract doDetermineCreateActions(): ElasticsearchAction[];
+  protected abstract doDetermineCreateActions(): Promise<ElasticsearchAction[]>;
   protected abstract doDetermineUpdateActions(
+    desiredState: State,
+    startingState: State,
     startingStateStream: StreamActiveRecord<TDefinition>
-  ): ElasticsearchAction[];
-  protected abstract doDetermineDeleteActions(): ElasticsearchAction[];
+  ): Promise<ElasticsearchAction[]>;
+  protected abstract doDetermineDeleteActions(): Promise<ElasticsearchAction[]>;
 }

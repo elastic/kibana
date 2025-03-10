@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
@@ -22,10 +21,9 @@ interface DeleteDataStreamOptions {
   logger: Logger;
 }
 
-interface RolloverDataStreamOptions {
+interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
-  mappings: MappingTypeMapping['properties'] | undefined;
   logger: Logger;
 }
 
@@ -55,21 +53,30 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
   }
 }
 
-export async function rolloverDataStreamIfNecessary({
+export async function updateOrRolloverDataStream({
   esClient,
   name,
   logger,
-  mappings,
-}: RolloverDataStreamOptions) {
-  const dataStreams = await esClient.indices.getDataStream({ name: `${name},${name}.*` });
+}: UpdateOrRolloverDataStreamOptions) {
+  const dataStreams = await esClient.indices.getDataStream({ name });
   for (const dataStream of dataStreams.data_streams) {
+    // simulate index and try to path on write index
+    // if that doesn't work, roll it over
+    const simulatedIndex = await esClient.indices.simulateIndexTemplate({
+      name,
+    });
     const writeIndex = dataStream.indices.at(-1);
     if (!writeIndex) {
       continue;
     }
     try {
       await retryTransientEsErrors(
-        () => esClient.indices.putMapping({ index: writeIndex.index_name, properties: mappings }),
+        () =>
+          esClient.indices.putMapping({
+            index: writeIndex.index_name,
+            // TODO - do I need to do the same for settings?
+            properties: simulatedIndex.template.mappings.properties,
+          }),
         {
           logger,
         }

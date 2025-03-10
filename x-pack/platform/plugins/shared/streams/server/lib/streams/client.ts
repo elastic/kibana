@@ -21,7 +21,6 @@ import {
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
-  asIngestStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
@@ -37,6 +36,7 @@ import {
   streamDefinitionSchema,
   findInheritedLifecycle,
   findInheritingStreams,
+  asWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
@@ -555,39 +555,45 @@ export class StreamsClient {
     name: string;
     if: Condition;
   }): Promise<ForkStreamResponse> {
-    const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
+    const parentDefinition = asWiredStreamDefinition(await this.getStream(parent));
 
     const childDefinition: WiredStreamDefinition = {
       name,
       ingest: { lifecycle: { inherit: {} }, processing: [], routing: [], wired: { fields: {} } },
     };
 
-    // check whether root stream has a child of the given name already
-    if (parentDefinition.ingest.routing.some((item) => item.destination === childDefinition.name)) {
-      throw new MalformedStreamIdError(
-        `The stream with ID (${name}) already exists as a child of the parent stream`
-      );
-    }
-    if (!isChildOf(parentDefinition.name, childDefinition.name)) {
-      throw new MalformedStreamIdError(
-        `The ID (${name}) from the new stream must start with the parent's name (${parentDefinition.name}), followed by a dot and a name`
-      );
-    }
-
-    // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
-
-    const { parentDefinition: updatedParentDefinition } = await this.validateAndUpsertStream({
-      definition: childDefinition,
-    });
-
-    await this.updateStreamRouting({
-      definition: updatedParentDefinition!,
-      routing: parentDefinition.ingest.routing.concat({
-        destination: name,
-        if: condition,
-      }),
-    });
-
+    // rewrite work as update of parent routing and upsert of child
+    await State.attemptChanges(
+      [
+        {
+          target: parentDefinition.name,
+          type: 'wired_upsert',
+          request: {
+            // todo add dashboards
+            dashboards: [],
+            stream: {
+              ...parentDefinition,
+              ingest: {
+                ...parentDefinition.ingest,
+                routing: parentDefinition.ingest.routing.concat({
+                  destination: name,
+                  if: condition,
+                }),
+              },
+            },
+          },
+        },
+        {
+          target: name,
+          type: 'wired_upsert',
+          request: {
+            dashboards: [],
+            stream: childDefinition,
+          },
+        },
+      ],
+      this.dependencies
+    );
     return { acknowledged: true, result: 'created' };
   }
 
