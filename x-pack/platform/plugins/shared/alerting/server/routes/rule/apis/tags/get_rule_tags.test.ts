@@ -46,6 +46,7 @@ describe('getRuleTagsRoute', () => {
           search: 'test',
           per_page: 10,
           page: 1,
+          rule_type_ids: ['rule_type_1', 'rule_type_2'],
         },
       },
       ['ok']

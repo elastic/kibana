@@ -12,8 +12,10 @@ export const transformRuleTagsQueryRequest: RewriteRequestCase<RuleTagsParams> =
   per_page: perPage,
   page,
   search,
+  rule_type_ids: ruleTypeIds,
 }) => ({
   page,
   search,
   perPage,
+  ruleTypeIds,
 });
