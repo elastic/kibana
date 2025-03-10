@@ -209,7 +209,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -230,7 +230,7 @@ export const buildFieldsDefinitionsWithMetadata = (
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {
     const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
-    const variables = getVariablesByType?.(variableType) ?? [];
+    const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
 
     const controlSuggestions = fields.length
       ? getControlSuggestion(
@@ -418,7 +418,7 @@ export function getCompatibleLiterals(
     addComma?: boolean;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.some(isNumericType)) {
@@ -436,7 +436,9 @@ export function getCompatibleLiterals(
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
     if (options?.supportsControls) {
-      const variables = getVariablesByType?.(ESQLVariableType.TIME_LITERAL) ?? [];
+      const variables =
+        getVariables?.()?.filter((variable) => variable.type === ESQLVariableType.TIME_LITERAL) ??
+        [];
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
@@ -520,13 +522,13 @@ export function getDateLiterals(options?: {
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   if (!supportsControls) {
     return [];
   }
   const variableType = type;
-  const variables = getVariablesByType?.(variableType) ?? [];
+  const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
   const controlSuggestion = getControlSuggestion(
     variableType,
     variables?.map((v) => `?${v.key}`)

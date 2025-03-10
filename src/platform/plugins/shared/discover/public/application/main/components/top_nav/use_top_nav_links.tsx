@@ -13,11 +13,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { AppMenuItemPrimary, AppMenuItemSecondary, AppMenuRegistry } from '@kbn/discover-utils';
+import type { AppMenuItemPrimary, AppMenuItemSecondary } from '@kbn/discover-utils';
+import { AppMenuRegistry } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getNewSearchAppMenuItem,
@@ -25,7 +27,6 @@ import {
   getShareAppMenuItem,
   getInspectAppMenuItem,
   convertAppMenuItemToTopNavItem,
-  AppMenuDiscoverParams,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
