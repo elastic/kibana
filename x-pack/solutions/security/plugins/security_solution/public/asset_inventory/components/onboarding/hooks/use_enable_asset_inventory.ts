@@ -27,7 +27,9 @@ export const useEnableAssetInventory = () => {
     postEnableAssetInventory,
     {
       onSuccess: () => {
+        // ensure the success callout is visible after enabling Asset Inventory
         dispatchSuccessCalloutVisibility();
+        // re-fetch the status API to update the UI
         refetchStatus();
       },
     }
@@ -43,14 +45,10 @@ export const useEnableAssetInventory = () => {
   // can show a loading spinner while the status is being re-fetched
   const isEnabling = mutation.isLoading || mutation.isSuccess;
 
-  const enableAssetInventory = () => {
-    mutation.mutate();
-  };
-
   return {
     isEnabling,
     error: mutation.isError ? errorMessage : null,
     reset: mutation.reset,
-    enableAssetInventory,
+    enableAssetInventory: () => mutation.mutate(),
   };
 };
