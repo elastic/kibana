@@ -30,6 +30,7 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   alertsService: AlertsService | null;
   context: RuleTypeRunnerContext;
   executionId: string;
+  isPreview: boolean;
   logger: Logger;
   maxAlerts: number;
   rule: RuleData<Params>;
@@ -50,6 +51,7 @@ export const initializeAlertsClient = async <
   alertsService,
   context,
   executionId,
+  isPreview,
   logger,
   maxAlerts,
   rule,
@@ -67,6 +69,7 @@ export const initializeAlertsClient = async <
 
   const alertsClientParams = {
     alertingEventLogger: context.alertingEventLogger,
+    isPreview,
     logger,
     maintenanceWindowsService: context.maintenanceWindowsService,
     request: context.request,

@@ -12,9 +12,15 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiResizableContainer,
   EuiSpacer,
   EuiSteps,
+  EuiSuperUpdateButton,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -26,20 +32,45 @@ import { RulePageNameInput } from './rule_page_name_input';
 import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import { ConfirmRuleClose } from '../components';
+import { hasRuleErrors } from '../validation';
+import { PreviewResults } from '../common/apis';
+import { ActionPreview } from './action_preview';
 
 export interface RulePageProps {
   isEdit?: boolean;
   isSaving?: boolean;
+  isLoadingPreview?: boolean;
+  previewData: PreviewResults | null;
   onCancel?: () => void;
+  onPreview: (formData: RuleFormData) => void;
   onSave: (formData: RuleFormData) => void;
 }
 
 export const RulePage = (props: RulePageProps) => {
-  const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
+  const {
+    isEdit = false,
+    isSaving = false,
+    isLoadingPreview = false,
+    previewData,
+    onCancel = () => {},
+    onSave,
+    onPreview,
+  } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
 
-  const { formData, multiConsumerSelection, connectorTypes, connectors, touched, onInteraction } =
-    useRuleFormState();
+  const {
+    plugins: { actionTypeRegistry },
+    baseErrors = {},
+    paramsErrors = {},
+    actionsErrors = {},
+    actionsParamsErrors = {},
+    formData,
+    multiConsumerSelection,
+    connectorTypes,
+    connectors,
+    touched,
+    onInteraction,
+  } = useRuleFormState();
 
   const { steps } = useRuleFormSteps();
 
@@ -55,6 +86,13 @@ export const RulePage = (props: RulePageProps) => {
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
     });
   }, [onSave, formData, multiConsumerSelection]);
+
+  const onPreviewInternal = useCallback(() => {
+    onPreview({
+      ...formData,
+      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+    });
+  }, [onPreview, formData, multiConsumerSelection]);
 
   const onCancelInternal = useCallback(() => {
     if (touched) {
@@ -80,6 +118,23 @@ export const RulePage = (props: RulePageProps) => {
       return !actionType.enabled && !checkEnabledResult.isEnabled;
     });
   }, [actions, connectors, connectorTypes]);
+
+  const hasErrors = useMemo(() => {
+    const hasBrokenConnectors = actions.some((action) => {
+      return !connectors.find((connector) => connector.id === action.id);
+    });
+
+    if (hasBrokenConnectors) {
+      return true;
+    }
+
+    return hasRuleErrors({
+      baseErrors,
+      paramsErrors,
+      actionsErrors,
+      actionsParamsErrors,
+    });
+  }, [actions, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   return (
     <>
@@ -119,19 +174,202 @@ export const RulePage = (props: RulePageProps) => {
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiPageTemplate.Section>
-          {hasActionsDisabled && (
-            <>
-              <EuiCallOut
-                size="s"
-                color="danger"
-                iconType="error"
-                data-test-subj="hasActionsDisabled"
-                title={DISABLED_ACTIONS_WARNING_TITLE}
-              />
-              <EuiSpacer />
-            </>
-          )}
-          <EuiSteps steps={steps} />
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+              return (
+                <>
+                  <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
+                    {hasActionsDisabled && (
+                      <>
+                        <EuiCallOut
+                          size="s"
+                          color="danger"
+                          iconType="error"
+                          data-test-subj="hasActionsDisabled"
+                          title={DISABLED_ACTIONS_WARNING_TITLE}
+                        />
+                        <EuiSpacer />
+                      </>
+                    )}
+                    <EuiSteps steps={steps} />
+                  </EuiResizablePanel>
+                  <EuiResizableButton />
+                  <EuiResizablePanel
+                    id={'preview'}
+                    mode="collapsible"
+                    initialSize={30}
+                    minSize={'20%'}
+                  >
+                    <EuiTitle size="m">
+                      <h3>Rule preview</h3>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
+                    <EuiText color="subdued">
+                      <p>Preview your rule before saving it.</p>
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup>
+                      <EuiSuperUpdateButton
+                        isDisabled={hasErrors}
+                        iconType="refresh"
+                        onClick={onPreviewInternal}
+                        // onClick={async () => {
+                        //   setIsLoadingPreview(true);
+                        //   const result = await previewRule({ http, rule: rule as RuleUpdates });
+
+                        //   if (result.alerts.length > 0) {
+                        //     setHasPreviewAlertData(true);
+                        //     setAlertsTableQuery({
+                        //       bool: {
+                        //         filter: [
+                        //           {
+                        //             term: {
+                        //               [ALERT_RULE_EXECUTION_UUID]: result.uuid,
+                        //             },
+                        //           },
+                        //           {
+                        //             bool: {
+                        //               must_not: [
+                        //                 {
+                        //                   term: {
+                        //                     [ALERT_STATUS]: 'preview-complete',
+                        //                   },
+                        //                 },
+                        //               ],
+                        //             },
+                        //           },
+                        //         ],
+                        //       },
+                        //     });
+                        //   } else {
+                        //     setHasPreviewAlertData(false);
+                        //   }
+
+                        //   setPreviewActionData(result.actions ?? []);
+                        //   setLoadedFirstPreview(true);
+                        //   setIsLoadingPreview(false);
+                        // }}
+                        color="primary"
+                        fill={true}
+                        data-test-subj="previewSubmitButton"
+                      />
+                      {isLoadingPreview ? <EuiLoadingSpinner size="xl" /> : null}
+                    </EuiFlexGroup>
+                    <EuiSpacer size="m" />
+                    {/* {hasPreviewAlertData && alertsTableQuery ? (
+                      <>
+                        <EuiTitle size="s">
+                          <h3>Alert preview</h3>
+                        </EuiTitle>
+                        <EuiSpacer size="s" />
+                        <EuiText color="subdued">
+                          <p>The following alerts would have been detected</p>
+                        </EuiText>
+                        <EuiSpacer size="m" />
+                        <AlertsTableState
+                          id={'preview'}
+                          configurationId={'preview'}
+                          alertsTableConfigurationRegistry={
+                            alertsTableConfigurationRegistry as TypeRegistry<AlertsTableConfigurationRegistry>
+                          }
+                          featureIds={['alerts']}
+                          showExpandToDetails={false}
+                          query={alertsTableQuery}
+                        />
+                        <EuiSpacer size="m" />
+                      </>
+                    ) : null}
+                    {loadedFirstPreview && !hasPreviewAlertData ? (
+                      <EuiPanel
+                        hasBorder={true}
+                        style={{
+                          maxWidth: 500,
+                        }}
+                      >
+                        <EuiFlexGroup
+                          style={{ height: 150 }}
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <EuiFlexItem>
+                            <EuiText size="s">
+                              <EuiTitle>
+                                <h3>
+                                  <FormattedMessage
+                                    id="xpack.triggersActionsUI.empty.title"
+                                    defaultMessage="No alerts detected"
+                                  />
+                                </h3>
+                              </EuiTitle>
+                              <p>
+                                <FormattedMessage
+                                  id="xpack.triggersActionsUI.empty.description"
+                                  defaultMessage="Try modifying your rule configuration"
+                                />
+                              </p>
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiImage
+                              style={{ width: 200, height: 148 }}
+                              size="200"
+                              alt=""
+                              url={icon}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    ) : null} */}
+                    {connectorTypes && previewData && previewData.actions.length > 0 ? (
+                      <>
+                        <EuiTitle size="s">
+                          <h3>Action preview</h3>
+                        </EuiTitle>
+                        <EuiSpacer size="s" />
+                        <EuiText color="subdued">
+                          <p>
+                            The following{' '}
+                            {previewData.actions.length > 1
+                              ? `${previewData.actions.length} notifications`
+                              : `notification`}{' '}
+                            would have been sent
+                          </p>
+                        </EuiText>
+                        <EuiSpacer size="m" />
+                        {previewData.actions.map((previewAction: any, index: number) => {
+                          const actionConnector = connectors.find(
+                            (field) => field.id === previewAction.id
+                          );
+                          const connectorType = actionTypeRegistry.get(
+                            actionConnector?.actionTypeId ?? ''
+                          );
+
+                          return actionConnector && connectorType ? (
+                            <ActionPreview
+                              actionItem={previewAction}
+                              actionConnector={actionConnector}
+                              connectorType={connectorType}
+                              index={index}
+                              key={`action-preview-action-at-${index}`}
+                              connectors={connectors}
+                            />
+                          ) : null;
+                        })}
+                      </>
+                    ) : null}
+                    {!isLoadingPreview && previewData && !previewData.actions.length ? (
+                      <EuiTitle size="xxs">
+                        <h5>
+                          <EuiIcon type="iInCircle" />
+                          Add actions to your rule configuration to preview their contents
+                        </h5>
+                      </EuiTitle>
+                    ) : null}
+                  </EuiResizablePanel>
+                </>
+              );
+            }}
+          </EuiResizableContainer>
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section>
           <RulePageFooter
