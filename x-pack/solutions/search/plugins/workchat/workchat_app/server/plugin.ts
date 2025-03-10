@@ -13,16 +13,20 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
+import { registerTypes } from './saved_objects';
 import type { InternalServices } from './services/types';
-import { AgentFactory } from './services/orchestration';
-
+import {
+  IntegrationsService,
+  ConversationServiceImpl,
+  AgentFactory,
+  ChatService,
+} from './services';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
   WorkChatAppPluginSetupDependencies,
   WorkChatAppPluginStartDependencies,
 } from './types';
-import { IntegrationsService } from './services';
 
 export class WorkChatAppPlugin
   implements
@@ -40,9 +44,13 @@ export class WorkChatAppPlugin
     this.logger = context.logger;
   }
 
-  public setup(core: CoreSetup, pluginsDependencies: WorkChatAppPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<WorkChatAppPluginStartDependencies>,
+    pluginsDependencies: WorkChatAppPluginSetupDependencies
+  ) {
     const router = core.http.createRouter();
     registerRoutes({
+      core,
       router,
       logger: this.logger.get('routes'),
       getServices: () => {
@@ -53,19 +61,24 @@ export class WorkChatAppPlugin
       },
     });
 
+    registerTypes({ savedObjects: core.savedObjects });
+
     return {};
   }
 
   public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
-
-    const { wciSalesforce, wciCustomIndex } = pluginsDependencies;
+    const { wciSalesforce } = pluginsDependencies;
 
     const integrationsService = new IntegrationsService({
-      logger: this.logger.get('services.integrationsService'),
-      integrationPlugins: [
-        wciSalesforce.integration,
-        wciCustomIndex.integration
-      ]
+      logger: this.logger.get('services.integrations'),
+      integrationPlugins: [wciSalesforce.integration],
+      elasticsearch: core.elasticsearch,
+    });
+
+    const conversationService = new ConversationServiceImpl({
+      savedObjects: core.savedObjects,
+      security: core.security,
+      logger: this.logger.get('services.conversations'),
     });
 
     const agentFactory = new AgentFactory({
@@ -74,9 +87,18 @@ export class WorkChatAppPlugin
       integrationsService,
     });
 
+    const chatService = new ChatService({
+      inference: pluginsDependencies.inference,
+      logger: this.logger.get('services.chat'),
+      agentFactory,
+      conversationService,
+    });
+
     this.services = {
+      conversationService,
       agentFactory,
       integrationsService,
+      chatService,
     };
 
     return {};

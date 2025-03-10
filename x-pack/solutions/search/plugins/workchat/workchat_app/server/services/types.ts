@@ -6,9 +6,13 @@
  */
 
 import { IntegrationsService } from './integrations/integrations_service';
-import { AgentFactory } from './orchestration';
+import type { AgentFactory } from './orchestration';
+import type { ConversationService } from './conversations';
+import type { ChatService } from './chat';
 
 export interface InternalServices {
   agentFactory: AgentFactory;
+  chatService: ChatService;
+  conversationService: ConversationService;
   integrationsService: IntegrationsService;
 }

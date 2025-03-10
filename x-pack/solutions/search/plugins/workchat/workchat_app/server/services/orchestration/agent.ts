@@ -5,69 +5,68 @@
  * 2.0.
  */
 
-import { Observable, from, filter, shareReplay } from 'rxjs';
+import { from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ChatEvent } from '../../../common/chat_events';
-import { createAgentGraph } from './agent_graph';
-import { IntegrationsService } from '../integrations/integrations_service';
+import { IntegrationsSession } from '../integrations/integrations_session';
 import { getLCTools } from '../integrations/utils';
-import { langchainToChatEvents } from './utils';
-
-interface AgentRunOptions {
-  message: string;
-}
-
-interface AgentRunResult {
-  events$: Observable<ChatEvent>;
-}
-
-export interface Agent {
-  run(options: AgentRunOptions): Promise<AgentRunResult>;
-}
+import { createAgentGraph } from './agent_graph';
+import { langchainToChatEvents, conversationEventsToMessages } from './utils';
+import type { Agent, AgentRunResult } from './types';
 
 export const createAgent = async ({
   agentId,
   chatModel,
-  integrationsService,
+  integrationsSession,
 }: {
   agentId: string;
   chatModel: InferenceChatModel;
-  integrationsService: IntegrationsService;
+  integrationsSession: IntegrationsSession;
 }): Promise<Agent> => {
-  // TODO: everything
-
-  const integrationTools = await getLCTools(integrationsService);
+  const integrationTools = await getLCTools(integrationsSession);
 
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
-    run: async ({ message }): Promise<AgentRunResult> => {
+    run: async ({ previousEvents }): Promise<AgentRunResult> => {
+      const initialMessages = conversationEventsToMessages(previousEvents);
+
+      const runName = 'defaultAgentGraph';
+
       const eventStream = agentGraph.streamEvents(
-        { input: message },
+        { initialMessages },
         {
           version: 'v2',
-          runName: 'defaultAgentGraph',
+          runName,
           metadata: {
             agentId,
           },
-          recursionLimit: 5
+          recursionLimit: 5,
         }
       );
 
-      const isStreamEvent = (input: any): input is StreamEvent => {
-        return 'event' in input;
-      };
-
       const events$ = from(eventStream).pipe(
         filter(isStreamEvent),
-        langchainToChatEvents(),
+        langchainToChatEvents({ runName }),
         shareReplay()
       );
+
+      events$.subscribe({
+        complete: () => {
+          integrationsSession.disconnect();
+        },
+        error: () => {
+          integrationsSession.disconnect();
+        },
+      });
 
       return {
         events$,
       };
     },
   };
+};
+
+const isStreamEvent = (input: any): input is StreamEvent => {
+  return 'event' in input;
 };

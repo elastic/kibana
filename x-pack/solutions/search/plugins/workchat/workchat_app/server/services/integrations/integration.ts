@@ -1,16 +1,78 @@
-import { IntegrationPlugin } from "@kbn/wci-common";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-export class Integration {
+import { IntegrationPlugin } from '@kbn/wci-common';
+import { InternalIntegrationServices } from '@kbn/wci-common';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { SSEClientTransport } from './mcp/sse_client';
 
-    mcpServer: McpServer;
+export interface Integration {
+  id: string;
+  configuration: Record<string, any>;
+  connect(services: InternalIntegrationServices): Promise<Client>;
+}
 
-    constructor(
-        public id: string,
-        public typeInstance: IntegrationPlugin,
-        public configuration: Record<string, any>
-    ) {
-        this.mcpServer = typeInstance.mcpServer(configuration);
-    }
-    
+export class InternalIntegration implements Integration {
+  public id: string;
+  typeInstance: IntegrationPlugin;
+  configuration: Record<string, any>;
+
+  constructor(id: string, typeInstance: IntegrationPlugin, configuration: Record<string, any>) {
+    this.id = id;
+    this.typeInstance = typeInstance;
+    this.configuration = configuration;
+  }
+
+  async connect(services: InternalIntegrationServices): Promise<Client> {
+    const mcpServer = this.typeInstance.mcpServer(this.configuration, services);
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+    const client = new Client({
+      name: this.id,
+      version: '1.0.0',
+    });
+
+    await mcpServer.connect(clientTransport);
+    await client.connect(serverTransport);
+
+    return client;
+  }
+}
+
+export class ExternalIntegration implements Integration {
+  public id: string;
+  configuration: Record<string, any>;
+
+  constructor(id: string, configuration: Record<string, any>) {
+    this.id = id;
+    this.configuration = configuration;
+  }
+
+  async connect(): Promise<Client> {
+    const transport = new SSEClientTransport(new URL(this.configuration.url));
+
+    const client = new Client(
+      {
+        name: this.id,
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          prompts: {},
+          resources: {},
+          tools: {},
+        },
+      }
+    );
+
+    await client.connect(transport);
+
+    return client;
+  }
 }

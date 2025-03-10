@@ -1,21 +1,27 @@
-import { IntegrationTool, IntegrationToolInputSchema } from "../../types";
-import { StructuredTool, tool } from "@langchain/core/tools";
-import { IntegrationsService } from "./integrations_service";
-import { jsonSchemaToZod, JsonSchemaObject } from "@n8n/json-schema-to-zod";
-import { z } from "zod";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-export async function getLCTools(integrationService: IntegrationsService): Promise<StructuredTool[]> {
-    const tools = await integrationService.getAllTools();
+import { IntegrationTool } from "../../types";
+import { StructuredTool, tool } from "@langchain/core/tools";
+import { jsonSchemaToZod } from "@n8n/json-schema-to-zod";
+import { IntegrationsSession } from "./integrations_session";
+
+export async function getLCTools(integrationsSession: IntegrationsSession): Promise<StructuredTool[]> {
+    const tools = await integrationsSession.getAllTools();
     return tools.map(tool => convertToLCTool(tool, async (input) => {
-        const result = await integrationService.executeTool(tool.name, input);
+        const result = await integrationsSession.executeTool(tool.name, input);
         return JSON.stringify(result);
     }));
 }
 
 function convertToLCTool(integrationTool: IntegrationTool, action: (input: any) => Promise<string>): StructuredTool {
 
-  const schema = jsonSchemaToZod(integrationTool.inputSchema as unknown as JsonSchemaObject) as z.ZodObject<any>;
-    
+  const schema = jsonSchemaToZod(integrationTool.inputSchema);
+
   return tool(
     action,
     {

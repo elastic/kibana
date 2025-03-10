@@ -96,6 +96,14 @@ export class SiemRulesMigrationsService {
     return this.getMissingCapabilities(level).length > 0;
   }
 
+  /**
+   * checks if the service is available based on
+   *
+   * - the license
+   * - capabilities
+   * - feature flag
+   *
+   */
   public isAvailable() {
     return (
       !ExperimentalFeaturesService.get().siemMigrationsDisabled &&

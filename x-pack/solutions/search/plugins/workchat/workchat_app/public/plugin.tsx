@@ -13,7 +13,7 @@ import type {
   WorkChatAppPluginStartDependencies,
 } from './types';
 import { registerApp } from './application';
-import { ChatService, WorkChatServices } from './services';
+import { ChatService, ConversationService, type WorkChatServices } from './services';
 
 export class WorkChatAppPlugin
   implements
@@ -45,15 +45,19 @@ export class WorkChatAppPlugin
   }
 
   public start(
-    coreStart: CoreStart,
+    { http }: CoreStart,
     pluginsStart: WorkChatAppPluginStartDependencies
   ): WorkChatAppPluginStart {
+    const conversationService = new ConversationService({
+      http,
+    });
     const chatService = new ChatService({
-      http: coreStart.http,
+      http,
     });
 
     this.services = {
       chatService,
+      conversationService,
     };
 
     return {};

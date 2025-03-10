@@ -73,13 +73,13 @@ export function ConversationList({
 
   const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
-      defaultMessage: 'Delete this conversation?',
+      defaultMessage: 'Delete conversation',
     }),
     children: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationContent', {
-      defaultMessage: 'This action cannot be undone.',
+      defaultMessage: 'This action is permanent and cannot be undone.',
     }),
     confirmButtonText: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteButtonText', {
-      defaultMessage: 'Delete conversation',
+      defaultMessage: 'Delete',
     }),
   });
 
@@ -142,9 +142,7 @@ export function ConversationList({
                   <EuiFlexItem grow={false} key={category}>
                     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
                       <EuiText className={titleClassName} size="s">
-                        {i18n.translate('xpack.aiAssistant.conversationList.dateGroup', {
-                          defaultMessage: DATE_CATEGORY_LABELS[category],
-                        })}
+                        {DATE_CATEGORY_LABELS[category]}
                       </EuiText>
                     </EuiPanel>
                     <EuiListGroup flush={false} gutterSize="none">
@@ -169,7 +167,15 @@ export function ConversationList({
                               }
                             ),
                             onClick: () => {
-                              confirmDeleteCallback().then((confirmed) => {
+                              confirmDeleteCallback(
+                                i18n.translate(
+                                  'xpack.aiAssistant.flyout.confirmDeleteCheckboxLabel',
+                                  {
+                                    defaultMessage: 'Delete "{title}"',
+                                    values: { title: conversation.label },
+                                  }
+                                )
+                              ).then((confirmed) => {
                                 if (!confirmed) {
                                   return;
                                 }

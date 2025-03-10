@@ -6,51 +6,116 @@
  */
 
 import { useCallback, useState, useMemo } from 'react';
-import type { ChatEvent } from '../../../common/chat_events';
-import type { Message } from '../../../common/messages';
+import { i18n } from '@kbn/i18n';
+import type { ConversationCreatedEvent } from '../../../common/chat_events';
+import type { ChatError } from '../../../common/errors';
+import type { ConversationEvent } from '../../../common/conversations';
+import { assistantMessageEvent, userMessageEvent } from '../../../common/utils/conversation';
 import { useWorkChatServices } from './use_workchat_service';
+import { useKibana } from './use_kibana';
 
-export const useChat = () => {
+interface UseChatProps {
+  conversationId: string | undefined;
+  agentId: string;
+  connectorId?: string;
+  onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
+  onError?: (error: ChatError) => void;
+}
+
+export type ChatStatus = 'ready' | 'loading' | 'error';
+
+export const useChat = ({
+  conversationId,
+  agentId,
+  connectorId,
+  onConversationUpdate,
+  onError,
+}: UseChatProps) => {
   const { chatService } = useWorkChatServices();
-  const [events, setEvents] = useState<ChatEvent[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    services: { notifications },
+  } = useKibana();
+  const [conversationEvents, setConversationEvents] = useState<ConversationEvent[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [status, setStatus] = useState<ChatStatus>('ready');
 
-  const send = useCallback(
-    async (message: string) => {
-      setMessages((prevMessages) => [...prevMessages, { type: 'user', content: message }]);
+  const sendMessage = useCallback(
+    (nextMessage: string) => {
+      if (status === 'loading') {
+        return;
+      }
+      setStatus('loading');
+      setConversationEvents((prevEvents) => [...prevEvents, userMessageEvent(nextMessage)]);
 
-      const events$ = await chatService.callAgent({ message });
+      const events$ = chatService.converse({
+        nextMessage,
+        conversationId,
+        agentId,
+        connectorId,
+      });
 
-      let chunks = '';
+      let concatenatedChunks = '';
 
       events$.subscribe({
         next: (event) => {
-          setEvents((prevEvents) => [...prevEvents, event]);
-
           if (event.type === 'message_chunk') {
-            chunks += event.text_chunk;
-            setPendingMessage(chunks);
+            concatenatedChunks += event.text_chunk;
+            setPendingMessage(concatenatedChunks);
+          }
+
+          if (event.type === 'conversation_created') {
+            onConversationUpdate(event.conversation);
           }
         },
         complete: () => {
-          setMessages((previous) => [...previous, { type: 'assistant', content: chunks }]);
+          setConversationEvents((prevEvents) => [
+            ...prevEvents,
+            assistantMessageEvent(concatenatedChunks),
+          ]);
           setPendingMessage('');
+          setStatus('ready');
+        },
+        error: (err) => {
+          setPendingMessage('');
+          setStatus('error');
+          onError?.(err);
+
+          notifications.toasts.addError(err, {
+            title: i18n.translate('xpack.workchatApp.chat.chatError.title', {
+              defaultMessage: 'Error loading chat response',
+            }),
+            toastMessage: `${err.code} - ${err.message}`,
+          });
         },
       });
     },
-    [chatService]
+    [
+      chatService,
+      notifications,
+      status,
+      agentId,
+      conversationId,
+      connectorId,
+      onConversationUpdate,
+      onError,
+    ]
   );
 
-  const allMessages: Message[] = useMemo(() => {
-    return [...messages].concat(
-      pendingMessage ? [{ type: 'assistant', content: pendingMessage }] : []
+  const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {
+    setConversationEvents(newEvents);
+    setPendingMessage('');
+  }, []);
+
+  const allEvents = useMemo(() => {
+    return [...conversationEvents].concat(
+      pendingMessage ? [assistantMessageEvent(pendingMessage)] : []
     );
-  }, [messages, pendingMessage]);
+  }, [conversationEvents, pendingMessage]);
 
   return {
-    send,
-    events,
-    messages: allMessages,
+    status,
+    sendMessage,
+    conversationEvents: allEvents,
+    setConversationEvents: setConversationEventsExternal,
   };
 };

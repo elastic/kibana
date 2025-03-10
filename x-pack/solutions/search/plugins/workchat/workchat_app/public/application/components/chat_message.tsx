@@ -6,17 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiComment, EuiPanel, EuiAvatar } from '@elastic/eui';
+import { EuiComment, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Message } from '../../../common/messages';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import { ChatMessageText } from './chat_message_text';
+import { ChatMessageAvatar } from './chat_message_avatar';
+import type { ConversationItem } from '../utils/get_chart_conversation_items';
 
 interface ChatMessageProps {
-  message: Message;
+  message: ConversationItem;
+  currentUser: AuthenticatedUser | undefined;
 }
 
-const getUserLabel = (message: Message) => {
-  if (message.type === 'user') {
+const getUserLabel = (message: ConversationItem) => {
+  if (message.user === 'user') {
     return i18n.translate('xpack.workchatApp.chat.messages.userLabel', {
       defaultMessage: 'You',
     });
@@ -26,27 +29,27 @@ const getUserLabel = (message: Message) => {
   });
 };
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
   const isUserMessage = useMemo(() => {
-    return message.type === 'user';
+    return message.user === 'user';
   }, [message]);
 
   return (
     <EuiComment
       username={getUserLabel(message)}
       timelineAvatar={
-        isUserMessage ? (
-          <EuiAvatar name="User" initials="Y" color="subdued" />
-        ) : (
-          <EuiAvatar iconType="agentApp" name="WorkChat" color="subdued" />
-        )
+        <ChatMessageAvatar
+          role={message.user}
+          loading={message.loading}
+          currentUser={currentUser}
+        />
       }
       event=""
       eventColor={isUserMessage ? 'primary' : 'subdued'}
       actions={<></>}
     >
       <EuiPanel hasShadow={false} paddingSize="s">
-        <ChatMessageText content={message.content} loading={false} />
+        <ChatMessageText content={message.content} loading={message.loading} />
       </EuiPanel>
     </EuiComment>
   );

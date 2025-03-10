@@ -9,31 +9,30 @@ import { Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import type { IRouter, Logger } from '@kbn/core/server';
-import { InternalServices } from '../services';
+import type { RouteDependencies } from './types';
 
-export const registerChatRoutes = ({
-  getServices,
-  router,
-  logger,
-}: {
-  router: IRouter;
-  logger: Logger;
-  getServices: () => InternalServices;
-}) => {
+export const registerChatRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  const stubLogger = {
+    debug: () => undefined,
+    error: () => undefined,
+  };
+
   router.post(
     {
       path: '/internal/workchat/chat',
       validate: {
         body: schema.object({
-          message: schema.string(),
+          conversationId: schema.maybe(schema.string()),
+          connectorId: schema.maybe(schema.string()),
+          agentId: schema.string(),
+          nextMessage: schema.string(),
         }),
       },
     },
     async (ctx, request, res) => {
-      const { agentFactory } = getServices();
+      const { chatService } = getServices();
 
-      const { message } = request.body;
+      const { nextMessage, conversationId, agentId, connectorId } = request.body;
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
@@ -41,17 +40,16 @@ export const registerChatRoutes = ({
       });
 
       try {
-
-        const agent = await agentFactory.getAgent({
+        const events$ = chatService.converse({
           request,
-          agentId: 'TODO',
-          connectorId: 'azure-gpt4',
-          // connectorId: '31bc61b3-ab11-4780-a0a5-9d2dace40ead',
+          connectorId: connectorId ?? 'azure-gpt4', // TODO: auto-select on server-side when not present
+          agentId,
+          nextUserMessage: nextMessage,
+          conversationId,
         });
 
-        const { events$ } = await agent.run({ message });
-
         return res.ok({
+          // TODO uncomment when https://github.com/elastic/kibana/pull/213151 is merged
           headers: {
             // 'Content-Type': 'text/event-stream',
             // 'Cache-Control': 'no-cache',
@@ -59,15 +57,13 @@ export const registerChatRoutes = ({
           },
           body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
             signal: abortController.signal,
-            logger,
+            // already logging at the service level
+            logger: stubLogger,
           }),
         });
-      } catch (error) {
-        logger.error(error);
-        return res.customError({
-          statusCode: 500,
-          body: { message: 'Internal server error' },
-        });
+      } catch (err) {
+        logger.error(err);
+        throw err;
       }
     }
   );
