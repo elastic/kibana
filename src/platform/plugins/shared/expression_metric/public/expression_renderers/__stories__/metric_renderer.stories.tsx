@@ -8,7 +8,6 @@
  */
 
 import React, { CSSProperties } from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Style } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
@@ -38,10 +37,14 @@ const metricFontSpec: CSSProperties = {
   color: '#b83c6f',
 };
 
+export default {
+  title: 'renderers/Metric',
+};
+
 const core = coreMock.createStart();
 
-storiesOf('renderers/Metric', module)
-  .add('with null metric', () => {
+export const WithNullMetric = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: null,
       metricFont: {} as Style,
@@ -50,8 +53,13 @@ storiesOf('renderers/Metric', module)
       metricFormat: '',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  })
-  .add('with number metric', () => {
+  },
+
+  name: 'with null metric',
+};
+
+export const WithNumberMetric = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: '12345.6789',
       metricFont: metricFontSpec as Style,
@@ -60,8 +68,13 @@ storiesOf('renderers/Metric', module)
       metricFormat: '',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  })
-  .add('with string metric', () => {
+  },
+
+  name: 'with number metric',
+};
+
+export const WithStringMetric = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: '$12.34',
       metricFont: metricFontSpec as Style,
@@ -70,8 +83,13 @@ storiesOf('renderers/Metric', module)
       metricFormat: '',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  })
-  .add('with label', () => {
+  },
+
+  name: 'with string metric',
+};
+
+export const WithLabel = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: '$12.34',
       metricFont: metricFontSpec as Style,
@@ -80,8 +98,13 @@ storiesOf('renderers/Metric', module)
       metricFormat: '',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  })
-  .add('with number metric and a specified format', () => {
+  },
+
+  name: 'with label',
+};
+
+export const WithNumberMetricAndASpecifiedFormat = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: '-0.0024',
       metricFont: metricFontSpec as Style,
@@ -90,8 +113,13 @@ storiesOf('renderers/Metric', module)
       metricFormat: '0.00%',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  })
-  .add('with formatted string metric and a specified format', () => {
+  },
+
+  name: 'with number metric and a specified format',
+};
+
+export const WithFormattedStringMetricAndASpecifiedFormat = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: '$10000000.00',
       metricFont: metricFontSpec as Style,
@@ -100,8 +128,13 @@ storiesOf('renderers/Metric', module)
       metricFormat: '$0a',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  })
-  .add('with invalid metricFont', () => {
+  },
+
+  name: 'with formatted string metric and a specified format',
+};
+
+export const WithInvalidMetricFont = {
+  render: () => {
     const config: MetricRendererConfig = {
       metric: '$10000000.00',
       metricFont: metricFontSpec as Style,
@@ -110,4 +143,7 @@ storiesOf('renderers/Metric', module)
       metricFormat: '$0a',
     };
     return <Render renderer={getMetricRenderer(core)} config={config} />;
-  });
+  },
+
+  name: 'with invalid metricFont',
+};

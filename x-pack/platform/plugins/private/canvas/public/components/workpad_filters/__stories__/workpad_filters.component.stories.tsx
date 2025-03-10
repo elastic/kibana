@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
@@ -49,18 +49,30 @@ const filtersGroups: FiltersGroupType[] = [
   },
 ];
 
-storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
-  .addDecorator((story) => (
-    <div>
-      <div className="canvasLayout__sidebar">
-        <div style={{ width: '100%' }}>{story()}</div>
+export default {
+  title: 'components/WorkpadFilters/WorkpadFiltersComponent',
+
+  decorators: [
+    (story) => (
+      <div>
+        <div className="canvasLayout__sidebar">
+          <div style={{ width: '100%' }}>{story()}</div>
+        </div>
       </div>
-    </div>
-  ))
-  .add('default', () => (
+    ),
+  ],
+} as Meta;
+
+export const Default = {
+  render: () => (
     <WorkpadFilters filtersGroups={filtersGroups} onGroupByChange={action('onGroupByChange')} />
-  ))
-  .add('Filters groups without name', () => (
+  ),
+
+  name: 'default',
+};
+
+export const FiltersGroupsWithoutName = {
+  render: () => (
     <WorkpadFilters
       filtersGroups={[
         {
@@ -71,8 +83,13 @@ storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
       groupFiltersByField={'column'}
       onGroupByChange={action('onGroupByChange')}
     />
-  ))
-  .add('Filters groups without group name', () => (
+  ),
+
+  name: 'Filters groups without name',
+};
+
+export const FiltersGroupsWithoutGroupName = {
+  render: () => (
     <WorkpadFilters
       filtersGroups={[
         {
@@ -83,13 +100,24 @@ storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
       groupFiltersByField={'filterGroup'}
       onGroupByChange={action('onGroupByChange')}
     />
-  ))
-  .add('Filters groups without name and filters', () => (
+  ),
+
+  name: 'Filters groups without group name',
+};
+
+export const FiltersGroupsWithoutNameAndFilters = {
+  render: () => (
     <WorkpadFilters
       filtersGroups={[{ name: null, filters: [] }]}
       onGroupByChange={action('onGroupByChange')}
     />
-  ))
-  .add('Empty filters groups', () => (
-    <WorkpadFilters filtersGroups={[]} onGroupByChange={action('onGroupByChange')} />
-  ));
+  ),
+
+  name: 'Filters groups without name and filters',
+};
+
+export const EmptyFiltersGroups = {
+  render: () => <WorkpadFilters filtersGroups={[]} onGroupByChange={action('onGroupByChange')} />,
+
+  name: 'Empty filters groups',
+};
