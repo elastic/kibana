@@ -44,7 +44,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
   const [initialItems] = useState<TabItem[]>(() =>
-    Array.from({ length: 10 }, () => getNewTabDefaultProps())
+    Array.from({ length: 7 }, () => getNewTabDefaultProps())
   );
 
   const onAddFieldToWorkspace = useCallback(
