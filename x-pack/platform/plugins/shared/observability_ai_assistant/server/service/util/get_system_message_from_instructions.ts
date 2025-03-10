@@ -22,10 +22,10 @@ export function getSystemMessageFromInstructions({
   // application instructions registered by the functions. These will be displayed first
   applicationInstructions,
 
-  // instructions provided by the user. These will be displayed after the application instructions and only if they fit within the token budget
+  // instructions provided by the user via the KB. These will be displayed after the application instructions and only if they fit within the token budget
   userInstructions: kbUserInstructions,
 
-  // ad-hoc user instructions. These will be displayed after the application instructions and only if they fit within the token budget
+  // instructions provided by the user via the API. These will be displayed after the application instructions and only if they fit within the token budget
   adHocUserInstructions,
   availableFunctionNames,
 }: {
