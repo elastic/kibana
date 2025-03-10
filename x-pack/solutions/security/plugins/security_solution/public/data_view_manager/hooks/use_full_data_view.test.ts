@@ -12,12 +12,19 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from
 import { useFullDataView } from './use_full_data_view';
 import { useDataView } from './use_data_view';
 import { type FieldSpec, DataView } from '@kbn/data-views-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+
+jest.mock('../../common/hooks/use_experimental_features');
 
 jest.mock('./use_data_view', () => ({
   useDataView: jest.fn(),
 }));
 
 describe('useFullDataView', () => {
+  beforeEach(() => {
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+  });
+
   describe('when data view is available', () => {
     beforeAll(() => {
       jest.mocked(useDataView).mockReturnValue({

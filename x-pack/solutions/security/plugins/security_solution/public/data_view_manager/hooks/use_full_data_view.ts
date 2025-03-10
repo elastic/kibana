@@ -52,11 +52,11 @@ export const useFullDataView = (
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = useMemo(() => {
-    if (newDataViewPickerEnabled) {
+    if (!newDataViewPickerEnabled) {
       return undefined;
     }
 
-    dataViewFromSpec(fieldFormats, dataViewSpec);
+    return dataViewFromSpec(fieldFormats, dataViewSpec);
   }, [dataViewSpec, fieldFormats, newDataViewPickerEnabled]);
 
   return dataView;
