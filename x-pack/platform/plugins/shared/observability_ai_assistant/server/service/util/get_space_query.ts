@@ -9,25 +9,9 @@ export function getSpaceQuery({ namespace }: { namespace?: string }) {
   return [
     {
       bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  term: { namespace },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'namespace',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
+        should: [
+          { term: { namespace } },
+          { bool: { must_not: { exists: { field: 'namespace' } } } },
         ],
       },
     },
