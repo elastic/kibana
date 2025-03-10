@@ -24,6 +24,31 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
+  async function getEntries({
+    query = '',
+    sortBy = 'title',
+    sortDirection = 'asc',
+    spaceId,
+    role = 'editor',
+  }: {
+    query?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+    spaceId?: string;
+    role?: 'admin' | 'editor' | 'viewer';
+  } = {}) {
+    const res = await observabilityAIAssistantAPIClient[role]({
+      endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+      params: {
+        query: { query, sortBy, sortDirection },
+      },
+      spaceId,
+    });
+    expect(res.status).to.be(200);
+
+    return omitCategories(res.body.entries);
+  }
+
   describe('Knowledge base', function () {
     before(async () => {
       await importTinyElserModel(ml);
@@ -124,22 +149,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when managing multiple entries', () => {
-      async function getEntries({
-        query = '',
-        sortBy = 'title',
-        sortDirection = 'asc',
-      }: { query?: string; sortBy?: string; sortDirection?: 'asc' | 'desc' } = {}) {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: { query, sortBy, sortDirection },
-          },
-        });
-        expect(res.status).to.be(200);
-
-        return omitCategories(res.body.entries);
-      }
-
       beforeEach(async () => {
         await clearKnowledgeBase(es);
 
@@ -197,6 +206,151 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const entries = await getEntries({ query: 'b' });
         expect(entries.length).to.eql(1);
         expect(entries[0].title).to.eql('My title b');
+      });
+    });
+
+    describe('when managing multiple entries across spaces', () => {
+      const SPACE_A_ID = 'space_a';
+      const SPACE_A_NAME = 'Space A';
+      const SPACE_B_ID = 'space_b';
+      const SPACE_B_NAME = 'Space B';
+
+      before(async () => {
+        await clearKnowledgeBase(es);
+
+        const { status: importStatusForSpaceA } = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+          params: {
+            body: {
+              entries: [
+                {
+                  id: `1_${SPACE_A_ID}_public`,
+                  title: `Public Entry in ${SPACE_A_NAME} by Admin`,
+                  text: `This is a public entry in ${SPACE_A_NAME} created by Admin`,
+                  public: true,
+                },
+                {
+                  id: `2_${SPACE_A_ID}_private`,
+                  title: `Private Entry in ${SPACE_A_NAME} by Admin`,
+                  text: `This is a private entry in ${SPACE_A_NAME} created by Admin`,
+                  public: false,
+                },
+              ],
+            },
+          },
+          spaceId: SPACE_A_ID,
+        });
+        expect(importStatusForSpaceA).to.be(200);
+
+        const { status: importStatusForSpaceB } = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+          params: {
+            body: {
+              entries: [
+                {
+                  id: `1_${SPACE_B_ID}_public`,
+                  title: `Public Entry in ${SPACE_B_NAME} by Admin`,
+                  text: `This is a public entry in ${SPACE_B_NAME} created by Admin`,
+                  public: true,
+                },
+                {
+                  id: `2_${SPACE_B_ID}_private`,
+                  title: `Private Entry in ${SPACE_B_NAME} by Admin`,
+                  text: `This is a private entry in ${SPACE_B_NAME} created by Admin`,
+                  public: false,
+                },
+              ],
+            },
+          },
+          spaceId: SPACE_B_ID,
+        });
+        expect(importStatusForSpaceB).to.be(200);
+
+        const { status: editorImportStatusForSpaceB } =
+          await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+            params: {
+              body: {
+                entries: [
+                  {
+                    id: `3_${SPACE_B_ID}_public`,
+                    title: `Public Entry in ${SPACE_B_NAME} by Editor`,
+                    text: `This is a public entry in ${SPACE_B_NAME} created by Editor`,
+                    public: true,
+                  },
+                  {
+                    id: `4_${SPACE_B_ID}_private`,
+                    title: `Private Entry in ${SPACE_B_NAME} by Editor`,
+                    text: `This is a private entry in ${SPACE_B_NAME} created by Editor`,
+                    public: false,
+                  },
+                ],
+              },
+            },
+            spaceId: SPACE_B_ID,
+          });
+        expect(editorImportStatusForSpaceB).to.be(200);
+      });
+
+      after(async () => {
+        await clearKnowledgeBase(es);
+      });
+
+      it('ensures users can only access entries relevant to their namespace', async () => {
+        // User (admin) in space A should only see public entries in space A and their own entries in Space A
+        const spaceAEntries = await getEntries({
+          sortBy: 'id',
+          sortDirection: 'desc',
+          role: 'admin',
+          spaceId: SPACE_A_ID,
+        });
+
+        expect(spaceAEntries.length).to.be(2);
+
+        expect(spaceAEntries[0].id).to.equal('2_space_a_private');
+        expect(spaceAEntries[0].public).to.be(false);
+        expect(spaceAEntries[0].title).to.equal('Private Entry in Space A by Admin');
+
+        expect(spaceAEntries[1].id).to.equal('1_space_a_public');
+        expect(spaceAEntries[1].public).to.be(true);
+        expect(spaceAEntries[1].title).to.equal('Public Entry in Space A by Admin');
+
+        // User (admin) in space B should only see public entries in space B and their own entries in Space B
+        const spaceBEntries = await getEntries({
+          sortBy: 'id',
+          sortDirection: 'desc',
+          role: 'admin',
+          spaceId: SPACE_B_ID,
+        });
+
+        expect(spaceBEntries.length).to.be(3);
+
+        expect(spaceBEntries[0].id).to.equal('3_space_b_public');
+        expect(spaceBEntries[0].public).to.be(true);
+        expect(spaceBEntries[0].title).to.equal('Public Entry in Space B by Editor');
+
+        expect(spaceBEntries[1].id).to.equal('2_space_b_private');
+        expect(spaceBEntries[1].public).to.be(false);
+        expect(spaceBEntries[1].title).to.equal('Private Entry in Space B by Admin');
+
+        expect(spaceBEntries[2].id).to.equal('1_space_b_public');
+        expect(spaceBEntries[2].public).to.be(true);
+        expect(spaceBEntries[2].title).to.equal('Public Entry in Space B by Admin');
+      });
+
+      it('editor should only have access to public entries in space A', async () => {
+        const spaceAEntries = await getEntries({
+          sortBy: 'id',
+          sortDirection: 'desc',
+          role: 'editor',
+          spaceId: SPACE_A_ID,
+        });
+
+        expect(spaceAEntries.length).to.be(1);
+
+        expect(spaceAEntries[0].id).to.equal('1_space_a_public');
+        expect(spaceAEntries[0].public).to.be(true);
+        expect(spaceAEntries[0].title).to.equal('Public Entry in Space A by Admin');
       });
     });
 
