@@ -78,9 +78,13 @@ export const AddPrebuiltRulesTable = React.memo(() => {
           ) : (
             <>
               <EuiFlexGroup direction="column">
+                {/*
+                TODO: The rules changelog link is not yet available for v9. Uncomment this when it is available.
+                Issue to uncomment: https://github.com/elastic/kibana/issues/213709
                 <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
                   <RulesChangelogLink />
                 </EuiFlexItem>
+                */}
                 <EuiFlexItem grow={false}>
                   <AddPrebuiltRulesTableFilters />
                 </EuiFlexItem>
