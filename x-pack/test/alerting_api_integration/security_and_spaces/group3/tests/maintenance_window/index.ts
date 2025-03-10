@@ -24,6 +24,7 @@ export default function maintenanceWindowTests({ loadTestFile, getService }: Ftr
       loadTestFile(require.resolve('./external/get_maintenance_window'));
       loadTestFile(require.resolve('./external/create_maintenance_window'));
       loadTestFile(require.resolve('./external/delete_maintenance_window'));
+      loadTestFile(require.resolve('./external/archive_maintenance_window'));
 
       // Internal APIs
       loadTestFile(require.resolve('./internal/get_maintenance_window'));
