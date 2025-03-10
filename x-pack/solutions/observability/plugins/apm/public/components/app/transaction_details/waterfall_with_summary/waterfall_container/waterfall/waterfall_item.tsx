@@ -243,9 +243,6 @@ export function WaterfallItem({
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
 
-  const isMissingSpanDestination =
-    item.docType === 'span' && item.doc.span.type !== 'internal' && !item.doc.span.destination;
-
   const itemBarStyle = getItemBarStyle(item, color, width, left);
 
   const isServerlessColdstart = item.docType === 'transaction' && item.doc.faas?.coldstart;
@@ -289,7 +286,7 @@ export function WaterfallItem({
           <PrefixIcon item={item} />
         </SpanActionToolTip>
         {item.isOrphan ? <OrphanItemTooltipIcon docType={item.docType} /> : null}
-        {isMissingSpanDestination ? <SpanMissingDestinationTooltip /> : null}
+        {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
 

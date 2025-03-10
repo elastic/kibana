@@ -75,6 +75,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   legendValues: Record<WaterfallLegendType, string>;
   spanLinksCount: SpanLinksCount;
   isOrphan?: boolean;
+  missingDestination?: boolean;
 }
 
 export type IWaterfallError = Omit<
@@ -547,6 +548,15 @@ function buildTree({
           childrenToLoad: 0,
           hasInitializedChildren: false,
         };
+
+        // Check if currentNode is a transaction and node is a span without destination
+        if (
+          currentNode.item.docType === 'transaction' &&
+          node.item.docType === 'span' &&
+          !node.item.doc.span?.destination?.service?.resource
+        ) {
+          node.item.missingDestination = true;
+        }
 
         node.children.push(currentNode);
         queue.push(currentNode);
