@@ -151,6 +151,13 @@ export function getRuleType(
     }
   );
 
+  const actionVariableContextGroupingLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextGroupingLabel',
+    {
+      defaultMessage: 'The object containing groups that are reporting data',
+    }
+  );
+
   return {
     id: ES_QUERY_ID,
     name: ruleTypeName,
@@ -182,6 +189,7 @@ export function getRuleType(
         { name: 'hits', description: actionVariableContextHitsLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
         { name: 'link', description: actionVariableContextLinkLabel, usesPublicBaseUrl: true },
+        { name: 'grouping', description: actionVariableContextGroupingLabel },
       ],
       params: [
         { name: 'size', description: actionVariableContextSizeLabel },
