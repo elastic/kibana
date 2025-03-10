@@ -37,7 +37,7 @@ import { TableDimensionDataExtraEditor, TableDimensionEditor } from './component
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { FormatFactory, LayerType } from '../../../common/types';
 import { RowHeightMode } from '../../../common/types';
-import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
+import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
   type ColumnState,
   type SortingState,
@@ -59,7 +59,7 @@ import {
   shouldColorByTerms,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
+import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { getSimpleColumnType } from './components/table_actions';
 export interface DatatableVisualizationState {
   columns: ColumnState[];

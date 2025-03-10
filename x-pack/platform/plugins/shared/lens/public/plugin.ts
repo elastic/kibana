@@ -26,6 +26,7 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+  ACTION_CONVERT_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   VisualizationsSetup,
   VisualizationsStart,
@@ -49,6 +50,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
   ADD_PANEL_TRIGGER,
+  ACTION_VISUALIZE_LENS_FIELD,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -117,8 +119,6 @@ import type {
 import { lensVisTypeAlias } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
-import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
-import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
 import type {
   LensEmbeddableStartServices,
@@ -141,7 +141,6 @@ import {
   LensSavedObjectAttributes,
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import {
   ACTION_CREATE_ESQL_CHART,
@@ -648,40 +647,58 @@ export class LensPlugin {
     // this trigger enables external consumers to use the inline editing flyout
     startDependencies.uiActions.registerTrigger(inAppEmbeddableEditTrigger);
 
-    startDependencies.uiActions.addTriggerAction(
+    startDependencies.uiActions.addTriggerActionAsync(
       VISUALIZE_FIELD_TRIGGER,
-      visualizeFieldAction(core.application)
+      ACTION_VISUALIZE_LENS_FIELD,
+      async () => {
+        const { visualizeFieldAction } = await import('./async_services');
+        return visualizeFieldAction(core.application);
+      }
     );
 
-    startDependencies.uiActions.addTriggerAction(
+    startDependencies.uiActions.addTriggerActionAsync(
       VISUALIZE_EDITOR_TRIGGER,
-      visualizeTSVBAction(core.application)
+      ACTION_CONVERT_TO_LENS,
+      async () => {
+        const { visualizeTSVBAction } = await import('./async_services');
+        return visualizeTSVBAction(core.application);
+      }
     );
 
-    startDependencies.uiActions.addTriggerAction(
+    startDependencies.uiActions.addTriggerActionAsync(
       DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
-      convertToLensActionFactory(
-        ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
-        i18n.translate('xpack.lens.visualizeLegacyVisualizationChart', {
-          defaultMessage: 'Visualize legacy visualization chart',
-        }),
-        i18n.translate('xpack.lens.dashboardLabel', {
-          defaultMessage: 'Dashboard',
-        })
-      )(core.application)
+      ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+      async () => {
+        const { convertToLensActionFactory } = await import('./async_services');
+        const action = convertToLensActionFactory(
+          ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+          i18n.translate('xpack.lens.visualizeLegacyVisualizationChart', {
+            defaultMessage: 'Visualize legacy visualization chart',
+          }),
+          i18n.translate('xpack.lens.dashboardLabel', {
+            defaultMessage: 'Dashboard',
+          })
+        );
+        return action(core.application);
+      }
     );
 
-    startDependencies.uiActions.addTriggerAction(
+    startDependencies.uiActions.addTriggerActionAsync(
       AGG_BASED_VISUALIZATION_TRIGGER,
-      convertToLensActionFactory(
-        ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
-        i18n.translate('xpack.lens.visualizeAggBasedLegend', {
-          defaultMessage: 'Visualize agg based chart',
-        }),
-        i18n.translate('xpack.lens.AggBasedLabel', {
-          defaultMessage: 'aggregation based visualization',
-        })
-      )(core.application)
+      ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+      async () => {
+        const { convertToLensActionFactory } = await import('./async_services');
+        const action = convertToLensActionFactory(
+          ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+          i18n.translate('xpack.lens.visualizeAggBasedLegend', {
+            defaultMessage: 'Visualize agg based chart',
+          }),
+          i18n.translate('xpack.lens.AggBasedLabel', {
+            defaultMessage: 'aggregation based visualization',
+          })
+        );
+        return action(core.application);
+      }
     );
 
     // Allows the Lens embeddable to easily open the inline editing flyout

@@ -14,7 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import {
-  AddFieldFilterHandler,
+  type AddFieldFilterHandler,
   FieldStats,
   FieldPopover,
   FieldPopoverHeader,

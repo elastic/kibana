@@ -39,7 +39,7 @@ export class XyVisualization {
           dataViews,
         },
       ] = await core.getStartServices();
-      const [{ getXyVisualization }, palettes, eventAnnotationService] = await Promise.all([
+      const [{ getXyVisualization }, paletteService, eventAnnotationService] = await Promise.all([
         import('../../async_services'),
         charts.palettes.getPalettes(),
         eventAnnotation.getService(),
@@ -49,7 +49,7 @@ export class XyVisualization {
         core: coreStart,
         data,
         storage: new Storage(localStorage),
-        paletteService: palettes,
+        paletteService,
         eventAnnotationService,
         fieldFormats,
         useLegacyTimeAxis,

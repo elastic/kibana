@@ -37,8 +37,8 @@ import { getColumnAlignment } from '../utils';
 import {
   getFieldMetaFromDatatable,
   isNumericField,
-} from '../../../../common/expressions/datatable/utils';
-import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
+} from '../../../../common/expressions/impl/datatable/utils';
+import { DatatableInspectorTables } from '../../../../common/expressions/defs/datatable/datatable';
 
 const idPrefix = htmlIdGenerator()();
 
