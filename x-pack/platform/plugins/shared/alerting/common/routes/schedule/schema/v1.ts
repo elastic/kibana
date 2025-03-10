@@ -28,7 +28,8 @@ export const scheduleRequestSchema = schema.object(
     duration: schema.string({
       validate: validateDurationV1,
       meta: {
-        description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.',
+        description:
+          'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.',
       },
     }),
     timezone: schema.maybe(
@@ -53,7 +54,8 @@ export const scheduleRequestSchema = schema.object(
           schema.string({
             validate: validateIntervalAndFrequencyV1,
             meta: {
-              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.',
+              description:
+                'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.',
             },
           })
         ),
@@ -62,7 +64,8 @@ export const scheduleRequestSchema = schema.object(
             minSize: 1,
             validate: validateOnWeekDayV1,
             meta: {
-              description: 'The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.',
+              description:
+                'The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.',
             },
           })
         ),
@@ -92,8 +95,7 @@ export const scheduleRequestSchema = schema.object(
             {
               minSize: 1,
               meta: {
-                description:
-                  'The specific months for a recurring schedule. Valid values are 1-12.',
+                description: 'The specific months for a recurring schedule. Valid values are 1-12.',
               },
             }
           )
