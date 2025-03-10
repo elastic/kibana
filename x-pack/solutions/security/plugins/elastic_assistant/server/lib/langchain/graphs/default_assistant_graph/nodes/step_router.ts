@@ -21,7 +21,8 @@ export function stepRouter(state: AgentState): string {
       const { messages } = state;
       const lastMessage = messages[messages.length - 1];
       if (
-        lastMessage && 'tool_calls' in lastMessage &&
+        lastMessage &&
+        'tool_calls' in lastMessage &&
         Array.isArray(lastMessage.tool_calls) &&
         lastMessage.tool_calls?.length
       ) {

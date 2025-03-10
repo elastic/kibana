@@ -53,23 +53,24 @@ export async function runAgent({
   const userPrompt =
     state.llmType === 'gemini'
       ? await getPrompt({
-        actionsClient,
-        connectorId: state.connectorId,
-        promptId: promptDictionary.userPrompt,
-        promptGroupId: promptGroupId.aiAssistant,
-        provider: 'gemini',
-        savedObjectsClient,
-      })
+          actionsClient,
+          connectorId: state.connectorId,
+          promptId: promptDictionary.userPrompt,
+          promptGroupId: promptGroupId.aiAssistant,
+          provider: 'gemini',
+          savedObjectsClient,
+        })
       : '';
   const result = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
       {
         ...state,
-        knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${knowledgeHistory?.length
-          ? JSON.stringify(knowledgeHistory.map((e) => e.text))
-          : NO_KNOWLEDGE_HISTORY
-          }`,
+        knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
+          knowledgeHistory?.length
+            ? JSON.stringify(knowledgeHistory.map((e) => e.text))
+            : NO_KNOWLEDGE_HISTORY
+        }`,
         // prepend any user prompt (gemini)
         input: `${userPrompt}${state.input}`,
         chat_history: sanitizeChatHistory(state.chatHistory), // TODO: Message de-dupe with ...state spread
