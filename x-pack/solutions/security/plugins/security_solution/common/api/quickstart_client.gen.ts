@@ -38,24 +38,6 @@ import type {
   PerformRulesBulkActionResponse,
 } from './detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import type {
-  BulkCreateRulesRequestBodyInput,
-  BulkCreateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
-import type {
-  BulkDeleteRulesRequestBodyInput,
-  BulkDeleteRulesResponse,
-  BulkDeleteRulesPostRequestBodyInput,
-  BulkDeleteRulesPostResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import type {
-  BulkPatchRulesRequestBodyInput,
-  BulkPatchRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
-import type {
-  BulkUpdateRulesRequestBodyInput,
-  BulkUpdateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
-import type {
   CreateRuleRequestBodyInput,
   CreateRuleResponse,
 } from './detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
@@ -469,89 +451,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Create new detection rules in bulk.
-   */
-  async bulkCreateRules(props: BulkCreateRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkCreateRules`);
-    return this.kbnClient
-      .request<BulkCreateRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_create',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Delete detection rules in bulk.
-   */
-  async bulkDeleteRules(props: BulkDeleteRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRules`);
-    return this.kbnClient
-      .request<BulkDeleteRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_delete',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Deletes multiple rules.
-   */
-  async bulkDeleteRulesPost(props: BulkDeleteRulesPostProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRulesPost`);
-    return this.kbnClient
-      .request<BulkDeleteRulesPostResponse>({
-        path: '/api/detection_engine/rules/_bulk_delete',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Update specific fields of existing detection rules using the `rule_id` or `id` field.
-   */
-  async bulkPatchRules(props: BulkPatchRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkPatchRules`);
-    return this.kbnClient
-      .request<BulkPatchRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_update',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'PATCH',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-> info
-> You cannot modify the `id` or `rule_id` values.
-
-    */
-  async bulkUpdateRules(props: BulkUpdateRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkUpdateRules`);
-    return this.kbnClient
-      .request<BulkUpdateRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_update',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'PUT',
-        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2323,21 +2222,6 @@ detection engine rules.
 
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
-}
-export interface BulkCreateRulesProps {
-  body: BulkCreateRulesRequestBodyInput;
-}
-export interface BulkDeleteRulesProps {
-  body: BulkDeleteRulesRequestBodyInput;
-}
-export interface BulkDeleteRulesPostProps {
-  body: BulkDeleteRulesPostRequestBodyInput;
-}
-export interface BulkPatchRulesProps {
-  body: BulkPatchRulesRequestBodyInput;
-}
-export interface BulkUpdateRulesProps {
-  body: BulkUpdateRulesRequestBodyInput;
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
