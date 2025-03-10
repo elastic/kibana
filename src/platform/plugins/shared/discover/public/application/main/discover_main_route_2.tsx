@@ -81,6 +81,7 @@ import { updateSavedSearch } from './state_management/utils/update_saved_search'
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
 import { DiscoverMainApp } from './discover_main_app';
 import { getValidFilters } from '../../utils/get_valid_filters';
+import { copySavedSearch } from './state_management/discover_saved_search_container';
 
 export interface MainRoute2Props {
   customizationContext: DiscoverCustomizationContext;
@@ -337,7 +338,9 @@ const DiscoverSessionView = ({
       services,
     });
     const discoverSession = updateSavedSearch({
-      savedSearch: persistedDiscoverSession ?? savedSearch.getNew(),
+      savedSearch: persistedDiscoverSession
+        ? copySavedSearch(persistedDiscoverSession)
+        : savedSearch.getNew(),
       dataView,
       state: initialState,
       globalStateContainer: stateContainer.globalState,
@@ -395,7 +398,13 @@ const DiscoverSessionView = ({
       );
     }
 
-    stateContainer.savedSearchState.set(discoverSession);
+    if (persistedDiscoverSession) {
+      stateContainer.savedSearchState.set(persistedDiscoverSession);
+      stateContainer.savedSearchState.assignNextSavedSearch(discoverSession);
+    } else {
+      stateContainer.savedSearchState.set(discoverSession);
+    }
+
     stateContainer.appState.set(initialState);
     discoverSessionLoadTracker.reportEvent();
 
