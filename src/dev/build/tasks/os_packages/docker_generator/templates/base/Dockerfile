@@ -110,15 +110,7 @@ COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /
 RUN fc-cache -v
 {{/serverless}}
 WORKDIR /usr/share/kibana
-{{#fips}}
 
-RUN /bin/echo -e '\n--enable-fips' >> config/node.options
-COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
-ENV OPENSSL_CONF=/usr/share/kibana/config/nodejs.cnf
-ENV OPENSSL_MODULES=/usr/lib64/ossl-modules
-ENV XPACK_SECURITY_FIPSMODE_ENABLED=true
-
-{{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
@@ -131,6 +123,15 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
+{{#fips}}
+
+RUN /bin/echo -e '\n--enable-fips' >> config/node.options
+COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
+ENV OPENSSL_CONF=/usr/share/kibana/config/nodejs.cnf
+ENV OPENSSL_MODULES=/usr/lib64/ossl-modules
+RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
+
+{{/fips}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
