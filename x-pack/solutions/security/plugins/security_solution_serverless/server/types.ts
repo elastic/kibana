@@ -77,6 +77,11 @@ export interface UsageSource {
 
 export type Tier = ProductTier | 'none';
 
+export interface BackfillConfig {
+  enabled: boolean;
+  maxRecords?: number;
+}
+
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
@@ -88,6 +93,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   version: string;
   meteringCallback: MeteringCallback;
   usageReportingService: UsageReportingService;
+  backfillConfig?: BackfillConfig;
 }
 
 export interface SecurityUsageReportingTaskStartContract {
