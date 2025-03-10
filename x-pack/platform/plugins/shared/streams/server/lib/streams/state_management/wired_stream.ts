@@ -13,10 +13,13 @@ import {
   getAncestorsAndSelf,
   getParentId,
   isChildOf,
+  isDescendantOf,
+  isRootStreamDefinition,
+  isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { cloneDeep } from 'lodash';
-import { isResponseError } from '@kbn/es-errors';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import _ from 'lodash';
 import { State, StreamChange } from './state';
 import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stream_active_record';
@@ -28,6 +31,10 @@ import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pi
 import { getProcessingPipelineName, getReroutePipelineName } from '../ingest_pipelines/name';
 import { getComponentTemplateName } from '../component_templates/name';
 import { getIndexTemplateName } from '../index_templates/name';
+import { NameTakenError } from '../errors/name_taken_error';
+import { isDefinitionNotFoundError } from '../errors/definition_not_found_error';
+import { validateAncestorFields, validateDescendantFields } from '../helpers/validate_fields';
+import { validateRootStreamChanges } from '../helpers/validate_stream';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   constructor(definition: WiredStreamDefinition, dependencies: StreamDependencies) {
@@ -49,11 +56,24 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
+    if (definition.name !== this.definition.name) {
+      if (
+        isWiredStreamDefinition(definition) &&
+        isDescendantOf(definition.name, this.definition.name)
+      ) {
+        // if the an ancestor stream gets upserted, we might need to update the stream - mark as upserted
+        // so we check for updates during the Elasticsearch action planning phase.
+        this.changeStatus = 'upserted';
+      }
+
+      return [];
+    }
     if (!isWiredStreamDefinition(definition)) {
       throw new Error('Cannot change stream types');
     }
 
     this._updated_definition = definition;
+    this.changeStatus = 'upserted';
 
     const startingStateStreamDefinition = startingState.get(this.definition.name)?.definition;
 
@@ -153,7 +173,15 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return cascadingChanges;
   }
 
-  protected async doDelete(desiredState: State, startingState: State): Promise<StreamChange[]> {
+  protected async doDelete(
+    target: string,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
+    if (target !== this.definition.name) {
+      return [];
+    }
+    this.changeStatus = 'deleted';
     const cascadingChanges: StreamChange[] = [];
     const parentId = getParentId(this._updated_definition.name);
     if (parentId) {
@@ -271,7 +299,69 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       }
     }
 
+    await this.assertNoHierarchicalConflicts(this._updated_definition.name);
+
+    const [ancestors, descendants] = await Promise.all([
+      this.dependencies.streamsClient.getAncestors(this.definition.name),
+      this.dependencies.streamsClient.getDescendants(this.definition.name),
+    ]);
+
+    validateAncestorFields({
+      ancestors,
+      fields: this.definition.ingest.wired.fields,
+    });
+
+    validateDescendantFields({
+      descendants,
+      fields: this.definition.ingest.wired.fields,
+    });
+
+    if (isRootStreamDefinition(this.definition)) {
+      // only allow selective updates to a root stream
+      validateRootStreamChanges(this.definition, this._updated_definition);
+    }
+
     return { isValid: true, errors: [] };
+  }
+  private async assertNoHierarchicalConflicts(definitionName: string) {
+    const streamNames = [...getAncestors(definitionName), definitionName];
+    const hasConflict = await Promise.all(
+      streamNames.map((streamName) => this.isStreamNameTaken(streamName))
+    );
+    const conflicts = streamNames.filter((_val, index) => hasConflict[index]);
+
+    if (conflicts.length !== 0) {
+      throw new NameTakenError(
+        `Cannot create stream "${definitionName}" due to hierarchical conflicts caused by existing unwired stream definition, index or data stream: [${conflicts.join(
+          ', '
+        )}]`
+      );
+    }
+  }
+
+  private async isStreamNameTaken(name: string): Promise<boolean> {
+    try {
+      const definition = await this.dependencies.streamsClient.getStream(name);
+      return isUnwiredStreamDefinition(definition);
+    } catch (error) {
+      if (!isDefinitionNotFoundError(error)) {
+        throw error;
+      }
+    }
+
+    try {
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+        index: name,
+      });
+
+      return true;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {

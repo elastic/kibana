@@ -12,12 +12,10 @@ import {
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import {
-  IndicesDataStream,
   IndicesPutIndexTemplateRequest,
   IngestPipeline,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
 import { isResponseError } from '@kbn/es-errors';
 import _ from 'lodash';
@@ -27,7 +25,7 @@ import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stre
 import { ElasticsearchAction } from './execution_plan';
 import { generateIngestPipeline } from '../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
-import { getUnmanagedElasticsearchAssets } from '../stream_crud';
+import { getDataStream, getUnmanagedElasticsearchAssets } from '../stream_crud';
 
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   constructor(definition: UnwiredStreamDefinition, dependencies: StreamDependencies) {
@@ -47,6 +45,9 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
+    if (definition.name !== this.definition.name) {
+      return [];
+    }
     if (!isUnwiredStreamDefinition(definition)) {
       throw new Error('Cannot change stream types');
     }
@@ -79,44 +80,21 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     return [];
   }
 
-  protected async doDelete(desiredState: State, startingState: State): Promise<StreamChange[]> {
-    return this.definition.ingest.routing.map((routing) => ({
-      target: routing.destination,
-      type: 'delete',
-    }));
+  protected async doDelete(
+    target: string,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
+    if (target !== this.definition.name) {
+      return [];
+    }
+    this.changeStatus = 'deleted';
+    return [];
   }
 
   protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
     // What do we need to validate here?
     return { isValid: true, errors: [] };
-  }
-
-  // TODO - probably shouldn't be here, not sure where to put it... should the active
-  // record have a reference to the client again? This could lead to weird behavior OTOH...
-  // maybe a `Pick`ed version? Or maybe it should go into stream_crud instead?
-  private async getDataStream(name: string): Promise<IndicesDataStream> {
-    return this.dependencies.scopedClusterClient.asCurrentUser.indices
-      .getDataStream({ name })
-      .then((response) => {
-        if (response.data_streams.length === 0) {
-          throw new errors.ResponseError({
-            meta: {
-              aborted: false,
-              attempts: 1,
-              connection: null,
-              context: null,
-              name: 'resource_not_found_exception',
-              request: {} as unknown as DiagnosticResult['meta']['request'],
-            },
-            warnings: [],
-            body: 'resource_not_found_exception',
-            statusCode: 404,
-          });
-        }
-
-        const dataStream = response.data_streams[0];
-        return dataStream;
-      });
   }
 
   private async findStreamManagedPipelineReference(
@@ -172,7 +150,9 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
   private async ensureStreamManagedPipelineReference(): Promise<ElasticsearchAction[]> {
     const executionPlan: ElasticsearchAction[] = [];
-    const dataStream = await this.getDataStream(this._updated_definition.name);
+    const dataStream = await this.dependencies.streamsClient.getDataStream(
+      this._updated_definition.name
+    );
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
       scopedClusterClient: this.dependencies.scopedClusterClient,
@@ -213,8 +193,6 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         request: updatedTemplate,
       });
 
-      // rollover the data stream to apply the new default pipeline
-      // TODO
       executionPlan.push({
         type: 'upsert_write_index_or_rollover',
         request: {
@@ -320,7 +298,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-    return [
+    const actions: ElasticsearchAction[] = [
       {
         type: 'delete_ingest_pipeline',
         request: {
@@ -347,5 +325,34 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         },
       },
     ];
+    const dataStream = await getDataStream({
+      name: this.definition.name,
+      scopedClusterClient: this.dependencies.scopedClusterClient,
+    });
+    const unmanagedAssets = await getUnmanagedElasticsearchAssets({
+      dataStream,
+      scopedClusterClient: this.dependencies.scopedClusterClient,
+    });
+    const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
+    if (pipelineName) {
+      const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
+        await this.findStreamManagedPipelineReference(pipelineName, this.definition.name);
+      if (referencesStreamManagedPipeline) {
+        const streamManagedPipelineName = getProcessingPipelineName(this.definition.name);
+        const updatedProcessors = targetPipeline.processors!.filter(
+          (processor) =>
+            !(processor.pipeline && processor.pipeline.name === streamManagedPipelineName)
+        );
+        actions.push({
+          type: 'upsert_ingest_pipeline',
+          stream: this.definition.name,
+          request: {
+            id: targetPipelineName,
+            processors: updatedProcessors,
+          },
+        });
+      }
+    }
+    return actions;
   }
 }

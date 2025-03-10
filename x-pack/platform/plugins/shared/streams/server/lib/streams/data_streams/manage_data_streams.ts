@@ -72,11 +72,18 @@ export async function updateOrRolloverDataStream({
     try {
       await retryTransientEsErrors(
         () =>
-          esClient.indices.putMapping({
-            index: writeIndex.index_name,
-            // TODO - do I need to do the same for settings?
-            properties: simulatedIndex.template.mappings.properties,
-          }),
+          Promise.all([
+            esClient.indices.putMapping({
+              index: writeIndex.index_name,
+              // TODO - do I need to do the same for settings?
+              properties: simulatedIndex.template.mappings.properties,
+            }),
+            esClient.indices.putSettings({
+              index: writeIndex.index_name,
+              // TODO - do I need to do the same for settings?
+              settings: simulatedIndex.template.settings,
+            }),
+          ]),
         {
           logger,
         }

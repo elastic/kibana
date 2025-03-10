@@ -11,6 +11,7 @@ import { State, StreamChange } from './state'; // Does this create a circular de
 import { StreamsStorageClient } from '../service';
 import { AssetClient } from '../assets/asset_client';
 import { ElasticsearchAction } from './execution_plan';
+import { StreamsClient } from '../client';
 
 export interface StreamDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -18,6 +19,7 @@ export interface StreamDependencies {
   storageClient: StreamsStorageClient;
   logger: Logger;
   isServerless: boolean;
+  streamsClient: StreamsClient;
 }
 
 export interface ValidationResult {
@@ -30,7 +32,7 @@ type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected _updated_definition: TDefinition;
   protected dependencies: StreamDependencies;
-  private changeStatus: StreamChangeStatus = 'unchanged';
+  protected changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StreamDependencies) {
     this._updated_definition = definition;
@@ -50,7 +52,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
     try {
       if (change.type === 'delete') {
-        return this.delete(desiredState, startingState);
+        return this.delete(change.target, desiredState, startingState);
       } else {
         return this.upsert(change.request.stream, desiredState, startingState);
       }
@@ -60,10 +62,9 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  async delete(desiredState: State, startingState: State): Promise<StreamChange[]> {
+  async delete(target: string, desiredState: State, startingState: State): Promise<StreamChange[]> {
     try {
-      const cascadingChanges = await this.doDelete(desiredState, startingState);
-      this.changeStatus = 'deleted';
+      const cascadingChanges = await this.doDelete(target, desiredState, startingState);
       return cascadingChanges;
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
@@ -78,7 +79,6 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
   ): Promise<StreamChange[]> {
     try {
       const cascadingChanges = await this.doUpsert(definition, desiredState, startingState);
-      this.changeStatus = 'upserted';
       return cascadingChanges;
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
@@ -134,7 +134,11 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<StreamChange[]>;
 
-  protected abstract doDelete(desiredState: State, startingState: State): Promise<StreamChange[]>;
+  protected abstract doDelete(
+    target: string,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]>;
 
   protected abstract doValidate(
     desiredState: State,
