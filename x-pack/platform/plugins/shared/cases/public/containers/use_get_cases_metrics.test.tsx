@@ -7,12 +7,11 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from '../api';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useGetCasesMetrics } from './use_get_cases_metrics';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useToasts } from '../common/lib/kibana';
 import { CaseMetricsFeature } from '../../common/types/api';
+import { TestProviders } from '../common/mock';
 
 jest.mock('../api');
 jest.mock('../common/lib/kibana');
@@ -24,17 +23,14 @@ describe('useGetCasesMetrics', () => {
 
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCasesMetrics');
     renderHook(() => useGetCasesMetrics(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() =>
@@ -55,7 +51,7 @@ describe('useGetCasesMetrics', () => {
       .mockRejectedValue(new Error('useGetCasesMetrics: Test error'));
 
     renderHook(() => useGetCasesMetrics(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
