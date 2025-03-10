@@ -171,13 +171,15 @@ export const AnnotationIcon = ({
     return null;
   }
 
+  const shouldRotateIcon = !isHorizontal && iconConfig.shouldRotate && rotateClassName;
+
   return (
     <EuiIcon
       {...rest}
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
       className={iconConfig.shouldRotate ? rotateClassName : undefined}
-      css={styles.iconRotate90}
+      css={shouldRotateIcon && styles.rotatedIcon}
     />
   );
 };
@@ -204,7 +206,12 @@ export function Marker({
 }) {
   if (hasIcon(config.icon)) {
     return (
-      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
+      <AnnotationIcon
+        type={config.icon}
+        rotateClassName={rotateClassName}
+        renderedInChart={true}
+        isHorizontal={isHorizontal}
+      />
     );
   }
 
@@ -233,11 +240,9 @@ const styles = {
       letterSpacing: '-.5px',
     }),
 
-  iconRotate90: css({
-    '&.xyAnnotationIcon_rotate90': {
-      transform: 'rotate(90deg) !important',
-      transformOrigin: 'center',
-    },
+  rotatedIcon: css({
+    transform: 'rotate(90deg) !important',
+    transformOrigin: 'center',
   }),
 
   rotatedText: css({
