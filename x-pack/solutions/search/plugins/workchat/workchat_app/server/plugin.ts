@@ -70,7 +70,7 @@ export class WorkChatAppPlugin
     const { wciSalesforce } = pluginsDependencies;
 
     const integrationsService = new IntegrationsService({
-      logger: this.logger.get('services.integrationsService'),
+      logger: this.logger.get('services.integrations'),
       integrationPlugins: [wciSalesforce.integration],
     });
 
@@ -88,7 +88,7 @@ export class WorkChatAppPlugin
 
     const chatService = new ChatService({
       inference: pluginsDependencies.inference,
-      logger: this.logger.get('services.agentFactory'),
+      logger: this.logger.get('services.chat'),
       agentFactory,
       conversationService,
     });

@@ -71,7 +71,7 @@ export class ChatService {
     request: KibanaRequest;
   }) {
     const logError = (source: string, err: Error) => {
-      this.logger.error(`Error during converse from ${source}: ${err.message}`);
+      this.logger.error(`Error during converse from ${source}:\n${err.stack ?? err.message}`);
     };
 
     const isNewConversation = !conversationId;

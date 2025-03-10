@@ -12,6 +12,11 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { RouteDependencies } from './types';
 
 export const registerChatRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  const stubLogger = {
+    debug: () => undefined,
+    error: () => undefined,
+  };
+
   router.post(
     {
       path: '/internal/workchat/chat',
@@ -52,7 +57,8 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
           },
           body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
             signal: abortController.signal,
-            logger,
+            // already logging at the service level
+            logger: stubLogger,
           }),
         });
       } catch (err) {
