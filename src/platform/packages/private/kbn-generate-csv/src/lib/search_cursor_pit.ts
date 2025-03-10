@@ -47,7 +47,7 @@ export class SearchCursorPit extends SearchCursor {
           index: this.indexPatternTitle,
           keep_alive: scroll.duration(taskInstanceFields),
           ignore_unavailable: true,
-          querystring: { ignore_throttled: includeFrozen ? false : undefined }, // "true" will cause deprecation warnings logged in ES
+          ...(includeFrozen ? { querystring: { ignore_throttled: false } } : {}), // "true" will cause deprecation warnings logged in ES
         },
         {
           signal: this.abortController.signal,
