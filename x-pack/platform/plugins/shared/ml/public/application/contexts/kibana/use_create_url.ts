@@ -69,7 +69,6 @@ export const useNavigateToManagementMlLink = (appId: string) => {
   const mlManagementLocatorInternal = useMlManagementLocatorInternal();
   const [globalState] = useUrlState('_g');
 
-
   const redirectToMlPage: NavigateToMlManagementLink = useCallback(
     async (_page, pageState?) => {
       if (mlManagementLocatorInternal) {
