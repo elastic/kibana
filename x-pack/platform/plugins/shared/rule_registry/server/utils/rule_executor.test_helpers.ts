@@ -16,6 +16,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Logger } from '@kbn/logging';
@@ -79,6 +80,7 @@ export const createDefaultAlertExecutorOptions = <
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
     alertsClient: null,
+    actionsClient: actionsClientMock.create(),
     getDataViews: async () => dataViewPluginMocks.createStartContract(),
     getMaintenanceWindowIds: async () => ['test-id-1', 'test-id-2'],
     getSearchSourceClient: async () => searchSourceCommonMock,

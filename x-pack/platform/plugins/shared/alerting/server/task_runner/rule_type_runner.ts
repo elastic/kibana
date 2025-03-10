@@ -14,6 +14,8 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { IAlertsClient } from '../alerts_client/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
@@ -81,6 +83,7 @@ interface RunOpts<
 > {
   context: RuleTypeRunnerContext;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   executionId: string;
   executorServices: ExecutorServices & {
     getTimeRangeFn?: (
@@ -142,6 +145,7 @@ export class RuleTypeRunner<
   public async run({
     context,
     alertsClient,
+    actionsClient,
     executionId,
     executorServices,
     rule,
@@ -216,6 +220,7 @@ export class RuleTypeRunner<
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
+                  actionsClient,
                   getDataViews: executorServices.getDataViews,
                   getMaintenanceWindowIds: async () => {
                     if (context.maintenanceWindowsService) {
