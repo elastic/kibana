@@ -103,6 +103,7 @@ export function registerQueryFunction({
       };
     }
   );
+
   functions.registerFunction(
     {
       name: QUERY_FUNCTION_NAME,
@@ -129,7 +130,8 @@ export function registerQueryFunction({
         connectorId,
         messages: convertMessagesForInference(
           // remove system message and query function request
-          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1)
+          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
+          resources.logger
         ),
         logger: resources.logger,
         tools: Object.fromEntries(
