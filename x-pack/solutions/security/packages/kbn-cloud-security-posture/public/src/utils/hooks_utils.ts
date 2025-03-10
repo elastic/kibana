@@ -147,16 +147,36 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
       other_bucket_key: VULNERABILITIES_RESULT_EVALUATION.NONE,
       filters: {
         [VULNERABILITIES_RESULT_EVALUATION.LOW]: {
-          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.LOW },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_RESULT_EVALUATION.LOW,
+              case_insensitive: true,
+            },
+          },
         },
         [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: {
-          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.MEDIUM },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_RESULT_EVALUATION.MEDIUM,
+              case_insensitive: true,
+            },
+          },
         },
         [VULNERABILITIES_RESULT_EVALUATION.HIGH]: {
-          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.HIGH },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_RESULT_EVALUATION.HIGH,
+              case_insensitive: true,
+            },
+          },
         },
         [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: {
-          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.CRITICAL },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_RESULT_EVALUATION.CRITICAL,
+              case_insensitive: true,
+            },
+          },
         },
       },
     },
