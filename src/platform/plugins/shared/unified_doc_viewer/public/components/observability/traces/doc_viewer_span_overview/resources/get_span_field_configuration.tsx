@@ -64,7 +64,7 @@ export const getSpanFieldConfiguration = (
       content: (value) =>
         value && (
           <DependencyNameLink
-            dependencyName={value as string}
+            dependencyName={value}
             environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
           />
         ),
