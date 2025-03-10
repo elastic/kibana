@@ -69,12 +69,6 @@ Array [
     "type": "component_template",
   },
   Object {
-    "appLink": "/app/management/data/index_management/component_templates/all_assets@custom",
-    "attributes": Object {},
-    "id": "all_assets@custom",
-     "type": "component_template",
-  },
-  Object {
     "appLink": "/app/management/data/index_management/component_templates/logs-all_assets.test_logs@custom",
     "attributes": Object {},
     "id": "logs-all_assets.test_logs@custom",
