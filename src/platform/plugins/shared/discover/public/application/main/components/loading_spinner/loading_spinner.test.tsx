@@ -8,17 +8,20 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ReactWrapper } from 'enzyme';
+import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { LoadingSpinner } from './loading_spinner';
-import { findTestSubject } from '@elastic/eui/lib/test';
 
-describe('loading spinner', function () {
-  let component: ReactWrapper;
-
+describe('loading spinner', () => {
   it('LoadingSpinner renders a Searching text and a spinner', () => {
-    component = mountWithIntl(<LoadingSpinner />);
-    expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
-    expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <LoadingSpinner />
+      </IntlProvider>
+    );
+
+    expect(getByTestId('loadingSpinnerText').textContent).toBe('Searching');
+
+    expect(getByTestId('loadingSpinner')).toBeInTheDocument();
   });
 });
