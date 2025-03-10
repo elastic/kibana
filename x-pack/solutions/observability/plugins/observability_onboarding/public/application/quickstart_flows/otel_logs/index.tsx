@@ -33,7 +33,6 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
-import { useOtelIngestEndpointUrl } from '../shared/use_otel_ingest_endpoint_url';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -79,10 +78,7 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [apiKeyData, onPageReady, setup]);
 
-  const ingestEndpointUrl = useOtelIngestEndpointUrl({
-    elasticsearchUrl: setup?.elasticsearchUrl[0],
-    managedServiceUrl: setup?.managedServiceUrl,
-  });
+  const ingestEndpointUrl = isServerless ? setup?.managedOtlpServiceUrl : setup?.elasticsearchUrl;
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
   const agentVersion = setup?.elasticAgentVersionInfo.agentVersion ?? '';
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
