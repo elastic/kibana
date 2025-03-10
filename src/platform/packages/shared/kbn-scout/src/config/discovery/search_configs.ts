@@ -10,6 +10,7 @@
 import fastGlob from 'fast-glob';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
+import { KibanaSolutions } from '@kbn/constants';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
@@ -32,9 +33,10 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const files = patterns.flatMap((pattern) => fastGlob.sync(pattern, { onlyFiles: true }));
 
   const typeMappings: Record<string, string> = {
-    'x-pack/solutions/security': 'security',
-    'x-pack/solutions/search': 'search',
-    'x-pack/solutions/observability': 'observability',
+    ...KibanaSolutions.reduce<Record<string, string>>((agg, solution) => {
+      agg[`x-pack/solutions/${solution}`] = solution;
+      return agg;
+    }, {}),
     'x-pack/platform/plugins': 'platform',
     'src/platform/plugins': 'platform',
   };
@@ -42,7 +44,7 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const matchPluginPath = (filePath: string): { pluginPath: string; pluginName: string } | null => {
     const regexes = [
       /(x-pack\/platform\/plugins\/(?:private|shared|[^\/]+)\/([^\/]+))\/ui_tests\//,
-      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//,
+      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//, // covers all of KibanaSolutions
       /(src\/platform\/plugins\/(?:private|shared)?\/?([^\/]+))\/ui_tests\//,
     ];
 

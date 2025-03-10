@@ -200,6 +200,8 @@
       "@kbn/config-schema/*": ["src/platform/packages/shared/kbn-config-schema/*"],
       "@kbn/console-plugin": ["src/platform/plugins/shared/console"],
       "@kbn/console-plugin/*": ["src/platform/plugins/shared/console/*"],
+      "@kbn/constants": ["packages/kbn-constants"],
+      "@kbn/constants/*": ["packages/kbn-constants/*"],
       "@kbn/content-management-content-editor": ["src/platform/packages/shared/content-management/content_editor"],
       "@kbn/content-management-content-editor/*": ["src/platform/packages/shared/content-management/content_editor/*"],
       "@kbn/content-management-content-insights-public": ["src/platform/packages/shared/content-management/content_insights/content_insights_public"],
