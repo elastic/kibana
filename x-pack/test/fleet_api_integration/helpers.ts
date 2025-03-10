@@ -109,11 +109,14 @@ export async function generateAgent(
     id,
     document: {
       id,
+      type: 'PERMANENT',
       active: true,
+      enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
       policy_revision: 1,
       agent: {
+        id,
         version,
       },
       local_metadata: {
