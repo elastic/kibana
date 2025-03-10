@@ -9,7 +9,7 @@
 
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { containsIndexPattern, combineUnique } from '../../utils';
+import { containsIndexPattern } from '../../utils';
 
 export interface TracesContextService {
   getAllTracesIndexPattern(): string | undefined;
@@ -36,9 +36,12 @@ export const createTracesContextService = async ({
 
   if (apmSourcesAccess) {
     const { transaction, span } = await apmSourcesAccess.getApmSources();
-    const uniqIndices = combineUnique(transaction.split(','), span.split(','));
-    traces = uniqIndices.join();
-    allowedDataSources = allowedDataSources.concat(createRegExpPatternFrom(uniqIndices, 'data'));
+
+    const allIndices = [transaction, span].flatMap((index) => index.split(','));
+    const uniqueIndices = Array.from(new Set(allIndices));
+
+    traces = uniqueIndices.join();
+    allowedDataSources = allowedDataSources.concat(createRegExpPatternFrom(uniqueIndices, 'data'));
   } else {
     traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
   }

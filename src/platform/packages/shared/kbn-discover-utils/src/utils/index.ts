@@ -9,7 +9,6 @@
 
 export * from './build_data_record';
 export * from './calc_field_counts';
-export * from './combine_unique';
 export * from './contains_index_pattern';
 export * from './format_hit';
 export * from './format_value';
