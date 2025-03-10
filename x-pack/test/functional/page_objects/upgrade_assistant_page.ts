@@ -20,8 +20,9 @@ export class UpgradeAssistantPageObject extends FtrService {
 
   async navigateToPage() {
     return await this.retry.try(async () => {
-      await this.common.navigateToApp('settings');
-      await this.testSubjects.click('upgrade_assistant');
+      await this.common.navigateToUrl('management', 'stack/upgrade_assistant/overview', {
+        shouldUseHashForSubUrl: false,
+      });
       await this.retry.waitFor('url to contain /upgrade_assistant', async () => {
         const url = await this.browser.getCurrentUrl();
         return url.includes('/upgrade_assistant');

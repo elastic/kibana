@@ -11,12 +11,11 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
+  const pageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167081
-  describe.skip('Overview Page', function () {
+  describe('Overview Page', function () {
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
@@ -28,7 +27,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     });
 
     beforeEach(async () => {
-      await PageObjects.upgradeAssistant.navigateToPage();
+      await pageObjects.upgradeAssistant.navigateToPage();
     });
 
     it('Should render overview page', async () => {
@@ -38,9 +37,8 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     it('Should render overview upgrade steps', async () => {
       // step 1
       await testSubjects.exists('backupStep-incomplete');
-      // step 2: migrateSystemIndicesStep only enabled during x.last versions
-      await testSubjects.missingOrFail('migrateSystemIndicesStep-incomplete');
-      await testSubjects.missingOrFail('migrateSystemIndicesStep-complete');
+      // step 2
+      await testSubjects.exists('migrateSystemIndicesText');
       // step 3
       await testSubjects.exists('fixIssuesStep-incomplete');
       // step 4
