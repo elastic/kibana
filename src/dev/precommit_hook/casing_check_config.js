@@ -100,13 +100,13 @@ export const IGNORE_FILE_GLOBS = [
  */
 export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'packages/*',
-  'x-pack',
-  'x-pack/packages/*',
-  'src/dev/packages/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
-  'src/platform/packages/private/opentelemetry/*',
   'src/platform/packages/shared/*',
+  'x-pack',
+  'x-pack/dev-tools',
+  'x-pack/packages/ai-infra/*',
+  'x-pack/packages/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',
   ...KIBANA_SOLUTIONS.map((solution) => `x-pack/solutions/${solution}/packages/*`),
@@ -128,10 +128,6 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
  */
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
-  'packages/*',
-  'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
-  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/*',
-  'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'src/babel-*',
   'typings/*',
   'typings/**/*',
@@ -162,21 +158,6 @@ export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ej
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
-  'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
-  'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',
-  'src/core/server/core_app/assets/favicons/android-chrome-512x512.png',
-  'src/core/server/core_app/assets/favicons/apple-touch-icon.png',
-  'src/core/server/core_app/assets/favicons/favicon-16x16.png',
-  'src/core/server/core_app/assets/favicons/favicon-32x32.png',
-  'src/core/server/core_app/assets/favicons/mstile-70x70.png',
-  'src/core/server/core_app/assets/favicons/mstile-144x144.png',
-  'src/core/server/core_app/assets/favicons/mstile-150x150.png',
-  'src/core/server/core_app/assets/favicons/mstile-310x150.png',
-  'src/core/server/core_app/assets/favicons/mstile-310x310.png',
-  'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
-  'src/platform/test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'x-pack/legacy/platform/plugins/shared/index_management/public/lib/editSettings.js',
-  'x-pack/legacy/platform/plugins/shared/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/platform/plugins/private/monitoring/public/icons/health-gray.svg',
   'x-pack/platform/plugins/private/monitoring/public/icons/health-green.svg',
   'x-pack/platform/plugins/private/monitoring/public/icons/health-red.svg',

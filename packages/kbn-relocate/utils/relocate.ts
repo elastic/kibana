@@ -69,15 +69,6 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   chunks.shift(); // remove the base path up to '/packages/' or '/plugins/'
   const moduleFolder = chunks.join(moduleDelimiter); // in case there's an extra /packages/ or /plugins/ folder
 
-  if (
-    module.isDevOnly() &&
-    (!module.group || module.group === 'common') &&
-    fullPath.includes(`/${KIBANA_FOLDER}/packages/`) &&
-    !fullPath.includes(`/${KIBANA_FOLDER}/packages/core/`)
-  ) {
-    // relocate all dev modules under /packages to /src/dev/packages
-    return applyTransforms(module, join(BASE_FOLDER, 'src', 'dev', 'packages', moduleFolder));
-  }
   let path: string;
 
   if (group === 'platform') {
