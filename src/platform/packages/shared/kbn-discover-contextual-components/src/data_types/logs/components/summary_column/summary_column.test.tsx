@@ -188,7 +188,7 @@ describe('SummaryColumn', () => {
   describe('when rendering trace badges', () => {
     it('should display service.name with different fields exposed', () => {
       const record = getBaseRecord({
-        'event.outcome': 'success',
+        'event.outcome': 'failure',
         'transaction.name': 'GET /',
         'transaction.duration.us': 100,
         'data_stream.type': 'traces',
@@ -213,6 +213,24 @@ describe('SummaryColumn', () => {
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId(`dataTableCellActionsPopover_${constants.CONTAINER_NAME_FIELD}`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not display the event.outcome badge if the outcome is not "failure"', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'success',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
       ).not.toBeInTheDocument();
     });
   });

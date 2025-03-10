@@ -13,11 +13,11 @@ import { isFunction } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { CustomizationCallback } from './types';
-import {
-  createCustomizationService,
+import type {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
+import { createCustomizationService } from './customization_service';
 
 const customizationContext = createContext(createCustomizationService());
 
