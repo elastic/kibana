@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type GroupOption, getGroupingQuery } from '@kbn/grouping';
 import {
+  type GroupOption,
   type GroupingAggregation,
-  type GroupPanelRenderer,
-  type GetGroupStats,
   type NamedAggregation,
   isNoneGroup,
-  parseGroupingQuery,
-} from '@kbn/grouping/src';
+  getGroupingQuery,
+} from '@kbn/grouping';
+import { parseGroupingQuery, type GroupPanelRenderer, type GetGroupStats } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 
