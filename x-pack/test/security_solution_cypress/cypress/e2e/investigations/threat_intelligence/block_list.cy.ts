@@ -8,6 +8,7 @@
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeFlyout,
+  navigateToBlocklist,
   navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
@@ -19,7 +20,6 @@ import {
   openAddToBlockListFlyoutFromTable,
   openAddToBlocklistFromFlyout,
 } from '../../../tasks/threat_intelligence/blocklist';
-import { navigateToBlocklist } from '../../../tasks/threat_intelligence/common';
 import { login } from '../../../tasks/login';
 import {
   BLOCK_LIST_VALUE_INPUT,
@@ -70,7 +70,7 @@ describe('Block list interactions', { tags: ['@ess'] }, () => {
 
   it('should add to block list from the indicators table and from flyout', () => {
     // first indicator is a valid indicator for add to blocklist feature
-    const firstIndicatorId = 'd86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f';
+    const firstIndicatorId = '7cbf47ef916aa02a1b39cad40dfe71ea121d8d5b36d5a13fdec5977a8dcb4550';
 
     cy.log('add to blocklist from the table more action menu');
 
@@ -90,7 +90,7 @@ describe('Block list interactions', { tags: ['@ess'] }, () => {
     navigateToThreatIntelligence();
 
     // second indicator is a valid indicator for add to blocklist feature
-    const secondIndicatorId = 'd3e2cf87eabf84ef929aaf8dad1431b3387f5a26de8ffb7a0c3c2a13f973c0ab';
+    const secondIndicatorId = 'd4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed';
 
     cy.log('add to blocklist from the flyout');
 
