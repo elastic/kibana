@@ -217,6 +217,8 @@ Then the Rule Upgrade table should be displayed
 
 #### **Scenario: User can dismiss the prebuilt rule upgrade callout on the Rule Management page**
 
+Currently, we store the callout's state only in the browser memory. This means that a dismissed callout will show up again after the page refresh.
+
 **Automation**: 1 e2e test with mock rules + unit tests for the callout component.
 
 ```Gherkin
@@ -227,7 +229,7 @@ Then user should see the callout to upgrade prebuilt rules
 When user clicks on the Dismiss button
 Then the callout should disappear
 When user refreshes the page
-Then user should NOT see the callout
+Then the callout should appear again
 ```
 
 ### Rule upgrade notifications on the Rule Details page
