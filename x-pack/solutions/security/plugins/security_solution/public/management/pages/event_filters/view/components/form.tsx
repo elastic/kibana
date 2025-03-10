@@ -556,11 +556,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       // conditions and handler
       const handleOnBuilderChange = useCallback(
         (arg: OnChangeProps) => {
-          const hasDuplicates =
+          const isCalledWithoutChanges =
             (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
             isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
 
-          if (hasDuplicates) {
+          if (isCalledWithoutChanges) {
             const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
             if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
@@ -568,7 +568,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             }
 
             setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
-            if (!hasFormChanged) setHasFormChanged(true);
             return;
           } else {
             setHasDuplicateFields(false);
