@@ -102,7 +102,7 @@ export const bulkCreateThresholdSignals = async ({
     wrapHits(sharedParams, ecsResults, buildReasonMessageForThresholdAlert),
     undefined,
     createEnrichEventsFunction({
-      services: services,
+      services,
       logger: sharedParams.ruleExecutionLogger,
     })
   );

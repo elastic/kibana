@@ -19,7 +19,7 @@ import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
 import type { SecuritySharedParams, SignalSource } from '../types';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
-import { NewTermsRuleParams } from '../../rule_schema';
+import type { NewTermsRuleParams } from '../../rule_schema';
 
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;

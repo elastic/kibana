@@ -27,8 +27,8 @@ import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { ThresholdBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { transformBucketIntoHit } from './bulk_create_threshold_signals';
-import { SecuritySharedParams } from '../types';
-import { ThresholdRuleParams } from '../../rule_schema';
+import type { SecuritySharedParams } from '../types';
+import type { ThresholdRuleParams } from '../../rule_schema';
 
 /**
  * wraps suppressed threshold alerts

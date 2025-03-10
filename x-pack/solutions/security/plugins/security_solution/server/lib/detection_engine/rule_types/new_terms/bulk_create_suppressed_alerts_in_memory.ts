@@ -26,7 +26,7 @@ import type { EventsAndTerms } from './types';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
-import { NewTermsRuleParams } from '../../rule_schema';
+import type { NewTermsRuleParams } from '../../rule_schema';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
