@@ -43,7 +43,7 @@ export async function runDockerGenerator(
   let baseImageName = '';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
   /**
-   * Renovate config contains a regex manager to automatically updates this Chainguard reference
+   * Renovate config contains a regex manager to automatically update both Chainguard references
    *
    * If this logic moves to another file or under another name, then the Renovate regex manager
    * for automatic Chainguard updates will break.
@@ -53,11 +53,16 @@ export async function runDockerGenerator(
       'docker.elastic.co/wolfi/chainguard-base:latest@sha256:10f7cda15e3b43209e35f4ea0a9c68462be34a5bc2ba98a73db633dabbb93e3f';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud && !flags.fips)
+    imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.fips) imageFlavor += '-fips';
+  if (flags.fips) {
+    imageFlavor += '-fips';
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:d70e92385f4faf961d2e5d23664578de44fe536945918e641383af53f0aca544';
+  }
 
   // General docker var config
   const license = 'Elastic License';

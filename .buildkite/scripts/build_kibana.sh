@@ -30,6 +30,7 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --docker-tag-qualifier="$GIT_COMMIT" \
   --docker-push \
   --skip-docker-ubi \
+  --skip-docker-cloud-fips \
   --skip-docker-fips \
   --skip-docker-wolfi \
   --skip-docker-serverless \
@@ -39,6 +40,30 @@ if is_pr_with_label "ci:build-cloud-image"; then
   cat << EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image
 
   Kibana cloud image: \`$CLOUD_IMAGE\`
+EOF
+fi
+
+if is_pr_with_label "ci:build-cloud-fips-image"; then
+  node scripts/build \
+  --skip-initialize \
+  --skip-generic-folders \
+  --skip-platform-folders \
+  --skip-cdn-assets \
+  --skip-archives \
+  --docker-images \
+  --docker-tag-qualifier="$GIT_COMMIT" \
+  --docker-push \
+  --skip-docker-ubi \
+  --skip-docker-cloud \
+  --skip-docker-fips \
+  --skip-docker-wolfi \
+  --skip-docker-serverless \
+  --skip-docker-contexts
+
+  CLOUD_FIPS_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud-fips)
+  cat << EOF | buildkite-agent annotate --style "info" --context kibana-cloud-fips-image
+
+  Kibana cloud FIPS image: \`$CLOUD_FIPS_IMAGE\`
 EOF
 fi
 

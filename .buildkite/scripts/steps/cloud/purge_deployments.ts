@@ -51,7 +51,7 @@ for (const deployment of prDeployments) {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:(cloud-deploy|cloud-redeploy)$/.test(label.name)
+          /^ci:(cloud-deploy|cloud-redeploy|cloud-fips-deploy)$/.test(label.name)
         ).length
       )
     ) {
