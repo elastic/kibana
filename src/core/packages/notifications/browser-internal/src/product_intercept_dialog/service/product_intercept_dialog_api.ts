@@ -8,34 +8,74 @@
  */
 
 import * as Rx from 'rxjs';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { IProductInterceptPublicApi, ProductIntercept } from '@kbn/core-notifications-browser';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { ProductIntercept } from '@kbn/core-notifications-browser';
 
-interface ProductInterceptDialogApiInitDeps {
+import { ProductInterceptTelemetry } from './telemetry';
+
+interface ProductInterceptDialogApiStartDeps {
   analytics: AnalyticsServiceStart;
 }
 
-export class ProductInterceptDialogApi implements IProductInterceptPublicApi {
-  private startDeps?: ProductInterceptDialogApiInitDeps;
-  private productIntercepts$ = new Rx.BehaviorSubject<ProductIntercept[]>([]);
+interface ProductInterceptDialogApiSetupDeps {
+  analytics: AnalyticsServiceSetup;
+}
 
-  /** @internal */
-  public init(startDeps: ProductInterceptDialogApiInitDeps) {
-    this.startDeps = startDeps;
+export class ProductInterceptDialogApi {
+  private readonly telemetry = new ProductInterceptTelemetry();
+  private productIntercepts$ = new Rx.BehaviorSubject<ProductIntercept[]>([]);
+  private eventReporter?: ReturnType<ProductInterceptTelemetry['start']>;
+
+  setup({ analytics }: ProductInterceptDialogApiSetupDeps) {
+    this.telemetry.setup({ analytics });
+
+    return {};
   }
 
-  public get$() {
+  start({ analytics }: ProductInterceptDialogApiStartDeps) {
+    this.eventReporter = this.telemetry.start({ analytics });
+
+    return {
+      add: this.add.bind(this),
+      ack: this.ack.bind(this),
+      get$: this.get$.bind(this),
+    };
+  }
+
+  private get$() {
     return this.productIntercepts$.asObservable();
   }
 
-  public add(productIntercept: ProductIntercept) {
+  private add(
+    productIntercept: Omit<ProductIntercept, 'id'> & Partial<Pick<ProductIntercept, 'id'>>
+  ): string {
     const intercept = {
-      id: crypto.randomUUID(),
+      id: productIntercept?.id ?? crypto.randomUUID(),
       ...productIntercept,
     };
 
-    this.productIntercepts$.next([...this.productIntercepts$.getValue(), intercept]);
+    // order is important so we can operate on a FIFO basis
+    this.productIntercepts$.next([intercept, ...this.productIntercepts$.getValue()]);
 
     return intercept.id;
+  }
+
+  /**
+   * @description expected to be called when a user is determined to have acknowledged the intercept for which the id is provided
+   */
+  private ack(interceptId: string, ackType: 'dismissed' | 'completed'): void {
+    this.get$()
+      .pipe(Rx.map((intercepts) => intercepts.filter((intercept) => intercept.id !== interceptId)))
+      .pipe(Rx.take(1))
+      .subscribe({
+        next: (intercepts) => {
+          this.productIntercepts$.next(intercepts);
+        },
+        complete: () => {
+          this.eventReporter?.reportInterceptInteraction({
+            interactionType: ackType,
+          });
+        },
+      });
   }
 }

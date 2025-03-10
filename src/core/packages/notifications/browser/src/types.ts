@@ -127,12 +127,15 @@ interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'conten
 }
 
 export interface ProductIntercept {
+  id: string;
   title: string;
   steps: ProductInterceptSteps[];
   onFinish: () => void;
+  onDismiss?: () => void;
 }
 
 export interface IProductInterceptPublicApi {
-  get$: () => Observable<ProductIntercept[]>;
-  add(productIntercept: ProductIntercept): string;
+  add(
+    productIntercept: Omit<ProductIntercept, 'id'> & Partial<Pick<ProductIntercept, 'id'>>
+  ): string;
 }

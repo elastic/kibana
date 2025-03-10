@@ -47,9 +47,9 @@ export class NotificationsService {
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
     const notificationSetup = {
-      toasts: this.toasts.setup({ uiSettings, analytics }),
       coordinator: this.coordinator,
-      productIntercepts: this.productIntercepts.setup(),
+      toasts: this.toasts.setup({ uiSettings, analytics }),
+      productIntercepts: this.productIntercepts.setup({ analytics }),
     };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
