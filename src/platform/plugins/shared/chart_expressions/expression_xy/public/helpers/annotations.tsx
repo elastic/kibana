@@ -171,7 +171,7 @@ export const AnnotationIcon = ({
     return null;
   }
 
-  const shouldRotateIcon = !isHorizontal && iconConfig.shouldRotate && rotateClassName;
+  const shouldRotateIcon = !isHorizontal && iconConfig.shouldRotate && renderedInChart;
 
   return (
     <EuiIcon
