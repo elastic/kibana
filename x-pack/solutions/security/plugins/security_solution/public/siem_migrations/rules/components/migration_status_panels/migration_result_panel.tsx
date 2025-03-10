@@ -18,8 +18,11 @@ import {
   EuiText,
   EuiAccordion,
   EuiButtonIcon,
-  type EuiBasicTableColumn,
   EuiSpacer,
+  EuiBadge,
+  type EuiBasicTableColumn,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -48,6 +51,17 @@ const headerStyle = css`
   }
 `;
 
+const useCompleteBadgeStyles = () => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const successBackgroundColor = euiTheme.colors.backgroundLightSuccess;
+  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  return css`
+    background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
+    color: ${isDarkMode ? euiTheme.colors.plainDark : euiTheme.colors.textSuccess};
+    text-decoration: none;
+  `;
+};
+
 export interface MigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
   isCollapsed: boolean;
@@ -59,6 +73,8 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
       useGetMigrationTranslationStats(migrationStats.id);
 
+    const completeBadgeStyles = useCompleteBadgeStyles();
+
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
@@ -67,7 +83,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <PanelText size="s" semiBold>
-                    <p>{i18n.RULE_MIGRATION_COMPLETE_TITLE(migrationStats.number)}</p>
+                    <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
                   </PanelText>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -81,6 +97,9 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                   </PanelText>
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge css={completeBadgeStyles}>{i18n.RULE_MIGRATION_COMPLETE_BADGE}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -168,22 +187,22 @@ const TranslationResultsChart = React.memo<{
   const translationResultColors = useResultVisColors();
   const data = [
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(RuleTranslationResult.FULL),
       value: translationStats.rules.success.result.full,
     },
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
       value: translationStats.rules.success.result.partial,
     },
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
       value: translationStats.rules.success.result.untranslatable,
     },
     {
-      category: 'Results',
+      category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
       type: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
       value: translationStats.rules.failed,
     },
@@ -201,7 +220,7 @@ const TranslationResultsChart = React.memo<{
       <Settings showLegend={false} rotation={90} baseTheme={baseTheme} />
       <BarSeries
         id="results"
-        name="Results"
+        name={i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS}
         data={data}
         xAccessor="category"
         yAccessors={['value']}
@@ -225,7 +244,7 @@ interface TranslationResultsTableItem {
 const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
   {
     field: 'title',
-    name: i18n.RULE_MIGRATION_TABLE_COLUMN_RESULT,
+    name: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
     render: (title: string, { color }) => (
       <EuiHealth color={color} textSize="xs">
         {title}
