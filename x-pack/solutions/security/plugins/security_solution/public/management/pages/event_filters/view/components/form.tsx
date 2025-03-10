@@ -238,7 +238,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           cleanupEntries(item);
           onChange({
             item,
-            isValid: isFormValid && areConditionsValid,
+            isValid: isFormValid && areConditionsValid && hasFormChanged,
             confirmModalLabels: hasWildcardWithWrongOperator
               ? CONFIRM_WARNING_MODAL_LABELS(
                   i18n.translate(
@@ -251,7 +251,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               : undefined,
           });
         },
-        [areConditionsValid, exception, isFormValid, onChange, hasWildcardWithWrongOperator]
+        [
+          areConditionsValid,
+          exception,
+          hasFormChanged,
+          isFormValid,
+          onChange,
+          hasWildcardWithWrongOperator,
+        ]
       );
 
       // set initial state of `wasByPolicy` that checks
