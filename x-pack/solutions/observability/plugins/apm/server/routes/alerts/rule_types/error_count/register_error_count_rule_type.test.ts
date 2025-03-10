@@ -1227,7 +1227,9 @@ describe('Error count alert', () => {
           'kibana.alert.rule.consumer': 'alerts',
           'kibana.alert.rule.execution.uuid': '8ecb0754-1220-4b6b-b95d-87b3594e925a',
           'kibana.alert.rule.name': 'Error count threshold rule',
-          'kibana.alert.rule.parameters': [],
+          'kibana.alert.rule.parameters': {
+            groupBy: ['service.name', 'service.environment'],
+          },
           'kibana.alert.rule.producer': 'apm',
           'kibana.alert.rule.revision': 8,
           'kibana.alert.rule.rule_type_id': 'apm.error_rate',

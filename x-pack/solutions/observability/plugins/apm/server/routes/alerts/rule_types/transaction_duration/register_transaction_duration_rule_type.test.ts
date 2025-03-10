@@ -519,6 +519,7 @@ describe('registerTransactionDurationRuleType', () => {
             windowSize: 5,
             windowUnit: 'd',
             environment: 'ENVIRONMENT_ALL',
+            groupBy: ['service.name', 'service.environment', 'transaction.type'],
           },
           'kibana.alert.rule.producer': 'apm',
           'kibana.alert.rule.revision': 15,

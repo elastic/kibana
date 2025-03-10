@@ -698,7 +698,14 @@ describe('Transaction error rate alert', () => {
           'kibana.alert.rule.consumer': 'alerts',
           'kibana.alert.rule.execution.uuid': '3cf39cc5-b538-492e-b45d-35b01b5f56c3',
           'kibana.alert.rule.name': 'Failed transaction rate threshold rule',
-          'kibana.alert.rule.parameters': [],
+          'kibana.alert.rule.parameters': {
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.type',
+              'transaction.name',
+            ],
+          },
           'kibana.alert.rule.producer': 'apm',
           'kibana.alert.rule.revision': 1,
           'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
