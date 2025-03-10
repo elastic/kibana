@@ -16,6 +16,7 @@ import {
   EuiText,
   useEuiFontSize,
   UseEuiTheme,
+  euiTextTruncate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -119,9 +120,8 @@ export function MarkerBody({
   if (isHorizontal) {
     return (
       <div
-        className="eui-textTruncate"
-        css={{ maxWidth: LINES_MARKER_SIZE * 3 }}
         data-test-subj="xyVisAnnotationText"
+        css={[euiTextTruncate(), css({ maxWidth: LINES_MARKER_SIZE * 3 })]}
       >
         {label}
       </div>
@@ -131,18 +131,11 @@ export function MarkerBody({
     <div
       className="xyDecorationRotatedWrapper"
       data-test-subj="xyVisAnnotationText"
-      css={[
-        xyDecorationRotatedWrapperStyles,
-        {
-          maxWidth: LINES_MARKER_SIZE,
-        },
-      ]}
+      css={[styles.decorationRotatedWrapper, css({ maxWidth: LINES_MARKER_SIZE })]}
     >
       <div
-        className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        css={{
-          maxWidth: LINES_MARKER_SIZE * 3,
-        }}
+        className="xyDecorationRotatedWrapper__label"
+        css={[euiTextTruncate(), css({ maxWidth: LINES_MARKER_SIZE * 3 })]}
       >
         {label}
       </div>
@@ -154,12 +147,12 @@ function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      css={styles.xyAnnotationNumberIcon}
+      css={styles.numberIcon}
       data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" css={[useEuiFontSize('xxxs'), styles.xyAnnotationNumberIconText]}>
+      <EuiText color="ghost" css={[useEuiFontSize('xxxs'), styles.numberIconText]}>
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
@@ -194,7 +187,7 @@ export const AnnotationIcon = ({
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
       className={iconConfig.shouldRotate ? rotateClassName : undefined}
-      css={styles.xyAnnotationIconRotate90}
+      css={styles.iconRotate90}
     />
   );
 };
@@ -236,41 +229,40 @@ export function Marker({
 }
 
 const styles = {
-  xyAnnotationNumberIcon: ({ euiTheme }: UseEuiTheme) =>
+  numberIcon: ({ euiTheme }: UseEuiTheme) =>
     css({
       borderRadius: euiTheme.size.base,
       minWidth: euiTheme.size.base,
       height: euiTheme.size.base,
       backgroundColor: 'currentColor',
     }),
-  xyAnnotationNumberIconText: ({ euiTheme }: UseEuiTheme) =>
+  numberIconText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.medium,
       letterSpacing: '-.5px',
     }),
-  xyAnnotationIconRotate90: css({
+  iconRotate90: css({
     '&.xyAnnotationIcon_rotate90': {
       transform: 'rotate(90deg) !important',
       transformOrigin: 'center',
     },
   }),
-};
-
-const xyDecorationRotatedWrapperStyles = css({
-  display: 'inline-block',
-  overflow: 'hidden',
-  lineHeight: 1.5,
-
-  '& .xyDecorationRotatedWrapper__label': {
+  decorationRotatedWrapper: css({
     display: 'inline-block',
-    whiteSpace: 'nowrap',
-    transform: 'translate(0, 100%) rotate(-90deg)',
-    transformOrigin: '0 0',
+    overflow: 'hidden',
+    lineHeight: 1.5,
 
-    '&::after': {
-      content: '""',
-      float: 'left',
-      marginTop: '100%',
+    '& .xyDecorationRotatedWrapper__label': {
+      display: 'inline-block',
+      whiteSpace: 'nowrap',
+      transform: 'translate(0, 100%) rotate(-90deg)',
+      transformOrigin: '0 0',
+
+      '&::after': {
+        content: '""',
+        float: 'left',
+        marginTop: '100%',
+      },
     },
-  },
-});
+  }),
+};
