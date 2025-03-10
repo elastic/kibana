@@ -46,10 +46,12 @@ export function useJobSelectionFlyout() {
         singleSelection?: boolean;
         withTimeRangeSelector?: boolean;
         timeseriesOnly?: boolean;
+        selectedIds?: string[];
       } = {
         singleSelection: false,
         withTimeRangeSelector: true,
         timeseriesOnly: false,
+        selectedIds: [],
       }
     ): Promise<JobSelectionResult> => {
       const { uiSettings } = services;
@@ -62,7 +64,7 @@ export function useJobSelectionFlyout() {
           flyoutRef.current = overlays.openFlyout(
             <KibanaContextProvider services={services}>
               <JobSelectorFlyoutContent
-                selectedIds={[]}
+                selectedIds={config.selectedIds}
                 withTimeRangeSelector={config.withTimeRangeSelector}
                 applyTimeRangeConfig={applyTimeRangeConfig}
                 onTimeRangeConfigChange={setApplyTimeRangeConfig}
