@@ -323,7 +323,31 @@ describe('TrainedModelsService', () => {
   });
 
   it('updates model deployment successfully', async () => {
-    mockTrainedModelsApiService.updateModelDeployment.mockResolvedValueOnce({ acknowledge: true });
+    mockTrainedModelsApiService.updateModelDeployment.mockResolvedValueOnce({
+      assignment: {
+        assignment_state: 'started',
+        routing_table: {
+          'node-1': {
+            routing_state: 'started',
+            reason: '',
+            current_allocations: 1,
+            target_allocations: 1,
+          },
+        },
+        start_time: 1234567890,
+        task_parameters: {
+          model_id: 'test-model',
+          model_bytes: 1000,
+          priority: 'normal',
+          number_of_allocations: 1,
+          threads_per_allocation: 1,
+          queue_capacity: 1024,
+          deployment_id: 'my-deployment-id',
+          per_deployment_memory_bytes: '1mb',
+          per_allocation_memory_bytes: '1mb',
+        },
+      },
+    });
 
     trainedModelsService.updateModelDeployment('test-model', deploymentParamsUiMock);
     await flushPromises();
