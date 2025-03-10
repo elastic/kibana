@@ -276,7 +276,7 @@ export function registerMigrateDataStreamRoutes({
           );
         }
 
-        await migrationService.readonlyIndices(indices);
+        await migrationService.readonlyIndices(dataStreamName, indices);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         if (err instanceof errors.ResponseError) {
