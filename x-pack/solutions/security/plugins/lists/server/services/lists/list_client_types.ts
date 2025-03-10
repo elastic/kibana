@@ -15,6 +15,7 @@ import type {
   Filter,
   Id,
   IdOrUndefined,
+  Ids,
   Immutable,
   ListId,
   ListIdOrUndefined,
@@ -73,7 +74,7 @@ export interface DeleteListOptions {
  */
 export interface DeleteListItemOptions {
   /** The id of the list to delete from */
-  id: Id;
+  ids: Ids;
   refresh?: boolean;
 }
 

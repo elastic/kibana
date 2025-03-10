@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   FindListItemsRequestQuery,
@@ -21,7 +21,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      path: `${LIST_ITEM_URL}/_find`,
+      path: `${LIST_ITEMS_URL}/_find`,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],

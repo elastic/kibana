@@ -47,6 +47,7 @@ export * from './update_exception_list_route';
 export * from './list_item/update_list_item_route';
 export * from './list/update_list_route';
 export * from './utils';
+export * from './list_item/bulk_delete_list_item_route';
 
 // internal
 export * from './internal/create_exceptions_list_route';

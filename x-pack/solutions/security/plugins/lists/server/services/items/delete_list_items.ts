@@ -6,34 +6,34 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Ids, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { waitUntilDocumentIndexed } from '../utils';
 
-import { getListItem } from '.';
+import { getListItems } from '.';
 
 export interface DeleteListItemOptions {
-  id: Id;
+  ids: Ids;
   esClient: ElasticsearchClient;
   listItemIndex: string;
   refresh?: boolean;
 }
 
-export const deleteListItem = async ({
-  id,
+export const deleteListItems = async ({
+  ids,
   esClient,
   listItemIndex,
   refresh = false,
-}: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-  const listItem = await getListItem({ esClient, id, listItemIndex });
-  if (listItem == null) {
+}: DeleteListItemOptions): Promise<ListItemSchema[] | null> => {
+  const listItems = await getListItems({ esClient, ids, listItemIndex });
+  if (listItems == null) {
     return null;
   } else {
     const response = await esClient.deleteByQuery({
       index: listItemIndex,
       query: {
         ids: {
-          values: [id],
+          values: ids,
         },
       },
       refresh,
@@ -41,7 +41,7 @@ export const deleteListItem = async ({
 
     if (response.deleted) {
       const checkIfListItemDeleted = async (): Promise<void> => {
-        const deletedListItem = await getListItem({ esClient, id, listItemIndex });
+        const deletedListItem = await getListItems({ esClient, ids, listItemIndex });
         if (deletedListItem !== null) {
           throw Error(
             'List item was deleted, but the change was not propagated in the expected time interval.'
@@ -54,5 +54,5 @@ export const deleteListItem = async ({
       throw Error('Deletion of List Item [item_id] from [item_index] was not successful');
     }
   }
-  return listItem;
+  return listItems;
 };

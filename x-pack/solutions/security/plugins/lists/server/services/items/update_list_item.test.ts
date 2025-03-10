@@ -10,7 +10,7 @@ import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
 import { updateListItem } from './update_list_item';
-import { getListItem } from './get_list_item';
+import { getListItems } from './get_list_items';
 import { getUpdateListItemOptionsMock } from './update_list_item.mock';
 
 jest.mock('../utils/check_version_conflict', () => ({
@@ -19,7 +19,7 @@ jest.mock('../utils/check_version_conflict', () => ({
 jest.mock('../utils/wait_until_document_indexed', () => ({
   waitUntilDocumentIndexed: jest.fn(),
 }));
-jest.mock('./get_list_item', () => ({
+jest.mock('./get_list_items', () => ({
   getListItem: jest.fn(),
 }));
 
@@ -34,7 +34,7 @@ describe('update_list_item', () => {
 
   test('it returns a list item when updated', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItems as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getUpdateListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResponse({ updated: 1 });
@@ -44,7 +44,7 @@ describe('update_list_item', () => {
   });
 
   test('it returns null when there is not a list item to update', async () => {
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getListItems as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getUpdateListItemOptionsMock();
     const updatedListItem = await updateListItem(options);
     expect(updatedListItem).toEqual(null);
@@ -57,7 +57,7 @@ describe('update_list_item', () => {
       type: 'ip_range',
       value: '127.0.0.1',
     };
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItems as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getUpdateListItemOptionsMock();
     const updatedListItem = await updateListItem(options);
     expect(updatedListItem).toEqual(null);
@@ -65,7 +65,7 @@ describe('update_list_item', () => {
 
   test('throw error if no list item was updated', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItems as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getUpdateListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResponse({ updated: 0 });

@@ -21,7 +21,7 @@ import type {
 import {
   EXCEPTION_LIST_URL,
   LIST_INDEX,
-  LIST_ITEM_URL,
+  LIST_ITEMS_URL,
 } from '@kbn/securitysolution-list-constants';
 import {
   setPolicy,
@@ -273,7 +273,7 @@ export const importFile = async (
   testValues?: string[]
 ): Promise<void> => {
   const response = await supertest
-    .post(`${LIST_ITEM_URL}/_import?type=${type}`)
+    .post(`${LIST_ITEMS_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
     .attach('file', getImportListItemAsBuffer(contents), fileName)
     .expect('Content-Type', 'application/json; charset=utf-8');
@@ -309,7 +309,7 @@ export const importTextFile = async (
   fileName: string
 ): Promise<void> => {
   const response = await supertest
-    .post(`${LIST_ITEM_URL}/_import?type=${type}`)
+    .post(`${LIST_ITEMS_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
     .attach('file', getImportListItemAsBuffer(contents), fileName)
     .expect('Content-Type', 'application/json; charset=utf-8');
@@ -343,7 +343,7 @@ export const waitForListItem = async (
   await waitFor(
     async () => {
       const { status, body } = await supertest
-        .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
+        .get(`${LIST_ITEMS_URL}?list_id=${fileName}&value=${itemValue}`)
         .send();
       if (status !== 200) {
         log.debug(
@@ -394,7 +394,7 @@ export const waitForTextListItem = async (
       const promises = await Promise.all(
         tokens.map(async (token) => {
           const { status, body } = await supertest
-            .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${token}`)
+            .get(`${LIST_ITEMS_URL}?list_id=${fileName}&value=${token}`)
             .send();
           if (status !== 200) {
             log.error(

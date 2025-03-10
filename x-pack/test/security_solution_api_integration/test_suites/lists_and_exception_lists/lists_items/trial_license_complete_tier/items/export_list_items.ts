@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { CreateListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_ITEM_URL, LIST_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL, LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_item_schema.mock';
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
 import { LIST_ID, NAME } from '@kbn/lists-plugin/common/constants.mock';
@@ -45,13 +45,13 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(200);
 
         await supertest
-          .post(`${LIST_ITEM_URL}/_export?list_id=${LIST_ID}`)
+          .post(`${LIST_ITEMS_URL}/_export?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .expect('Content-Disposition', `attachment; filename="${NAME}"`)
           .expect(200);
@@ -65,13 +65,13 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(200);
 
         const { body } = await supertest
-          .post(`${LIST_ITEM_URL}/_export?list_id=${LIST_ID}`)
+          .post(`${LIST_ITEMS_URL}/_export?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .expect(200)
           .parse(binaryToString);
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(200);
@@ -97,10 +97,10 @@ export default ({ getService }: FtrProviderContext): void => {
           id: 'list-item-2',
           value: '127.0.0.2',
         };
-        await supertest.post(LIST_ITEM_URL).set('kbn-xsrf', 'true').send(secondList).expect(200);
+        await supertest.post(LIST_ITEMS_URL).set('kbn-xsrf', 'true').send(secondList).expect(200);
 
         const { body } = await supertest
-          .post(`${LIST_ITEM_URL}/_export?list_id=${LIST_ID}`)
+          .post(`${LIST_ITEMS_URL}/_export?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .expect(200)
           .parse(binaryToString);

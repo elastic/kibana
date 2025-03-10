@@ -19,6 +19,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
+import type {
+  BulkDeleteListItemsRequestQueryInput,
+  BulkDeleteListItemsResponse,
+} from './bulk_delete_list_items/bulk_delete_list_items.gen';
 import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
 import type {
   CreateListItemRequestBodyInput,
@@ -74,6 +78,23 @@ export class Client {
   constructor(options: ClientOptions) {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
+  }
+  /**
+   * Delete a value list item using its `id`, or its `list_id` and `value` fields.
+   */
+  async bulkDeleteListItems(props: BulkDeleteListItemsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteListItems`);
+    return this.kbnClient
+      .request<BulkDeleteListItemsResponse>({
+        path: '/api/lists/items/_bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
    * Create a new value list.
@@ -383,6 +404,9 @@ You can import items to a new or existing list.
   }
 }
 
+export interface BulkDeleteListItemsProps {
+  query: BulkDeleteListItemsRequestQueryInput;
+}
 export interface CreateListProps {
   body: CreateListRequestBodyInput;
 }
