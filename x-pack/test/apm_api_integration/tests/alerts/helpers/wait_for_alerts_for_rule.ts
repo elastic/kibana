@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Console, Effect } from 'effect';
+import { Effect } from 'effect';
 import {
   APM_ALERTS_INDEX,
   ApmAlertFields,
@@ -36,8 +36,9 @@ export async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
+  // :: Effect.Effect<ApmAlertFields[], TimeoutException, never>
   const main = Effect.gen(function* () {
-    yield* Effect.promise(() =>
+    return yield* Effect.promise(() =>
       getAlertByRuleId({ es, ruleId }).then((alerts) => {
         const actualAlertCount = alerts.length;
         if (actualAlertCount < minimumAlertCount)
@@ -45,7 +46,7 @@ export async function waitForAlertsForRule({
         return alerts;
       })
     );
-  }).pipe(Effect.timeout('20 seconds'));
+  }).pipe(Effect.timeout('30 seconds'));
 
-  return await Effect.runPromise(Effect.retry(main, { times: 10 })).catch(Console.error);
+  return await Effect.runPromise(Effect.retry(main, { times: 100 }));
 }
