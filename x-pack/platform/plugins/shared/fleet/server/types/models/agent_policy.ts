@@ -245,6 +245,24 @@ function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
   }
 }
 
+const BaseSSLSchema = schema.object({
+  verification_mode: schema.maybe(schema.string()),
+  certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  renegotiation: schema.maybe(schema.string()),
+});
+
+const BaseSecretsSchema = schema.object({
+  ssl: schema.maybe(
+    schema.object({
+      key: schema.object({
+        id: schema.maybe(schema.string()),
+      }),
+    })
+  ),
+});
+
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   force: schema.maybe(schema.boolean()),
@@ -332,26 +350,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
         hosts: schema.arrayOf(schema.string()),
         proxy_url: schema.maybe(schema.string()),
         proxy_headers: schema.maybe(schema.any()),
-        ssl: schema.maybe(
-          schema.object({
-            verification_mode: schema.maybe(schema.string()),
-            certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-            certificate: schema.maybe(schema.string()),
-            key: schema.maybe(schema.string()),
-            renegotiation: schema.maybe(schema.string()),
-          })
-        ),
-        secrets: schema.maybe(
-          schema.object({
-            ssl: schema.maybe(
-              schema.object({
-                key: schema.object({
-                  id: schema.maybe(schema.string()),
-                }),
-              })
-            ),
-          })
-        ),
+        ssl: schema.maybe(BaseSSLSchema),
+        secrets: schema.maybe(BaseSecretsSchema),
       }),
       schema.object({
         kibana: schema.object({
@@ -435,6 +435,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
       }),
       download: schema.object({
         sourceURI: schema.string(),
+        ssl: schema.maybe(BaseSSLSchema),
+        secrets: schema.maybe(BaseSecretsSchema),
       }),
       features: schema.recordOf(
         schema.string(),

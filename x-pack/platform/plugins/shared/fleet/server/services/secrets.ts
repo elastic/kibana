@@ -17,6 +17,8 @@ import type {
   NewFleetServerHost,
   NewRemoteElasticsearchOutput,
   Output,
+  DownloadSource,
+  DownloadSourceBase,
 } from '../../common/types';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
@@ -475,9 +477,7 @@ export async function isOutputSecretStorageEnabled(
     return true;
   }
 
-  logger.info(
-    'Output secrets storage is disabled as minimum fleet server version has not been met'
-  );
+  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
   return false;
 }
 
@@ -952,9 +952,8 @@ export async function extractAndWriteFleetServerHostsSecrets(opts: {
 }): Promise<{ fleetServerHost: NewFleetServerHost; secretReferences: PolicySecretReference[] }> {
   const { fleetServerHost, esClient, secretHashes = {} } = opts;
 
-  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
-    (path) => typeof path.value === 'string'
-  );
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
+
   const secretRes = await extractAndWriteSOSecrets<NewFleetServerHost>({
     soObject: fleetServerHost,
     secretPaths,
@@ -1000,10 +999,7 @@ export async function deleteFleetServerHostsSecrets(opts: {
 }): Promise<void> {
   const { fleetServerHost, esClient } = opts;
 
-  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
-    (path) => typeof path.value === 'string'
-  );
-
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
   await deleteSOSecrets(esClient, secretPaths);
 }
 
@@ -1023,5 +1019,93 @@ export function getFleetServerHostsSecretReferences(
     });
   }
 
+  return secretPaths;
+}
+
+// Download sources functions
+function getDownloadSourcesSecretPaths(
+  downloadSource: DownloadSource | Partial<DownloadSource>
+): SOSecretPath[] {
+  const secretPaths: SOSecretPath[] = [];
+
+  if (downloadSource?.secrets?.ssl?.key) {
+    secretPaths.push({
+      path: 'secrets.ssl.key',
+      value: downloadSource.secrets.ssl.key,
+    });
+  }
+  return secretPaths;
+}
+
+export async function extractAndWriteDownloadSourcesSecrets(opts: {
+  downloadSource: DownloadSourceBase;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{ downloadSource: DownloadSourceBase; secretReferences: PolicySecretReference[] }> {
+  const { downloadSource, esClient, secretHashes = {} } = opts;
+
+  const secretPaths = getFleetServerHostsSecretPaths(downloadSource).filter(
+    (path) => typeof path.value === 'string'
+  );
+  const secretRes = await extractAndWriteSOSecrets<DownloadSourceBase>({
+    soObject: downloadSource,
+    secretPaths,
+    esClient,
+    secretHashes,
+  });
+  return {
+    downloadSource: secretRes.soObjectWithSecrets,
+    secretReferences: secretRes.secretReferences,
+  };
+}
+
+export async function extractAndUpdateDownloadSourceSecrets(opts: {
+  oldDownloadSource: DownloadSourceBase;
+  downloadSourceUpdate: Partial<DownloadSourceBase>;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{
+  downloadSourceUpdate: Partial<DownloadSourceBase>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldDownloadSource, downloadSourceUpdate, esClient, secretHashes } = opts;
+  const oldSecretPaths = getDownloadSourcesSecretPaths(oldDownloadSource);
+  const updatedSecretPaths = getDownloadSourcesSecretPaths(downloadSourceUpdate);
+  const secretsRes = await extractAndUpdateSOSecrets<DownloadSourceBase>({
+    updatedSoObject: downloadSourceUpdate,
+    oldSecretPaths,
+    updatedSecretPaths,
+    esClient,
+    secretHashes,
+  });
+  return {
+    downloadSourceUpdate: secretsRes.updatedSoObject,
+    secretReferences: secretsRes.secretReferences,
+    secretsToDelete: secretsRes.secretsToDelete,
+  };
+}
+
+export async function deleteDownloadSourceSecrets(opts: {
+  downloadSource: DownloadSourceBase;
+  esClient: ElasticsearchClient;
+}): Promise<void> {
+  const { downloadSource, esClient } = opts;
+
+  const secretPaths = getDownloadSourcesSecretPaths(downloadSource);
+
+  await deleteSOSecrets(esClient, secretPaths);
+}
+
+export function getDownloadSourceSecretReferences(
+  downloadSource: DownloadSource
+): PolicySecretReference[] {
+  const secretPaths: PolicySecretReference[] = [];
+
+  if (typeof downloadSource.secrets?.ssl?.key === 'object') {
+    secretPaths.push({
+      id: downloadSource.secrets.ssl.key.id,
+    });
+  }
   return secretPaths;
 }

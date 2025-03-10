@@ -2105,6 +2105,7 @@
     }
   },
   "ingest-download-sources": {
+    "dynamic": false,
     "properties": {
       "host": {
         "type": "keyword"

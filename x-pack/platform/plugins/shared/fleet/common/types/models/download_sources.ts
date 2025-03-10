@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import type { BaseSSLSecrets } from './secret';
+
 export interface DownloadSourceBase {
   name: string;
   host: string;
   is_default: boolean;
   proxy_id?: string | null;
+  ssl?: {
+    certificate_authorities?: string[];
+    certificate?: string;
+    key?: string;
+  };
+  secrets?: BaseSSLSecrets;
 }
 
 export type DownloadSource = DownloadSourceBase & {
