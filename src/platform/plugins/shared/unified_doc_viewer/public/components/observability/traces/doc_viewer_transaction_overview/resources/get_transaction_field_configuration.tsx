@@ -18,13 +18,20 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { asDuration } from '../../utils';
 import {
+  CommonFieldConfiguration,
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
 
+interface TransactionFieldConfiguration extends CommonFieldConfiguration {
+  [TRANSACTION_DURATION_FIELD]: FieldConfiguration<number>;
+  [USER_AGENT_NAME_FIELD]: FieldConfiguration<string>;
+  [USER_AGENT_VERSION_FIELD]: FieldConfiguration<string>;
+}
+
 export const getTransactionFieldConfiguration = (
   attributes: TraceDocumentOverview
-): Record<string, FieldConfiguration> => {
+): TransactionFieldConfiguration => {
   return {
     ...getCommonFieldConfiguration(attributes),
     [TRANSACTION_DURATION_FIELD]: {
@@ -34,14 +41,14 @@ export const getTransactionFieldConfiguration = (
           defaultMessage: 'Duration',
         }
       ),
-      content: (value) => <EuiText size="xs">{asDuration(value as number)}</EuiText>,
+      content: (value) => value && <EuiText size="xs">{asDuration(value)}</EuiText>,
       value: attributes[TRANSACTION_DURATION_FIELD] ?? 0,
     },
     [USER_AGENT_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.userAgent.title', {
         defaultMessage: 'User agent',
       }),
-      content: (value) => <EuiText size="xs">{value}</EuiText>,
+      content: (value) => value && <EuiText size="xs">{value}</EuiText>,
       value: attributes[USER_AGENT_NAME_FIELD],
     },
     [USER_AGENT_VERSION_FIELD]: {
@@ -51,7 +58,7 @@ export const getTransactionFieldConfiguration = (
           defaultMessage: 'User agent version',
         }
       ),
-      content: (value) => <EuiText size="xs">{value}</EuiText>,
+      content: (value) => value && <EuiText size="xs">{value}</EuiText>,
       value: attributes[USER_AGENT_VERSION_FIELD],
     },
   };

@@ -21,28 +21,37 @@ import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { DependencyNameLink } from '../sub_components/dependency_name_link';
 import {
+  CommonFieldConfiguration,
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
 import { asDuration } from '../../utils';
 
+interface SpanFieldConfiguration extends CommonFieldConfiguration {
+  [SPAN_NAME_FIELD]: FieldConfiguration<string>;
+  [SPAN_DURATION_FIELD]: FieldConfiguration<number>;
+  [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: FieldConfiguration<string>;
+  [SPAN_TYPE_FIELD]: FieldConfiguration<string>;
+  [SPAN_SUBTYPE_FIELD]: FieldConfiguration<string>;
+}
+
 export const getSpanFieldConfiguration = (
   attributes: TraceDocumentOverview
-): Record<string, FieldConfiguration> => {
+): SpanFieldConfiguration => {
   return {
     ...getCommonFieldConfiguration(attributes),
     [SPAN_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.spanName.title', {
         defaultMessage: 'Span name',
       }),
-      content: (value) => <EuiText size="xs">{value}</EuiText>,
+      content: (value) => value && <EuiText size="xs">{value}</EuiText>,
       value: attributes[SPAN_NAME_FIELD],
     },
     [SPAN_DURATION_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: (value) => <EuiText size="xs">{asDuration(value as number)}</EuiText>,
+      content: (value) => value && <EuiText size="xs">{asDuration(value)}</EuiText>,
       value: attributes[SPAN_DURATION_FIELD] ?? 0,
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
@@ -52,12 +61,13 @@ export const getSpanFieldConfiguration = (
           defaultMessage: 'Dependency',
         }
       ),
-      content: (value) => (
-        <DependencyNameLink
-          dependencyName={value as string}
-          environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
-        />
-      ),
+      content: (value) =>
+        value && (
+          <DependencyNameLink
+            dependencyName={value as string}
+            environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
+          />
+        ),
       value: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       fieldMetadata: {
         flat_name: 'span.destination.service.resource',
@@ -67,14 +77,14 @@ export const getSpanFieldConfiguration = (
       title: i18n.translate('unifiedDocViewer.observability.traces.details.spanType.title', {
         defaultMessage: 'Type',
       }),
-      content: (value) => <EuiBadge color="hollow">{value}</EuiBadge>,
+      content: (value) => value && <EuiBadge color="hollow">{value}</EuiBadge>,
       value: attributes[SPAN_TYPE_FIELD],
     },
     [SPAN_SUBTYPE_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.spanSubtype.title', {
         defaultMessage: 'Subtype',
       }),
-      content: (value) => <EuiBadge color="hollow">{value}</EuiBadge>,
+      content: (value) => value && <EuiBadge color="hollow">{value}</EuiBadge>,
       value: attributes[SPAN_SUBTYPE_FIELD],
     },
   };
