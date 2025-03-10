@@ -52,6 +52,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/file-upload-common",
     "@kbn/deeplinks-search",
+    "@kbn/logging-mocks",
+    "@kbn/inference-plugin",
   ],
   "exclude": [
     "target/**/*",
