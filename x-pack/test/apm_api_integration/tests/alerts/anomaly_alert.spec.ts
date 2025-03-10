@@ -14,7 +14,7 @@ import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Effect } from 'effect';
+import { Effect, pipe } from 'effect';
 import {
   APM_ALERTS_INDEX,
   ApmAlertFields,
@@ -159,13 +159,31 @@ async function waitForAlertsForRule({
       return alerts;
     });
 
-  // this is the main program
-  const main = Effect.gen(function* () {
-    // Logging within the span below
-    yield* Effect.log(`Searching for rules`);
-    // flatMap the value from the first effect, and use it in the next effect.
-    return yield* Effect.flatMap(fetch, throwWhenLessThan);
-  }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
+  // This is the generator way of building the program.
+  // ****************************************************
+  // const main = Effect.gen(function* () {
+  //   // Logging within the span below
+  //   yield* Effect.log(`Searching for rules`);
+  //   // flatMap the value from the first effect, and use it in the next effect.
+  //   return yield* Effect.flatMap(fetch, throwWhenLessThan);
+  // }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
+
+  // This is the 'pipe' way of building the program.
+  // ****************************************************
+  // const main = pipe(
+  //   fetch,
+  //   Effect.flatMap(throwWhenLessThan),
+  //   Effect.timeout('30 seconds'),
+  //   Effect.withLogSpan('waitForAlertsForRule')
+  // );
+
+  // This is the 'pipe' way of building the program, but piping from an effect
+  // ****************************************************
+  const main = fetch.pipe(
+    Effect.flatMap(throwWhenLessThan),
+    Effect.timeout('30 seconds'),
+    Effect.withLogSpan('waitForAlertsForRule')
+  );
 
   // Run the 'main' program, and unwrap the value out of effect
   return await Effect.runPromise(Effect.retry(main, { times: 50 }));
