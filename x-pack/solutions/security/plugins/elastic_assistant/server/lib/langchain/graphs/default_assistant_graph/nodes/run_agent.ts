@@ -7,15 +7,14 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { AIMessage, BaseMessage } from '@langchain/core/messages';
+import { BaseMessage } from '@langchain/core/messages';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
-import { AgentAction, AgentFinish } from 'langchain/agents';
-import { v4 as uuidv4 } from 'uuid';
+import { AgentOutcomeParser } from './agent_outcome_parser';
 
 
 export interface RunAgentParams extends NodeParamsBase {
@@ -78,33 +77,12 @@ export async function runAgent({
       config
     );
 
-  const newMessages: BaseMessage[] = [];
+  const outcomeParser = AgentOutcomeParser({logger})
 
-  if (result?.tool != null) {
-    const agentAction = result as AgentAction
-    const toolMessage = new AIMessage({
-      content: agentAction.log,
-      tool_calls: [
-        {
-          name: agentAction.tool,
-          args: agentAction.toolInput as Record<string, any>,
-          id: uuidv4(),
-        }
-      ]
-    });
-
-    newMessages.push(toolMessage)
-  } else if (result?.returnValues != null) {
-    const agentFinish = result as AgentFinish
-    const aiMessage = new AIMessage({
-      content: agentFinish.returnValues.output,
-    });
-
-    newMessages.push(aiMessage);
-  }
+  const newMessage = outcomeParser(result);
 
   return {
-    messages: newMessages,
+    messages: [newMessage],
     lastNode: NodeType.AGENT,
   };
 }
