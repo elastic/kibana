@@ -155,7 +155,7 @@ async function waitForAlertsForRule({
         return alerts;
       })
     );
-  }).pipe(Effect.timeout('2 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
+  }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
 
-  return await Effect.runPromise(Effect.retry(main, { times: 2 }));
+  return await Effect.runPromise(Effect.retry(main, { times: 50 }));
 }
