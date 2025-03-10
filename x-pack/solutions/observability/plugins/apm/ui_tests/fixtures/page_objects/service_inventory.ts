@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 
 export class ServiceInventoryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  async waitForPageToLoad() {
-    await this.page.waitForSelector(
-      '[data-test-subj="kbnAppWrapper visibleChrome"] [aria-busy="false"]',
-      { state: 'visible' }
-    );
-  }
-
   async gotoDetailedServiceInventoryWithDateSelected(start: string, end: string) {
     this.page.goto(`${this.kbnUrl.app('apm')}/services?&rangeFrom=${start}&rangeTo=${end}`);
-    await this.waitForPageToLoad();
+    return this.page.waitForLoadingIndicatorHidden();
   }
 }

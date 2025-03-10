@@ -23,7 +23,6 @@ export type {
   KibanaUrl,
   ScoutLogger,
   ScoutPage,
-  PageObjects,
   ScoutServerConfig,
   ScoutTestConfig,
   ScoutPlaywrightOptions,

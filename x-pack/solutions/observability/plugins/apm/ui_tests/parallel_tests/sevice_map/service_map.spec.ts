@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 
 test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, page, pageObjects: { serviceMapPage } }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceMapPage.gotoWithDateSelected(start, end);
-    await serviceMapPage.waitForPageToLoad();
   });
+
   test('shows the service map', async ({ page, pageObjects: { serviceMapPage } }) => {
     await serviceMapPage.gotoWithDateSelected(start, end);
     expect(page.url()).toContain('/app/apm/service-map');
-    await page.waitForSelector('[data-test-subj="serviceMap"]');
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
-    await page.getByLabel('Zoom In').click();
-    await page.getByTestId('centerServiceMap').click();
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
+    await serviceMapPage.waitForServiceMapToLoad();
+    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.centerServiceMapBtn.click();
+    await serviceMapPage.waitForServiceMapToLoad();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.getByTestId('serviceMap').click();
-    const serviceMapLocator = await page.getByTestId('serviceMap');
+    await serviceMapPage.serviceMap.click();
+    const serviceMapLocator = page.getByTestId('serviceMap');
     await expect(serviceMapLocator).toHaveScreenshot('service_map.png', {
       animations: 'disabled',
       maxDiffPixels: 10,
@@ -37,14 +36,13 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
   test('shows a detailed service map', async ({ page, pageObjects: { serviceMapPage } }) => {
     await serviceMapPage.gotoDetailedServiceMapWithDateSelected(start, end);
     expect(page.url()).toContain('/services/opbeans-java/service-map');
-    await page.waitForSelector('[data-test-subj="serviceMap"]');
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
-    await page.getByLabel('Zoom out').click();
-    await page.getByTestId('centerServiceMap').click();
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
+    await serviceMapPage.waitForServiceMapToLoad();
+    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.centerServiceMapBtn.click();
+    await serviceMapPage.waitForServiceMapToLoad();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.getByTestId('serviceMap').click();
-    const serviceMapLocator = await page.getByTestId('serviceMap');
+    await serviceMapPage.serviceMap.click();
+    const serviceMapLocator = page.getByTestId('serviceMap');
     await expect(serviceMapLocator).toHaveScreenshot('detailed_service_map.png', {
       animations: 'disabled',
       maxDiffPixels: 10,
@@ -56,7 +54,7 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { serviceMapPage },
   }) => {
     await serviceMapPage.typeInTheSearchBar();
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
+    await serviceMapPage.waitForServiceMapToLoad();
     page.getByText('No services available');
     // search bar is still visible
     await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
