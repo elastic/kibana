@@ -13,6 +13,7 @@ import type {
 } from '../../../../../common/api/asset_inventory/types';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
 import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_status';
+import { useOnboardingSuccessCallout } from './use_onboarding_success_callout';
 
 /**
  * Hook with related business logic for enabling Asset Inventory
@@ -20,11 +21,13 @@ import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_stat
 export const useEnableAssetInventory = () => {
   const { postEnableAssetInventory } = useAssetInventoryRoutes();
   const { refetch: refetchStatus } = useAssetInventoryStatus();
+  const { dispatchSuccessCalloutVisibility } = useOnboardingSuccessCallout();
 
   const mutation = useMutation<AssetInventoryEnableResponse, AssetInventoryServerApiError>(
     postEnableAssetInventory,
     {
       onSuccess: () => {
+        dispatchSuccessCalloutVisibility();
         refetchStatus();
       },
     }
@@ -40,10 +43,14 @@ export const useEnableAssetInventory = () => {
   // can show a loading spinner while the status is being re-fetched
   const isEnabling = mutation.isLoading || mutation.isSuccess;
 
+  const enableAssetInventory = () => {
+    mutation.mutate();
+  };
+
   return {
     isEnabling,
     error: mutation.isError ? errorMessage : null,
     reset: mutation.reset,
-    enableAssetInventory: () => mutation.mutate(),
+    enableAssetInventory,
   };
 };

@@ -11,6 +11,7 @@ import { createTestProviderWrapper } from '../../../test/test_provider';
 
 const mockPostEnableAssetInventory = jest.fn();
 const mockRefetchStatus = jest.fn();
+const mockDispatchSuccessCalloutVisibility = jest.fn();
 
 jest.mock('../../../hooks/use_asset_inventory_routes', () => ({
   useAssetInventoryRoutes: () => ({
@@ -21,6 +22,12 @@ jest.mock('../../../hooks/use_asset_inventory_routes', () => ({
 jest.mock('../../../hooks/use_asset_inventory_status', () => ({
   useAssetInventoryStatus: () => ({
     refetch: mockRefetchStatus,
+  }),
+}));
+
+jest.mock('./use_onboarding_success_callout', () => ({
+  useOnboardingSuccessCallout: () => ({
+    dispatchSuccessCalloutVisibility: mockDispatchSuccessCalloutVisibility,
   }),
 }));
 
@@ -64,6 +71,18 @@ describe('useEnableAssetInventory', () => {
 
       await waitFor(() => {
         expect(mockRefetchStatus).toHaveBeenCalled();
+      });
+    });
+
+    it('should call dispatchSuccessCalloutVisibility when asset inventory is enabled', async () => {
+      mockPostEnableAssetInventory.mockResolvedValue({});
+
+      const { result } = renderHookWithWrapper();
+
+      result.current.enableAssetInventory();
+
+      await waitFor(() => {
+        expect(mockDispatchSuccessCalloutVisibility).toHaveBeenCalled();
       });
     });
   });
