@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { act, cleanup, fireEvent } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -48,6 +48,39 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
+/** When some props and states change, `EventFilterForm` will recreate its internal `processChanged` function,
+ * and therefore will call it from a `useEffect` hook.
+ *
+ * Amongst the aforementioned props is the item itself, which comes from the outside - the test environment.
+ * Amongst the aforementioned states is the `hasFormChanged` state, which will change from `false` to `true`
+ * on the first user action.
+ *
+ * In the browser, the `item` prop is a state, a state from the parent component, therefore both
+ * `item` and `hasFormChange` will change at the same re-render, which ensures that the `useEffect` will
+ * call `processChanged` with consistent data.
+ *
+ * In the test environment, however, we need a trick to make sure that the data is updated in the same re-render
+ * both outside and inside the component, in order to not receive additional calls from `processChanged` with outdated
+ * data.
+ *
+ * This `TestComponentWrapper` component is meant to provide this kind of syncronisation, by turning the `item` prop
+ * into a state.
+ *
+ */
+const TestComponentWrapper: typeof EventFiltersForm = (formProps: ArtifactFormComponentProps) => {
+  const [item, setItem] = useState(formProps.item);
+
+  const handleOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
+    (formStatus) => {
+      setItem(formStatus.item);
+      formProps.onChange(formStatus);
+    },
+    [formProps]
+  );
+
+  return <EventFiltersForm {...formProps} item={item} onChange={handleOnChange} />;
+};
+
 describe('Event filter form', () => {
   const formPrefix = 'eventFilters-form';
   const generator = new EndpointDocGenerator('effected-policy-select');
@@ -57,7 +90,7 @@ describe('Event filter form', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: ArtifactFormComponentProps['item'];
 
-  const getUI = () => <EventFiltersForm {...formProps} />;
+  const getUI = () => <TestComponentWrapper {...formProps} />;
   const render = () => {
     return (renderResult = mockedContext.render(getUI()));
   };
@@ -202,14 +235,7 @@ describe('Event filter form', () => {
       render();
       const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
-      act(() => {
-        fireEvent.change(nameInput, {
-          target: {
-            value: 'Exception name',
-          },
-        });
-        fireEvent.blur(nameInput);
-      });
+      await userEvent.type(nameInput, 'Exception name');
       rerenderWithLatestProps();
 
       expect(formProps.item?.name).toBe('Exception name');
@@ -220,14 +246,8 @@ describe('Event filter form', () => {
       render();
       const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
-      act(() => {
-        fireEvent.change(nameInput, {
-          target: {
-            value: '   ',
-          },
-        });
-        fireEvent.blur(nameInput);
-      });
+      await userEvent.type(nameInput, '   ');
+      fireEvent.blur(nameInput);
       rerenderWithLatestProps();
 
       expect(formProps.item.name).toBe('');
@@ -236,16 +256,9 @@ describe('Event filter form', () => {
 
     it('should change description', async () => {
       render();
-      const nameInput = renderResult.getByTestId(`${formPrefix}-description-input`);
+      const descriptionInput = renderResult.getByTestId(`${formPrefix}-description-input`);
 
-      act(() => {
-        fireEvent.change(nameInput, {
-          target: {
-            value: 'Exception description',
-          },
-        });
-        fireEvent.blur(nameInput);
-      });
+      await userEvent.type(descriptionInput, 'Exception description');
       rerenderWithLatestProps();
 
       expect(formProps.item.description).toBe('Exception description');
@@ -255,14 +268,7 @@ describe('Event filter form', () => {
       render();
       const commentInput = renderResult.getByLabelText('Comment Input');
 
-      act(() => {
-        fireEvent.change(commentInput, {
-          target: {
-            value: 'Exception comment',
-          },
-        });
-        fireEvent.blur(commentInput);
-      });
+      await userEvent.type(commentInput, 'Exception comment');
       rerenderWithLatestProps();
 
       expect(formProps.item.comments).toEqual([{ comment: 'Exception comment' }]);
