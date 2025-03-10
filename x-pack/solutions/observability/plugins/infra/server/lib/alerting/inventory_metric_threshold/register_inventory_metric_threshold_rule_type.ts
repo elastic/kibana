@@ -79,6 +79,7 @@ export function registerInventoryThresholdRuleType(
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
+    solution: 'observability',
     minimumLicenseRequired: 'basic',
     isExportable: true,
     /*
