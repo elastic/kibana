@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PROJECT_DEFAULT_ROLES } from '../../../../common';
+import { CustomRoleManager, Role, PROJECT_DEFAULT_ROLES } from '../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
 export type LoginFunction = (role: string) => Promise<void>;
@@ -28,6 +28,12 @@ export interface BrowserAuthFixture {
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginAsPrivilegedUser: () => Promise<void>;
+  /**
+   * Logs in as a user with a custom role.
+   * @param role - A role object that defines the permissions of the custom role. Role will re-created if it doesn't exist.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginWithCustomRole: (role: Role) => Promise<void>;
 }
 
 /**
@@ -36,7 +42,12 @@ export interface BrowserAuthFixture {
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
  */
 export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: BrowserAuthFixture }>({
-  browserAuth: async ({ log, context, samlAuth, config, kbnUrl }, use) => {
+  browserAuth: async ({ log, context, samlAuth, config, kbnUrl, kbnClient }, use) => {
+    const customRoleName = samlAuth
+      .getSupportedRoles()
+      .find((role) => role.startsWith('custom_role'))!;
+    const customRoleManager = CustomRoleManager.getInstance();
+
     const setSessionCookie = async (cookieValue: string) => {
       await context.clearCookies();
       await context.addCookies([
@@ -49,9 +60,14 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       ]);
     };
 
-    const loginAs: LoginFunction = async (role) => {
+    const loginAs: LoginFunction = async (role: string) => {
       const cookie = await samlAuth.getInteractiveUserSessionCookieWithRoleScope(role);
       await setSessionCookie(cookie);
+    };
+
+    const loginWithCustomRole = async (role: Role) => {
+      await customRoleManager.ensureRoleExists(customRoleName, role, kbnClient);
+      return loginAs(customRoleName);
     };
 
     const loginAsAdmin = () => loginAs('admin');
@@ -64,6 +80,6 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
     };
 
     log.serviceLoaded('browserAuth');
-    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
+    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser, loginWithCustomRole });
   },
 });

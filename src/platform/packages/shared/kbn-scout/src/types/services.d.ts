@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EsClient, KbnClient, KibanaUrl, SamlSessionManager, ScoutLogger } from '../common';
+export type {
+  EsClient,
+  KbnClient,
+  KibanaUrl,
+  SamlSessionManager,
+  ScoutLogger,
+  Role,
+  RoleDescriptor,
+} from '../common';

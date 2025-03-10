@@ -36,9 +36,15 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  Role,
+  RoleDescriptor,
 } from './src/types';
 
 // re-export from Playwright
 export type { Locator } from 'playwright/test';
 
-export { measurePerformance, measurePerformanceAsync } from './src/common';
+export {
+  measurePerformance,
+  measurePerformanceAsync,
+  transformRoleDescriptorToKibanaRole,
+} from './src/common';

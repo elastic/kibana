@@ -320,6 +320,15 @@ describe('SamlSessionManager', () => {
       expect(email).toBe(cloudEmail);
     });
 
+    test(`'getSupportedRoles' return the correct roles`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        supportedRoles,
+      });
+      const roles = samlSessionManager.getSupportedRoles();
+      expect(roles).toBe(supportedRoles.roles);
+    });
+
     test(`'getUserData' should call security API and return user profile data`, async () => {
       const testData: UserProfile = {
         username: '92qab123',

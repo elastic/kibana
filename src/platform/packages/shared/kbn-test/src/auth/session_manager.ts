@@ -211,4 +211,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
     return profileData;
   }
+
+  getSupportedRoles() {
+    return this.supportedRoles!.roles;
+  }
 }

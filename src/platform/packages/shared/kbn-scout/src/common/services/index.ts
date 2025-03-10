@@ -19,3 +19,5 @@ export type { SamlSessionManager } from '@kbn/test';
 export type { ScoutLogger } from './logger';
 export type { KbnClient } from '@kbn/test';
 export type { Client as EsClient } from '@elastic/elasticsearch';
+export { CustomRoleManager, transformRoleDescriptorToKibanaRole } from './custom_role';
+export type { Role, RoleDescriptor } from './custom_role';
