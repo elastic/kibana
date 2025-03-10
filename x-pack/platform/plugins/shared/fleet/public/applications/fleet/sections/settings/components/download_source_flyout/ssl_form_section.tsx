@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,6 +28,16 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
 
   return (
     <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.editDownloadSourcesFlyout.sslWarningCallout', {
+          defaultMessage:
+            'Invalid settings can prevent Elastic Agent from being able to upgrade. If this happens, you will need to provide valid credentials.',
+        })}
+        color="warning"
+        iconType="warning"
+      />
+      <EuiSpacer size="m" />
       <MultiRowInput
         placeholder={i18n.translate(
           'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateAuthoritiesInputPlaceholder',
