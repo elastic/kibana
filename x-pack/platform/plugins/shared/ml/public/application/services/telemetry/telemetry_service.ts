@@ -23,6 +23,8 @@ export class TelemetryService {
     this.analytics = analytics;
 
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsDeploymentCreatedEventType);
+    analytics.registerEventType(trainedModelsEbtEvents.trainedModelsModelDownloadEventType);
+    analytics.registerEventType(trainedModelsEbtEvents.trainedModelsDeploymentUpdatedEventType);
   }
 
   public start(): ITelemetryClient {
