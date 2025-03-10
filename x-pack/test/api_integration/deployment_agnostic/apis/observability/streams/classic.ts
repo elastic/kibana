@@ -50,7 +50,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
-          routing: [],
           unwired: {},
         },
       });
@@ -67,7 +66,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
-                routing: [],
                 processing: [
                   {
                     grok: {
@@ -122,7 +120,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           ],
-          routing: [],
           unwired: {},
         },
       });
@@ -188,7 +185,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                routing: [],
                 unwired: {},
               },
             },
@@ -284,7 +280,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               stream: {
                 ingest: {
                   lifecycle: { inherit: {} },
-                  routing: [],
                   processing: [
                     {
                       grok: {
