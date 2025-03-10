@@ -20,7 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
-import { ProcessorMetrics } from '../hooks/use_processing_simulator';
+import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
@@ -116,7 +116,9 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
   const shouldDisplayErrorToggle = remainingCount > 0;
 
   const getCalloutProps = (type: ProcessorMetrics['errors'][number]['type']): EuiCallOutProps => {
-    const isWarningError = type === 'generic_processor_failure' && success_rate > 0;
+    const isWarningError =
+      type === 'non_additive_processor_failure' ||
+      (type === 'generic_processor_failure' && success_rate > 0);
 
     return {
       color: isWarningError ? 'warning' : 'danger',
