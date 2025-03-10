@@ -29,6 +29,7 @@ export const transformControlGroupOut: (
   transformPanelsJSON
 );
 
+// TODO We may want to remove setting defaults in the future
 function transformControlGroupSetDefaults(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
 ) {
