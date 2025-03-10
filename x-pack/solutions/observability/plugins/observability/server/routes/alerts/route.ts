@@ -21,7 +21,9 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/alerts/suggested_dashboards',
   security: {
     authz: {
-      requiredPrivileges: ['dashboard_v2'],
+      enabled: false,
+      reason:
+        'This route is opted out from authorization because it is a wrapper around Saved Object client',
     },
   },
   options: { access: 'internal' },
@@ -30,13 +32,6 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const { dependencies, params, request, response, context, logger } = services;
     const core = await context.core;
     const featureFlags = core.featureFlags;
-    const isSuggestedDashboardsEnabled = await featureFlags.getBooleanValue(
-      'rca.recommendedDashboards',
-      false
-    );
-    if (isSuggestedDashboardsEnabled === false) {
-      return response.notFound();
-    }
     const { alertId } = params.query;
     const { ruleRegistry, dashboard } = dependencies;
     const { contentClient } = dashboard;
