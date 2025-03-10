@@ -44,6 +44,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   winlogEventId: string | null | undefined;
+  scopeId: string;
 }
 
 export const EndgameSecurityEventDetailsLine = React.memo<Props>(
@@ -67,6 +68,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     userDomain,
     userName,
     winlogEventId,
+    scopeId,
   }) => {
     const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
     const eventDetails = getEventDetails({ eventAction, eventOutcome });
@@ -91,6 +93,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
           )}
 
           <UserHostWorkingDir
+            scopeId={scopeId}
             contextId={contextId}
             eventId={id}
             hostName={hostName}
@@ -113,6 +116,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.logon_type"
@@ -135,6 +139,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.target_logon_id"
@@ -155,6 +160,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
 
           <TokensFlexItem component="span" grow={false}>
             <ProcessDraggableWithNonExistentProcess
+              scopeId={scopeId}
               contextId={contextId}
               endgamePid={undefined}
               endgameProcessName={undefined}
@@ -177,6 +183,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
 
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_user_name"
@@ -200,6 +207,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_domain_name"
@@ -221,6 +229,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_logon_id"
@@ -240,6 +249,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               {!isNillEmptyOrNotFinite(eventCode) ? (
                 <TokensFlexItem component="span" grow={false}>
                   <DraggableBadge
+                    scopeId={scopeId}
                     contextId={contextId}
                     eventId={id}
                     field="event.code"
@@ -251,6 +261,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               ) : (
                 <TokensFlexItem component="span" grow={false}>
                   <DraggableBadge
+                    scopeId={scopeId}
                     contextId={contextId}
                     eventId={id}
                     iconType="logoWindows"
