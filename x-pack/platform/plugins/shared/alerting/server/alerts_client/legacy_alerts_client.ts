@@ -133,10 +133,6 @@ export class LegacyAlertsClient<
     });
   }
 
-  public getTrackedAlerts() {
-    return this.trackedAlerts;
-  }
-
   public getAlert(id: string) {
     return this.alertFactory?.get(id);
   }
