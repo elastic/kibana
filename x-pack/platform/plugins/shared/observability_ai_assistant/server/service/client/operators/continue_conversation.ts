@@ -173,8 +173,8 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  adHocUserInstructions = [],
-  userInstructions,
+  apiUserInstructions = [],
+  kbUserInstructions,
   logger,
   disableFunctions,
   tracer,
@@ -186,8 +186,8 @@ export function continueConversation({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  adHocUserInstructions: InstructionOrPlainText[];
-  userInstructions: Instruction[];
+  apiUserInstructions: InstructionOrPlainText[];
+  kbUserInstructions: Instruction[];
   logger: Logger;
   disableFunctions:
     | boolean
@@ -323,8 +323,8 @@ export function continueConversation({
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,
-              userInstructions,
-              adHocUserInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               logger,
               disableFunctions,
               tracer,

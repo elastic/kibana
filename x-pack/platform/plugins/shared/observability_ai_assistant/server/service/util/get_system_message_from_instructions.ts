@@ -6,8 +6,7 @@
  */
 
 import { compact, uniqBy } from 'lodash';
-import { v4 } from 'uuid';
-import { Instruction, InstructionOrPlainText } from '../../../common/types';
+import { Instruction } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
 import { InstructionOrCallback } from '../types';
 
@@ -23,15 +22,15 @@ export function getSystemMessageFromInstructions({
   applicationInstructions,
 
   // instructions provided by the user via the KB. These will be displayed after the application instructions and only if they fit within the token budget
-  userInstructions: kbUserInstructions,
+  kbUserInstructions,
 
   // instructions provided by the user via the API. These will be displayed after the application instructions and only if they fit within the token budget
-  adHocUserInstructions,
+  apiUserInstructions,
   availableFunctionNames,
 }: {
   applicationInstructions: InstructionOrCallback[];
-  userInstructions: Instruction[];
-  adHocUserInstructions: InstructionOrPlainText[];
+  kbUserInstructions: Instruction[];
+  apiUserInstructions: Instruction[];
   availableFunctionNames: string[];
 }): string {
   const allApplicationInstructions = compact(
@@ -43,20 +42,10 @@ export function getSystemMessageFromInstructions({
     })
   );
 
-  const adHocUserInstructionsWithId: Instruction[] = adHocUserInstructions.map(
-    (adHocUserInstruction) =>
-      typeof adHocUserInstruction === 'string'
-        ? {
-            text: adHocUserInstruction,
-            id: v4(),
-          }
-        : adHocUserInstruction
-  );
-
-  // all adhoc user instructions and KB instructions.
-  // adhoc instructions will be prioritized over Knowledge Base instructions if the id is the same
+  // all api user instructions and KB instructions.
+  // api instructions will be prioritized over Knowledge Base instructions if the id is the same
   const allUserInstructions = withTokenBudget(
-    uniqBy([...adHocUserInstructionsWithId, ...kbUserInstructions], (i) => i.id),
+    uniqBy([...apiUserInstructions, ...kbUserInstructions], (i) => i.id),
     1000
   );
 

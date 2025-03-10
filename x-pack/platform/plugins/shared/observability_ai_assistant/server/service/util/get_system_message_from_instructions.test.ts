@@ -14,8 +14,8 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first', 'second'],
-        userInstructions: [],
-        adHocUserInstructions: [],
+        kbUserInstructions: [],
+        apiUserInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first\n\nsecond`);
@@ -30,8 +30,8 @@ describe('getSystemMessageFromInstructions', () => {
             return availableFunctionNames[0];
           },
         ],
-        userInstructions: [],
-        adHocUserInstructions: [],
+        kbUserInstructions: [],
+        apiUserInstructions: [],
         availableFunctionNames: ['myFunction'],
       })
     ).toEqual(`first\n\nmyFunction`);
@@ -41,8 +41,8 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ id: 'second', text: 'second from kb' }],
-        adHocUserInstructions: [
+        kbUserInstructions: [{ id: 'second', text: 'second from kb' }],
+        apiUserInstructions: [
           {
             id: 'second',
             text: 'second from adhoc instruction',
@@ -57,8 +57,8 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ id: 'second', text: 'second_kb' }],
-        adHocUserInstructions: [],
+        kbUserInstructions: [{ id: 'second', text: 'second_kb' }],
+        apiUserInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
@@ -73,8 +73,8 @@ describe('getSystemMessageFromInstructions', () => {
             return undefined;
           },
         ],
-        userInstructions: [],
-        adHocUserInstructions: [],
+        kbUserInstructions: [],
+        apiUserInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first`);

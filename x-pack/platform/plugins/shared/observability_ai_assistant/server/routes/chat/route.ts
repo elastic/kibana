@@ -9,6 +9,7 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
+import { v4 } from 'uuid';
 import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
@@ -20,6 +21,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { Instruction } from '../../../common/types';
 import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
@@ -266,6 +268,16 @@ async function chatComplete(
     scopes,
   });
 
+  const userInstructionsWithId: Instruction[] | undefined = userInstructions?.map(
+    (userInstruction) =>
+      typeof userInstruction === 'string'
+        ? {
+            text: userInstruction,
+            id: v4(),
+          }
+        : userInstruction
+  );
+
   const response$ = client.complete({
     messages,
     connectorId,
@@ -274,7 +286,7 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    userInstructions,
+    userInstructions: userInstructionsWithId,
     simulateFunctionCalling,
     disableFunctions,
   });
