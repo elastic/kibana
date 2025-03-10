@@ -483,6 +483,8 @@ export const invokeDefendInsightsGraph = async ({
     maxHallucinationFailures,
   } = result;
 
+  console.log(JSON.stringify({ insights, anonymizedEvents }, null, 2)); // TODO: remove
+
   throwIfErrorCountsExceeded({
     errors,
     generationAttempts,

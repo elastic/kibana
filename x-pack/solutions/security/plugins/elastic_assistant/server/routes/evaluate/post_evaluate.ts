@@ -28,6 +28,7 @@ import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
@@ -177,27 +178,54 @@ export const postEvaluateRoute = (
             ids: connectorIds,
             throwIfSystemAction: false,
           });
-          const connectorsWithPrompts = await Promise.all(
-            connectors.map(async (connector) => {
-              const prompts = await getAttackDiscoveryPrompts({
-                actionsClient,
-                connectorId: connector.id,
-                connector,
-                savedObjectsClient,
-              });
-              return {
-                ...connector,
-                prompts,
-              };
-            })
-          );
 
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs } = getGraphsFromNames(graphNames);
+
+          if (defendInsightsGraphs.length > 0) {
+            try {
+              void evaluateDefendInsights({
+                actionsClient,
+                defendInsightsGraphs,
+                connectors,
+                connectorTimeout: CONNECTOR_TIMEOUT,
+                datasetName,
+                esClient,
+                evaluationId,
+                evaluatorConnectorId,
+                langSmithApiKey,
+                langSmithProject,
+                logger,
+                runName,
+                size,
+              });
+            } catch (err) {
+              logger.error(() => `Error evaluating defend insights: ${err}`);
+            }
+
+            return response.ok({
+              body: { evaluationId, success: true },
+            });
+          }
 
           if (attackDiscoveryGraphs.length > 0) {
+            const connectorsWithPrompts = await Promise.all(
+              connectors.map(async (connector) => {
+                const prompts = await getAttackDiscoveryPrompts({
+                  actionsClient,
+                  connectorId: connector.id,
+                  connector,
+                  savedObjectsClient,
+                });
+                return {
+                  ...connector,
+                  prompts,
+                };
+              })
+            );
+
             try {
               // NOTE: we don't wait for the evaluation to finish here, because
               // the client will retry / timeout when evaluations take too long

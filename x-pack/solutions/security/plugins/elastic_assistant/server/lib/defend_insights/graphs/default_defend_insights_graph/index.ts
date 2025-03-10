@@ -90,7 +90,7 @@ export const getDefaultDefendInsightsGraph = ({
     // get edges:
     const generateOrEndEdge = getGenerateOrEndEdge(logger);
 
-    const generatOrRefineOrEndEdge = getGenerateOrRefineOrEndEdge(logger);
+    const generateOrRefineOrEndEdge = getGenerateOrRefineOrEndEdge(logger);
 
     const refineOrEndEdge = getRefineOrEndEdge(logger);
 
@@ -110,7 +110,7 @@ export const getDefaultDefendInsightsGraph = ({
         end: END,
         generate: NodeType.GENERATE_NODE,
       })
-      .addConditionalEdges(NodeType.GENERATE_NODE, generatOrRefineOrEndEdge, {
+      .addConditionalEdges(NodeType.GENERATE_NODE, generateOrRefineOrEndEdge, {
         end: END,
         generate: NodeType.GENERATE_NODE,
         refine: NodeType.REFINE_NODE,
