@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { EntityType } from '../types';
 import { getAllEntityTypes, getDisabledEntityTypes } from '../utils';
 import type { ExperimentalFeatures } from '../../experimental_features';
 
@@ -27,10 +28,15 @@ export function fromEnum<EnumType extends string>(
   );
 }
 
+const RISK_ENGINE_UNAVAILABLE_TYPES = [EntityType.generic];
+
 // TODO delete this function when the universal entity support is added
 export const getRiskEngineEntityTypes = (experimentalFeatures: ExperimentalFeatures) => {
   const allEntityTypes = getAllEntityTypes();
   const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
 
-  return allEntityTypes.filter((value) => !disabledEntityTypes.includes(value));
+  return allEntityTypes.filter(
+    (value) =>
+      !disabledEntityTypes.includes(value) && !RISK_ENGINE_UNAVAILABLE_TYPES.includes(value)
+  );
 };
