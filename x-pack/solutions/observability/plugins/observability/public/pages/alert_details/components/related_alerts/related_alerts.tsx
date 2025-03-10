@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { buildEsQuery } from '@kbn/es-query';
 import React from 'react';
 import { ObservabilityAlertsTable, TopAlert } from '../../../..';
 import {
@@ -27,95 +27,83 @@ export function RelatedAlerts({ alert }: Props) {
     return null;
   }
 
-  const esQuery = buildEsQuery(
-    undefined,
-    {
-      language: 'lucene',
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'kibana.alert.status': 'active',
-              },
-            },
-          ],
-          filter: [
-            {
-              range: {
-                'kibana.alert.start': {
-                  gte: '2025-03-10T12:22:35.261Z',
-                  lte: '2025-03-10T16:22:35.261Z',
-                },
-              },
-            },
-          ],
-          should: [
-            {
-              bool: {
-                boost: 2.0,
-                must: [
-                  {
-                    term: {
-                      'kibana.alert.group.field': 'labels.projectId',
-                    },
-                  },
-                  {
-                    term: {
-                      'kibana.alert.group.value': 'bf61f3fc-f1e5-4ed2-9919-edf06e74272e',
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              terms: {
-                'kibana.alert.instance.id': ['bf61f3fc-f1e5-4ed2-9919-edf06e74272e'],
-                boost: 1.0,
-              },
-            },
-            {
-              terms: {
-                tags: ['prod', 'test'],
-                boost: 0.8,
-              },
-            },
-            {
-              term: {
-                'kibana.alert.rule.uuid': {
-                  value: 'a849eff1-2712-4102-b36c-acc3354cf538',
-                  boost: 0.8,
-                },
-              },
-            },
-            {
-              function_score: {
-                functions: [
-                  {
-                    exp: {
-                      'kibana.alert.start': {
-                        origin: '2025-03-10T14:22:35.261Z',
-                        scale: '5m',
-                        offset: '5m',
-                        decay: 0.5,
-                      },
-                    },
-                  },
-                ],
-                boost_mode: 'multiply',
-              },
-            },
-          ],
+  const esQuery: QueryDslQueryContainer = {
+    bool: {
+      must: [
+        {
+          term: {
+            'kibana.alert.status': 'active',
+          },
         },
-      },
+      ],
+      filter: [
+        {
+          range: {
+            'kibana.alert.start': {
+              gte: '2025-03-10T12:22:35.261Z',
+              lte: '2025-03-10T16:22:35.261Z',
+            },
+          },
+        },
+      ],
+      should: [
+        {
+          bool: {
+            boost: 2.0,
+            must: [
+              {
+                term: {
+                  'kibana.alert.group.field': 'labels.projectId',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.group.value': 'bf61f3fc-f1e5-4ed2-9919-edf06e74272e',
+                },
+              },
+            ],
+          },
+        },
+        {
+          terms: {
+            'kibana.alert.instance.id': ['bf61f3fc-f1e5-4ed2-9919-edf06e74272e'],
+            boost: 1.0,
+          },
+        },
+        {
+          terms: {
+            tags: ['prod', 'test'],
+            boost: 0.8,
+          },
+        },
+        {
+          term: {
+            'kibana.alert.rule.uuid': {
+              value: 'a849eff1-2712-4102-b36c-acc3354cf538',
+              boost: 0.8,
+            },
+          },
+        },
+        {
+          function_score: {
+            functions: [
+              {
+                exp: {
+                  'kibana.alert.start': {
+                    origin: '2025-03-10T14:22:35.261Z',
+                    scale: '5m',
+                    offset: '5m',
+                    decay: 0.5,
+                  },
+                },
+              },
+            ],
+            boost_mode: 'multiply',
+          },
+        },
+      ],
     },
-    [],
-    {
-      allowLeadingWildcards: false,
-      queryStringOptions: {},
-      ignoreFilterIfFieldNotInIndex: false,
-    }
-  );
+  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -129,6 +117,7 @@ export function RelatedAlerts({ alert }: Props) {
           query={esQuery}
           initialPageSize={ALERTS_PER_PAGE}
           showInspectButton
+          onLoaded={(alerts) => console.dir(alerts)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
