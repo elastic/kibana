@@ -98,3 +98,21 @@ export const SUGGESTED_PROMPTS_CONTEXT_TOOLTIP = i18n.translate(
 );
 
 // END SUGGESTED PROMPTS
+
+// START AI ASSISTANT
+export const AI_ASSISTANT = i18n.translate('xpack.elasticAssistant.aiAssistant.title', {
+  defaultMessage: 'AI Assistant',
+});
+
+export const YOUR_CONVERSATIONS = i18n.translate(
+  'xpack.elasticAssistant.aiAssistant.yourConversations',
+  {
+    defaultMessage: 'Your conversations',
+  }
+);
+
+export const VIEW = i18n.translate('xpack.elasticAssistant.aiAssistant.view', {
+  defaultMessage: 'View',
+});
+
+// END AI ASSISTANT
