@@ -207,8 +207,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '1', 'Standard', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '1', 'Standard', '5 days ', 'Delete'],
+        ['', 'dataStream1', 'green', '1', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '1', '5 days ', 'Delete'],
       ]);
     });
 
@@ -256,7 +256,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '5b',
           '1',
-          'Standard',
+
           '7 days',
           'Delete',
         ],
@@ -267,7 +267,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          'Standard',
+
           '5 days ',
           'Delete',
         ],
@@ -293,7 +293,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '5b',
           '1',
-          'Standard',
+
           '7 days',
           'Delete',
         ],
@@ -304,7 +304,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          'Standard',
+
           '5 days ',
           'Delete',
         ],
@@ -352,8 +352,8 @@ describe('Data Streams tab', () => {
 
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '156kb', '10000', '1', 'Standard', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days ', 'Delete'],
+        ['', 'dataStream1', 'green', '156kb', '10000', '1', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '156kb', '10000', '1', '5 days ', 'Delete'],
       ]);
     });
 
@@ -384,7 +384,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '5b',
           '1',
-          'Standard',
+
           '7 days',
           'Delete',
         ],
@@ -395,7 +395,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          'Standard',
+
           '5 days ',
           'Delete',
         ],
@@ -720,8 +720,8 @@ describe('Data Streams tab', () => {
           const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
           expect(tableCellsValues).toEqual([
-            ['', 'dataStream1', 'green', '1', 'Standard', 'Disabled', 'Delete'],
-            ['', 'dataStream2', 'green', '1', 'Standard', '', 'Delete'],
+            ['', 'dataStream1', 'green', '1', 'Disabled', 'Delete'],
+            ['', 'dataStream2', 'green', '1', '', 'Delete'],
           ]);
 
           await actions.clickNameAt(0);
@@ -1130,16 +1130,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        [
-          '',
-          `managed-data-stream${nonBreakingSpace}Managed`,
-          'green',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
-        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
       ]);
     });
 
@@ -1148,23 +1140,15 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        [
-          '',
-          `managed-data-stream${nonBreakingSpace}Managed`,
-          'green',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
-        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
       ]);
 
       actions.toggleViewFilterAt(0);
 
       ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
       expect(tableCellsValues).toEqual([
-        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
       ]);
     });
   });
@@ -1196,15 +1180,7 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        [
-          '',
-          `hidden-data-stream${nonBreakingSpace}Hidden`,
-          'green',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
+        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', '7 days', 'Delete'],
       ]);
     });
   });
@@ -1251,10 +1227,10 @@ describe('Data Streams tab', () => {
         const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
-          ['', 'dataStreamFullPermissions', 'green', '1', 'Standard', '7 days', 'Delete'],
-          ['', 'dataStreamNoDelete', 'green', '1', 'Standard', '7 days', ''],
-          ['', 'dataStreamNoEditRetention', 'green', '1', 'Standard', '7 days', 'Delete'],
-          ['', 'dataStreamNoPermissions', 'green', '1', 'Standard', '7 days', ''],
+          ['', 'dataStreamFullPermissions', 'green', '1', '7 days', 'Delete'],
+          ['', 'dataStreamNoDelete', 'green', '1', '7 days', ''],
+          ['', 'dataStreamNoEditRetention', 'green', '1', '7 days', 'Delete'],
+          ['', 'dataStreamNoPermissions', 'green', '1', '7 days', ''],
         ]);
       });
 
