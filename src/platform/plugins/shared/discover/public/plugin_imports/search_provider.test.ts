@@ -12,8 +12,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { getESQLSearchProvider } from './search_provider';
 import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
 import type { DiscoverAppLocator } from '../../common';
-import { DiscoverStartPlugins } from '../types';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DiscoverStartPlugins } from '../types';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('ES|QL search provider', () => {
   const getServices = (): Promise<[CoreStart, DiscoverStartPlugins]> =>

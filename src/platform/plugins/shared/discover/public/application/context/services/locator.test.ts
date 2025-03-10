@@ -8,7 +8,8 @@
  */
 
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DISCOVER_CONTEXT_APP_LOCATOR, DiscoverContextAppLocatorParams } from './locator';
+import type { DiscoverContextAppLocatorParams } from './locator';
+import { DISCOVER_CONTEXT_APP_LOCATOR } from './locator';
 import { contextAppLocatorGetLocation } from './locator_get_location';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';

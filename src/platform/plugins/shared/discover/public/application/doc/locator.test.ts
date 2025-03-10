@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DISCOVER_SINGLE_DOC_LOCATOR, DiscoverSingleDocLocatorParams } from './locator';
+import type { DiscoverSingleDocLocatorParams } from './locator';
+import { DISCOVER_SINGLE_DOC_LOCATOR } from './locator';
 import { singleDocLocatorGetLocation } from './locator_get_location';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
