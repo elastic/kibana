@@ -5,83 +5,56 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
-import { TableColumn, UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
+import {
+  useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 
-interface SimulationPlaygroundProps {
-  definition: IngestStreamGetResponse;
-  columns: TableColumn[];
-  isLoading: UseProcessingSimulatorReturn['isLoading'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
-  filteredSamples: UseProcessingSimulatorReturn['filteredSamples'];
-  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
-  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
-  onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
-}
+export const SimulationPlayground = () => {
+  const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
+    state.matches({
+      ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
+    })
+  );
+  const isViewingDetectedFields = useStreamsEnrichmentSelector((state) =>
+    state.matches({
+      ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
+    })
+  );
+  const canViewDetectedFields = useStreamsEnrichmentSelector((state) =>
+    isWiredStreamGetResponse(state.context.definition)
+  );
 
-export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
-  const {
-    definition,
-    columns,
-    isLoading,
-    simulation,
-    filteredSamples,
-    onRefreshSamples,
-    setSelectedDocsFilter,
-    selectedDocsFilter,
-  } = props;
-
-  const tabs = {
-    dataPreview: {
-      name: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
-        { defaultMessage: 'Data preview' }
-      ),
-    },
-    ...(isWiredStreamGetResponse(definition) && {
-      detectedFields: {
-        name: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-          { defaultMessage: 'Detected fields' }
-        ),
-      },
-    }),
-  } as const;
-
-  const [selectedTabId, setSelectedTabId] = useState<keyof typeof tabs>('dataPreview');
+  const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
 
   return (
     <>
       <EuiFlexItem grow={false}>
         <EuiTabs bottomBorder={false}>
-          {Object.entries(tabs).map(([tabId, tab]) => (
-            <EuiTab
-              key={tabId}
-              isSelected={selectedTabId === tabId}
-              onClick={() => setSelectedTabId(tabId as keyof typeof tabs)}
-            >
-              {tab.name}
+          <EuiTab isSelected={isViewingDataPreview} onClick={viewSimulationPreviewData}>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
+              { defaultMessage: 'Data preview' }
+            )}
+          </EuiTab>
+          {canViewDetectedFields && (
+            <EuiTab isSelected={isViewingDetectedFields} onClick={viewSimulationDetectedFields}>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+                { defaultMessage: 'Detected fields' }
+              )}
             </EuiTab>
-          ))}
+          )}
         </EuiTabs>
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      {selectedTabId === 'dataPreview' && (
-        <ProcessorOutcomePreview
-          columns={columns}
-          isLoading={isLoading}
-          simulation={simulation}
-          filteredSamples={filteredSamples}
-          onRefreshSamples={onRefreshSamples}
-          selectedDocsFilter={selectedDocsFilter}
-          setSelectedDocsFilter={setSelectedDocsFilter}
-        />
-      )}
-      {selectedTabId === 'detectedFields' &&
+      {isViewingDataPreview && <ProcessorOutcomePreview />}
+      {isViewingDetectedFields &&
         i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
           defaultMessage: 'WIP',
         })}

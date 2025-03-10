@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 
 const tabItem = {
@@ -17,9 +18,11 @@ const tabItem = {
 };
 
 const tabContentId = 'test-content-id';
+const tabButtonTestSubj = `unifiedTabs_selectTabBtn_${tabItem.id}`;
 
 describe('Tab', () => {
   it('renders tab', async () => {
+    const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
     const onClose = jest.fn();
 
@@ -28,6 +31,7 @@ describe('Tab', () => {
         tabContentId={tabContentId}
         item={tabItem}
         isSelected={false}
+        onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
       />
@@ -42,10 +46,14 @@ describe('Tab', () => {
     expect(onSelect).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
+    const tabButton = screen.getByTestId(tabButtonTestSubj);
+    tabButton.click();
+    expect(onSelect).toHaveBeenCalledTimes(2);
+
     const closeButton = screen.getByTestId(`unifiedTabs_closeTabBtn_${tabItem.id}`);
     closeButton.click();
     expect(onClose).toHaveBeenCalled();
-    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledTimes(2);
   });
 
   it('can render tab menu items', async () => {
@@ -65,6 +73,7 @@ describe('Tab', () => {
         item={tabItem}
         isSelected={false}
         getTabMenuItems={getTabMenuItems}
+        onLabelEdited={jest.fn()}
         onSelect={jest.fn()}
         onClose={jest.fn()}
       />
@@ -79,5 +88,69 @@ describe('Tab', () => {
     menuItem.click();
     expect(mockClick).toHaveBeenCalledTimes(1);
     expect(getTabMenuItems).toHaveBeenCalledTimes(1);
+  });
+
+  it('can edit tab label', async () => {
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        item={tabItem}
+        isSelected={false}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+      />
+    );
+
+    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    await userEvent.dblClick(screen.getByText(tabItem.label));
+    expect(onSelect).toHaveBeenCalled();
+    expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
+
+    const input = screen.getByRole('textbox');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'new-label');
+    expect(input).toHaveValue('new-label');
+    await userEvent.keyboard('{enter}');
+    expect(onLabelEdited).toHaveBeenCalledWith(tabItem, 'new-label');
+
+    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('can cancel editing of tab label', async () => {
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        item={tabItem}
+        isSelected={false}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+      />
+    );
+
+    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    await userEvent.dblClick(screen.getByText(tabItem.label));
+    expect(onSelect).toHaveBeenCalled();
+    expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
+
+    const input = screen.getByRole('textbox');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'new-label');
+    expect(input).toHaveValue('new-label');
+    fireEvent.keyUp(input, { key: 'Escape' });
+    expect(onLabelEdited).not.toHaveBeenCalled();
+
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
   });
 });
