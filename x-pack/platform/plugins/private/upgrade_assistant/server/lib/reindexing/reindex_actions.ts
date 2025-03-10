@@ -125,6 +125,19 @@ export const reindexActionsFactory = (
   // ----- Public interface
   return {
     async createReindexOp(indexName: string, opts?: ReindexOptions) {
+      const rollupCaps = await esClient.rollup.getRollupIndexCaps({ index: indexName });
+      const rollupIndices = Object.keys(rollupCaps);
+      let rollupJob;
+      if (rollupIndices.length > 0) {
+        // there should only be one job
+        rollupJob = rollupCaps[rollupIndices[0]].rollup_jobs[0].job_id;
+        const jobs = await esClient.rollup.getJobs({ id: rollupJob });
+        // there can only be one job. If its stopped then we don't need rollup handling
+        if (jobs.jobs[0].status.job_state === 'stopped') {
+          rollupJob = undefined;
+        }
+      }
+
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
@@ -136,6 +149,7 @@ export const reindexActionsFactory = (
         errorMessage: null,
         runningReindexCount: null,
         reindexOptions: opts,
+        rollupJob,
       });
     },
 
