@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -19,8 +20,12 @@ const scriptedField = dataView.getFieldByName('script date')!;
 const conflictField = dataView.getFieldByName('custom_user_field')!;
 
 describe('UnifiedFieldList FieldItemButton', () => {
+  const renderWithThemeProvider = (component: React.ReactElement) => {
+    return render(<EuiThemeProvider>{component}</EuiThemeProvider>);
+  };
+
   test('renders properly', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={bytesField}
         fieldSearchHighlight="by"
@@ -30,11 +35,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly when empty', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={scriptedField}
         fieldSearchHighlight={undefined}
@@ -44,11 +49,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly when a conflict field', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={conflictField}
         fieldSearchHighlight={undefined}
@@ -58,11 +63,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly for Records (Lens field)', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={
           new DataViewField({
@@ -80,11 +85,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly with an action when selected', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={bytesField}
         fieldSearchHighlight={undefined}
@@ -96,11 +101,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly with an action when deselected', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={bytesField}
         fieldSearchHighlight={undefined}
@@ -113,11 +118,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly with a drag icon', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         size="xs"
         className="custom"
@@ -131,11 +136,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly for text-based column field', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton<DatatableColumn>
         field={{ id: 'test', name: 'agent', meta: { type: 'string' } }}
         fieldSearchHighlight="ag"
@@ -146,11 +151,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly for wildcard search', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={scriptedField}
         fieldSearchHighlight="sc*te"
@@ -160,11 +165,11 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders properly for search with spaces', () => {
-    const component = shallow(
+    const { container } = renderWithThemeProvider(
       <FieldItemButton
         field={scriptedField}
         fieldSearchHighlight="sc te"
@@ -174,6 +179,6 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });
