@@ -23,6 +23,7 @@ import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
+import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -242,6 +243,9 @@ export function WaterfallItem({
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
 
+  const isMissingSpanDestination =
+    item.docType === 'span' && item.doc.span.type !== 'internal' && !item.doc.span.destination;
+
   const itemBarStyle = getItemBarStyle(item, color, width, left);
 
   const isServerlessColdstart = item.docType === 'transaction' && item.doc.faas?.coldstart;
@@ -285,6 +289,7 @@ export function WaterfallItem({
           <PrefixIcon item={item} />
         </SpanActionToolTip>
         {item.isOrphan ? <OrphanItemTooltipIcon docType={item.docType} /> : null}
+        {isMissingSpanDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
 
