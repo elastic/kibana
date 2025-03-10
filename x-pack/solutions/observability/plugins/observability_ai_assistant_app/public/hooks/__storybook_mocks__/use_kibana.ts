@@ -20,6 +20,7 @@ export function useKibana() {
       application: { navigateToApp: () => {} },
       http: {
         basePath: {
+          get: () => '/basePath/',
           prepend: () => '',
         },
       },
@@ -38,6 +39,7 @@ export function useKibana() {
             useChat,
             ObservabilityAIAssistantMultipaneFlyoutContext,
           },
+          discover: {},
           share: {
             url: {
               locators: {

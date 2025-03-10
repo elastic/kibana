@@ -7,6 +7,7 @@
 
 export function parseSuggestionScores(scoresAsString: string) {
   // make sure that spaces, semi-colons etc work as separators as well
+
   const scores = scoresAsString
     .replace(/[^0-9a-zA-Z\-_,]/g, ' ')
     .trim()
@@ -15,7 +16,7 @@ export function parseSuggestionScores(scoresAsString: string) {
       const [id, score] = pair.split(',').map((str) => str.trim());
 
       return {
-        id,
+        shortId: id,
         score: parseInt(score, 10),
       };
     });

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import React, { type ComponentType, lazy, type Ref } from 'react';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import { lazy } from 'react';
+import { aiAssistantCapabilities } from '../common/capabilities';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
-import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
+import { createUseChat } from './hooks/use_chat';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
-import { createScreenContextAction } from './utils/create_screen_context_action';
-import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -29,7 +26,9 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
-import { aiAssistantCapabilities } from '../common/capabilities';
+import { createScreenContextAction } from './utils/create_screen_context_action';
+import { createWithProviders } from './utils/create_with_providers';
+import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -71,26 +70,14 @@ export class ObservabilityAIAssistantPlugin
       scopeIsMutable: !!this.scopeFromConfig,
     }));
 
-    const withProviders = <P extends {}, R = {}>(
-      Component: ComponentType<P>,
-      services: Omit<CoreStart, 'plugins'> & {
-        plugins: { start: ObservabilityAIAssistantPluginStartDependencies };
-      }
-    ) =>
-      React.forwardRef((props: P, ref: Ref<R>) => (
-        <KibanaContextProvider services={services}>
-          <ObservabilityAIAssistantProvider value={service}>
-            <Component {...props} ref={ref} />
-          </ObservabilityAIAssistantProvider>
-        </KibanaContextProvider>
-      ));
-
     const services = {
       ...coreStart,
       plugins: {
         start: pluginsStart,
       },
     };
+
+    const withProviders = createWithProviders({ service, kibanaContextServices: services });
 
     const isEnabled = service.isEnabled();
 
@@ -108,8 +95,7 @@ export class ObservabilityAIAssistantPlugin
             withProviders(
               lazy(() =>
                 import('./components/insight/insight').then((m) => ({ default: m.Insight }))
-              ),
-              services
+              )
             )
           )
         : null,

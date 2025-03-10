@@ -31,6 +31,11 @@ import type {
   AIAssistantManagementSelectionPluginPublicStart,
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
+import type {
+  SearchConnectorsPluginStart,
+  SearchConnectorsPluginSetup,
+} from '@kbn/search-connectors-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
 
 export interface ObservabilityAIAssistantAppPublicStart {
@@ -53,6 +58,8 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  searchConnectors: SearchConnectorsPluginStart;
+  discover: DiscoverStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -66,4 +73,6 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   ml: MlPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
+  searchConnectors: SearchConnectorsPluginSetup;
+  discover: DiscoverSetup;
 }

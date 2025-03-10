@@ -14,10 +14,11 @@ import { MessageRole, type Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
-import { KnowledgeBaseQueryContainer, RecalledEntry } from '../../service/knowledge_base_service';
 import { rewriteQuery } from '../rewrite_query';
-
-export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
+import {
+  KnowledgeBaseHit,
+  KnowledgeBaseQueryContainer,
+} from '../../service/knowledge_base_service/types';
 
 export async function recallAndScore({
   recall,
@@ -40,10 +41,10 @@ export async function recallAndScore({
   logger: Logger;
   signal: AbortSignal;
 }): Promise<{
-  relevantDocuments?: RecalledSuggestion[];
-  scores?: Array<{ id: string; score: number }>;
-  suggestions: RecalledSuggestion[];
-  queries?: KnowledgeBaseQueryContainer[];
+  entries: KnowledgeBaseHit[];
+  selected: string[];
+  queries: KnowledgeBaseQueryContainer[];
+  scores?: Map<string, number>;
 }> {
   const [[systemMessage], otherMessages] = partition(
     messages,
@@ -59,22 +60,19 @@ export async function recallAndScore({
 
   logger.debug(() => `Query rewrite: ${JSON.stringify(queries)}`);
 
-  const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
-    ({ id, text, score }) => ({ id, text, score })
-  );
+  const entries = await recall({ queries, limit: { tokenCount: 8000 } });
 
-  if (!suggestions.length) {
+  if (!entries.length) {
     return {
-      relevantDocuments: [],
-      scores: [],
-      suggestions: [],
+      selected: [],
+      entries,
       queries,
     };
   }
 
   try {
-    const { scores, relevantDocuments } = await scoreSuggestions({
-      suggestions,
+    const { scores, selected } = await scoreSuggestions({
+      entries,
       logger,
       messages,
       userPrompt,
@@ -85,21 +83,23 @@ export async function recallAndScore({
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
       prompt: JSON.stringify(queries),
-      scoredDocuments: suggestions.map((suggestion) => {
-        const llmScore = scores.find((score) => score.id === suggestion.id);
+      scoredDocuments: entries.map((entry) => {
+        const llmScore = scores?.get(entry.id);
         return {
-          content: suggestion.text,
-          elserScore: suggestion.score ?? -1,
-          llmScore: llmScore ? llmScore.score : -1,
+          content: entry.text,
+          elserScore: entry.score,
+          llmScore: llmScore ?? -1,
         };
       }),
     });
 
-    return { scores, relevantDocuments, suggestions, queries };
+    return { scores, selected, queries, entries };
   } catch (error) {
     logger.error(`Error scoring documents: ${error.message}`, { error });
     return {
-      suggestions: suggestions.slice(0, 5),
+      entries,
+      selected: entries.slice(0, 5).map((entry) => entry.id),
+      queries,
     };
   }
 }

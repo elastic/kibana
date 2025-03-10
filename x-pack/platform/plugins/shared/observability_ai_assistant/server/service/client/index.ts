@@ -7,12 +7,16 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { CoreSetup, IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
+import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
 import {
+  Observable,
   catchError,
   defer,
   filter,
@@ -20,7 +24,6 @@ import {
   from,
   map,
   merge as mergeOperator,
-  Observable,
   of,
   shareReplay,
   switchMap,
@@ -28,61 +31,58 @@ import {
   throwError,
 } from 'rxjs';
 import { v4 } from 'uuid';
-import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
-  ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
+  ChatCompletionMessageEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
-  createConversationNotFoundError,
   StreamingChatResponseEventType,
+  createConversationNotFoundError,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
+  KnowledgeBaseEntryRole,
+  KnowledgeBaseType,
   type AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
-  KnowledgeBaseType,
-  KnowledgeBaseEntryRole,
 } from '../../../common/types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import type { ChatFunctionClient } from '../chat_function_client';
-import {
-  KnowledgeBaseQueryContainer,
-  KnowledgeBaseService,
-  RecalledEntry,
-} from '../knowledge_base_service';
-import { getAccessQuery } from '../util/get_access_query';
-import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
-import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
-import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
-import { LangTracer } from './instrumentation/lang_tracer';
-import { continueConversation } from './operators/continue_conversation';
-import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
-import { extractMessages } from './operators/extract_messages';
-import { getGeneratedTitle } from './operators/get_generated_title';
+import { KnowledgeBaseService } from '../knowledge_base_service';
+import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
+import { KnowledgeBaseClient } from '../knowledge_base_service/knowledge_base_client';
+import { KnowledgeBaseHit, KnowledgeBaseQueryContainer } from '../knowledge_base_service/types';
 import {
   reIndexKnowledgeBaseAndPopulateSemanticTextField,
   scheduleKbSemanticTextMigrationTask,
 } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
-import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
+import { getAccessQuery } from '../util/get_access_query';
+import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
+import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
+import { LangTracer } from './instrumentation/lang_tracer';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { continueConversation } from './operators/continue_conversation';
+import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
+import { extractMessages } from './operators/extract_messages';
+import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
+import { getGeneratedTitle } from './operators/get_generated_title';
 
 const MAX_FUNCTION_CALLS = 8;
 
 export class ObservabilityAIAssistantClient {
+  private readonly kbClient: KnowledgeBaseClient;
   constructor(
     private readonly dependencies: {
       config: ObservabilityAIAssistantConfig;
@@ -90,20 +90,31 @@ export class ObservabilityAIAssistantClient {
       actionsClient: PublicMethodsOf<ActionsClient>;
       uiSettingsClient: IUiSettingsClient;
       namespace: string;
-      esClient: {
-        asInternalUser: ElasticsearchClient;
-        asCurrentUser: ElasticsearchClient;
-      };
+      esClient: IScopedClusterClient;
       inferenceClient: InferenceClient;
       logger: Logger;
-      user?: {
+      user: {
         id?: string;
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      productDocBase: ProductDocBaseStartContract;
       scopes: AssistantScope[];
     }
-  ) {}
+  ) {
+    this.kbClient = new KnowledgeBaseClient({
+      config: dependencies.config,
+      core: dependencies.core,
+      logger: dependencies.logger,
+      user: dependencies.user,
+      pluginsStart: {
+        productDocBase: dependencies.productDocBase,
+      },
+      scopedClusterClient: dependencies.esClient,
+      spaceId: dependencies.namespace,
+      uiSettingsClient: dependencies.uiSettingsClient,
+    });
+  }
 
   private getConversationWithMetaFields = async (
     conversationId: string
@@ -653,28 +664,19 @@ export class ObservabilityAIAssistantClient {
 
   recall = async ({
     queries,
-    categories,
     limit,
   }: {
     queries: KnowledgeBaseQueryContainer[];
-    categories?: string[];
     limit?: { size?: number; tokenCount?: number };
-  }): Promise<RecalledEntry[]> => {
-    return (
-      this.dependencies.knowledgeBaseService?.recall({
-        namespace: this.dependencies.namespace,
-        user: this.dependencies.user,
-        queries,
-        categories,
-        esClient: this.dependencies.esClient,
-        uiSettingsClient: this.dependencies.uiSettingsClient,
-        limit,
-      }) || []
-    );
+  }): Promise<KnowledgeBaseHit[]> => {
+    return this.kbClient.recall({
+      queries,
+      limit,
+    });
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getStatus();
+    return this.kbClient.status();
   };
 
   setupKnowledgeBase = async (modelId: string | undefined) => {

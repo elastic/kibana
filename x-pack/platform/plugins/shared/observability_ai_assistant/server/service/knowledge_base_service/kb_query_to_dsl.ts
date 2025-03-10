@@ -6,102 +6,91 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { KnowledgeBaseQueryContainer } from '.';
-import { ML_INFERENCE_PREFIX } from './recall_from_search_connectors';
+import { KnowledgeBaseQueryContainer } from './types';
 
-function wrapInShould(query: QueryDslQueryContainer[]): QueryDslQueryContainer {
+export const ML_INFERENCE_PREFIX = 'ml.inference.';
+
+const MATCH_ALL_NO_SCORE = {
+  bool: {
+    filter: [
+      {
+        match_all: {},
+      },
+    ],
+  },
+};
+
+export function kbQueryToSparseVector(
+  query: KnowledgeBaseQueryContainer,
+  fields: string[],
+  modelId: string
+): QueryDslQueryContainer {
+  if ('keyword' in query) {
+    return MATCH_ALL_NO_SCORE;
+  }
   return {
     bool: {
-      should: query,
-      minimum_should_match: 1,
+      should: fields.map((field) => {
+        const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
+        const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
+        return {
+          bool: {
+            should: [
+              {
+                sparse_vector: {
+                  field: vectorField,
+                  query: query.semantic.query,
+                  inference_id: modelId,
+                  boost: query.semantic.boost ?? 1,
+                },
+              },
+            ],
+            filter: [
+              {
+                term: {
+                  [modelField]: modelId,
+                },
+              },
+            ],
+          },
+        };
+      }),
     },
   };
 }
 
 export function kbQueryToDsl(
   query: KnowledgeBaseQueryContainer,
-  field: string,
-  modelId: string
-): QueryDslQueryContainer;
-
-export function kbQueryToDsl(
-  query: KnowledgeBaseQueryContainer,
-  semanticTextFields: string[]
-): QueryDslQueryContainer;
-
-export function kbQueryToDsl(
-  query: KnowledgeBaseQueryContainer,
-  ...rest: [string[]] | [string, string]
+  textFields: string[]
 ): QueryDslQueryContainer {
-  const fields = rest.length === 1 ? rest[0] : [rest[0]];
-
   if ('keyword' in query) {
-    return wrapInShould([
-      ...query.keyword.value.map((keyword) => ({
-        multi_match: {
-          fields: ['*'],
-          query: keyword,
-          boost: query.keyword.boost ?? 1,
-        },
-      })),
-    ]);
+    return {
+      // use multi_match to query both text and keyword fields
+      multi_match: {
+        fields: ['*'],
+        query: query.keyword.value.join(' '),
+        operator: 'OR',
+        boost: query.keyword.boost ?? 1,
+      },
+    };
   }
 
-  return fields.length
-    ? wrapInShould([
-        ...fields.flatMap((field) => {
-          if (rest.length === 2) {
-            const modelId = rest[1];
-            const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
-            const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
-            return {
-              bool: {
-                should: [
-                  {
-                    sparse_vector: {
-                      field: vectorField,
-                      query: query.semantic.query,
-                      inference_id: rest[1],
-                      boost: query.semantic.boost ?? 1,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-                filter: [
-                  {
-                    term: {
-                      [modelField]: modelId,
-                    },
-                  },
-                ],
-              },
-            };
-          }
-          return {
-            bool: {
-              should: [
-                {
-                  semantic: {
-                    query: query.semantic.query,
-                    field,
-                    boost: query.semantic.boost ?? 1,
-                  },
-                },
-                {
-                  match: {
-                    [field]: {
-                      query: query.semantic.query,
-                      boost: Math.max(1, (query.semantic.boost ?? 2) - 1),
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          };
-        }),
-      ])
-    : {
-        match_all: {},
-      };
+  if (!textFields.length) {
+    return MATCH_ALL_NO_SCORE;
+  }
+
+  return {
+    bool: {
+      should: textFields.map((field) => ({
+        // multi_match doesn't work on semantic_text,
+        // so we use match queries
+        match: {
+          [field]: {
+            query: query.semantic.query,
+            boost: query.semantic.boost,
+          },
+        },
+      })),
+    },
+  };
 }

@@ -6,10 +6,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import {
+  InferenceInferenceEndpointInfo,
+  MlDeploymentAssignmentState,
+  MlDeploymentAllocationState,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import moment from 'moment';
-import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 
@@ -90,15 +94,28 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   );
 }
 
+interface ElserModelErrorStatus {
+  ready: false;
+  errorMessage: string;
+}
+
+interface ElserModelResolvedStatus {
+  ready: boolean;
+  endpoint: InferenceInferenceEndpointInfo;
+  allocation_count: number;
+  deployment_state: MlDeploymentAssignmentState | undefined;
+  allocation_state: MlDeploymentAllocationState | undefined;
+}
+
+export type ElserModelStatus = ElserModelErrorStatus | ElserModelResolvedStatus;
+
 export async function getElserModelStatus({
   esClient,
   logger,
-  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  config: ObservabilityAIAssistantConfig;
-}) {
+}): Promise<ElserModelErrorStatus | ElserModelResolvedStatus> {
   let errorMessage = '';
   const endpoint = await getInferenceEndpoint({
     esClient,
@@ -109,9 +126,8 @@ export async function getElserModelStatus({
     errorMessage = error.message;
   });
 
-  const enabled = config.enableKnowledgeBase;
   if (!endpoint) {
-    return { ready: false, enabled, errorMessage };
+    return { ready: false, errorMessage };
   }
 
   const modelId = endpoint.service_settings?.model_id;
@@ -123,7 +139,7 @@ export async function getElserModelStatus({
     });
 
   if (!modelStats) {
-    return { ready: false, enabled, errorMessage };
+    return { ready: false, errorMessage };
   }
 
   const elserModelStats = modelStats.trained_model_stats.find(
@@ -139,11 +155,8 @@ export async function getElserModelStatus({
   return {
     endpoint,
     ready,
-    enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    allocation_count: allocationCount,
+    deployment_state: deploymentState,
+    allocation_state: allocationState,
   };
 }

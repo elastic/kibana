@@ -9,12 +9,11 @@ import { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
-import { omit } from 'lodash';
 import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
-import { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../common/utils/short_id_table';
+import { KnowledgeBaseHit } from '../../service/knowledge_base_service/types';
 
 const scoreFunctionRequestRt = t.type({
   message: t.type({
@@ -30,7 +29,7 @@ const scoreFunctionArgumentsRt = t.type({
 });
 
 export async function scoreSuggestions({
-  suggestions,
+  entries,
   messages,
   userPrompt,
   context,
@@ -38,7 +37,7 @@ export async function scoreSuggestions({
   signal,
   logger,
 }: {
-  suggestions: RecalledSuggestion[];
+  entries: KnowledgeBaseHit[];
   messages: Message[];
   userPrompt: string;
   context: string;
@@ -46,10 +45,16 @@ export async function scoreSuggestions({
   signal: AbortSignal;
   logger: Logger;
 }): Promise<{
-  relevantDocuments: RecalledSuggestion[];
-  scores: Array<{ id: string; score: number }>;
+  selected: string[];
+  scores?: Map<string, number>;
 }> {
   const shortIdTable = new ShortIdTable();
+
+  const formattedEntries = entries.map((entry) => ({
+    text: entry.truncated?.truncatedText ?? entry.text,
+    truncated: !!entry.truncated,
+    id: shortIdTable.take(entry.id), // Shorten id to save tokens
+  }));
 
   const newUserMessageContent =
     dedent(`Given the following prompt, score the documents that are relevant to the prompt on a scale from 0 to 7,
@@ -68,14 +73,10 @@ export async function scoreSuggestions({
     ${context}
 
     Documents:
-    ${JSON.stringify(
-      suggestions.map((suggestion) => ({
-        ...omit(suggestion, 'score'), // Omit score to not bias the LLM
-        id: shortIdTable.take(suggestion.id), // Shorten id to save tokens
-      })),
-      null,
-      2
-    )}`);
+    \`\`\`json
+    ${JSON.stringify(formattedEntries)}
+    \`\`\`
+    `);
 
   const newUserMessage: Message = {
     '@timestamp': new Date().toISOString(),
@@ -123,31 +124,31 @@ export async function scoreSuggestions({
 
   const scores = parseSuggestionScores(scoresAsString)
     // Restore original IDs
-    .map(({ id, score }) => ({ id: shortIdTable.lookup(id)!, score }));
+    .map(({ shortId, score }) => ({ id: shortIdTable.lookup(shortId)!, score }));
 
   if (scores.length === 0) {
     // seemingly invalid or no scores, return all
-    return { relevantDocuments: suggestions, scores: [] };
+    return {
+      selected: entries.map((entry) => entry.id),
+    };
   }
 
-  const suggestionIds = suggestions.map((document) => document.id);
+  const suggestionIds = entries.map((document) => document.id);
 
   // get top 5 documents ids with scores > 4
   const relevantDocumentIds = scores
     .filter(({ score }) => score > 4)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
     .filter(({ id }) => suggestionIds.includes(id ?? '')) // Remove hallucinated documents
+    .slice(0, 10)
     .map(({ id }) => id);
 
-  const relevantDocuments = suggestions.filter((suggestion) =>
-    relevantDocumentIds.includes(suggestion.id)
-  );
+  const selected = entries.filter((entry) => relevantDocumentIds.includes(entry.id));
 
-  logger.debug(() => `Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
+  logger.debug(() => `Relevant documents: ${JSON.stringify(selected)}`);
 
   return {
-    relevantDocuments,
-    scores: scores.map((score) => ({ id: score.id, score: score.score })),
+    scores: new Map<string, number>(scores.map((score) => [score.id, score.score])),
+    selected: relevantDocumentIds,
   };
 }

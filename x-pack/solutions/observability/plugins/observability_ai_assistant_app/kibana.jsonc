@@ -35,7 +35,8 @@
       "logsDataAccess",
       "spaces",
       "slo",
-      "llmTasks"
+      "searchConnectors",
+      "discover"
     ],
     "optionalPlugins": [
       "cloud"

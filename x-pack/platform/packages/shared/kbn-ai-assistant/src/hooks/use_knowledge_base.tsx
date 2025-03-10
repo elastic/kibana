@@ -102,7 +102,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       const { value: currentStatus } = statusRequest;
 
       // check if the model is now ready
-      if (currentStatus?.ready) {
+      if (currentStatus?.internal?.available) {
         // done installing
         setIsInstalling(false);
         setIsPollingForDeployment(false);
@@ -111,7 +111,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       }
 
       // if "deployment failed" state
-      if (currentStatus?.model_stats?.deployment_state === 'failed') {
+      if (currentStatus?.internal?.model_status === 'failed') {
         setInstallError(new Error('model deployment failed'));
         setIsInstalling(false);
         setIsPollingForDeployment(false);

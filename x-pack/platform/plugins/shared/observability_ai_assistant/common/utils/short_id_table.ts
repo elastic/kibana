@@ -32,7 +32,7 @@ export class ShortIdTable {
 
     let uniqueId: string | undefined;
     let attemptsAtLength = 0;
-    let length = 4;
+    let length = 6;
     while (!uniqueId) {
       const nextId = generateShortId(length);
       attemptsAtLength++;

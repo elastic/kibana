@@ -21,6 +21,14 @@ export type {
 export type { ObservabilityAIAssistantClient } from './service/client';
 
 export {
+  type ContextEntry,
+  type ContextToolResponseV1,
+  type ContextToolResponseV2,
+  type ContextToolResponse,
+  CONTEXT_FUNCTION_NAME,
+} from './functions/context';
+
+export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,

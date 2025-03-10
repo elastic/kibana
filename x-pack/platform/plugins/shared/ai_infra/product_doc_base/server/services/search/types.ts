@@ -35,6 +35,8 @@ export interface DocSearchResult {
   content: string;
   /** content highlights based on the query */
   highlights: string[];
+  /** The relevance score of the document */
+  score: number;
 }
 
 /**

@@ -81,7 +81,7 @@ ${
       If the user asks how to change the language, reply in the same language the user asked in.`);
   }
 
-  const { ready: isKnowledgeBaseReady } = await client.getKnowledgeBaseStatus();
+  const knowledgeBaseStatus = await client.getKnowledgeBaseStatus();
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];
@@ -103,7 +103,7 @@ ${
         Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`);
     }
 
-    if (isKnowledgeBaseReady) {
+    if (knowledgeBaseStatus.internal?.available) {
       if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
         instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
           Only use this function when the user asks to remember or store some information.
@@ -123,11 +123,11 @@ ${
     return instructions.map((instruction) => dedent(instruction));
   });
 
-  if (isKnowledgeBaseReady) {
+  if (knowledgeBaseStatus.internal?.available) {
     registerSummarizationFunction(registrationParameters);
   }
 
-  registerContextFunction({ ...registrationParameters, isKnowledgeBaseReady });
+  registerContextFunction({ ...registrationParameters, knowledgeBaseStatus });
 
   registerElasticsearchFunction(registrationParameters);
   const request = registrationParameters.resources.request;

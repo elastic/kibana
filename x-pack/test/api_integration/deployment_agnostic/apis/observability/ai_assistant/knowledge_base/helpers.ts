@@ -61,7 +61,7 @@ export async function waitForKnowledgeBaseReady({
       endpoint: 'GET /internal/observability_ai_assistant/kb/status',
     });
     expect(res.status).to.be(200);
-    expect(res.body.ready).to.be(true);
+    expect(res.body.internal?.available).to.be(true);
   });
 }
 

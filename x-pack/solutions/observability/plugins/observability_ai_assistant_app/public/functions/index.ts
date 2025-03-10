@@ -10,6 +10,7 @@ import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../type
 import { registerChangesRenderFunction } from './changes';
 import { registerLensRenderFunction } from './lens';
 import { registerVisualizeQueryRenderFunction } from './visualize_esql';
+import { registerContextRenderFunction } from './context';
 
 export async function registerFunctions({
   registerRenderFunction,
@@ -21,6 +22,11 @@ export async function registerFunctions({
   registerLensRenderFunction({ pluginsStart, registerRenderFunction });
   registerVisualizeQueryRenderFunction({ pluginsStart, registerRenderFunction });
   registerChangesRenderFunction({
+    pluginsStart,
+    registerRenderFunction,
+  });
+
+  registerContextRenderFunction({
     pluginsStart,
     registerRenderFunction,
   });

@@ -6,10 +6,8 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { orderBy } from 'lodash';
-import { encode } from 'gpt-tokenizer';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -17,23 +15,19 @@ import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseType,
 } from '../../../common/types';
-import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
-import { getCategoryQuery } from '../util/get_category_query';
+import { ObservabilityAIAssistantConfig } from '../../config';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getElserModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
-import { recallFromSearchConnectors } from './recall_from_search_connectors';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import {
   isKnowledgeBaseIndexWriteBlocked,
   isSemanticTextUnsupportedError,
 } from './reindex_knowledge_base';
-import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
-import { kbQueryToDsl } from './kb_query_to_dsl';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -44,36 +38,9 @@ interface Dependencies {
   config: ObservabilityAIAssistantConfig;
 }
 
-export interface RecalledEntry {
-  id: string;
-  text: string;
-  score: number | null;
-  is_correction?: boolean;
-  labels?: Record<string, string>;
-  tokens: number;
-}
-
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
-
-export interface KnowledgeBaseKeywordQueryContainer {
-  keyword: {
-    value: string[];
-    boost?: number;
-  };
-}
-
-export interface KnowledgeBaseSemanticTextContainer {
-  semantic: {
-    query: string;
-    boost?: number;
-  };
-}
-
-export type KnowledgeBaseQueryContainer =
-  | KnowledgeBaseKeywordQueryContainer
-  | KnowledgeBaseSemanticTextContainer;
 
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
@@ -99,133 +66,6 @@ export class KnowledgeBaseService {
       throw error;
     }
   }
-
-  private async recallFromKnowledgeBase({
-    queries,
-    categories,
-    namespace,
-    user,
-  }: {
-    queries: KnowledgeBaseQueryContainer[];
-    categories?: string[];
-    namespace: string;
-    user?: { name: string };
-  }): Promise<Array<Omit<RecalledEntry, 'tokens'>>> {
-    this.dependencies.logger.debug(() =>
-      JSON.stringify({
-        queries: queries.map((query) => {
-          return kbQueryToDsl(query, ['semantic_text']);
-        }),
-      })
-    );
-    const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
-    >({
-      index: [resourceNames.aliases.kb],
-      query: {
-        bool: {
-          should: queries.map((query) => {
-            return kbQueryToDsl(query, ['semantic_text']);
-          }),
-          filter: [
-            ...getAccessQuery({
-              user,
-              namespace,
-            }),
-            ...getCategoryQuery({ categories }),
-
-            // exclude user instructions
-            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
-          ],
-        },
-      },
-      size: 20,
-      _source: {
-        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
-      },
-    });
-
-    return response.hits.hits.map((hit) => ({
-      text: hit._source?.text!,
-      is_correction: hit._source?.is_correction,
-      labels: hit._source?.labels,
-      title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
-      score: hit._score!,
-      id: hit._id!,
-    }));
-  }
-
-  recall = async ({
-    user,
-    queries,
-    categories,
-    namespace,
-    esClient,
-    uiSettingsClient,
-    limit = {},
-  }: {
-    queries: KnowledgeBaseQueryContainer[];
-    categories?: string[];
-    user?: { name: string };
-    namespace: string;
-    esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
-    uiSettingsClient: IUiSettingsClient;
-    limit?: { size?: number };
-  }): Promise<RecalledEntry[]> => {
-    if (!this.dependencies.config.enableKnowledgeBase) {
-      return [];
-    }
-
-    this.dependencies.logger.debug(
-      () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
-    );
-
-    const [documentsFromKb, documentsFromConnectors] = await Promise.all([
-      this.recallFromKnowledgeBase({
-        user,
-        queries,
-        categories,
-        namespace,
-      }).catch((error) => {
-        if (isInferenceEndpointMissingOrUnavailable(error)) {
-          throwKnowledgeBaseNotReady(error.body);
-        }
-        throw error;
-      }),
-      recallFromSearchConnectors({
-        esClient,
-        uiSettingsClient,
-        queries,
-        core: this.dependencies.core,
-        logger: this.dependencies.logger,
-      }).catch((error) => {
-        this.dependencies.logger.debug('Error getting data from search indices');
-        this.dependencies.logger.debug(error);
-        return [];
-      }),
-    ]);
-
-    this.dependencies.logger.debug(
-      () => `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
-    );
-    this.dependencies.logger.debug(
-      () =>
-        `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
-    );
-
-    const sortedEntries = orderBy(
-      documentsFromKb.concat(documentsFromConnectors),
-      'score',
-      'desc'
-    ).slice(0, limit.size ?? 20);
-
-    const returnedEntries: RecalledEntry[] = sortedEntries.map((entry) => ({
-      ...entry,
-      tokens: encode(entry.text).length,
-    }));
-
-    return returnedEntries;
-  };
 
   getUserInstructions = async (
     namespace: string,
@@ -488,13 +328,5 @@ export class KnowledgeBaseService {
       }
       throw error;
     }
-  };
-
-  getStatus = async () => {
-    return getElserModelStatus({
-      esClient: this.dependencies.esClient,
-      logger: this.dependencies.logger,
-      config: this.dependencies.config,
-    });
   };
 }

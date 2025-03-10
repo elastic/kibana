@@ -121,6 +121,7 @@ export class ProductDocBasePlugin
         getStatus: documentationManager.getStatus.bind(documentationManager),
       },
       search: searchService.search.bind(searchService),
+      getIndexPattern: searchService.getIndexPattern.bind(searchService),
     };
   }
 }

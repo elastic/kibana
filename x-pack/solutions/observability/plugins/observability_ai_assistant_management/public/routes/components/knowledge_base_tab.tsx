@@ -233,7 +233,7 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  return knowledgeBase.status.value?.ready ? (
+  return knowledgeBase.status.value?.internal?.available ? (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>

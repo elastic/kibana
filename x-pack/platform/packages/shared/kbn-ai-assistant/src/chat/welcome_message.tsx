@@ -61,7 +61,7 @@ export function WelcomeMessage({
       connectors.reloadConnectors();
     }
 
-    if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
+    if (!knowledgeBase.status.value || knowledgeBase.status.value?.internal?.available === false) {
       knowledgeBase.install();
     }
   };
@@ -88,7 +88,7 @@ export function WelcomeMessage({
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
           />
-          {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
+          {knowledgeBase.status.value?.internal?.available && connectors.connectors?.length ? (
             <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
           ) : null}
         </EuiFlexItem>
