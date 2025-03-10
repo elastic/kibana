@@ -20,7 +20,6 @@ import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { RulesChangelogLink } from '../rules_changelog_link';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import type { UpgradePrebuiltRulesSortingOptions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
