@@ -9,7 +9,8 @@
 
 import { RawValue, deserializeField } from '@kbn/data-plugin/common';
 import { ColorMapping } from '../config';
-import { assignmentMatchFn } from './rule_matching';
+
+type AssignmentMatchCount = [assignmentIndex: number, matchCount: number];
 
 /**
  * A class to encapsulate assignment logic
@@ -23,37 +24,26 @@ export class ColorAssignmentMatcher {
   /**
    * Map values (or keys) to assignment index and match count
    */
-  #assignmentMap: Map<string, [assignmentIndex: number, matchCount: number]>;
+  #assignmentMap: Map<string, AssignmentMatchCount>;
 
   constructor(assignments: ColorMapping.Assignment[]) {
     this.#assignments = assignments;
-    this.#assignmentMap = this.#assignments.reduce<
-      Map<string, [assignmentIndex: number, matchCount: number]>
-    >((acc, assignment, i) => {
-      assignment.rules.forEach((rule) => {
-        const key = getKey(rule);
-        if (key) {
-          const [index = i, matchCount = 0] = acc.get(key) ?? [];
-          acc.set(key, [index, matchCount + 1]);
-        }
-      });
-      return acc;
-    }, new Map());
+    this.#assignmentMap = this.#assignments.reduce<Map<string, AssignmentMatchCount>>(
+      (acc, assignment, i) => {
+        assignment.rules.forEach((rule) => {
+          const key = getKey(rule);
+          if (key) {
+            const [index = i, matchCount = 0] = acc.get(key) ?? [];
+            acc.set(key, [index, matchCount + 1]);
+          }
+        });
+        return acc;
+      },
+      new Map()
+    );
   }
 
-  /**
-   * Required for the following rules:
-   * - `match` with partial words
-   * - `regex`
-   */
-  #getExhaustiveMatch(value: RawValue) {
-    const assignmentIndex = this.#assignments.findIndex(assignmentMatchFn(value));
-
-    // TODO: improve this logic, currently this is not needed/used
-    return [assignmentIndex, 1];
-  }
-
-  #getMatch(value: RawValue) {
+  #getMatch(value: RawValue): AssignmentMatchCount {
     const key = String(value);
     return this.#assignmentMap.get(key) ?? [-1, 0];
   }
