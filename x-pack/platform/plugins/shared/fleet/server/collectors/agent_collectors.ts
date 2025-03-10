@@ -28,7 +28,8 @@ export interface AgentUsage extends AgentStatus {
 
 export const getAgentUsage = async (
   soClient?: SavedObjectsClient,
-  esClient?: ElasticsearchClient
+  esClient?: ElasticsearchClient,
+  agentPolicyIds?: string[]
 ): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.
   if (!soClient || !esClient) {
@@ -45,7 +46,14 @@ export const getAgentUsage = async (
   }
 
   const { total, inactive, online, error, offline, updating, unenrolled } =
-    await AgentService.getAgentStatusForAgentPolicy(esClient, soClient);
+    await AgentService.getAgentStatusForAgentPolicy(
+      esClient,
+      soClient,
+      undefined,
+      undefined,
+      undefined,
+      agentPolicyIds
+    );
   return {
     total_enrolled: total,
     healthy: online,
