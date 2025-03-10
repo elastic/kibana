@@ -21,9 +21,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import type { DiscoverCustomizationService } from '../../customizations/customization_service';
 import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { RootProfileState } from '../../context_awareness';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -41,26 +41,25 @@ jest.mock('./discover_main_app', () => {
   };
 });
 
-let mockRootProfileLoading = false;
-let mockDefaultAdHocDataViews: DataViewSpec[] = [];
+const defaultRootProfileState: RootProfileState = {
+  rootProfileLoading: false,
+  AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
+  getDefaultAdHocDataViews: () => [],
+};
+let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
 jest.mock('../../context_awareness', () => {
   const originalModule = jest.requireActual('../../context_awareness');
   return {
     ...originalModule,
-    useRootProfile: () => ({
-      rootProfileLoading: mockRootProfileLoading,
-      AppWrapper: ({ children }: { children: ReactNode }) => <>{children}</>,
-      getDefaultAdHocDataViews: () => mockDefaultAdHocDataViews,
-    }),
+    useRootProfile: () => mockRootProfileState,
   };
 });
 
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
-    mockRootProfileLoading = false;
-    mockDefaultAdHocDataViews = [];
+    mockRootProfileState = defaultRootProfileState;
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
@@ -73,7 +72,11 @@ describe('DiscoverMainRoute', () => {
   });
 
   test('renders the main app when ad hoc data views exist', async () => {
-    mockDefaultAdHocDataViews = [{ id: 'test', title: 'test' }];
+    const defaultAdHocDataViews = [{ id: 'test', title: 'test' }];
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultAdHocDataViews: () => defaultAdHocDataViews,
+    };
     const component = mountComponent(true, false);
 
     await waitFor(() => {
@@ -135,13 +138,13 @@ describe('DiscoverMainRoute', () => {
   });
 
   test('renders LoadingIndicator while root profile is loading', async () => {
-    mockRootProfileLoading = true;
+    mockRootProfileState = { rootProfileLoading: true };
     const component = mountComponent(true, true);
     await waitFor(() => {
       component.update();
       expect(component.find(DiscoverMainApp).exists()).toBe(false);
     });
-    mockRootProfileLoading = false;
+    mockRootProfileState = defaultRootProfileState;
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);
