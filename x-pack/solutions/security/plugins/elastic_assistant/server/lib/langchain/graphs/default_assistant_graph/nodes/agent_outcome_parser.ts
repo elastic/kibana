@@ -18,7 +18,7 @@ export const AgentOutcomeParser = ({ logger }: { logger: Logger }) => (item: unk
         return parseAgentAction(item);
     }
 
-    console.log(JSON.stringify(item, null, 2));
+    logger.error(`Unable to parse agent outcome: ${JSON.stringify(item)}`);
     return new AIMessage({
       content: `-`,
     });
