@@ -13,7 +13,7 @@ Previous versions: {kibana-ref-all}/8.17/whats-new.html[8.17] | {kibana-ref-all}
 [discrete]
 ==== In-table search and highlight
 
-This release introduces an in-table search feature that scans beyond what’s currently visible, making it easier to find logs, transaction IDs, and other records in large data sets. Inspired by your browser’s native search, this new box sits at the top of the Discover table and supports keyboard navigation for navigating through matches. It’s available across Kibana wherever the Discover table is embedded. It also respects contextual rendering, so you can locate insights without resorting to workarounds or older versions. 
+This release introduces an in-table search feature that scans beyond what’s currently visible, making it easier to find logs, transaction IDs, and other records in large data sets. Inspired by your browser’s native search, this new box sits at the top of the Discover table and supports keyboard navigation for navigating through matches. It’s available across Kibana wherever the Discover table is embedded. 
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt30bf5f8b9a45ab74/67c234a787966d9fbc994ce0/in-table-search-demo.gif[Using the in-table search and navigating through the matches]
 
