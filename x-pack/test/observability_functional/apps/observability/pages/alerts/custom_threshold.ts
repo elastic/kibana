@@ -18,7 +18,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const logger = getService('log');
   const retry = getService('retry');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects(['header']);
+  const pageObjects = getPageObjects(['header']);
 
   describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
@@ -49,6 +49,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         logger,
       });
       await observability.alerts.common.navigateToRulesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -59,7 +60,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     it('shows the custom threshold rule in the observability section', async () => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
     });

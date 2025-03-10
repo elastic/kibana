@@ -122,6 +122,8 @@ export function DependenciesInventoryTable() {
         meta: {
           rangeFrom,
           rangeTo,
+          description:
+            '[ttfmp_dependencies] Dependencies table is ready after fetching top_dependencies.',
         },
       });
     }
