@@ -14,6 +14,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { type DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 /**
  * Creates a DataView from the provided DataViewSpec.
@@ -48,11 +49,15 @@ export const useFullDataView = (
     services: { fieldFormats },
   } = useKibana();
   const { dataView: dataViewSpec } = useDataView(dataViewManagerScope);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const dataView = useMemo(
-    () => dataViewFromSpec(fieldFormats, dataViewSpec),
-    [dataViewSpec, fieldFormats]
-  );
+  const dataView = useMemo(() => {
+    if (newDataViewPickerEnabled) {
+      return undefined;
+    }
+
+    dataViewFromSpec(fieldFormats, dataViewSpec);
+  }, [dataViewSpec, fieldFormats, newDataViewPickerEnabled]);
 
   return dataView;
 };

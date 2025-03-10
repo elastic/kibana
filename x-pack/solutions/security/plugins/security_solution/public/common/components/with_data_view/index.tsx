@@ -36,20 +36,19 @@ export const withDataView = <P extends WithDataViewArg>(
   const ComponentWithDataView = (props: OmitDataView<P>) => {
     const experimentalDataView = useFullDataView(DataViewManagerScopeName.timeline);
 
-    let dataView = useGetScopedSourcererDataView({
+    const dataView = useGetScopedSourcererDataView({
       sourcererScope: SourcererScopeName.timeline,
     });
 
     const { newDataViewPickerEnabled } = useEnableExperimental();
-    if (newDataViewPickerEnabled) {
-      dataView = experimentalDataView;
-    }
 
-    if (!dataView) {
+    const dataViewToUse = newDataViewPickerEnabled ? experimentalDataView : dataView;
+
+    if (!dataViewToUse) {
       return fallback ?? <DataViewErrorComponent />;
     }
 
-    return <Component {...(props as unknown as P)} dataView={dataView} />;
+    return <Component {...(props as unknown as P)} dataView={dataViewToUse} />;
   };
 
   return ComponentWithDataView;

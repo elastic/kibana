@@ -29,7 +29,7 @@ jest.mock('../../data_view_manager/hooks/use_full_data_view', () => ({
   useFullDataView: jest.fn(() => ({ matchedIndices: [] })),
 }));
 jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: jest.fn(() => jest.fn()),
+  useIsExperimentalFeatureEnabled: jest.fn(() => jest.fn()),
 }));
 
 describe('TimelinesPage', () => {

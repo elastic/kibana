@@ -20,7 +20,7 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useFullDataView } from '../../data_view_manager/hooks/use_full_data_view';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
@@ -28,7 +28,7 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   let { indicesExist } = useSourcererDataView();
 
   const fullDataView = useFullDataView(DataViewManagerScopeName.default);
