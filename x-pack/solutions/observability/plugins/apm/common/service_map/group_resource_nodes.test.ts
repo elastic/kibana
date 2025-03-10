@@ -78,7 +78,7 @@ describe('groupResourceNodes', () => {
 
   const createMockEdge = (source: string, target: string): ConnectionElement => ({
     data: {
-      id: getEdgeId({ source, target }),
+      id: getEdgeId(source, target),
       source,
       target,
     },

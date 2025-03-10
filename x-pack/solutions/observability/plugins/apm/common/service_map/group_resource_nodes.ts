@@ -74,7 +74,7 @@ function getUngroupedNodesAndEdges({
     targets.forEach((target) => {
       ungroupedNodes.delete(target);
       sources.forEach((source) => {
-        ungroupedEdges.delete(getEdgeId({ source, target }));
+        ungroupedEdges.delete(getEdgeId(source, target));
       });
     });
   }
@@ -141,7 +141,9 @@ export function groupResourceNodes({
   elements: ConnectionElement[];
 }): GroupResourceNodesResponse {
   const nodesMap = new Map(elements.filter(isNode).map((node) => [node.data.id, node]));
-  const edgesMap = new Map(elements.filter(isEdge).map((edge) => [getEdgeId(edge.data), edge]));
+  const edgesMap = new Map(
+    elements.filter(isEdge).map((edge) => [getEdgeId(edge.data.source, edge.data.target), edge])
+  );
   const groupableNodeIds = new Set(
     elements.filter(isElligibleGroupNode).map(({ data: { id } }) => id)
   );

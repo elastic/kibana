@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Connection, ConnectionNode, ExternalConnectionNode, ServiceConnectionNode } from '.';
+import type {
+  Connection,
+  ConnectionNode,
+  ExternalConnectionNode,
+  ServiceConnectionNode,
+} from './types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -15,12 +20,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../es_fields/apm';
-import type {
-  ConnectionEdge,
-  ConnectionNodeLegacy,
-  ServiceMapExitSpan,
-  ServiceMapService,
-} from './types';
+import type { ConnectionNodeLegacy, ServiceMapExitSpan, ServiceMapService } from './types';
 
 export const invalidLicenseMessage = i18n.translate('xpack.apm.serviceMap.invalidLicenseMessage', {
   defaultMessage:
@@ -64,7 +64,7 @@ export function getConnections(
         'id' in path[i] ? path[i] : { ...path[i], id: getLegacyNodeId(path[i]) }
       ) as ConnectionNode;
 
-      const connectionId = getConnectionId({ source: sourceNode, destination: destinationNode });
+      const connectionId = getEdgeId(sourceNode.id, destinationNode.id);
 
       if (!connectionsById.has(connectionId)) {
         connectionsById.add(connectionId);
@@ -108,11 +108,8 @@ export const getExternalConnectionNode = (event: ServiceMapExitSpan): ExternalCo
   };
 };
 
-export function getConnectionId(connection: Connection) {
-  return `${connection.source.id}~${connection.destination.id}`;
+export function getEdgeId(sourceId: string, destinationId: string) {
+  return `${sourceId}~${destinationId}`;
 }
-
-export const getEdgeId = ({ source, target }: Pick<ConnectionEdge, 'source' | 'target'>) =>
-  `${source}|${target}`;
 
 export const SERVICE_MAP_TIMEOUT_ERROR = 'ServiceMapTimeoutError';

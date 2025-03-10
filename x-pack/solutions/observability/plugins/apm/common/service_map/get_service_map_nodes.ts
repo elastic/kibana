@@ -26,7 +26,7 @@ import type {
 } from './types';
 
 import { groupResourceNodes } from './group_resource_nodes';
-import { getConnectionId, getEdgeId, isExitSpan } from './utils';
+import { getEdgeId, isExitSpan } from './utils';
 
 const FORBIDDEN_SERVICE_NAMES = ['constructor'];
 
@@ -209,7 +209,7 @@ function mapEdges({
     const label = `${sourceData[SERVICE_NAME]} to ${
       targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]
     }`;
-    const id = getConnectionId({ source: sourceData, destination: targetData });
+    const id = getEdgeId(sourceData.id, targetData.id);
 
     acc.set(id, {
       source: sourceData.id,
@@ -230,7 +230,7 @@ function markBidirectionalConnections({ connections }: { connections: Connection
   const targets = new Map<string, ConnectionEdge>();
 
   for (const connection of connections) {
-    const edgeId = getEdgeId(connection);
+    const edgeId = getEdgeId(connection.source, connection.target);
     const reversedConnection = targets.get(edgeId);
 
     if (reversedConnection) {
