@@ -3752,6 +3752,7 @@ paths:
         - alerting
   /api/alerting/rule/{id}/snooze_schedule:
     post:
+      description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time or indefinitely and schedule single or recurring downtimes.
       operationId: post-alerting-rule-id-snooze-schedule
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3783,24 +3784,24 @@ paths:
                       type: object
                       properties:
                         duration:
-                          description: 'Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: ''5h'', ''30m'', ''5000s''.'
+                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.'
                           type: string
                         recurring:
                           additionalProperties: false
                           type: object
                           properties:
                             end:
-                              description: End date of recurrence of the schedule in ISO 8601 format.
+                              description: The end date of a recurring schedule in ISO 8601 format.
                               type: string
                             every:
-                              description: 'Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: ''15d'', ''2w'', ''3m'', ''1y''.'
+                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
                               type: string
                             occurrences:
-                              description: Total number of recurrences of the schedule.
+                              description: The total number of recurrences of the schedule.
                               minimum: 1
                               type: number
                             onMonth:
-                              description: Specific months for recurrence of the schedule. Valid values are 1-12.
+                              description: The specific months for a recurring schedule. Valid values are 1-12.
                               items:
                                 maximum: 12
                                 minimum: 1
@@ -3808,7 +3809,7 @@ paths:
                               minItems: 1
                               type: array
                             onMonthDay:
-                              description: Specific days of the month for recurrence of the schedule. Valid values are 1-31.
+                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
                               items:
                                 maximum: 31
                                 minimum: 1
@@ -3816,16 +3817,16 @@ paths:
                               minItems: 1
                               type: array
                             onWeekDay:
-                              description: Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.
+                              description: The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.
                               items:
                                 type: string
                               minItems: 1
                               type: array
                         start:
-                          description: Start date and time of the schedule in ISO 8601 format.
+                          description: The start date and time of the schedule in ISO 8601 format.
                           type: string
                         timezone:
-                          description: Timezone of the schedule. The default timezone is UTC.
+                          description: The timezone of the schedule. The default timezone is UTC.
                           type: string
                       required:
                         - start
@@ -3853,24 +3854,24 @@ paths:
                             type: object
                             properties:
                               duration:
-                                description: 'Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: ''5h'', ''30m'', ''5000s''.'
+                                description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.'
                                 type: string
                               recurring:
                                 additionalProperties: false
                                 type: object
                                 properties:
                                   end:
-                                    description: End date of recurrence of the schedule in ISO 8601 format.
+                                    description: The end date of a recurring schedule in ISO 8601 format.
                                     type: string
                                   every:
-                                    description: 'Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: ''15d'', ''2w'', ''3m'', ''1y''.'
+                                    description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
                                     type: string
                                   occurrences:
-                                    description: Total number of recurrences of the schedule.
+                                    description: The total number of recurrences of the schedule.
                                     minimum: 1
                                     type: number
                                   onMonth:
-                                    description: Specific months for recurrence of the schedule. Valid values are 1-12.
+                                    description: The specific months for a recurring schedule. Valid values are 1-12.
                                     items:
                                       maximum: 12
                                       minimum: 1
@@ -3878,7 +3879,7 @@ paths:
                                     minItems: 1
                                     type: array
                                   onMonthDay:
-                                    description: Specific days of the month for recurrence of the schedule. Valid values are 1-31.
+                                    description: The specific days of the month for a recurring schedule. Valid values are 1-31.
                                     items:
                                       maximum: 31
                                       minimum: 1
@@ -3886,16 +3887,16 @@ paths:
                                     minItems: 1
                                     type: array
                                   onWeekDay:
-                                    description: Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.
+                                    description: The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.
                                     items:
                                       type: string
                                     minItems: 1
                                     type: array
                               start:
-                                description: Start date and time of the schedule in ISO 8601 format.
+                                description: The start date and time of the schedule in ISO 8601 format.
                                 type: string
                               timezone:
-                                description: Timezone of the schedule. The default timezone is UTC.
+                                description: The timezone of the schedule. The default timezone is UTC.
                                 type: string
                             required:
                               - start

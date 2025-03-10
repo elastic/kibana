@@ -36,7 +36,12 @@ export const snoozeRuleRoute = (
       options: {
         access: 'public',
         summary: 'Schedule a snooze for the rule',
+        description: 'When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time or indefinitely and schedule single or recurring downtimes.',
         tags: ['oas-tag:alerting'],
+        availability: {
+          since: '8.19.0',
+          stability: 'stable',
+        },
       },
       validate: {
         request: {
