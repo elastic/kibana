@@ -20,17 +20,17 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { getDiscoverAppStateContainer, isEqualState } from './discover_app_state_container';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
-import { getInternalStateContainer } from './discover_internal_state_container';
 import {
   DiscoverSavedSearchContainer,
   getSavedSearchContainer,
 } from './discover_saved_search_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
+import { createInternalStateStore, createRuntimeStateManager, InternalStateStore } from './redux';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
-let internalState: ReturnType<typeof getInternalStateContainer>;
+let internalState: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
 
 describe('Test discover app state container', () => {
@@ -42,18 +42,21 @@ describe('Test discover app state container', () => {
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
-    internalState = getInternalStateContainer();
+    internalState = createInternalStateStore({
+      services: discoverServiceMock,
+      runtimeStateManager: createRuntimeStateManager(),
+    });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
-      internalStateContainer: internalState,
+      internalState,
     });
   });
 
   const getStateContainer = () =>
     getDiscoverAppStateContainer({
       stateStorage,
-      internalStateContainer: internalState,
+      internalState,
       savedSearchContainer: savedSearchState,
       services: discoverServiceMock,
     });
@@ -271,13 +274,13 @@ describe('Test discover app state container', () => {
   describe('initAndSync', () => {
     it('should call setResetDefaultProfileState correctly with no initial state', () => {
       const state = getStateContainer();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -288,13 +291,13 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
       const state = getStateContainer();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: true,
         breakdownField: true,
@@ -305,13 +308,13 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
       const state = getStateContainer();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: false,
         breakdownField: true,
@@ -328,13 +331,13 @@ describe('Test discover app state container', () => {
         managed: false,
       });
       const state = getStateContainer();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,

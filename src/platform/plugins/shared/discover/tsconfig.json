@@ -102,6 +102,7 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/ui-theme",
     "@kbn/response-ops-rule-form",
+    "@kbn/shared-ux-page-analytics-no-data-types"
   ],
   "exclude": ["target/**/*"]
 }
