@@ -161,12 +161,12 @@ async function waitForAlertsForRule({
 
   // This is the generator way of building the program.
   // ****************************************************
-  // const main = Effect.gen(function* () {
-  //   // Logging within the span below
-  //   yield* Effect.log(`Searching for rules`);
-  //   // flatMap the value from the first effect, and use it in the next effect.
-  //   return yield* Effect.flatMap(fetch, throwWhenLessThan);
-  // }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
+  const main = Effect.gen(function* () {
+    // Logging within the span below
+    yield* Effect.log(`Searching for rules`);
+    // flatMap the value from the first effect, and use it in the next effect.
+    return yield* Effect.flatMap(fetch, throwWhenLessThan);
+  }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
 
   // This is the 'pipe' way of building the program.
   // ****************************************************
@@ -179,11 +179,11 @@ async function waitForAlertsForRule({
 
   // This is the 'pipe' way of building the program, but piping from an effect
   // ****************************************************
-  const main = fetch.pipe(
-    Effect.flatMap(throwWhenLessThan),
-    Effect.timeout('30 seconds'),
-    Effect.withLogSpan('waitForAlertsForRule')
-  );
+  // const main = fetch.pipe(
+  //   Effect.flatMap(throwWhenLessThan),
+  //   Effect.timeout('30 seconds'),
+  //   Effect.withLogSpan('waitForAlertsForRule')
+  // );
 
   // Run the 'main' program, and unwrap the value out of effect
   return await Effect.runPromise(Effect.retry(main, { times: 50 }));
