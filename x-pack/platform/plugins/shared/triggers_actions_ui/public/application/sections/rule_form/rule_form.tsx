@@ -46,6 +46,7 @@ import {
   useEuiTheme,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
@@ -83,7 +84,7 @@ import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
-import './rule_form.scss';
+// import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
@@ -205,7 +206,12 @@ export const RuleForm = ({
     dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
-  const { colorMode } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
+
+  const ruleTypeNodeHeadingCss = css`
+    margin-left: ${euiTheme.size.s};
+    margin-right: ${euiTheme.size.s};
+  `;
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
@@ -552,6 +558,7 @@ export const RuleForm = ({
             gutterSize="none"
             alignItems="center"
             className="triggersActionsUI__ruleTypeNodeHeading"
+            css={ruleTypeNodeHeadingCss}
           >
             <EuiFlexItem>
               <EuiTitle
