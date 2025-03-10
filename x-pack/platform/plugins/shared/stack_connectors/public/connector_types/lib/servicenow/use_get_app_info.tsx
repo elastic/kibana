@@ -11,6 +11,7 @@ import { HttpStart } from '@kbn/core/public';
 import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 import { FETCH_ERROR } from './translations';
+import { CORSError } from './cors_error';
 
 export interface UseGetAppInfoProps {
   actionTypeId?: string;
@@ -66,7 +67,7 @@ export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGe
          * in the ServiceNow instance is needed by our ServiceNow applications.
          */
         if (error.name === 'TypeError') {
-          throw new Error(FETCH_ERROR);
+          throw new CORSError(FETCH_ERROR);
         }
 
         throw error;
