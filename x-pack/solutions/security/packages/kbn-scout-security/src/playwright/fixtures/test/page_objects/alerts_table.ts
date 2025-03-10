@@ -27,7 +27,7 @@ export class AlertsTablePage {
   }
 
   async getCurrentUrl() {
-    const url = await this.page.url();
+    const url = this.page.url();
     return url;
   }
 
