@@ -10,18 +10,20 @@
 import React from 'react';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import type {
+  DataSourceProfileProvider,
+  DocumentProfileProvider,
+  RootProfileProvider,
+} from '../profiles';
 import {
   DataSourceCategory,
-  DataSourceProfileProvider,
   DataSourceProfileService,
-  DocumentProfileProvider,
   DocumentProfileService,
   DocumentType,
-  RootProfileProvider,
   RootProfileService,
   SolutionType,
 } from '../profiles';
-import { ProfileProviderServices } from '../profile_providers/profile_provider_services';
+import type { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 import { DiscoverEBTManager } from '../../services/discover_ebt_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
