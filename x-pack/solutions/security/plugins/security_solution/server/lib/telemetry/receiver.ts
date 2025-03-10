@@ -1423,7 +1423,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
 
             index_failed: stats.total?.indexing?.index_failed,
-            index_failed_due_to_version_conflict: (stats.total?.indexing as object)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            index_failed_due_to_version_conflict: (stats.total?.indexing as any)
               ?.index_failed_due_to_version_conflict,
 
             docs_count_primaries: stats.primaries?.docs?.count,
