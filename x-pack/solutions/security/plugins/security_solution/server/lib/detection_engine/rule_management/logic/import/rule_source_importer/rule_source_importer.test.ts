@@ -40,7 +40,6 @@ describe('ruleSourceImporter', () => {
       config,
       prebuiltRuleAssetsClient: ruleAssetsClientMock,
       prebuiltRuleObjectsClient: ruleObjectsClientMock,
-      ruleCustomizationStatus: { isRulesCustomizationEnabled: true },
     });
   });
 

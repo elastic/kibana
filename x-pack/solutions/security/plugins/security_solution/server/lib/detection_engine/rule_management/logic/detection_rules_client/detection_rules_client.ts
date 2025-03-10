@@ -37,14 +37,12 @@ import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
-import type { ExperimentalFeatures } from '../../../../../../common';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
-  experimentalFeatures: ExperimentalFeatures;
   productFeaturesService: ProductFeaturesService;
   license: ILicense;
 }
@@ -54,7 +52,6 @@ export const createDetectionRulesClient = ({
   rulesClient,
   mlAuthz,
   savedObjectsClient,
-  experimentalFeatures,
   productFeaturesService,
   license,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
@@ -63,9 +60,7 @@ export const createDetectionRulesClient = ({
   return {
     getRuleCustomizationStatus() {
       /**
-       * The prebuilt rules customization feature is gated by two things:
-       * 1. The feature flag `prebuiltRulesCustomizationEnabled` in the config.
-       * 2. The license level.
+       * The prebuilt rules customization feature is gated by the license level.
        *
        * The license level is verified against the minimum required level for
        * the feature (Enterprise). However, since Serverless always operates at
@@ -74,16 +69,12 @@ export const createDetectionRulesClient = ({
        * unavailable features are disabled.
        */
       const isRulesCustomizationEnabled =
-        experimentalFeatures.prebuiltRulesCustomizationEnabled &&
         license.hasAtLeast(MINIMUM_RULE_CUSTOMIZATION_LICENSE) &&
         productFeaturesService.isEnabled(ProductFeatureKey.prebuiltRuleCustomization);
 
-      let customizationDisabledReason;
-      if (!isRulesCustomizationEnabled) {
-        customizationDisabledReason = !experimentalFeatures.prebuiltRulesCustomizationEnabled
-          ? PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-          : PrebuiltRulesCustomizationDisabledReason.License;
-      }
+      const customizationDisabledReason = isRulesCustomizationEnabled
+        ? undefined
+        : PrebuiltRulesCustomizationDisabledReason.License;
 
       return {
         isRulesCustomizationEnabled,
@@ -130,7 +121,6 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           mlAuthz,
           ruleUpdate,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },
@@ -143,7 +133,6 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           mlAuthz,
           rulePatch,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },
@@ -162,7 +151,6 @@ export const createDetectionRulesClient = ({
           ruleAsset,
           mlAuthz,
           prebuiltRuleAssetClient,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },
@@ -175,7 +163,6 @@ export const createDetectionRulesClient = ({
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },

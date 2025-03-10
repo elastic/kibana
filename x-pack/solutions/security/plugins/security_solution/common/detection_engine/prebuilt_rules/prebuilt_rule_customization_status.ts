@@ -7,7 +7,6 @@
 
 export enum PrebuiltRulesCustomizationDisabledReason {
   License = 'License',
-  FeatureFlag = 'FeatureFlag',
 }
 
 export interface PrebuiltRulesCustomizationStatus {

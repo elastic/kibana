@@ -11,34 +11,19 @@ import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 import { convertRuleToDiffable } from '../../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert_prebuilt_rule_asset_to_rule_response';
-import {
-  PrebuiltRulesCustomizationDisabledReason,
-  type PrebuiltRulesCustomizationStatus,
-} from '../../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 interface CalculateIsCustomizedArgs {
   baseRule: PrebuiltRuleAsset | undefined;
   nextRule: RuleResponse;
   // Current rule can be undefined in case of importing a prebuilt rule that is not installed
   currentRule: RuleResponse | undefined;
-  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 export function calculateIsCustomized({
   baseRule,
   nextRule,
   currentRule,
-  ruleCustomizationStatus,
 }: CalculateIsCustomizedArgs) {
-  if (
-    ruleCustomizationStatus.customizationDisabledReason ===
-    PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-  ) {
-    // We don't want to accidentally mark rules as customized when customization
-    // is disabled.
-    return false;
-  }
-
   if (baseRule) {
     // Base version is available, so we can determine the customization status
     // by comparing the base version with the next version

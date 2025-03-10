@@ -123,7 +123,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerl
       it('should display a badge with the installed integrations', () => {
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
-          `0/${EXPECTED_RELATED_INTEGRATIONS.length} integrations`
+          `0/${EXPECTED_RELATED_INTEGRATIONS.length}`
         );
       });
 
@@ -199,7 +199,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerl
       it('should display a badge with the installed integrations', () => {
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
-          `2/${EXPECTED_RELATED_INTEGRATIONS.length} integrations`
+          `2/${EXPECTED_RELATED_INTEGRATIONS.length}`
         );
       });
 
