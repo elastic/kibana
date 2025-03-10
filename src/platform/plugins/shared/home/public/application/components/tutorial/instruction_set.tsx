@@ -178,6 +178,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
         <EuiButton
           onClick={onStatusCheck}
           isLoading={statusCheckState === StatusCheckStates.FETCHING}
+          data-test-subj="statusCheckButton"
         >
           {statusCheckConfig?.btnLabel || (
             <FormattedMessage

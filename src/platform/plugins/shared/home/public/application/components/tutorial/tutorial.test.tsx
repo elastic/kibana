@@ -17,7 +17,7 @@ import { TutorialType } from '../../../services/tutorials/types';
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     http: {
-      post: jest.fn().mockImplementation(async () => ({ count: 1 })),
+      post: jest.fn().mockImplementation(async () => ({ count: 0 })),
       basePath: { prepend: (path: string) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
@@ -55,6 +55,9 @@ function buildInstructionSet(type: string) {
             ],
           },
         ],
+        statusCheck: {
+          title: 'Status Check title',
+        },
       },
     ],
   };
@@ -173,6 +176,61 @@ describe('Tutorial component', () => {
       await loadTutorialPromise;
 
       expect(getByText('elasticCloud instructions')).toBeInTheDocument();
+    });
+  });
+
+  describe('custom status check', () => {
+    test('should update statusCheckStates correctly on status check', async () => {
+      const { getByText, getByTestId } = render(
+        <I18nProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={bulkCreateMock}
+          />
+        </I18nProvider>
+      );
+      await loadTutorialPromise;
+
+      // Simulate status check
+      fireEvent.click(getByTestId('statusCheckButton'));
+      await waitFor(() => {
+        expect(getByText('Success')).toBeInTheDocument();
+      });
+    });
+
+    test('should update statusCheckStates correctly on status check failure', async () => {
+      const tutorialWithNoDataCheck = {
+        ...tutorial,
+        customStatusCheckName: 'custom_status_check_no_data',
+      };
+      const loadTutorialWithNoDataCheckPromise = Promise.resolve(tutorialWithNoDataCheck);
+      const getTutorialWithNoDataCheck = (id: string) => {
+        return loadTutorialWithNoDataCheckPromise as Promise<TutorialType>;
+      };
+
+      const { getByText, getByTestId } = render(
+        <I18nProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorialWithNoDataCheck}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={bulkCreateMock}
+          />
+        </I18nProvider>
+      );
+      await loadTutorialWithNoDataCheckPromise;
+
+      // Simulate status check
+      fireEvent.click(getByTestId('statusCheckButton'));
+      await waitFor(() => {
+        expect(getByText('No data found')).toBeInTheDocument();
+      });
     });
   });
 });
