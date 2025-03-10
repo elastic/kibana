@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 
 export function updateFlappingHistory(
   flappingSettings: RulesSettingsFlappingProperties,
