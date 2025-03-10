@@ -407,7 +407,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             (await this.isModelInstalled())
               ? Promise.resolve()
               : Promise.reject(new Error('Model not installed')),
-          { minTimeout: 30000, maxTimeout: 30000, retries: 10 }
+          { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
         );
         this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
       } else {
