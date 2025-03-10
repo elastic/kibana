@@ -172,7 +172,7 @@ const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
 
   const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
   if (!asJson) {
-    return yaml.dump(data);
+    return yaml.safeDump(data);
   }
 
   return JSON.stringify(data, null, 2);
