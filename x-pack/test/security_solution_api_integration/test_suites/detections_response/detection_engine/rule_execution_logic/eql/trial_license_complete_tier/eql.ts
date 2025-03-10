@@ -82,8 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
   const packetBeatPath = dataPathBuilder.getPath('packetbeat/default');
 
-  // Failing: See https://github.com/elastic/kibana/issues/209024
-  describe.skip('@ess @serverless @serverlessQA EQL type rules', () => {
+  describe('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -955,8 +954,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // skipped on MKI since feature flags are not supported there
-    describe('@skipInServerlessMKI manual rule run', () => {
+    describe('manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
