@@ -9,19 +9,10 @@
     "id": "metricsDataAccess",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "metrics_data_access"
-    ],
-    "requiredPlugins": [
-      "data",
-      "observabilityShared"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "configPath": ["xpack", "metrics_data_access"],
+    "requiredPlugins": ["data", "observabilityShared"],
+    "optionalPlugins": ["taskManager"],
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": ["common"]
   }
 }
