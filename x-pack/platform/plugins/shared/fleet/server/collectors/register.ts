@@ -36,7 +36,6 @@ export interface Usage {
   packages: PackageUsage[];
   fleet_server: FleetServerUsage;
   agentless_agents: AgentUsage;
-  agentless_packages: PackageUsage[];
 }
 
 export interface FleetUsage extends Usage, AgentData {
@@ -63,7 +62,6 @@ export const fetchFleetUsage = async (
   if (!soClient || !esClient) {
     return;
   }
-  const { agentlessPackages, agentlessAgents } = await getAgenlessUsage(soClient, esClient);
 
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
@@ -79,8 +77,7 @@ export const fetchFleetUsage = async (
     license_issued_to: (await esClient.license.get()).license.issued_to,
     deployment_id: appContextService.getCloud()?.deploymentId,
     integrations_details: await getIntegrationsDetails(soClient),
-    agentless_agents: agentlessAgents,
-    agentless_packages: agentlessPackages,
+    agentless_agents: await getAgenlessUsage(soClient, esClient),
   };
   return usage;
 };
@@ -88,14 +85,12 @@ export const fetchFleetUsage = async (
 // used by kibana daily collector
 const fetchUsage = async (core: CoreSetup, config: FleetConfigType): Promise<Usage> => {
   const [soClient, esClient] = await getInternalClients(core);
-  const { agentlessPackages, agentlessAgents } = await getAgenlessUsage(soClient, esClient);
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
-    agentless_agents: agentlessAgents,
-    agentless_packages: agentlessPackages,
+    agentless_agents: await getAgenlessUsage(soClient, esClient),
   };
   return usage;
 };
@@ -293,14 +288,6 @@ export function registerFleetUsageCollector(
           _meta: {
             description: 'The total number of agents in any state, both enrolled and inactive',
           },
-        },
-      },
-      agentless_packages: {
-        type: 'array',
-        items: {
-          name: { type: 'keyword' },
-          version: { type: 'keyword' },
-          enabled: { type: 'boolean' },
         },
       },
     },
