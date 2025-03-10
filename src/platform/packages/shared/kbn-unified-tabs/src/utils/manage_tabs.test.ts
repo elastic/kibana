@@ -65,7 +65,7 @@ describe('manage_tabs', () => {
       expect(nextState.selectedItem).toBe(newItem);
     });
 
-    it('should add a tab if limit is reached', () => {
+    it('should not add a tab if limit is reached', () => {
       const maxItemsCount = items.length;
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
