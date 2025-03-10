@@ -47,12 +47,15 @@ export const EntityAnalyticsManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
+  const userHasRequiredPrivileges =
+    'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
+  const runEngineBtnIsDisabled =
+    !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
     try {
       scheduleNowRiskEngine();
-
       if (!isLoading) {
         addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
       }
@@ -115,6 +118,7 @@ export const EntityAnalyticsManagementPage = () => {
                     <EuiButton
                       size="s"
                       iconType="play"
+                      disabled={runEngineBtnIsDisabled}
                       isLoading={isLoading}
                       onClick={handleRunEngineClick}
                     >
