@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
@@ -64,6 +65,13 @@ export function FirehosePanel() {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFirehoseFlow();
   const { data: populatedAWSIndexList } = usePopulatedAWSIndexList();
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    if (data) {
+      onPageReady();
+    }
+  }, [data, onPageReady]);
 
   const hasExistingData = Array.isArray(populatedAWSIndexList) && populatedAWSIndexList.length > 0;
 
