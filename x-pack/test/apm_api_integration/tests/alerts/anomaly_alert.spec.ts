@@ -110,7 +110,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('produces an alert with the correct reason', async () => {
-          const alerts = await waitForAlertsForRule({ es, ruleId: createdRule.id });
+          const alerts = await waitForAlertsForRule({
+            es,
+            ruleId: createdRule.id,
+          });
 
           const score = alerts[0]['kibana.alert.evaluation.value'];
           expect(alerts[0]['kibana.alert.reason']).to.be(
@@ -145,7 +148,9 @@ async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
+  // :: Effect.Effect<ApmAlertFields[], never, never>
   const fetch = Effect.promise(() => getAlertByRuleId({ es, ruleId }));
+  // :: (alerts: ApmAlertFields[]) => Effect.Effect<ApmAlertFields[], UnknownException, never>
   const throwWhenLessThan = (alerts: ApmAlertFields[]) =>
     Effect.try(() => {
       const actualAlertCount = alerts.length;
@@ -154,10 +159,14 @@ async function waitForAlertsForRule({
       return alerts;
     });
 
+  // this is the main program
   const main = Effect.gen(function* () {
+    // Logging within the span below
     yield* Effect.log(`Searching for rules`);
+    // flatMap the value from the first effect, and use it in the next effect.
     return yield* Effect.flatMap(fetch, throwWhenLessThan);
   }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
 
+  // Run the 'main' program, and unwrap the value out of effect
   return await Effect.runPromise(Effect.retry(main, { times: 50 }));
 }
