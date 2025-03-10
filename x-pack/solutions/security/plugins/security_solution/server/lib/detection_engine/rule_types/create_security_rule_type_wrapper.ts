@@ -37,7 +37,7 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory } from './factories';
+import { bulkCreateFactory } from './factories';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
@@ -378,18 +378,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ignoreFieldsObject[field] = true;
             });
             const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
-            const wrapHits = wrapHitsFactory({
-              ignoreFields: ignoreFieldsObject,
-              ignoreFieldsRegexes,
-              mergeStrategy,
-              completeRule,
-              spaceId,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
-              publicBaseUrl,
-              ruleExecutionLogger,
-              intendedTimestamp,
-            });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               startedAt,
@@ -418,7 +406,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     searchAfterSize,
                     tuple,
                     bulkCreate,
-                    wrapHits,
                     listClient,
                     ruleDataClient,
                     mergeStrategy,
@@ -433,6 +420,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     experimentalFeatures,
                     intendedTimestamp,
                     spaceId,
+                    ignoreFields: ignoreFieldsObject,
+                    ignoreFieldsRegexes,
                   },
                 });
 

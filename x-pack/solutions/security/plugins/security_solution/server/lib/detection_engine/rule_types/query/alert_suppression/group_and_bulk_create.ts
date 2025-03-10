@@ -267,16 +267,9 @@ export const groupAndBulkCreate = async ({
       }));
 
       const wrappedAlerts = wrapSuppressedAlerts({
+        sharedParams,
         suppressionBuckets,
-        spaceId: sharedParams.spaceId,
-        completeRule: sharedParams.completeRule,
-        mergeStrategy: sharedParams.mergeStrategy,
-        indicesToQuery: sharedParams.inputIndex,
-        publicBaseUrl: sharedParams.publicBaseUrl,
         buildReasonMessage,
-        alertTimestampOverride: sharedParams.alertTimestampOverride,
-        ruleExecutionLogger: sharedParams.ruleExecutionLogger,
-        intendedTimestamp: sharedParams.intendedTimestamp,
       });
 
       const suppressionDuration = sharedParams.completeRule.ruleParams.alertSuppression?.duration;

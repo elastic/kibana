@@ -70,11 +70,6 @@ export const esqlExecutor = async ({
     exceptionFilter,
     unprocessedExceptions,
     ruleExecutionLogger,
-    spaceId,
-    mergeStrategy,
-    alertTimestampOverride,
-    publicBaseUrl,
-    intendedTimestamp,
     bulkCreate,
   } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -163,20 +158,6 @@ export const esqlExecutor = async ({
           licensing,
         });
 
-        const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
-          wrapEsqlAlerts({
-            events,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            isRuleAggregating,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-            tuple,
-            intendedTimestamp,
-          });
-
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...esqlResult } = document;
 
@@ -193,18 +174,9 @@ export const esqlExecutor = async ({
         if (isAlertSuppressionActive) {
           const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
             wrapSuppressedEsqlAlerts({
+              sharedParams,
               events,
-              spaceId,
-              completeRule,
-              mergeStrategy,
               isRuleAggregating,
-              alertTimestampOverride,
-              ruleExecutionLogger,
-              publicBaseUrl,
-              primaryTimestamp,
-              secondaryTimestamp,
-              tuple,
-              intendedTimestamp,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
@@ -230,7 +202,11 @@ export const esqlExecutor = async ({
             break;
           }
         } else {
-          const wrappedAlerts = wrapHits(syntheticHits);
+          const wrappedAlerts = wrapEsqlAlerts({
+            sharedParams,
+            events: syntheticHits,
+            isRuleAggregating,
+          });
 
           const enrichAlerts = createEnrichEventsFunction({
             services,

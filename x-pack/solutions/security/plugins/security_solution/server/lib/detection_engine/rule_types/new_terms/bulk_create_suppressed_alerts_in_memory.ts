@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
+  SecuritySharedParams,
   WrapSuppressedHits,
 } from '../types';
 
@@ -20,29 +20,21 @@ import { executeBulkCreateAlerts } from '../utils/bulk_create_suppressed_alerts_
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-  NewTermsFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
 import type { EventsAndTerms } from './types';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
+import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
+import { NewTermsRuleParams } from '../../rule_schema';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
   alertSuppression?: AlertSuppressionCamel;
 }
 export interface BulkCreateSuppressedAlertsParams
-  extends Pick<
-    SearchAfterAndBulkCreateSuppressedAlertsParams,
-    'sharedParams' | 'services' | 'alertSuppression'
-  > {
-  wrapHits: (
-    events: EventsAndTerms[]
-  ) => Array<WrappedFieldsLatest<BaseFieldsLatest & NewTermsFieldsLatest>>;
-  wrapSuppressedHits: (
-    events: EventsAndTerms[]
-  ) => Array<
-    WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest & NewTermsFieldsLatest>
-  >;
+  extends Pick<SearchAfterAndBulkCreateSuppressedAlertsParams, 'services' | 'alertSuppression'> {
+  sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   eventsAndTerms: EventsAndTerms[];
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
@@ -56,8 +48,6 @@ export interface BulkCreateSuppressedAlertsParams
 export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   sharedParams,
   eventsAndTerms,
-  wrapHits,
-  wrapSuppressedHits,
   toReturn,
   services,
   alertSuppression,
@@ -77,12 +67,18 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
       ['event', 'fields']
     );
 
-    unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1]);
+    unsuppressibleWrappedDocs = wrapNewTermsAlerts({
+      sharedParams,
+      eventsAndTerms: partitionedEvents[1],
+    });
 
     suppressibleEvents = partitionedEvents[0];
   }
 
-  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents);
+  const suppressibleWrappedDocs = wrapSuppressedNewTermsAlerts({
+    sharedParams,
+    eventsAndTerms: suppressibleEvents,
+  });
 
   return executeBulkCreateAlerts({
     sharedParams,

@@ -10,6 +10,7 @@ import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType
 import { createEnrichEventsFunction } from './enrichments';
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
 import { searchAfterAndBulkCreateFactory } from './search_after_bulk_create_factory';
+import { wrapHits } from '../factories';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async (
@@ -21,7 +22,7 @@ export const searchAfterAndBulkCreate = async (
     enrichedEvents,
     toReturn,
   }) => {
-    const wrappedDocs = sharedParams.wrapHits(enrichedEvents, buildReasonMessage);
+    const wrappedDocs = wrapHits(sharedParams, enrichedEvents, buildReasonMessage);
 
     const bulkCreateResult = await sharedParams.bulkCreate(
       wrappedDocs,

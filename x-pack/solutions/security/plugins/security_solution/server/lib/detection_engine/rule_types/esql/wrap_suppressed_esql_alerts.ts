@@ -6,7 +6,6 @@
  */
 
 import objectHash from 'object-hash';
-import type { Moment } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
@@ -15,46 +14,23 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../config';
-import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
+import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
-import type { SignalSource } from '../types';
+import type { SecuritySharedParams, SignalSource } from '../types';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
 import { generateAlertId } from './utils';
 
 export const wrapSuppressedEsqlAlerts = ({
+  sharedParams,
   events,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  tuple,
   isRuleAggregating,
-  primaryTimestamp,
-  secondaryTimestamp,
-  intendedTimestamp,
 }: {
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
-  spaceId: string | null | undefined;
-  completeRule: CompleteRule<EsqlRuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  tuple: {
-    to: Moment;
-    from: Moment;
-    maxSignals: number;
-  };
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+  const { spaceId, completeRule, tuple, primaryTimestamp, secondaryTimestamp } = sharedParams;
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {
       const combinedFields = { ...event?.fields, ...event._source };
@@ -76,20 +52,11 @@ export const wrapSuppressedEsqlAlerts = ({
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
       const baseAlert: BaseFieldsLatest = transformHitToAlert({
-        spaceId,
-        completeRule,
+        sharedParams,
         doc: event,
-        mergeStrategy,
-        ignoreFields: {},
-        ignoreFieldsRegexes: [],
         applyOverrides: true,
         buildReasonMessage: buildReasonMessageForNewTermsAlert,
-        indicesToQuery: [],
-        alertTimestampOverride,
-        ruleExecutionLogger,
         alertUuid: id,
-        publicBaseUrl,
-        intendedTimestamp,
       });
 
       return {

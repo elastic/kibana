@@ -53,6 +53,7 @@ import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils
 import { logShardFailures } from '../utils/log_shard_failure';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { wrapSequences } from './wrap_sequences';
+import { wrapHits } from '../factories';
 
 interface EqlExecutorParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
@@ -76,7 +77,7 @@ export const eqlExecutor = async ({
   result: SearchAfterAndBulkCreateReturnType;
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
-  const { completeRule, tuple, ruleExecutionLogger, bulkCreate, wrapHits } = sharedParams;
+  const { completeRule, tuple, ruleExecutionLogger, bulkCreate } = sharedParams;
   const ruleParams = completeRule.ruleParams;
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -157,7 +158,7 @@ export const eqlExecutor = async ({
             experimentalFeatures,
           });
         } else {
-          newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
+          newSignals = wrapHits(sharedParams, events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
         if (
