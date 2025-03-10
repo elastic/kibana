@@ -172,7 +172,8 @@
         "sharp",
         "superagent",
         "supertest",
-        "xmlbuilder"
+        "xmlbuilder",
+        "effect"
       ],
       "reviewers": [
         "team:appex-qa"

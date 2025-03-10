@@ -1126,7 +1126,6 @@
     "del": "^6.1.0",
     "diff": "^7.0.0",
     "dotenv": "^16.4.5",
-    "effect": "^3.13.2",
     "elastic-apm-node": "^4.11.0",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^3.0.0",
@@ -1311,6 +1310,7 @@
     "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
+    "effect": "^3.13.2",
     "@apidevtools/swagger-parser": "^10.1.1",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
