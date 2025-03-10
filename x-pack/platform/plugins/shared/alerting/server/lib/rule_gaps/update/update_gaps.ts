@@ -7,10 +7,11 @@
 
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import { findGaps } from '../find_gaps';
+import { findGapsSearchAfter } from '../find_gaps';
 import type { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
@@ -199,8 +200,8 @@ const updateGapBatch = async (
 
 /**
  * Update gaps for a given rule
- * Trying to fetch gaps in batches
- * Prepare them for update
+ * Using search_after pagination to process more than 10,000 gaps with stable sorting
+ * Prepare gaps for update
  * Update them in bulk
  * If there are conflicts, retry the failed gaps
  */
@@ -225,46 +226,73 @@ export const updateGaps = async (params: UpdateGapsParams) => {
 
   try {
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
-    let currentPage = 1;
     let hasErrors = false;
+    let searchAfter: SortResults[] | undefined;
+    let pitId: string | undefined;
+    let iterationCount = 0;
+    // Circuit breaker to prevent infinite loops
+    // It should be enough to update 50,000,000 gaps
+    // 100000 * 500 = 50,000,000 millions gaps
+    const MAX_ITERATIONS = 100000;
 
-    while (true) {
-      const { data: gaps } = await findGaps({
-        eventLogClient,
-        logger,
-        params: {
-          ruleId,
-          start: start.toISOString(),
-          end: end.toISOString(),
-          page: currentPage,
-          perPage: PAGE_SIZE,
-          statuses: [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
-        },
-      });
+    try {
+      while (true) {
+        if (iterationCount >= MAX_ITERATIONS) {
+          logger.warn(
+            `Circuit breaker triggered: Reached maximum number of iterations (${MAX_ITERATIONS}) while updating gaps for rule ${ruleId}`
+          );
+          break;
+        }
+        iterationCount++;
 
-      if (gaps.length > 0) {
-        const success = await updateGapBatch(gaps, {
-          backfillSchedule,
-          savedObjectsRepository,
-          shouldRefetchAllBackfills,
-          backfillClient,
-          actionsClient,
-          alertingEventLogger,
-          logger,
-          ruleId,
+        const gapsResponse = await findGapsSearchAfter({
           eventLogClient,
+          logger,
+          params: {
+            ruleId,
+            start: start.toISOString(),
+            end: end.toISOString(),
+            perPage: PAGE_SIZE,
+            statuses: [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
+            sortField: '@timestamp',
+            sortOrder: 'asc',
+            searchAfter,
+            pitId,
+          },
         });
 
-        if (!success) {
-          hasErrors = true;
+        const { data: gaps, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
+        pitId = nextPitId;
+
+        if (gaps.length > 0) {
+          const success = await updateGapBatch(gaps, {
+            backfillSchedule,
+            savedObjectsRepository,
+            shouldRefetchAllBackfills,
+            backfillClient,
+            actionsClient,
+            alertingEventLogger,
+            logger,
+            ruleId,
+            eventLogClient,
+          });
+
+          if (!success) {
+            hasErrors = true;
+          }
         }
-      }
 
-      if (gaps.length === 0 || gaps.length < PAGE_SIZE) {
-        break;
-      }
+        // Exit conditions: no more results or no next search_after
+        if (gaps.length === 0 || !nextSearchAfter) {
+          break;
+        }
 
-      currentPage++;
+        searchAfter = nextSearchAfter;
+      }
+    } finally {
+      if (pitId) {
+        await eventLogClient.closePointInTime(pitId);
+      }
     }
 
     if (hasErrors) {

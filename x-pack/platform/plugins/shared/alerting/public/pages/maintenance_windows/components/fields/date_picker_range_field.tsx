@@ -11,8 +11,12 @@ import moment from 'moment';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from '../../translations';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../../common';
+import { useUiSetting } from '../../../../utils/kibana_react';
 import { getSelectedForDatePicker as getSelected } from '../../helpers/get_selected_for_date_picker';
+import * as i18n from '../../translations';
 
 interface DatePickerRangeFieldProps {
   fields: { startDate: FieldHook<string, string>; endDate: FieldHook<string, string> };
@@ -24,6 +28,10 @@ interface DatePickerRangeFieldProps {
 export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.memo(
   ({ fields, timezone, showTimeSelect = true, ...rest }) => {
     const [today] = useState<Moment>(moment());
+    const systemDateFormat = useUiSetting<string>(
+      UI_SETTINGS.DATE_FORMAT,
+      MAINTENANCE_WINDOW_DATE_FORMAT
+    );
 
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [fields.startDate.path, fields.endDate.path] });
@@ -60,6 +68,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
       },
       [setFieldValue, fields.endDate.path]
     );
+
     const isInvalid = startDate.isAfter(endDate);
 
     return (
@@ -77,6 +86,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
                 showTimeSelect={showTimeSelect}
                 minDate={today}
                 utcOffset={startOffset}
+                dateFormat={systemDateFormat}
               />
             }
             endDateControl={
@@ -89,6 +99,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
                 showTimeSelect={showTimeSelect}
                 minDate={today}
                 utcOffset={endOffset}
+                dateFormat={systemDateFormat}
               />
             }
             fullWidth

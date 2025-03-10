@@ -87,6 +87,7 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
@@ -504,6 +505,7 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_INSTANCE_ID]: '1',
           [ALERT_SEVERITY_IMPROVING]: false,
           [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+          [ALERT_PENDING_RECOVERED_COUNT]: 0,
           [ALERT_CONSECUTIVE_MATCHES]: 1,
           [ALERT_RULE_CATEGORY]: 'My test rule',
           [ALERT_RULE_CONSUMER]: mockedAdHocRunSO.attributes.rule.consumer,

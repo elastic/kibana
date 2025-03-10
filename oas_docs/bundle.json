@@ -17292,7 +17292,6 @@
             "name": "page",
             "required": false,
             "schema": {
-              "default": 1,
               "type": "number"
             }
           },
@@ -17366,6 +17365,38 @@
                 "asc",
                 "desc"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "searchAfter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "openPit",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pitId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pitKeepAlive",
+            "required": false,
+            "schema": {
               "type": "string"
             }
           }
@@ -17611,20 +17642,7 @@
                             "type": "number"
                           },
                           "sort": {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
+                            "items": {},
                             "type": "array"
                           },
                           "status": {
@@ -17670,6 +17688,13 @@
                                 "output",
                                 "other"
                               ],
+                              "type": "string"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
+                          "upgrade_attempts": {
+                            "items": {
                               "type": "string"
                             },
                             "nullable": true,
@@ -17770,11 +17795,17 @@
                       },
                       "type": "array"
                     },
+                    "nextSearchAfter": {
+                      "type": "string"
+                    },
                     "page": {
                       "type": "number"
                     },
                     "perPage": {
                       "type": "number"
+                    },
+                    "pit": {
+                      "type": "string"
                     },
                     "statusSummary": {
                       "additionalProperties": {
@@ -19658,20 +19689,7 @@
                           "type": "number"
                         },
                         "sort": {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "enum": [],
-                                "nullable": true
-                              }
-                            ]
-                          },
+                          "items": {},
                           "type": "array"
                         },
                         "status": {
@@ -19717,6 +19735,13 @@
                               "output",
                               "other"
                             ],
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "upgrade_attempts": {
+                          "items": {
                             "type": "string"
                           },
                           "nullable": true,
@@ -20142,20 +20167,7 @@
                           "type": "number"
                         },
                         "sort": {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "enum": [],
-                                "nullable": true
-                              }
-                            ]
-                          },
+                          "items": {},
                           "type": "array"
                         },
                         "status": {
@@ -20201,6 +20213,13 @@
                               "output",
                               "other"
                             ],
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "upgrade_attempts": {
+                          "items": {
                             "type": "string"
                           },
                           "nullable": true,
@@ -22296,6 +22315,14 @@
           {
             "in": "query",
             "name": "excludeInstallStatus",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withPackagePoliciesCount",
             "required": false,
             "schema": {
               "type": "boolean"
