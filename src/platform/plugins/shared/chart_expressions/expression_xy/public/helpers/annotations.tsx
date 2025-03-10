@@ -114,31 +114,21 @@ export function MarkerBody({
   label: string | undefined;
   isHorizontal: boolean;
 }) {
-  if (!label) {
-    return null;
-  }
-  if (isHorizontal) {
-    return (
-      <div
-        data-test-subj="xyVisAnnotationText"
-        css={[euiTextTruncate(), css({ maxWidth: LINES_MARKER_SIZE * 3 })]}
-      >
-        {label}
-      </div>
-    );
-  }
+  if (!label) return null;
+
+  const maxWidth = isHorizontal ? LINES_MARKER_SIZE * 3 : LINES_MARKER_SIZE;
+
   return (
     <div
-      className="xyDecorationRotatedWrapper"
       data-test-subj="xyVisAnnotationText"
-      css={[styles.decorationRotatedWrapper, css({ maxWidth: LINES_MARKER_SIZE })]}
+      css={[
+        css`
+          ${euiTextTruncate(`${maxWidth}px`)}
+        `,
+        !isHorizontal && styles.rotatedText,
+      ]}
     >
-      <div
-        className="xyDecorationRotatedWrapper__label"
-        css={[euiTextTruncate(), css({ maxWidth: LINES_MARKER_SIZE * 3 })]}
-      >
-        {label}
-      </div>
+      {label}
     </div>
   );
 }
@@ -236,33 +226,30 @@ const styles = {
       height: euiTheme.size.base,
       backgroundColor: 'currentColor',
     }),
+
   numberIconText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.medium,
       letterSpacing: '-.5px',
     }),
+
   iconRotate90: css({
     '&.xyAnnotationIcon_rotate90': {
       transform: 'rotate(90deg) !important',
       transformOrigin: 'center',
     },
   }),
-  decorationRotatedWrapper: css({
+
+  rotatedText: css({
     display: 'inline-block',
-    overflow: 'hidden',
-    lineHeight: 1.5,
+    whiteSpace: 'nowrap',
+    transform: 'translate(0, 100%) rotate(-90deg)',
+    transformOrigin: '0 0',
 
-    '& .xyDecorationRotatedWrapper__label': {
-      display: 'inline-block',
-      whiteSpace: 'nowrap',
-      transform: 'translate(0, 100%) rotate(-90deg)',
-      transformOrigin: '0 0',
-
-      '&::after': {
-        content: '""',
-        float: 'left',
-        marginTop: '100%',
-      },
+    '&::after': {
+      content: '""',
+      float: 'left',
+      marginTop: '100%',
     },
   }),
 };
