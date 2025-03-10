@@ -86,6 +86,20 @@ export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
   }
 );
 
+export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewRuleDefinitionInvalidWarningTitle',
+  {
+    defaultMessage: 'Rule definition is invalid',
+  }
+);
+
+export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewRuleDefinitionInvalidWarningMessage',
+  {
+    defaultMessage: `One or more defields in the rule definition are invalid. Please fix the rule definition before previewing the rule. You can consult the validation errors in the "Define rule" section.`,
+  }
+);
+
 export const QUERY_GRAPH_COUNT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel',
   {
