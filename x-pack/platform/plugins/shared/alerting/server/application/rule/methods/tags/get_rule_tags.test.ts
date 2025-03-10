@@ -315,6 +315,7 @@ describe('getTags()', () => {
 
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.getTags({
+      page: 1,
       ruleTypeIds: ['.es-query', '.index-threshold'],
       search: 'search',
     });
