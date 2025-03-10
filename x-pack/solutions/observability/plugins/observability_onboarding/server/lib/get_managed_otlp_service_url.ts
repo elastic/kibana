@@ -28,9 +28,5 @@ export async function getManagedOtlpServiceUrl({
 
   const urlParts = managedApmServiceUrl.split('.');
 
-<<<<<<< HEAD
   return `${urlParts[0]}.ingest.${urlParts.slice(2).join('.')}:443`;
-=======
-  return `${urlParts[0]}.ingest.${urlParts.slice(2).join('.')}`;
->>>>>>> 9e3bce83497 (Move URL generation logic to the server)
 }
