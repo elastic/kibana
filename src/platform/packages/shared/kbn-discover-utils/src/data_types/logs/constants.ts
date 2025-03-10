@@ -73,8 +73,6 @@ export const RESOURCE_FIELDS = [
   fieldConstants.SERVICE_NAME_FIELD,
   fieldConstants.CONTAINER_NAME_FIELD,
   fieldConstants.HOST_NAME_FIELD,
-  fieldConstants.ORCHESTRATOR_NAMESPACE_FIELD,
-  fieldConstants.CLOUD_INSTANCE_ID_FIELD,
   fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
   fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
   fieldConstants.ORCHESTRATOR_CLUSTER_ID_FIELD,
