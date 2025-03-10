@@ -66,10 +66,14 @@ export const coreWorkerFixtures = base.extend<
    */
   config: [
     ({ log }, use, workerInfo) => {
-      const configName = 'local';
       const projectUse = workerInfo.project.use as ScoutTestOptions;
+      if (!projectUse.configName) {
+        throw new Error(
+          'Invalid Playwright project configuration. Make sure to set "configName" property'
+        );
+      }
       const serversConfigDir = projectUse.serversConfigDir;
-      const configInstance = createScoutConfig(serversConfigDir, configName, log);
+      const configInstance = createScoutConfig(serversConfigDir, projectUse.configName, log);
 
       use(configInstance);
     },
