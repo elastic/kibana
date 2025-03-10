@@ -191,6 +191,6 @@ export const InstallationVersionStatus: React.FunctionComponent<{
   } else if (status === 'upgrade_failed') {
     return <InstallUpgradeFailedVersionStatus isUpgradeFailed={true} item={item} />;
   } else if (status === 'install_failed') {
-    return <InstallUpgradeFailedVersionStatus isUpgradeFailed={true} item={item} />;
+    return <InstallUpgradeFailedVersionStatus isUpgradeFailed={false} item={item} />;
   } else return null;
 });
