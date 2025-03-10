@@ -361,37 +361,39 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       return;
     }
 
-    this.options.logger.debug('Checking if ML nodes are available...');
-    const mlNodesCount = await getMlNodeCount({ asInternalUser: esClient } as IScopedClusterClient);
-
-    if (mlNodesCount.count === 0 && mlNodesCount.lazyNodeCount === 0) {
-      throw new Error('No ML nodes available');
-    }
-
-    this.options.logger.debug('Starting Knowledge Base setup...');
-    this.options.setIsKBSetupInProgress(this.spaceId, true);
-    const elserId = await this.options.getElserId();
-
-    // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
     try {
-      const legacyESQL = await esClient.deleteByQuery({
-        index: this.indexTemplateAndPattern.alias,
-        query: {
-          bool: {
-            must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
-          },
-        },
-      });
-      if (legacyESQL?.total != null && legacyESQL?.total > 0) {
-        this.options.logger.info(
-          `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
-        );
+      this.options.logger.debug('Checking if ML nodes are available...');
+      const mlNodesCount = await getMlNodeCount({
+        asInternalUser: esClient,
+      } as IScopedClusterClient);
+
+      if (mlNodesCount.count === 0 && mlNodesCount.lazyNodeCount === 0) {
+        throw new Error('No ML nodes available');
       }
-    } catch (e) {
-      this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
-    }
 
-    try {
+      this.options.logger.debug('Starting Knowledge Base setup...');
+      this.options.setIsKBSetupInProgress(this.spaceId, true);
+      const elserId = await this.options.getElserId();
+
+      // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
+      try {
+        const legacyESQL = await esClient.deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
+            },
+          },
+        });
+        if (legacyESQL?.total != null && legacyESQL?.total > 0) {
+          this.options.logger.info(
+            `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
+      } catch (e) {
+        this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
+      }
+
       /*
         #1 Check if ELSER model is downloaded
         #2 Check if inference endpoint is deployed
@@ -451,7 +453,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           }
 
           this.options.logger.debug(`Loading Security Labs KB docs...`);
-          void loadSecurityLabs(this, this.options.logger).then(() => {
+
+          void loadSecurityLabs(this, this.options.logger)?.then(() => {
             this.options.setIsKBSetupInProgress(this.spaceId, false);
           });
         } else {
