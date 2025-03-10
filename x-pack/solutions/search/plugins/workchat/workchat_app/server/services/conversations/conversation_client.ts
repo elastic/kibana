@@ -33,6 +33,7 @@ export interface ConversationClient {
 export class ConversationClientImpl implements ConversationClient {
   private readonly client: SavedObjectsClientContract;
   private readonly user: ClientUser;
+  // @ts-expect-error will be used at some point
   private readonly logger: Logger;
 
   constructor({ client, user, logger }: ConversationClientOptions) {
@@ -45,6 +46,7 @@ export class ConversationClientImpl implements ConversationClient {
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
       filter: `${conversationTypeName}.attributes.user_id: ${this.user.id}`,
+      perPage: 1000,
     });
 
     return results.map(savedObjectToModel);
@@ -57,7 +59,7 @@ export class ConversationClientImpl implements ConversationClient {
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
     const now = new Date();
-    const id = uuidv4();
+    const id = conversation.id ?? uuidv4();
     const attributes = createRequestToRaw({
       conversation,
       id,

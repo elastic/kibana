@@ -70,8 +70,9 @@ export class WorkChatAppPlugin
     const { wciSalesforce } = pluginsDependencies;
 
     const integrationsService = new IntegrationsService({
-      logger: this.logger.get('services.integrationsService'),
+      logger: this.logger.get('services.integrations'),
       integrationPlugins: [wciSalesforce.integration],
+      elasticsearch: core.elasticsearch,
     });
 
     const conversationService = new ConversationServiceImpl({
@@ -83,12 +84,12 @@ export class WorkChatAppPlugin
     const agentFactory = new AgentFactory({
       inference: pluginsDependencies.inference,
       logger: this.logger.get('services.agentFactory'),
-      integrationsService
+      integrationsService,
     });
 
     const chatService = new ChatService({
       inference: pluginsDependencies.inference,
-      logger: this.logger.get('services.agentFactory'),
+      logger: this.logger.get('services.chat'),
       agentFactory,
       conversationService,
     });

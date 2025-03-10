@@ -7,7 +7,7 @@
 
 import type { Message } from './messages';
 
-interface ChatEventBase {
+export interface ChatEventBase {
   type: string;
 }
 

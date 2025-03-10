@@ -12,6 +12,11 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { RouteDependencies } from './types';
 
 export const registerChatRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  const stubLogger = {
+    debug: () => undefined,
+    error: () => undefined,
+  };
+
   router.post(
     {
       path: '/internal/workchat/chat',
@@ -35,16 +40,12 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
       });
 
       try {
-        const events$ = await chatService.converse({
+        const events$ = chatService.converse({
           request,
           connectorId: connectorId ?? 'azure-gpt4', // TODO: auto-select on server-side when not present
           agentId,
           nextUserMessage: nextMessage,
           conversationId,
-          internalServices: {
-            elasticsearchClient: (await ctx.core).elasticsearch.client.asCurrentUser,
-            logger,
-          }
         });
 
         return res.ok({
@@ -56,7 +57,8 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
           },
           body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
             signal: abortController.signal,
-            logger,
+            // already logging at the service level
+            logger: stubLogger,
           }),
         });
       } catch (err) {

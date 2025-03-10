@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
-import { IntegrationTypes } from "./constants";
-import type { ElasticsearchClient, Logger } from "@kbn/core/server";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IntegrationTypes } from './constants';
 
 export interface InternalIntegrationServices {
   elasticsearchClient: ElasticsearchClient;
@@ -15,7 +15,10 @@ export interface InternalIntegrationServices {
 }
 
 export interface IntegrationPlugin {
-  mcpServer: (configuration: Record<string, any>, services: InternalIntegrationServices) => McpServer; 
+  mcpServer: (
+    configuration: Record<string, any>,
+    services: InternalIntegrationServices
+  ) => McpServer;
   name: IntegrationTypes;
 }
 

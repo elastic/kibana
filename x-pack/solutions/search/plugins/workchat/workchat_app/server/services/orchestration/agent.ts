@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import { Observable, from, filter, shareReplay } from 'rxjs';
+import { from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ChatEvent } from '../../../common/chat_events';
-import type { Conversation } from '../../../common/conversations';
-import { IntergrationsSession } from '../integrations/integrations_session';
+import { IntegrationsSession } from '../integrations/integrations_session';
 import { getLCTools } from '../integrations/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
-
-interface AgentRunOptions {
-  conversation: Conversation;
-}
-
-interface AgentRunResult {
-  /**
-   * Live events that can be streamed back to the UI
-   */
-  events$: Observable<ChatEvent>;
-}
-
-export interface Agent {
-  run(options: AgentRunOptions): Promise<AgentRunResult>;
-}
+import type { Agent, AgentRunResult } from './types';
 
 export const createAgent = async ({
   agentId,
@@ -37,17 +21,15 @@ export const createAgent = async ({
 }: {
   agentId: string;
   chatModel: InferenceChatModel;
-  integrationsSession: IntergrationsSession;
+  integrationsSession: IntegrationsSession;
 }): Promise<Agent> => {
-  // TODO: everything
-
   const integrationTools = await getLCTools(integrationsSession);
 
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
-    run: async ({ conversation }): Promise<AgentRunResult> => {
-      const initialMessages = conversationEventsToMessages(conversation.events);
+    run: async ({ previousEvents }): Promise<AgentRunResult> => {
+      const initialMessages = conversationEventsToMessages(previousEvents);
 
       const runName = 'defaultAgentGraph';
 
