@@ -6,7 +6,7 @@
  */
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
-import { Conversation, ConversationAccess, MessageRole } from '../../../common/types';
+import { Conversation, MessageRole } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
 
@@ -190,10 +190,7 @@ const patchConversationRoute = createObservabilityAIAssistantServerRoute({
       conversationId: t.string,
     }),
     body: t.partial({
-      access: t.union([
-        t.literal(ConversationAccess.SHARED),
-        t.literal(ConversationAccess.PRIVATE),
-      ]),
+      public: t.boolean,
     }),
   }),
   security: {

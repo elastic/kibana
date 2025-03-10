@@ -54,7 +54,6 @@ import {
   type Message,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
-  ConversationAccess,
 } from '../../../common/types';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
@@ -611,7 +610,7 @@ export class ObservabilityAIAssistantClient {
     updates,
   }: {
     conversationId: string;
-    updates: Partial<{ title: string; access: ConversationAccess }>;
+    updates: Partial<{ public: boolean }>;
   }): Promise<Conversation> => {
     const conversation = await this.get(conversationId);
     if (!conversation) {
@@ -619,7 +618,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     const updatedConversation: Conversation = merge({}, conversation, {
-      ...(updates.access !== undefined && { public: updates.access === ConversationAccess.SHARED }),
+      ...(updates.public !== undefined && { public: updates.public }),
     });
 
     return this.update(conversationId, updatedConversation);

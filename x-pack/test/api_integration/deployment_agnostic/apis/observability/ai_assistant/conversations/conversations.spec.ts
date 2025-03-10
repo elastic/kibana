@@ -11,7 +11,6 @@ import {
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   MessageRole,
-  ConversationAccess,
   Conversation,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../../services/observability_ai_assistant_api';
@@ -704,7 +703,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: patchConversationRoute,
           params: {
             path: { conversationId: createdConversationId },
-            body: { access: ConversationAccess.SHARED },
+            body: { public: true },
           },
         });
 
@@ -717,7 +716,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: patchConversationRoute,
           params: {
             path: { conversationId: createdConversationId },
-            body: { access: ConversationAccess.SHARED },
+            body: { public: true },
           },
         });
 
@@ -729,7 +728,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: patchConversationRoute,
           params: {
             path: { conversationId: 'non-existing-conversation-id' },
-            body: { access: ConversationAccess.SHARED },
+            body: { public: true },
           },
         });
 

@@ -168,7 +168,7 @@ export function useConversation({
               conversationId: displayedConversationId,
             },
             body: {
-              access,
+              public: access === ConversationAccess.SHARED,
             },
           },
         }
