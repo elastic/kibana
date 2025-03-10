@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
+import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
@@ -106,11 +108,17 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }) => {
     const { getAppUrl } = useAppUrl();
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
-
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
+      'endpointManagementSpaceAwarenessEnabled'
+    );
+    const canManageGlobalArtifacts =
+      useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
 
-    const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(
-      () => [
+    const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(() => {
+      const isGlobalButtonDisabled = !isSpaceAwarenessEnabled ? false : !canManageGlobalArtifacts;
+
+      return [
         {
           id: 'globalPolicy',
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
@@ -118,6 +126,10 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           }),
           iconType: isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('global'),
+          isDisabled: isGlobalButtonDisabled,
+          toolTipContent: isGlobalButtonDisabled
+            ? NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE
+            : undefined,
         },
         {
           id: 'perPolicy',
@@ -127,9 +139,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           iconType: !isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('perPolicy'),
         },
-      ],
-      [getTestId, isGlobal]
-    );
+      ];
+    }, [canManageGlobalArtifacts, getTestId, isGlobal, isSpaceAwarenessEnabled]);
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
       const isPolicySelected = new Set<string>(selected.map((policy) => policy.id));
