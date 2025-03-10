@@ -83,7 +83,7 @@ export const getGroupedAssetsQuery = (query: GroupingQuery) => ({
   size: 0,
 });
 
-export const useGroupedAssets = ({
+export const useFetchGroupedData = ({
   query,
   enabled = true,
 }: {

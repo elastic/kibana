@@ -37,8 +37,8 @@ import {
 import {
   type AssetsGroupingAggregation,
   type AssetsRootGroupingAggregation,
-  useGroupedAssets,
-} from './use_grouped_assets';
+  useFetchGroupedData,
+} from './use_fetch_grouped_data';
 import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './translations';
 
 // TODO Remove?
@@ -253,7 +253,7 @@ export const useAssetInventoryGrouping = ({
     ],
   });
 
-  const { data, isFetching } = useGroupedAssets({
+  const { data, isFetching } = useFetchGroupedData({
     query: groupingQuery,
     enabled: !isNoneSelected,
   });

@@ -27,7 +27,7 @@ import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../consta
 import { firstNonNullValue } from './utils/first_non_null_value';
 import { NullGroup } from './null_group';
 import { LoadingGroup } from './loading_group';
-import type { AssetsGroupingAggregation } from './use_grouped_assets';
+import type { AssetsGroupingAggregation } from './use_fetch_grouped_data';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './translations';
 
 export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> = (
