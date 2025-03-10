@@ -88,6 +88,7 @@ export class EventBus<S extends Slice> {
       )
       .subscribe({
         next: cb,
+        // eslint-disable-next-line no-console
         error: errorHandler || console.error,
       });
   }
