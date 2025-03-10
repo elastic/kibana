@@ -28,8 +28,10 @@ export async function validateModelMemoryLimit(
 
   // retrieve the model memory limit specified by the user in the job config.
   // note, this will probably be the auto generated value, unless the user has
-  // over written it.
-  const mml = job?.analysis_limits?.model_memory_limit?.toUpperCase() ?? null;
+  // overwritten it.
+  const mml = job?.analysis_limits?.model_memory_limit
+    ? `${job.analysis_limits.model_memory_limit}`.toUpperCase()
+    : null;
 
   const messages = [];
 
@@ -56,8 +58,12 @@ export async function validateModelMemoryLimit(
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
   const body = await mlClient.info();
-  const maxModelMemoryLimit = body.limits.max_model_memory_limit?.toUpperCase();
-  const effectiveMaxModelMemoryLimit = body.limits.effective_max_model_memory_limit?.toUpperCase();
+  const maxModelMemoryLimit = body.limits.max_model_memory_limit
+    ? `${body.limits.max_model_memory_limit}`.toUpperCase()
+    : undefined;
+  const effectiveMaxModelMemoryLimit = body.limits.effective_max_model_memory_limit
+    ? `${body.limits.effective_max_model_memory_limit}`.toUpperCase()
+    : undefined;
 
   if (runCalcModelMemoryTest) {
     const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(client, mlClient)(

@@ -137,11 +137,14 @@ const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModel
   // Enrich deployment stats
   if (modelStats && modelStats.deployment_stats) {
     model.hasStats = true;
-    model.deploymentState = getDeploymentState(modelStats.deployment_stats.allocation_status.state);
-    model.nodeAllocationCount = modelStats.deployment_stats.allocation_status.allocation_count;
+    model.deploymentState = getDeploymentState(
+      modelStats.deployment_stats.allocation_status?.state
+    );
+    model.nodeAllocationCount =
+      modelStats.deployment_stats.allocation_status?.allocation_count ?? 0;
     model.targetAllocationCount =
-      modelStats.deployment_stats.allocation_status.target_allocation_count;
-    model.threadsPerAllocation = modelStats.deployment_stats.threads_per_allocation;
+      modelStats.deployment_stats.allocation_status?.target_allocation_count ?? 0;
+    model.threadsPerAllocation = modelStats.deployment_stats.threads_per_allocation ?? 0;
     model.startTime = modelStats.deployment_stats.start_time;
   } else if (model.modelId === LANG_IDENT_MODEL_ID) {
     model.deploymentState = MlModelDeploymentState.FullyAllocated;
@@ -246,7 +249,7 @@ const getUserFriendlyTitle = (modelId: string, modelType: string) => {
     : modelId;
 };
 
-const getDeploymentState = (state: string): MlModelDeploymentState => {
+const getDeploymentState = (state: string | undefined): MlModelDeploymentState => {
   switch (state) {
     case 'starting':
       return MlModelDeploymentState.Starting;
