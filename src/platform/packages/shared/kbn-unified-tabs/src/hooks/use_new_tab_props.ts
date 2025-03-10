@@ -17,16 +17,20 @@ export const useNewTabProps = ({ numberOfInitialItems }: { numberOfInitialItems:
 
   const getNewTabDefaultProps = useCallback((): Pick<TabItem, 'id' | 'label'> => {
     counterRef.current += 1;
-    return {
-      id: uuidv4(),
-      label: i18n.translate('unifiedTabs.defaultNewTabLabel', {
-        defaultMessage: 'Untitled session {counter}',
-        values: { counter: counterRef.current },
-      }),
-    };
+    return getNewTabPropsForIndex(counterRef.current);
   }, []);
 
   return {
     getNewTabDefaultProps,
   };
 };
+
+export function getNewTabPropsForIndex(index: number): Pick<TabItem, 'id' | 'label'> {
+  return {
+    id: uuidv4(),
+    label: i18n.translate('unifiedTabs.defaultNewTabLabel', {
+      defaultMessage: 'Untitled session {counter}',
+      values: { counter: index },
+    }),
+  };
+}

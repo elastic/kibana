@@ -114,7 +114,7 @@ export const Tab: React.FC<TabProps> = ({
               css={getTabButtonCss(euiTheme)}
               className="unifiedTabs__tabBtn"
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-              title={tabsSizeConfig.isRegularTabLimitedInWidth ? item.label : undefined}
+              title={item.label}
               type="button"
               onClick={onSelectEvent}
               onDoubleClick={() => setIsInlineEditActive(true)}

@@ -40,7 +40,6 @@ export const calculateResponsiveTabs = ({
 
   return {
     isScrollable: items.length > numberOfVisibleItems,
-    isRegularTabLimitedInWidth: calculatedTabWidth <= MAX_TAB_WIDTH,
     regularTabMaxWidth: calculatedTabWidth,
     regularTabMinWidth: MIN_TAB_WIDTH,
   };
