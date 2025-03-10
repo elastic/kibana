@@ -36,20 +36,16 @@ export async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
-  const getAlerts = () =>
-    getAlertByRuleId({ es, ruleId }).then((alerts) => {
-      const actualAlertCount = alerts.length;
-      if (actualAlertCount < minimumAlertCount)
-        throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
+  const main = Effect.gen(function* () {
+    yield* Effect.promise(() =>
+      getAlertByRuleId({ es, ruleId }).then((alerts) => {
+        const actualAlertCount = alerts.length;
+        if (actualAlertCount < minimumAlertCount)
+          throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
+        return alerts;
+      })
+    );
+  }).pipe(Effect.timeout('20 seconds'));
 
-      return alerts;
-    });
-
-  return await Effect.runPromise(
-    Effect.tryPromise(getAlerts).pipe(
-      Effect.retry({ times: 100 }),
-      Effect.timeout('2 minutes'),
-      Effect.catchAll(Console.error)
-    )
-  );
+  return await Effect.runPromise(Effect.retry(main, { times: 10 })).catch(Console.error);
 }
