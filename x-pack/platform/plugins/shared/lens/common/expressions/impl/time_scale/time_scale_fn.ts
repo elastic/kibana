@@ -15,7 +15,11 @@ import {
   TimeRangeBounds,
   TimeRange,
 } from '@kbn/data-plugin/common';
-import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from '../../defs/time_scale/types';
+import type {
+  TimeScaleExpressionFunction,
+  TimeScaleUnit,
+  TimeScaleArgs,
+} from '../../defs/time_scale/types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {
   s: 1000,

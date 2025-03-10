@@ -6,7 +6,10 @@
  */
 
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { OriginalColumn, MapToColumnsExpressionFunction } from '../../defs/map_to_columns/types';
+import type {
+  OriginalColumn,
+  MapToColumnsExpressionFunction,
+} from '../../defs/map_to_columns/types';
 
 export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn'] = (
   data,
