@@ -247,9 +247,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                             </EuiButtonEmpty>
                           )}
                         </EuiFlexItem>
-                        {withTimeRangeSelector &&
-                        initialApplyTimeRangeConfig !== undefined &&
-                        jobs.length !== 0 ? (
+                        {withTimeRangeSelector && jobs.length !== 0 ? (
                           <EuiFlexItem grow={false}>
                             <EuiSwitch
                               label={i18n.translate(
