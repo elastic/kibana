@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
+import React, { useMemo } from 'react';
+import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
@@ -22,6 +22,8 @@ export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'loca
   link: React.ReactElement;
 };
 
+export const INITIAL_SORTING_FIELD = 'impact';
+export const INITIAL_SORTING_DIRECTION = 'desc';
 interface Props {
   dependencies: DependenciesItem[];
   initialPageSize: number;
@@ -33,51 +35,55 @@ interface Props {
   compact?: boolean;
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
+  onChangeRenderedItems?: (items: FormattedSpanMetricGroup[]) => void;
 }
 
-type FormattedSpanMetricGroup = SpanMetricGroup & {
+export type FormattedSpanMetricGroup = SpanMetricGroup & {
   name: string;
   link: React.ReactElement;
 };
 
-export function DependenciesTable(props: Props) {
-  const {
-    dependencies,
-    fixedHeight,
-    link,
-    title,
-    nameColumnTitle,
-    status,
-    compact = true,
-    showPerPageOptions = true,
-    initialPageSize,
-    showSparkPlots,
-  } = props;
-
+export function DependenciesTable({
+  dependencies,
+  fixedHeight,
+  link,
+  title,
+  nameColumnTitle,
+  status,
+  compact = true,
+  showPerPageOptions = true,
+  initialPageSize,
+  showSparkPlots,
+  onChangeRenderedItems,
+}: Props) {
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
 
-  const items: FormattedSpanMetricGroup[] = dependencies.map((dependency) => ({
-    name: dependency.name,
-    link: dependency.link,
-    latency: dependency.currentStats.latency.value,
-    throughput: dependency.currentStats.throughput.value,
-    failureRate: dependency.currentStats.errorRate.value,
-    impact: dependency.currentStats.impact,
-    currentStats: {
-      latency: dependency.currentStats.latency.timeseries,
-      throughput: dependency.currentStats.throughput.timeseries,
-      failureRate: dependency.currentStats.errorRate.timeseries,
-    },
-    previousStats: dependency.previousStats
-      ? {
-          latency: dependency.previousStats.latency.timeseries,
-          throughput: dependency.previousStats.throughput.timeseries,
-          failureRate: dependency.previousStats.errorRate.timeseries,
-          impact: dependency.previousStats.impact,
-        }
-      : undefined,
-  }));
+  const items: FormattedSpanMetricGroup[] = useMemo(
+    () =>
+      dependencies.map((dependency) => ({
+        name: dependency.name,
+        link: dependency.link,
+        latency: dependency.currentStats.latency.value,
+        throughput: dependency.currentStats.throughput.value,
+        failureRate: dependency.currentStats.errorRate.value,
+        impact: dependency.currentStats.impact,
+        currentStats: {
+          latency: dependency.currentStats.latency.timeseries,
+          throughput: dependency.currentStats.throughput.timeseries,
+          failureRate: dependency.currentStats.errorRate.timeseries,
+        },
+        previousStats: dependency.previousStats
+          ? {
+              latency: dependency.previousStats.latency.timeseries,
+              throughput: dependency.previousStats.throughput.timeseries,
+              failureRate: dependency.previousStats.errorRate.timeseries,
+              impact: dependency.previousStats.impact,
+            }
+          : undefined,
+      })),
+    [dependencies]
+  );
 
   const columns: Array<ITableColumn<FormattedSpanMetricGroup>> = [
     {
@@ -131,11 +137,12 @@ export function DependenciesTable(props: Props) {
             columns={columns}
             items={items}
             noItemsMessage={noItemsMessage}
-            initialSortField="impact"
-            initialSortDirection="desc"
+            initialSortField={INITIAL_SORTING_FIELD}
+            initialSortDirection={INITIAL_SORTING_DIRECTION}
             pagination={true}
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
+            onChangeRenderedItems={onChangeRenderedItems}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

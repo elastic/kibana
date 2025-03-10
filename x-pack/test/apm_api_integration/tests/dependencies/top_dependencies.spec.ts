@@ -12,6 +12,8 @@ import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../../utils';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_dependencies'>;
+type TopDependenciesStatistics =
+  APIReturnType<'POST /internal/apm/dependencies/top_dependencies/statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -20,6 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const bucketSize = Math.round((end - start) / (60 * 1000));
 
   async function callApi() {
     return await apmApiClient.readUser({
@@ -31,7 +34,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
           numBuckets: 20,
-          offset: '',
+        },
+      },
+    });
+  }
+
+  async function callStatisticsApi() {
+    return await apmApiClient.readUser({
+      endpoint: 'POST /internal/apm/dependencies/top_dependencies/statistics',
+      params: {
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          numBuckets: 20,
+        },
+        body: {
+          dependencyNames: JSON.stringify([dataConfig.span.destination]),
         },
       },
     });
@@ -53,11 +73,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Top dependencies', { config: 'basic', archives: [] }, () => {
     describe('when data is generated', () => {
       let topDependencies: TopDependencies;
+      let topDependenciesStats: TopDependenciesStatistics;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
         await generateData({ apmSynthtraceEsClient, start, end });
-        const response = await callApi();
+        const [response, statisticsResponse] = await Promise.all([callApi(), callStatisticsApi()]);
         topDependencies = response.body;
+        topDependenciesStats = statisticsResponse.body;
       });
 
       after(() => apmSynthtraceEsClient.clean());
@@ -93,6 +116,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(dependencies.currentStats).to.have.property('impact');
         });
 
+        it("doesn't have timeseries stats", () => {
+          expect(dependencies.currentStats.latency).to.not.have.property('timeseries');
+          expect(dependencies.currentStats.totalTime).to.not.have.property('timeseries');
+          expect(dependencies.currentStats.throughput).to.not.have.property('timeseries');
+          expect(dependencies.currentStats.errorRate).to.not.have.property('timeseries');
+        });
+
         it('returns the correct latency', () => {
           const {
             currentStats: { latency },
@@ -100,38 +130,52 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const { transaction } = dataConfig;
 
-          expect(latency.value).to.be(transaction.duration * 1000);
-          expect(latency.timeseries.every(({ y }) => y === transaction.duration * 1000)).to.be(
-            true
-          );
+          const expectedValue = transaction.duration * 1000;
+          expect(latency.value).to.be(expectedValue);
+          expect(
+            topDependenciesStats.currentTimeseries[dataConfig.span.destination].latency.every(
+              ({ y }) => y === expectedValue
+            )
+          ).to.be(true);
         });
 
         it('returns the correct throughput', () => {
           const {
             currentStats: { throughput },
           } = dependencies;
-          const { rate } = dataConfig;
+          const { rate, errorRate } = dataConfig;
 
-          expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
+          const totalRate = rate + errorRate;
+          expect(roundNumber(throughput.value)).to.be(roundNumber(totalRate));
+          expect(
+            topDependenciesStats.currentTimeseries[dataConfig.span.destination].throughput.every(
+              ({ y }) => roundNumber(y) === roundNumber(totalRate)
+            )
+          ).to.be(true);
         });
 
         it('returns the correct total time', () => {
           const {
             currentStats: { totalTime },
           } = dependencies;
-          const { rate, transaction } = dataConfig;
+          const { rate, transaction, errorRate } = dataConfig;
 
-          expect(
-            totalTime.timeseries.every(({ y }) => y === rate * transaction.duration * 1000)
-          ).to.be(true);
+          const expectedValuePerBucket = (rate + errorRate) * transaction.duration * 1000;
+          expect(totalTime.value).to.be(expectedValuePerBucket * bucketSize);
         });
 
         it('returns the correct error rate', () => {
           const {
             currentStats: { errorRate },
           } = dependencies;
-          expect(errorRate.value).to.be(0);
-          expect(errorRate.timeseries.every(({ y }) => y === 0)).to.be(true);
+          const { rate, errorRate: dataConfigErroRate } = dataConfig;
+          const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
+          expect(errorRate.value).to.be(expectedValue);
+          expect(
+            topDependenciesStats.currentTimeseries[dataConfig.span.destination].errorRate.every(
+              ({ y }) => y === expectedValue
+            )
+          ).to.be(true);
         });
       });
     });
