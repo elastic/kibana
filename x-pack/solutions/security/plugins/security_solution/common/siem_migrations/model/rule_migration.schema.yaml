@@ -217,6 +217,9 @@ components:
         last_updated_at:
           type: string
           description: The moment of the last update.
+        last_error:
+          type: string
+          description: The last error message if the migration task execution failed.
 
     RuleMigrationTaskStatus:
       type: string
