@@ -47,8 +47,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: true,
-        shouldInitializeCustomEvents: true,
       });
 
       expect(coreSetupMock.analytics.registerContextProvider).toHaveBeenCalledWith({
@@ -103,8 +101,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: true,
-        shouldInitializeCustomEvents: false,
       });
       discoverEBTContextManager.onDiscoverAppMounted();
 
@@ -121,8 +117,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: true,
-        shouldInitializeCustomEvents: false,
       });
       discoverEBTContextManager.onDiscoverAppMounted();
 
@@ -138,8 +132,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: true,
-        shouldInitializeCustomEvents: false,
       });
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
@@ -151,8 +143,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: true,
-        shouldInitializeCustomEvents: false,
       });
       discoverEBTContextManager.onDiscoverAppMounted();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
@@ -172,8 +162,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: false,
-        shouldInitializeCustomEvents: true,
       });
 
       await discoverEBTContextManager.trackDataTableSelection({
@@ -200,8 +188,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: false,
-        shouldInitializeCustomEvents: true,
       });
 
       await discoverEBTContextManager.trackDataTableRemoval({
@@ -228,8 +214,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: false,
-        shouldInitializeCustomEvents: true,
       });
 
       await discoverEBTContextManager.trackFilterAddition({
@@ -262,8 +246,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: false,
-        shouldInitializeCustomEvents: true,
       });
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
@@ -313,8 +295,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: false,
-        shouldInitializeCustomEvents: true,
       });
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
@@ -343,8 +323,6 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
-        shouldInitializeCustomContext: false,
-        shouldInitializeCustomEvents: true,
       });
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({

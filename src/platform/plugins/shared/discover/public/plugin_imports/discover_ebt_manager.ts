@@ -67,21 +67,12 @@ export class DiscoverEBTManager {
   public initialize({
     core,
     discoverEbtContext$,
-    shouldInitializeCustomContext,
-    shouldInitializeCustomEvents,
   }: {
     core: CoreSetup;
     discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>;
-    shouldInitializeCustomContext: boolean;
-    shouldInitializeCustomEvents: boolean;
   }) {
-    if (shouldInitializeCustomContext) {
-      this.customContext$ = discoverEbtContext$;
-    }
-
-    if (shouldInitializeCustomEvents) {
-      this.reportEvent = core.analytics.reportEvent;
-    }
+    this.customContext$ = discoverEbtContext$;
+    this.reportEvent = core.analytics.reportEvent;
   }
 
   public onDiscoverAppMounted() {

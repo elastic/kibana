@@ -161,14 +161,7 @@ export class DiscoverPlugin
     const getEbtManager = once(async () => {
       const { DiscoverEBTManager } = await getSharedServices();
       const ebtManager = new DiscoverEBTManager();
-
-      ebtManager.initialize({
-        core,
-        discoverEbtContext$: this.discoverEbtContext$,
-        shouldInitializeCustomContext: true,
-        shouldInitializeCustomEvents: true,
-      });
-
+      ebtManager.initialize({ core, discoverEbtContext$: this.discoverEbtContext$ });
       return ebtManager;
     });
 
