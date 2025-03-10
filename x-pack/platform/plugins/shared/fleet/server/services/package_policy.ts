@@ -1040,7 +1040,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
-      inputs = await _compilePackagePolicyInputs(
+      inputs = _compilePackagePolicyInputs(
         pkgInfo,
         restOfPackagePolicy.vars || {},
         inputs,
@@ -1238,7 +1238,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       try {
         const id = packagePolicyUpdate.id;
         this.keepPolicyIdInSync(packagePolicyUpdate);
-        const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
+        let enrichedPackagePolicy: UpdatePackagePolicy;
+        try {
+          logger.debug(`Starting update of package policy ${id}`);
+          enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+            'packagePolicyUpdate',
+            packagePolicyUpdate,
+            soClient,
+            esClient
+          );
+        } catch (error) {
+          logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
+          logger.error(error);
+          if (error.apiPassThrough) {
+            throw error;
+          }
+          enrichedPackagePolicy = packagePolicyUpdate;
+        }
+
+        const packagePolicy = { ...enrichedPackagePolicy, name: enrichedPackagePolicy.name.trim() };
+
         await preflightCheckPackagePolicy(soClient, packagePolicy);
         const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
         if (!oldPackagePolicy) {
@@ -1249,9 +1268,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         let secretReferences: PolicySecretReference[] | undefined;
 
+        const { version } = packagePolicyUpdate;
         // id and version are not part of the saved object attributes
         // eslint-disable-next-line prefer-const
-        let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+        let { version: _version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
         if (packagePolicyUpdate.is_managed && !options?.force) {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);

@@ -435,8 +435,7 @@ export const OrphanedPackagePoliciesResponseSchema = schema.object({
   total: schema.number(),
 });
 
-export const DryRunPackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
+export const DryRunPackagePolicySchema = PackagePolicyResponseSchema.extends({
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
   errors: schema.maybe(
