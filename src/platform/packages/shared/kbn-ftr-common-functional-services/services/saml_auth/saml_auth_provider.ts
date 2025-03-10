@@ -159,7 +159,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         log.debug(
           `Creating API key for ${role} with privileges: ${JSON.stringify(roleDescriptor)}`
         );
-        roleDescriptors = { [role]: roleDescriptor };
+        roleDescriptors = { [role]: { ...roleDescriptor, metadata: undefined } };
       }
 
       const payload = createApiKeyPayload(role, roleDescriptors);
