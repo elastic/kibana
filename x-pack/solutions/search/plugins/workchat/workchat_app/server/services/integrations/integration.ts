@@ -29,7 +29,7 @@ export class InternalIntegration implements Integration {
   }
 
   async connect(services: InternalIntegrationServices): Promise<Client> {
-    const mcpServer = this.typeInstance.mcpServer(this.configuration, services);
+    const mcpServer = await this.typeInstance.mcpServer(this.configuration, services);
 
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 

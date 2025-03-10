@@ -49,7 +49,7 @@ const IntegrationsSO: IntegrationModel[] = [
   },
   {
     id: '3',
-    isInternal: false,
+    isInternal: true,
     type: 'custom_index' as IntegrationTypes,
     configuration: {
       index: "support-hub-questions",
@@ -61,10 +61,11 @@ const IntegrationsSO: IntegrationModel[] = [
           { field: "created", type: "date", aggs: false, description: "Date the article was created" }
         ],
         contextFields: [
-          { field: "description", type: "keyword", description: "Description of the article" }
+          { field: "description", type: "keyword", description: "Description of the article" },
+          { field: "content", type: "semantic", description: "Content of the article" }
         ]
       },
-      queryTemplate: '{"query":{"semantic":{"query":"{query}","field":"content"}}}'
+      queryTemplate: '{"semantic":{"query":"{query}","field":"content"}}'
     }
   }
 ];

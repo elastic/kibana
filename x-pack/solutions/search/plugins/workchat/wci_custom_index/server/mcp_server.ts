@@ -5,33 +5,14 @@
  * 2.0.
  */
 
-import { AggregationsStringTermsAggregate } from "@elastic/elasticsearch/lib/api/types";
-import { InternalIntegrationServices } from "@kbn/wci-common";
+import type { AggregationsStringTermsAggregate } from "@elastic/elasticsearch/lib/api/types";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { InternalIntegrationServices } from "@kbn/wci-common";
 
 interface SearchResult {
 }
-
-/**
- * 
- *  configuration: {
-            index: "support-hub-questions",
-            description: "Knowledge base articles",
-            fields: {
-                filterFields: [
-                    { field: "status", type: "keyword", aggs: true, description: "Status of the article" },
-                    { field: "tags", type: "keyword", aggs: true, description: "Tags of the article" },
-                    { field: "created", type: "date", aggs: false, description: "Date the article was created" }
-                ],
-                contextFields: [
-                    { field: "description", type: "keyword", description: "Description of the article" }
-                ]
-            },
-            queryTemplate: '{"query":{"semantic":{"query":"{query}","field":"content"}}}'
-        }
- * 
- */
 
 interface CustomIndexConfiguration {
   index: string;
@@ -59,7 +40,7 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
   const { index, fields } = configuration;
 
   const aggFields = fields.filterFields.filter(field => field.aggs);
-  let fieldValues = fields.filterFields.map(field => ({ field: field.field, values: [] }));
+  let fieldValues = fields.filterFields.map(field => ({ field: field.field, values: [] as string[], description: field.description, type: field.type, aggs: field.aggs }));
 
   if (aggFields.length > 0) {
     try {
@@ -72,7 +53,7 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
             {
               terms: {
                 field: field.field,
-                size: 100 // Limit to top 100 values
+                size: 20 // Limit to top 100 values
               }
             }
           ])
@@ -83,9 +64,10 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
         const buckets = (aggResult.aggregations?.[fieldValue.field] as AggregationsStringTermsAggregate)?.buckets;
         if (buckets) {
           return {
-            field: fieldValue.field,
+            ...fieldValue,
             // @ts-ignore
-            values: buckets.map(bucket => bucket.key as string)
+            values: buckets.map(bucket => bucket.key as string) as unknown as string[],
+
           };
         }
         return fieldValue;
@@ -96,25 +78,79 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
     }
   }
 
-  server.tool("search", { query: z.string() }, async ({ query }) => {
-    const { index,  } = configuration;
-    
+  const filterSchema = fieldValues.reduce((acc, field) => {
+    if (field.type === "keyword" && field.aggs && field.values.length > 0) {
+      return {
+        ...acc,
+        [field.field]: z.string().describe(field.description + " (one of " + field.values.join(", ") + ")")
+      }
+    } else if (field.type === "keyword" && !field.aggs) {
+      return {
+        ...acc,
+        [field.field]: z.string().describe(field.description)
+      }
+    } else if (field.type === "date" && field.values.length > 0) {
+      return {
+        ...acc,
+        [field.field]: z.date().describe(field.description)
+      }
+    }
+    return {
+      ...acc
+    }
+  }, {
+    query: z.string().describe("The query to search for")
+  })
+
+  server.tool("search", configuration.description, filterSchema, async ({ query, ...filters }) => {
+    const { index, } = configuration;
+
     services.logger.info(`Searching for "${query}" in index "${index}"`);
 
-    const result = await services.elasticsearchClient.search<SearchResult>({
-      index: index || "custom_index",
-      query: JSON.parse(configuration.queryTemplate.replace("{query}", query)),
-      "_source": {
-        "includes": ""
-      },
-      "highlight": {
-        "fields": {
-          [highlightField || field || "content"]: {
-            "type": "semantic"
-          }
+    let result = null
+
+    const esFilters = Object.entries(filters).map(([field, value]) => {
+      const fieldConfig = fields.filterFields.find(f => f.field === field);
+      if (fieldConfig?.type === "keyword") {
+        return {
+          "term": { [field]: value }
         }
+      } 
+    })
+
+    try {
+      result = await services.elasticsearchClient.search<SearchResult>({
+        index: index,
+        body: {
+          query: {
+            "bool": {
+              "must": [
+                JSON.parse(configuration.queryTemplate.replace("{query}", query))
+              ],
+              "filter": esFilters
+            }
+          },
+          "_source": {
+            "includes": fields.contextFields.map(field => field.field)
+          },
+          "highlight": {
+            "fields": fields.contextFields.reduce((acc: Record<string, any>, field) => {
+              if (field.type === "semantic") {
+                acc[field.field] = {
+                  "type": "semantic"
+                }
+              }
+              return acc;
+            }, {})
+          },
+        }
+      });
+    } catch (error) {
+      services.logger.error(`Failed to search: ${error}`);
+      return {
+        content: []
       }
-    });
+    };
 
     services.logger.info(`Found ${result.hits.hits.length} hits`);
 
@@ -122,7 +158,14 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
       const highlightField = Object.keys(hit.highlight || {})[0];
       return {
         type: "text" as const,
-        text: hit.highlight?.[highlightField]?.flat().join("\n") || ""
+        text: configuration.fields.contextFields.map((field) => {
+          if (field.type === "semantic") {
+            return `${field.field}: ${hit.highlight?.[highlightField]?.flat().join("\n") || ""}`
+          } else {
+            // @ts-ignore
+            return `${field.field}: ${hit._source?.[field.field] || ""}`
+          }
+        }).join("\n")
       }
     });
 
