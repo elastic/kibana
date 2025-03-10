@@ -80,7 +80,6 @@ export const RuleDashboards = ( { plugins }) => {
       {isLinkedDashboardsEnabled && (
       <EuiSplitPanel.Inner>
         <EuiFlexItem>
-          <EuiSpacer size="m" />
           <EuiTitle size="xs">
             <h6>
               <FormattedMessage
@@ -96,7 +95,6 @@ export const RuleDashboards = ( { plugins }) => {
             selectedOptions={selectedDashboards}
             onChange={onChange}
           />
-          <EuiSpacer size="m" />
         </EuiFlexItem>
       </EuiSplitPanel.Inner>
       )}
