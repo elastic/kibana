@@ -31,7 +31,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { CreateRuleOptions, RunOpts, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
-import { checkErrorDetails } from './utils/check_error_details';
+import { checkErrorDetails } from '../utils/check_error_details';
 import * as i18n from '../translations';
 
 import {
