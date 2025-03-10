@@ -70,6 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Failing: See https://github.com/elastic/kibana/issues/95591
   // Failing: See https://github.com/elastic/kibana/issues/213311
+  // Failing: See https://github.com/elastic/kibana/issues/213308
   describe.skip('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
