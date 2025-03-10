@@ -44,6 +44,12 @@ describe('checkErrorDetails', () => {
 
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
+    it('should mark string literal error as user error from error message', () => {
+      const errorMessage = `parsing_exception
+	Root causes:
+		parsing_exception: line 1:28: Use double quotes ["] to define string literals, not single quotes [']`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
   });
 
   describe('data source verification errors', () => {

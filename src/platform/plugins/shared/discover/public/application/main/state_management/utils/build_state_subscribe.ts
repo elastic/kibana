@@ -13,11 +13,8 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverStateContainer } from '../discover_state';
-import {
-  DiscoverAppState,
-  DiscoverAppStateContainer,
-  isEqualState,
-} from '../discover_app_state_container';
+import type { DiscoverAppState, DiscoverAppStateContainer } from '../discover_app_state_container';
+import { isEqualState } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
