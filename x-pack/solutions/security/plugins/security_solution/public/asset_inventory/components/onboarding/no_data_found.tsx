@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -17,15 +16,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { OnboardingContextProvider } from '../../../onboarding/components/onboarding_context';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { InventoryTitle } from '../inventory_title';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import illustration from '../../../common/images/integrations_light.png';
-import { useNoDataFound } from './hooks/use_no_data_found';
+import { IntegrationsCardGridTabs } from '../../../onboarding/components/onboarding_body/cards/integrations/integration_card_grid_tabs';
+import { OnboardingSuccessCallout } from './onboarding_success_callout';
+import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
 
 export const NoDataFound = () => {
   const spaceId = useSpaceId();
-  const { isCalloutVisible, onHideCallout, renderIntegrationsExplorer } = useNoDataFound();
 
   if (!spaceId) {
     return <AssetInventoryLoading />;
@@ -35,25 +36,8 @@ export const NoDataFound = () => {
     <>
       <InventoryTitle />
       <EuiSpacer size="l" />
-      {isCalloutVisible && (
-        <>
-          <EuiCallOut
-            onDismiss={onHideCallout}
-            title="Entity Store Installed Successfully"
-            color="success"
-            iconType="check"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.onboarding.entityStoreInstalledSuccessfully"
-                defaultMessage="The Entity Store is now set up and ready to use. You can start managing your assets with enhanced visibility and context, empowering your security team to make informed decisions."
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
-      )}
-      <EuiPanel>
+      <OnboardingSuccessCallout />
+      <EuiPanel data-test-subj={TEST_SUBJ_ONBOARDING_NO_DATA_FOUND}>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="m">
@@ -86,7 +70,9 @@ export const NoDataFound = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        {renderIntegrationsExplorer(spaceId)}
+        <OnboardingContextProvider spaceId={spaceId}>
+          <IntegrationsCardGridTabs installedIntegrationsCount={0} isAgentRequired={false} />
+        </OnboardingContextProvider>
       </EuiPanel>
     </>
   );
