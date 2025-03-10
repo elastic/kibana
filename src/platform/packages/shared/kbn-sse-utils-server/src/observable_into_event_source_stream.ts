@@ -14,7 +14,7 @@ import {
   ServerSentEventErrorCode,
 } from '@kbn/sse-utils/src/errors';
 import { ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, Subject, throttleTime } from 'rxjs';
 import { PassThrough } from 'stream';
 import type { Zlib } from 'zlib';
 
@@ -33,9 +33,17 @@ export function observableIntoEventSourceStream(
   {
     logger,
     signal,
+    flushThrottleMs = 100,
   }: {
     logger: Pick<Logger, 'debug' | 'error'>;
     signal: AbortSignal;
+    /**
+     * The minimum time in milliseconds between flushes of the stream.
+     * This is to avoid flushing too often if the source emits events in quick succession.
+     *
+     * @default 100
+     */
+    flushThrottleMs?: number;
   }
 ) {
   const withSerializedErrors$ = source$.pipe(
@@ -70,21 +78,28 @@ export function observableIntoEventSourceStream(
   );
 
   const stream = new ResponseStream();
+  const flush$ = new Subject<void>();
+  flush$
+    // Using `leading: true` and `trailing: true` to avoid holding the flushing for too long,
+    // but still avoid flushing too often (it will emit at the beginning of the throttling process, and at the end).
+    .pipe(throttleTime(flushThrottleMs, void 0, { leading: true, trailing: true }))
+    .subscribe(() => stream.flush());
 
   const intervalId = setInterval(() => {
     // `:` denotes a comment - this is to keep the connection open
     // it will be ignored by the SSE parser on the client
     stream.write(': keep-alive\n');
-    stream.flush();
+    flush$.next();
   }, 10000);
 
   const subscription = withSerializedErrors$.subscribe({
     next: (line) => {
       stream.write(line);
       // Make sure to flush the written lines to emit them immediately (instead of waiting for buffer to fill)
-      stream.flush();
+      flush$.next();
     },
     complete: () => {
+      flush$.complete();
       stream.end();
       clearTimeout(intervalId);
     },
@@ -101,6 +116,7 @@ export function observableIntoEventSourceStream(
           },
         })
       );
+      flush$.complete();
       // No need to flush because we're ending the stream anyway
       stream.end();
     },

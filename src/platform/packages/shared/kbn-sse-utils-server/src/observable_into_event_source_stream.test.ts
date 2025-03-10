@@ -61,6 +61,34 @@ describe('observableIntoEventSourceStream', () => {
     expect(streamFlushSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('multiple writes only call flush twice', () => {
+    source$.next({ type: ServerSentEventType.data, data: { foo: 'bar-1' } });
+    source$.next({ type: ServerSentEventType.data, data: { foo: 'bar-2' } });
+    source$.next({ type: ServerSentEventType.data, data: { foo: 'bar-3' } });
+    source$.next({ type: ServerSentEventType.data, data: { foo: 'bar-4' } });
+    source$.complete();
+
+    expect(streamFlushSpy).toHaveBeenCalledTimes(1); // on the first message
+
+    jest.advanceTimersByTime(50); // Advance half the throttling time
+
+    expect(streamFlushSpy).toHaveBeenCalledTimes(1); // still the first flush only
+
+    jest.advanceTimersByTime(50); // Advance throttling time
+
+    expect(streamFlushSpy).toHaveBeenCalledTimes(2); // on the first message, and after the throttling time
+
+    jest.runAllTimers();
+
+    expect(data).toEqual([
+      'event: data\ndata: {"data":{"foo":"bar-1"}}\n\n',
+      'event: data\ndata: {"data":{"foo":"bar-2"}}\n\n',
+      'event: data\ndata: {"data":{"foo":"bar-3"}}\n\n',
+      'event: data\ndata: {"data":{"foo":"bar-4"}}\n\n',
+    ]);
+    expect(streamFlushSpy).toHaveBeenCalledTimes(2);
+  });
+
   it('handles SSE errors', () => {
     const sseError = createSSEInternalError('Invalid input');
 
