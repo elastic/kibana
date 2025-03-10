@@ -213,7 +213,9 @@ type SessionInitializationState =
       stateContainer: DiscoverStateContainer;
     };
 
-type InitializeSession = (initialState?: DiscoverAppState) => Promise<SessionInitializationState>;
+type InitializeSession = (
+  defaultUrlState?: DiscoverAppState
+) => Promise<SessionInitializationState>;
 
 const DiscoverSessionView = ({
   rootProfileState,
@@ -243,12 +245,12 @@ const DiscoverSessionView = ({
   const defaultProfileAdHocDataViewIds = useInternalStateSelector(
     (state) => state.defaultProfileAdHocDataViewIds
   );
-  const initialize = useLatest<InitializeSession>(async (initialUrlState) => {
+  const initialize = useLatest<InitializeSession>(async (defaultUrlState) => {
     internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
 
     const discoverSessionLoadTracker = ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
-      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? initialUrlState,
+      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? defaultUrlState,
       uiSettings
     );
     const persistedDiscoverSession = discoverSessionId
@@ -406,6 +408,10 @@ const DiscoverSessionView = ({
       loading: true,
     }
   );
+  const initializeSessionWithDefaultLocationState = useLatest(() => {
+    const scopedHistory = getScopedHistory<{ defaultState?: DiscoverAppState }>();
+    initializeSession(scopedHistory?.location.state?.defaultState);
+  });
   const initializeSessionState = initializationState as NarrowAsyncState<
     typeof initializationState
   >;
@@ -417,9 +423,16 @@ const DiscoverSessionView = ({
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   useEffect(() => {
-    // TODO: Pass current data view when Discover session is cleared
-    initializeSession();
-  }, [discoverSessionId, initializeSession]);
+    initializeSessionWithDefaultLocationState.current();
+  }, [discoverSessionId, initializeSessionWithDefaultLocationState]);
+
+  useUrl({
+    history,
+    savedSearchId: discoverSessionId,
+    onNewUrl: () => {
+      initializeSessionWithDefaultLocationState.current();
+    },
+  });
 
   useAlertResultsToast({
     isAlertResults: historyLocationState?.isAlertResults,
@@ -430,15 +443,6 @@ const DiscoverSessionView = ({
     type: 'application',
     page: 'app',
     id: discoverSessionId || 'new',
-  });
-
-  useUrl({
-    history,
-    savedSearchId: discoverSessionId,
-    onNewUrl: () => {
-      const scopedHistory = getScopedHistory<{ initialState?: DiscoverAppState }>();
-      initializeSession(scopedHistory?.location.state?.initialState);
-    },
   });
 
   if (initializeSessionState.loading) {
