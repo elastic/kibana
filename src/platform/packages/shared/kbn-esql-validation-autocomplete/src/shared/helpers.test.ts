@@ -324,7 +324,7 @@ describe('getExpressionType', () => {
       },
       {
         expression: '[null, null, null]',
-        expectedType: 'null',
+        expectedType: 'unknown', // There is no such thing as list of nulls
       },
       {
         expression: '[true, false]',

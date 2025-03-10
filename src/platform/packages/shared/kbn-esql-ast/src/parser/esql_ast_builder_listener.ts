@@ -101,8 +101,14 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitWhereCommand(ctx: WhereCommandContext) {
     const command = createCommand('where', ctx);
+
     this.ast.push(command);
-    command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
+
+    const expression = collectBooleanExpression(ctx.booleanExpression())[0];
+
+    if (expression) {
+      command.args.push(expression);
+    }
   }
 
   /**

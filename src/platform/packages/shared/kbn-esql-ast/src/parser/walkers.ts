@@ -94,6 +94,7 @@ import {
   ESQLAstField,
   ESQLInlineCast,
   ESQLOrderExpression,
+  ESQLSingleAstItem,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
 
@@ -215,25 +216,30 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
   return ast;
 }
 
-function visitLogicalNot(ctx: LogicalNotContext) {
+function visitLogicalNot(ctx: LogicalNotContext): ESQLSingleAstItem {
   const fn = createFunction('not', ctx, undefined, 'unary-expression');
-  fn.args.push(...collectBooleanExpression(ctx.booleanExpression()));
+  const expression = collectBooleanExpression(ctx.booleanExpression())[0];
+
+  if (expression) {
+    fn.args.push(expression);
+  }
+
   // update the location of the assign based on arguments
   const argsLocationExtends = computeLocationExtends(fn);
   fn.location = argsLocationExtends;
   return fn;
 }
 
-function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
+function visitLogicalAndsOrs(ctx: LogicalBinaryContext): ESQLSingleAstItem {
   const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
-  fn.args.push(...collectBooleanExpression(ctx._left), ...collectBooleanExpression(ctx._right));
+  fn.args.push(collectBooleanExpression(ctx._left)[0], collectBooleanExpression(ctx._right)[0]);
   // update the location of the assign based on arguments
   const argsLocationExtends = computeLocationExtends(fn);
   fn.location = argsLocationExtends;
   return fn;
 }
 
-function visitLogicalIns(ctx: LogicalInContext) {
+function visitLogicalIns(ctx: LogicalInContext): ESQLSingleAstItem {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx, undefined, 'binary-expression');
   const [left, ...list] = ctx.valueExpression_list();
   const leftArg = visitValueExpression(left);
@@ -264,7 +270,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
   return (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || '';
 }
 
-export function visitValueExpression(ctx: ValueExpressionContext) {
+export function visitValueExpression(
+  ctx: ValueExpressionContext
+): ESQLAstItem | ESQLAstItem[] | undefined {
   if (!textExistsAndIsValid(ctx.getText())) {
     return [];
   }
@@ -422,7 +430,7 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
     return createColumn(ctx.qualifiedName());
   }
   if (ctx instanceof ParenthesizedExpressionContext) {
-    return collectBooleanExpression(ctx.booleanExpression());
+    return [collectBooleanExpression(ctx.booleanExpression())[0]];
   }
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
@@ -435,7 +443,10 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
     }
     const functionArgs = functionExpressionCtx
       .booleanExpression_list()
-      .flatMap(collectBooleanExpression)
+      .flatMap((context) => {
+        const expression = collectBooleanExpression(context)[0];
+        return expression ? [expression] : [];
+      })
       .filter(nonNullable);
     if (functionArgs.length) {
       fn.args.push(...functionArgs);
@@ -453,91 +464,115 @@ function collectInlineCast(ctx: InlineCastContext): ESQLInlineCast {
   return createInlineCast(ctx, primaryExpression);
 }
 
-export function collectLogicalExpression(ctx: BooleanExpressionContext) {
+export function visitLogicalExpression(
+  ctx: BooleanExpressionContext
+): ESQLSingleAstItem | undefined {
   if (ctx instanceof LogicalNotContext) {
-    return [visitLogicalNot(ctx)];
+    return visitLogicalNot(ctx);
+  } else if (ctx instanceof LogicalBinaryContext) {
+    return visitLogicalAndsOrs(ctx);
+  } else if (ctx instanceof LogicalInContext) {
+    return visitLogicalIns(ctx);
   }
-  if (ctx instanceof LogicalBinaryContext) {
-    return [visitLogicalAndsOrs(ctx)];
-  }
-  if (ctx instanceof LogicalInContext) {
-    return [visitLogicalIns(ctx)];
-  }
-  return [];
 }
 
-function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
-  const regexes = ctx.getTypedRuleContexts(RegexBooleanExpressionContext);
-  const ret: ESQLFunction[] = [];
-  return ret.concat(
-    regexes.map((regex) => {
-      const negate = regex.NOT();
-      const likeType = regex._kind.text?.toLowerCase() || '';
-      const fnName = `${negate ? 'not_' : ''}${likeType}`;
-      const fn = createFunction(fnName, regex, undefined, 'binary-expression');
-      const arg = visitValueExpression(regex.valueExpression());
-      if (arg) {
-        fn.args.push(arg);
+function visitRegexExpression(ctx: BooleanExpressionContext): ESQLFunction | undefined {
+  const regex = ctx.getTypedRuleContext(RegexBooleanExpressionContext, 0);
 
-        const literal = createLiteralString(regex._pattern);
+  if (!regex) {
+    return;
+  }
 
-        fn.args.push(literal);
-      }
-      return fn;
-    })
-  );
+  const negate = regex.NOT();
+  const likeType = regex._kind.text?.toLowerCase() || '';
+  const fnName = `${negate ? 'not_' : ''}${likeType}`;
+  const fn = createFunction(fnName, regex, undefined, 'binary-expression');
+  const arg = visitValueExpression(regex.valueExpression());
+
+  if (arg) {
+    fn.args.push(arg);
+
+    const literal = createLiteralString(regex._pattern);
+
+    fn.args.push(literal);
+  }
+
+  return fn;
 }
 
-function collectIsNullExpression(ctx: BooleanExpressionContext) {
+function visitIsNullExpression(ctx: BooleanExpressionContext): ESQLFunction | undefined {
   if (!(ctx instanceof IsNullContext)) {
-    return [];
+    return;
   }
+
   const negate = ctx.NOT();
   const fnName = `is${negate ? ' not ' : ' '}null`;
   const fn = createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
   const arg = visitValueExpression(ctx.valueExpression());
+
   if (arg) {
     fn.args.push(arg);
   }
-  return [fn];
+
+  return fn;
 }
 
-function collectDefaultExpression(ctx: BooleanExpressionContext) {
+function visitDefaultExpression(ctx: BooleanExpressionContext): ESQLSingleAstItem | undefined {
   if (!(ctx instanceof BooleanDefaultContext)) {
+    return;
+  }
+
+  const arg = visitValueExpression(ctx.valueExpression());
+
+  return Array.isArray(arg) ? (firstItem(arg) as ESQLSingleAstItem | undefined) : arg;
+}
+
+export function collectBooleanExpression(
+  ctx: BooleanExpressionContext | undefined
+): ESQLSingleAstItem[] {
+  if (!ctx) {
     return [];
   }
-  const arg = visitValueExpression(ctx.valueExpression());
-  return arg ? [arg] : [];
-}
 
-export function collectBooleanExpression(ctx: BooleanExpressionContext | undefined): ESQLAstItem[] {
-  const ast: ESQLAstItem[] = [];
-  if (!ctx) {
-    return ast;
+  const logicalExpression = visitLogicalExpression(ctx);
+
+  if (logicalExpression) {
+    return [logicalExpression];
   }
-  return ast
-    .concat(
-      collectLogicalExpression(ctx),
-      collectRegexExpression(ctx),
-      collectIsNullExpression(ctx),
-      collectDefaultExpression(ctx)
-    )
-    .flat();
+
+  const regexExperssion = visitRegexExpression(ctx);
+
+  if (regexExperssion) {
+    return [regexExperssion];
+  }
+
+  const nullExpression = visitIsNullExpression(ctx);
+
+  if (nullExpression) {
+    return [nullExpression];
+  }
+
+  const defaultExpression = visitDefaultExpression(ctx);
+
+  if (defaultExpression) {
+    return [defaultExpression];
+  }
+
+  return [];
 }
 
 export function visitField(ctx: FieldContext) {
   if (ctx.qualifiedName() && ctx.ASSIGN()) {
     const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
-    fn.args.push(
-      createColumn(ctx.qualifiedName()!),
-      collectBooleanExpression(ctx.booleanExpression())
-    );
+    fn.args.push(createColumn(ctx.qualifiedName()!), [
+      collectBooleanExpression(ctx.booleanExpression())[0],
+    ]);
     // update the location of the assign based on arguments
     const argsLocationExtends = computeLocationExtends(fn);
     fn.location = argsLocationExtends;
     return [fn];
   }
-  return collectBooleanExpression(ctx.booleanExpression());
+  return [collectBooleanExpression(ctx.booleanExpression())[0]];
 }
 
 export function collectAllAggFields(ctx: AggFieldsContext | undefined): ESQLAstField[] {
