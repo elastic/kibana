@@ -13,11 +13,16 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations KSPM K8S', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_k8s']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;

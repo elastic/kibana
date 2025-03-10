@@ -28,6 +28,7 @@ const {
 export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
@@ -36,6 +37,10 @@ export default function (providerContext: FtrProviderContext) {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;

@@ -21,6 +21,11 @@ export default function (providerContext: FtrProviderContext) {
     const RETRY_COUNT = 5;
     const RETRY_DELAY = 1000;
     const retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY };
+    const kibanaServer = getService('kibanaServer');
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;

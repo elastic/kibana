@@ -23,12 +23,17 @@ const SHARED_CREDETIALS_PROFILE_NAME_TEST_ID = 'credentialProfileName';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects } = providerContext;
+  const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations KSPM EKS', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_eks']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
