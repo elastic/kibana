@@ -215,9 +215,9 @@ describe('helpers', function () {
           startLineNumber: 1,
         },
         {
-          endColumn: 40,
+          endColumn: 36,
           endLineNumber: 1,
-          message: 'evaluation of [TO_LOWER([\\FOO\\, \\BAR\\])] failed',
+          message: 'evaluation of [TO_LOWER([FOO, BAR])] failed',
           severity: 4,
           startColumn: 9,
           startLineNumber: 1,

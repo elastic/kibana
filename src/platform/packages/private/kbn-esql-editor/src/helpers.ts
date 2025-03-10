@@ -66,7 +66,7 @@ export const useDebounceWithOptions = (
 // Quotes can be used as separators for multiple warnings unless
 // they are escaped with backslashes. This regexp will match any
 // quoted string that is not escaped.
-const quotedWarningMessageRegexp = /(?<!\\)"(.*?)(?<!\\)"/g;
+const quotedWarningMessageRegexp = /"(?:[^"\\]*(?:\\.[^"\\]*)*)"/g;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
   if (quotedWarningMessageRegexp.test(warning)) {
@@ -74,7 +74,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
     if (matches) {
       return matches.map((message) => {
         // start extracting the quoted message and with few default positioning
-        let warningMessage = message.replace(/"/g, '');
+        let warningMessage = message.replace(/\\"/g, '').replace(/"/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
         // initialize the length to 10 in case no error word found
