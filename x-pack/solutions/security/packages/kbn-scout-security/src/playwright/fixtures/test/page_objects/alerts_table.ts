@@ -10,18 +10,20 @@ import { ScoutPage, Locator } from '@kbn/scout';
 const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
-  public expandAlertBtn: Locator;
+  public expandFirstAlertBtn: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.expandAlertBtn = this.page.testSubj.locator('expand-event');
+    this.expandFirstAlertBtn = this.page.locator(
+      '[aria-label^="View details for the alert or event in row 1,"][data-test-subj="expand-event"]'
+    );
   }
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
   }
 
-  async expandAlertDetailsFlyout(index = 0) {
-    await this.expandAlertBtn.nth(index).click();
+  async expandFirstAlertDetailsFlyout() {
+    await this.expandFirstAlertBtn.click();
   }
 
   async getCurrentUrl() {

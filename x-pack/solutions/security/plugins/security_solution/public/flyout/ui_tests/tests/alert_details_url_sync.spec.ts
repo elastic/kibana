@@ -25,7 +25,7 @@ test.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }
     const urlBeforeAlertDetails = await alertsTablePage.getCurrentUrl();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
-    await alertsTablePage.expandAlertDetailsFlyout();
+    await alertsTablePage.expandFirstAlertDetailsFlyout();
 
     const urlAfterAlertDetails = await alertsTablePage.getCurrentUrl();
     expect(urlAfterAlertDetails).toContain(RIGHT);
