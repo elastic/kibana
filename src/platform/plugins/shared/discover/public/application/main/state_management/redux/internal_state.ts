@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -16,10 +15,15 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
+  createAsyncThunk,
 } from '@reduxjs/toolkit';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from './runtime_state';
-import type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+import {
+  LoadingStatus,
+  type DiscoverInternalState,
+  type InternalStateDataRequestParams,
+} from './types';
 
 const initialState: DiscoverInternalState = {
   dataViewId: undefined,
@@ -36,7 +40,30 @@ const initialState: DiscoverInternalState = {
     rowHeight: false,
     breakdownField: false,
   },
+  documentsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: [],
+  },
+  totalHitsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: 0,
+  },
+  chartRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: {},
+  },
 };
+
+const createInternalStateAsyncThunk = createAsyncThunk.withTypes<{
+  state: DiscoverInternalState;
+  dispatch: InternalStateDispatch;
+  extra: InternalStateThunkDependencies;
+}>();
+
+export const loadDataViewList = createInternalStateAsyncThunk(
+  'internalState/loadDataViewList',
+  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
+);
 
 export const internalStateSlice = createSlice({
   name: 'internalState',
@@ -56,10 +83,6 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
-    },
-
-    setSavedDataViews: (state, action: PayloadAction<DataViewListItem[]>) => {
-      state.savedDataViews = action.payload;
     },
 
     setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {
@@ -103,9 +126,14 @@ export const internalStateSlice = createSlice({
       state.expandedDoc = undefined;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(loadDataViewList.fulfilled, (state, action) => {
+      state.savedDataViews = action.payload;
+    });
+  },
 });
 
-interface InternalStateThunkDependencies {
+export interface InternalStateThunkDependencies {
   services: DiscoverServices;
   runtimeStateManager: RuntimeStateManager;
 }

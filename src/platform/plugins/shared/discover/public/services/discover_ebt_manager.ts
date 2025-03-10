@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
 /**
@@ -68,6 +69,10 @@ export class DiscoverEBTManager {
       [ContextualProfileLevel.dataSourceLevel]: undefined,
       [ContextualProfileLevel.documentLevel]: undefined,
     };
+  }
+
+  public trackPerformanceEvent(eventName: string) {
+    return { reportEvent: () => {} };
   }
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
@@ -152,6 +157,23 @@ export class DiscoverEBTManager {
       });
       this.reportEvent = core.analytics.reportEvent;
     }
+
+    this.trackPerformanceEvent = (eventName: string) => {
+      const startTime = window.performance.now();
+      let reported = false;
+
+      return {
+        reportEvent: () => {
+          if (reported) return;
+          reported = true;
+          const duration = window.performance.now() - startTime;
+          reportPerformanceMetricEvent(core.analytics, {
+            eventName,
+            duration,
+          });
+        },
+      };
+    };
   }
 
   public onDiscoverAppMounted() {

@@ -8,7 +8,7 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
+import { internalStateSlice, loadDataViewList } from './internal_state';
 import {
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
@@ -23,6 +23,7 @@ export { type InternalStateStore, createInternalStateStore } from './internal_st
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
+  loadDataViewList,
   setDataView,
   setAdHocDataViews,
   setDefaultProfileAdHocDataViews,

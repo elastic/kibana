@@ -47,6 +47,7 @@ export function updateSavedSearch({
       savedSearch.usesAdHocDataView = true;
     }
   }
+
   if (useFilterAndQueryServices) {
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())
@@ -59,6 +60,7 @@ export function updateSavedSearch({
       .setField('query', state.query ?? undefined)
       .setField('filter', [...globalFilters, ...appFilters]);
   }
+
   if (state) {
     savedSearch.columns = state.columns || [];
     savedSearch.sort = (state.sort as SortOrder[]) || [];
@@ -105,5 +107,6 @@ export function updateSavedSearch({
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
+
   return savedSearch;
 }

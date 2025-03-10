@@ -15,8 +15,10 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import {
   RuntimeStateManager,
+  createInternalStateStore,
   createRuntimeStateManager,
 } from '../application/main/state_management/redux';
+import { HistoryLocationState } from '../build_services';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -27,13 +29,15 @@ export function getDiscoverStateMock({
   savedSearch?: SavedSearch;
   runtimeStateManager?: RuntimeStateManager;
 }) {
-  const history = createBrowserHistory();
+  const history = createBrowserHistory<HistoryLocationState>();
   history.push('/');
+  const services = { ...discoverServiceMock, history };
+  runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
   const container = getDiscoverStateContainer({
-    services: discoverServiceMock,
-    history,
+    services,
     customizationContext: mockCustomizationContext,
-    runtimeStateManager: runtimeStateManager ?? createRuntimeStateManager(),
+    internalState: createInternalStateStore({ services, runtimeStateManager }),
+    runtimeStateManager,
   });
   container.savedSearchState.set(
     savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
