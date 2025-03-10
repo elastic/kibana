@@ -43,6 +43,14 @@ export const getColumns = (
 
   return [
     {
+      displayAsText: i18n.translate('xpack.observability.alertsTGrid.score', {
+        defaultMessage: 'SCORE',
+      }),
+      id: '_score',
+      schema: 'numeric',
+      initialWidth: 70,
+    },
+    {
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
         defaultMessage: 'Alert Status',
       }),

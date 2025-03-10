@@ -7,6 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import dedent from 'dedent';
 import React from 'react';
 import { ObservabilityAlertsTable, TopAlert } from '../../../..';
 import {
@@ -40,8 +41,8 @@ export function RelatedAlerts({ alert }: Props) {
         {
           range: {
             'kibana.alert.start': {
-              gte: '2025-03-10T12:22:35.261Z',
-              lte: '2025-03-10T16:22:35.261Z',
+              gte: '2025-03-10T14:08:04.011Z',
+              lte: '2025-03-10T17:08:04.011Z',
             },
           },
         },
@@ -58,29 +59,17 @@ export function RelatedAlerts({ alert }: Props) {
               },
               {
                 term: {
-                  'kibana.alert.group.value': 'bf61f3fc-f1e5-4ed2-9919-edf06e74272e',
+                  'kibana.alert.group.value': '115b7cd8-eb86-4176-8afa-adba9da94691',
                 },
               },
             ],
           },
         },
         {
-          terms: {
-            'kibana.alert.instance.id': ['bf61f3fc-f1e5-4ed2-9919-edf06e74272e'],
-            boost: 1.0,
-          },
-        },
-        {
-          terms: {
-            tags: ['prod', 'test'],
-            boost: 0.8,
-          },
-        },
-        {
           term: {
             'kibana.alert.rule.uuid': {
               value: 'a849eff1-2712-4102-b36c-acc3354cf538',
-              boost: 0.8,
+              boost: 1,
             },
           },
         },
@@ -90,15 +79,74 @@ export function RelatedAlerts({ alert }: Props) {
               {
                 exp: {
                   'kibana.alert.start': {
-                    origin: '2025-03-10T14:22:35.261Z',
+                    origin: '2025-03-10T17:02:16.399Z',
                     scale: '5m',
                     offset: '5m',
                     decay: 0.5,
                   },
                 },
+                weight: 5,
+              },
+              {
+                script_score: {
+                  script: {
+                    source: dedent(`
+                      double jaccardSimilarity(Set a, Set b) {
+                        if (a.size() == 0 || b.size() == 0) return 0.0;
+                        Set intersection = new HashSet(a);
+                        intersection.retainAll(b);
+                        Set union = new HashSet(a);
+                        union.addAll(b);
+                        return (double) intersection.size() / union.size();
+                      }
+                      Set tagsQuery = new HashSet(params.tags);
+                      Set tagsDoc = new HashSet(doc.containsKey('tags.keyword') ? doc['tags.keyword'].values : []);
+                      double tagsSimilarity = jaccardSimilarity(tagsQuery, tagsDoc);
+                      return tagsSimilarity;
+                    `),
+                    params: {
+                      tags: ['prod', 'test'],
+                    },
+                  },
+                },
+                weight: 5,
+              },
+              {
+                script_score: {
+                  script: {
+                    source: dedent(`
+                      double jaccardSimilarity(Set a, Set b) {
+                        if (a.size() == 0 || b.size() == 0) return 0.0;
+                        Set intersection = new HashSet(a);
+                        intersection.retainAll(b);
+                        Set union = new HashSet(a);
+                        union.addAll(b);
+                        return (double) intersection.size() / union.size();
+                      }
+                      Set instanceIdQuery = new HashSet(params.instanceId);
+                      Set instanceIdDoc = new HashSet();
+                      if (doc.containsKey('kibana.alert.instance.id')) {
+                        String instanceIdStr = doc['kibana.alert.instance.id'].value;
+                        if (instanceIdStr != null && !instanceIdStr.isEmpty()) {
+                          StringTokenizer tokenizer = new StringTokenizer(instanceIdStr, ',');
+                          while (tokenizer.hasMoreTokens()) {
+                            instanceIdDoc.add(tokenizer.nextToken());
+                          }
+                        }
+                      }
+                      double instanceIdSimilarity = jaccardSimilarity(instanceIdQuery, instanceIdDoc);
+
+                      return instanceIdSimilarity;
+                    `),
+                    params: {
+                      instanceId: ['16e54aa2-a792-48b1-9730-9c3bd9d8895e'],
+                    },
+                  },
+                },
+                weight: 10,
               },
             ],
-            boost_mode: 'multiply',
+            boost_mode: 'sum',
           },
         },
       ],
@@ -117,7 +165,7 @@ export function RelatedAlerts({ alert }: Props) {
           query={esQuery}
           initialPageSize={ALERTS_PER_PAGE}
           showInspectButton
-          onLoaded={(alerts) => console.dir(alerts)}
+          onLoaded={(alerts, columns) => console.dir({ alerts, columns })}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
