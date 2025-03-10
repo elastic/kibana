@@ -15,7 +15,7 @@ export const TINY_ELSER = {
   id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
 };
 
-export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
+export async function importTinyElserModel(ml: ReturnType<typeof MachineLearningProvider>) {
   const config = {
     ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
     input: {
@@ -30,23 +30,11 @@ export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
 export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
   await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-  await ml.api.cleanMlIndices();
   await ml.testResources.cleanMLSavedObjects();
 }
 
 export async function clearKnowledgeBase(es: Client) {
   const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
-
-  return es.deleteByQuery({
-    index: KB_INDEX,
-    conflicts: 'proceed',
-    query: { match_all: {} },
-    refresh: true,
-  });
-}
-
-export async function clearConversations(es: Client) {
-  const KB_INDEX = '.kibana-observability-ai-assistant-conversations-*';
 
   return es.deleteByQuery({
     index: KB_INDEX,
@@ -63,11 +51,5 @@ export async function deleteInferenceEndpoint({
   es: Client;
   name?: string;
 }) {
-  return es.transport.request({
-    method: 'DELETE',
-    path: `_inference/sparse_embedding/${name}`,
-    querystring: {
-      force: true,
-    },
-  });
+  return es.inference.delete({ inference_id: name, force: true });
 }

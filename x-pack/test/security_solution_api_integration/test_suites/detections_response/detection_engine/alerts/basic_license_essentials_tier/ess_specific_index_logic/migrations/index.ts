@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete_alerts_migrations'));
     loadTestFile(require.resolve('./finalize_alerts_migrations'));
     loadTestFile(require.resolve('./get_alerts_migration_status'));
+    loadTestFile(require.resolve('./deprecations'));
   });
 }

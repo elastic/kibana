@@ -1,0 +1,46 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    // add all the folders containg files to be compiled
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "server/**/*.json",
+    "scripts/**/*",
+    "package.json",
+    "storybook/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    // add references to other TypeScript projects the plugin depends on
+
+    // requiredPlugins from ./kibana.json
+
+    // optionalPlugins from ./kibana.json
+    "@kbn/security-plugin",
+
+    // requiredBundles from ./kibana.json
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/alerting-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/shared-ux-router",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
+    "@kbn/securitysolution-rules",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

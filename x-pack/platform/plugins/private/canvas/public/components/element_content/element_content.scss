@@ -1,0 +1,28 @@
+.canvasElement {
+  height: 100%;
+  width: 100%;
+
+  .embPanel {
+    .embPanel__content {
+      overflow: visible;
+    }
+
+    .embPanel__dragHandle {
+      visibility: hidden;
+    }
+  }
+}
+
+.canvasElement__content {
+  height: 100%;
+  width: 100%;
+}
+
+.canvas__element--selected {
+  .embPanel__hoverActions {
+    z-index: $euiZLevel9;
+    top: -$euiSizeXL;
+    opacity: 1;
+    visibility: visible;
+  }
+}

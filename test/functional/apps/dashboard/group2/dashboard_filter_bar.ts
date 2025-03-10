@@ -23,12 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const security = getService('security');
-  const { dashboard, discover, header, timePicker } = getPageObjects([
-    'dashboard',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
 
   describe('dashboard filter bar', () => {
     before(async () => {
@@ -201,12 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await dashboard.waitForRenderComplete();
-        const isLegacyDefault = await discover.useLegacyTable();
-        if (isLegacyDefault) {
-          await testSubjects.click('docTableCellFilter');
-        } else {
-          await dataGrid.clickCellFilterForButtonExcludingControlColumns(1, 1);
-        }
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(1, 1);
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
       });

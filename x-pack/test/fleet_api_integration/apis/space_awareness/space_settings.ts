@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { SpaceTestApiClient } from './api_helper';
+import { expectToRejectWithError } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -96,17 +97,13 @@ export default function (providerContext: FtrProviderContext) {
           );
         });
         it('should restrict non authorized agent policy namespace', async () => {
-          let err: Error | undefined;
-          try {
-            await apiClient.createAgentPolicy(TEST_SPACE_1, {
-              namespace: 'default',
-            });
-          } catch (_err) {
-            err = _err;
-          }
-
-          expect(err).to.be.an(Error);
-          expect(err?.message).to.match(/400 "Bad Request"/);
+          await expectToRejectWithError(
+            () =>
+              apiClient.createAgentPolicy(TEST_SPACE_1, {
+                namespace: 'default',
+              }),
+            /400 Bad Request Invalid namespace, supported namespace prefixes: test/
+          );
         });
         it('should allow authorized agent policy namespace', async () => {
           await apiClient.createAgentPolicy(TEST_SPACE_1, {

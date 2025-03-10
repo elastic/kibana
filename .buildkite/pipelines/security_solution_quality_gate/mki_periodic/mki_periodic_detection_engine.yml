@@ -12,7 +12,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 8
@@ -27,7 +26,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 6
@@ -43,7 +41,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -58,7 +55,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -73,7 +69,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -88,7 +83,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -103,7 +97,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -148,7 +141,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -163,7 +155,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -178,7 +169,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -193,7 +183,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -208,7 +197,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -223,7 +211,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -238,7 +225,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -253,7 +239,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -268,7 +253,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -283,7 +267,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -298,7 +281,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -313,7 +295,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -328,7 +309,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -343,7 +323,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -358,7 +337,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -373,7 +351,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -388,7 +365,20 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+      
+      - label: Running rule_execution_logic:general_logic:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:essentials:qa:serverless
+        key: rule_execution_logic:general_logic:essentials:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -403,7 +393,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -418,7 +407,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -433,7 +421,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -448,7 +435,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -463,7 +449,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:

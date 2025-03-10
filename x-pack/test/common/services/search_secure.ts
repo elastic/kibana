@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-// NOTE: This is pretty much a copy/paste from packages/kbn-ftr-common-functional-services/services/bsearch.ts
+// NOTE: This is pretty much a copy/paste from src/platform/packages/shared/kbn-ftr-common-functional-services/services/bsearch.ts
 // but with the ability to provide custom auth
 
 import expect from '@kbn/expect';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { FtrService } from '../ftr_provider_context';
 
@@ -44,10 +43,12 @@ export class SearchSecureService extends FtrService {
     space,
   }: SendOptions) {
     const spaceUrl = getSpaceUrlPrefix(space);
+    const statusesWithoutRetry = [200, 400, 403, 500];
 
     const { body } = await this.retry.try(async () => {
       let result;
       const url = `${spaceUrl}/internal/search/${strategy}`;
+
       if (referer && kibanaVersion) {
         result = await supertestWithoutAuth
           .post(url)
@@ -89,9 +90,11 @@ export class SearchSecureService extends FtrService {
           .set('kbn-xsrf', 'true')
           .send(options);
       }
-      if ((result.status === 500 || result.status === 200) && result.body) {
+
+      if (statusesWithoutRetry.includes(result.status) && result.body) {
         return result;
       }
+
       throw new Error('try again');
     });
 
@@ -105,7 +108,7 @@ export class SearchSecureService extends FtrService {
         .auth(auth.username, auth.password)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
-        .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send(options)
         .expect(200);
       expect(resp.body.isRunning).equal(false);

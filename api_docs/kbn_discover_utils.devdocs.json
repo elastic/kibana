@@ -25,7 +25,7 @@
         "tags": [],
         "label": "AppMenuRegistry",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "tags": [],
             "label": "CUSTOM_ITEMS_LIMIT",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,7 +50,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -80,7 +80,7 @@
                   },
                   ")[]"
                 ],
-                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -98,7 +98,7 @@
             "signature": [
               "(appMenuItemId: string) => boolean"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -112,7 +112,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -140,7 +140,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,7 +160,7 @@
                     "text": "AppMenuItemCustom"
                   }
                 ],
-                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -196,7 +196,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -210,7 +210,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -239,7 +239,7 @@
                     "text": "AppMenuSubmenuHorizontalRule"
                   }
                 ],
-                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -267,7 +267,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -285,7 +285,7 @@
         "tags": [],
         "label": "buildDataTableRecord",
         "description": [
-          "\nBuild a record for data table, explorer + classic one"
+          "\nBuild a record for data grid"
         ],
         "signature": [
           "(doc: ",
@@ -313,7 +313,7 @@
             "text": "DataTableRecord"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -335,7 +335,7 @@
                 "text": "EsHitRecord"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -359,7 +359,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -376,7 +376,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -388,7 +388,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -402,7 +402,7 @@
                 "signature": [
                   "((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined"
                 ],
-                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -456,7 +456,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +467,7 @@
             "tags": [],
             "label": "{\n  records,\n  dataView,\n  processRecord,\n}",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -488,7 +488,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -509,7 +509,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -531,7 +531,7 @@
                   },
                   ") => T) | undefined"
                 ],
-                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -551,7 +551,7 @@
                         "text": "DataTableRecord"
                       }
                     ],
-                    "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                    "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/build_data_record.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -585,7 +585,7 @@
           },
           "[] | undefined) => Record<string, number>"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/calc_field_counts.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/calc_field_counts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -606,7 +606,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/calc_field_counts.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/calc_field_counts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -633,7 +633,7 @@
           },
           " | undefined, showTimeCol: boolean, isESQLMode: boolean) => boolean"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -647,7 +647,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -662,7 +662,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -684,7 +684,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -699,7 +699,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -714,7 +714,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -742,7 +742,7 @@
             "text": "RowControlColumn"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -758,7 +758,7 @@
             "signature": [
               "DegradedDocsControlProps | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -775,11 +775,19 @@
         "label": "createLogsContextService",
         "description": [],
         "signature": [
-          "({ logsDataAccess }: ",
+          "({ logsDataAccess, }: ",
           "LogsContextServiceDeps",
-          ") => Promise<{ isLogsIndexPattern: (indexPattern: unknown) => boolean; }>"
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogsContextService",
+            "text": "LogsContextService"
+          },
+          ">"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -788,12 +796,12 @@
             "id": "def-common.createLogsContextService.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ logsDataAccess }",
+            "label": "{\n  logsDataAccess,\n}",
             "description": [],
             "signature": [
               "LogsContextServiceDeps"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -829,7 +837,7 @@
             "text": "RowControlColumn"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -853,7 +861,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -880,7 +888,7 @@
           },
           ") => void"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -900,7 +908,7 @@
                 "text": "DiscoverFlyouts"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -935,7 +943,7 @@
           },
           " | undefined) => void"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -956,7 +964,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -978,7 +986,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1055,7 +1063,7 @@
           },
           " | undefined) => string"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1071,7 +1079,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1094,7 +1102,7 @@
                 "text": "EsHitRecord"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1117,7 +1125,7 @@
                 "text": "FieldFormatsStart"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1141,7 +1149,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1165,7 +1173,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1189,7 +1197,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1221,7 +1229,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1283,7 +1291,7 @@
             "text": "FormattedHit"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1303,7 +1311,7 @@
                 "text": "DataTableRecord"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1324,7 +1332,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1345,7 +1353,7 @@
                 "text": "ShouldShowFieldInTableHandler"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1360,7 +1368,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1381,7 +1389,7 @@
                 "text": "FieldFormatsStart"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1410,7 +1418,7 @@
           },
           " & { _routing?: string | undefined; }) => string"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_doc_id.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1431,7 +1439,7 @@
               },
               " & { _routing?: string | undefined; }"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_doc_id.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1458,7 +1466,7 @@
           },
           ", TField extends string>(record: TRecord, field: TField & keyof TRecord[\"flattened\"]) => TRecord[\"flattened\"][TField]"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_field_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1472,7 +1480,7 @@
             "signature": [
               "TRecord"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_field_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1487,7 +1495,7 @@
             "signature": [
               "TField & keyof TRecord[\"flattened\"]"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_field_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1524,7 +1532,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_ignored_reason.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1547,7 +1555,7 @@
                 "text": "DataViewField"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_ignored_reason.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1564,7 +1572,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_ignored_reason.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1614,7 +1622,7 @@
             "text": "LogDocumentOverview"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_document_overview.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1634,7 +1642,7 @@
                 "text": "DataTableRecord"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_document_overview.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1646,7 +1654,7 @@
             "tags": [],
             "label": "{ dataView, fieldFormats }",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_document_overview.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1666,7 +1674,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_document_overview.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1696,7 +1704,7 @@
                   },
                   "; }"
                 ],
-                "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_document_overview.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1724,7 +1732,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1738,7 +1746,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1765,7 +1773,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1785,7 +1793,7 @@
                 "text": "LogLevelCoalescedValue"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1814,7 +1822,7 @@
           "EuiThemeComputed",
           "<{}>) => string | undefined"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1834,7 +1842,7 @@
                 "text": "LogLevelCoalescedValue"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1850,7 +1858,7 @@
               "EuiThemeComputed",
               "<{}>"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1875,9 +1883,9 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ") => { field: \"message\" | \"event.original\" | \"error.message\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
+          ", { includeFormattedValue }?: { includeFormattedValue?: boolean | undefined; }) => { field: \"message\" | \"event.original\" | \"error.message\"; value: string; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1897,10 +1905,37 @@
                 "text": "LogDocumentOverview"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getMessageFieldWithFallbacks.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ includeFormattedValue = false }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getMessageFieldWithFallbacks.$2.includeFormattedValue",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeFormattedValue",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1933,7 +1968,7 @@
             "text": "ShouldShowFieldInTableHandler"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1947,7 +1982,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1968,7 +2003,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1983,7 +2018,61 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getTraceDocumentOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "getTraceDocumentOverview",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceDocumentOverview",
+            "text": "TraceDocumentOverview"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTraceDocumentOverview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2010,7 +2099,7 @@
           },
           ", shouldPrependTimeFieldColumn: boolean) => string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2024,7 +2113,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2045,7 +2134,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2060,80 +2149,10 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_visible_columns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.isLegacyTableEnabled",
-        "type": "Function",
-        "tags": [],
-        "label": "isLegacyTableEnabled",
-        "description": [],
-        "signature": [
-          "({\n  uiSettings,\n  isEsqlMode,\n}: { uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          "; isEsqlMode: boolean; }) => boolean"
-        ],
-        "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.isLegacyTableEnabled.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  uiSettings,\n  isEsqlMode,\n}",
-            "description": [],
-            "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.isLegacyTableEnabled.$1.uiSettings",
-                "type": "Object",
-                "tags": [],
-                "label": "uiSettings",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-public.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
-                ],
-                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.isLegacyTableEnabled.$1.isEsqlMode",
-                "type": "boolean",
-                "tags": [],
-                "label": "isEsqlMode",
-                "description": [],
-                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -2159,7 +2178,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/nested_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2173,7 +2192,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/nested_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2194,7 +2213,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/nested_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2215,7 +2234,7 @@
           "EuiBadgeProps",
           ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2231,7 +2250,7 @@
               "EuiBadgeProps",
               ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2250,7 +2269,7 @@
         "signature": [
           "({ initialPageSize, totalItems, }: { totalItems: number; initialPageSize: number; }) => { curPageIndex: number; pageSize: number; changePageIndex: (pageIndex: number) => void; changePageSize: (newPageSize: number) => void; totalPages: number; startIndex: number; hasNextPage: boolean; }"
         ],
-        "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2261,7 +2280,7 @@
             "tags": [],
             "label": "{\n  initialPageSize,\n  totalItems,\n}",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2272,7 +2291,7 @@
                 "tags": [],
                 "label": "totalItems",
                 "description": [],
-                "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2283,7 +2302,7 @@
                 "tags": [],
                 "label": "initialPageSize",
                 "description": [],
-                "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2302,7 +2321,7 @@
         "tags": [],
         "label": "AppMenuActionBase",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2313,7 +2332,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2327,7 +2346,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2360,7 +2379,7 @@
             "text": "AppMenuActionBase"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2381,7 +2400,7 @@
               },
               ".custom"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2419,7 +2438,7 @@
               },
               ") => void | React.ReactNode) | undefined; }"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2452,7 +2471,7 @@
             "text": "AppMenuActionBase"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2473,7 +2492,7 @@
               },
               ".primary"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2509,9 +2528,9 @@
                 "section": "def-common.AppMenuControlOnClickParams",
                 "text": "AppMenuControlOnClickParams"
               },
-              ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"memory\" | \"stop\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"image\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"brush\" | \"percent\" | \"temperature\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
+              ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"section\" | \"image\" | \"stop\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"brush\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"contrast\" | \"contrastHigh\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createGenericJob\" | \"createGeoJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"memory\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"percent\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plugs\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"temperature\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"web\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2544,7 +2563,7 @@
             "text": "AppMenuActionBase"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2565,7 +2584,7 @@
               },
               ".secondary"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2603,7 +2622,7 @@
               },
               ") => void | React.ReactNode) | undefined; }"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2636,7 +2655,7 @@
             "text": "AppMenuActionBase"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2674,7 +2693,7 @@
               },
               ".custom"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2685,7 +2704,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2699,7 +2718,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2713,7 +2732,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2775,7 +2794,7 @@
               },
               ")[]"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2789,7 +2808,7 @@
         "tags": [],
         "label": "AppMenuControlOnClickParams",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2803,7 +2822,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2817,7 +2836,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2853,7 +2872,7 @@
           },
           ", \"controlProps\">"
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2891,7 +2910,7 @@
               },
               ") => void | React.ReactNode) | undefined; } & ControlWithOptionalIcon"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2925,7 +2944,7 @@
           },
           ", \"controlProps\">"
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2963,7 +2982,7 @@
               },
               ") => void | React.ReactNode) | undefined; } & ControlWithOptionalIcon"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2996,7 +3015,7 @@
             "text": "AppMenuActionBase"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3017,7 +3036,7 @@
               },
               ".submenuHorizontalRule"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3031,7 +3050,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3047,7 +3066,7 @@
         "description": [
           "\nThis is the record/row of data provided to our Data Table"
         ],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3060,7 +3079,7 @@
             "description": [
               "\nA unique id generated by index, id and routing of a record"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3082,7 +3101,7 @@
                 "text": "EsHitRecord"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3098,7 +3117,7 @@
             "signature": [
               "{ [x: string]: unknown; }"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3114,7 +3133,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3138,7 +3157,7 @@
           },
           " extends Omit<DiscoverSearchHit, \"_source\" | \"_index\" | \"_id\">"
         ],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3152,7 +3171,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3166,7 +3185,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3180,7 +3199,7 @@
             "signature": [
               "Record<string, unknown> | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3194,7 +3213,7 @@
         "tags": [],
         "label": "LogCloudFields",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3208,7 +3227,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3222,7 +3241,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3236,7 +3255,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3250,7 +3269,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3264,7 +3283,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3311,7 +3330,7 @@
             "text": "LogCloudFields"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3322,7 +3341,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3336,7 +3355,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3350,7 +3369,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3364,7 +3383,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3378,7 +3397,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3392,7 +3411,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3406,7 +3425,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3417,7 +3436,7 @@
             "tags": [],
             "label": "'data_stream.namespace'",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3428,7 +3447,7 @@
             "tags": [],
             "label": "'data_stream.dataset'",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3442,7 +3461,7 @@
         "tags": [],
         "label": "LogResourceFields",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3456,7 +3475,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3470,7 +3489,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3484,7 +3503,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3498,7 +3517,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3512,7 +3531,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3526,7 +3545,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3540,7 +3559,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3554,7 +3573,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3568,7 +3587,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3582,10 +3601,26 @@
         "tags": [],
         "label": "LogsContextService",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogsContextService.getAllLogsIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllLogsIndexPattern",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.LogsContextService.isLogsIndexPattern",
@@ -3596,7 +3631,7 @@
             "signature": [
               "(indexPattern: unknown) => boolean"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3610,7 +3645,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3628,7 +3663,7 @@
         "tags": [],
         "label": "LogStackTraceFields",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3642,7 +3677,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3656,7 +3691,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3670,7 +3705,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3684,7 +3719,7 @@
         "tags": [],
         "label": "RowControlColumn",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3695,7 +3730,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3706,7 +3741,7 @@
             "tags": [],
             "label": "headerAriaLabel",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3720,7 +3755,7 @@
             "signature": [
               "React.ComponentType<{}> | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3750,7 +3785,7 @@
               },
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3770,7 +3805,7 @@
                     "text": "RowControlComponent"
                   }
                 ],
-                "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3791,7 +3826,7 @@
                     "text": "RowControlRowProps"
                   }
                 ],
-                "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3809,7 +3844,7 @@
         "tags": [],
         "label": "RowControlProps",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3821,9 +3856,9 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3846,7 +3881,7 @@
               "Theme",
               ">"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3860,7 +3895,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3874,7 +3909,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3888,7 +3923,7 @@
             "signature": [
               "string | React.ComponentType<{}>"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3899,7 +3934,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3921,7 +3956,7 @@
               },
               ") => void) | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3935,7 +3970,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3949,7 +3984,7 @@
         "tags": [],
         "label": "RowControlRowProps",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3960,7 +3995,7 @@
             "tags": [],
             "label": "rowIndex",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3980,7 +4015,369 @@
                 "text": "DataTableRecord"
               }
             ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ServiceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServiceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ServiceFields.service.name",
+            "type": "string",
+            "tags": [],
+            "label": "'service.name'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ServiceFields.service.environment",
+            "type": "string",
+            "tags": [],
+            "label": "'service.environment'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ServiceFields.agent.name",
+            "type": "string",
+            "tags": [],
+            "label": "'agent.name'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SpanTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.name",
+            "type": "string",
+            "tags": [],
+            "label": "'span.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.action",
+            "type": "string",
+            "tags": [],
+            "label": "'span.action'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.duration.us",
+            "type": "number",
+            "tags": [],
+            "label": "'span.duration.us'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.type",
+            "type": "string",
+            "tags": [],
+            "label": "'span.type'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.subtype",
+            "type": "string",
+            "tags": [],
+            "label": "'span.subtype'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.destination.service.resource",
+            "type": "string",
+            "tags": [],
+            "label": "'span.destination.service.resource'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TraceDocumentOverview",
+        "type": "Interface",
+        "tags": [],
+        "label": "TraceDocumentOverview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceDocumentOverview",
+            "text": "TraceDocumentOverview"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ServiceFields",
+            "text": "ServiceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TransactionTraceFields",
+            "text": "TransactionTraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SpanTraceFields",
+            "text": "SpanTraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.UserAgentTraceFields",
+            "text": "UserAgentTraceFields"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.trace.id",
+            "type": "string",
+            "tags": [],
+            "label": "'trace.id'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.parent.id",
+            "type": "string",
+            "tags": [],
+            "label": "'parent.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.http.response.status_code",
+            "type": "number",
+            "tags": [],
+            "label": "'http.response.status_code'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.processor.event",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'processor.event'",
+            "description": [],
+            "signature": [
+              "\"transaction\" | \"span\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TransactionTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "TransactionTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionTraceFields.transaction.id",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionTraceFields.transaction.name",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionTraceFields.transaction.duration.us",
+            "type": "number",
+            "tags": [],
+            "label": "'transaction.duration.us'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.UserAgentTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserAgentTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.UserAgentTraceFields.user_agent.name",
+            "type": "string",
+            "tags": [],
+            "label": "'user_agent.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.UserAgentTraceFields.user_agent.version",
+            "type": "string",
+            "tags": [],
+            "label": "'user_agent.version'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3996,7 +4393,7 @@
         "tags": [],
         "label": "AppMenuActionId",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4008,7 +4405,7 @@
         "tags": [],
         "label": "AppMenuActionType",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4020,7 +4417,7 @@
         "tags": [],
         "label": "DiscoverFlyouts",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4032,7 +4429,7 @@
         "tags": [],
         "label": "IgnoredReason",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_ignored_reason.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4044,7 +4441,7 @@
         "tags": [],
         "label": "LogLevelCoalescedValue",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4061,7 +4458,7 @@
         "signature": [
           "80"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4076,7 +4473,7 @@
         "signature": [
           "\"agent.name\""
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4108,7 +4505,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4140,7 +4537,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4179,7 +4576,7 @@
           },
           ") => void | React.ReactNode) | undefined; }"
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4216,9 +4613,9 @@
             "section": "def-common.AppMenuControlOnClickParams",
             "text": "AppMenuControlOnClickParams"
           },
-          ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"memory\" | \"stop\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"image\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"brush\" | \"percent\" | \"temperature\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
+          ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"section\" | \"image\" | \"stop\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"brush\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"contrast\" | \"contrastHigh\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createGenericJob\" | \"createGeoJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"memory\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"percent\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plugs\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"temperature\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"web\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4257,7 +4654,7 @@
             "text": "AppMenuItemCustom"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4288,7 +4685,7 @@
             "text": "AppMenuActionSubmenuCustom"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4311,7 +4708,7 @@
             "text": "AppMenuActionPrimary"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4342,7 +4739,7 @@
             "text": "AppMenuActionSubmenuSecondary"
           }
         ],
-        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4357,7 +4754,7 @@
         "signature": [
           "\"cloud.availability_zone\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4372,7 +4769,7 @@
         "signature": [
           "\"cloud.instance.id\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4387,7 +4784,7 @@
         "signature": [
           "\"cloud.project.id\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4402,7 +4799,7 @@
         "signature": [
           "\"cloud.provider\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4417,7 +4814,7 @@
         "signature": [
           "\"cloud.region\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4432,7 +4829,7 @@
         "signature": [
           "\"container.id\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4447,7 +4844,7 @@
         "signature": [
           "\"container.name\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4462,7 +4859,7 @@
         "signature": [
           "\"content\""
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4477,7 +4874,7 @@
         "signature": [
           "\"context:defaultSize\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4492,7 +4889,7 @@
         "signature": [
           "\"context:step\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4507,7 +4904,7 @@
         "signature": [
           "\"context:tieBreakerFields\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4522,7 +4919,7 @@
         "signature": [
           "320"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4537,7 +4934,7 @@
         "signature": [
           "240"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4552,7 +4949,7 @@
         "signature": [
           "\"data_stream.dataset\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4567,7 +4964,22 @@
         "signature": [
           "\"data_stream.namespace\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DATASTREAM_TYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "DATASTREAM_TYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"data_stream.type\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4592,7 +5004,7 @@
           },
           "; esType?: string | undefined; }; }"
         ],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4607,7 +5019,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4622,7 +5034,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4637,7 +5049,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4653,7 +5065,7 @@
           "SmartFieldGridColumnOptions",
           "[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4668,7 +5080,7 @@
         "signature": [
           "\"defaultColumns\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4683,7 +5095,7 @@
         "signature": [
           "100"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4698,52 +5110,37 @@
         "signature": [
           "\"doc_table:hideTimeColumn\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.DOC_TABLE_LEGACY",
+        "id": "def-common.ERROR_EXCEPTION_STACKTRACE_ABS_PATH",
         "type": "string",
         "tags": [],
-        "label": "DOC_TABLE_LEGACY",
+        "label": "ERROR_EXCEPTION_STACKTRACE_ABS_PATH",
         "description": [],
         "signature": [
-          "\"doc_table:legacy\""
+          "\"error.exception.stacktrace.abs_path\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ERROR_EXCEPTION_STACKTRACE",
+        "id": "def-common.ERROR_LOG_STACKTRACE_ABS_PATH",
         "type": "string",
         "tags": [],
-        "label": "ERROR_EXCEPTION_STACKTRACE",
+        "label": "ERROR_LOG_STACKTRACE_ABS_PATH",
         "description": [],
         "signature": [
-          "\"error.exception.stacktrace\""
+          "\"error.log.stacktrace.abs_path\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ERROR_LOG_STACKTRACE",
-        "type": "string",
-        "tags": [],
-        "label": "ERROR_LOG_STACKTRACE",
-        "description": [],
-        "signature": [
-          "\"error.log.stacktrace\""
-        ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4758,7 +5155,7 @@
         "signature": [
           "\"error.message\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4773,7 +5170,7 @@
         "signature": [
           "\"error.stack_trace\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4788,7 +5185,22 @@
         "signature": [
           "\"event.original\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.EVENT_OUTCOME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_OUTCOME_FIELD",
+        "description": [],
+        "signature": [
+          "\"event.outcome\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4803,7 +5215,7 @@
         "signature": [
           "\"fields:popularLimit\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4818,7 +5230,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4835,7 +5247,7 @@
         "signature": [
           "FormattedHitPair[]"
         ],
-        "path": "packages/kbn-discover-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4850,7 +5262,7 @@
         "signature": [
           "\"hideAnnouncements\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4865,7 +5277,22 @@
         "signature": [
           "\"host.name\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.HTTP_RESPONSE_STATUS_CODE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "HTTP_RESPONSE_STATUS_CODE_FIELD",
+        "description": [],
+        "signature": [
+          "\"http.response.status_code\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4880,7 +5307,7 @@
         "signature": [
           "\"_ignored\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4895,7 +5322,22 @@
         "signature": [
           "\"ignored_field_values\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.INDEX_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_FIELD",
+        "description": [],
+        "signature": [
+          "\"_index\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4910,7 +5352,7 @@
         "signature": [
           "\"log.file.path\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4925,7 +5367,7 @@
         "signature": [
           "\"log.level\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4940,7 +5382,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4955,7 +5397,7 @@
         "signature": [
           "\"logs-explorer\""
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4970,7 +5412,7 @@
         "signature": [
           "\"discover:maxDocFieldsDisplayed\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4985,7 +5427,7 @@
         "signature": [
           "\"message\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5000,7 +5442,22 @@
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ORCHESTRATOR_CLUSTER_ID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ORCHESTRATOR_CLUSTER_ID_FIELD",
+        "description": [],
+        "signature": [
+          "\"orchestrator.cluster.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5015,7 +5472,7 @@
         "signature": [
           "\"orchestrator.cluster.name\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5030,7 +5487,7 @@
         "signature": [
           "\"orchestrator.namespace\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5045,7 +5502,37 @@
         "signature": [
           "\"orchestrator.resource.id\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.PARENT_ID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "PARENT_ID_FIELD",
+        "description": [],
+        "signature": [
+          "\"parent.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.PROCESSOR_EVENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESSOR_EVENT_FIELD",
+        "description": [],
+        "signature": [
+          "\"processor.event\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5060,7 +5547,7 @@
         "signature": [
           "\"resource\""
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5075,7 +5562,7 @@
         "signature": [
           "\"discover:rowHeightOption\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5098,7 +5585,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5144,7 +5631,7 @@
         "signature": [
           "\"discover:sampleRowsPerPage\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5159,7 +5646,7 @@
         "signature": [
           "\"discover:sampleSize\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5174,22 +5661,7 @@
         "signature": [
           "\"search\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.SEARCH_FIELDS_FROM_SOURCE",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_FIELDS_FROM_SOURCE",
-        "description": [],
-        "signature": [
-          "\"discover:searchFieldsFromSource\""
-        ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5204,7 +5676,22 @@
         "signature": [
           "\"discover:searchOnPageLoad\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SERVICE_ENVIRONMENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_ENVIRONMENT_FIELD",
+        "description": [],
+        "signature": [
+          "\"service.environment\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5219,7 +5706,7 @@
         "signature": [
           "\"service.name\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5234,7 +5721,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5249,7 +5736,7 @@
         "signature": [
           "(fieldName: string) => boolean"
         ],
-        "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5261,7 +5748,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5278,7 +5765,7 @@
         "signature": [
           "\"discover:showFieldStatistics\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5293,7 +5780,7 @@
         "signature": [
           "\"discover:showMultiFields\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5308,7 +5795,97 @@
         "signature": [
           "\"discover:sort:defaultOrder\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_ACTION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_ACTION_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.action\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_DESTINATION_SERVICE_RESOURCE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DESTINATION_SERVICE_RESOURCE_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.destination.service.resource\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_DURATION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DURATION_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.duration.us\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_SUBTYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_SUBTYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.subtype\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_TYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_TYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.type\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5323,7 +5900,7 @@
         "signature": [
           "\"@timestamp\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5338,37 +5915,82 @@
         "signature": [
           "\"trace.id\""
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TRUNCATE_MAX_HEIGHT",
+        "id": "def-common.TRANSACTION_DURATION_FIELD",
         "type": "string",
         "tags": [],
-        "label": "TRUNCATE_MAX_HEIGHT",
+        "label": "TRANSACTION_DURATION_FIELD",
         "description": [],
         "signature": [
-          "\"truncate:maxHeight\""
+          "\"transaction.duration.us\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
-        "type": "number",
+        "id": "def-common.TRANSACTION_ID_FIELD",
+        "type": "string",
         "tags": [],
-        "label": "TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
+        "label": "TRANSACTION_ID_FIELD",
         "description": [],
         "signature": [
-          "115"
+          "\"transaction.id\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRANSACTION_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.USER_AGENT_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"user_agent.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.USER_AGENT_VERSION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_VERSION_FIELD",
+        "description": [],
+        "signature": [
+          "\"user_agent.version\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5382,7 +6004,7 @@
         "tags": [],
         "label": "CONTENT_FIELD_CONFIGURATION",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5396,7 +6018,7 @@
             "signature": [
               "\"smart-field\""
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5410,7 +6032,7 @@
             "signature": [
               "\"content\""
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5424,7 +6046,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5441,7 +6063,22 @@
         "signature": [
           "readonly [\"_ignored\", \"ignored_field_values\"]"
         ],
-        "path": "packages/kbn-discover-utils/src/field_constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DURATION_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DURATION_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5453,7 +6090,7 @@
         "tags": [],
         "label": "RESOURCE_FIELD_CONFIGURATION",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5467,7 +6104,7 @@
             "signature": [
               "\"smart-field\""
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5481,7 +6118,7 @@
             "signature": [
               "\"resource\""
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5495,7 +6132,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5506,11 +6143,26 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.RESOURCE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "RESOURCE_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly [\"service.name\", \"container.name\", \"host.name\", \"orchestrator.namespace\", \"cloud.instance.id\", \"orchestrator.resource.id\", \"orchestrator.cluster.name\", \"orchestrator.cluster.id\", \"container.id\", \"agent.name\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5520,7 +6172,7 @@
         "tags": [],
         "label": "SMART_FALLBACK_FIELDS",
         "description": [],
-        "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5534,7 +6186,7 @@
             "signature": [
               "SmartFieldGridColumnOptions"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5548,11 +6200,26 @@
             "signature": [
               "SmartFieldGridColumnOptions"
             ],
-            "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRACE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "TRACE_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly [\"service.name\", \"event.outcome\", \"transaction.name\", \"transaction.duration.us\", \"span.name\", \"span.duration.us\", \"agent.name\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

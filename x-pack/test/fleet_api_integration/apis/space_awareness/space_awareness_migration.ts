@@ -123,6 +123,16 @@ export default function (providerContext: FtrProviderContext) {
         expect(policiesTestSpaceIds.length).to.eql(0);
       });
 
+      it('enrollment api keys should be available', async () => {
+        const defaultSpaceEnrollmentApiKeys = await apiClient.getEnrollmentApiKeys();
+        expect(defaultSpaceEnrollmentApiKeys.items.length).to.eql(3);
+
+        await apiClient.getEnrollmentApiKeys(defaultSpaceEnrollmentApiKeys.items[0].id);
+
+        const testSpaceEnrollmentApiKeys = await apiClient.getEnrollmentApiKeys(TEST_SPACE_1);
+        expect(testSpaceEnrollmentApiKeys.items.length).to.eql(0);
+      });
+
       it('package policies should be migrated to the default space', async () => {
         const policiesDefaultSpaceIds = (await apiClient.getPackagePolicies()).items
           .map(({ id }) => id)

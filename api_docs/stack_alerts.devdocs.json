@@ -13,9 +13,9 @@
         "signature": [
           "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: ",
           "DataViewSelectPopoverProps",
-          ") => React.JSX.Element | null"
+          ") => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "DataViewSelectPopoverProps"
             ],
-            "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,7 +60,7 @@
         "signature": [
           "{}"
         ],
-        "path": "x-pack/plugins/stack_alerts/server/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -75,7 +75,7 @@
         "signature": [
           "\".index-threshold\""
         ],
-        "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -99,7 +99,7 @@
           },
           "<{}>"
         ],
-        "path": "x-pack/plugins/stack_alerts/server/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -121,7 +121,7 @@
           "Comparator",
           ", threshold: number[], fieldName: string) => string"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,7 +135,7 @@
             "signature": [
               "Comparator"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,7 +150,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,7 +165,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -186,7 +186,7 @@
           "Comparator",
           ") => string | undefined"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -200,7 +200,7 @@
             "signature": [
               "Comparator"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -219,7 +219,7 @@
         "signature": [
           "(columns: EsqlResultColumn[], row: EsqlResultRow) => EsqlDocument"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,7 +233,7 @@
             "signature": [
               "EsqlResultColumn[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -248,7 +248,7 @@
             "signature": [
               "EsqlResultRow"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -275,7 +275,7 @@
           },
           ") => { hits: EsqlHit[]; total: number; }"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -295,7 +295,7 @@
                 "text": "EsqlTable"
               }
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -329,7 +329,7 @@
             "text": "EsqlTable"
           }
         ],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -349,7 +349,7 @@
                 "text": "Datatable"
               }
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -367,7 +367,7 @@
         "tags": [],
         "label": "EsqlTable",
         "description": [],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -381,7 +381,7 @@
             "signature": [
               "EsqlResultColumn[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -395,7 +395,7 @@
             "signature": [
               "EsqlResultRow[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -415,7 +415,7 @@
         "signature": [
           "10000"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -430,49 +430,12 @@
         "signature": [
           "100"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.ComparatorFnNames",
-        "type": "Object",
-        "tags": [],
-        "label": "ComparatorFnNames",
-        "description": [],
-        "signature": [
-          "Set<",
-          "Comparator",
-          ">"
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.ComparatorFns",
-        "type": "Object",
-        "tags": [],
-        "label": "ComparatorFns",
-        "description": [],
-        "signature": [
-          "Map<",
-          "Comparator",
-          ", ",
-          "ComparatorFn",
-          ">"
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

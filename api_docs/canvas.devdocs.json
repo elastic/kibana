@@ -11,7 +11,7 @@
         "tags": [],
         "label": "WithKibanaProps",
         "description": [],
-        "path": "x-pack/plugins/canvas/public/index.ts",
+        "path": "x-pack/platform/plugins/private/canvas/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,20 +24,14 @@
             "description": [],
             "signature": [
               "{ services: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               " & ",
               "CanvasStartDeps",
               " & { canvas: ",
               "CanvasServices",
               "; }; }"
             ],
-            "path": "x-pack/plugins/canvas/public/index.ts",
+            "path": "x-pack/platform/plugins/private/canvas/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -60,7 +54,7 @@
       "signature": [
         "CanvasApi"
       ],
-      "path": "x-pack/plugins/canvas/public/plugin.tsx",
+      "path": "x-pack/platform/plugins/private/canvas/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -76,7 +70,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/canvas/public/plugin.tsx",
+      "path": "x-pack/platform/plugins/private/canvas/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -107,7 +101,7 @@
         "signature": [
           "\"CANVAS_APP_LOCATOR\""
         ],
-        "path": "x-pack/plugins/canvas/common/locator.ts",
+        "path": "x-pack/platform/plugins/private/canvas/common/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,7 +131,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/canvas/common/locator.ts",
+        "path": "x-pack/platform/plugins/private/canvas/common/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -152,7 +146,7 @@
         "signature": [
           "{ view: \"workpadPDF\"; id: string; page: number; }"
         ],
-        "path": "x-pack/plugins/canvas/common/locator.ts",
+        "path": "x-pack/platform/plugins/private/canvas/common/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -166,7 +160,7 @@
         "tags": [],
         "label": "UI_SETTINGS",
         "description": [],
-        "path": "x-pack/plugins/canvas/common/index.ts",
+        "path": "x-pack/platform/plugins/private/canvas/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,7 +171,7 @@
             "tags": [],
             "label": "ENABLE_LABS_UI",
             "description": [],
-            "path": "x-pack/plugins/canvas/common/index.ts",
+            "path": "x-pack/platform/plugins/private/canvas/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

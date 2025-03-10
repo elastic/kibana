@@ -19,7 +19,7 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [],
-        "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+        "path": "src/core/packages/execution-context/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,16 +34,10 @@
             ],
             "signature": [
               "<R>(context: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined, fn: (...args: any[]) => R) => R"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+            "path": "src/core/packages/execution-context/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,16 +49,10 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-execution-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                    "section": "def-common.KibanaExecutionContext",
-                    "text": "KibanaExecutionContext"
-                  },
+                  "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+                "path": "src/core/packages/execution-context/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -79,7 +67,7 @@
                 "signature": [
                   "(...args: any[]) => R"
                 ],
-                "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+                "path": "src/core/packages/execution-context/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -98,7 +86,7 @@
               "() => ",
               "Labels"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+            "path": "src/core/packages/execution-context/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -114,7 +102,7 @@
         "tags": [],
         "label": "IExecutionContextContainer",
         "description": [],
-        "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
+        "path": "src/core/packages/execution-context/server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,7 +116,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
+            "path": "src/core/packages/execution-context/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -143,16 +131,10 @@
             "description": [],
             "signature": [
               "() => Readonly<",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               ">"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
+            "path": "src/core/packages/execution-context/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -172,15 +154,9 @@
         "label": "ExecutionContextStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-execution-context-server",
-            "scope": "server",
-            "docId": "kibKbnCoreExecutionContextServerPluginApi",
-            "section": "def-server.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+        "path": "src/core/packages/execution-context/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

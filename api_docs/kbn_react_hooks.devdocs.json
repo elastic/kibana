@@ -21,6 +21,94 @@
     "functions": [
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useAbortableAsync",
+        "type": "Function",
+        "tags": [],
+        "label": "useAbortableAsync",
+        "description": [],
+        "signature": [
+          "(fn: ({}: { signal: AbortSignal; }) => T | Promise<T>, deps: any[], options: UseAbortableAsyncOptions<T> | undefined) => ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.AbortableAsyncState",
+            "text": "AbortableAsyncState"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useAbortableAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "({}: { signal: AbortSignal; }) => T | Promise<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useAbortableAsync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useAbortableAsync.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "UseAbortableAsyncOptions<T> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useAbortController",
+        "type": "Function",
+        "tags": [],
+        "label": "useAbortController",
+        "description": [],
+        "signature": [
+          "() => { signal: AbortSignal; abort: () => void; refresh: () => void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abort_controller/use_abort_controller.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useBoolean",
         "type": "Function",
         "tags": [],
@@ -36,7 +124,7 @@
             "text": "UseBooleanResult"
           }
         ],
-        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,12 +138,30 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useErrorTextStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "useErrorTextStyle",
+        "description": [],
+        "signature": [
+          "() => ",
+          "SerializedStyles"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_error_text_style/use_error_text_style.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -68,7 +174,7 @@
         "tags": [],
         "label": "UseBooleanHandlers",
         "description": [],
-        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,7 +188,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -98,7 +204,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -114,7 +220,7 @@
             "signature": [
               "(nextValue?: any) => void"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -143,6 +249,106 @@
     "misc": [
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.AbortableAsyncState",
+        "type": "Type",
+        "tags": [],
+        "label": "AbortableAsyncState",
+        "description": [],
+        "signature": [
+          "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.UseAbortableAsync",
+        "type": "Type",
+        "tags": [],
+        "label": "UseAbortableAsync",
+        "description": [],
+        "signature": [
+          "<T>(fn: ({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>, deps: any[], options?: (UseAbortableAsyncOptions<T> & TAdditionalOptions) | undefined) => ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.AbortableAsyncState",
+            "text": "AbortableAsyncState"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseAbortableAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseAbortableAsync.$1.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ signal: AbortSignal; } & TAdditionalParameters"
+                ],
+                "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseAbortableAsync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseAbortableAsync.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "(UseAbortableAsyncOptions<T> & TAdditionalOptions) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.UseBooleanResult",
         "type": "Type",
         "tags": [],
@@ -159,7 +365,7 @@
           },
           "]"
         ],
-        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

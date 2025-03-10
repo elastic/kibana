@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/hapi-mocks",
-  "owner": "@elastic/kibana-core"
-}

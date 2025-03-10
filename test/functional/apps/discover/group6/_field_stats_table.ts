@@ -29,48 +29,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update(defaultSettings);
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
-    [true, false].forEach((shouldSearchFieldsFromSource) => {
-      describe(`discover:searchFieldsFromSource: ${shouldSearchFieldsFromSource}`, function () {
-        before(async function () {
-          await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-          await kibanaServer.uiSettings.update({
-            ...defaultSettings,
-            'discover:searchFieldsFromSource': shouldSearchFieldsFromSource,
-          });
-          await common.navigateToApp('discover');
-          await header.waitUntilLoadingHasFinished();
-          await discover.waitUntilSearchingHasFinished();
-        });
+    it('should show Field Statistics data in data view mode', async () => {
+      await testSubjects.click('dscViewModeFieldStatsButton');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dataVisualizerTableContainer');
 
-        after(async () => {
-          await kibanaServer.uiSettings.replace({});
-        });
+      await testSubjects.click('dscViewModeDocumentButton');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('discoverDocTable');
+    });
 
-        it('should show Field Statistics data in data view mode', async () => {
-          await testSubjects.click('dscViewModeFieldStatsButton');
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('dataVisualizerTableContainer');
-
-          await testSubjects.click('dscViewModeDocumentButton');
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('discoverDocTable');
-        });
-
-        it('should not show Field Statistics data in ES|QL mode', async () => {
-          await discover.selectTextBaseLang();
-          await header.waitUntilLoadingHasFinished();
-          await discover.waitUntilSearchingHasFinished();
-          await testSubjects.missingOrFail('dscViewModeFieldStatsButton');
-        });
-      });
+    it('should not show Field Statistics data in ES|QL mode', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await testSubjects.missingOrFail('dscViewModeFieldStatsButton');
     });
   });
 }

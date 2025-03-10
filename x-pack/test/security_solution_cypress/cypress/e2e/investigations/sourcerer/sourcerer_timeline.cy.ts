@@ -40,7 +40,7 @@ import { closeTimeline, openTimelineById } from '../../../tasks/timeline';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     waitForRulesBootstrap();
   });
@@ -100,11 +100,9 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     beforeEach(() => {
       login();
       deleteTimelines();
-      createTimeline().then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
-      );
+      createTimeline().then((response) => cy.wrap(response.body.savedObjectId).as('timelineId'));
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
+        cy.wrap(response.body.savedObjectId).as('auditbeatTimelineId')
       );
       visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();
@@ -133,7 +131,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     });
 
     const defaultPatterns = [`auditbeat-*`, `${DEFAULT_ALERTS_INDEX}-default`];
-    it('alerts checkbox behaves as expected', () => {
+    it('alerts checkbox behaves as expected', { tags: ['@skipInServerless'] }, () => {
       isDataViewSelection(siemDataViewTitle);
       defaultPatterns.forEach((pattern) => isSourcererSelection(pattern));
       openDataViewSelection();

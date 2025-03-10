@@ -18,32 +18,14 @@
         "label": "CoreVersionedRouter",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-router-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
-            "section": "def-server.CoreVersionedRouter",
-            "text": "CoreVersionedRouter"
-          },
+          "CoreVersionedRouter",
           " implements ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.VersionedRouter",
-            "text": "VersionedRouter"
-          },
+          "VersionedRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">"
         ],
-        "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+        "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +39,7 @@
             "signature": [
               "Map<string, boolean>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +53,7 @@
             "signature": [
               "symbol | undefined"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,18 +65,12 @@
             "label": "from",
             "description": [],
             "signature": [
-              "({ router, defaultHandlerResolutionStrategy, isDev, useVersionResolutionStrategyForInternalPaths, }: ",
+              "({ router, log, defaultHandlerResolutionStrategy, env, useVersionResolutionStrategyForInternalPaths, }: ",
               "VersionedRouterArgs",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-router-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
-                "section": "def-server.CoreVersionedRouter",
-                "text": "CoreVersionedRouter"
-              }
+              "CoreVersionedRouter"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -103,12 +79,12 @@
                 "id": "def-server.CoreVersionedRouter.from.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    router,\n    defaultHandlerResolutionStrategy,\n    isDev,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
+                "label": "{\n    router,\n    log,\n    defaultHandlerResolutionStrategy,\n    env,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
                 "description": [],
                 "signature": [
                   "VersionedRouterArgs"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -125,28 +101,16 @@
             "description": [],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRouteConfig",
-                "text": "VersionedRouteConfig"
-              },
+              "VersionedRouteConfig",
               "<",
               "Method",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRoute",
-                "text": "VersionedRoute"
-              },
+              "VersionedRoute",
               "<",
               "Method",
               ", any>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -160,44 +124,20 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfig",
-                    "text": "RouteConfig"
-                  },
+                  "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
                   ">, \"validate\" | \"options\"> & { options?: Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfigOptions",
-                    "text": "RouteConfigOptions"
-                  },
+                  "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteAccess",
-                    "text": "RouteAccess"
-                  },
+                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "RouteAccess",
                   "; security?: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteSecurity",
-                    "text": "RouteSecurity"
-                  },
+                  "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -212,28 +152,16 @@
             "description": [],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRouteConfig",
-                "text": "VersionedRouteConfig"
-              },
+              "VersionedRouteConfig",
               "<",
               "Method",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRoute",
-                "text": "VersionedRoute"
-              },
+              "VersionedRoute",
               "<",
               "Method",
               ", any>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -247,44 +175,20 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfig",
-                    "text": "RouteConfig"
-                  },
+                  "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
                   ">, \"validate\" | \"options\"> & { options?: Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfigOptions",
-                    "text": "RouteConfigOptions"
-                  },
+                  "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteAccess",
-                    "text": "RouteAccess"
-                  },
+                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "RouteAccess",
                   "; security?: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteSecurity",
-                    "text": "RouteSecurity"
-                  },
+                  "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -299,28 +203,16 @@
             "description": [],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRouteConfig",
-                "text": "VersionedRouteConfig"
-              },
+              "VersionedRouteConfig",
               "<",
               "Method",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRoute",
-                "text": "VersionedRoute"
-              },
+              "VersionedRoute",
               "<",
               "Method",
               ", any>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -334,44 +226,20 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfig",
-                    "text": "RouteConfig"
-                  },
+                  "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
                   ">, \"validate\" | \"options\"> & { options?: Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfigOptions",
-                    "text": "RouteConfigOptions"
-                  },
+                  "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteAccess",
-                    "text": "RouteAccess"
-                  },
+                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "RouteAccess",
                   "; security?: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteSecurity",
-                    "text": "RouteSecurity"
-                  },
+                  "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -386,28 +254,16 @@
             "description": [],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRouteConfig",
-                "text": "VersionedRouteConfig"
-              },
+              "VersionedRouteConfig",
               "<",
               "Method",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRoute",
-                "text": "VersionedRoute"
-              },
+              "VersionedRoute",
               "<",
               "Method",
               ", any>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -421,44 +277,20 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfig",
-                    "text": "RouteConfig"
-                  },
+                  "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
                   ">, \"validate\" | \"options\"> & { options?: Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfigOptions",
-                    "text": "RouteConfigOptions"
-                  },
+                  "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteAccess",
-                    "text": "RouteAccess"
-                  },
+                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "RouteAccess",
                   "; security?: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteSecurity",
-                    "text": "RouteSecurity"
-                  },
+                  "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -473,28 +305,16 @@
             "description": [],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRouteConfig",
-                "text": "VersionedRouteConfig"
-              },
+              "VersionedRouteConfig",
               "<",
               "Method",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRoute",
-                "text": "VersionedRoute"
-              },
+              "VersionedRoute",
               "<",
               "Method",
               ", any>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -508,44 +328,20 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfig",
-                    "text": "RouteConfig"
-                  },
+                  "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
                   ">, \"validate\" | \"options\"> & { options?: Omit<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteConfigOptions",
-                    "text": "RouteConfigOptions"
-                  },
+                  "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteAccess",
-                    "text": "RouteAccess"
-                  },
+                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "RouteAccess",
                   "; security?: ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.RouteSecurity",
-                    "text": "RouteSecurity"
-                  },
+                  "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -560,16 +356,10 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.VersionedRouterRoute",
-                "text": "VersionedRouterRoute"
-              },
+              "VersionedRouterRoute",
               "<unknown, unknown, unknown>[]"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -585,7 +375,7 @@
         "tags": [],
         "label": "HapiResponseAdapter",
         "description": [],
-        "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+        "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -599,7 +389,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -613,7 +403,7 @@
                 "signature": [
                   "ResponseToolkit"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+                "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -633,7 +423,7 @@
               "Boom",
               "<unknown>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -647,7 +437,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+                "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -667,7 +457,7 @@
               "Boom",
               "<any>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -685,7 +475,7 @@
               "KibanaResponse",
               "<any>) => any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -700,7 +490,7 @@
                   "KibanaResponse",
                   "<any>"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+                "path": "src/core/packages/http/router-server-internal/src/response_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -722,23 +512,11 @@
         "description": [],
         "signature": [
           "(headers: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.Headers",
-            "text": "Headers"
-          },
+          "Headers",
           ", fieldsToKeep: string[], fieldsToExclude: string[]) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.Headers",
-            "text": "Headers"
-          }
+          "Headers"
         ],
-        "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+        "path": "src/core/packages/http/router-server-internal/src/headers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -750,15 +528,9 @@
             "label": "headers",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.Headers",
-                "text": "Headers"
-              }
+              "Headers"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/headers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -773,7 +545,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/headers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -788,7 +560,57 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.getWarningHeaderMessageFromRouteDeprecation",
+        "type": "Function",
+        "tags": [],
+        "label": "getWarningHeaderMessageFromRouteDeprecation",
+        "description": [],
+        "signature": [
+          "(deprecationObject: ",
+          "RouteDeprecationInfo",
+          ", kibanaVersion: string) => string"
+        ],
+        "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.getWarningHeaderMessageFromRouteDeprecation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecationObject",
+            "description": [],
+            "signature": [
+              "RouteDeprecationInfo"
+            ],
+            "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.getWarningHeaderMessageFromRouteDeprecation.$2",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -806,16 +628,10 @@
         "description": [],
         "signature": [
           "(method: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteMethod",
-            "text": "RouteMethod"
-          },
+          "RouteMethod",
           ") => boolean"
         ],
-        "path": "packages/core/http/core-http-router-server-internal/src/route.ts",
+        "path": "src/core/packages/http/router-server-internal/src/route.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -827,15 +643,9 @@
             "label": "method",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteMethod",
-                "text": "RouteMethod"
-              }
+              "RouteMethod"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/route.ts",
+            "path": "src/core/packages/http/router-server-internal/src/route.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -856,7 +666,7 @@
         "tags": [],
         "label": "kibanaResponseFactory",
         "description": [],
-        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+        "path": "src/core/packages/http/router-server-internal/src/response.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -870,7 +680,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -884,7 +694,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -898,7 +708,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,7 +722,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -926,7 +736,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,26 +751,14 @@
               "<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
+              "CustomHttpResponseOptions",
               "<T>) => ",
               "KibanaResponse",
               "<T>"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -972,16 +770,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.CustomHttpResponseOptions",
-                    "text": "CustomHttpResponseOptions"
-                  },
+                  "CustomHttpResponseOptions",
                   "<T>"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+                "path": "src/core/packages/http/router-server-internal/src/response.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -999,7 +791,7 @@
         "tags": [],
         "label": "lifecycleResponseFactory",
         "description": [],
-        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+        "path": "src/core/packages/http/router-server-internal/src/response.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1013,7 +805,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1027,7 +819,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "path": "src/core/packages/http/router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1041,7 +833,7 @@
         "tags": [],
         "label": "resolvers",
         "description": [],
-        "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+        "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1053,9 +845,9 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string[]"
+              "(versions: string[], access: \"public\" | \"internal\") => string[]"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1070,7 +862,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1082,9 +874,9 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1098,9 +890,9 @@
             "label": "oldest",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
+              "(versions: string[], access: \"public\" | \"internal\") => string | undefined"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1115,7 +907,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1127,9 +919,9 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1143,9 +935,9 @@
             "label": "newest",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
+              "(versions: string[], access: \"public\" | \"internal\") => string | undefined"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1160,7 +952,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1172,9 +964,9 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1188,9 +980,9 @@
             "label": "none",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
+              "(versions: string[], access: \"public\" | \"internal\") => string | undefined"
             ],
-            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1205,7 +997,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1217,9 +1009,9 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

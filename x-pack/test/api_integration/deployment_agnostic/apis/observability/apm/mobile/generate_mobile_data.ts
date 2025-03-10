@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const SERVICE_VERSIONS = ['2.3', '1.2', '1.1'];
 

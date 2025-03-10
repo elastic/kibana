@@ -18,13 +18,7 @@
             "text": "NavigationPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "navigation",
@@ -47,7 +41,7 @@
           "NavigationPublicStartDependencies",
           ">"
         ],
-        "path": "src/plugins/navigation/public/plugin.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +55,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/navigation/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -73,16 +67,10 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
-                "path": "src/plugins/navigation/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -99,14 +87,8 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>, deps: ",
+              "CoreSetup",
+              "<{}, unknown>, deps: ",
               "NavigationPublicSetupDependencies",
               ") => ",
               {
@@ -117,7 +99,7 @@
                 "text": "NavigationPublicSetup"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,16 +111,10 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
+                  "CoreSetup",
+                  "<{}, unknown>"
                 ],
-                "path": "src/plugins/navigation/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,7 +129,7 @@
                 "signature": [
                   "NavigationPublicSetupDependencies"
                 ],
-                "path": "src/plugins/navigation/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -170,13 +146,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", depsStart: ",
               "NavigationPublicStartDependencies",
               ") => ",
@@ -188,7 +158,7 @@
                 "text": "NavigationPublicStart"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -200,15 +170,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "src/plugins/navigation/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -223,7 +187,7 @@
                 "signature": [
                   "NavigationPublicStartDependencies"
                 ],
-                "path": "src/plugins/navigation/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -241,7 +205,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/navigation/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -270,7 +234,7 @@
           },
           "<QT>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
         ],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,7 +255,7 @@
               },
               "<QT>"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -318,7 +282,7 @@
           },
           "[] | undefined; }) => React.JSX.Element | null"
         ],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -329,7 +293,7 @@
             "tags": [],
             "label": "{ badges }",
             "description": [],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -350,7 +314,7 @@
                   },
                   "[] | undefined"
                 ],
-                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -370,7 +334,7 @@
         "signature": [
           "({ config, className, popoverBreakpoints, }: TopNavMenuItemsProps) => React.JSX.Element | null"
         ],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -384,7 +348,7 @@
             "signature": [
               "TopNavMenuItemsProps"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -402,7 +366,7 @@
         "tags": [],
         "label": "TopNavMenuData",
         "description": [],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,7 +380,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -427,7 +391,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,7 +405,7 @@
             "signature": [
               "(anchorElement: HTMLElement) => void"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -456,7 +420,7 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+                "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -472,7 +436,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -486,7 +450,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -500,7 +464,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -514,7 +478,7 @@
             "signature": [
               "boolean | (() => boolean) | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -528,7 +492,7 @@
             "signature": [
               "string | (() => string | undefined) | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -554,7 +518,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -570,7 +534,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -590,7 +554,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -608,7 +572,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -628,7 +592,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -648,7 +612,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -666,7 +630,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -686,13 +650,13 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
               "<{ tooltipContent: React.ReactNode; title?: string | undefined; }, { title: string; tooltipContent?: React.ReactNode; }> & { title: string; tooltipContent?: React.ReactNode; } & { label: React.ReactNode; }) | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -706,7 +670,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,7 +684,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -734,7 +698,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -748,7 +712,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -762,7 +726,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -776,7 +740,7 @@
             "signature": [
               "\"right\" | \"left\" | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -790,7 +754,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -804,7 +768,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -818,7 +782,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -833,7 +797,7 @@
               "IntlShape",
               " | undefined"
             ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -863,7 +827,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/navigation/public/types.ts",
+        "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -878,7 +842,7 @@
         "signature": [
           "\"security\" | \"analytics\" | \"es\" | \"oblt\""
         ],
-        "path": "src/plugins/navigation/public/types.ts",
+        "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -896,7 +860,7 @@
           "EuiToolTipProps",
           "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
         ],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -942,16 +906,10 @@
             "text": "UnifiedSearchPublicPluginStart"
           },
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined) => void) | undefined; popoverBreakpoints?: string[] | undefined; }"
         ],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
+        "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -965,7 +923,7 @@
       "tags": [],
       "label": "NavigationPublicSetup",
       "description": [],
-      "path": "src/plugins/navigation/public/types.ts",
+      "path": "src/platform/plugins/shared/navigation/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -981,7 +939,7 @@
             "RegisteredTopNavMenuData",
             ") => void"
           ],
-          "path": "src/plugins/navigation/public/types.ts",
+          "path": "src/platform/plugins/shared/navigation/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -996,7 +954,7 @@
               "signature": [
                 "RegisteredTopNavMenuData"
               ],
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
+              "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1013,7 +971,7 @@
       "tags": [],
       "label": "NavigationPublicStart",
       "description": [],
-      "path": "src/plugins/navigation/public/types.ts",
+      "path": "src/platform/plugins/shared/navigation/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1101,7 +1059,7 @@
             },
             "<QT>) => React.JSX.Element; }"
           ],
-          "path": "src/plugins/navigation/public/types.ts",
+          "path": "src/platform/plugins/shared/navigation/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1125,7 +1083,7 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/navigation/public/types.ts",
+          "path": "src/platform/plugins/shared/navigation/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1145,7 +1103,7 @@
                   "text": "AddSolutionNavigationArg"
                 }
               ],
-              "path": "src/plugins/navigation/public/types.ts",
+              "path": "src/platform/plugins/shared/navigation/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1166,7 +1124,7 @@
             "Observable",
             "<boolean>"
           ],
-          "path": "src/plugins/navigation/public/types.ts",
+          "path": "src/platform/plugins/shared/navigation/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1199,7 +1157,7 @@
         "signature": [
           "\"defaultRoute\""
         ],
-        "path": "src/plugins/navigation/common/constants.ts",
+        "path": "src/platform/plugins/shared/navigation/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1213,7 +1171,7 @@
         "tags": [],
         "label": "DEFAULT_ROUTES",
         "description": [],
-        "path": "src/plugins/navigation/common/constants.ts",
+        "path": "src/platform/plugins/shared/navigation/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1224,7 +1182,7 @@
             "tags": [],
             "label": "classic",
             "description": [],
-            "path": "src/plugins/navigation/common/constants.ts",
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1235,7 +1193,7 @@
             "tags": [],
             "label": "es",
             "description": [],
-            "path": "src/plugins/navigation/common/constants.ts",
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1246,7 +1204,7 @@
             "tags": [],
             "label": "oblt",
             "description": [],
-            "path": "src/plugins/navigation/common/constants.ts",
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1257,7 +1215,7 @@
             "tags": [],
             "label": "security",
             "description": [],
-            "path": "src/plugins/navigation/common/constants.ts",
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }

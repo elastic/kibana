@@ -39,7 +39,7 @@ const esqlFarequoteData = {
   sourceIndexOrSavedSearch: 'ft_farequote',
   expected: {
     hasDocCountChart: true,
-    initialLimitSize: '10,000 (100%)',
+    initialLimitSize: '5,000 (100%)',
     totalDocCountFormatted: '86,274',
     metricFields: [
       {
@@ -48,7 +48,7 @@ const esqlFarequoteData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         statsMaxDecimalPlaces: 3,
         topValuesCount: 11,
         viewableInLens: false,
@@ -61,7 +61,7 @@ const esqlFarequoteData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         exampleCount: 2,
         viewableInLens: false,
       },
@@ -72,7 +72,7 @@ const esqlFarequoteData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -82,7 +82,7 @@ const esqlFarequoteData = {
         aggregatable: true,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -92,7 +92,7 @@ const esqlFarequoteData = {
         aggregatable: true,
         loading: false,
         exampleCount: 10,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -102,7 +102,7 @@ const esqlFarequoteData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -112,7 +112,7 @@ const esqlFarequoteData = {
         aggregatable: true,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
     ],
@@ -253,7 +253,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it(`${testData.suiteTitle} updates data when limit size changes`, async () => {
       if (testData.expected.initialLimitSize !== undefined) {
-        await ml.testExecution.logTestStep('shows analysis for 10,000 rows by default');
+        await ml.testExecution.logTestStep('shows analysis for 5,000 rows by default');
         for (const fieldRow of testData.expected.metricFields as Array<
           Required<MetricFieldVisConfig>
         >) {
@@ -263,13 +263,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             undefined,
             false,
             false,
-            true
+            false
           );
         }
       }
 
-      await ml.testExecution.logTestStep('sets limit size to Analyze all');
-      await ml.dataVisualizer.setLimitSize(100000);
+      await ml.testExecution.logTestStep('sets limit size to 10,000 rows');
+      await ml.dataVisualizer.setLimitSize(10000);
 
       await ml.testExecution.logTestStep('updates table with newly set limit size');
       for (const fieldRow of testData.expected.metricFields as Array<
@@ -281,7 +281,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           undefined,
           false,
           false,
-          true
+          false
         );
       }
 

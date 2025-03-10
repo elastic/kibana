@@ -49,6 +49,12 @@ export async function cleanFleetIndices(esClient: Client) {
       ignore_unavailable: true,
       refresh: true,
     }),
+    esClient.deleteByQuery({
+      index: AGENT_ACTIONS_INDEX,
+      q: '*',
+      ignore_unavailable: true,
+      refresh: true,
+    }),
   ]);
 }
 
@@ -96,7 +102,7 @@ export async function createFleetAgent(esClient: Client, agentPolicyId: string, 
   const agentResponse = await esClient.index({
     index: '.fleet-agents',
     refresh: true,
-    body: {
+    document: {
       access_api_key_id: 'api-key-3',
       active: true,
       policy_id: agentPolicyId,
@@ -133,10 +139,8 @@ export async function makeAgentsUpgradeable(esClient: Client, agentIds: string[]
       id: agentId,
       refresh: 'wait_for',
       index: AGENTS_INDEX,
-      body: {
-        doc: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version } } },
-        },
+      doc: {
+        local_metadata: { elastic: { agent: { upgradeable: true, version } } },
       },
     });
   });

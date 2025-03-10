@@ -1,0 +1,310 @@
+{
+  "id": "streamsApp",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-public.StreamsApplicationProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamsApplicationProps",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationProps.appMountParameters",
+            "type": "Object",
+            "tags": [],
+            "label": "appMountParameters",
+            "description": [],
+            "signature": [
+              "AppMountParameters",
+              "<unknown>"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationProps.PageTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "PageTemplate",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "streamsApp",
+                "id": "def-public.StreamsApplicationProps.PageTemplate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streamsApp",
+                "id": "def-public.StreamsApplicationProps.PageTemplate.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-public.StreamsApplicationComponentType",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamsApplicationComponentType",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "streamsApp",
+            "scope": "public",
+            "docId": "kibStreamsAppPluginApi",
+            "section": "def-public.StreamsApplicationProps",
+            "text": "StreamsApplicationProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationComponentType.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationComponentType.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "streamsApp",
+      "id": "def-public.StreamsAppPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppPublicSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "streamsApp",
+      "id": "def-public.StreamsAppPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppPublicStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "streamsApp",
+          "id": "def-public.StreamsAppPublicStart.createStreamsApplicationComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "createStreamsApplicationComponent",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "streamsApp",
+              "scope": "public",
+              "docId": "kibStreamsAppPluginApi",
+              "section": "def-public.StreamsApplicationComponentType",
+              "text": "StreamsApplicationComponentType"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "streamsApp",
+      "id": "def-server.StreamsAppServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppServerSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/streams_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "streamsApp",
+      "id": "def-server.StreamsAppServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppServerStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/streams_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-common.EntityTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "EntityTypeDefinition",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-common.EntityTypeDefinition.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-common.Entity",
+        "type": "Type",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          "EntityBase & { type: \"stream\"; properties: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          "; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-common.StreamEntity",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamEntity",
+        "description": [],
+        "signature": [
+          "EntityBase & { type: \"stream\"; properties: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          "; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

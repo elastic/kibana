@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
+      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -82,10 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectNotLinkedToLibrary(
-        'Artistpreviouslyknownaslens Copy',
-        true
-      );
+      await dashboardPanelActions.expectNotLinkedToLibrary('Artistpreviouslyknownaslens Copy');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -109,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
+      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -131,10 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectNotLinkedToLibrary(
-        'Artistpreviouslyknownaslens Copy',
-        true
-      );
+      await dashboardPanelActions.expectNotLinkedToLibrary('Artistpreviouslyknownaslens Copy');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -147,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal', true);
+      await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -162,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref', true);
+      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -186,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal', true);
+      await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -208,10 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectLinkedToLibrary(
-        'Artistpreviouslyknownaslens by ref 2',
-        true
-      );
+      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref 2');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);

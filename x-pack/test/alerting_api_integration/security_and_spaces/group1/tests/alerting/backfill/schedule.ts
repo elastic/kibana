@@ -13,14 +13,9 @@ import { get } from 'lodash';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { asyncForEach } from '../../../../../../functional/services/transform/api';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
-import {
-  checkAAD,
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
-} from '../../../../../common/lib';
+import { checkAAD, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { TEST_ACTIONS_INDEX, getScheduledTask } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function scheduleBackfillTests({ getService }: FtrProviderContext) {
@@ -36,6 +31,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
       await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
+          .set('x-elastic-internal-origin', 'xxx')
           .set('kbn-xsrf', 'foo');
       });
       backfillIds = [];
@@ -50,16 +46,13 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
       return result._source;
     }
 
-    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask = await es.get<TaskManagerDoc>({
-        id: `task:${id}`,
-        index: '.kibana_task_manager',
-      });
-      return scheduledTask._source!;
-    }
-
     function getRule(overwrites = {}) {
-      return getTestRuleData({
+      return {
+        name: 'abc',
+        enabled: true,
+        tags: ['foo'],
+        consumer: 'alertsFixture',
+        actions: [],
         rule_type_id: 'test.patternFiringAutoRecoverFalse',
         params: {
           pattern: {
@@ -68,7 +61,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         },
         schedule: { interval: '12h' },
         ...overwrites,
-      });
+      };
     }
 
     function getLifecycleRule(overwrites = {}) {
@@ -127,6 +120,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           username: user.username,
           password: user.password,
         };
+
         it('should handle scheduling backfill job requests appropriately', async () => {
           const defaultStart = moment().utc().startOf('day').subtract(7, 'days').toISOString();
           const defaultEnd = moment().utc().startOf('day').subtract(1, 'day').toISOString();
@@ -150,6 +144,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // schedule backfill for both rules as current user
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -282,7 +277,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRunSO2.references).to.eql([{ id: ruleId2, name: 'rule', type: 'alert' }]);
 
               // check that the task was scheduled correctly
-              const taskRecord1 = await getScheduledTask(result[0].id);
+              const taskRecord1 = await getScheduledTask(es, result[0].id);
               expect(taskRecord1.type).to.eql('task');
               expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord1.task.timeoutOverride).to.eql('10s');
@@ -291,7 +286,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 adHocRunParamsId: result[0].id,
                 spaceId: space.id,
               });
-              const taskRecord2 = await getScheduledTask(result[1].id);
+              const taskRecord2 = await getScheduledTask(es, result[1].id);
               expect(taskRecord2.type).to.eql('task');
               expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord2.task.timeoutOverride).to.eql('10s');
@@ -338,6 +333,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // schedule 3 backfill jobs for rule as current user
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -513,7 +509,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRunSO3.references).to.eql([{ id: ruleId, name: 'rule', type: 'alert' }]);
 
               // check that the task was scheduled correctly
-              const taskRecord1 = await getScheduledTask(result[0].id);
+              const taskRecord1 = await getScheduledTask(es, result[0].id);
               expect(taskRecord1.type).to.eql('task');
               expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord1.task.timeoutOverride).to.eql('10s');
@@ -522,7 +518,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 adHocRunParamsId: result[0].id,
                 spaceId: space.id,
               });
-              const taskRecord2 = await getScheduledTask(result[1].id);
+              const taskRecord2 = await getScheduledTask(es, result[1].id);
               expect(taskRecord2.type).to.eql('task');
               expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord2.task.timeoutOverride).to.eql('10s');
@@ -531,7 +527,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 adHocRunParamsId: result[1].id,
                 spaceId: space.id,
               });
-              const taskRecord3 = await getScheduledTask(result[2].id);
+              const taskRecord3 = await getScheduledTask(es, result[2].id);
               expect(taskRecord3.type).to.eql('task');
               expect(taskRecord3.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord3.task.timeoutOverride).to.eql('10s');
@@ -571,6 +567,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // invalid start time
           const response1 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([{ rule_id: 'abc', start: 'foo' }]);
@@ -578,6 +575,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // invalid end time
           const response2 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -592,6 +590,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           const time = moment().utc().startOf('day').subtract(7, 'days').toISOString();
           const response3 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([{ rule_id: 'abc', start: time, end: time }]);
@@ -599,6 +598,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // end time is before start time
           const response4 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -612,6 +612,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // start time is too far in the past
           const response5 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([{ rule_id: 'abc', start: '2023-04-30T00:00:00.000Z' }]);
@@ -619,6 +620,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // start time is in the future
           const response6 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -628,6 +630,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // end time is in the future
           const response7 = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -714,6 +717,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // schedule backfill for non-existent rule
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -813,6 +817,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           // schedule backfill as current user
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
@@ -1018,7 +1023,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRunSO3.references).to.eql([{ id: ruleId1, name: 'rule', type: 'alert' }]);
 
               // check that the task was scheduled correctly
-              const taskRecord1 = await getScheduledTask(result[0].id);
+              const taskRecord1 = await getScheduledTask(es, result[0].id);
               expect(taskRecord1.type).to.eql('task');
               expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord1.task.timeoutOverride).to.eql('10s');
@@ -1027,7 +1032,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 adHocRunParamsId: result[0].id,
                 spaceId: space.id,
               });
-              const taskRecord2 = await getScheduledTask(result[1].id);
+              const taskRecord2 = await getScheduledTask(es, result[1].id);
               expect(taskRecord2.type).to.eql('task');
               expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord2.task.timeoutOverride).to.eql('10s');
@@ -1036,7 +1041,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 adHocRunParamsId: result[1].id,
                 spaceId: space.id,
               });
-              const taskRecord3 = await getScheduledTask(result[5].id);
+              const taskRecord3 = await getScheduledTask(es, result[5].id);
               expect(taskRecord3.type).to.eql('task');
               expect(taskRecord3.task.taskType).to.eql('ad_hoc_run-backfill');
               expect(taskRecord3.task.timeoutOverride).to.eql('10s');
@@ -1064,6 +1069,267 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 spaceId: space.id,
                 type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
                 id: result[5].id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle schedule request where rule has supported and unsupported actions', async () => {
+          // create a connector
+          const cresponse = await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'An index connector',
+              connector_type_id: '.index',
+              config: {
+                index: TEST_ACTIONS_INDEX,
+                refresh: true,
+              },
+              secrets: {},
+            })
+            .expect(200);
+          const connectorId = cresponse.body.id;
+          objectRemover.add(apiOptions.spaceId, connectorId, 'connector', 'actions');
+
+          const start = moment().utc().startOf('day').subtract(14, 'days').toISOString();
+          const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
+          // create 2 rules
+          const rresponse1 = await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getRule({
+                actions: [
+                  {
+                    group: 'default',
+                    id: connectorId,
+                    uuid: '111-111',
+                    params: { documents: [{ alertUuid: '{{alert.uuid}}' }] },
+                    frequency: { notify_when: 'onActiveAlert', throttle: null, summary: true },
+                  },
+                  {
+                    group: 'default',
+                    id: connectorId,
+                    uuid: '222-222',
+                    params: { documents: [{ alertUuid: '{{alert.uuid}}' }] },
+                    frequency: {
+                      notify_when: 'onActionGroupChange',
+                      throttle: null,
+                      summary: true,
+                    },
+                  },
+                ],
+              })
+            )
+            .expect(200);
+          const ruleId1 = rresponse1.body.id;
+          objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
+
+          const rresponse2 = await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getRule({
+                actions: [
+                  {
+                    group: 'default',
+                    id: connectorId,
+                    uuid: '333-333',
+                    params: { documents: [{ alertUuid: '{{alert.uuid}}' }] },
+                    frequency: { notify_when: 'onActiveAlert', throttle: null, summary: false },
+                  },
+                ],
+              })
+            )
+            .expect(200);
+          const ruleId2 = rresponse2.body.id;
+          objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+
+          // schedule backfill as current user
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .set('x-elastic-internal-origin', 'xxx')
+            .auth(apiOptions.username, apiOptions.password)
+            .send([
+              { rule_id: ruleId1, start, end, run_actions: true },
+              { rule_id: ruleId2, start, end, run_actions: true },
+            ]);
+
+          switch (scenario.id) {
+            // User can't do anything in this space
+            case 'no_kibana_privileges at space1':
+            // User has no privileges in this space
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find rules for any rule types`,
+                statusCode: 403,
+              });
+              break;
+            // User has read privileges in this space
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body.error).to.eql('Forbidden');
+              expect(response.body.message).to.match(
+                /Unauthorized by "alertsFixture" to scheduleBackfill "[^"]+" rule/
+              );
+              break;
+            // User doesn't have access to actions
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body.error).to.eql('Forbidden');
+              expect(response.body.message).to.eql('Unauthorized to get actions');
+              break;
+            // Superuser has access to everything
+            case 'superuser at space1':
+            // User has all privileges in this space
+            case 'space_1_all at space1':
+            // User has all privileges in this space
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              const result = response.body;
+
+              expect(result.length).to.eql(2);
+
+              // successful schedule with warning for unsupported action
+              expect(typeof result[0].id).to.be('string');
+              backfillIds.push({ id: result[0].id, spaceId: apiOptions.spaceId });
+              expect(result[0].duration).to.eql('12h');
+              expect(result[0].enabled).to.eql(true);
+              expect(result[0].start).to.eql(start);
+              expect(result[0].end).to.eql(end);
+              expect(result[0].status).to.eql('pending');
+              expect(result[0].space_id).to.eql(space.id);
+              expect(typeof result[0].created_at).to.be('string');
+              expect(result[0].rule.actions.length).to.eql(1);
+              expect(result[0].rule.actions[0]).to.eql({
+                actionTypeId: '.index',
+                group: 'default',
+                id: connectorId,
+                uuid: '111-111',
+                params: { documents: [{ alertUuid: '{{alert.uuid}}' }] },
+                frequency: { notifyWhen: 'onActiveAlert', throttle: null, summary: true },
+              });
+              expect(result[0].warnings).to.eql([
+                `Rule has actions that are not supported for backfill. Those actions will be skipped.`,
+              ]);
+
+              let currentStart = start;
+              result[0].schedule.forEach((sched: any) => {
+                expect(sched.interval).to.eql('12h');
+                expect(sched.status).to.eql('pending');
+                const runAt = moment(currentStart).add(12, 'hours').toISOString();
+                expect(sched.run_at).to.eql(runAt);
+                currentStart = runAt;
+              });
+
+              // // successful schedule
+              expect(typeof result[1].id).to.be('string');
+              backfillIds.push({ id: result[1].id, spaceId: apiOptions.spaceId });
+              expect(result[1].duration).to.eql('12h');
+              expect(result[1].enabled).to.eql(true);
+              expect(result[1].start).to.eql(start);
+              expect(result[1].end).to.eql(end);
+              expect(result[1].status).to.eql('pending');
+              expect(result[1].space_id).to.eql(space.id);
+              expect(typeof result[1].created_at).to.be('string');
+              expect(result[1].rule.actions.length).to.eql(1);
+              expect(result[1].rule.actions[0]).to.eql({
+                actionTypeId: '.index',
+                group: 'default',
+                id: connectorId,
+                uuid: '333-333',
+                params: { documents: [{ alertUuid: '{{alert.uuid}}' }] },
+                frequency: { notifyWhen: 'onActiveAlert', throttle: null, summary: false },
+              });
+              expect(result[1].warnings).to.be(undefined);
+
+              currentStart = start;
+              result[1].schedule.forEach((sched: any) => {
+                expect(sched.interval).to.eql('12h');
+                expect(sched.status).to.eql('pending');
+                const runAt = moment(currentStart).add(12, 'hours').toISOString();
+                expect(sched.run_at).to.eql(runAt);
+                currentStart = runAt;
+              });
+
+              // check that the expected ad hoc run SOs were created
+              const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
+              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
+              const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
+              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params')!;
+
+              expect(typeof adHocRun1.apiKeyId).to.be('string');
+              expect(typeof adHocRun1.apiKeyToUse).to.be('string');
+              expect(typeof adHocRun1.createdAt).to.be('string');
+              expect(adHocRun1.duration).to.eql('12h');
+              expect(adHocRun1.enabled).to.eql(true);
+              expect(adHocRun1.start).to.eql(start);
+              expect(adHocRun1.end).to.eql(end);
+              expect(adHocRun1.status).to.eql('pending');
+              expect(adHocRun1.spaceId).to.eql(space.id);
+
+              currentStart = start;
+              adHocRun1.schedule.forEach((sched: any) => {
+                expect(sched.interval).to.eql('12h');
+                expect(sched.status).to.eql('pending');
+                const runAt = moment(currentStart).add(12, 'hours').toISOString();
+                expect(sched.runAt).to.eql(runAt);
+                currentStart = runAt;
+              });
+
+              expect(typeof adHocRun2.apiKeyId).to.be('string');
+              expect(typeof adHocRun2.apiKeyToUse).to.be('string');
+              expect(typeof adHocRun2.createdAt).to.be('string');
+              expect(adHocRun2.duration).to.eql('12h');
+              expect(adHocRun2.enabled).to.eql(true);
+              expect(adHocRun2.start).to.eql(start);
+              expect(adHocRun2.end).to.eql(end);
+              expect(adHocRun2.status).to.eql('pending');
+              expect(adHocRun2.spaceId).to.eql(space.id);
+
+              currentStart = start;
+              adHocRun2.schedule.forEach((sched: any) => {
+                expect(sched.interval).to.eql('12h');
+                expect(sched.status).to.eql('pending');
+                const runAt = moment(currentStart).add(12, 'hours').toISOString();
+                expect(sched.runAt).to.eql(runAt);
+                currentStart = runAt;
+              });
+
+              // check references are stored correctly
+              expect(adHocRunSO1.references).to.eql([
+                { id: ruleId1, name: 'rule', type: 'alert' },
+                { id: connectorId, name: 'action_0', type: 'action' },
+              ]);
+              expect(adHocRunSO2.references).to.eql([
+                { id: ruleId2, name: 'rule', type: 'alert' },
+                { id: connectorId, name: 'action_0', type: 'action' },
+              ]);
+
+              // check that the task was scheduled correctly
+              const taskRecord1 = await getScheduledTask(es, result[0].id);
+              expect(taskRecord1.type).to.eql('task');
+              expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord1.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord1.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord1.task.params)).to.eql({
+                adHocRunParamsId: result[0].id,
+                spaceId: space.id,
+              });
+              const taskRecord2 = await getScheduledTask(es, result[1].id);
+              expect(taskRecord2.type).to.eql('task');
+              expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord2.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord2.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord2.task.params)).to.eql({
+                adHocRunParamsId: result[1].id,
+                spaceId: space.id,
               });
               break;
             default:

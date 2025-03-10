@@ -315,6 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // check available formats for ES_FIELD_TYPES.BOOLEAN
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
               FIELD_FORMAT_IDS.STATIC_LOOKUP,
               FIELD_FORMAT_IDS.STRING,
               FIELD_FORMAT_IDS.URL,
@@ -403,8 +404,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.setValue('~colorEditorColorPicker', '#ffffff');
-              await testSubjects.setValue('~colorEditorBackgroundPicker', '#ff0000');
+              await testSubjects.click('~colorEditorColorPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+              await testSubjects.click('~colorEditorBackgroundPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
@@ -428,18 +431,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should apply default formatter by field meta value', async () => {
         await es.indices.create({
           index: indexTitle,
-          body: {
-            mappings: {
-              properties: {
-                seconds: { type: 'long', meta: { unit: 's' } },
-              },
+          mappings: {
+            properties: {
+              seconds: { type: 'long', meta: { unit: 's' } },
             },
           },
         });
 
         const docResult = await es.index({
           index: indexTitle,
-          body: { seconds: 1234 },
+          document: { seconds: 1234 },
           refresh: 'wait_for',
         });
 
@@ -479,20 +480,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.indices.create({
         index: indexTitle,
-        body: {
-          mappings: {
-            // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
-            properties: specs.reduce((properties, spec, index) => {
-              properties[`${index}`] = { type: spec.fieldType };
-              return properties;
-            }, {} as Record<string, { type: ES_FIELD_TYPES }>),
-          },
+        mappings: {
+          // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
+          properties: specs.reduce((properties, spec, index) => {
+            properties[`${index}`] = { type: spec.fieldType };
+            return properties;
+          }, {} as Record<string, { type: ES_FIELD_TYPES }>),
         },
       });
 
       const docResult = await es.index({
         index: indexTitle,
-        body: specs.reduce((properties, spec, index) => {
+        document: specs.reduce((properties, spec, index) => {
           properties[`${index}`] = spec.fieldValue;
           return properties;
         }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),

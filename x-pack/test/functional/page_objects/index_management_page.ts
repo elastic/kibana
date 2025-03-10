@@ -38,6 +38,32 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
+    async clickIndexTemplate(name: string): Promise<void> {
+      const indexTemplateLinks = await testSubjects.findAll('templateDetailsLink');
+
+      for (const link of indexTemplateLinks) {
+        if ((await link.getVisibleText()).includes(name)) {
+          await link.click();
+          return;
+        }
+      }
+    },
+
+    async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
+      for (const dsName of dataStreamNames) {
+        const checkbox = await testSubjects.find(`checkboxSelectRow-${dsName}`);
+        if (!(await checkbox.isSelected())) {
+          await checkbox.click();
+        }
+      }
+      await testSubjects.click('dataStreamActionsPopoverButton');
+      await testSubjects.click('bulkEditDataRetentionButton');
+    },
+
+    async clickIndexTemplateNameLink(name: string): Promise<void> {
+      await find.clickByLinkText(name);
+    },
+
     async clickDataStreamNameLink(name: string): Promise<void> {
       await find.clickByLinkText(name);
     },
@@ -142,6 +168,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickNextButton() {
       await testSubjects.click('nextButton');
     },
+
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -159,6 +186,28 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         const url = await browser.getCurrentUrl();
         expect(url).to.contain(`tab=${tabId}`);
       },
+      async expectEditSettingsToBeEnabled() {
+        await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+        const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
+          'indexDetailsSettingsEditModeSwitch'
+        );
+        expect(isEditSettingsButtonDisabled).to.be(true);
+      },
+      async expectIndexDetailsMappingsAddFieldToBeEnabled() {
+        await testSubjects.existOrFail('indexDetailsMappingsAddField');
+        const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+        expect(isMappingsFieldEnabled).to.be(true);
+      },
+      async expectTabsExists() {
+        await testSubjects.existOrFail('indexDetailsTab-mappings', { timeout: 2000 });
+        await testSubjects.existOrFail('indexDetailsTab-overview', { timeout: 2000 });
+        await testSubjects.existOrFail('indexDetailsTab-settings', { timeout: 2000 });
+      },
+      async changeTab(
+        tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
+      ) {
+        await testSubjects.click(tab);
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
@@ -166,6 +215,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async setCreateIndexName(value: string) {
       await testSubjects.existOrFail('createIndexNameFieldText');
       await testSubjects.setValue('createIndexNameFieldText', value);
+    },
+    async setCreateIndexMode(value: string) {
+      await testSubjects.existOrFail('indexModeField');
+      await testSubjects.selectValue('indexModeField', value);
     },
     async clickCreateIndexSaveButton() {
       await testSubjects.existOrFail('createIndexSaveButton');
@@ -199,14 +252,33 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
 
     async expectIndexIsDeleted(indexName: string) {
-      const table = await find.byCssSelector('table');
-      const rows = await table.findAllByTestSubject('indexTableRow');
-      const indexNames: string[] = await Promise.all(
-        rows.map(async (row) => {
-          return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
-        })
-      );
-      expect(indexNames.includes(indexName)).to.be(false);
+      try {
+        const table = await find.byCssSelector('table');
+        const rows = await table.findAllByTestSubject('indexTableRow');
+
+        const indexNames = await Promise.all(
+          rows.map(async (row) => {
+            try {
+              return await (
+                await row.findByTestSubject('indexTableIndexNameLink')
+              ).getVisibleText();
+            } catch (error) {
+              // If the current row is stale, it has already been removed
+              if (error.name === 'StaleElementReferenceError') return undefined;
+              throw error; // Rethrow unexpected errors
+            }
+          })
+        ).then((names) => names.filter((name) => name !== undefined));
+
+        expect(indexNames.includes(indexName)).to.be(false);
+      } catch (error) {
+        if (error.name === 'StaleElementReferenceError') {
+          // If the table itself is stale, it means all rows have been removed
+          return; // Pass the test since the table is gone
+        } else {
+          throw error; // Rethrow unexpected errors
+        }
+      }
     },
     async manageIndex(indexName: string) {
       const id = `checkboxSelectIndex-${indexName}`;

@@ -67,6 +67,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const stepTitle = await testSubjects.getVisibleText('stepTitle');
         expect(stepTitle).to.be('Index settings (optional)');
 
+        // Verify that index mode callout is displayed
+        const indexModeCalloutText = await testSubjects.getVisibleText('indexModeCallout');
+        expect(indexModeCalloutText).to.be(
+          'The index.mode setting has been set to Standard within the Logistics step. Any changes to index.mode set on this page will be overwritten by the Logistics selection.'
+        );
+
         // Click Next button
         await pageObjects.indexManagement.clickNextButton();
       });

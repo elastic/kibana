@@ -62,7 +62,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('find_cases', () => {
@@ -560,16 +559,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const defaultSignalsIndex = 'siem-signals-default-000001';
       const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
       const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
-      beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
-      });
-
       afterEach(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
         await deleteAllCaseItems(es);
       });
 
@@ -592,11 +586,6 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
-
-          // There is potential for the alert index to not be refreshed by the time the second comment is created
-          // which could attempt to update the alert status again and will encounter a conflict so this will
-          // ensure that the index is up to date before we try to update the next alert status
-          await es.indices.refresh({ index: defaultSignalsIndex });
         }
 
         const patchedCase = await createComment({
@@ -656,12 +645,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            size: 10000,
-            sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
-            query: {
-              term: { type: 'cases' },
-            },
+          size: 10000,
+          sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
+          query: {
+            term: { type: 'cases' },
           },
         });
         return cases.hits.hits.map((hit) => hit._source);

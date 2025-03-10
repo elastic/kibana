@@ -27,6 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testIndexName = `test-index-ftr-${Math.random()}`;
   const testAPIIndexName = `test-api-index-ftr-${Math.random()}`;
   describe('index management', function () {
+    // see details: https://github.com/elastic/kibana/issues/200878
+    this.tags(['failsOnMKI']);
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page

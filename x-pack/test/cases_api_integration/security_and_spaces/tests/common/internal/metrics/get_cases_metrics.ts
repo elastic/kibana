@@ -25,7 +25,7 @@ import {
   getCasesMetrics,
   updateCase,
 } from '../../../../../common/lib/api';
-import { getPostCaseRequest } from '../../../../../common/lib/mock';
+import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -42,8 +42,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(metrics).to.eql({ mttr: null });
-
-      await deleteAllCaseItems(es);
     });
 
     describe(CaseMetricsFeature.MTTR, () => {
@@ -79,6 +77,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(metrics).to.eql({ mttr: null });
+
+        await deleteAllCaseItems(es);
       });
 
       describe('closed and open cases from kbn archive', () => {
@@ -92,6 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await kibanaServer.importExport.unload(
             'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json'
           );
+
           await deleteAllCaseItems(es);
         });
 
@@ -119,6 +120,62 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe(CaseMetricsFeature.STATUS, () => {
+      it('responses with zeros if there are no cases', async () => {
+        const metrics = await getCasesMetrics({
+          supertest,
+          features: [CaseMetricsFeature.STATUS],
+        });
+
+        expect(metrics).to.eql({
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
+        });
+      });
+
+      it('should return case statuses', async () => {
+        const [, inProgressCase, postedCase] = await Promise.all([
+          createCase(supertest, postCaseReq),
+          createCase(supertest, postCaseReq),
+          createCase(supertest, postCaseReq),
+        ]);
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: inProgressCase.id,
+                version: inProgressCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        const metrics = await getCasesMetrics({
+          supertest,
+          features: [CaseMetricsFeature.STATUS],
+        });
+
+        expect(metrics.status).to.eql({
+          open: 1,
+          inProgress: 1,
+          closed: 1,
+        });
+
+        await deleteAllCaseItems(es);
+      });
+    });
+
     describe('rbac', () => {
       before(async () => {
         await kibanaServer.importExport.load(
@@ -132,6 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
           'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
           { space: 'space1' }
         );
+
         await deleteAllCaseItems(es);
       });
 
@@ -139,29 +197,68 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const scenario of [
           {
             user: globalRead,
-            expectedMetrics: { mttr: 220 },
+            expectedMetrics: {
+              mttr: 220,
+              status: {
+                closed: 3,
+                inProgress: 0,
+                open: 1,
+              },
+            },
             owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
           {
             user: superUser,
-            expectedMetrics: { mttr: 220 },
+            expectedMetrics: {
+              mttr: 220,
+              status: {
+                closed: 3,
+                inProgress: 0,
+                open: 1,
+              },
+            },
             owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
           {
             user: secOnlyRead,
-            expectedMetrics: { mttr: 250 },
+            expectedMetrics: {
+              mttr: 250,
+              status: {
+                closed: 2,
+                inProgress: 0,
+                open: 1,
+              },
+            },
             owners: ['securitySolutionFixture'],
           },
-          { user: obsOnlyRead, expectedMetrics: { mttr: 160 }, owners: ['observabilityFixture'] },
+          {
+            user: obsOnlyRead,
+            expectedMetrics: {
+              mttr: 160,
+              status: {
+                closed: 1,
+                inProgress: 0,
+                open: 0,
+              },
+            },
+            owners: ['observabilityFixture'],
+          },
           {
             user: obsSecRead,
-            expectedMetrics: { mttr: 220 },
+            expectedMetrics: {
+              mttr: 220,
+              status: {
+                closed: 3,
+                inProgress: 0,
+                open: 1,
+              },
+            },
             owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
         ]) {
           const metrics = await getCasesMetrics({
             supertest: supertestWithoutAuth,
-            features: [CaseMetricsFeature.MTTR],
+            features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
             auth: {
               user: scenario.user,
               space: 'space1',
@@ -182,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // user should not be able to read cases at the appropriate space
           await getCasesMetrics({
             supertest: supertestWithoutAuth,
-            features: [CaseMetricsFeature.MTTR],
+            features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
             auth: {
               user: scenario.user,
               space: scenario.space,
@@ -195,7 +292,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should respect the owner filter when having permissions', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: [CaseMetricsFeature.MTTR],
+          features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
           query: {
             owner: 'securitySolutionFixture',
           },
@@ -205,13 +302,20 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(metrics).to.eql({ mttr: 250 });
+        expect(metrics).to.eql({
+          mttr: 250,
+          status: {
+            closed: 2,
+            inProgress: 0,
+            open: 1,
+          },
+        });
       });
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: [CaseMetricsFeature.MTTR],
+          features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
           query: {
             owner: ['securitySolutionFixture', 'observabilityFixture'],
           },
@@ -221,13 +325,20 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(metrics).to.eql({ mttr: 250 });
+        expect(metrics).to.eql({
+          mttr: 250,
+          status: {
+            closed: 2,
+            inProgress: 0,
+            open: 1,
+          },
+        });
       });
 
       it('should respect the owner filter when using range queries', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: [CaseMetricsFeature.MTTR],
+          features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
           query: {
             from: '2022-04-20',
             to: '2022-04-30',
@@ -238,7 +349,14 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(metrics).to.eql({ mttr: 250 });
+        expect(metrics).to.eql({
+          mttr: 250,
+          status: {
+            closed: 2,
+            inProgress: 0,
+            open: 0,
+          },
+        });
       });
     });
   });

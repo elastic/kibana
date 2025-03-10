@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/code-owners",
+  "owner": [
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

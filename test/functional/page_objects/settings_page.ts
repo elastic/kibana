@@ -263,10 +263,12 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getScriptedFieldsTabCount() {
-    return await this.retry.try(async () => {
+    try {
       const text = await this.testSubjects.getVisibleText('tab-scriptedFields');
-      return text.split(' ')[2].replace(/\((.*)\)/, '$1');
-    });
+      return text.split(' ')[2].replace(/\((.*)\)/, '$1') || '0';
+    } catch (e) {
+      return '0';
+    }
   }
 
   async getRelationshipsTabCount() {
@@ -405,10 +407,19 @@ export class SettingsPageObject extends FtrService {
       `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
         td:nth-last-child(2) button`
     );
+    await this.retry.waitFor('flyout to open', async () => {
+      return await this.testSubjects.exists('flyoutTitle');
+    });
+  }
+
+  async setPopularity(value: number) {
+    await this.testSubjects.setValue('editorFieldCount', String(value), {
+      clearWithKeyboard: true,
+    });
   }
 
   async increasePopularity() {
-    await this.testSubjects.setValue('editorFieldCount', '1', { clearWithKeyboard: true });
+    await this.setPopularity(Number(await this.getPopularity()) + 1);
   }
 
   async getPopularity() {
@@ -727,7 +738,7 @@ export class SettingsPageObject extends FtrService {
     popularity: string,
     script: string
   ) {
-    await this.clickAddScriptedField();
+    await this.goToAddScriptedField();
     await this.setScriptedFieldName(name);
     if (language) await this.setScriptedFieldLanguage(language);
     if (type) await this.setScriptedFieldType(type);
@@ -896,9 +907,12 @@ export class SettingsPageObject extends FtrService {
     await this.monacoEditor.setCodeEditorValue(script);
   }
 
-  async clickAddScriptedField() {
-    this.log.debug('click Add Scripted Field');
-    await this.testSubjects.click('addScriptedFieldLink');
+  async goToAddScriptedField() {
+    this.log.debug('go to Add Scripted Field url');
+    const url = await this.browser.getCurrentUrl();
+    const newUrl = url.split('#')[0];
+    await this.browser.get(newUrl + '/create-field/');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveScriptedField() {

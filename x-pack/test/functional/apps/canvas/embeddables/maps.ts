@@ -18,6 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('maps in canvas', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       // open canvas home
       await canvas.goToListingPage();
       // create new workpad
@@ -25,10 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await canvas.setWorkpadName('maps tests');
     });
 
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     describe('by-value', () => {
       it('creates new map embeddable', async () => {
         const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await canvas.createNewVis('maps');
+        await canvas.addNewPanel('Maps');
         await maps.clickSaveAndReturnButton();
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount + 1);

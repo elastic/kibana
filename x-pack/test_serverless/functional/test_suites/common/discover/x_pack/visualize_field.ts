@@ -48,7 +48,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await setDiscoverTimeRange();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
@@ -64,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
     });
 
-    it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
+    it('visualizes field to Lens and loads fields to the dimension editor', async () => {
       await PageObjects.unifiedFieldList.findFieldByName('bytes');
       await PageObjects.unifiedFieldList.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();

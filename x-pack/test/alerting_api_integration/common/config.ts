@@ -9,10 +9,12 @@ import path from 'path';
 import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -55,6 +57,7 @@ const enabledActionTypes = [
   '.d3security',
   SENTINELONE_CONNECTOR_ID,
   CROWDSTRIKE_CONNECTOR_ID,
+  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   '.slack',
   '.slack_api',
   '.thehive',
@@ -169,6 +172,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         : [];
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
@@ -217,7 +221,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
-          '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,

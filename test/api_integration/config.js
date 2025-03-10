@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -18,6 +19,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./apis')],
     services,
     servers: commonConfig.get('servers'),
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     junit: {
       reportName: 'API Integration Tests',
     },

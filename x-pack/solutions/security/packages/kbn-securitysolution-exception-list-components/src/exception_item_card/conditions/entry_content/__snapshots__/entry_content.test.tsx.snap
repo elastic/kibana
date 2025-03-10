@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EntryContent should render a nested value 1`] = `
+<div>
+  <div
+    data-test-subj="EntryContentlistlist_id0EntryContent"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+      data-test-subj="EntryContentNestedEntry"
+    >
+      <span
+        class="euiToken emotion-euiToken-circle-light-s-euiColorVis4"
+        data-test-subj="nstedEntryIcon"
+      >
+        <span
+          data-euiicon-type="tokenNested"
+        />
+      </span>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <span
+          class="euiExpression emotion-euiExpression-subdued"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
+          />
+           
+        </span>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="entryValueExpression"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            included in
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            list_id
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

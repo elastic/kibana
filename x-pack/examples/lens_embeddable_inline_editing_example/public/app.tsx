@@ -24,7 +24,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StartDependencies } from './plugin';
 import { LensChart } from './embeddable';
 import { MultiPaneFlyout } from './flyout';
@@ -46,137 +45,128 @@ export const App = (props: {
   );
 
   return (
-    <KibanaContextProvider
-      services={{
-        uiSettings: props.core.uiSettings,
-        settings: props.core.settings,
-        theme: props.core.theme,
-      }}
-    >
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageHeader
-            paddingSize="s"
-            bottomBorder={true}
-            pageTitle="Lens embeddable inline editing"
-          />
-          <EuiPageSection paddingSize="s">
-            <EuiFlexGroup
-              className="eui-fullHeight"
-              gutterSize="none"
-              direction="row"
-              responsive={false}
-            >
-              <EuiFlexItem className="eui-fullHeight">
-                <LensChart
-                  configBuilder={configBuilder}
-                  plugins={props.plugins}
-                  defaultDataView={props.defaultDataView}
-                  isESQL
-                  setPanelActive={setPanelActive}
-                  isActive={Boolean(panelActive === 1) || !panelActive}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem className="eui-fullHeight">
-                <LensChart
-                  configBuilder={configBuilder}
-                  plugins={props.plugins}
-                  defaultDataView={props.defaultDataView}
-                  setPanelActive={setPanelActive}
-                  isActive={Boolean(panelActive === 2) || !panelActive}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel
-                  hasShadow={false}
-                  hasBorder={true}
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageHeader
+          paddingSize="s"
+          bottomBorder={true}
+          pageTitle="Lens embeddable inline editing"
+        />
+        <EuiPageSection paddingSize="s">
+          <EuiFlexGroup
+            className="eui-fullHeight"
+            gutterSize="none"
+            direction="row"
+            responsive={false}
+          >
+            <EuiFlexItem className="eui-fullHeight">
+              <LensChart
+                configBuilder={configBuilder}
+                plugins={props.plugins}
+                defaultDataView={props.defaultDataView}
+                isESQL
+                setPanelActive={setPanelActive}
+                isActive={Boolean(panelActive === 1) || !panelActive}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem className="eui-fullHeight">
+              <LensChart
+                configBuilder={configBuilder}
+                plugins={props.plugins}
+                defaultDataView={props.defaultDataView}
+                setPanelActive={setPanelActive}
+                isActive={Boolean(panelActive === 2) || !panelActive}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel
+                hasShadow={false}
+                hasBorder={true}
+                css={css`
+                  opacity: ${Boolean(panelActive === 3) || !panelActive ? '1' : '0.25'};
+                  pointer-events: ${Boolean(panelActive === 3) || !panelActive ? 'all' : 'none'};
+                `}
+              >
+                <EuiTitle
+                  size="xs"
                   css={css`
-                    opacity: ${Boolean(panelActive === 3) || !panelActive ? '1' : '0.25'};
-                    pointer-events: ${Boolean(panelActive === 3) || !panelActive ? 'all' : 'none'};
+                    text-align: center;
                   `}
                 >
-                  <EuiTitle
-                    size="xs"
-                    css={css`
-                      text-align: center;
-                    `}
-                  >
-                    <h3>#3: Embeddable inside a flyout</h3>
-                  </EuiTitle>
-                  <EuiSpacer />
-                  <EuiTitle
-                    size="xxs"
-                    css={css`
-                      text-align: center;
-                    `}
-                  >
-                    <p>
-                      In case you do not want to use a push flyout, you can check this example.{' '}
-                      <br />
-                      In this example, we have a Lens embeddable inside a flyout and we want to
-                      render the inline editing Component in a second slot of the same flyout.
-                    </p>
-                  </EuiTitle>
-                  <EuiSpacer />
-                  <EuiFlexGroup justifyContent="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        onClick={() => {
-                          setIsFlyoutVisible(true);
-                          setPanelActive(3);
+                  <h3>#3: Embeddable inside a flyout</h3>
+                </EuiTitle>
+                <EuiSpacer />
+                <EuiTitle
+                  size="xxs"
+                  css={css`
+                    text-align: center;
+                  `}
+                >
+                  <p>
+                    In case you do not want to use a push flyout, you can check this example. <br />
+                    In this example, we have a Lens embeddable inside a flyout and we want to render
+                    the inline editing Component in a second slot of the same flyout.
+                  </p>
+                </EuiTitle>
+                <EuiSpacer />
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={() => {
+                        setIsFlyoutVisible(true);
+                        setPanelActive(3);
+                      }}
+                    >
+                      Show flyout
+                    </EuiButton>
+                    {isFlyoutVisible ? (
+                      <MultiPaneFlyout
+                        mainContent={{
+                          content: (
+                            <LensChart
+                              configBuilder={configBuilder}
+                              plugins={props.plugins}
+                              defaultDataView={props.defaultDataView}
+                              container={container}
+                              setIsinlineEditingVisible={setIsinlineEditingVisible}
+                              onApplyCb={() => {
+                                setIsinlineEditingVisible(false);
+                                if (container) {
+                                  ReactDOM.unmountComponentAtNode(container);
+                                }
+                              }}
+                              onCancelCb={() => {
+                                setIsinlineEditingVisible(false);
+                                if (container) {
+                                  ReactDOM.unmountComponentAtNode(container);
+                                }
+                              }}
+                              isESQL
+                              isActive
+                            />
+                          ),
                         }}
-                      >
-                        Show flyout
-                      </EuiButton>
-                      {isFlyoutVisible ? (
-                        <MultiPaneFlyout
-                          mainContent={{
-                            content: (
-                              <LensChart
-                                configBuilder={configBuilder}
-                                plugins={props.plugins}
-                                defaultDataView={props.defaultDataView}
-                                container={container}
-                                setIsinlineEditingVisible={setIsinlineEditingVisible}
-                                onApplyCb={() => {
-                                  setIsinlineEditingVisible(false);
-                                  if (container) {
-                                    ReactDOM.unmountComponentAtNode(container);
-                                  }
-                                }}
-                                onCancelCb={() => {
-                                  setIsinlineEditingVisible(false);
-                                  if (container) {
-                                    ReactDOM.unmountComponentAtNode(container);
-                                  }
-                                }}
-                                isESQL
-                                isActive
-                              />
-                            ),
-                          }}
-                          inlineEditingContent={{
-                            visible: isInlineEditingVisible,
-                          }}
-                          setContainer={setContainer}
-                          onClose={() => {
-                            setIsFlyoutVisible(false);
-                            setIsinlineEditingVisible(false);
-                            setPanelActive(null);
-                            if (container) {
-                              ReactDOM.unmountComponentAtNode(container);
-                            }
-                          }}
-                        />
-                      ) : null}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageSection>
-        </EuiPageBody>
-      </EuiPage>
-    </KibanaContextProvider>
+                        inlineEditingContent={{
+                          visible: isInlineEditingVisible,
+                        }}
+                        setContainer={setContainer}
+                        onClose={() => {
+                          setIsFlyoutVisible(false);
+                          setIsinlineEditingVisible(false);
+                          setPanelActive(null);
+                          if (container) {
+                            ReactDOM.unmountComponentAtNode(container);
+                          }
+                        }}
+                      />
+                    ) : null}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageSection>
+      </EuiPageBody>
+    </EuiPage>
   );
 };

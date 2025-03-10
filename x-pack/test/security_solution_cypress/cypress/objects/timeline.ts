@@ -72,7 +72,7 @@ export const expectedExportedTimelineTemplate = (
   templateResponse: Cypress.Response<PersistTimelineResponse>,
   username: string
 ) => {
-  const timelineTemplateBody = templateResponse.body.data.persistTimeline.timeline;
+  const timelineTemplateBody = templateResponse.body;
 
   return {
     savedObjectId: timelineTemplateBody.savedObjectId,
@@ -118,7 +118,7 @@ export const expectedExportedTimeline = (
   timelineResponse: Cypress.Response<PersistTimelineResponse>,
   username: string
 ) => {
-  const timelineBody = timelineResponse.body.data.persistTimeline.timeline;
+  const timelineBody = timelineResponse.body;
 
   return {
     savedObjectId: timelineBody.savedObjectId,

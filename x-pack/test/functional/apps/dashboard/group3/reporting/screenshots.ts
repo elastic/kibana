@@ -62,15 +62,12 @@ export default function ({
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_all'] },
+            feature: { dashboard: ['minimal_all', 'generate_report'] },
           },
         ],
       });
 
-      await security.testUser.setRoles([
-        'test_dashboard_user',
-        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
-      ]);
+      await security.testUser.setRoles(['test_dashboard_user']);
     });
     after('clean up archives', async () => {
       await share.closeShareModal();
@@ -78,7 +75,7 @@ export default function ({
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
       await security.testUser.restoreDefaults();
     });
@@ -221,7 +218,6 @@ export default function ({
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');

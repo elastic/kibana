@@ -21,7 +21,7 @@
         "description": [
           "\nKibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met.\n"
         ],
-        "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+        "path": "src/core/packages/preboot/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,7 +37,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+            "path": "src/core/packages/preboot/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -55,7 +55,7 @@
             "signature": [
               "(reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>) => void"
             ],
-            "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+            "path": "src/core/packages/preboot/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -71,7 +71,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+                "path": "src/core/packages/preboot/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -88,7 +88,7 @@
                 "signature": [
                   "Promise<{ shouldReloadConfig: boolean; } | undefined>"
                 ],
-                "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+                "path": "src/core/packages/preboot/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

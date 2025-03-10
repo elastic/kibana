@@ -14,7 +14,7 @@
       "tags": [],
       "label": "SearchConnectorsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_connectors/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_connectors/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -36,7 +36,7 @@
             },
             "[]"
           ],
-          "path": "x-pack/plugins/search_connectors/public/types.ts",
+          "path": "x-pack/solutions/search/plugins/search_connectors/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -53,7 +53,7 @@
       "tags": [],
       "label": "SearchConnectorsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_connectors/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_connectors/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -75,7 +75,7 @@
             },
             "[]"
           ],
-          "path": "x-pack/plugins/search_connectors/public/types.ts",
+          "path": "x-pack/solutions/search/plugins/search_connectors/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -100,7 +100,7 @@
       "tags": [],
       "label": "SearchConnectorsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_connectors/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_connectors/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -122,7 +122,7 @@
             },
             "[]"
           ],
-          "path": "x-pack/plugins/search_connectors/server/types.ts",
+          "path": "x-pack/solutions/search/plugins/search_connectors/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -139,7 +139,7 @@
       "tags": [],
       "label": "SearchConnectorsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_connectors/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_connectors/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/test-eui-helpers",
-  "devOnly": true,
-  "owner": ["@elastic/kibana-visualizations"],
-}

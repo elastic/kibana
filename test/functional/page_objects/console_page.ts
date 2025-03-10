@@ -52,6 +52,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.clearValueWithKeyboard();
   }
 
+  public async focusInputEditor() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoEditor');
+    // Simply clicking on the editor doesn't focus it, so we need to click
+    // on the margin view overlays
+    await (await outputEditor.findByClassName('margin-view-overlays')).click();
+  }
+
   public async focusOutputEditor() {
     const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
     // Simply clicking on the output editor doesn't focus it, so we need to click
@@ -217,6 +224,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async isPlayButtonVisible() {
+    return await this.testSubjects.exists('sendRequestButton');
+  }
+
   public async clickCopyOutput() {
     await this.testSubjects.click('copyOutputButton');
   }
@@ -272,8 +283,12 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSkipTourButton');
   }
 
-  public async clickNextTourStep() {
+  public async clickNextTourStep(andWaitFor: number = 0) {
     await this.testSubjects.click('consoleNextTourStepButton');
+
+    if (andWaitFor) {
+      await this.common.sleep(andWaitFor);
+    }
   }
 
   public async clickCompleteTour() {
@@ -296,16 +311,23 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleHistoryButton');
   }
 
+  async isConsoleTabOpen(tabId: string) {
+    await this.retry.waitFor('console container is displayed', async () => {
+      return await this.testSubjects.isDisplayed('consolePanel');
+    });
+    return await this.testSubjects.exists(tabId);
+  }
+
   public async isShellOpen() {
-    return await this.testSubjects.exists('consoleEditorContainer');
+    return await this.isConsoleTabOpen('consoleEditorContainer');
   }
 
   public async isConfigOpen() {
-    return await this.testSubjects.exists('consoleConfigPanel');
+    return await this.isConsoleTabOpen('consoleConfigPanel');
   }
 
   public async isHistoryOpen() {
-    return await this.testSubjects.exists('consoleHistoryPanel');
+    return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
   public async openSettings() {
@@ -343,6 +365,10 @@ export class ConsolePageObject extends FtrService {
         await this.testSubjects.click('confirmModalConfirmButton');
       });
     });
+  }
+
+  public async copyVariableToClipboard(name: string) {
+    await this.testSubjects.click(`variableCopyButton-${name}`);
   }
 
   public async getVariables() {

@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-saved-objects-api-browser",
-  "owner": "@elastic/kibana-core"
-}

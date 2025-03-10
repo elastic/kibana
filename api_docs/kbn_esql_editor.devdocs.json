@@ -21,7 +21,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-esql-editor/src/esql_editor.tsx",
+        "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -83,15 +83,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined, abortController: AbortController | undefined, dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined) => Promise<",
+          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -101,7 +93,7 @@
           },
           " | undefined>"
         ],
-        "path": "packages/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+        "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,7 +121,7 @@
                 "text": "AggregateQuery"
               }
             ],
-            "path": "packages/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,7 +142,7 @@
                 "text": "ExpressionsStart"
               }
             ],
-            "path": "packages/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -172,7 +164,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -187,7 +179,7 @@
             "signature": [
               "AbortController | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -195,21 +187,14 @@
           {
             "parentPluginId": "@kbn/esql-editor",
             "id": "def-public.fetchFieldsFromESQL.$5",
-            "type": "Object",
+            "type": "string",
             "tags": [],
-            "label": "dataView",
+            "label": "timeFieldName",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
+              "string | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -227,7 +212,7 @@
         "tags": [],
         "label": "ESQLEditorProps",
         "description": [],
-        "path": "packages/kbn-esql-editor/src/types.ts",
+        "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +228,7 @@
             "signature": [
               "{ esql: string; }"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,7 +252,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -287,7 +272,7 @@
                     "text": "AggregateQuery"
                   }
                 ],
-                "path": "packages/kbn-esql-editor/src/types.ts",
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -315,7 +300,7 @@
               },
               " | undefined, abortController?: AbortController | undefined) => Promise<void>"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -336,7 +321,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-esql-editor/src/types.ts",
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -351,7 +336,7 @@
                 "signature": [
                   "AbortController | undefined"
                 ],
-                "path": "packages/kbn-esql-editor/src/types.ts",
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -371,7 +356,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,7 +372,7 @@
             "signature": [
               "Error[] | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -403,7 +388,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -419,7 +404,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -435,7 +420,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -449,7 +434,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -465,7 +450,23 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.hideRunQueryButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideRunQueryButton",
+            "description": [
+              "Hide the Run query button which appears when editor is inlined"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -481,7 +482,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,7 +498,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -513,7 +514,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -529,7 +530,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -545,7 +546,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -561,7 +562,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -577,7 +578,129 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-editor/src/types.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.disableAutoFocus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFocus",
+            "description": [
+              "The component by default focuses on the editor when it is mounted, this flag disables it"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.supportsControls",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supportsControls",
+            "description": [
+              "The editor supports the creation of controls,\nThis flag should be set to true to display the \"Create control\" suggestion"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.onSaveControl",
+            "type": "Function",
+            "tags": [],
+            "label": "onSaveControl",
+            "description": [
+              "Function to be called after the control creation"
+            ],
+            "signature": [
+              "((controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorProps.onSaveControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlState",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorProps.onSaveControl.$2",
+                "type": "string",
+                "tags": [],
+                "label": "updatedQuery",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.onCancelControl",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancelControl",
+            "description": [
+              "Function to be called after cancelling the control creation"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [
+              "The available ESQL variables from the page context this editor was opened in"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

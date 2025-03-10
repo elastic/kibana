@@ -1,0 +1,47 @@
+{
+  "type": "plugin",
+  "id": "@kbn/osquery-plugin",
+  "owner": "@elastic/security-defend-workflows",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "osquery",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "osquery"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "licensing",
+      "dataViews",
+      "discover",
+      "features",
+      "navigation",
+      "taskManager",
+      "triggersActionsUi",
+      "ruleRegistry",
+      "security"
+    ],
+    "optionalPlugins": [
+      "fleet",
+      "home",
+      "lens",
+      "telemetry",
+      "cases"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "fleet",
+      "kibanaUtils",
+      "kibanaReact",
+      "lens",
+      "cases"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

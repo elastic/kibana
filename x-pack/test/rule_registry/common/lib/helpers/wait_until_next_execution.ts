@@ -27,7 +27,7 @@ export async function waitUntilNextExecution(
   });
 
   const { body, status } = await supertest
-    .get(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert/${alert.id}`)
+    .get(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${alert.id}`)
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'foo');
 

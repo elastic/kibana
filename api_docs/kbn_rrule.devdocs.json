@@ -25,7 +25,7 @@
         "tags": [],
         "label": "RRule",
         "description": [],
-        "path": "packages/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-rrule/rrule.ts",
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,9 +51,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Options"
+                  "ConstructorOptions"
                 ],
-                "path": "packages/kbn-rrule/rrule.ts",
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -71,7 +71,7 @@
             "signature": [
               "(start: Date, end: Date) => Date[]"
             ],
-            "path": "packages/kbn-rrule/rrule.ts",
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -85,7 +85,7 @@
                 "signature": [
                   "Date"
                 ],
-                "path": "packages/kbn-rrule/rrule.ts",
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -100,7 +100,7 @@
                 "signature": [
                   "Date"
                 ],
-                "path": "packages/kbn-rrule/rrule.ts",
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -118,7 +118,7 @@
             "signature": [
               "(dt: Date) => Date"
             ],
-            "path": "packages/kbn-rrule/rrule.ts",
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -132,7 +132,7 @@
                 "signature": [
                   "Date"
                 ],
-                "path": "packages/kbn-rrule/rrule.ts",
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -150,7 +150,7 @@
             "signature": [
               "(dt: Date) => Date | null"
             ],
-            "path": "packages/kbn-rrule/rrule.ts",
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -164,7 +164,7 @@
                 "signature": [
                   "Date"
                 ],
-                "path": "packages/kbn-rrule/rrule.ts",
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -182,7 +182,7 @@
             "signature": [
               "(limit?: number) => AllResult"
             ],
-            "path": "packages/kbn-rrule/rrule.ts",
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,7 +196,41 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-rrule/rrule.ts",
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.isValid",
+            "type": "Function",
+            "tags": [],
+            "label": "isValid",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "ConstructorOptions",
+              ") => boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.isValid.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ConstructorOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -218,7 +252,7 @@
         "tags": [],
         "label": "Frequency",
         "description": [],
-        "path": "packages/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -230,7 +264,7 @@
         "tags": [],
         "label": "Weekday",
         "description": [],
-        "path": "packages/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -239,15 +273,25 @@
     "misc": [
       {
         "parentPluginId": "@kbn/rrule",
-        "id": "def-common.ConstructorOptions",
+        "id": "def-common.Options",
         "type": "Type",
         "tags": [],
-        "label": "ConstructorOptions",
+        "label": "Options",
         "description": [],
         "signature": [
-          "Omit<Options, \"byweekday\" | \"wkst\"> & { byweekday?: (string | number)[] | null | undefined; wkst?: number | \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | null | undefined; }"
+          "Omit<",
+          "IterOptions",
+          ", \"refDT\"> & { dtstart: Date; freq?: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          " | undefined; interval?: number | undefined; until?: Date | null | undefined; count?: number | undefined; tzid: string; }"
         ],
-        "path": "packages/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -262,7 +306,7 @@
         "signature": [
           "\"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\""
         ],
-        "path": "packages/kbn-rrule/index.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

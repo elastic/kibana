@@ -34,6 +34,13 @@ export class FieldEditorService extends FtrService {
   public async setCustomDescription(description: string) {
     await this.testSubjects.setValue('customDescriptionRow > input', description);
   }
+  public async setPopularity(value: number) {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.setEuiSwitch('popularityRow > toggle', 'check');
+    await this.testSubjects.setValue('editorFieldCount', String(value), {
+      clearWithKeyboard: true,
+    });
+  }
   public async getFormError() {
     const alert = await this.find.byCssSelector(
       '[data-test-subj=indexPatternFieldEditorForm] > [role="alert"]'
@@ -90,9 +97,11 @@ export class FieldEditorService extends FtrService {
   public async setColorFormat(value: string, color: string, backgroundColor?: string) {
     await this.testSubjects.click('colorEditorAddColor');
     await this.testSubjects.setValue('~colorEditorKeyPattern', value);
-    await this.testSubjects.setValue('~colorEditorColorPicker', color);
+    await this.testSubjects.click('~colorEditorColorPicker');
+    await this.testSubjects.setValue('~euiColorPickerInput_bottom', color);
     if (backgroundColor) {
-      await this.testSubjects.setValue('~colorEditorBackgroundPicker', backgroundColor);
+      await this.testSubjects.click('~colorEditorBackgroundPicker');
+      await this.testSubjects.setValue('~euiColorPickerInput_bottom', backgroundColor);
     }
   }
 

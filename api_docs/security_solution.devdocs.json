@@ -18,13 +18,7 @@
             "text": "Plugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "securitySolution",
@@ -47,7 +41,7 @@
           "StartPlugins",
           ">"
         ],
-        "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+        "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +55,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -73,16 +67,10 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -99,13 +87,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "StartPluginsDependencies",
               ", ",
@@ -127,7 +109,7 @@
                 "text": "PluginSetup"
               }
             ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -139,13 +121,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "StartPluginsDependencies",
                   ", ",
@@ -158,7 +134,7 @@
                   },
                   ">"
                 ],
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -173,7 +149,7 @@
                 "signature": [
                   "SetupPlugins"
                 ],
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -190,13 +166,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: ",
               "StartPlugins",
               ") => ",
@@ -208,7 +178,7 @@
                 "text": "PluginStart"
               }
             ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -220,15 +190,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -243,7 +207,7 @@
                 "signature": [
                   "StartPlugins"
                 ],
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -261,7 +225,97 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.registerDiscoverSharedFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDiscoverSharedFeatures",
+            "description": [],
+            "signature": [
+              "(core: ",
+              "CoreSetup",
+              "<",
+              "StartPluginsDependencies",
+              ", ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
+              ">, plugins: ",
+              "SetupPlugins",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<",
+                  "StartPluginsDependencies",
+                  ", ",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
+                    "text": "PluginStart"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "SetupPlugins"
+                ],
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.getLazyDiscoverSharedDeps",
+            "type": "Function",
+            "tags": [],
+            "label": "getLazyDiscoverSharedDeps",
+            "description": [],
+            "signature": [
+              "() => Promise<typeof ",
+              "x-pack/solutions/security/plugins/security_solution/public/one_discover/index",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -280,7 +334,7 @@
         "tags": [],
         "label": "FetchRulesResponse",
         "description": [],
-        "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,7 +345,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -302,7 +356,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -313,7 +367,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -325,9 +379,9 @@
             "label": "data",
             "description": [],
             "signature": [
-              "({ id: string; type: \"eql\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"eql\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; event_category_override?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"query\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"saved_query\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; saved_id: string; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; query?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"s\" | \"h\"; }; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"threat_match\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; }[]; }[]; threat_index: string[]; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"kuery\" | \"lucene\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"new_terms\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"esql\"; version: number; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; tags: string[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"esql\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; })[]"
+              "({ id: string; type: \"eql\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; event_category_override?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"query\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"saved_query\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; saved_id: string; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; query?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"s\" | \"h\"; }; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"threat_match\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; }[]; }[]; threat_index: string[]; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"kuery\" | \"lucene\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"new_terms\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"esql\"; version: number; name: string; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; }[]; setup: string; description: string; enabled: boolean; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; } | { type: \"internal\"; }; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; version?: string | undefined; snapshot?: boolean | undefined; platform?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; })[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -341,7 +395,7 @@
         "tags": [],
         "label": "LinkItem",
         "description": [],
-        "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -358,7 +412,7 @@
               "RequiredCapabilities",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -390,7 +444,7 @@
               },
               ">[] | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +460,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -420,9 +474,9 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"responseActionsSentinelOneGetFileEnabled\" | \"responseActionsSentinelOneKillProcessEnabled\" | \"responseActionsSentinelOneProcessesEnabled\" | \"responseActionsCrowdstrikeManualHostIsolationEnabled\" | \"endpointManagementSpaceAwarenessEnabled\" | \"securitySolutionNotesDisabled\" | \"entityAlertPreviewDisabled\" | \"newUserDetailsFlyoutManagedUser\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"responseActionsTelemetryEnabled\" | \"jamfDataInAnalyzerEnabled\" | \"timelineEsqlTabDisabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"graphVisualizationInFlyoutEnabled\" | \"prebuiltRulesCustomizationEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"unifiedManifestEnabled\" | \"valueListItemsModalEnabled\" | \"filterProcessDescendantsForEventFiltersEnabled\" | \"dataIngestionHubEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsEnabled\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsights\" | \"assistantAttackDiscoverySchedulingEnabled\" | \"alertSuppressionForSequenceEqlRuleEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"responseActionsSentinelOneGetFileEnabled\" | \"responseActionsSentinelOneKillProcessEnabled\" | \"responseActionsSentinelOneProcessesEnabled\" | \"responseActionsCrowdstrikeManualHostIsolationEnabled\" | \"endpointManagementSpaceAwarenessEnabled\" | \"securitySolutionNotesDisabled\" | \"newUserDetailsFlyoutManagedUser\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"responseActionsTelemetryEnabled\" | \"jamfDataInAnalyzerEnabled\" | \"prebuiltRulesCustomizationEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"unifiedManifestEnabled\" | \"valueListItemsModalEnabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForEventFiltersEnabled\" | \"dataIngestionHubEnabled\" | \"entityStoreDisabled\" | \"serviceEntityStoreEnabled\" | \"siemMigrationsDisabled\" | \"newExpandableFlyoutNavigationDisabled\" | \"crowdstrikeRunScriptEnabled\" | \"responseActionsMSDefenderEndpointEnabled\" | \"eventCollectionDataReductionBannerEnabled\" | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -438,7 +492,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -454,7 +508,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -470,7 +524,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -486,7 +540,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -500,9 +554,9 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"responseActionsSentinelOneGetFileEnabled\" | \"responseActionsSentinelOneKillProcessEnabled\" | \"responseActionsSentinelOneProcessesEnabled\" | \"responseActionsCrowdstrikeManualHostIsolationEnabled\" | \"endpointManagementSpaceAwarenessEnabled\" | \"securitySolutionNotesDisabled\" | \"entityAlertPreviewDisabled\" | \"newUserDetailsFlyoutManagedUser\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"responseActionsTelemetryEnabled\" | \"jamfDataInAnalyzerEnabled\" | \"timelineEsqlTabDisabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"graphVisualizationInFlyoutEnabled\" | \"prebuiltRulesCustomizationEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"unifiedManifestEnabled\" | \"valueListItemsModalEnabled\" | \"filterProcessDescendantsForEventFiltersEnabled\" | \"dataIngestionHubEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsEnabled\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsights\" | \"assistantAttackDiscoverySchedulingEnabled\" | \"alertSuppressionForSequenceEqlRuleEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"responseActionsSentinelOneGetFileEnabled\" | \"responseActionsSentinelOneKillProcessEnabled\" | \"responseActionsSentinelOneProcessesEnabled\" | \"responseActionsCrowdstrikeManualHostIsolationEnabled\" | \"endpointManagementSpaceAwarenessEnabled\" | \"securitySolutionNotesDisabled\" | \"newUserDetailsFlyoutManagedUser\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"responseActionsTelemetryEnabled\" | \"jamfDataInAnalyzerEnabled\" | \"prebuiltRulesCustomizationEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"unifiedManifestEnabled\" | \"valueListItemsModalEnabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForEventFiltersEnabled\" | \"dataIngestionHubEnabled\" | \"entityStoreDisabled\" | \"serviceEntityStoreEnabled\" | \"siemMigrationsDisabled\" | \"newExpandableFlyoutNavigationDisabled\" | \"crowdstrikeRunScriptEnabled\" | \"responseActionsMSDefenderEndpointEnabled\" | \"eventCollectionDataReductionBannerEnabled\" | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,7 +578,7 @@
                 "text": "SecurityPageName"
               }
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +594,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -556,7 +610,7 @@
             "signature": [
               "{ text: string; } | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -573,7 +627,7 @@
               "IconType",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -589,7 +643,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -605,7 +659,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -628,7 +682,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,7 +695,7 @@
             "description": [
               "\nLink path relative to security root"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -657,7 +711,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,7 +727,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,7 +744,7 @@
               "IconType",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -706,7 +760,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -719,7 +773,7 @@
             "description": [
               "\nTitle of the link"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -735,7 +789,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -749,16 +803,10 @@
               "\nLocations where the link is visible in the UI"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppDeepLinkLocations",
-                "text": "AppDeepLinkLocations"
-              },
+              "AppDeepLinkLocations",
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -774,7 +822,7 @@
             "signature": [
               "string | { key: string; value: unknown; } | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -788,7 +836,7 @@
         "tags": [],
         "label": "TimelineModel",
         "description": [],
-        "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -804,7 +852,7 @@
             "signature": [
               "TimelineTabs"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -818,7 +866,7 @@
             "signature": [
               "TimelineTabs"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,7 +883,7 @@
               "ScrollToTopEvent",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -851,7 +899,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -864,7 +912,7 @@
             "description": [
               "A summary of the events and notes in this timeline"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -880,11 +928,11 @@
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.EqlOptionsSelected",
-                "text": "EqlOptionsSelected"
+                "section": "def-common.EqlOptions",
+                "text": "EqlOptions"
               }
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -901,7 +949,7 @@
               "TimelineEventsType",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -917,7 +965,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -933,7 +981,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -946,7 +994,7 @@
             "description": [
               "The chronological history of actions related to this timeline"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -959,7 +1007,7 @@
             "description": [
               "When true, this timeline was marked as \"favorite\" by the user"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -972,7 +1020,7 @@
             "description": [
               "When true, the timeline will update as new data arrives"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -988,7 +1036,7 @@
             "signature": [
               "\"filter\" | \"search\""
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1001,7 +1049,7 @@
             "description": [
               "Title"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1017,7 +1065,7 @@
             "signature": [
               "\"default\" | \"template\""
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1033,7 +1081,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1049,7 +1097,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1065,7 +1113,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1081,7 +1129,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,7 +1143,7 @@
             "signature": [
               "{ [x: string]: { version: string; eventId: string; timelineId: string; pinnedEventId: string; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; }; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,7 +1158,7 @@
               "ResolveTimelineConfig",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1124,7 +1172,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1138,7 +1186,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1153,7 +1201,7 @@
               "SessionViewConfig",
               " | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1166,7 +1214,7 @@
             "description": [
               "When true, show the timeline flyover"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1182,7 +1230,7 @@
             "signature": [
               "\"active\" | \"draft\" | \"immutable\""
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1198,7 +1246,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1214,7 +1262,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1227,7 +1275,7 @@
             "description": [
               "timeline is saving"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1241,7 +1289,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1255,7 +1303,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1269,7 +1317,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1286,7 +1334,7 @@
               "SortColumnTimeline",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1303,7 +1351,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1318,7 +1366,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1341,7 +1389,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1357,7 +1405,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1373,7 +1421,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1384,7 +1432,7 @@
             "tags": [],
             "label": "documentType",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1396,9 +1444,9 @@
             "label": "excludedRowRendererIds",
             "description": [],
             "signature": [
-              "(\"alert\" | \"alerts\" | \"plain\" | \"system\" | \"registry\" | \"auditd\" | \"auditd_file\" | \"library\" | \"netflow\" | \"suricata\" | \"system_dns\" | \"system_endgame_process\" | \"system_file\" | \"system_fim\" | \"system_security_event\" | \"system_socket\" | \"threat_match\" | \"zeek\")[]"
+              "(\"alert\" | \"alerts\" | \"system\" | \"registry\" | \"auditd\" | \"plain\" | \"auditd_file\" | \"library\" | \"netflow\" | \"suricata\" | \"system_dns\" | \"system_endgame_process\" | \"system_file\" | \"system_fim\" | \"system_security_event\" | \"system_socket\" | \"threat_match\" | \"zeek\")[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1419,7 +1467,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1433,7 +1481,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1447,7 +1495,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1461,7 +1509,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1477,7 +1525,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1491,7 +1539,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1504,7 +1552,7 @@
             "description": [
               "The number of items to show in a single page of results"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1520,7 +1568,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1538,7 +1586,7 @@
               "SerializedFilterQuery",
               " | null; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1554,7 +1602,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1570,7 +1618,7 @@
             "signature": [
               "{ start: string; end: string; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1583,7 +1631,7 @@
             "description": [
               "Uniquely identifies the timeline"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1605,7 +1653,7 @@
               },
               "[]; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1618,18 +1666,7 @@
             "description": [
               "If selectAll checkbox in header is checked"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.isLoading",
-            "type": "boolean",
-            "tags": [],
-            "label": "isLoading",
-            "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1640,7 +1677,7 @@
             "tags": [],
             "label": "selectAll",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1654,7 +1691,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1675,7 +1712,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1686,7 +1723,7 @@
             "tags": [],
             "label": "isDataProviderVisible",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1702,7 +1739,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1716,7 +1753,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1727,7 +1764,7 @@
             "tags": [],
             "label": "sampleSize",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1743,7 +1780,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1761,7 +1798,7 @@
       "tags": [],
       "label": "PluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1777,7 +1814,7 @@
             "ResolverPluginSetup",
             ">"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1791,11 +1828,57 @@
           "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            "{ readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly responseActionsSentinelOneKillProcessEnabled: boolean; readonly responseActionsSentinelOneProcessesEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly endpointManagementSpaceAwarenessEnabled: boolean; readonly securitySolutionNotesDisabled: boolean; readonly entityAlertPreviewDisabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly responseActionsTelemetryEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly graphVisualizationInFlyoutEnabled: boolean; readonly prebuiltRulesCustomizationEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly unifiedManifestEnabled: boolean; readonly valueListItemsModalEnabled: boolean; readonly filterProcessDescendantsForEventFiltersEnabled: boolean; readonly dataIngestionHubEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsEnabled: boolean; }"
+            "{ readonly alertSuppressionForSequenceEqlRuleEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly responseActionsSentinelOneKillProcessEnabled: boolean; readonly responseActionsSentinelOneProcessesEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly endpointManagementSpaceAwarenessEnabled: boolean; readonly securitySolutionNotesDisabled: boolean; readonly assistantModelEvaluation: boolean; readonly assistantAttackDiscoverySchedulingEnabled: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly responseActionsTelemetryEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly prebuiltRulesCustomizationEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly unifiedManifestEnabled: boolean; readonly valueListItemsModalEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForEventFiltersEnabled: boolean; readonly dataIngestionHubEnabled: boolean; readonly entityStoreDisabled: boolean; readonly serviceEntityStoreEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsights: boolean; readonly newExpandableFlyoutNavigationDisabled: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly responseActionsMSDefenderEndpointEnabled: boolean; readonly eventCollectionDataReductionBannerEnabled: boolean; }"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.setProductFeatureKeys",
+          "type": "Function",
+          "tags": [],
+          "label": "setProductFeatureKeys",
+          "description": [],
+          "signature": [
+            "(productFeatureKeys: ",
+            {
+              "pluginId": "@kbn/security-solution-features",
+              "scope": "common",
+              "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+              "section": "def-common.ProductFeatureKeys",
+              "text": "ProductFeatureKeys"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginSetup.setProductFeatureKeys.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "productFeatureKeys",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/security-solution-features",
+                  "scope": "common",
+                  "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                  "section": "def-common.ProductFeatureKeys",
+                  "text": "ProductFeatureKeys"
+                }
+              ],
+              "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1808,7 +1891,7 @@
       "tags": [],
       "label": "PluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1826,7 +1909,7 @@
             "NavigationLink",
             "[]>"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1840,9 +1923,9 @@
           "label": "setComponents",
           "description": [],
           "signature": [
-            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; }>) => void"
+            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; AdditionalChargesMessage: React.ComponentType<{}>; }>) => void"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1855,9 +1938,9 @@
               "label": "components",
               "description": [],
               "signature": [
-                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; }"
+                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; AdditionalChargesMessage?: React.ComponentType<{}> | undefined; }"
               ],
-              "path": "x-pack/plugins/security_solution/public/contract_components.ts",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/contract_components.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1877,7 +1960,7 @@
             "BreadcrumbsNav",
             ">"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1894,7 +1977,7 @@
             "() => ",
             "UpsellingService"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1910,7 +1993,7 @@
           "signature": [
             "({ userUrl, isAgentlessAvailable, }: { userUrl: UserUrl; isAgentlessAvailable: boolean; }) => void"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1925,7 +2008,7 @@
               "signature": [
                 "{ userUrl: UserUrl; isAgentlessAvailable: boolean; }"
               ],
-              "path": "x-pack/plugins/security_solution/public/onboarding/service/onboarding_service.ts",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/service/onboarding_service.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1941,7 +2024,7 @@
           "signature": [
             "(isSolutionNavigationEnabled: boolean) => void"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1955,7 +2038,7 @@
               "signature": [
                 "boolean"
               ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1975,7 +2058,7 @@
             "SolutionNavigation",
             ">"
           ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1995,7 +2078,7 @@
         "tags": [],
         "label": "AppClient",
         "description": [],
-        "path": "x-pack/plugins/security_solution/server/client/client.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2009,7 +2092,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2023,7 +2106,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2044,7 +2127,7 @@
                     "text": "ConfigType"
                   }
                 ],
-                "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2059,7 +2142,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2074,7 +2157,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2095,7 +2178,7 @@
                     "text": "BuildFlavor"
                   }
                 ],
-                "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2113,7 +2196,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2129,7 +2212,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2145,7 +2228,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2161,7 +2244,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2177,7 +2260,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2193,7 +2276,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2209,7 +2292,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2232,7 +2315,7 @@
                 "text": "BuildFlavor"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2257,13 +2340,7 @@
             "text": "Plugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
-            "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "securitySolution",
@@ -2286,7 +2363,7 @@
           "SecuritySolutionPluginStartDependencies",
           ">"
         ],
-        "path": "x-pack/plugins/security_solution/server/plugin.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2300,7 +2377,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/security_solution/server/plugin.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2312,16 +2389,10 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
-                    "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<unknown>"
                 ],
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2350,7 +2421,7 @@
                 "text": "SecuritySolutionPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/plugin.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2364,7 +2435,7 @@
                 "signature": [
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2379,7 +2450,7 @@
                 "signature": [
                   "SecuritySolutionPluginSetupDependencies"
                 ],
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2396,13 +2467,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: ",
               "SecuritySolutionPluginStartDependencies",
               ") => ",
@@ -2414,7 +2479,7 @@
                 "text": "SecuritySolutionPluginStart"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/plugin.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2426,15 +2491,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2449,7 +2508,7 @@
                 "signature": [
                   "SecuritySolutionPluginStartDependencies"
                 ],
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2467,7 +2526,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/security_solution/server/plugin.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2486,7 +2545,7 @@
         "tags": [],
         "label": "SecuritySolutionApiRequestHandlerContext",
         "description": [],
-        "path": "x-pack/plugins/security_solution/server/types.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2498,15 +2557,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
-                "text": "CoreRequestHandlerContext"
-              }
+              "CoreRequestHandlerContext"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2520,7 +2573,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2540,7 +2593,7 @@
               "EndpointAuthz",
               ">>"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2563,7 +2616,7 @@
                 "text": "ConfigType"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2580,7 +2633,7 @@
               "() => ",
               "FrameworkRequest"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2603,7 +2656,7 @@
                 "text": "AppClient"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2619,7 +2672,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2642,7 +2695,7 @@
                 "text": "IRuleDataService"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2659,7 +2712,7 @@
               "() => ",
               "IDetectionRulesClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2676,7 +2729,7 @@
               "() => ",
               "IDetectionEngineHealthClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2693,7 +2746,7 @@
               "() => ",
               "IRuleExecutionLogForRoutes"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2708,13 +2761,7 @@
             "description": [],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "ruleRegistry",
@@ -2725,7 +2772,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2737,16 +2784,10 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/security_solution/server/types.ts",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2763,16 +2804,10 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.AuditLogger",
-                "text": "AuditLogger"
-              },
+              "AuditLogger",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2795,7 +2830,7 @@
                 "text": "DataViewsService"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2819,7 +2854,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2836,7 +2871,7 @@
               "() => ",
               "EndpointInternalFleetServicesInterface"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2853,7 +2888,7 @@
               "() => ",
               "RiskEngineDataClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2870,7 +2905,7 @@
               "() => ",
               "RiskScoreDataClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2887,7 +2922,7 @@
               "() => ",
               "AssetCriticalityDataClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2904,7 +2939,7 @@
               "() => ",
               "EntityStoreDataClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2921,7 +2956,7 @@
               "() => ",
               "SiemRuleMigrationsClient"
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2944,7 +2979,24 @@
                 "text": "InferenceClient"
               }
             ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getAssetInventoryClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getAssetInventoryClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AssetInventoryDataClient"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2976,7 +3028,7 @@
           "ConfigSettings",
           "; enableUiSettingsValidations: boolean; }"
         ],
-        "path": "x-pack/plugins/security_solution/server/config.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2990,7 +3042,7 @@
       "tags": [],
       "label": "SecuritySolutionPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3005,10 +3057,16 @@
           ],
           "signature": [
             "(configurator: ",
-            "ProductFeaturesConfigurator",
+            {
+              "pluginId": "@kbn/security-solution-features",
+              "scope": "common",
+              "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+              "section": "def-common.ProductFeaturesConfigurator",
+              "text": "ProductFeaturesConfigurator"
+            },
             ") => void"
           ],
-          "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3021,9 +3079,15 @@
               "label": "configurator",
               "description": [],
               "signature": [
-                "ProductFeaturesConfigurator"
+                {
+                  "pluginId": "@kbn/security-solution-features",
+                  "scope": "common",
+                  "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                  "section": "def-common.ProductFeaturesConfigurator",
+                  "text": "ProductFeaturesConfigurator"
+                }
               ],
-              "path": "x-pack/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3039,9 +3103,9 @@
             "\nThe security solution generic experimental features"
           ],
           "signature": [
-            "{ readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly responseActionsSentinelOneKillProcessEnabled: boolean; readonly responseActionsSentinelOneProcessesEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly endpointManagementSpaceAwarenessEnabled: boolean; readonly securitySolutionNotesDisabled: boolean; readonly entityAlertPreviewDisabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly responseActionsTelemetryEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly graphVisualizationInFlyoutEnabled: boolean; readonly prebuiltRulesCustomizationEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly unifiedManifestEnabled: boolean; readonly valueListItemsModalEnabled: boolean; readonly filterProcessDescendantsForEventFiltersEnabled: boolean; readonly dataIngestionHubEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsEnabled: boolean; }"
+            "{ readonly alertSuppressionForSequenceEqlRuleEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly responseActionsSentinelOneKillProcessEnabled: boolean; readonly responseActionsSentinelOneProcessesEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly endpointManagementSpaceAwarenessEnabled: boolean; readonly securitySolutionNotesDisabled: boolean; readonly assistantModelEvaluation: boolean; readonly assistantAttackDiscoverySchedulingEnabled: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly responseActionsTelemetryEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly prebuiltRulesCustomizationEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly unifiedManifestEnabled: boolean; readonly valueListItemsModalEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForEventFiltersEnabled: boolean; readonly dataIngestionHubEnabled: boolean; readonly entityStoreDisabled: boolean; readonly serviceEntityStoreEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsights: boolean; readonly newExpandableFlyoutNavigationDisabled: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly responseActionsMSDefenderEndpointEnabled: boolean; readonly eventCollectionDataReductionBannerEnabled: boolean; }"
           ],
-          "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
+          "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3056,7 +3120,7 @@
       "tags": [],
       "label": "SecuritySolutionPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -3076,7 +3140,7 @@
         "tags": [],
         "label": "SecurityPageName",
         "description": [],
-        "path": "packages/deeplinks/security/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/security/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3090,7 +3154,7 @@
         "tags": [],
         "label": "ADD_DATA_PATH",
         "description": [],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3107,7 +3171,7 @@
         "signature": [
           "\"securitySolution\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3122,7 +3186,7 @@
         "signature": [
           "\"/app/security\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3137,7 +3201,7 @@
         "signature": [
           "\"securitySolutionUI\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3150,9 +3214,9 @@
         "label": "CASES_FEATURE_ID",
         "description": [],
         "signature": [
-          "\"securitySolutionCases\""
+          "\"securitySolutionCasesV3\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3167,7 +3231,7 @@
         "signature": [
           "\"/api/detection_engine/rules/_find\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3184,7 +3248,7 @@
         "signature": [
           "\"9a1a2dae-0b5f-4c3d-8305-a268d404c306\""
         ],
-        "path": "x-pack/plugins/security_solution/common/detection_engine/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3199,7 +3263,7 @@
         "signature": [
           "\"alert.attributes.enabled\""
         ],
-        "path": "x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3212,9 +3276,9 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly responseActionsSentinelOneKillProcessEnabled: boolean; readonly responseActionsSentinelOneProcessesEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly endpointManagementSpaceAwarenessEnabled: boolean; readonly securitySolutionNotesDisabled: boolean; readonly entityAlertPreviewDisabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly responseActionsTelemetryEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly graphVisualizationInFlyoutEnabled: boolean; readonly prebuiltRulesCustomizationEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly unifiedManifestEnabled: boolean; readonly valueListItemsModalEnabled: boolean; readonly filterProcessDescendantsForEventFiltersEnabled: boolean; readonly dataIngestionHubEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsEnabled: boolean; }"
+          "{ readonly alertSuppressionForSequenceEqlRuleEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly responseActionsSentinelOneKillProcessEnabled: boolean; readonly responseActionsSentinelOneProcessesEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly endpointManagementSpaceAwarenessEnabled: boolean; readonly securitySolutionNotesDisabled: boolean; readonly assistantModelEvaluation: boolean; readonly assistantAttackDiscoverySchedulingEnabled: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly responseActionsTelemetryEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly prebuiltRulesCustomizationEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly unifiedManifestEnabled: boolean; readonly valueListItemsModalEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForEventFiltersEnabled: boolean; readonly dataIngestionHubEnabled: boolean; readonly entityStoreDisabled: boolean; readonly serviceEntityStoreEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsights: boolean; readonly newExpandableFlyoutNavigationDisabled: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly responseActionsMSDefenderEndpointEnabled: boolean; readonly eventCollectionDataReductionBannerEnabled: boolean; }"
         ],
-        "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3229,7 +3293,22 @@
         "signature": [
           "\"/manage\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.SECURITY_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"siemV2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3246,7 +3325,7 @@
         "signature": [
           "\"logs-sentinel_one.activity-*\""
         ],
-        "path": "x-pack/plugins/security_solution/common/endpoint/service/response_actions/sentinel_one.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/endpoint/service/response_actions/sentinel_one.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3261,7 +3340,7 @@
         "signature": [
           "\"siem\""
         ],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3278,9 +3357,9 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: true; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: true; readonly responseActionsSentinelOneGetFileEnabled: true; readonly responseActionsSentinelOneKillProcessEnabled: true; readonly responseActionsSentinelOneProcessesEnabled: true; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: true; readonly endpointManagementSpaceAwarenessEnabled: false; readonly securitySolutionNotesDisabled: false; readonly entityAlertPreviewDisabled: false; readonly assistantModelEvaluation: false; readonly newUserDetailsFlyoutManagedUser: false; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: true; readonly responseActionsTelemetryEnabled: false; readonly jamfDataInAnalyzerEnabled: true; readonly timelineEsqlTabDisabled: false; readonly analyzerDatePickersAndSourcererDisabled: false; readonly graphVisualizationInFlyoutEnabled: false; readonly prebuiltRulesCustomizationEnabled: false; readonly malwareOnWriteScanOptionAvailable: true; readonly unifiedManifestEnabled: true; readonly valueListItemsModalEnabled: true; readonly filterProcessDescendantsForEventFiltersEnabled: true; readonly dataIngestionHubEnabled: false; readonly entityStoreDisabled: false; readonly siemMigrationsEnabled: false; }"
+          "{ readonly alertSuppressionForSequenceEqlRuleEnabled: true; readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: false; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: true; readonly responseActionsSentinelOneGetFileEnabled: true; readonly responseActionsSentinelOneKillProcessEnabled: true; readonly responseActionsSentinelOneProcessesEnabled: true; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: true; readonly endpointManagementSpaceAwarenessEnabled: false; readonly securitySolutionNotesDisabled: false; readonly assistantModelEvaluation: false; readonly assistantAttackDiscoverySchedulingEnabled: false; readonly newUserDetailsFlyoutManagedUser: false; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: true; readonly responseActionsTelemetryEnabled: false; readonly jamfDataInAnalyzerEnabled: true; readonly prebuiltRulesCustomizationEnabled: false; readonly malwareOnWriteScanOptionAvailable: true; readonly unifiedManifestEnabled: true; readonly valueListItemsModalEnabled: true; readonly storeGapsInEventLogEnabled: false; readonly filterProcessDescendantsForEventFiltersEnabled: true; readonly dataIngestionHubEnabled: false; readonly entityStoreDisabled: false; readonly serviceEntityStoreEnabled: true; readonly siemMigrationsDisabled: false; readonly defendInsights: true; readonly newExpandableFlyoutNavigationDisabled: false; readonly crowdstrikeRunScriptEnabled: true; readonly responseActionsMSDefenderEndpointEnabled: true; readonly eventCollectionDataReductionBannerEnabled: false; }"
         ],
-        "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

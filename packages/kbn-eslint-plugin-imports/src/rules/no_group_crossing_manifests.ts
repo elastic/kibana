@@ -71,7 +71,7 @@ export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
         if (dependency) {
           // at this point, we know the dependency is a plugin
           const { id, group, visibility } = dependency;
-          if (!isImportableFrom(moduleId.group, group, visibility)) {
+          if (!isImportableFrom(moduleId, group, visibility)) {
             offendingDependencies.push({ id, pluginId, group, visibility });
           }
         }

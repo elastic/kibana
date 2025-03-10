@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should return the corect total number of alerts attached to cases', async () => {
+    it('should return the correct total number of alerts attached to cases', async () => {
       const firstCase = await createCase(supertest, getPostCaseRequest());
       const secondCase = await createCase(supertest, getPostCaseRequest());
 

@@ -1,0 +1,18 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/securitysolution-io-ts-types",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/es-query",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/securitysolution-exceptions-common"
+  ],
+  "exclude": ["target/**/*"]
+}

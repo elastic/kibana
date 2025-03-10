@@ -9,6 +9,8 @@ export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
 
 export const ABOUT_EDIT_BUTTON = '[data-test-subj="edit-about-rule"]';
 
+export const DEFINITION_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
+
 export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
 
 export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
@@ -73,19 +75,19 @@ export const QUERY_BAR_ADD_FILTER =
   '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="addFilter"]';
 
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
-  '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
+  '[data-test-subj="ruleThreatMatchMappingField"] [data-test-subj="fieldAutocompleteComboBox"]';
 
 export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
 
 export const THREAT_MATCH_QUERY_INPUT =
-  '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
+  '[data-test-subj="ruleThreatMatchQueryField"] [data-test-subj="queryInput"]';
 
 export const CUSTOM_INDEX_PATTERN_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
-  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="ruleThreatMatchIndicesField"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_AND_BUTTON = '[data-test-subj="andButton"]';
 
@@ -103,6 +105,8 @@ export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is require
 export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is required.';
 
 export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
+
+export const THREAT_MATCH_QUERY_REQUIRED = 'An indicator index query is required.';
 
 export const DATA_VIEW_COMBO_BOX =
   '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
@@ -268,18 +272,17 @@ export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
 
-export const ESQL_QUERY_BAR_INPUT_AREA =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] textarea';
+export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea';
 
-export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
+export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
 export const NEW_TERMS_HISTORY_SIZE =
-  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
+  '[data-test-subj="historyWindowSize"] [data-test-subj="interval"]';
 
 export const NEW_TERMS_HISTORY_TIME_TYPE =
-  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
+  '[data-test-subj="historyWindowSize"] [data-test-subj="timeType"]';
 
 export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
   '[data-test-subj="detectionEngineStepDefineRuleShouldLoadQueryDynamically"] input';

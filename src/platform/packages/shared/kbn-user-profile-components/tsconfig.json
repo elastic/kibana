@@ -1,0 +1,29 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@emotion/react/types/css-prop",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-notifications-browser",
+    "@kbn/core",
+    "@kbn/core-theme-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-user-profile-browser",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

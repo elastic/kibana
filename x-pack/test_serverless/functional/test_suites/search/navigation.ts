@@ -19,8 +19,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
 
   describe('navigation', function () {
-    // see details: https://github.com/elastic/kibana/issues/196823
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
@@ -71,15 +69,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check Build
       // > Dev Tools
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'dev_tools',
+        deepLinkId: 'dev_tools:console',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'dev_tools',
+        deepLinkId: 'dev_tools:console',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dev Tools' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'dev_tools',
+        deepLinkId: 'dev_tools:console',
       });
       // > Playground
       await solutionNavigation.sidenav.clickLink({
@@ -95,17 +93,17 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       // check Relevance
       // > Inference Endpoints
-      // await solutionNavigation.sidenav.clickLink({
-      //   deepLinkId: 'searchInferenceEndpoints',
-      // });
-      // await solutionNavigation.sidenav.expectLinkActive({
-      //   deepLinkId: 'searchInferenceEndpoints',
-      // });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inference Endpoints' });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-      //   deepLinkId: 'searchInferenceEndpoints',
-      // });
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
 
       // check Analyze
       // > Discover
@@ -164,16 +162,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'ml:modelManagement',
       });
       // > Management
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'management',
-      });
+      await solutionNavigation.sidenav.clickLink({ navId: 'management' });
+      await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
@@ -206,9 +198,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate management', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management']);
-      await testSubjects.click('app-card-dataViews');
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
     });
 
@@ -241,11 +236,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Data' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Analyze' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
@@ -255,7 +251,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Users and roles' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
 
@@ -265,11 +260,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'data',
         'management:index_management',
         'serverlessConnectors',
+        'serverlessWebCrawlers',
         'build',
         'dev_tools',
         'searchPlayground',
-        // 'relevance',
-        // 'searchInferenceEndpoints',
+        'relevance',
+        'searchInferenceEndpoints',
         'analyze',
         'discover',
         'dashboards',
@@ -279,7 +275,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'project_settings_project_nav',
         'ml:modelManagement',
         'management',
-        'cloudLinkUserAndRoles',
         'cloudLinkDeployment',
         'cloudLinkBilling',
       ]);

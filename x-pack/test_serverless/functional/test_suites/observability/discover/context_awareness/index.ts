@@ -35,6 +35,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
+    loadTestFile(require.resolve('./_get_row_indicator_provider'));
+    loadTestFile(require.resolve('./_get_doc_viewer'));
+    loadTestFile(require.resolve('./_get_cell_renderers'));
     loadTestFile(require.resolve('./_get_app_menu'));
   });
 }

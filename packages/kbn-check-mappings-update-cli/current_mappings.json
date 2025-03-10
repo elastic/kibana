@@ -17,7 +17,11 @@
   },
   "action_task_params": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      }
+    }
   },
   "ad_hoc_run_params": {
     "dynamic": false,
@@ -585,6 +589,17 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
@@ -787,6 +802,10 @@
         "type": "keyword"
       }
     }
+  },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
   },
   "cloud-security-posture-settings": {
     "dynamic": false,
@@ -1071,6 +1090,9 @@
         "type": "keyword"
       },
       "status": {
+        "type": "keyword"
+      },
+      "timestampField": {
         "type": "keyword"
       },
       "type": {
@@ -1509,6 +1531,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
@@ -1585,6 +1611,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1599,6 +1626,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -1654,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1678,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -1706,7 +1742,11 @@
     "properties": {}
   },
   "fleet-package-policies": {
+    "dynamic": false,
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -1774,6 +1814,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -1948,6 +1991,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1962,6 +2006,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -2029,6 +2077,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2073,6 +2125,7 @@
     }
   },
   "ingest-outputs": {
+    "dynamic": false,
     "properties": {
       "allow_edit": {
         "enabled": false
@@ -2291,7 +2344,11 @@
     }
   },
   "ingest-package-policies": {
+    "dynamic": false,
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2359,6 +2416,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -2499,6 +2559,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -2837,6 +2911,26 @@
       }
     }
   },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
+      }
+    }
+  },
   "query": {
     "dynamic": false,
     "properties": {
@@ -2943,6 +3037,33 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "security-ai-prompt": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "model": {
+        "type": "keyword"
+      },
+      "prompt": {
+        "properties": {
+          "default": {
+            "type": "text"
+          }
+        }
+      },
+      "promptGroupId": {
+        "type": "keyword"
+      },
+      "promptId": {
+        "type": "keyword"
+      },
+      "provider": {
+        "type": "keyword"
+      }
+    }
   },
   "security-rule": {
     "dynamic": false,
@@ -3586,6 +3707,9 @@
         "type": "keyword"
       },
       "partition": {
+        "type": "integer"
+      },
+      "priority": {
         "type": "integer"
       },
       "retryAt": {

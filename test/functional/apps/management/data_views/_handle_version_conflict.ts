@@ -21,7 +21,6 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const es = getService('es');
@@ -45,17 +44,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.clickScriptedFieldsTab();
-      await PageObjects.settings.clickAddScriptedField();
+      await PageObjects.settings.goToAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await es.update(
         {
           index: ANALYTICS_SAVED_OBJECT_INDEX,
           id: 'index-pattern:logstash-*',
-          body: {
-            doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
-          },
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
         },
         { meta: true }
       );
@@ -77,19 +73,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');
-      await (
-        await (
-          await testSubjects.find('formatRow')
-        ).findAllByCssSelector('[data-test-subj="toggle"]')
-      )[0].click();
+      await PageObjects.settings.toggleRow('formatRow');
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update(
         {
           index: ANALYTICS_SAVED_OBJECT_INDEX,
           id: 'index-pattern:logstash-*',
-          body: {
-            doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
-          },
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
         },
         { meta: true }
       );

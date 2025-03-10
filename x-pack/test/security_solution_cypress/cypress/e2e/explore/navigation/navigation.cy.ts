@@ -21,7 +21,6 @@ import {
   DETECTION_RESPONSE,
   DASHBOARDS,
   CSP_DASHBOARD,
-  KUBERNETES,
   INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
@@ -54,7 +53,6 @@ import {
   EXPLORE_URL,
   MANAGE_URL,
   CSP_DASHBOARD_URL,
-  KUBERNETES_URL,
   BLOCKLIST_URL,
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
@@ -69,7 +67,6 @@ import {
   MACHINE_LEARNING_LANDING_URL,
   ASSETS_URL,
   FLEET_URL,
-  CLOUD_DEFEND_URL,
   HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -112,11 +109,6 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   it('navigates to the Entity Analytics page', () => {
     navigateFromHeaderTo(ENTITY_ANALYTICS);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
-
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(KUBERNETES);
-    cy.url().should('include', KUBERNETES_URL);
   });
 
   it('navigates to the CSP dashboard page', () => {
@@ -289,11 +281,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.KUBERNETES, true);
-    cy.url().should('include', KUBERNETES_URL);
-  });
-
   it('navigates to the CSP dashboard page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CSP_DASHBOARD, true);
     cy.url().should('include', CSP_DASHBOARD_URL);
@@ -388,10 +375,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Fleet page', () => {
     navigateFromHeaderTo(ServerlessHeaders.FLEET, true);
     cy.url().should('include', FLEET_URL);
-  });
-  it('navigates to the Cloud defend page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.CLOUD_DEFEND, true);
-    cy.url().should('include', CLOUD_DEFEND_URL);
   });
   it('navigates to the Machine learning landing page', () => {
     navigateFromHeaderTo(ServerlessHeaders.MACHINE_LEARNING, true);

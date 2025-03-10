@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-fips-daily
-  description: Run Kibana FIPS smoke tests
+  description: Run Kibana test suite with FIPS agents
   links:
     - title: Pipeline link
       url: https://buildkite.com/elastic/kibana-fips
@@ -16,10 +16,10 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / fips
-      description: Run Kibana FIPS smoke tests
+      description: Run Kibana test suite with FIPS agents
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
       branch_configuration: main

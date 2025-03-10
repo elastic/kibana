@@ -29,7 +29,7 @@
         "signature": [
           "React.NamedExoticComponent<DocumentationFlyoutProps> & { readonly type: ({ searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationFlyoutProps) => React.JSX.Element; }"
         ],
-        "path": "packages/kbn-language-documentation/src/components/as_flyout/index.tsx",
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_flyout/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -61,7 +61,7 @@
         "signature": [
           "React.NamedExoticComponent<DocumentationInlineProps> & { readonly type: ({ searchInDescription, height }: DocumentationInlineProps) => React.JSX.Element; }"
         ],
-        "path": "packages/kbn-language-documentation/src/components/as_inline/index.tsx",
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_inline/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -93,7 +93,7 @@
         "signature": [
           "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationPopoverProps) => React.JSX.Element; }"
         ],
-        "path": "packages/kbn-language-documentation/src/components/as_popover/index.tsx",
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -125,7 +125,7 @@
         "signature": [
           "React.NamedExoticComponent<DocumentationProps> & { readonly type: ({ language, sections, searchInDescription, linkToDocumentation, }: DocumentationProps) => React.JSX.Element; }"
         ],
-        "path": "packages/kbn-language-documentation/src/components/as_popover/popover_content.tsx",
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/popover_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -156,7 +156,7 @@
         "tags": [],
         "label": "LanguageDocumentationSections",
         "description": [],
-        "path": "packages/kbn-language-documentation/src/types.ts",
+        "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -170,7 +170,7 @@
             "signature": [
               "{ label: string; description?: string | undefined; items: { label: string; description?: JSX.Element | undefined; }[]; }[]"
             ],
-            "path": "packages/kbn-language-documentation/src/types.ts",
+            "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,7 +184,7 @@
             "signature": [
               "JSX.Element"
             ],
-            "path": "packages/kbn-language-documentation/src/types.ts",
+            "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

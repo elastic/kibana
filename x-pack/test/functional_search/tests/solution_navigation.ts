@@ -11,7 +11,11 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
+  const { common, solutionNavigation, indexManagement } = getPageObjects([
+    'common',
+    'indexManagement',
+    'solutionNavigation',
+  ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
 
@@ -26,7 +30,10 @@ export default function searchSolutionNavigation({
       });
 
       // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'es' }));
+      ({ cleanUp, space: spaceCreated } = await spaces.create({
+        name: 'search-ftr',
+        solution: 'es',
+      }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
     });
 
@@ -41,15 +48,12 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Indices' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'App Search' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Workplace Search' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
     });
 
@@ -106,15 +110,16 @@ export default function searchSolutionNavigation({
       // check the Content
       // > Indices section
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchContent:searchIndices',
+        deepLinkId: 'management:index_management',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchContent:searchIndices',
+        deepLinkId: 'management:index_management',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchContent:searchIndices',
+        text: 'Indices',
       });
       // > Connectors
       await solutionNavigation.sidenav.clickLink({
@@ -136,7 +141,7 @@ export default function searchSolutionNavigation({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web crawlers' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web Crawlers' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
@@ -144,15 +149,15 @@ export default function searchSolutionNavigation({
       // check Build
       // > Playground
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       // > Search applications
       await solutionNavigation.sidenav.clickLink({
@@ -167,20 +172,6 @@ export default function searchSolutionNavigation({
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchApplications:searchApplications',
-      });
-      // > Behavioral Analytics
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Behavioral Analytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchAnalytics',
       });
 
       // check Relevance
@@ -199,38 +190,9 @@ export default function searchSolutionNavigation({
         deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
       });
 
-      // check Enterprise Search
-      // > App Search
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'appSearch:engines',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'appSearch:engines',
-      });
-      // ent-search node not running for FTRs, so we see setup guide without breadcrumbs
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-      //   text: 'App Search',
-      // });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'appSearch:engines',
-      });
-      // > Workplace Search
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'workplaceSearch',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'workplaceSearch',
-      });
-      // ent-search node not running for FTRs, so we see setup guide without breadcrumbs
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-      //   text: 'Workplace Search',
-      // });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'workplaceSearch',
-      });
-
       // Other tools
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
+      await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
       // > Maps
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'maps',
@@ -244,20 +206,6 @@ export default function searchSolutionNavigation({
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'maps',
-      });
-      // > Canvas
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'canvas',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'canvas',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Canvas',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'canvas',
       });
       // > Graph
       await solutionNavigation.sidenav.clickLink({
@@ -278,9 +226,19 @@ export default function searchSolutionNavigation({
       await expectNoPageReload();
     });
 
+    it("should redirect to index management when clicking on 'Indices'", async () => {
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'management:index_management',
+      });
+      await indexManagement.expectToBeOnIndicesManagement();
+    });
+
     it('renders only expected items', async () => {
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
       await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
+      await solutionNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
+
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'enterpriseSearch',
@@ -289,25 +247,21 @@ export default function searchSolutionNavigation({
         'discover',
         'dashboards',
         'content',
-        'enterpriseSearchContent:searchIndices',
+        'management:index_management',
         'enterpriseSearchContent:connectors',
         'enterpriseSearchContent:webCrawlers',
         'build',
-        'enterpriseSearchApplications:playground',
+        'searchPlayground',
         'enterpriseSearchApplications:searchApplications',
-        'enterpriseSearchAnalytics',
         'relevance',
         'searchInferenceEndpoints:inferenceEndpoints',
-        'entsearch',
-        'appSearch:engines',
-        'workplaceSearch',
         'otherTools',
         'maps',
-        'canvas',
         'graph',
         'project_settings_project_nav',
         'ml:modelManagement',
         'stack_management',
+        'monitoring',
       ]);
     });
   });

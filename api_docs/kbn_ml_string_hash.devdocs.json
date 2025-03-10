@@ -31,7 +31,7 @@
         "signature": [
           "(str: string) => number"
         ],
-        "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
+        "path": "x-pack/platform/packages/private/ml/string_hash/src/string_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
+            "path": "x-pack/platform/packages/private/ml/string_hash/src/string_hash.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

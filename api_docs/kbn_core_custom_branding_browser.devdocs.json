@@ -11,7 +11,7 @@
         "tags": [],
         "label": "CustomBrandingSetup",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+        "path": "src/core/packages/custom-branding/browser/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25,16 +25,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-custom-branding-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
-                "section": "def-common.CustomBranding",
-                "text": "CustomBranding"
-              },
+              "CustomBranding",
               ">"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+            "path": "src/core/packages/custom-branding/browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +43,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+            "path": "src/core/packages/custom-branding/browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -63,7 +57,7 @@
         "tags": [],
         "label": "CustomBrandingSetupDeps",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+        "path": "src/core/packages/custom-branding/browser/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,7 +71,7 @@
             "signature": [
               "InternalInjectedMetadataSetup"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+            "path": "src/core/packages/custom-branding/browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -91,7 +85,7 @@
         "tags": [],
         "label": "CustomBrandingStart",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+        "path": "src/core/packages/custom-branding/browser/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,16 +99,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-custom-branding-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
-                "section": "def-common.CustomBranding",
-                "text": "CustomBranding"
-              },
+              "CustomBranding",
               ">"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+            "path": "src/core/packages/custom-branding/browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -129,7 +117,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
+            "path": "src/core/packages/custom-branding/browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

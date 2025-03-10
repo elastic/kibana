@@ -42,6 +42,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/eql/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/general_logic/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/general_logic/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/indicator_match/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/machine_learning/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/new_terms/trial_license_complete_tier/configs/ess.config.ts
@@ -58,17 +59,29 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/large_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/management/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/update_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_enabled/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_enabled/diffable_rule_fields/common_fields/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_enabled/diffable_rule_fields/type_specific_fields/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_disabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/customization_disabled/configs/ess_trial_license.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_non_customized_prebuilt_rules/feature_enabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_non_customized_prebuilt_rules/feature_disabled/configs/ess_feature_flag_disabled.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_customized_prebuilt_rules/feature_enabled/configs/ess_enterprise_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_customized_prebuilt_rules/feature_disabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/import_customized_prebuilt_rules/feature_disabled/configs/ess_feature_flag_disabled.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/export_prebuilt_rules/feature_enabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/export_prebuilt_rules/feature_disabled/configs/ess_feature_flag_disabled.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/telemetry/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
@@ -80,13 +93,9 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/explore/users/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/overview/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/basic_license_essentials_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/basic_license_essentials_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
@@ -97,6 +106,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
@@ -104,3 +114,10 @@ enabled:
   - x-pack/test/cloud_security_posture_functional/config.ts
   - x-pack/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/test/cloud_security_posture_functional/data_views/config.ts
+  - x-pack/test/automatic_import_api_integration/apis/config_basic.ts
+  - x-pack/test/automatic_import_api_integration/apis/config_graphs.ts
+  - x-pack/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
+  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_basic.ts
+  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_trial.ts
+  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_trial.ts
+  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_basic.ts

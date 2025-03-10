@@ -57,7 +57,6 @@ import {
   TOOLTIP,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
-import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -82,6 +81,7 @@ import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import { openFilterGroupContextMenu } from './common/filter_group';
 import { visitWithTimeRange } from './navigation';
 import { GET_DATA_GRID_HEADER_ACTION_BUTTON } from '../screens/common/data_grid';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -196,9 +196,19 @@ export const closePageFilterPopover = (filterIndex: number) => {
   cy.get(OPTION_LIST_VALUES(filterIndex)).should('not.have.class', 'euiFilterButton-isSelected');
 };
 
+export const hasSelection = (filterIndex: number) => {
+  return cy.get(OPTION_LIST_VALUES(filterIndex)).then(($el) => {
+    return $el.find(getDataTestSubjectSelector('optionsListSelections')).length > 0;
+  });
+};
+
 export const clearAllSelections = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES(filterIndex)).realHover();
-  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
+  hasSelection(filterIndex).then(($el) => {
+    if ($el) {
+      cy.get(OPTION_LIST_VALUES(filterIndex)).realHover();
+      cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
+    }
+  });
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
@@ -216,7 +226,6 @@ export const goToClosedAlertsOnRuleDetailsPage = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToClosedAlerts = () => {
@@ -233,7 +242,6 @@ export const goToClosedAlerts = () => {
   selectPageFilterValue(0, 'closed');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
@@ -297,7 +305,6 @@ export const goToAcknowledgedAlerts = () => {
   selectPageFilterValue(0, 'acknowledged');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const markAlertsAcknowledged = () => {

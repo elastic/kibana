@@ -1,0 +1,43 @@
+{
+  "nodes.stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "completion_fields": [],
+      "fielddata_fields": [],
+      "fields": [],
+      "groups": "__flag__",
+      "include_segment_file_sizes": "__flag__",
+      "level": [
+        "cluster",
+        "indices",
+        "shards"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "types": "",
+      "include_unloaded_segments": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_nodes/stats",
+      "_nodes/{node_id}/stats",
+      "_nodes/stats/{metric}",
+      "_nodes/{node_id}/stats/{metric}",
+      "_nodes/stats/{metric}/{index_metric}",
+      "_nodes/{node_id}/stats/{metric}/{index_metric}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

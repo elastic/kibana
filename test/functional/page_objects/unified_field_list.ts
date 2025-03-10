@@ -204,10 +204,9 @@ export class UnifiedFieldListPageObject extends FtrService {
 
     if (!isActive) {
       // expand the field to show the "Visualize" button
-      await field.click();
+      await this.clickFieldListItem(fieldName);
     }
 
-    await this.waitUntilFieldPopoverIsOpen();
     const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
     // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
     await this.retry.try(async () => {

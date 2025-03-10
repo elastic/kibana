@@ -10,13 +10,13 @@
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
-import registerSearchEmbeddableSource from '!!raw-loader!../react_embeddables/search/register_search_embeddable';
+import registerSearchEmbeddableSource from '../react_embeddables/search/register_search_embeddable?raw';
 // @ts-ignore
-import registerAttachActionSource from '!!raw-loader!../react_embeddables/search/register_add_search_panel_action';
+import registerAttachActionSource from '../react_embeddables/search/register_add_search_panel_action?raw';
 // @ts-ignore
-import registerFieldListEmbeddableSource from '!!raw-loader!../react_embeddables/field_list/register_field_list_embeddable';
+import registerFieldListEmbeddableSource from '../react_embeddables/field_list/register_field_list_embeddable?raw';
 // @ts-ignore
-import registerReactEmbeddableSavedObjectSource from '!!raw-loader!../react_embeddables/register_saved_object_example';
+import registerReactEmbeddableSavedObjectSource from '../react_embeddables/register_saved_object_example?raw';
 
 export const RegisterEmbeddable = () => {
   return (
@@ -81,13 +81,14 @@ export const RegisterEmbeddable = () => {
       <EuiSpacer size="l" />
 
       <EuiText>
-        <h2>Saved object embeddables</h2>
+        <h2>
+          Show saved object type in <em>Add from library</em> menu
+        </h2>
         <p>
           Embeddable factories, such as Lens, Maps, Links, that can reference saved objects should
-          register their saved object types using{' '}
-          <strong>registerReactEmbeddableSavedObject</strong>. The <em>Add from library</em> flyout
-          on Dashboards uses this registry to list saved objects. The example function below could
-          be called from the public start contract for a plugin.
+          register their saved object types using <strong>registerAddFromLibraryType</strong>. The{' '}
+          <em>Add from library</em> flyout on Dashboards uses this registry to list saved objects.
+          The example function below could be called from the public start contract for a plugin.
         </p>
       </EuiText>
       <EuiSpacer size="s" />

@@ -17,6 +17,12 @@
     "initialize-server:ea:basic_essentials": "node ./scripts/index.js server entity_analytics basic_license_essentials_tier",
     "run-tests:ea:basic_essentials": "node ./scripts/index.js runner entity_analytics basic_license_essentials_tier",
 
+    "initialize-server:asset_inventory:trial_complete": "node ./scripts/index.js server asset_inventory trial_license_complete_tier",
+    "run-tests:asset_inventory:trial_complete": "node ./scripts/index.js runner asset_inventory trial_license_complete_tier",
+
+    "asset_inventory:entity_store:server:ess": "npm run initialize-server:asset_inventory:trial_complete entity_store ess",
+    "asset_inventory:entity_store:runner:ess": "npm run run-tests:asset_inventory:trial_complete entity_store ess essEnv --",
+
     "initialize-server:dr": "node ./scripts/index.js server detections_response trial_license_complete_tier",
     "run-tests:dr": "node ./scripts/index.js runner detections_response trial_license_complete_tier",
 
@@ -51,6 +57,9 @@
 
     "intialize-server:explore": "node scripts/index.js server explore trial_license_complete_tier",
     "run-tests:explore": "node scripts/index.js runner explore trial_license_complete_tier",
+
+    "initialize-server:siem_migrations:trial_complete": "node ./scripts/index.js server siem_migrations trial_license_complete_tier",
+    "run-tests:siem_migrations:trial_complete": "node ./scripts/index.js runner siem_migrations trial_license_complete_tier",
 
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
@@ -297,6 +306,13 @@
     "rule_execution_logic:general_logic:server:ess": "npm run initialize-server:de rule_execution_logic/general_logic ess",
     "rule_execution_logic:general_logic:runner:ess": "npm run run-tests:de rule_execution_logic/general_logic ess essEnv",
 
+    "rule_execution_logic:general_logic:essentials:server:serverless": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic serverless",
+    "rule_execution_logic:general_logic:essentials:runner:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless serverlessEnv",
+    "rule_execution_logic:general_logic:essentials:qa:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless qaPeriodicEnv",
+    "rule_execution_logic:general_logic:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless qaEnv",
+    "rule_execution_logic:general_logic:basic:server:ess": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic ess",
+    "rule_execution_logic:general_logic:basic:runner:ess": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic ess essEnv",
+
     "rule_execution_logic:indicator_match:server:serverless": "npm run initialize-server:de rule_execution_logic/indicator_match serverless",
     "rule_execution_logic:indicator_match:runner:serverless": "npm run run-tests:de rule_execution_logic/indicator_match serverless serverlessEnv",
     "rule_execution_logic:indicator_match:qa:serverless": "npm run run-tests:de rule_execution_logic/indicator_match serverless qaPeriodicEnv",
@@ -527,6 +543,13 @@
     "explore:users:runner:qa:serverless": "npm run run-tests:explore users serverless qaPeriodicEnv",
     "explore:users:runner:qa:serverless:release": "npm run run-tests:explore users serverless qaEnv",
     "explore:users:server:ess": "npm run intialize-server:explore users ess",
-    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv"
+    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv",
+
+    "siem_migrations_rules:server:serverless": "npm run initialize-server:siem_migrations:trial_complete rules serverless",
+    "siem_migrations_rules:runner:serverless": "npm run run-tests:siem_migrations:trial_complete rules serverless serverlessEnv",
+    "siem_migrations_rules:qa:serverless": "npm run run-tests:siem_migrations:trial_complete rules serverless qaPeriodicEnv",
+    "siem_migrations_rules:qa:serverless:release": "npm run run-tests:siem_migrations:trial_complete rules serverless qaEnv",
+    "siem_migrations_rules:server:ess": "npm run initialize-server:siem_migrations:trial_complete rules ess",
+    "siem_migrations_rules:runner:ess": "npm run run-tests:siem_migrations:trial_complete rules ess essEnv"
   }
 }

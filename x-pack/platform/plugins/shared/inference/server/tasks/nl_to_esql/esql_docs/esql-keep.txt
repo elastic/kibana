@@ -1,0 +1,75 @@
+# KEEP
+
+The KEEP command allows you to specify which columns to return and in what order.
+
+## Syntax
+
+`KEEP columns`
+
+### Parameters
+
+#### columns
+
+A comma-separated list of columns to retain. Wildcards are supported. If an existing column matches multiple provided wildcards or column names, certain rules apply.
+
+## Note
+
+The KEEP command is used to specify which columns to return and their order.
+
+When a field name matches multiple expressions, precedence rules are applied. Fields are added in the order they appear. If one field matches multiple expressions, the following precedence rules apply (from highest to lowest priority):
+
+1. Complete field name (without wildcards)
+2. Partial wildcard expressions (like `fieldNam*`)
+3. Only wildcard (`*`)
+
+If a field matches two expressions with the same precedence, the rightmost expression wins.
+
+Important: only the columns in the KEEP command can be used after a KEEP command.
+
+## Examples
+
+Return columns in a specified order:
+
+```esql
+FROM employees
+| KEEP emp_no, first_name, last_name, height
+```
+
+If you do not want to mention each column by name, you can use wildcards to select all columns that match a certain pattern:
+
+```esql
+FROM employees
+| KEEP h*
+```
+
+The wildcard asterisk (`*`) by itself translates to all columns that are not matched by other arguments.
+
+This command will first return all columns with a name that starts with `h`, followed by all other columns:
+
+```esql
+FROM employees
+| KEEP h*, *
+```
+
+The following examples demonstrate how precedence rules function when a field name corresponds to multiple expressions.
+
+Clear field name takes precedence over wildcard expressions:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, first_name*
+```
+
+Wildcard expressions have the same priority, with the last one winning (despite it being a less specific match):
+
+```esql
+FROM employees
+| KEEP first_name*, last_name, first_na*
+```
+
+A simple wildcard expression `*` has the minimum precedence. The sequence of output is determined by other arguments:
+
+```esql
+FROM employees
+| KEEP *, first_name
+```

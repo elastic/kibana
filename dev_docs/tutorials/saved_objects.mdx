@@ -126,6 +126,56 @@ Do not use field mappings like you would use data types for the columns of a SQL
 SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false`
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
 
+Never use `enabled: false` or `index: false` in your mappings. Elasticsearch does not support toggling these mapping options, so if 
+your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require 
+migrating to a new field and making associated code changes. Instead, use `dynamic: false` which provides the same flexibility while
+maintaining the future ability to query fields if necessary.
+
+Here's an example of what NOT to do:
+
+```ts
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      metadata: {
+        enabled: false,  // ❌ Don't do this
+        properties: {
+          created_by: { type: 'keyword' }
+        }
+      },
+      description: {
+        index: false,    // ❌ Don't do this
+        type: 'text'
+      }
+    }
+  }
+};
+```
+
+Instead, use `dynamic: false` if you want to persist data which does not need to be queryable.
+```ts
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      dynamic: false,  // ✅ Do this instead
+      metadata: {
+        // dynamic: false gets inherited from above
+        properties: {
+          // `created_by` can now be stored but won't be queryable
+        }
+      },
+      // `description` can now be stored but won't be queryable
+    }
+  }
+};
+```
+
+This approach maintains flexibility while ensuring all fields remain queryable if needed in the future.
+
 Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the
 fields they add to the mappings. Similarly, Saved Object types should never use `dynamic: true` as this can cause an arbitrary
  amount of fields to be added to the .kibana index.

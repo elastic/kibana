@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -100,24 +97,22 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         async () => {
           const response = await esClient.search<T>({
             index: indexName,
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        'kibana.alert.rule.uuid': ruleId,
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'kibana.alert.rule.uuid': ruleId,
+                    },
+                  },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: filter.getTime().toString(),
                       },
                     },
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: filter.getTime().toString(),
-                        },
-                      },
-                    },
-                  ],
-                },
+                  },
+                ],
               },
             },
           });
@@ -149,17 +144,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         const response = await esClient.search({
           index: indexName,
           sort: `date:${sort}`,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'ruleId.keyword': ruleId,
-                    },
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'ruleId.keyword': ruleId,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         });
@@ -191,17 +184,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           const response = await esClient.search({
             index: indexName,
             sort: `date:${sort}`,
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        'ruleId.keyword': ruleId,
-                      },
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'ruleId.keyword': ruleId,
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           });
@@ -638,17 +629,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             const response = await esClient.search({
               index: indexName,
               sort: `date:${sort}`,
-              body: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          'ruleId.keyword': ruleId,
-                        },
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'ruleId.keyword': ruleId,
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             });
@@ -672,17 +661,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       }): Promise<SearchResponse> {
         return await esClient.search({
           index: indexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'ruleId.keyword': ruleId,
-                    },
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'ruleId.keyword': ruleId,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         });
@@ -704,31 +691,29 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
-              body: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          'task.scope': ['actions', 'alerting'],
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        'task.scope': ['actions', 'alerting'],
+                      },
+                    },
+                    {
+                      range: {
+                        'task.scheduledAt': {
+                          gte: filter.getTime().toString(),
                         },
                       },
-                      {
-                        range: {
-                          'task.scheduledAt': {
-                            gte: filter.getTime().toString(),
-                          },
-                        },
+                    },
+                  ],
+                  must_not: [
+                    {
+                      term: {
+                        'task.status': 'idle',
                       },
-                    ],
-                    must_not: [
-                      {
-                        term: {
-                          'task.status': 'idle',
-                        },
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             });
@@ -761,38 +746,36 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           async () => {
             const response = await esClient.search({
               index: '.kibana-event-log*',
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        term: {
-                          'rule.id': {
-                            value: ruleId,
-                          },
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        'rule.id': {
+                          value: ruleId,
                         },
                       },
-                      {
-                        term: {
-                          'event.provider': {
-                            value: 'alerting',
-                          },
+                    },
+                    {
+                      term: {
+                        'event.provider': {
+                          value: 'alerting',
                         },
                       },
-                      {
-                        term: {
-                          'event.action': 'execute',
+                    },
+                    {
+                      term: {
+                        'event.action': 'execute',
+                      },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: filter.getTime().toString(),
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: filter.getTime().toString(),
-                          },
-                        },
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             });
@@ -809,7 +792,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         return await esClient.indices.create(
           {
             index: indexName,
-            body: {},
           },
           { meta: true }
         );
@@ -833,39 +815,37 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
-              body: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          'task.status': 'idle',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'task.status': 'idle',
+                      },
+                    },
+                    {
+                      term: {
+                        'task.attempts': attempts,
+                      },
+                    },
+                    {
+                      terms: {
+                        'task.scope': ['actions', 'alerting'],
+                      },
+                    },
+                    {
+                      term: {
+                        'task.taskType': taskType,
+                      },
+                    },
+                    {
+                      range: {
+                        'task.scheduledAt': {
+                          gte: filter.getTime().toString(),
                         },
                       },
-                      {
-                        term: {
-                          'task.attempts': attempts,
-                        },
-                      },
-                      {
-                        terms: {
-                          'task.scope': ['actions', 'alerting'],
-                        },
-                      },
-                      {
-                        term: {
-                          'task.taskType': taskType,
-                        },
-                      },
-                      {
-                        range: {
-                          'task.scheduledAt': {
-                            gte: filter.getTime().toString(),
-                          },
-                        },
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             });
@@ -894,34 +874,32 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
-              body: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          'task.id': `task:${ruleId}`,
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'task.id': `task:${ruleId}`,
+                      },
+                    },
+                    {
+                      terms: {
+                        'task.scope': ['actions', 'alerting'],
+                      },
+                    },
+                    {
+                      range: {
+                        'task.scheduledAt': {
+                          gte: filter.getTime().toString(),
                         },
                       },
-                      {
-                        terms: {
-                          'task.scope': ['actions', 'alerting'],
-                        },
+                    },
+                    {
+                      term: {
+                        'task.enabled': true,
                       },
-                      {
-                        range: {
-                          'task.scheduledAt': {
-                            gte: filter.getTime().toString(),
-                          },
-                        },
-                      },
-                      {
-                        term: {
-                          'task.enabled': true,
-                        },
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             });
@@ -942,14 +920,16 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId,
       expectedStatus,
       roleAuthc,
+      spaceId,
     }: {
       ruleId: string;
       expectedStatus: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
-          .get(`/api/alerting/rule/${ruleId}`)
+          .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .timeout(requestTimeout);
@@ -977,11 +957,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           rest_total_hits_as_int: true,
           ...(ruleId
             ? {
-                body: {
-                  query: {
-                    term: {
-                      'kibana.alert.rule.uuid': ruleId,
-                    },
+                query: {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
                   },
                 },
               }
@@ -1015,11 +993,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await es.search<T>({
           index: indexName,
-          body: {
-            query: {
-              term: {
-                'kibana.alert.rule.uuid': ruleId,
-              },
+          query: {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
             },
           },
         });
@@ -1034,13 +1010,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       name,
       indexName,
       roleAuthc,
+      spaceId,
     }: {
       name: string;
       indexName: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/actions/connector`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/actions/connector`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -1063,6 +1041,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule,
       consumer,
       roleAuthc,
+      spaceId,
     }: {
       ruleTypeId: string;
       name: string;
@@ -1080,9 +1059,10 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule?: { interval: string };
       consumer: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/alerting/rule`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -1118,17 +1098,17 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       });
     },
 
-    async findInRules(roleAuthc: RoleCredentials, ruleId: string) {
+    async findInRules(roleAuthc: RoleCredentials, ruleId: string, spaceId?: string) {
       const response = await supertestWithoutAuth
-        .get('/api/alerting/rules/_find')
+        .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rules/_find`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },
 
-    async searchRules(roleAuthc: RoleCredentials, filter: string) {
+    async searchRules(roleAuthc: RoleCredentials, filter: string, spaceId?: string) {
       return supertestWithoutAuth
-        .get('/api/alerting/rules/_find')
+        .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rules/_find`)
         .query({ filter })
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
@@ -1141,7 +1121,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         .set(samlAuth.getInternalRequestHeader());
     },
 
-    async deleteRules({ roleAuthc, filter }: { roleAuthc: RoleCredentials; filter: string }) {
+    async deleteRules({ roleAuthc, filter = '' }: { roleAuthc: RoleCredentials; filter?: string }) {
       const response = await this.searchRules(roleAuthc, filter);
       return Promise.all(
         response.body.data.map((rule: any) => this.deleteRuleById({ roleAuthc, ruleId: rule.id }))
@@ -1186,14 +1166,14 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       connectorIndexName,
     }: {
       roleAuthc: RoleCredentials;
-      ruleId: string;
+      ruleId?: string;
       consumer?: string;
       alertIndexName?: string;
       connectorIndexName?: string;
     }) {
       return Promise.allSettled([
         // Delete the rule by ID
-        this.deleteRuleById({ roleAuthc, ruleId }),
+        ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
         // Delete all documents in the alert index if specified
         alertIndexName
           ? es.deleteByQuery({

@@ -10,7 +10,7 @@ import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { RoleCredentials } from '../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {

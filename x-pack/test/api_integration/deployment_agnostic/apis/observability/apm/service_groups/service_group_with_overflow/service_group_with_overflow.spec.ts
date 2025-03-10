@@ -9,8 +9,8 @@ import { ValuesType } from 'utility-types';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createServiceGroupApi, deleteAllServiceGroups } from '../service_groups_api_methods';
 import { createServiceTransactionMetricsDocs } from './es_utils';
 import { generateData } from './generate_data';
@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         }),
       ];
 
-      const bulkActions = docs.reduce(
+      const operations = docs.reduce(
         (prev, doc) => {
           return [...prev, { create: { _index: indexName } }, doc];
         },
@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       );
 
       await es.bulk({
-        body: bulkActions,
+        operations,
         refresh: 'wait_for',
       });
 

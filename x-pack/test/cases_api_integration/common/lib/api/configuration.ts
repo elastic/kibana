@@ -56,6 +56,7 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
     customFields: [],
+    observableTypes: [],
     ...overwrite,
   };
 };

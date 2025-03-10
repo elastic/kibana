@@ -6,18 +6,19 @@
  */
 
 import Path from 'path';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { ProductName } from '@kbn/product-doc-common';
 import {
   // checkConnectivity,
   createTargetIndex,
   extractDocumentation,
   indexDocuments,
-  installElser,
   createChunkFiles,
   createArtifact,
   cleanupFolders,
   deleteIndex,
+  processDocuments,
 } from './tasks';
 import type { TaskConfig } from './types';
 
@@ -30,6 +31,8 @@ const getSourceClient = (config: TaskConfig) => {
       username: config.sourceClusterUsername,
       password: config.sourceClusterPassword,
     },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 };
 
@@ -43,6 +46,7 @@ const getEmbeddingClient = (config: TaskConfig) => {
     },
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
+    Connection: HttpConnection,
   });
 };
 
@@ -65,9 +69,6 @@ export const buildArtifacts = async (config: TaskConfig) => {
   // await checkConnectivity({ sourceClient, embeddingClient });
 
   await cleanupFolders({ folders: [config.buildFolder] });
-
-  log.info('Ensuring ELSER is installed on the embedding cluster');
-  await installElser({ client: embeddingClient });
 
   for (const productName of config.productNames) {
     await buildArtifact({
@@ -93,7 +94,7 @@ const buildArtifact = async ({
   sourceClient,
   log,
 }: {
-  productName: string;
+  productName: ProductName;
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;
@@ -105,13 +106,15 @@ const buildArtifact = async ({
 
   const targetIndex = getTargetIndexName({ productName, stackVersion });
 
-  const documents = await extractDocumentation({
+  let documents = await extractDocumentation({
     client: sourceClient,
     index: 'search-docs-1',
     log,
     productName,
     stackVersion,
   });
+
+  documents = await processDocuments({ documents, log });
 
   await createTargetIndex({
     client: embeddingClient,

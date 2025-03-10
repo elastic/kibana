@@ -28,7 +28,7 @@ import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
@@ -36,7 +36,7 @@ import {
   HasUniqueId,
   PublishesDataLoading,
   useBatchedPublishingSubjects,
-  ViewMode as ViewModeType,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
@@ -55,12 +55,12 @@ import {
 const toggleViewButtons = [
   {
     id: `viewModeToggle_edit`,
-    value: ViewMode.EDIT,
+    value: 'edit',
     label: 'Edit mode',
   },
   {
     id: `viewModeToggle_view`,
-    value: ViewMode.VIEW,
+    value: 'view',
     label: 'View mode',
   },
 ];
@@ -95,7 +95,7 @@ export const ReactControlExample = ({
     return new BehaviorSubject<[number, number] | undefined>(undefined);
   }, []);
   const viewMode$ = useMemo(() => {
-    return new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
+    return new BehaviorSubject<ViewMode>('edit');
   }, []);
   const saveNotification$ = useMemo(() => {
     return new Subject<void>();
@@ -119,9 +119,9 @@ export const ReactControlExample = ({
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
     return {
-      dataLoading: dataLoading$,
+      dataLoading$,
       unifiedSearchFilters$,
-      viewMode: viewMode$,
+      viewMode$,
       filters$,
       query$,
       timeRange$,
@@ -149,7 +149,7 @@ export const ReactControlExample = ({
   useEffect(() => {
     const subscription = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
       dashboardApi,
-      'dataLoading',
+      'dataLoading$',
       apiPublishesDataLoading,
       undefined,
       // flatten method
@@ -249,7 +249,7 @@ export const ReactControlExample = ({
     if (!controlGroupApi) {
       return;
     }
-    const subscription = controlGroupApi.unsavedChanges.subscribe((nextUnsavedChanges) => {
+    const subscription = controlGroupApi.unsavedChanges$.subscribe((nextUnsavedChanges) => {
       if (!nextUnsavedChanges) {
         clearControlGroupRuntimeState();
         setUnsavedChanges(undefined);
@@ -315,10 +315,7 @@ export const ReactControlExample = ({
                   <EuiCodeBlock language="json">
                     {JSON.stringify(controlGroupApi?.serializeState(), null, 2)}
                   </EuiCodeBlock>,
-                  {
-                    theme: core.theme,
-                    i18n: core.i18n,
-                  }
+                  core
                 )
               );
             }}
@@ -374,10 +371,10 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={async () => {
+                onClick={() => {
                   if (controlGroupApi) {
                     saveNotification$.next();
-                    setControlGroupSerializedState(await controlGroupApi.serializeState());
+                    setControlGroupSerializedState(controlGroupApi.serializeState());
                   }
                 }}
               >

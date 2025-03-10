@@ -150,9 +150,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('returns log rate timeseries', async () => {
           const response = await getLogsRateTimeseries();
           expect(response.status).to.be(200);
-          expect(
-            response.body.currentPeriod[serviceName].every(({ y }) => y === 0.06666666666666667)
-          ).to.be(true);
+          expect(response.body.currentPeriod[serviceName].every(({ y }) => y === 1)).to.be(true);
         });
 
         it('handles environment filter', async () => {
@@ -168,10 +166,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             });
 
             expect(response.status).to.be(200);
-            expect(first(response.body.currentPeriod?.['my-service'])?.y).to.be(
-              0.18181818181818182
-            );
-            expect(last(response.body.currentPeriod?.['my-service'])?.y).to.be(0.09090909090909091);
+            expect(first(response.body.currentPeriod?.['my-service'])?.y).to.be(2);
+            expect(last(response.body.currentPeriod?.['my-service'])?.y).to.be(1);
           });
         });
       });

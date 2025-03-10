@@ -27,7 +27,7 @@
         "tags": [],
         "label": "AllocateAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,7 +55,7 @@
             "signature": [
               "{} | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,7 +69,7 @@
             "signature": [
               "{} | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,7 +83,7 @@
             "signature": [
               "{ [attribute: string]: string; } | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -97,7 +97,7 @@
         "tags": [],
         "label": "CommonPhaseSettings",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,7 +108,7 @@
             "tags": [],
             "label": "phaseEnabled",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -147,7 +147,7 @@
             "text": "PhaseWithMinAge"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,7 +158,7 @@
             "tags": [],
             "label": "waitForSnapshotPolicy",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -172,7 +172,7 @@
         "tags": [],
         "label": "DownsampleAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,7 +183,7 @@
             "tags": [],
             "label": "fixed_interval",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -197,7 +197,7 @@
         "tags": [],
         "label": "ForcemergeAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,7 +208,7 @@
             "tags": [],
             "label": "max_num_segments",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -222,7 +222,66 @@
             "signature": [
               "\"best_compression\" | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.IlmLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.IlmLocatorParams",
+            "text": "IlmLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.IlmLocatorParams.page",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "\"policies_list\" | \"policy_edit\" | \"policy_create\""
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.IlmLocatorParams.policyName",
+            "type": "string",
+            "tags": [],
+            "label": "policyName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -236,7 +295,7 @@
         "tags": [],
         "label": "MigrateAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,7 +308,7 @@
             "description": [
               "\nIf enabled is ever set it will probably only be set to `false` because the default value\nfor this is `true`. Rather leave unspecified for true when serialising."
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,7 +322,7 @@
         "tags": [],
         "label": "Phases",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -284,7 +343,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -305,7 +364,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +385,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,7 +406,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,7 +427,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -382,7 +441,7 @@
         "tags": [],
         "label": "PhaseWithMinAge",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -393,7 +452,7 @@
             "tags": [],
             "label": "selectedMinimumAge",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -404,7 +463,7 @@
             "tags": [],
             "label": "selectedMinimumAgeUnits",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -418,7 +477,7 @@
         "tags": [],
         "label": "PolicyFromES",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -429,7 +488,7 @@
             "tags": [],
             "label": "modifiedDate",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -440,7 +499,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,7 +519,7 @@
                 "text": "SerializedPolicy"
               }
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -471,7 +530,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -485,7 +544,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -499,7 +558,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -513,7 +572,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -527,7 +586,7 @@
         "tags": [],
         "label": "RolloverAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -541,7 +600,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -555,7 +614,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -569,7 +628,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -583,7 +642,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,77 +658,77 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/__jest__/mocks.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/__jest__/mocks.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
               }
             ]
           }
@@ -683,7 +742,7 @@
         "tags": [],
         "label": "SearchableSnapshotAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -694,7 +753,7 @@
             "tags": [],
             "label": "snapshot_repository",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -710,7 +769,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -724,7 +783,7 @@
         "tags": [],
         "label": "SerializedActionWithAllocation",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -745,7 +804,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -766,7 +825,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -797,7 +856,7 @@
             "text": "SerializedPhase"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -851,7 +910,7 @@
               },
               " | undefined; }"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -882,7 +941,7 @@
             "text": "SerializedPhase"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -896,7 +955,7 @@
             "signature": [
               "{ wait_for_snapshot?: { policy: string; } | undefined; delete?: { delete_searchable_snapshot?: boolean | undefined; } | undefined; }"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -927,7 +986,7 @@
             "text": "SerializedPhase"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -949,7 +1008,7 @@
               },
               " | undefined; }"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -980,7 +1039,7 @@
             "text": "SerializedPhase"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1042,7 +1101,7 @@
               },
               " | undefined; }"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1056,7 +1115,7 @@
         "tags": [],
         "label": "SerializedPhase",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1070,7 +1129,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1084,7 +1143,7 @@
             "signature": [
               "{ [action: string]: any; }"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1098,7 +1157,7 @@
         "tags": [],
         "label": "SerializedPolicy",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1109,7 +1168,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1129,7 +1188,7 @@
                 "text": "Phases"
               }
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1143,7 +1202,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1157,7 +1216,7 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1188,7 +1247,7 @@
             "text": "SerializedPhase"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1250,7 +1309,7 @@
               },
               " | undefined; }"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1264,7 +1323,7 @@
         "tags": [],
         "label": "SetPriorityAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1278,7 +1337,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1292,7 +1351,7 @@
         "tags": [],
         "label": "ShrinkAction",
         "description": [],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1306,7 +1365,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1320,7 +1379,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1393,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1354,7 +1413,7 @@
         "signature": [
           "\"ILM_LOCATOR_ID\""
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1376,7 +1435,7 @@
             "text": "Phases"
           }
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1391,7 +1450,7 @@
         "signature": [
           "\"warm\" | \"hot\" | \"frozen\" | \"cold\""
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1406,7 +1465,7 @@
         "signature": [
           "\"warm\" | \"cold\""
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1421,7 +1480,7 @@
         "signature": [
           "\"warm\" | \"hot\" | \"cold\""
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1436,7 +1495,7 @@
         "signature": [
           "\"delete\" | \"warm\" | \"frozen\" | \"cold\""
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,246 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ColorFormatEditor should render boolean type normally 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="boolean"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={false}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiButton
+    data-test-subj="colorEditorAddColor"
+    iconType="plusInCircle"
+    onClick={[Function]}
+    size="s"
+  >
+    <MemoizedFormattedMessage
+      defaultMessage="Add color"
+      id="indexPatternFieldEditor.color.addColorButton"
+    />
+  </EuiButton>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;
+
+exports[`ColorFormatEditor should render multiple colors 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="string"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={true}
+    />
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="string"
+      index={1}
+      key="1"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={true}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiButton
+    data-test-subj="colorEditorAddColor"
+    iconType="plusInCircle"
+    onClick={[Function]}
+    size="s"
+  >
+    <MemoizedFormattedMessage
+      defaultMessage="Add color"
+      id="indexPatternFieldEditor.color.addColorButton"
+    />
+  </EuiButton>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;
+
+exports[`ColorFormatEditor should render other type normally (range field) 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="number"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={false}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiButton
+    data-test-subj="colorEditorAddColor"
+    iconType="plusInCircle"
+    onClick={[Function]}
+    size="s"
+  >
+    <MemoizedFormattedMessage
+      defaultMessage="Add color"
+      id="indexPatternFieldEditor.color.addColorButton"
+    />
+  </EuiButton>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;
+
+exports[`ColorFormatEditor should render string type normally (regex field) 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="string"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={false}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiButton
+    data-test-subj="colorEditorAddColor"
+    iconType="plusInCircle"
+    onClick={[Function]}
+    size="s"
+  >
+    <MemoizedFormattedMessage
+      defaultMessage="Add color"
+      id="indexPatternFieldEditor.color.addColorButton"
+    />
+  </EuiButton>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;

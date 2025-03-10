@@ -30,13 +30,7 @@
         "label": "MlNodeDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<",
           {
             "pluginId": "@kbn/deeplinks-ml",
@@ -62,13 +56,7 @@
             "text": "NavigationID"
           },
           "> & { children: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<",
           {
             "pluginId": "@kbn/deeplinks-ml",
@@ -95,7 +83,7 @@
           },
           ">[]; }"
         ],
-        "path": "packages/default-nav/ml/default_navigation.ts",
+        "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -110,7 +98,7 @@
         "signature": [
           "\"data_frame_analytics\" | \"root\" | \"rootNav:ml\" | \"anomaly_detection\" | \"model_management\" | \"data_visualizer\" | \"aiops_labs\""
         ],
-        "path": "packages/default-nav/ml/default_navigation.ts",
+        "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -124,7 +112,7 @@
         "tags": [],
         "label": "defaultNavigation",
         "description": [],
-        "path": "packages/default-nav/ml/default_navigation.ts",
+        "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -138,7 +126,7 @@
             "signature": [
               "\"rootNav:ml\""
             ],
-            "path": "packages/default-nav/ml/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,7 +137,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/default-nav/ml/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,7 +148,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "path": "packages/default-nav/ml/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,7 +174,7 @@
               "Location",
               "<unknown>; prepend: (path: string) => string; }) => boolean; })[]; })[]"
             ],
-            "path": "packages/default-nav/ml/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }

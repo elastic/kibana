@@ -15,7 +15,7 @@
           "RouterLinkProps",
           "; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/public/pages/link_to/use_asset_details_redirect.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/pages/link_to/use_asset_details_redirect.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -31,7 +31,7 @@
         "tags": [],
         "label": "RouteState",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "tags": [],
             "label": "originAppId",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,7 +53,7 @@
             "tags": [],
             "label": "originPathname",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,7 +67,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -85,7 +85,7 @@
       "tags": [],
       "label": "MetricsDataPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -99,7 +99,7 @@
           "signature": [
             "MetricsDataClient"
           ],
-          "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -114,7 +114,7 @@
       "tags": [],
       "label": "MetricsDataPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -128,7 +128,7 @@
           "signature": [
             "MetricsDataClient"
           ],
-          "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -144,7 +144,7 @@
             "NodeMetricsTableProps",
             ") => JSX.Element"
           ],
-          "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -158,7 +158,7 @@
               "signature": [
                 "NodeMetricsTableProps"
               ],
-              "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+              "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -178,7 +178,7 @@
             "NodeMetricsTableProps",
             ") => JSX.Element"
           ],
-          "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -192,7 +192,7 @@
               "signature": [
                 "NodeMetricsTableProps"
               ],
-              "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+              "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -212,7 +212,7 @@
             "NodeMetricsTableProps",
             ") => JSX.Element"
           ],
-          "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -226,7 +226,7 @@
               "signature": [
                 "NodeMetricsTableProps"
               ],
-              "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
+              "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -248,7 +248,7 @@
         "tags": [],
         "label": "MetricsDataClient",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,7 +270,7 @@
               },
               ") => Promise<string>"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -290,7 +290,7 @@
                     "text": "GetMetricIndicesOptions"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -315,16 +315,10 @@
                 "text": "UpdateMetricIndicesOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<{ metricIndices: string; }>>"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -344,7 +338,7 @@
                     "text": "UpdateMetricIndicesOptions"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -370,7 +364,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -390,7 +384,7 @@
                     "text": "DefaultMetricIndicesHandler"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client/client.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -411,7 +405,7 @@
         "tags": [],
         "label": "GetMetricIndicesOptions",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/server/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -423,15 +417,9 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -459,7 +447,7 @@
           },
           ") => Promise<string>) | null"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/server/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -474,7 +462,7 @@
         "signature": [
           "\"metrics-data-source\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/server/saved_objects/metrics_data_source/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/saved_objects/metrics_data_source/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -496,7 +484,7 @@
           },
           " & { metricIndices: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/server/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -510,7 +498,7 @@
         "tags": [],
         "label": "MetricsDataClientMock",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client_mock.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client_mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -531,7 +519,7 @@
                 "text": "MetricsDataClient"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/server/client_mock.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/client_mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -548,7 +536,7 @@
       "tags": [],
       "label": "MetricsDataPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/metrics_data_access/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -568,7 +556,7 @@
               "text": "MetricsDataClient"
             }
           ],
-          "path": "x-pack/plugins/observability_solution/metrics_data_access/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -590,7 +578,7 @@
         "signature": [
           "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -604,7 +592,7 @@
             "signature": [
               "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -631,7 +619,7 @@
           },
           "<T>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -645,7 +633,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -664,7 +652,7 @@
         "signature": [
           "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -678,7 +666,7 @@
             "signature": [
               "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -699,7 +687,7 @@
           "AggregationsMetricAggregationBase",
           ", \"field\"> | undefined>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -713,7 +701,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -734,7 +722,7 @@
           "AggregationsAggregationContainer",
           ", \"derivative\">"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -748,7 +736,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -769,7 +757,7 @@
           "AggregationsAggregationContainer",
           ", \"sum_bucket\">"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -783,7 +771,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -804,7 +792,7 @@
           "AggregationsAggregationContainer",
           ", \"aggregations\" | \"terms\">"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -818,7 +806,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -844,7 +832,7 @@
             "text": "MetricsUIAggregation"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -858,7 +846,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -873,7 +861,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -891,7 +879,7 @@
         "tags": [],
         "label": "MetricsAPIMetric",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -902,7 +890,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -918,7 +906,7 @@
               "AggregationsAggregate",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -938,7 +926,7 @@
         "signature": [
           "(\"rx\" | \"tx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/aws_ec2/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/aws_ec2/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -953,7 +941,7 @@
         "signature": [
           "(\"cpu\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/aws_rds/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/aws_rds/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -968,7 +956,7 @@
         "signature": [
           "(\"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/aws_s3/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/aws_s3/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -983,7 +971,7 @@
         "signature": [
           "(\"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/aws_sqs/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/aws_sqs/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -998,7 +986,7 @@
         "signature": [
           "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/container/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/container/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1013,7 +1001,7 @@
         "signature": [
           "(\"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/host/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/host/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1028,7 +1016,7 @@
         "signature": [
           "\"number\" | \"percent\" | \"bytes\" | \"bits\" | \"abbreviatedNumber\" | \"highPrecision\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1043,7 +1031,7 @@
         "signature": [
           "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1058,7 +1046,7 @@
         "signature": [
           "\"custom\" | \"hostSystemOverview\" | \"hostCpuUsageTotal\" | \"hostCpuUsage\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1143,7 +1131,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1161,7 +1149,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1179,7 +1167,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1197,7 +1185,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1207,11 +1195,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly cpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; readonly normalizedLoad1m: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly disk: { readonly xy: { readonly diskThroughputReadWrite: { title: string; dataset?: ",
           "LensDataset",
@@ -1223,7 +1211,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1241,7 +1229,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1259,7 +1247,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1277,7 +1265,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1295,7 +1283,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1313,7 +1301,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1331,7 +1319,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1349,7 +1337,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1359,7 +1347,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly diskUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly memory: { xy: { memoryUsageBreakdown: { title: string; dataset?: ",
           "LensDataset",
@@ -1371,7 +1359,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1389,7 +1377,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1407,7 +1395,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1417,7 +1405,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly network: { readonly xy: { readonly rxTx: { title: string; dataset?: ",
           "LensDataset",
@@ -1429,7 +1417,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1447,7 +1435,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1465,7 +1453,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1483,7 +1471,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1501,7 +1489,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1519,7 +1507,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1537,7 +1525,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1555,7 +1543,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1597,7 +1585,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1615,7 +1603,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1625,11 +1613,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly memory: { xy: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           "LensDataset",
@@ -1641,7 +1629,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1659,7 +1647,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1669,11 +1657,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly network: { xy: { dockerContainerRxTx: { title: string; dataset?: ",
           "LensDataset",
@@ -1685,7 +1673,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1703,7 +1691,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1713,7 +1701,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; }; }>>)[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1798,7 +1786,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1816,7 +1804,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1834,7 +1822,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1852,7 +1840,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1862,11 +1850,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly cpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; readonly normalizedLoad1m: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly disk: { readonly xy: { readonly diskThroughputReadWrite: { title: string; dataset?: ",
           "LensDataset",
@@ -1878,7 +1866,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1896,7 +1884,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1914,7 +1902,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1932,7 +1920,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1950,7 +1938,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1968,7 +1956,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -1986,7 +1974,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2004,7 +1992,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2014,7 +2002,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly diskUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly memory: { xy: { memoryUsageBreakdown: { title: string; dataset?: ",
           "LensDataset",
@@ -2026,7 +2014,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2044,7 +2032,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2062,7 +2050,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2072,7 +2060,7 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly network: { readonly xy: { readonly rxTx: { title: string; dataset?: ",
           "LensDataset",
@@ -2084,7 +2072,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2102,7 +2090,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2120,7 +2108,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2138,7 +2126,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2156,7 +2144,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2174,7 +2162,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2192,7 +2180,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2210,7 +2198,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2252,7 +2240,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2270,7 +2258,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2280,11 +2268,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly memory: { xy: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           "LensDataset",
@@ -2296,7 +2284,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2314,7 +2302,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2324,11 +2312,11 @@
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           "LensDataset",
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
           " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly network: { xy: { dockerContainerRxTx: { title: string; dataset?: ",
           "LensDataset",
@@ -2340,7 +2328,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2358,7 +2346,7 @@
           "LensBreakdownConfig",
           " | undefined; xAxis: ",
           "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
+          "; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
           "LensDataset",
           " | undefined; yAxis: ",
           "LensBaseLayer",
@@ -2384,7 +2372,7 @@
           "InventoryMetrics",
           ">; }[T]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2397,9 +2385,9 @@
         "label": "InventoryVisType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\""
+          "\"line\" | \"area\" | \"bar\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2414,7 +2402,7 @@
         "signature": [
           "20"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/constants.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2429,7 +2417,7 @@
         "signature": [
           "{ name: string; type: \"string\" | \"number\" | \"date\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2444,7 +2432,7 @@
         "signature": [
           "\"string\" | \"number\" | \"date\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2459,7 +2447,7 @@
         "signature": [
           "{ afterKey: { [x: string]: string | null; } | null | undefined; } & { interval?: number | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2482,7 +2470,7 @@
           },
           "[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2497,7 +2485,7 @@
         "signature": [
           "{ series: ({ id: string; columns: { name: string; type: \"string\" | \"number\" | \"date\"; }[]; rows: ({ timestamp: number; } & { [x: string]: string | number | object[] | null | undefined; })[]; } & { keys?: string[] | undefined; } & { metricsets?: string[] | undefined; })[]; info: { afterKey: { [x: string]: string | null; } | null | undefined; } & { interval?: number | undefined; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2512,7 +2500,7 @@
         "signature": [
           "{ timestamp: number; } & { [x: string]: string | number | object[] | null | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2527,7 +2515,7 @@
         "signature": [
           "{ id: string; columns: { name: string; type: \"string\" | \"number\" | \"date\"; }[]; rows: ({ timestamp: number; } & { [x: string]: string | number | object[] | null | undefined; })[]; } & { keys?: string[] | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2542,7 +2530,7 @@
         "signature": [
           "{ from: number; to: number; interval: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2559,7 +2547,7 @@
           "AggregationsAggregate",
           "; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2574,7 +2562,7 @@
         "signature": [
           "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/kubernetes/pod/metrics/index.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/kubernetes/pod/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2587,9 +2575,9 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"memory\" | \"custom\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2604,7 +2592,7 @@
         "signature": [
           "{ id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsageTotal\" | \"hostCpuUsage\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2619,7 +2607,7 @@
         "signature": [
           "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsageTotal\" | \"hostCpuUsage\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2631,7 +2619,7 @@
             "tags": [],
             "label": "timeField",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2645,7 +2633,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2656,7 +2644,7 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2676,7 +2664,7 @@
           "KeyofC",
           "<{ abbreviatedNumber: null; bits: null; bytes: null; number: null; percent: null; highPrecision: null; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2692,7 +2680,7 @@
           "KeyofC",
           "<{ hostSystemOverview: null; hostCpuUsageTotal: null; hostCpuUsage: null; hostK8sOverview: null; hostK8sCpuCap: null; hostK8sDiskCap: null; hostK8sMemoryCap: null; hostK8sPodCap: null; hostLoad: null; hostMemoryUsage: null; hostNetworkTraffic: null; podOverview: null; podCpuUsage: null; podMemoryUsage: null; podLogUsage: null; podNetworkTraffic: null; containerOverview: null; containerCpuUsage: null; containerDiskIOOps: null; containerDiskIOBytes: null; containerMemory: null; containerNetworkTraffic: null; containerK8sOverview: null; containerK8sCpuUsage: null; containerK8sMemoryUsage: null; nginxHits: null; nginxRequestRate: null; nginxActiveConnections: null; nginxRequestsPerConnection: null; awsOverview: null; awsCpuUtilization: null; awsNetworkBytes: null; awsNetworkPackets: null; awsDiskioBytes: null; awsDiskioOps: null; awsEC2CpuUtilization: null; awsEC2NetworkTraffic: null; awsEC2DiskIOBytes: null; awsS3TotalRequests: null; awsS3NumberOfObjects: null; awsS3BucketSize: null; awsS3DownloadBytes: null; awsS3UploadBytes: null; awsRDSCpuTotal: null; awsRDSConnections: null; awsRDSQueriesExecuted: null; awsRDSActiveTransactions: null; awsRDSLatency: null; awsSQSMessagesVisible: null; awsSQSMessagesDelayed: null; awsSQSMessagesSent: null; awsSQSMessagesEmpty: null; awsSQSOldestMessage: null; custom: null; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2708,7 +2696,7 @@
           "KeyofC",
           "<{ line: null; area: null; bar: null; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2724,7 +2712,7 @@
           "KeyofC",
           "<{ host: null; pod: null; container: null; awsEC2: null; awsS3: null; awsSQS: null; awsRDS: null; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2736,7 +2724,7 @@
         "tags": [],
         "label": "metrics",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2747,7 +2735,7 @@
             "tags": [],
             "label": "tsvb",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2761,7 +2749,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2775,7 +2763,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2789,7 +2777,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2803,7 +2791,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2817,7 +2805,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2831,7 +2819,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2855,7 +2843,7 @@
           "KeyofC",
           "<{ date: null; number: null; string: null; }>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2871,7 +2859,7 @@
           "KeyofC",
           "<{ date: null; number: null; string: null; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2891,7 +2879,7 @@
           "UnknownRecordC",
           "; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2929,7 +2917,7 @@
           "NumberC",
           "; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3025,7 +3013,7 @@
           "BooleanC",
           "; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3121,7 +3109,7 @@
           "NumberC",
           "; }>]>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3189,7 +3177,7 @@
           "StringC",
           ">; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3227,7 +3215,7 @@
           "ObjectC",
           ">]>>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3287,7 +3275,7 @@
           "StringC",
           ">; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/http_api/metrics_api.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3299,7 +3287,7 @@
         "tags": [],
         "label": "SnapshotMetricTypeKeys",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3313,7 +3301,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3327,7 +3315,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3341,7 +3329,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3355,7 +3343,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3369,7 +3357,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3383,7 +3371,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3397,7 +3385,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3411,7 +3399,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3425,7 +3413,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3439,7 +3427,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3453,7 +3441,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3467,7 +3455,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3481,7 +3469,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3495,7 +3483,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3509,7 +3497,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3523,7 +3511,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3537,7 +3525,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3551,7 +3539,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3565,7 +3553,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3579,7 +3567,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3593,7 +3581,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3607,7 +3595,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3621,7 +3609,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3635,7 +3623,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3649,7 +3637,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3663,7 +3651,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3677,7 +3665,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3691,7 +3679,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3705,7 +3693,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3719,7 +3707,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3733,7 +3721,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3747,7 +3735,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3765,7 +3753,7 @@
           "KeyofC",
           "<{ count: null; cpuV2: null; cpu: null; diskLatency: null; diskSpaceUsage: null; load: null; memory: null; memoryFree: null; memoryTotal: null; normalizedLoad1m: null; tx: null; rx: null; txV2: null; rxV2: null; logRate: null; diskIOReadBytes: null; diskIOWriteBytes: null; s3TotalRequests: null; s3NumberOfObjects: null; s3BucketSize: null; s3DownloadBytes: null; s3UploadBytes: null; rdsConnections: null; rdsQueriesExecuted: null; rdsActiveTransactions: null; rdsLatency: null; sqsMessagesVisible: null; sqsMessagesDelayed: null; sqsMessagesSent: null; sqsMessagesEmpty: null; sqsOldestMessage: null; custom: null; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

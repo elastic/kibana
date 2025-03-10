@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('custom_dashboards', () => {
     loadTestFile(require.resolve('./dependency_metrics.spec.ts'));
     loadTestFile(require.resolve('./metadata.spec.ts'));
-    loadTestFile(require.resolve('./service_dependencies.spec.ts'));
     loadTestFile(require.resolve('./top_dependencies.spec.ts'));
     loadTestFile(require.resolve('./top_operations.spec.ts'));
     loadTestFile(require.resolve('./top_spans.spec.ts'));

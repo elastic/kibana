@@ -30,7 +30,9 @@ export default function ({ getService }: FtrProviderContext) {
     return req.send(body);
   };
 
-  describe('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', function () {
+    // see details: https://github.com/elastic/kibana/issues/208903
+    this.tags(['failsOnMKI']);
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
@@ -49,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an empty graph', async () => {
         const response = await postGraph(supertestViewer, {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
           },
@@ -63,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a graph with nodes and edges by actor', async () => {
         const response = await postGraph(supertestViewer, {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {

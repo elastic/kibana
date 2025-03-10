@@ -9,10 +9,16 @@ import expect from '@kbn/expect';
 import deepmerge from 'deepmerge';
 import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import ossPlatformTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_platform.json';
 import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_platform.json';
+import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
+import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
+import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -40,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
-      await es.cluster.putSettings({ body: disableCollection });
+      await es.cluster.putSettings(disableCollection);
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest
@@ -57,15 +63,23 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = deepmerge(
-        deepmerge(ossPluginsTelemetrySchema, ossPackagesTelemetrySchema),
-        xpackPluginsTelemetrySchema
-      );
+
+      const schemas = [
+        ossPluginsTelemetrySchema,
+        ossPackagesTelemetrySchema,
+        ossPlatformTelemetrySchema,
+        xpackPluginsTelemetrySchema,
+        xpackPlatformTelemetrySchema,
+        xpackObservabilityTelemetrySchema,
+        xpackSearchTelemetrySchema,
+        xpackSecurityTelemetrySchema,
+      ] as TelemetrySchemaObject[];
+      const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 
       try {
         assertTelemetryPayload({ root, plugins }, stats);
       } catch (err) {
-        err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date, please update it as required: ${err.message}`;
+        err.message = `The telemetry schemas in are out-of-date. Please define the schema of your collector and run "node scripts/telemetry_check --fix" to update them: ${err.message}`;
         throw err;
       }
     });
