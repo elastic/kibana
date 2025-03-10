@@ -12,6 +12,12 @@ import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
 
+const asyncAction =
+  (name: string) =>
+  async (...params: any[]) => {
+    action(name)(...params);
+  };
+
 export default {
   title: 'Unified Tabs/Tab',
   parameters: {
@@ -23,7 +29,12 @@ export default {
 } as Meta;
 
 const TabTemplate: StoryFn<TabProps> = (args) => (
-  <Tab {...args} onSelect={action('onSelect')} onClose={action('onClose')} />
+  <Tab
+    {...args}
+    onLabelEdited={asyncAction('onLabelEdited')}
+    onSelect={asyncAction('onSelect')}
+    onClose={asyncAction('onClose')}
+  />
 );
 
 export const Default = TabTemplate.bind({});
