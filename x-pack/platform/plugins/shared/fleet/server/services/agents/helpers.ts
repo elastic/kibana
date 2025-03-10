@@ -79,7 +79,6 @@ export function searchHitToAgent(
     last_checkin_message: hit._source?.last_checkin_message,
     policy_revision: hit._source?.policy_revision_idx,
     packages: hit._source?.packages ?? [],
-    // @ts-expect-error `sort` now depends on `FieldValue` that is too broad
     sort: hit.sort,
     tags: hit._source?.tags,
     outputs,
