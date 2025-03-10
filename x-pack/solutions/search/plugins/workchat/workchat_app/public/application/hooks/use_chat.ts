@@ -6,51 +6,90 @@
  */
 
 import { useCallback, useState, useMemo } from 'react';
-import type { ChatEvent } from '../../../common/chat_events';
-import type { Message } from '../../../common/messages';
+import type { ConversationCreatedEvent } from '../../../common/chat_events';
+import type { ConversationEvent } from '../../../common/conversations';
+import { assistantMessageEvent, userMessageEvent } from '../../../common/utils/conversation';
 import { useWorkChatServices } from './use_workchat_service';
 
-export const useChat = () => {
+interface UseChatProps {
+  conversationId: string | undefined;
+  agentId: string;
+  connectorId?: string;
+  onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
+  onError?: (error: any) => void;
+}
+
+export type ChatStatus = 'ready' | 'loading' | 'error';
+
+export const useChat = ({
+  conversationId,
+  agentId,
+  connectorId,
+  onConversationUpdate,
+  onError,
+}: UseChatProps) => {
   const { chatService } = useWorkChatServices();
-  const [events, setEvents] = useState<ChatEvent[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversationEvents, setConversationEvents] = useState<ConversationEvent[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [status, setStatus] = useState<ChatStatus>('ready');
 
-  const send = useCallback(
-    async (message: string) => {
-      setMessages((prevMessages) => [...prevMessages, { type: 'user', content: message }]);
+  const sendMessage = useCallback(
+    async (nextMessage: string) => {
+      setConversationEvents((prevEvents) => [...prevEvents, userMessageEvent(nextMessage)]);
 
-      const events$ = await chatService.callAgent({ message });
+      const events$ = await chatService.converse({
+        nextMessage,
+        conversationId,
+        agentId,
+        connectorId,
+      });
 
-      let chunks = '';
+      setStatus('loading');
+      let concatenatedChunks = '';
 
       events$.subscribe({
         next: (event) => {
-          setEvents((prevEvents) => [...prevEvents, event]);
-
           if (event.type === 'message_chunk') {
-            chunks += event.text_chunk;
-            setPendingMessage(chunks);
+            concatenatedChunks += event.text_chunk;
+            setPendingMessage(concatenatedChunks);
+          }
+
+          if (event.type === 'conversation_created') {
+            onConversationUpdate(event.conversation);
           }
         },
         complete: () => {
-          setMessages((previous) => [...previous, { type: 'assistant', content: chunks }]);
+          setConversationEvents((prevEvents) => [
+            ...prevEvents,
+            assistantMessageEvent(concatenatedChunks),
+          ]);
           setPendingMessage('');
+          setStatus('ready');
+        },
+        error: (err) => {
+          setStatus('error');
+          onError?.(err);
         },
       });
     },
-    [chatService]
+    [chatService, agentId, conversationId, connectorId, onConversationUpdate, onError]
   );
 
-  const allMessages: Message[] = useMemo(() => {
-    return [...messages].concat(
-      pendingMessage ? [{ type: 'assistant', content: pendingMessage }] : []
+  const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {
+    setConversationEvents(newEvents);
+    setPendingMessage('');
+  }, []);
+
+  const allEvents = useMemo(() => {
+    return [...conversationEvents].concat(
+      pendingMessage ? [assistantMessageEvent(pendingMessage)] : []
     );
-  }, [messages, pendingMessage]);
+  }, [conversationEvents, pendingMessage]);
 
   return {
-    send,
-    events,
-    messages: allMessages,
+    status,
+    sendMessage,
+    conversationEvents: allEvents,
+    setConversationEvents: setConversationEventsExternal,
   };
 };

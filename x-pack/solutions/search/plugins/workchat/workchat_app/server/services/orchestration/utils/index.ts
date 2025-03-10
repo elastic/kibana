@@ -6,3 +6,4 @@
  */
 
 export { langchainToChatEvents } from './convert_langchain_events';
+export { conversationEventsToMessages } from './events_to_messages';

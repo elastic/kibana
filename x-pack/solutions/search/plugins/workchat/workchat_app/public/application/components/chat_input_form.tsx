@@ -53,6 +53,7 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         <EuiFlexItem>
           <EuiTextArea
+            data-test-subj="workchatAppChatInputFormTextArea"
             fullWidth
             rows={1}
             value={message}
@@ -65,6 +66,7 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="workchatAppChatInputFormSubmitButton"
             iconType="kqlFunction"
             onClick={handleSubmit}
             disabled={loading || disabled}

@@ -67,6 +67,7 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
       }}
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}
+      actionsColumnWidth={120}
       renderFlyoutHeader={AlertsFlyoutHeader}
       renderFlyoutBody={AlertsFlyoutBody}
       renderFlyoutFooter={AlertsFlyoutFooter}

@@ -8,17 +8,21 @@
 import { Observable, from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ChatEvent } from '../../../common/chat_events';
-import { createAgentGraph } from './agent_graph';
-import { getLCTools } from '../integrations/utils';
-import { langchainToChatEvents } from './utils';
+import type { ChatEvent } from '../../../common/chat_events';
+import type { Conversation } from '../../../common/conversations';
 import { IntergrationsSession } from '../integrations/integrations_session';
+import { getLCTools } from '../integrations/utils';
+import { createAgentGraph } from './agent_graph';
+import { langchainToChatEvents, conversationEventsToMessages } from './utils';
 
 interface AgentRunOptions {
-  message: string;
+  conversation: Conversation;
 }
 
 interface AgentRunResult {
+  /**
+   * Live events that can be streamed back to the UI
+   */
   events$: Observable<ChatEvent>;
 }
 
@@ -42,26 +46,26 @@ export const createAgent = async ({
   const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
 
   return {
-    run: async ({ message }): Promise<AgentRunResult> => {
+    run: async ({ conversation }): Promise<AgentRunResult> => {
+      const initialMessages = conversationEventsToMessages(conversation.events);
+
+      const runName = 'defaultAgentGraph';
+
       const eventStream = agentGraph.streamEvents(
-        { input: message },
+        { initialMessages },
         {
           version: 'v2',
-          runName: 'defaultAgentGraph',
+          runName,
           metadata: {
             agentId,
           },
-          recursionLimit: 5
+          recursionLimit: 5,
         }
       );
 
-      const isStreamEvent = (input: any): input is StreamEvent => {
-        return 'event' in input;
-      };
-
       const events$ = from(eventStream).pipe(
         filter(isStreamEvent),
-        langchainToChatEvents(),
+        langchainToChatEvents({ runName }),
         shareReplay()
       );
 
@@ -79,4 +83,8 @@ export const createAgent = async ({
       };
     },
   };
+};
+
+const isStreamEvent = (input: any): input is StreamEvent => {
+  return 'event' in input;
 };

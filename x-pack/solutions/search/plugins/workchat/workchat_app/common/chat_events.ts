@@ -5,18 +5,52 @@
  * 2.0.
  */
 
+import type { Message } from './messages';
+
 interface ChatEventBase {
   type: string;
 }
 
+/**
+ * Emitted when a message chunk is emitted by the LLM.
+ */
 export interface ChunkEvent extends ChatEventBase {
   type: 'message_chunk';
   text_chunk: string;
 }
 
-export interface CustomEvent extends ChatEventBase {
-  type: 'custom';
-  content: Record<string, any>;
+/**
+ * Emitted when a conversation was created.
+ *
+ * Can be used to update the UI with the new information.
+ */
+export interface ConversationCreatedEvent extends ChatEventBase {
+  type: 'conversation_created';
+  conversation: ConversationEventChanges;
 }
 
-export type ChatEvent = ChunkEvent | CustomEvent;
+/**
+ * Emitted when a conversation was updated.
+ *
+ * Can be used to update the UI with the new information.
+ */
+export interface ConversationUpdatedEvent extends ChatEventBase {
+  type: 'conversation_updated';
+  conversation: ConversationEventChanges;
+}
+
+export interface MessageEvent extends ChatEventBase {
+  type: 'message';
+  message: Message;
+}
+
+export interface ConversationEventChanges {
+  id: string;
+  title: string;
+}
+
+export type ChatEvent =
+  | ChunkEvent
+  | MessageEvent
+  | ConversationCreatedEvent
+  | ConversationUpdatedEvent;

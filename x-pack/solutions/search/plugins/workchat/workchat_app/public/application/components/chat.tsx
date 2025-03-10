@@ -5,32 +5,83 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiCommentList, EuiPanel } from '@elastic/eui';
-import { useChat } from '../hooks/use_chat';
+import React, { useCallback, useRef, useEffect } from 'react';
+import { css } from '@emotion/css';
+import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import type { AuthenticatedUser } from '@kbn/core/public';
+import { ConversationEventChanges } from '../../../common/chat_events';
+import { useConversation } from '../hooks/use_conversation';
+import { useStickToBottom } from '../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
-import { ChatMessage } from './chat_message';
+import { ChatConversation } from './chat_conversation';
 
-export const Chat: React.FC<{}> = () => {
-  const { send, messages } = useChat();
+interface ChatProps {
+  conversationId: string | undefined;
+  connectorId: string | undefined;
+  currentUser: AuthenticatedUser | undefined;
+  onConversationUpdate: (changes: ConversationEventChanges) => void;
+}
+
+const fullHeightClassName = css`
+  height: 100%;
+`;
+
+const panelClassName = css`
+  min-height: 100%;
+`;
+
+const scrollContainerClassName = (scrollBarStyles: string) => css`
+  overflow-y: auto;
+  ${scrollBarStyles}
+`;
+
+export const Chat: React.FC<ChatProps> = ({
+  conversationId,
+  currentUser,
+  onConversationUpdate,
+  connectorId,
+}) => {
+  const { sendMessage, conversationEvents, chatStatus } = useConversation({
+    conversationId,
+    connectorId,
+    agentId: 'default',
+    onConversationUpdate,
+  });
+
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
+
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const { setStickToBottom } = useStickToBottom({
+    defaultState: true,
+    scrollContainer: scrollContainerRef.current,
+  });
+
+  useEffect(() => {
+    setStickToBottom(true);
+  }, [conversationId, setStickToBottom]);
 
   const onSubmit = useCallback(
     (message: string) => {
-      send(message);
+      setStickToBottom(true);
+      sendMessage(message);
     },
-    [send]
+    [sendMessage, setStickToBottom]
   );
 
   return (
     <>
-      <EuiFlexItem grow css={{ overflow: 'auto' }}>
-        <EuiPanel hasBorder={false} hasShadow={false}>
-          <EuiCommentList>
-            {messages.map((message) => {
-              return <ChatMessage message={message} />;
-            })}
-          </EuiCommentList>
-        </EuiPanel>
+      <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
+        <div ref={scrollContainerRef} className={fullHeightClassName}>
+          <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
+            <ChatConversation
+              conversationEvents={conversationEvents}
+              chatStatus={chatStatus}
+              currentUser={currentUser}
+            />
+          </EuiPanel>
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ChatInputForm disabled={false} loading={false} onSubmit={onSubmit} />

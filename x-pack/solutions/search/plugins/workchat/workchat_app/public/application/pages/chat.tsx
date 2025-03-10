@@ -6,11 +6,20 @@
  */
 
 import { css } from '@emotion/css';
-import React, { FC } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
+import React, { useMemo, useCallback, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { ConversationEventChanges } from '../../../common/chat_events';
 import { Chat } from '../components/chat';
+import { ChatHeader } from '../components/chat_header';
+import { ConversationList } from '../components/conversation_list';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { useCurrentUser } from '../hooks/use_current_user';
+import { useConversationList } from '../hooks/use_conversation_list';
+import { useKibana } from '../hooks/use_kibana';
+
+const newConversationId = 'new';
 
 const pageSectionContentClassName = css`
   width: 100%;
@@ -18,11 +27,39 @@ const pageSectionContentClassName = css`
   flex-grow: 1;
   padding-top: 0;
   padding-bottom: 0;
+  height: 100%;
   max-block-size: calc(100vh - 96px);
 `;
 
-export const WorkchatChatPage: FC<{}> = () => {
+export const WorkchatChatPage: React.FC<{}> = () => {
   useBreadcrumb([{ text: 'Kibana' }, { text: 'WorkChat' }]);
+  const {
+    services: { application },
+  } = useKibana();
+
+  const currentUser = useCurrentUser();
+
+  const { conversations, refresh: refreshConversations } = useConversationList();
+
+  const { conversationId: conversationIdFromParams } = useParams<{
+    conversationId: string | undefined;
+  }>();
+
+  const conversationId = useMemo(() => {
+    return conversationIdFromParams === newConversationId ? undefined : conversationIdFromParams;
+  }, [conversationIdFromParams]);
+
+  const onConversationUpdate = useCallback(
+    (changes: ConversationEventChanges) => {
+      if (!conversationId) {
+        application.navigateToApp('workchat', { path: `/chat/${changes.id}` });
+      }
+      refreshConversations();
+    },
+    [application, conversationId, refreshConversations]
+  );
+
+  const [connectorId, setConnectorId] = useState<string>();
 
   return (
     <KibanaPageTemplate
@@ -32,30 +69,36 @@ export const WorkchatChatPage: FC<{}> = () => {
       grow={false}
       panelled={false}
     >
-      <EuiFlexGroup
-        className={pageSectionContentClassName}
-        direction="column"
-        gutterSize="none"
-        justifyContent="center"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={true} hasShadow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow>
-                <EuiTitle>
-                  <h2>WorkChat</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>You know, for chat!</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
+      <KibanaPageTemplate.Sidebar paddingSize="none">
+        <ConversationList
+          conversations={conversations}
+          activeConversationId={conversationId}
+          onConversationSelect={(newConvId) => {
+            application.navigateToApp('workchat', { path: `/chat/${newConvId}` });
+          }}
+          onNewConversationSelect={() => {
+            application.navigateToApp('workchat', { path: `/chat/${newConversationId}` });
+          }}
+        />
+      </KibanaPageTemplate.Sidebar>
 
-        <Chat />
-      </EuiFlexGroup>
+      <KibanaPageTemplate.Section paddingSize="none" grow contentProps={{ css: 'height: 100%' }}>
+        <EuiFlexGroup
+          className={pageSectionContentClassName}
+          direction="column"
+          gutterSize="none"
+          justifyContent="center"
+          responsive={false}
+        >
+          <ChatHeader connectorId={connectorId} onConnectorChange={setConnectorId} />
+          <Chat
+            conversationId={conversationId}
+            connectorId={connectorId}
+            currentUser={currentUser}
+            onConversationUpdate={onConversationUpdate}
+          />
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };

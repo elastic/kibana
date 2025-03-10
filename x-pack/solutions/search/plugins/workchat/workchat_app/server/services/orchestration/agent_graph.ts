@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { StateGraph, Annotation, MessagesAnnotation } from '@langchain/langgraph';
-import { AIMessage, AIMessageChunk } from '@langchain/core/messages';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { basePrompt } from './prompts';
+import { StateGraph, Annotation } from '@langchain/langgraph';
+import { BaseMessage, AIMessage } from '@langchain/core/messages';
+import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool } from '@langchain/core/tools';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { withSystemPrompt } from './prompts';
+
 export const createAgentGraph = async ({
   agentId,
   chatModel,
@@ -21,9 +23,14 @@ export const createAgentGraph = async ({
   integrationTools: StructuredTool[];
 }) => {
   const StateAnnotation = Annotation.Root({
-    input: Annotation<string>,
-    ...MessagesAnnotation.spec, // unused for now
-    response: Annotation<AIMessageChunk>,
+    initialMessages: Annotation<BaseMessage[]>({
+      reducer: messagesStateReducer,
+      default: () => [],
+    }),
+    addedMessages: Annotation<BaseMessage[]>({
+      reducer: messagesStateReducer,
+      default: () => [],
+    }),
   });
 
   const tools = [...integrationTools];
@@ -35,15 +42,16 @@ export const createAgentGraph = async ({
   });
 
   const callModel = async (state: typeof StateAnnotation.State) => {
-    const systemPrompt = await basePrompt({ message: state.input })
-    const response = await model.invoke([...systemPrompt.toChatMessages(), ...state.messages]);
+    const response = await model.invoke(
+      await withSystemPrompt({ messages: [...state.initialMessages, ...state.addedMessages] })
+    );
     return {
-      messages: [response],
-    }
+      addedMessages: [response],
+    };
   };
 
   const shouldContinue = async (state: typeof StateAnnotation.State) => {
-    const messages = state.messages;
+    const messages = state.addedMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
       return 'tools';
@@ -52,11 +60,11 @@ export const createAgentGraph = async ({
   };
 
   const graph = new StateGraph(StateAnnotation)
-    .addNode("agent", callModel)
-    .addEdge("__start__", "agent")
-    .addNode("tools", toolNode)
-    .addEdge("tools", "agent")
-    .addConditionalEdges("agent", shouldContinue)
+    .addNode('agent', callModel)
+    .addEdge('__start__', 'agent')
+    .addNode('tools', toolNode)
+    .addEdge('tools', 'agent')
+    .addConditionalEdges('agent', shouldContinue)
     .compile();
 
   return graph;
