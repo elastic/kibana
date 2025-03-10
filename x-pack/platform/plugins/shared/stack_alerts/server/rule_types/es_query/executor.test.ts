@@ -419,6 +419,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-1',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -451,6 +456,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-2" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-2',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -483,6 +493,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-3" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-3',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -854,6 +869,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-1',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
