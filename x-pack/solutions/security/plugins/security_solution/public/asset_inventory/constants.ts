@@ -38,8 +38,8 @@ export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
 export const DOCS_URL = 'https://ela.st/asset-inventory';
 
 export const ASSET_FIELDS = {
-  ASSET_TYPE: 'asset.type',
-  ASSET_CATEGORY: 'asset.category',
+  ASSET_TYPE: 'entity.type',
+  ASSET_CATEGORY: 'entity.category',
   RISK: 'host.risk.calculated_level',
   CRITICALITY: 'asset.criticality',
 } as const;
