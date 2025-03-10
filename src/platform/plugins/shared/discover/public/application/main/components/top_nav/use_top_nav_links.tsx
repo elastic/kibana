@@ -118,12 +118,12 @@ export const useTopNavLinks = ({
         const newSearchMenuItem = getNewSearchAppMenuItem({
           newSearchUrl: services.locator.getRedirectUrl(locatorParams),
           onNewSearch: () => {
-            const initialState: DiscoverAppState = defaultEsqlState ?? {
+            const defaultState: DiscoverAppState = defaultEsqlState ?? {
               dataSource: currentDataView.id
                 ? createDataViewDataSource({ dataViewId: currentDataView.id })
                 : undefined,
             };
-            services.application.navigateToApp(DISCOVER_APP_ID, { state: { initialState } });
+            services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
           },
         });
         items.push(newSearchMenuItem);
