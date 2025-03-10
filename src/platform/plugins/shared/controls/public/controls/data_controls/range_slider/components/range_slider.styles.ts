@@ -30,7 +30,6 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .euiFormControlLayout {
-        background-color: transparent;
         border: none;
         border-radius: 0;
       }
@@ -54,7 +53,6 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
 
       /* Remove the append background so the caution icon looks more natural */
       .euiFormControlLayout__append {
-        background-color: transparent;
       }
     `,
 
