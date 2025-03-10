@@ -69,6 +69,12 @@ Array [
     "type": "component_template",
   },
   Object {
+    "appLink": "/app/management/data/index_management/component_templates/all_assets@custom",
+    "attributes": Object {},
+    "id": "all_assets@custom",
+    "type": "component_template",
+  },
+  Object {
     "appLink": "/app/management/data/index_management/component_templates/logs-all_assets.test_logs@custom",
     "attributes": Object {},
     "id": "logs-all_assets.test_logs@custom",
@@ -99,12 +105,6 @@ Array [
     "type": "component_template",
   },
   Object {
-    "appLink": "",
-    "attributes": Object {},
-    "id": "sample_csp_rule_template",
-    "type": "csp-rule-template",
-  },
-  Object {
     "appLink": "/app/dashboards#/view/sample_dashboard",
     "attributes": Object {
       "description": "Sample dashboard",
@@ -123,14 +123,6 @@ Array [
     "type": "dashboard",
   },
   Object {
-    "appLink": "/app/management/kibana/dataViews/dataView/test-*",
-    "attributes": Object {
-      "title": "test-*",
-    },
-    "id": "test-*",
-    "type": "index-pattern",
-  },
-  Object {
     "appLink": "/app/lens#/edit/sample_lens",
     "attributes": Object {
       "description": "",
@@ -140,6 +132,32 @@ Array [
     "type": "lens",
   },
   Object {
+    "appLink": "/app/visualize#/edit/sample_visualization",
+    "attributes": Object {
+      "description": "sample visualization update",
+      "title": "sample vis title",
+    },
+    "id": "sample_visualization",
+    "type": "visualization",
+  },
+  Object {
+    "appLink": "/app/discover#/view/sample_search",
+    "attributes": Object {
+      "description": "",
+      "title": "All logs [Logs Kafka] ECS",
+    },
+    "id": "sample_search",
+    "type": "search",
+  },
+  Object {
+    "appLink": "/app/management/kibana/dataViews/dataView/test-*",
+    "attributes": Object {
+      "title": "test-*",
+    },
+    "id": "test-*",
+    "type": "index-pattern",
+  },
+  Object {
     "appLink": "/app/ml/supplied_configurations/?_a=(supplied_configurations%3A(queryText%3A'Nginx%20access%20logs'))",
     "attributes": Object {
       "description": "Find unusual activity in HTTP access logs from filebeat (ECS).",
@@ -147,6 +165,20 @@ Array [
     },
     "id": "sample_ml_module",
     "type": "ml-module",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {
+      "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
+    },
+    "id": "sample_security_rule",
+    "type": "security-rule",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {},
+    "id": "sample_csp_rule_template",
+    "type": "csp-rule-template",
   },
   Object {
     "appLink": "",
@@ -163,38 +195,12 @@ Array [
     "type": "osquery-saved-query",
   },
   Object {
-    "appLink": "/app/discover#/view/sample_search",
-    "attributes": Object {
-      "description": "",
-      "title": "All logs [Logs Kafka] ECS",
-    },
-    "id": "sample_search",
-    "type": "search",
-  },
-  Object {
-    "appLink": "",
-    "attributes": Object {
-      "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
-    },
-    "id": "sample_security_rule",
-    "type": "security-rule",
-  },
-  Object {
     "appLink": "",
     "attributes": Object {
       "description": "",
     },
     "id": "sample_tag",
     "type": "tag",
-  },
-  Object {
-    "appLink": "/app/visualize#/edit/sample_visualization",
-    "attributes": Object {
-      "description": "sample visualization update",
-      "title": "sample vis title",
-    },
-    "id": "sample_visualization",
-    "type": "visualization",
   },
 ]
 `;
