@@ -8,25 +8,27 @@
  */
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import {
-  canImportVisContext,
+import type {
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
   UnifiedHistogramCreationOptions,
-  UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
+import {
+  canImportVisContext,
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramFetchStatus,
+} from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Observable } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
   filter,
   map,
   merge,
-  Observable,
   pairwise,
   skip,
   startWith,
@@ -35,7 +37,8 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -48,7 +51,7 @@ import {
   useAppStateSelector,
   type DiscoverAppState,
 } from '../../state_management/discover_app_state_container';
-import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import type { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
