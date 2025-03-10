@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useState as useStateMock } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { SelectIndicesFlyout } from './select_indices_flyout';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -16,6 +16,11 @@ jest.mock('../hooks/use_source_indices_field');
 jest.mock('../hooks/use_query_indices');
 jest.mock('../hooks/use_indices_fields', () => ({
   useIndicesFields: () => ({ fields: {} }),
+}));
+
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  useState: jest.fn(),
 }));
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -33,9 +38,12 @@ const mockedUseQueryIndices = useQueryIndices as jest.MockedFunction<typeof useQ
 
 describe('SelectIndicesFlyout', () => {
   const onCloseMock = jest.fn();
+  const setSelectedTempIndices = jest.fn();
+  const useStateMockImplementation = (initialState: any) => [initialState, setSelectedTempIndices];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useStateMock as jest.Mock).mockImplementation(useStateMockImplementation);
 
     mockedUseSourceIndicesFields.mockReturnValue({
       indices: ['index1', 'index2'],
@@ -107,5 +115,15 @@ describe('SelectIndicesFlyout', () => {
 
     const saveButton = getByTestId('saveButton');
     expect(saveButton).toBeDisabled();
+  });
+
+  it('updates selectedTempIndices correctly', () => {
+    const { getByTestId } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
+      wrapper: Wrapper,
+    });
+
+    fireEvent.click(getByTestId('sourceIndex-2'));
+
+    expect(setSelectedTempIndices).toHaveBeenCalledWith(['index1', 'index2', 'index3']);
   });
 });
