@@ -7,10 +7,19 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiResizableContainer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { GroupedTable } from './grouped_table';
 import { FieldList } from './field_list';
+
+const FIELD_LIST_PANEL_ID = 'fieldList';
+const TABLE_PANEL_ID = 'table';
+
+const FIELD_LIST_INITIAL_WIDTH = 20; // %
+const TABLE_INITIAL_WIDTH = 80; // %
+
+const FIELD_LIST_MIN_WIDTH = '250px';
+const TABLE_MIN_WIDTH = '70%';
 
 export interface TableSectionProps {
   /**
@@ -24,18 +33,31 @@ export interface TableSectionProps {
  */
 export const TableSection = memo(({ dataView }: TableSectionProps) => {
   return (
-    <EuiFlexGroup
+    <EuiResizableContainer
       css={css`
         height: 600px;
       `}
     >
-      <EuiFlexItem grow={0}>
-        <FieldList dataView={dataView} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <GroupedTable dataView={dataView} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {(EuiResizablePanel, EuiResizableButton) => (
+        <>
+          <EuiResizablePanel
+            id={FIELD_LIST_PANEL_ID}
+            initialSize={FIELD_LIST_INITIAL_WIDTH}
+            minSize={FIELD_LIST_MIN_WIDTH}
+          >
+            <FieldList dataView={dataView} />
+          </EuiResizablePanel>
+          <EuiResizableButton />
+          <EuiResizablePanel
+            id={TABLE_PANEL_ID}
+            initialSize={TABLE_INITIAL_WIDTH}
+            minSize={TABLE_MIN_WIDTH}
+          >
+            <GroupedTable dataView={dataView} />
+          </EuiResizablePanel>
+        </>
+      )}
+    </EuiResizableContainer>
   );
 });
 

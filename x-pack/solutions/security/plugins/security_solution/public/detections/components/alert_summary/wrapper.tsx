@@ -78,7 +78,7 @@ export const Wrapper = memo(({ dataView }: WrapperProps) => {
           <EuiSpacer />
           <EuiSkeletonRectangle height={275} width="100%" />
           <EuiSpacer />
-          <EuiSkeletonRectangle height={500} width="100%" />
+          <EuiSkeletonRectangle height={600} width="100%" />
         </>
       }
       loadedContent={

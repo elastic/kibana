@@ -78,12 +78,14 @@ export const FieldList = memo(({ dataView }: FieldListProps) => {
 
   return (
     <UnifiedFieldListSidebarContainer
-      ref={unifiedFieldListContainerRef}
       allFields={dataView.fields}
+      compressed
       dataView={dataView}
+      fullWidth
       getCreationOptions={getFieldsListCreationOptions}
       onAddFieldToWorkspace={onAddFieldToWorkspace}
       onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+      ref={unifiedFieldListContainerRef}
       services={services}
     />
   );
