@@ -24,7 +24,7 @@ import { closeToast } from '../../../tasks/common/toast';
 import { getFullname } from '../../../tasks/common';
 
 // FLAKY: https://github.com/elastic/kibana/issues/187550
-describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();

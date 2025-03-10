@@ -70,7 +70,7 @@ describe('Timeline', () => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/194510
-    describe.skip('no existing esql query is present', () => {
+    describe('no existing esql query is present', () => {
       it('should not show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isEsqlAdvancedSettingEnabled: false,
