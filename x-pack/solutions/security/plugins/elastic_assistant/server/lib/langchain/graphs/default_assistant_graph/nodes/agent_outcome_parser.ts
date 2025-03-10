@@ -3,43 +3,74 @@ import { AgentAction, AgentFinish } from "langchain/agents";
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 
-export const AgentOutcomeParser = ({ logger }: { logger: Logger }) => (outcome: unknown): BaseMessage => {
-    console.log(outcome)
-    if (isAgentFinish(outcome)) {
-        return new AIMessage({
-            content: outcome.returnValues.output,
-        });
+export const AgentOutcomeParser = ({ logger }: { logger: Logger }) => (item: unknown | unknown[]): BaseMessage => {
+    if (isAgentFinish(item)) {
+        return parseAgentFinish(item);
     }
-    if (isAgentAction(outcome)) {
-        return new AIMessage({
-            content: outcome.log,
-            tool_calls: [
-                {
-                    name: outcome.tool,
-                    args: outcome.toolInput as Record<string, unknown>,
-                    id: uuidv4(),
-                }
-            ]
-        });
+    if (isAgentAction(item)) {
+        return parseAgentAction(item);
     }
-    logger.error(`Unknown agent outcome: ${outcome}`);
+
+    console.log(JSON.stringify(item, null, 2));
     return new AIMessage({
         content: `-`,
     });
 }
 
-const isAgentFinish = (outcome: unknown): outcome is AgentFinish => {
-    if (outcome !== undefined && typeof outcome === 'object') {
-        const outcomeObj = outcome as AgentFinish;
-        return outcomeObj.returnValues !== undefined && outcomeObj.log !== undefined;
+const parseAgentAction = (item: AgentAction | AgentAction[]): BaseMessage => {
+    if(Array.isArray(item)) {
+        return new AIMessage({
+            content: item.map(i=>i.log).join('\n'),
+            tool_calls: item.map(i=>({
+                name: i.tool,
+                args: i.toolInput as Record<string, unknown>,
+                id: "toolCallId" in i ? i.toolCallId as string : uuidv4()
+            }))
+        })
+    }
+
+    return new AIMessage({
+        content: item.log,
+        tool_calls: [
+            {
+                name: item.tool,
+                args: item.toolInput as Record<string, unknown>,
+                id: "toolCallId" in item ? item.toolCallId as string : uuidv4()
+            }
+        ]
+    });
+}
+
+const parseAgentFinish = (item: AgentFinish | AgentFinish[]): BaseMessage => {
+    if(Array.isArray(item)) {
+        return new AIMessage({
+            content: item.map(i=>i.returnValues.output).join('\n'),
+        })
+    }
+
+    return new AIMessage({
+        content: item.returnValues.output,
+    });
+}
+
+const isAgentFinish = (item: unknown | unknown[]): item is AgentFinish | AgentFinish[] => {
+    if(Array.isArray(item)) {
+        return item.every(isAgentFinish);
+    }
+    if (item !== undefined && typeof item === 'object') {
+        const agentFinish = item as AgentFinish;
+        return agentFinish.returnValues !== undefined && agentFinish.log !== undefined;
     }
     return false;
 }
 
-const isAgentAction = (outcome: unknown): outcome is AgentAction => {
-    if (outcome !== undefined && typeof outcome === 'object') {
-        const outcomeObj = outcome as AgentAction;
-        return outcomeObj.tool !== undefined && outcomeObj.toolInput !== undefined && outcomeObj.log !== undefined;
+const isAgentAction = (item: unknown | unknown[]): item is AgentAction | AgentAction[] => {
+    if(Array.isArray(item)) {
+        return item.every(isAgentAction);
+    }
+    if (item !== undefined && typeof item === 'object') {
+        const agentAction = item as AgentAction;
+        return agentAction.tool !== undefined && agentAction.toolInput !== undefined && agentAction.log !== undefined;
     }
 
     return false;
