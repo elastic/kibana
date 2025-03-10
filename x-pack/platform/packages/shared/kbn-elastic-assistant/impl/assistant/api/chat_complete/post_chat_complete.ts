@@ -36,7 +36,7 @@ export const postChatComplete = async ({
   traceOptions,
 }: PostChatCompleteParams): Promise<ChatCompleteResponse> => {
   try {
-    // TODO get connector id and actionTypeId from Elastic LLM
+    // TODO get connector id and actionTypeIdfrom configured LLM
     const connectorId = 'my-gpt4o-ai';
     const actionTypeId = '.gen-ai';
     const path = `/internal/elastic_assistant/actions/connector/${connectorId}/_execute`;
