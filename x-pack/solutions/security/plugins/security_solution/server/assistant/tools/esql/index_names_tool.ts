@@ -20,7 +20,7 @@ export const getIndexNamesTool = ({ esClient }: { esClient: ElasticsearchClient 
       const indexNames = await esClient.cat
         .indices({
           format: 'json',
-          expand_wildcards:'all'
+          expand_wildcards: 'all',
         })
         .then((response) =>
           response

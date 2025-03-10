@@ -14,13 +14,13 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { getEsqlSelfHealingGraph } from '../../server/assistant/tools/esql/graph';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
-import { getEsqlSelfHealingGraph } from '@kbn/security-solution-plugin/server/assistant/tools/esql/graph';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -92,4 +92,3 @@ export const draw = async () => {
     outputFilename: '../../docs/esql_self_healing/img/esql_self_healing_graph.png',
   });
 };
-

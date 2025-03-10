@@ -46,15 +46,15 @@ export const getNlToEsqlAgent = ({
         logger,
         tools: langchainToolsToInferenceTools(tools),
         messages: inferenceMessages,
-        system: 'It is very important to use tools to answer the question.'
+        system: 'It is very important to use tools to answer the question.',
       })
     )) as ChatCompletionMessageEvent;
 
-        return new Command({
-            update:{
-                messages : [nlToEsqlTaskEventToLangchainMessage(result)],
-                maximumLLMCalls: state.maximumLLMCalls - 1
-            }
-        })
-    }
-}
+    return new Command({
+      update: {
+        messages: [nlToEsqlTaskEventToLangchainMessage(result)],
+        maximumLLMCalls: state.maximumLLMCalls - 1,
+      },
+    });
+  };
+};
