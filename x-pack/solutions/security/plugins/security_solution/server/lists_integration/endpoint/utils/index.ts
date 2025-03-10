@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// for API tests
-export { getAggregatedCriticalPathRootNodes } from './critical_path/get_aggregated_critical_path_root_nodes';
+export * from './set_find_request_filter_scope_to_active_space';
