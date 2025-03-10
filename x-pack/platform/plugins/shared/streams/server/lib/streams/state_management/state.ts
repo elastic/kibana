@@ -148,7 +148,7 @@ export class State {
         newCascadingChanges.push(...newChanges);
       }
       currentCascadingChanges = newCascadingChanges;
-      if (++iterationCounter > 10) {
+      if (++iterationCounter > 100) {
         throw new Error('Excessive cascading changes');
       }
     }
