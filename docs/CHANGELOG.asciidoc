@@ -200,9 +200,8 @@ For detailed information about the 8.18.0 release, review the enhancements and b
 Alerting::
 * Allows pre-configured connectors to opt-in to exposing their config by setting `exposeConfig` ({kibana-pull}207654[#207654]).
 * Adds new flyout to rule form library, responsive design and illustration to rule form page ({kibana-pull}206141[#206141]).
-* Case templates are now generally available ({kibana-pull}205940[#205940]).
-* Ability to pass any field to ServiceNow using the ServiceNow SecOps connector with a JSON field called "additional fields" ({kibana-pull}201948[#201948]).
 Cases::
+* Case templates are now generally available ({kibana-pull}205940[#205940]).
 * ServiceNow connectors support the ability to send a JSON payload to ServiceNow using the "Additional fields" form field ({kibana-pull}201948[#201948]). 
 Dashboards & Visualizations::
 * Allows custom MVT sources to style the map layers and provide custom legend ({kibana-pull}200656[#200656]).
