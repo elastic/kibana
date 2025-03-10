@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import * as RxApi from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -19,7 +19,8 @@ import {
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { type Filter } from '@kbn/es-query';
-import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
+import type { DiscoverNoResultsProps } from './no_results';
+import { DiscoverNoResults } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
