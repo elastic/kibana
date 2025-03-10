@@ -100,8 +100,6 @@ export const useInvalidateKnowledgeBaseStatus = () => {
  */
 export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undefined): boolean =>
   (kbStatus?.elser_exists &&
-    kbStatus?.index_exists &&
-    kbStatus?.pipeline_exists &&
     // Allows to use UI while importing Security Labs docs
     (kbStatus?.security_labs_exists ||
       kbStatus?.is_setup_in_progress ||

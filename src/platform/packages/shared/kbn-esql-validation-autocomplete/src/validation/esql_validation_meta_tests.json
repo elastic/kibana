@@ -10050,7 +10050,7 @@
     {
       "query": "from index METADATA _id, _source2",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode]"
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score]"
       ],
       "warning": []
     },
