@@ -141,12 +141,12 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   if (node) {
     if (node.type === 'literal' && node.literalType === 'keyword') {
       // command ... "<here>"
-      return { type: 'value' as const, command, node };
+      return { type: 'value' as const, command, node, option: undefined };
     }
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
-        return { type: 'list' as const, command, node };
+        return { type: 'list' as const, command, node, option: undefined };
       }
       if (
         isNotEnrichClauseAssigment(node, command) &&
@@ -157,19 +157,20 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         !(isOperator(node) && command.name !== 'stats')
       ) {
         // command ... fn( <here> )
-        return { type: 'function' as const, command, node };
+        return { type: 'function' as const, command, node, option: undefined };
       }
     }
   }
   if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node };
+    return { type: 'newCommand' as const, command: undefined, node, option: undefined };
   }
 
   // command a ... <here> OR command a = ... <here>
   return {
     type: 'expression' as const,
     command,
+    option: undefined,
     node,
   };
 }

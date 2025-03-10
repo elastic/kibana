@@ -409,13 +409,13 @@ describe('autocomplete', () => {
     testSuggestions('FROM index1 | MV_EXPAND f/', getFieldNamesByType('any'));
 
     // RENAME field
-    testSuggestions('FROM index1 | RENAME f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | RENAME f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS $0']);
-
-    // RENAME field AS var0
-    testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
