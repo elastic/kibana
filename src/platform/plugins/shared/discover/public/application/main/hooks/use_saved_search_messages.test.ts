@@ -20,7 +20,10 @@ import {
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { DataDocumentsMsg, DataMainMsg } from '../state_management/discover_data_state_container';
+import type {
+  DataDocumentsMsg,
+  DataMainMsg,
+} from '../state_management/discover_data_state_container';
 import { filter } from 'rxjs';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
