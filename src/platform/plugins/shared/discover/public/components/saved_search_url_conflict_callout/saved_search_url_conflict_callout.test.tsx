@@ -14,7 +14,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
