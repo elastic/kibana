@@ -8,12 +8,20 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useShareTabsContext } from '.';
+import { useShareTabsContext, useShareContext } from '.';
 
 describe('share menu context', () => {
+  describe('useShareContext', () => {
+    it('throws an error if used outside of ShareMenuProvider tree', () => {
+      expect(() => renderHook(() => useShareContext())).toThrow(
+        /^Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing./
+      );
+    });
+  });
+
   describe('useShareTabsContext', () => {
     it('throws an error if used outside of ShareMenuProvider tree', () => {
-      expect(() => renderHook(() => useShareTabsContext())).toThrow(
+      expect(() => renderHook(() => useShareTabsContext('embed'))).toThrow(
         /^Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing./
       );
     });
