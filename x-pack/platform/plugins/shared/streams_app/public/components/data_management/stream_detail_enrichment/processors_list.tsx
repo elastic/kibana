@@ -10,20 +10,19 @@ import { EuiDraggable } from '@elastic/eui';
 import { EditProcessorPanel, type EditProcessorPanelProps } from './processors';
 
 export const DraggableProcessorListItem = ({
-  processor,
   idx,
   ...props
 }: EditProcessorPanelProps & { idx: number }) => (
   <EuiDraggable
     index={idx}
     spacing="m"
-    draggableId={processor.id}
+    draggableId={props.processorRef.id}
     hasInteractiveChildren
     style={{
       paddingLeft: 0,
       paddingRight: 0,
     }}
   >
-    {() => <EditProcessorPanel processor={processor} {...props} />}
+    {() => <EditProcessorPanel {...props} />}
   </EuiDraggable>
 );
