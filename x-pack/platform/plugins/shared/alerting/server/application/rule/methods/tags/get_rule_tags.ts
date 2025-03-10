@@ -54,7 +54,7 @@ export async function getRuleTags(
 
   const { filter: authorizationFilter } = authorizationTuple;
   const ruleTypeIdsFilter = buildRuleTypeIdsFilter(ruleTypeIds);
-  const searchFilter = !!search
+  const searchFilter = Boolean(search)
     ? nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(`${search}*`))
     : null;
   const combinedFilters = combineFilters([ruleTypeIdsFilter, searchFilter]);

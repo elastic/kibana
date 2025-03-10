@@ -241,13 +241,13 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             .get(
               `${getUrlPrefix(
                 Spaces.space1.id
-              )}/internal/alerting/rules/_tags?page=1&per_page=5&rule_type_ids=["test.noop","test.restricted-noop"]`
+              )}/internal/alerting/rules/_tags?page=1&per_page=10&rule_type_ids=["test.noop","test.restricted-noop"]`
             )
             .expect(200);
 
           expect(response.body).to.eql({
             data: ['rule1-tag1', 'rule1-tag2', 'rule2-tag1', 'rule2-tag2'],
-            per_page: 5,
+            per_page: 10,
             page: 1,
             total: 4,
           });
