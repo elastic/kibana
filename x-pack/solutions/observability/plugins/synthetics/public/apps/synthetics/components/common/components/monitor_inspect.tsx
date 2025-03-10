@@ -80,6 +80,7 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiSwitch
+                compressed
                 label={HIDE_PARAMS}
                 checked={hideParams}
                 onChange={(e) => setHideParams(e.target.checked)}
@@ -87,6 +88,7 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSwitch
+                compressed
                 label={AS_JSON}
                 checked={asJson}
                 onChange={(e) => setAsJson(e.target.checked)}
