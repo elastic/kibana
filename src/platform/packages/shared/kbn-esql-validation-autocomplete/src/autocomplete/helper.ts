@@ -532,7 +532,8 @@ export function checkFunctionInvocationComplete(
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return func.args.every((a, index) => {
       return (
-        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        fnDefinition.name.endsWith('null') ||
+        def.params[index].type === 'any' ||
         def.params[index].type === getExpressionType(a)
       );
     });

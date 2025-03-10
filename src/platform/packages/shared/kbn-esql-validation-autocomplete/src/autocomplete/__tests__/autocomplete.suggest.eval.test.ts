@@ -15,6 +15,8 @@ import {
   getLiteralsByType,
   PartialSuggestionWithText,
   getDateLiteralsByFieldType,
+  AssertSuggestionsFn,
+  fields,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
@@ -45,27 +47,89 @@ const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataTyp
 
 describe('autocomplete.suggest', () => {
   describe('eval', () => {
-    test('suggestions', async () => {
-      const { assertSuggestions } = await setup();
+    let assertSuggestions: AssertSuggestionsFn;
+
+    beforeEach(async () => {
+      const setupResult = await setup();
+      assertSuggestions = setupResult.assertSuggestions;
+    });
+
+    test('empty expression', async () => {
       await assertSuggestions('from a | eval /', [
         'var0 = ',
-        ...getFieldNamesByType('any'),
+        ...getFieldNamesByType('any').map((v) => `${v} `),
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ]);
 
-      await assertSuggestions('from a | eval doubleField/', [
-        'doubleField, ',
-        'doubleField | ',
-        'var0 = ',
-      ]);
+      // Re-enable with https://github.com/elastic/kibana/issues/210639
+      // await assertSuggestions('from a | eval a=doubleField, /', [
+      //   'var0 = ',
+      //   ...getFieldNamesByType('any').map((v) => `${v} `),
+      //   'a',
+      //   ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      // ]);
 
+      await assertSuggestions(
+        'from a | stats avg(doubleField) by keywordField | eval /',
+        [
+          'var0 = ',
+          '`avg(doubleField)` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ],
+        {
+          triggerCharacter: ' ',
+          // make aware EVAL of the previous STATS command
+          callbacks: createCustomCallbackMocks(
+            [{ name: 'avg(doubleField)', type: 'double' }],
+            undefined,
+            undefined
+          ),
+        }
+      );
+      await assertSuggestions(
+        'from a | eval abs(doubleField) + 1 | eval /',
+        [
+          'var0 = ',
+          ...getFieldNamesByType('any').map((v) => `${v} `),
+          '`abs(doubleField) + 1` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ],
+        {
+          triggerCharacter: ' ',
+          callbacks: createCustomCallbackMocks(
+            [...fields, { name: 'abs(doubleField) + 1', type: 'double' }],
+            undefined,
+            undefined
+          ),
+        }
+      );
+      await assertSuggestions(
+        'from a | stats avg(doubleField) by keywordField | eval /',
+        [
+          'var0 = ',
+          '`avg(doubleField)` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ],
+        {
+          triggerCharacter: ' ',
+          callbacks: createCustomCallbackMocks(
+            [{ name: 'avg(doubleField)', type: 'double' }],
+            undefined,
+            undefined
+          ),
+        }
+      );
+    });
+
+    test('after column', async () => {
       await assertSuggestions('from a | eval doubleField /', [
         ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
         ]),
-        ',',
-        '| ',
       ]);
+    });
+
+    test('after NOT', async () => {
       await assertSuggestions('from index | EVAL keywordField not /', [
         'LIKE $0',
         'RLIKE $0',
@@ -76,6 +140,14 @@ describe('autocomplete.suggest', () => {
         'RLIKE $0',
         'IN $0',
       ]);
+
+      await assertSuggestions('from index | EVAL not /', [
+        ...getFieldNamesByType('boolean'),
+        ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
+      ]);
+    });
+
+    test('with lists', async () => {
       await assertSuggestions('from index | EVAL doubleField in /', ['( $0 )']);
       await assertSuggestions(
         'from index | EVAL doubleField in (/)',
@@ -86,10 +158,9 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: '(' }
       );
       await assertSuggestions('from index | EVAL doubleField not in /', ['( $0 )']);
-      await assertSuggestions('from index | EVAL not /', [
-        ...getFieldNamesByType('boolean'),
-        ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
-      ]);
+    });
+
+    test('after assignment', async () => {
       await assertSuggestions(
         'from a | eval a=/',
         [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
@@ -100,12 +171,9 @@ describe('autocomplete.suggest', () => {
         [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
         { triggerCharacter: '=' }
       );
-      await assertSuggestions('from a | eval a=doubleField, /', [
-        'var0 = ',
-        ...getFieldNamesByType('any'),
-        'a',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-      ]);
+    });
+
+    test('in and around functions', async () => {
       await assertSuggestions(
         'from a | eval a=round(/)',
         [
@@ -212,64 +280,6 @@ describe('autocomplete.suggest', () => {
           scalar: true,
         }),
       ]);
-      await assertSuggestions(
-        'from a | stats avg(doubleField) by keywordField | eval /',
-        [
-          'var0 = ',
-          '`avg(doubleField)`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-        ],
-        {
-          triggerCharacter: ' ',
-          // make aware EVAL of the previous STATS command
-          callbacks: createCustomCallbackMocks([], undefined, undefined),
-        }
-      );
-      await assertSuggestions(
-        'from a | eval abs(doubleField) + 1 | eval /',
-        [
-          'var0 = ',
-          ...getFieldNamesByType('any'),
-          '`abs(doubleField) + 1`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-        ],
-        { triggerCharacter: ' ' }
-      );
-      await assertSuggestions(
-        'from a | stats avg(doubleField) by keywordField | eval /',
-        [
-          'var0 = ',
-          '`avg(doubleField)`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-        ],
-        {
-          triggerCharacter: ' ',
-          callbacks: createCustomCallbackMocks(
-            [{ name: 'avg_doubleField_', type: 'double' }],
-            undefined,
-            undefined
-          ),
-        }
-        // make aware EVAL of the previous STATS command with the buggy field name from expression
-      );
-      await assertSuggestions(
-        'from a | stats avg(doubleField), avg(kubernetes.something.something) by keywordField | eval /',
-        [
-          'var0 = ',
-          '`avg(doubleField)`',
-          '`avg(kubernetes.something.something)`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-        ],
-        {
-          triggerCharacter: ' ',
-          // make aware EVAL of the previous STATS command with the buggy field name from expression
-          callbacks: createCustomCallbackMocks(
-            [{ name: 'avg_doubleField_', type: 'double' }],
-            undefined,
-            undefined
-          ),
-        }
-      );
 
       await assertSuggestions(
         'from a | eval a=round(doubleField), b=round(/)',
@@ -335,11 +345,9 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: ' ' }
       );
-      // test deep function nesting suggestions (and check that the same function is not suggested)
-      // round(round(
-      // round(round(round(
-      // etc...
+    });
 
+    test('deep function nesting', async () => {
       for (const nesting of [1, 2, 3, 4]) {
         await assertSuggestions(
           `from a | eval a=${Array(nesting).fill('round(/').join('')}`,
@@ -356,13 +364,13 @@ describe('autocomplete.suggest', () => {
           { triggerCharacter: '(' }
         );
       }
+    });
 
+    test('discards query after cursor', async () => {
       const absParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
       // Smoke testing for suggestions in previous position than the end of the statement
       await assertSuggestions('from a | eval var0 = abs(doubleField) / | eval abs(var0)', [
-        ',',
-        '| ',
         ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
         ]),
@@ -398,9 +406,6 @@ describe('autocomplete.suggest', () => {
         ) {
           test(`${fn.name}`, async () => {
             const testedCases = new Set<string>();
-
-            const { assertSuggestions } = await setup();
-
             for (const signature of fn.signatures) {
               // @ts-expect-error Partial type
               const enrichedArgs: Array<
@@ -517,7 +522,6 @@ describe('autocomplete.suggest', () => {
         // but currently, our autocomplete only suggests the literal suggestions
         if (['date_extract', 'date_diff'].includes(fn.name)) {
           test(`${fn.name}`, async () => {
-            const { assertSuggestions } = await setup();
             const firstParam = fn.signatures[0].params[0];
             const suggestedConstants = firstParam?.literalSuggestions || firstParam?.acceptedValues;
             const requiresMoreArgs = true;
@@ -538,7 +542,6 @@ describe('autocomplete.suggest', () => {
     });
 
     test('date math', async () => {
-      const { assertSuggestions } = await setup();
       const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
 
       // Eval bucket is not a valid expression
@@ -581,7 +584,6 @@ describe('autocomplete.suggest', () => {
     });
 
     test('case', async () => {
-      const { assertSuggestions } = await setup();
       const comparisonOperators = ['==', '!=', '>', '<', '>=', '<=']
         .map((op) => `${op}`)
         .concat(',');

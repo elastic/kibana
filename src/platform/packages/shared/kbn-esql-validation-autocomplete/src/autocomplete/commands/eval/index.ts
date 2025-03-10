@@ -8,16 +8,36 @@
  */
 
 import type { ESQLSingleAstItem } from '@kbn/esql-ast';
+import { isAssignment } from '../../../..';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { suggestForExpression } from '../where';
+import { getPosition } from '../where/util';
+import { getNewVariableSuggestion } from '../../factories';
 
 export async function suggest(
   params: CommandSuggestParams<'eval'>
 ): Promise<SuggestionRawDefinition[]> {
-  const expressionRoot = params.command.args[0] as ESQLSingleAstItem | undefined;
-  return suggestForExpression({
+  let expressionRoot = /,\s*$/.test(params.innerText)
+    ? undefined
+    : (params.command.args[params.command.args.length - 1] as ESQLSingleAstItem | undefined);
+
+  if (expressionRoot && isAssignment(expressionRoot)) {
+    // EVAL foo = <use this as the expression root>
+    expressionRoot = expressionRoot.args[1][0] as ESQLSingleAstItem;
+  }
+
+  const suggestions = await suggestForExpression({
     ...params,
     expressionRoot,
+    commandName: 'eval',
   });
+
+  // EVAL-specific stuff
+  const positionInExpression = getPosition(params.innerText, expressionRoot);
+  if (positionInExpression === 'empty_expression') {
+    suggestions.push(getNewVariableSuggestion(params.getSuggestedVariableName()));
+  }
+
+  return suggestions;
 }

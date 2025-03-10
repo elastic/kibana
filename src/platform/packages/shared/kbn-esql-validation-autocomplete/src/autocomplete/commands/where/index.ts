@@ -34,20 +34,37 @@ export async function suggest(
   return suggestForExpression({
     ...params,
     expressionRoot,
+    commandName: 'where',
   });
 }
 
+/**
+ * Creates suggestion within an expression.
+ *
+ * TODO — should this function know about the command context
+ * or would we prefer a set of generic configuration options?
+ *
+ * @param param0
+ * @returns
+ */
 export async function suggestForExpression({
   expressionRoot,
   innerText,
   getExpressionType,
   getColumnsByType,
+  getSuggestedVariableName,
   previousCommands,
+  commandName,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
+  commandName: string;
 } & Pick<
   CommandSuggestParams<string>,
-  'innerText' | 'getExpressionType' | 'getColumnsByType' | 'previousCommands'
+  | 'innerText'
+  | 'getExpressionType'
+  | 'getColumnsByType'
+  | 'previousCommands'
+  | 'getSuggestedVariableName'
 >): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -65,9 +82,8 @@ export async function suggestForExpression({
 
       suggestions.push(
         ...getOperatorSuggestions({
-          command: 'where',
+          command: commandName,
           leftParamType: columnType,
-          // no assignments allowed in WHERE
           ignored: ['='],
         })
       );
@@ -85,7 +101,7 @@ export async function suggestForExpression({
 
       suggestions.push(
         ...getOperatorSuggestions({
-          command: 'where',
+          command: commandName,
           leftParamType: returnType,
           ignored: ['='],
         })
@@ -149,9 +165,9 @@ export async function suggestForExpression({
       suggestions.push(
         ...(await getSuggestionsToRightOfOperatorExpression({
           queryText: innerText,
-          commandName: 'where',
+          commandName,
           rootOperator: rightmostOperator,
-          preferredExpressionType: 'boolean',
+          preferredExpressionType: commandName === 'where' ? 'boolean' : undefined,
           getExpressionType,
           getColumnsByType,
         }))
@@ -179,7 +195,7 @@ export async function suggestForExpression({
       }
       suggestions.push(
         ...columnSuggestions,
-        ...getFunctionSuggestions({ command: 'where', ignored })
+        ...getFunctionSuggestions({ command: commandName, ignored })
       );
 
       break;
@@ -198,7 +214,7 @@ export async function suggestForExpression({
    * - it counts "." as a word separator
    * - it doesn't handle multi-word completions (like "is null")
    *
-   * TODO - think about how to generalize this.
+   * TODO - think about how to generalize this — issue: https://github.com/elastic/kibana/issues/209905
    */
   const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
   if (hasNonWhitespacePrefix) {
