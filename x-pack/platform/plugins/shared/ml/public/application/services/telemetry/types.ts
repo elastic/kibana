@@ -6,6 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
+import type { TrainedModelType } from '@kbn/ml-trained-models-utils';
 
 export interface TrainedModelsDeploymentEbtProps {
   model_id: string;
@@ -18,15 +19,29 @@ export interface TrainedModelsDeploymentEbtProps {
   vcpu_usage: 'low' | 'medium' | 'high';
 }
 
-export enum TrainedModelsTelemetryEventTypes {
-  DEPLOYMENT_CREATED = 'Trained Models Deployment Created',
+export interface TrainedModelsModelTestedEbtProps {
+  model_id: string;
+  model_type?: TrainedModelType;
+  task_type?: string;
+  result: 'success' | 'failure';
 }
 
-export interface TrainedModelsTelemetryEvent {
-  eventType: TrainedModelsTelemetryEventTypes.DEPLOYMENT_CREATED;
-  schema: RootSchema<TrainedModelsDeploymentEbtProps>;
+export enum TrainedModelsTelemetryEventTypes {
+  DEPLOYMENT_CREATED = 'Trained Models Deployment Created',
+  MODEL_TESTED = 'Trained Model Tested',
 }
+
+export type TrainedModelsTelemetryEvent =
+  | {
+      eventType: TrainedModelsTelemetryEventTypes.DEPLOYMENT_CREATED;
+      schema: RootSchema<TrainedModelsDeploymentEbtProps>;
+    }
+  | {
+      eventType: TrainedModelsTelemetryEventTypes.MODEL_TESTED;
+      schema: RootSchema<TrainedModelsModelTestedEbtProps>;
+    };
 
 export interface ITelemetryClient {
   trackTrainedModelsDeploymentCreated: (eventProps: TrainedModelsDeploymentEbtProps) => void;
+  trackTrainedModelsModelTested: (eventProps: TrainedModelsModelTestedEbtProps) => void;
 }
