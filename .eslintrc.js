@@ -1089,6 +1089,7 @@ module.exports = {
         'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1642,10 +1643,11 @@ module.exports = {
      */
     {
       files: [
-        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
           'error',
