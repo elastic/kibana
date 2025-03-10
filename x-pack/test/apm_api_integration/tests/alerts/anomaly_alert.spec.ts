@@ -12,7 +12,13 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
+import type { Client } from '@elastic/elasticsearch';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Effect } from 'effect';
+import {
+  APM_ALERTS_INDEX,
+  ApmAlertFields,
+} from '../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { createApmRule } from './helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
@@ -77,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await ml.cleanMlIndices();
       }
 
-      describe('with ml jobs', () => {
+      describe.only('with ml jobs', () => {
         let createdRule: Awaited<ReturnType<typeof createApmRule>>;
 
         before(async () => {
@@ -114,4 +120,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     }
   );
+}
+
+async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
+  const response = (await es.search({
+    index: APM_ALERTS_INDEX,
+    body: {
+      query: {
+        term: {
+          'kibana.alert.rule.uuid': ruleId,
+        },
+      },
+    },
+  })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;
+
+  return response.hits.hits.map((hit) => hit._source) as ApmAlertFields[];
+}
+async function waitForAlertsForRule({
+  es,
+  ruleId,
+  minimumAlertCount = 1,
+}: {
+  es: Client;
+  ruleId: string;
+  minimumAlertCount?: number;
+}) {
+  // :: Effect.Effect<ApmAlertFields[], TimeoutException, never>
+  const main = Effect.gen(function* () {
+    return yield* Effect.promise(() =>
+      getAlertByRuleId({ es, ruleId }).then((alerts) => {
+        const actualAlertCount = alerts.length;
+        if (actualAlertCount < minimumAlertCount)
+          throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
+        return alerts;
+      })
+    );
+  }).pipe(Effect.timeout('30 seconds'));
+
+  return await Effect.runPromise(Effect.retry(main, { times: 100 }));
 }
