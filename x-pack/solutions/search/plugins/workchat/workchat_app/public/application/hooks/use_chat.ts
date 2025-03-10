@@ -9,8 +9,11 @@ import { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationCreatedEvent } from '../../../common/chat_events';
 import type { ChatError } from '../../../common/errors';
-import type { ConversationEvent } from '../../../common/conversations';
-import { assistantMessageEvent, userMessageEvent } from '../../../common/utils/conversation';
+import {
+  type ConversationEvent,
+  createUserMessage,
+  createAssistantMessage,
+} from '../../../common/conversation_events';
 import { useWorkChatServices } from './use_workchat_service';
 import { useKibana } from './use_kibana';
 
@@ -45,7 +48,10 @@ export const useChat = ({
         return;
       }
       setStatus('loading');
-      setConversationEvents((prevEvents) => [...prevEvents, userMessageEvent(nextMessage)]);
+      setConversationEvents((prevEvents) => [
+        ...prevEvents,
+        createUserMessage({ content: nextMessage }),
+      ]);
 
       const events$ = chatService.converse({
         nextMessage,
@@ -58,6 +64,11 @@ export const useChat = ({
 
       events$.subscribe({
         next: (event) => {
+          // TODO: remove
+          // if (event.type !== 'message_chunk') {
+          //   console.log('*** event', event);
+          // }
+
           if (event.type === 'message_chunk') {
             concatenatedChunks += event.text_chunk;
             setPendingMessage(concatenatedChunks);
@@ -70,7 +81,7 @@ export const useChat = ({
         complete: () => {
           setConversationEvents((prevEvents) => [
             ...prevEvents,
-            assistantMessageEvent(concatenatedChunks),
+            createAssistantMessage({ content: concatenatedChunks }),
           ]);
           setPendingMessage('');
           setStatus('ready');
@@ -108,7 +119,7 @@ export const useChat = ({
 
   const allEvents = useMemo(() => {
     return [...conversationEvents].concat(
-      pendingMessage ? [assistantMessageEvent(pendingMessage)] : []
+      pendingMessage ? [createAssistantMessage({ content: pendingMessage })] : []
     );
   }, [conversationEvents, pendingMessage]);
 

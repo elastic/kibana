@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { ConversationEvent } from '../../../common/conversations';
-import { isMessageEvent } from '../../../common/utils/conversation';
+import {
+  type ConversationEvent,
+  isAssistantMessage,
+  isUserMessage,
+  createAssistantMessage,
+} from '../../../common/conversation_events';
 import type { ChatStatus } from '../hooks/use_chat';
 
 // TODO: maybe composition from ConversationEvent?
-export interface ConversationItem {
-  type: 'message';
-  user: 'user' | 'assistant';
+export type ConversationItem = ConversationEvent & {
   loading: boolean;
-  id: string;
-  createdAt: string;
-  content: string;
-}
+};
 
 /**
  * Utility function preparing the data to display the chat conversation
@@ -29,30 +28,24 @@ export const getChartConversationItems = ({
   conversationEvents: ConversationEvent[];
   chatStatus: ChatStatus;
 }): ConversationItem[] => {
-  const items = conversationEvents.filter(isMessageEvent).map<ConversationItem>((event, index) => {
-    return {
-      type: 'message',
-      user: event.message.type,
-      loading: false,
-      id: event.id,
-      createdAt: event.createdAt,
-      content: event.message.content,
-    };
-  });
+  const items = conversationEvents
+    .filter((event) => isUserMessage(event) || isAssistantMessage(event))
+    .map<ConversationItem>((event, index) => {
+      return {
+        ...event,
+        loading: false,
+      };
+    });
 
   if (chatStatus === 'loading') {
     const lastItem = items[items.length - 1];
-    if (lastItem.user === 'assistant') {
+    if (isAssistantMessage(lastItem)) {
       lastItem.loading = true;
     } else {
       // need to insert loading placeholder
       items.push({
-        type: 'message',
-        user: 'assistant',
+        ...createAssistantMessage({ content: '' }),
         loading: true,
-        id: '__placeholder__',
-        createdAt: '',
-        content: '',
       });
     }
   }

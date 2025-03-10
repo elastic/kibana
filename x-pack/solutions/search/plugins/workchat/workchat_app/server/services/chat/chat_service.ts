@@ -30,9 +30,9 @@ import {
   isMessageEvent,
 } from '../../../common/utils/chat_events';
 import { createChatError, isChatError } from '../../../common/errors';
-import { userMessageEvent, messageEvent } from '../../../common/utils/conversation';
+import { type ConversationEvent, createUserMessage } from '../../../common/conversation_events';
 import type { ChatEvent } from '../../../common/chat_events';
-import type { Conversation, ConversationEvent } from '../../../common/conversations';
+import type { Conversation } from '../../../common/conversations';
 import { AgentFactory } from '../orchestration';
 import { ConversationService, ConversationClient } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
@@ -75,7 +75,7 @@ export class ChatService {
     };
 
     const isNewConversation = !conversationId;
-    const nextUserEvent = userMessageEvent(nextUserMessage);
+    const nextUserEvent = createUserMessage({ content: nextUserMessage });
 
     return forkJoin({
       agent: defer(() => this.agentFactory.getAgent({ request, connectorId, agentId })),
@@ -215,13 +215,13 @@ const extractNewConversationEvents$ = ({
   agentEvents$,
 }: {
   agentEvents$: Observable<ChatEvent>;
-}) => {
+}): Observable<ConversationEvent[]> => {
   return agentEvents$.pipe(
     filter(isMessageEvent),
     map((event) => event.message),
     toArray(),
     mergeMap((newMessages) => {
-      const newEvents = newMessages.map((message) => messageEvent(message));
+      const newEvents = newMessages.map((message) => message);
       return of(newEvents);
     }),
     shareReplay()

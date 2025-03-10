@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Message } from './messages';
+import type { ConversationEvent } from './conversation_events';
 
 export interface Conversation {
   id: string;
@@ -18,19 +18,6 @@ export interface Conversation {
   };
   events: ConversationEvent[];
 }
-
-interface EventBase<T extends string> {
-  type: T;
-  id: string;
-  createdAt: string;
-}
-
-export interface ConversationMessageEvent extends EventBase<'message'> {
-  message: Message;
-}
-
-// only one type of event for now
-export type ConversationEvent = ConversationMessageEvent;
 
 export type ConversationCreateRequest = Omit<Conversation, 'id' | 'lastUpdated' | 'user'> & {
   id?: string;

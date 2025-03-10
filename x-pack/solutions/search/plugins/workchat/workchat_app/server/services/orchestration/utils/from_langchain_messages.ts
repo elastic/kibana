@@ -11,14 +11,14 @@ import {
   isAIMessage,
   isHumanMessage,
 } from '@langchain/core/messages';
-import { userMessage, assistantMessage } from '../../../../common/utils/messages';
+import { createUserMessage, createAssistantMessage } from '../../../../common/conversation_events';
 
 export const messageFromLangchain = (message: BaseMessage) => {
   if (isAIMessage(message)) {
-    return assistantMessage(extractTextContent(message));
+    return createAssistantMessage({ content: extractTextContent(message) });
   }
   if (isHumanMessage(message)) {
-    return userMessage(extractTextContent(message));
+    return createUserMessage({ content: extractTextContent(message) });
   }
 
   // tools will come later
