@@ -10,12 +10,12 @@ import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE,
   MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE,
 } from './translations';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { isArtifactGlobal } from '../../../../../common/endpoint/service/artifacts';
 import { useCardArtifact } from './card_artifact_context';
@@ -31,7 +31,8 @@ export interface CardActionsFlexItemProps extends Pick<CommonProps, 'data-test-s
 export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
   ({ actions, 'data-test-subj': dataTestSubj }) => {
     const item = useCardArtifact() as ExceptionListItemSchema;
-    const canManageGlobalArtifacts = useEndpointPrivileges().canManageGlobalArtifacts;
+    const canManageGlobalArtifacts =
+      useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const ownerSpaceIds = useMemo(() => getArtifactOwnerSpaceIds(item), [item]);
     const isSpacesEnabled = useIsExperimentalFeatureEnabled(
