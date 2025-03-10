@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { firstValueFrom } from 'rxjs';
 import { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
@@ -16,6 +17,7 @@ import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { createManagedServiceApiKey } from '../../lib/api_key/create_managed_service_api_key';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -51,6 +53,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     scriptDownloadUrl: string;
     elasticAgentVersionInfo: ElasticAgentVersionInfo;
     elasticsearchUrl: string[];
+    managedServiceUrl: string;
   }> {
     const {
       core,
@@ -72,12 +75,16 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
+    const managedServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((config) => {
+      return config.managedServiceUrl;
+    });
 
     return {
       apiEndpoint,
       elasticsearchUrl,
       scriptDownloadUrl,
       elasticAgentVersionInfo,
+      managedServiceUrl,
     };
   },
 });
@@ -91,8 +98,7 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
     },
   },
   params: t.type({}),
-  async handler(resources): Promise<{ apiKeyEncoded: string }> {
-    const { context } = resources;
+  async handler({ context, config }): Promise<{ apiKeyEncoded: string }> {
     const {
       elasticsearch: { client },
     } = await context.core;
@@ -102,7 +108,10 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
       throw Boom.forbidden('Insufficient permissions to create shipper API key');
     }
 
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
+    const timestamp = new Date().toISOString();
+    const { encoded: apiKeyEncoded } = config.serverless.enabled
+      ? await createManagedServiceApiKey(client.asCurrentUser, `ingest-otel-host-${timestamp}`)
+      : await createShipperApiKey(client.asCurrentUser, `otel-logs-${timestamp}`);
 
     return { apiKeyEncoded };
   },
