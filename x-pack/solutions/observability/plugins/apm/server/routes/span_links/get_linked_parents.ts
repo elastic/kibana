@@ -57,7 +57,6 @@ export async function getLinkedParentsOfSpan({
           { term: { [TRACE_ID]: traceId } },
           {
             bool: {
-
               should: [...existsQuery(SPAN_LINKS), ...existsQuery(LINKS_SPAN_ID)],
               minimum_should_match: 1,
             },
