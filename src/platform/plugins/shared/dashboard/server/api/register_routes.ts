@@ -161,8 +161,8 @@ export function registerAPIRoutes({
         .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
       let result;
       try {
-       const { result } = await client.update(req.params.id, attributes, { references });
-       return res.ok({ body: result });
+        const { result } = await client.update(req.params.id, attributes, { references });
+        return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
