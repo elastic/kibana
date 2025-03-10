@@ -14,11 +14,13 @@ import { DocumentType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 
+const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span-document-profile';
+
 export const createObservabilityTracesSpanDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
   isExperimental: true,
-  profileId: 'obs-traces-span-document-profile',
+  profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   profile: {
     getDocViewer: createGetDocViewer('traces-*'),
     // TODO add APM configured indexes instead of traces-*, currently blocked by https://github.com/elastic/kibana/issues/211414
