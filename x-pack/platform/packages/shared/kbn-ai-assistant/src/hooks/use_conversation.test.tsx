@@ -98,6 +98,7 @@ describe('useConversation', () => {
               },
             ],
             initialConversationId: 'foo',
+            onConversationDuplicate: jest.fn(),
           },
           wrapper,
         })
@@ -111,6 +112,7 @@ describe('useConversation', () => {
         initialProps: {
           chatService: mockChatService,
           connectorId: 'my-connector',
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -144,6 +146,7 @@ describe('useConversation', () => {
               },
             },
           ],
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -185,6 +188,7 @@ describe('useConversation', () => {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -232,6 +236,7 @@ describe('useConversation', () => {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -318,6 +323,7 @@ describe('useConversation', () => {
             },
           ],
           onConversationUpdate,
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -396,6 +402,7 @@ describe('useConversation', () => {
                 },
               ],
               initialConversationId: 'foo',
+              onConversationDuplicate: jest.fn(),
             },
             wrapper,
           });
@@ -439,6 +446,7 @@ describe('useConversation', () => {
               chatService: mockChatService,
               connectorId: 'my-connector',
               initialConversationId: 'my-conversation-id',
+              onConversationDuplicate: jest.fn(),
             },
             wrapper,
           });

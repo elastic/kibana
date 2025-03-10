@@ -7,10 +7,8 @@
 import { BehaviorSubject, throwError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
-import type {
-  StartAllocationParams,
-  TrainedModelsApiService,
-} from '../services/ml_api_service/trained_models';
+import type { TrainedModelsApiService } from '../services/ml_api_service/trained_models';
+import type { ScheduledDeployment } from './trained_models_service';
 import { TrainedModelsService } from './trained_models_service';
 import type {
   StartTrainedModelDeploymentResponse,
@@ -19,6 +17,9 @@ import type {
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
+import type { ITelemetryClient } from '../services/telemetry/types';
+import type { DeploymentParamsUI } from './deployment_setup';
+import type { DeploymentParamsMapper } from './deployment_params_mapper';
 
 // Helper that resolves on the next microtask tick
 const flushPromises = () =>
@@ -28,8 +29,10 @@ describe('TrainedModelsService', () => {
   let mockTrainedModelsApiService: jest.Mocked<TrainedModelsApiService>;
   let mockSavedObjectsApiService: jest.Mocked<SavedObjectsApiService>;
   let trainedModelsService: TrainedModelsService;
-  let scheduledDeploymentsSubject: BehaviorSubject<StartAllocationParams[]>;
+  let scheduledDeploymentsSubject: BehaviorSubject<ScheduledDeployment[]>;
   let mockSetScheduledDeployments: jest.Mock<any, any>;
+  let mockTelemetryService: jest.Mocked<ITelemetryClient>;
+  let mockDeploymentParamsMapper: jest.Mocked<DeploymentParamsMapper>;
 
   const startModelAllocationResponseMock = {
     assignment: {
@@ -65,6 +68,13 @@ describe('TrainedModelsService', () => {
     } as const,
   };
 
+  const deploymentParamsUiMock: DeploymentParamsUI = {
+    deploymentId: 'my-deployment-id',
+    optimized: 'optimizedForIngest',
+    adaptiveResources: false,
+    vCPUUsage: 'low',
+  };
+
   const mockDisplayErrorToast = jest.fn();
   const mockDisplaySuccessToast = jest.fn();
 
@@ -72,10 +82,14 @@ describe('TrainedModelsService', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
 
-    scheduledDeploymentsSubject = new BehaviorSubject<StartAllocationParams[]>([]);
-    mockSetScheduledDeployments = jest.fn((deployments: StartAllocationParams[]) => {
+    scheduledDeploymentsSubject = new BehaviorSubject<ScheduledDeployment[]>([]);
+    mockSetScheduledDeployments = jest.fn((deployments: ScheduledDeployment[]) => {
       scheduledDeploymentsSubject.next(deployments);
     });
+
+    mockTelemetryService = {
+      trackTrainedModelsDeploymentCreated: jest.fn(),
+    } as unknown as jest.Mocked<ITelemetryClient>;
 
     mockTrainedModelsApiService = {
       getTrainedModelsList: jest.fn(),
@@ -91,6 +105,24 @@ describe('TrainedModelsService', () => {
       trainedModelsSpaces: jest.fn(),
     } as unknown as jest.Mocked<SavedObjectsApiService>;
 
+    mockDeploymentParamsMapper = {
+      mapUiToApiDeploymentParams: jest.fn().mockReturnValue({
+        modelId: 'test-model',
+        deploymentParams: {
+          deployment_id: 'my-deployment-id',
+          priority: 'normal',
+          threads_per_allocation: 1,
+          number_of_allocations: 1,
+        },
+      }),
+      mapApiToUiDeploymentParams: jest.fn().mockReturnValue({
+        deploymentId: 'my-deployment-id',
+        optimized: 'optimizedForIngest',
+        adaptiveResources: false,
+        vCPUUsage: 'low',
+      }),
+    } as unknown as jest.Mocked<DeploymentParamsMapper>;
+
     trainedModelsService = new TrainedModelsService(mockTrainedModelsApiService);
     trainedModelsService.init({
       scheduledDeployments$: scheduledDeploymentsSubject,
@@ -99,6 +131,8 @@ describe('TrainedModelsService', () => {
       displaySuccessToast: mockDisplaySuccessToast,
       savedObjectsApiService: mockSavedObjectsApiService,
       canManageSpacesAndSavedObjects: true,
+      telemetryService: mockTelemetryService,
+      deploymentParamsMapper: mockDeploymentParamsMapper,
     });
 
     mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValue([]);
@@ -216,7 +250,7 @@ describe('TrainedModelsService', () => {
 
   it('deploys a model successfully', async () => {
     const mockModel = {
-      model_id: 'deploy-model',
+      model_id: 'test-model',
       state: MODEL_STATE.DOWNLOADED,
       type: ['pytorch'],
     } as unknown as TrainedModelUIItem;
@@ -228,23 +262,20 @@ describe('TrainedModelsService', () => {
     );
 
     // Start deployment
-    trainedModelsService.startModelDeployment('deploy-model', {
-      priority: 'low',
-      threads_per_allocation: 1,
-      deployment_id: 'my-deployment-id',
-    });
+    trainedModelsService.startModelDeployment('test-model', deploymentParamsUiMock);
 
     // Advance timers enough to pass the debounceTime(100)
     jest.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledWith({
-      modelId: 'deploy-model',
-      deploymentParams: {
-        priority: 'low',
-        threads_per_allocation: 1,
+      modelId: 'test-model',
+      deploymentParams: expect.objectContaining({
         deployment_id: 'my-deployment-id',
-      },
+        priority: expect.any(String),
+        number_of_allocations: expect.any(Number),
+        threads_per_allocation: expect.any(Number),
+      }),
       adaptiveAllocationsParams: undefined,
     });
     expect(mockDisplaySuccessToast).toHaveBeenCalledWith({
@@ -256,6 +287,7 @@ describe('TrainedModelsService', () => {
         values: { deploymentId: 'my-deployment-id' },
       }),
     });
+    expect(mockTelemetryService.trackTrainedModelsDeploymentCreated).toHaveBeenCalled();
   });
 
   it('handles startModelDeployment error', async () => {
@@ -275,11 +307,7 @@ describe('TrainedModelsService', () => {
       ) as unknown as Observable<StartTrainedModelDeploymentResponse>
     );
 
-    trainedModelsService.startModelDeployment('error-model', {
-      priority: 'low',
-      threads_per_allocation: 1,
-      deployment_id: 'my-deployment-id',
-    });
+    trainedModelsService.startModelDeployment('error-model', deploymentParamsUiMock);
 
     // Advance timers enough to pass the debounceTime(100)
     jest.advanceTimersByTime(100);
@@ -297,25 +325,15 @@ describe('TrainedModelsService', () => {
   it('updates model deployment successfully', async () => {
     mockTrainedModelsApiService.updateModelDeployment.mockResolvedValueOnce({ acknowledge: true });
 
-    trainedModelsService.updateModelDeployment('update-model', 'my-deployment-id', {
-      adaptive_allocations: {
-        enabled: true,
-        min_number_of_allocations: 1,
-        max_number_of_allocations: 2,
-      },
-    });
+    trainedModelsService.updateModelDeployment('test-model', deploymentParamsUiMock);
     await flushPromises();
 
     expect(mockTrainedModelsApiService.updateModelDeployment).toHaveBeenCalledWith(
-      'update-model',
+      'test-model',
       'my-deployment-id',
-      {
-        adaptive_allocations: {
-          enabled: true,
-          min_number_of_allocations: 1,
-          max_number_of_allocations: 2,
-        },
-      }
+      expect.objectContaining({
+        number_of_allocations: expect.any(Number),
+      })
     );
 
     expect(mockDisplaySuccessToast).toHaveBeenCalledWith({
@@ -333,13 +351,7 @@ describe('TrainedModelsService', () => {
     const updateError = new Error('Update error');
     mockTrainedModelsApiService.updateModelDeployment.mockRejectedValueOnce(updateError);
 
-    trainedModelsService.updateModelDeployment('update-model', 'my-deployment-id', {
-      adaptive_allocations: {
-        enabled: true,
-        min_number_of_allocations: 1,
-        max_number_of_allocations: 2,
-      },
-    });
+    trainedModelsService.updateModelDeployment('update-model', deploymentParamsUiMock);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -365,29 +377,21 @@ describe('TrainedModelsService', () => {
       .mockReturnValueOnce(of(startModelAllocationResponseMock));
 
     // First deployment
-    trainedModelsService.startModelDeployment('test-model', {
-      deployment_id: 'first-deployment',
-      priority: 'low',
-      threads_per_allocation: 1,
-    });
+    trainedModelsService.startModelDeployment('test-model', deploymentParamsUiMock);
 
     jest.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.stringContaining('first-deployment')
+      expect.stringContaining('my-deployment-id')
     );
 
     jest.advanceTimersByTime(100);
     await flushPromises();
 
     // Second deployment
-    trainedModelsService.startModelDeployment('test-model', {
-      deployment_id: 'second-deployment',
-      priority: 'low',
-      threads_per_allocation: 1,
-    });
+    trainedModelsService.startModelDeployment('test-model', deploymentParamsUiMock);
 
     jest.advanceTimersByTime(100);
     await flushPromises();
@@ -395,7 +399,7 @@ describe('TrainedModelsService', () => {
     expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledTimes(2);
     expect(mockDisplaySuccessToast).toHaveBeenCalledWith(
       expect.objectContaining({
-        text: expect.stringContaining('second-deployment'),
+        text: expect.stringContaining('my-deployment-id'),
       })
     );
   });

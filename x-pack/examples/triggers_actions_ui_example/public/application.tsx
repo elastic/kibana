@@ -24,6 +24,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -58,6 +59,7 @@ export interface TriggersActionsUiExampleComponentParams {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -284,6 +286,7 @@ export const renderApp = (
               unifiedSearch={deps.unifiedSearch}
               fieldFormats={deps.fieldFormats}
               licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
               {...core}
             />
           </IntlProvider>
