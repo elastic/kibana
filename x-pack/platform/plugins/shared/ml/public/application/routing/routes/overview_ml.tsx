@@ -42,7 +42,7 @@ export const overviewRouteFactory = (
       }),
     },
   ],
-  'data-test-subj': 'mlPageOverview',
+  'data-test-subj': 'mlAppPageOverview',
 });
 
 const PageWrapper: FC<PageProps> = () => {

@@ -259,7 +259,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         key={tab.id}
         onClick={() => setSelectedTabId(tab.id)}
         isSelected={tab.id === selectedTabId}
-        data-test-subj={`mlManagmentOverviewPageTabs ${tab.id}`}
+        data-test-subj={`mlManagementOverviewPageTabs ${tab.id}`}
         append={tab.append}
       >
         {tab.name}
@@ -268,7 +268,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
   };
 
   return (
-    <div>
+    <div data-test-subj="mlStackManagementOverviewPage">
       <MlPageHeader>
         <PageTitle
           title={i18n.translate('xpack.ml.overview.overviewLabel', {

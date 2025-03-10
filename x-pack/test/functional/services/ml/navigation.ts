@@ -35,17 +35,6 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToStackManagement({ expectMlLink = true }: { expectMlLink?: boolean } = {}) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('management');
-        if (expectMlLink) {
-          await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
-        } else {
-          await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
-        }
-      });
-    },
-
     async navigateToStackManagementMlSection(sectionId: string, pageSubject: string) {
       await PageObjects.common.navigateToApp('management');
       const sections = await managementMenu.getSections();
@@ -169,11 +158,23 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToOverview() {
-      await this.navigateToArea('~mlMainTab & ~overview', 'mlPageOverview');
+      await this.navigateToArea('~mlMainTab & ~overview', 'mlAppPageOverview');
+    },
+
+    async navigateToOverviewTab() {
+      await testSubjects.click('mlManagementOverviewPageTabs overview');
     },
 
     async navigateToNotifications() {
-      await this.navigateToArea('~mlMainTab & ~notifications', 'mlPageNotifications');
+      await this.navigateToStackManagementMlSection('overview', 'mlStackManagementOverviewPage');
+      await testSubjects.click('mlManagementOverviewPageTabs notifications');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.existOrFail('mlNotificationsTable loaded');
+      });
+    },
+
+    async navigateToNotificationsTab() {
+      await testSubjects.click('mlManagementOverviewPageTabs notifications');
     },
 
     async navigateToMemoryUsage() {
@@ -182,6 +183,28 @@ export function MachineLearningNavigationProvider({
 
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
+    },
+
+    async navigateToAnomalyExplorerWithSideNav() {
+      await this.navigateToArea('~mlMainTab & ~anomalyExplorer', 'mlAnomalyDetectionEmptyState');
+    },
+
+    async navigateToSingleMetricViewerWithSideNav() {
+      await this.navigateToArea('~mlMainTab & ~singleMetricViewer', 'mlNoSingleMetricJobsFound');
+    },
+
+    async navigateToDfaMapWithSideNav() {
+      await this.navigateToArea(
+        '~mlMainTab & ~dataFrameAnalyticsMap',
+        'mlNoDataFrameAnalyticsFound'
+      );
+    },
+
+    async navigateToDfaResultsExplorerWithSideNav() {
+      await this.navigateToArea(
+        '~mlMainTab & ~dataFrameAnalyticsResultsExplorer',
+        'mlNoDataFrameAnalyticsFound'
+      );
     },
 
     async navigateToAnomalyExplorer(
@@ -209,7 +232,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToDataFrameAnalytics() {
-      await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
+      await this.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
     },
 
     async navigateToTrainedModels() {
@@ -247,11 +270,11 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToJobManagement() {
-      await this.navigateToAnomalyDetection();
+      await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
     },
 
     async navigateToSettings() {
-      await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
+      await this.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
     },
 
     async navigateToStackManagementJobsListPage() {
@@ -280,15 +303,6 @@ export function MachineLearningNavigationProvider({
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
         await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detector loaded');
-      });
-    },
-
-    async navigateToStackManagementJobsListPageAnalyticsTab() {
-      // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementAnalyticsTab');
-      await retry.tryForTime(60 * 1000, async () => {
-        // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics loaded');
       });
     },
 
