@@ -51,7 +51,7 @@ async function fetchDependenciesTimeseriesStatistics({
     apm: {
       events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
-    body:{
+    body: {
       track_total_hits: false,
       size: 0,
       query: {
@@ -60,7 +60,9 @@ async function fetchDependenciesTimeseriesStatistics({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(start, end),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(
+              searchServiceDestinationMetrics
+            ),
             { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyNames } },
           ],
         },
@@ -155,8 +157,8 @@ async function fetchDependenciesTimeseriesStatistics({
           },
         },
       },
-    }   
-    });
+    },
+  });
 
   return response.aggregations?.dependencies.buckets || [];
 }
