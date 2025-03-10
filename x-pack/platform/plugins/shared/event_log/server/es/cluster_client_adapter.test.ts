@@ -2595,6 +2595,25 @@ describe('queryEventsByDocumentIds', () => {
   });
 });
 
+describe('refreshIndex', () => {
+  test('should successfully refresh index', async () => {
+    clusterClient.indices.refresh.mockResolvedValue({});
+
+    await clusterClientAdapter.refreshIndex();
+
+    expect(clusterClient.indices.refresh).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+    });
+  });
+
+  test('should throw error when refresh fails', async () => {
+    clusterClient.indices.refresh.mockRejectedValue(new Error('Failed to refresh index'));
+
+    await expect(clusterClientAdapter.refreshIndex()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to refresh index"`
+    );
+  });
+});
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
