@@ -260,3 +260,5 @@ function FieldConflictInfoIcon({
     </EuiToolTip>
   );
 }
+
+export type GenericFieldItemButtonType = typeof FieldItemButton;

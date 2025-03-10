@@ -7,4 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FieldItemButton, type FieldItemButtonProps } from './field_item_button';
+import React, { Fragment } from 'react';
+import type { FieldItemButtonProps, GenericFieldItemButtonType } from './field_item_button';
+import { FieldListItem } from '../../types';
+
+const Fallback = () => <Fragment />;
+
+const LazyFieldItemButton = React.lazy(() =>
+  import('./field_item_button').then((module) => ({ default: module.FieldItemButton }))
+) as GenericFieldItemButtonType;
+
+function WrappedFieldItemButton<T extends FieldListItem>(props: FieldItemButtonProps<T>) {
+  return (
+    <React.Suspense fallback={<Fallback />}>
+      <LazyFieldItemButton {...props} />
+    </React.Suspense>
+  );
+}
+
+export type { FieldItemButtonProps };
+export const FieldItemButton = WrappedFieldItemButton;
