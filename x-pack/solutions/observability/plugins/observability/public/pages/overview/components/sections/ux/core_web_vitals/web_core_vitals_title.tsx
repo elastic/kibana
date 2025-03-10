@@ -41,10 +41,8 @@ export function WebCoreVitalsTitle({
   totalPageViews?: number;
   displayTrafficMetric: boolean;
 }) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isBrowserPopoverOpen, setIsBrowserPopoverOpen] = useState(false);
 
-  const closePopover = () => setIsPopoverOpen(false);
   const closeBrowserPopover = () => setIsBrowserPopoverOpen(false);
 
   const helpAriaLabel = i18n.translate(
@@ -68,7 +66,7 @@ export function WebCoreVitalsTitle({
             external
             target="_blank"
           >
-            {i18n.translate('xpack.observability.ux.dashboard.webCoreVitals.tooltip', {
+            {i18n.translate('xpack.observability.ux.dashboard.webCoreVitals.help', {
               defaultMessage: 'Learn more',
             })}
           </EuiLink>
