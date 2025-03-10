@@ -16,7 +16,6 @@ import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
 import { AgentOutcomeParser } from './agent_outcome_parser';
 
-
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
   config?: RunnableConfig;
@@ -78,7 +77,7 @@ export async function runAgent({
       config
     );
 
-  const outcomeParser = AgentOutcomeParser({logger})
+  const outcomeParser = AgentOutcomeParser({ logger });
 
   const newMessage = outcomeParser(result);
 
