@@ -9,11 +9,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesTransactionOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
+import { UnifiedDocViewerObservabilityTracesSpanOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocumentProfileProvider } from '../../../../../profiles';
+import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
-export const getDocViewer =
+export const createGetDocViewer =
+  (transactionIndexPattern: string): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
@@ -22,16 +24,18 @@ export const getDocViewer =
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
-          id: 'doc_view_obs_traces_transaction_overview',
-          title: i18n.translate(
-            'discover.docViews.observability.traces.transactionOverview.title',
-            {
-              defaultMessage: 'Transaction overview',
-            }
-          ),
+          id: 'doc_view_obs_traces_span_overview',
+          title: i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
+            defaultMessage: 'Span overview',
+          }),
           order: 0,
           component: (props) => {
-            return <UnifiedDocViewerObservabilityTracesTransactionOverview {...props} />;
+            return (
+              <UnifiedDocViewerObservabilityTracesSpanOverview
+                {...props}
+                transactionIndexPattern={transactionIndexPattern}
+              />
+            );
           },
         });
 
