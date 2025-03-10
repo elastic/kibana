@@ -11,14 +11,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  installationStatuses,
-  useGetPackagesQuery,
-  useGetSettingsQuery,
-} from '@kbn/fleet-plugin/public';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import { SourceFilterButton } from './sources_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { inputsActions } from '../../../../common/store/inputs';
@@ -38,12 +33,16 @@ export interface SearchBarSectionProps {
    *
    */
   dataView: DataView;
+  /**
+   *
+   */
+  installedPackages: CustomIntegration[] | PackageListItem[];
 }
 
 /**
  *
  */
-export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
+export const SearchBarSection = memo(({ dataView, installedPackages }: SearchBarSectionProps) => {
   const dispatch = useDispatch();
   const [dateRange, setDateRange] = useState<TimeRange>(defaultTimeRange);
   const [query, setQuery] = useState<Query>(defaultQuery);
@@ -100,30 +99,6 @@ export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
     [dispatch]
   );
 
-  const { fleet } = useKibana().services;
-  const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
-  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
-    enabled: isAuthorizedToFetchSettings,
-  });
-  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
-  const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
-  const { data: allPackages, isLoading } = useGetPackagesQuery(
-    {
-      prerelease: prereleaseIntegrationsEnabled,
-    },
-    {
-      enabled: shouldFetchPackages,
-    }
-  );
-  const installedPackages: PackageListItem[] = useMemo(
-    () =>
-      (allPackages?.items || []).filter(
-        (pkg) =>
-          pkg.status === installationStatuses.Installed ||
-          pkg.status === installationStatuses.InstallFailed
-      ),
-    [allPackages]
-  );
   const sources: EuiSelectableOption[] = useMemo(
     () =>
       installedPackages.map((relatedIntegration: PackageListItem) => ({
@@ -136,11 +111,9 @@ export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
   return (
     <>
       <EuiFlexGroup gutterSize="none" alignItems="center">
-        {sources && sources.length > 0 && (
-          <EuiFlexItem grow={false}>
-            <SourceFilterButton sources={sources} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <SourceFilterButton sources={sources} />
+        </EuiFlexItem>
         <EuiFlexItem>
           <SearchBar
             dateRangeFrom={dateRange.from}

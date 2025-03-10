@@ -5,66 +5,40 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  installationStatuses,
-  useGetPackagesQuery,
-  useGetSettingsQuery,
-} from '@kbn/fleet-plugin/public';
+import React, { memo } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import { useKibana } from '../../../../common/lib/kibana';
-import { AddIntegration } from './add_integration';
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import { IntegrationBadge } from './integration_badge';
+import { ADD_INTEGRATION } from './translations';
+import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrations_url';
+
+export interface IntegrationSectionProps {
+  /**
+   *
+   */
+  installedPackages: CustomIntegration[] | PackageListItem[];
+}
 
 /**
  *
  */
-export const IntegrationSection = memo(() => {
-  const { fleet } = useKibana().services;
-  const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
-  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
-    enabled: isAuthorizedToFetchSettings,
-  });
-  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
-  const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
-  const { data: allPackages, isLoading } = useGetPackagesQuery(
-    {
-      prerelease: prereleaseIntegrationsEnabled,
-    },
-    {
-      enabled: shouldFetchPackages,
-    }
-  );
-  const installedPackages: PackageListItem[] = useMemo(
-    () =>
-      (allPackages?.items || []).filter(
-        (pkg) =>
-          pkg.status === installationStatuses.Installed ||
-          pkg.status === installationStatuses.InstallFailed
-      ),
-    [allPackages]
-  );
+export const IntegrationSection = memo(({ installedPackages }: IntegrationSectionProps) => {
+  const { onClick: addIntegration } = useAddIntegrationsUrl();
 
   return (
-    <>
-      {isLoading ? (
-        <>
-          <div>{'hello'}</div>
-        </>
-      ) : (
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          {installedPackages.map((installedPackage) => (
-            <EuiFlexItem grow={false}>
-              <IntegrationBadge integration={installedPackage} />
-            </EuiFlexItem>
-          ))}
-          <EuiFlexItem grow={false}>
-            <AddIntegration />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </>
+    <EuiFlexGroup gutterSize="m" alignItems="center">
+      {installedPackages.map((installedPackage) => (
+        <EuiFlexItem grow={false}>
+          <IntegrationBadge integration={installedPackage} />
+        </EuiFlexItem>
+      ))}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={addIntegration} iconType="plusInCircle">
+          {ADD_INTEGRATION}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 

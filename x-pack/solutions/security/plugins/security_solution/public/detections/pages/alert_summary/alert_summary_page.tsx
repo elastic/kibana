@@ -6,14 +6,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiHorizontalRule, EuiSpacer, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { Wrapper } from '../../components/alert_summary/wrapper';
 import { DATAVIEW_ERROR } from './translations';
 import { useKibana } from '../../../common/lib/kibana';
-import { KPIsSection } from '../../components/alert_summary/kpis/kpis_section';
-import { SearchBarSection } from '../../components/alert_summary/search_bar/search_bar_section';
-import { TableSection } from '../../components/alert_summary/table/table_section';
-import { IntegrationSection } from '../../components/alert_summary/integrations/integration_section';
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
@@ -48,17 +45,7 @@ export const AlertSummaryPage = () => {
     return <EuiEmptyPrompt iconType="error" color="danger" title={<h2>{DATAVIEW_ERROR}</h2>} />;
   }
 
-  return (
-    <>
-      <IntegrationSection />
-      <EuiHorizontalRule />
-      <SearchBarSection dataView={dataView} />
-      <EuiSpacer />
-      <KPIsSection dataView={dataView} />
-      <EuiSpacer />
-      <TableSection dataView={dataView} />
-    </>
-  );
+  return <Wrapper dataView={dataView} />;
 };
 
 AlertSummaryPage.displayName = 'AlertSummaryPage';
