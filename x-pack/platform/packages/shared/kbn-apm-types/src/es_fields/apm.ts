@@ -48,6 +48,7 @@ export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
+export const USER_AGENT_VERSION = 'user_agent.version';
 
 export const OBSERVER_VERSION = 'observer.version';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';

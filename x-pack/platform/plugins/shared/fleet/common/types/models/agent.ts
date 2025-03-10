@@ -144,7 +144,7 @@ export interface Agent extends AgentBase {
   outputs?: OutputMap;
   status?: AgentStatus;
   packages: string[];
-  sort?: Array<number | string | null>;
+  sort?: any[];
   metrics?: AgentMetrics;
 }
 
