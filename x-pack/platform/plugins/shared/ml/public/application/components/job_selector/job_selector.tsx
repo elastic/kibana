@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -24,9 +24,14 @@ import type { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
 import type { JobSelectorFlyoutProps } from './job_selector_flyout';
 import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type {
+  MlJobWithTimeRange,
+  MlSummaryJob,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
+import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
+import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
 
 export interface GroupObj {
   groupId: string;
@@ -86,6 +91,7 @@ export interface JobSelectorProps {
   }) => void;
   selectedJobIds?: string[];
   selectedGroups?: GroupObj[];
+  selectedJobs?: MlSummaryJob[];
 }
 
 export interface JobSelectionMaps {
@@ -99,6 +105,7 @@ export function JobSelector({
   timeseriesOnly,
   selectedJobIds = [],
   selectedGroups = [],
+  selectedJobs = [],
   onSelectionChange,
 }: JobSelectorProps) {
   const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
@@ -141,6 +148,14 @@ export function JobSelector({
     [onSelectionChange]
   );
 
+  const page = useMemo(() => {
+    return singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER;
+  }, [singleSelection]);
+
+  const removeJobId = (jobOrGroupId: string[]) => {
+    const newSelection = selectedIds.filter((id) => !jobOrGroupId.includes(id));
+    applySelection({ newSelection, jobIds: newSelection, time: undefined });
+  };
   function renderJobSelectionBar() {
     return (
       <>
@@ -159,7 +174,10 @@ export function JobSelector({
                   onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
                   selectedJobIds={selectedJobIds}
                   selectedGroups={selectedGroups}
+                  selectedJobs={selectedJobs}
                   showAllBarBadges={showAllBarBadges}
+                  page={page}
+                  onRemoveJobId={removeJobId}
                 />
               </EuiFlexGroup>
             ) : (
@@ -187,10 +205,7 @@ export function JobSelector({
           <EuiFlexItem />
 
           <EuiFlexItem grow={false}>
-            <FeedBackButton
-              jobIds={selectedIds}
-              page={singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER}
-            />
+            <FeedBackButton jobIds={selectedIds} page={page} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
@@ -223,8 +238,11 @@ export function JobSelector({
 
   return (
     <div>
-      {renderJobSelectionBar()}
-      {renderFlyout()}
+      <JobInfoFlyoutsProvider>
+        {renderJobSelectionBar()}
+        {renderFlyout()}
+        <JobInfoFlyoutsManager />
+      </JobInfoFlyoutsProvider>
     </div>
   );
 }

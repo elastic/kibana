@@ -23,8 +23,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
+import type {
+  ActionConnector,
+  UserConfiguredActionConnector,
+} from '@kbn/alerts-ui-shared/src/common/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChatRequestData, MessageRole, LLMs } from '../common/types';
 
 export * from '../common/types';
@@ -56,6 +60,7 @@ export interface AppPluginStartDependencies {
   searchNavigation?: SearchNavigationPluginStart;
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
@@ -224,8 +229,8 @@ export interface LLMModel {
   promptTokenLimit?: number;
 }
 
-export type { ActionConnector };
+export type { ActionConnector, UserConfiguredActionConnector };
 export type InferenceActionConnector = ActionConnector & {
-  config: { provider: ServiceProviderKeys };
+  config: { provider: ServiceProviderKeys; inferenceId: string };
 };
 export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };

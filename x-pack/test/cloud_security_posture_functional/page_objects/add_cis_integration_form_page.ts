@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { setTimeout as sleep } from 'node:timers/promises';
 import expect from '@kbn/expect';
+import { testSubjectIds } from '../constants/test_subject_ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -17,24 +17,10 @@ export function AddCisIntegrationFormPageProvider({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
+  const logger = getService('log');
+  const retry = getService('retry');
 
   const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-
-  const testSubjectIds = {
-    AWS_SINGLE_ACCOUNT_TEST_ID: 'awsSingleTestId',
-    CIS_AWS_OPTION_TEST_ID: 'cisAwsTestId',
-    AWS_CREDENTIAL_SELECTOR: 'aws-credentials-type-selector',
-    SETUP_TECHNOLOGY_SELECTOR: 'setup-technology-selector',
-    SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
-    SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',
-    DIRECT_ACCESS_KEYS: 'direct_access_keys',
-    DIRECT_ACCESS_KEY_ID_TEST_ID: 'awsDirectAccessKeyId',
-    DIRECT_ACCESS_SECRET_KEY_TEST_ID: 'passwordInput-secret-access-key',
-    PRJ_ID_TEST_ID: 'project_id_test_id',
-    CIS_GCP_OPTION_TEST_ID: 'cisGcpTestId',
-    GCP_SINGLE_ACCOUNT_TEST_ID: 'gcpSingleAccountTestId',
-    CREDENTIALS_JSON_TEST_ID: 'textAreaInput-credentials-json',
-  };
 
   const cisAzure = {
     getPostInstallArmTemplateModal: async () => {
@@ -270,8 +256,9 @@ export function AddCisIntegrationFormPageProvider({
     const button = await testSubjects.find(buttonId);
     await button.click();
     // Wait a bit to allow the new tab to load the URL
-    await sleep(3000);
-    await browser.switchTab(1);
+    await retry.tryForTime(3000, async () => {
+      await browser.switchTab(1);
+    });
     const currentUrl = await browser.getCurrentUrl();
     await browser.closeCurrentWindow();
     await browser.switchTab(0);
@@ -303,12 +290,16 @@ export function AddCisIntegrationFormPageProvider({
     await radio.click();
   };
 
+  const getSetupTechnologyRadio = async (setupTechnology: 'agentless' | 'agent-based') => {
+    const radioGroup = await testSubjects.find(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    return await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
+  };
+
   const showSetupTechnologyComponent = async () => {
     return await testSubjects.exists(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
   };
 
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
-    await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
       AWS_CREDENTIAL_SELECTOR,
       credentialType === 'direct' ? 'direct_access_keys' : 'temporary_keys'
@@ -429,7 +420,7 @@ export function AddCisIntegrationFormPageProvider({
 
     await clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
 
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO);
+    await selectSetupTechnology('agentless');
     await selectValue(testSubjectIds.AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID, directAccessSecretKey);
@@ -441,7 +432,7 @@ export function AddCisIntegrationFormPageProvider({
 
     await clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
     await clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO);
+    await selectSetupTechnology('agentless');
     await fillInTextField(testSubjectIds.PRJ_ID_TEST_ID, projectId);
     await fillInTextField(testSubjectIds.CREDENTIALS_JSON_TEST_ID, credentialJson);
   };
@@ -466,6 +457,8 @@ export function AddCisIntegrationFormPageProvider({
     await navigateToAddIntegrationCspmPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
+    await inputIntegrationName(`cloud_security_posture-${new Date().toISOString()}`);
+
     await fillOutForm(cloudProvider);
 
     // Click Save Button to create the Integration then navigate to Integration Policies Tab Page
@@ -482,6 +475,12 @@ export function AddCisIntegrationFormPageProvider({
 
     // Fill out form to edit an agentless integration
     await fillInTextField(testSubjectId, value);
+
+    // TechDebt: This is a workaround to ensure the form is saved
+    // const agentlessRadio = await getSetupTechnologyRadio('agentless');
+    // const agentBasedRadio = await getSetupTechnologyRadio('agent-based');
+    // expect(await agentlessRadio.isEnabled()).to.be(true);
+    // expect(agentBasedRadio.isEnabled()).to.be(true);
 
     // Clicking Save Button updates and navigates to Integration Policies Tab Page
     await clickSaveIntegrationButton();
@@ -525,6 +524,31 @@ export function AddCisIntegrationFormPageProvider({
     return await agentName.getAttribute('value');
   };
 
+  const closeAllOpenTabs = async () => {
+    const handles = await browser.getAllWindowHandles();
+    logger.debug(`Found ${handles.length} tabs to clean up`);
+    try {
+      // Keep the first tab and close all others in reverse order
+      for (let i = handles.length - 1; i > 0; i--) {
+        await browser.switchTab(i);
+        await browser.closeCurrentWindow();
+        logger.debug(`Closed tab ${i}`);
+      }
+
+      // Switch back to the first tab
+      await browser.switchTab(0);
+      logger.debug('Successfully closed all extra tabs and returned to main tab');
+    } catch (err) {
+      logger.error(`Error while closing tabs: ${err}`);
+      // Attempt to return to first tab even if there was an error
+      try {
+        await browser.switchTab(0);
+      } catch (switchErr) {
+        logger.error(`Error switching back to first tab: ${switchErr}`);
+      }
+    }
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -548,6 +572,7 @@ export function AddCisIntegrationFormPageProvider({
     clickOptionButton,
     selectAwsCredentials,
     selectSetupTechnology,
+    getSetupTechnologyRadio,
     clickSaveButton,
     clickSaveIntegrationButton,
     clickAccordianButton,
@@ -579,5 +604,6 @@ export function AddCisIntegrationFormPageProvider({
     showSetupTechnologyComponent,
     navigateToEditIntegrationPage,
     navigateToEditAgentlessIntegrationPage,
+    closeAllOpenTabs,
   };
 }

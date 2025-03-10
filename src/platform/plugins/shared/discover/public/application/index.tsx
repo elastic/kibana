@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ExperimentalFeatures } from '../../server/config';
 import { DiscoverRouter } from './discover_router';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {
@@ -30,7 +30,7 @@ export const renderApp = ({
 }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
 
-  if (!capabilities.discover.save) {
+  if (!capabilities.discover_v2.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
         defaultMessage: 'Read only',

@@ -10,12 +10,9 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { TextBasedLanguages } from '@kbn/esql-utils';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
@@ -25,6 +22,13 @@ import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import './top_nav.scss';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useDataViewsForPicker,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -45,13 +49,12 @@ export const DiscoverTopNav = ({
   isLoading,
   onCancelClick,
 }: DiscoverTopNavProps) => {
+  const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
-    services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
-  const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
-  const dataView = useInternalStateSelector((state) => state.dataView!);
-  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
+  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
+  const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
@@ -134,7 +137,7 @@ export const DiscoverTopNav = ({
       if (shouldDismissModal) {
         services.storage.set(ESQL_TRANSITION_MODAL_KEY, true);
       }
-      stateContainer.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(false);
+      dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false));
       // the user dismissed the modal, we don't need to save the search or switch to the data view mode
       if (needsSave == null) {
         return;
@@ -145,9 +148,7 @@ export const DiscoverTopNav = ({
           services,
           state: stateContainer,
           onClose: () =>
-            stateContainer.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(
-              false
-            ),
+            dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
           onSaveCb: () => {
             stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
           },
@@ -156,7 +157,7 @@ export const DiscoverTopNav = ({
         stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
       }
     },
-    [dataView.id, services, stateContainer]
+    [dataView.id, dispatch, services, stateContainer]
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
@@ -171,11 +172,6 @@ export const DiscoverTopNav = ({
   );
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
-    const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);
-    const supportedTextBasedLanguages: DataViewPickerProps['textBasedLanguages'] = isESQLModeEnabled
-      ? [TextBasedLanguages.ESQL]
-      : [];
-
     return {
       trigger: {
         label: dataView?.getName() || '',
@@ -187,8 +183,8 @@ export const DiscoverTopNav = ({
       onDataViewCreated: createNewDataView,
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
       onChangeDataView: stateContainer.actions.onChangeDataView,
-      textBasedLanguages: supportedTextBasedLanguages,
       adHocDataViews,
+      managedDataViews,
       savedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
@@ -197,9 +193,9 @@ export const DiscoverTopNav = ({
     addField,
     createNewDataView,
     dataView,
+    managedDataViews,
     savedDataViews,
     stateContainer,
-    uiSettings,
   ]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
@@ -232,9 +228,7 @@ export const DiscoverTopNav = ({
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
         showDatePicker={showDatePicker}
-        saveQueryMenuVisibility={
-          services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
         dataViewPickerOverride={

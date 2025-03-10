@@ -10,13 +10,13 @@
 import React, { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import { MountPointPortal } from './mount_point_portal';
+import { MountPointPortal, MountPointPortalProps } from './mount_point_portal';
 import { act } from 'react-dom/test-utils';
 
 describe('MountPointPortal', () => {
   let portalTarget: HTMLElement;
   let mountPoint: MountPoint;
-  let setMountPoint: jest.Mock<(mountPoint: MountPoint<HTMLElement>) => void>;
+  let setMountPoint: MountPointPortalProps['setMountPoint'];
   let dom: ReactWrapper;
 
   const refresh = () => {
@@ -38,7 +38,9 @@ describe('MountPointPortal', () => {
   beforeEach(() => {
     portalTarget = document.createElement('div');
     document.body.append(portalTarget);
-    setMountPoint = jest.fn().mockImplementation((mp) => (mountPoint = mp));
+    setMountPoint = jest.fn().mockImplementation((mp) => {
+      mountPoint = mp;
+    });
   });
 
   afterEach(() => {
@@ -141,6 +143,35 @@ describe('MountPointPortal', () => {
     await refresh();
 
     expect(portalTarget.innerHTML).toBe('');
+  });
+
+  it('calls cleanup function when the component is unmounted', async () => {
+    const cleanup = jest.fn();
+    dom = mount(
+      <MountPointPortal
+        setMountPoint={(mp) => {
+          mountPoint = mp!;
+          return cleanup;
+        }}
+      >
+        <span>portal content</span>
+      </MountPointPortal>
+    );
+
+    act(() => {
+      mountPoint(portalTarget);
+    });
+
+    await refresh();
+
+    expect(portalTarget.innerHTML).toBe('<span>portal content</span>');
+
+    dom.unmount();
+
+    await refresh();
+
+    expect(portalTarget.innerHTML).toBe('');
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   it('updates the content of the portal element when the content of MountPointPortal changes', async () => {

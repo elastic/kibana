@@ -308,6 +308,7 @@ export class Server {
       http: httpSetup,
       coreUsageData: coreUsageDataSetup,
       logging: loggingSetup,
+      docLinks: docLinksSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -452,6 +453,10 @@ export class Server {
 
     this.httpRateLimiter.start();
     this.status.start();
+
+    this.rendering.start({
+      featureFlags: featureFlagsStart,
+    });
 
     this.coreStart = {
       analytics: analyticsStart,

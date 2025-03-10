@@ -8,7 +8,6 @@
 import { CoreStart } from '@kbn/core/public';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
@@ -50,9 +49,7 @@ const isApiCompatible = (api: unknown | null): api is AbstractExploreDataActionA
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (
-    isApiCompatible(api) &&
-    getInheritedViewMode(api) === ViewMode.VIEW &&
-    !apiIsOfType(api, LENS_DOC_TYPE)
+    isApiCompatible(api) && getInheritedViewMode(api) === 'view' && !apiIsOfType(api, LENS_DOC_TYPE)
   );
 };
 
@@ -114,7 +111,7 @@ export abstract class AbstractExploreDataAction {
     const { core, plugins } = this.params.start();
     const { capabilities } = core.application;
 
-    if (capabilities.discover && !capabilities.discover.show) return false;
+    if (capabilities.discover_v2 && !capabilities.discover_v2.show) return false;
     if (!plugins.discover.locator) return false;
 
     return shared.hasExactlyOneDataView(embeddable);

@@ -19,6 +19,7 @@ import {
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../embeddable/slo/overview/constants';
 import { SLORepositoryClient } from '../types';
+import { openSloConfiguration } from '../embeddable/slo/overview/slo_overview_open_configuration';
 
 export function createOverviewPanelAction(
   coreStart: CoreStart,
@@ -37,9 +38,6 @@ export function createOverviewPanelAction(
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
       try {
-        const { openSloConfiguration } = await import(
-          '../embeddable/slo/overview/slo_overview_open_configuration'
-        );
         const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {

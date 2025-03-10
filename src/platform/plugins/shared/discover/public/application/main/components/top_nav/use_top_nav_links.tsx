@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { AppMenuItemPrimary, AppMenuItemSecondary, AppMenuRegistry } from '@kbn/discover-utils';
+import type { AppMenuItemPrimary, AppMenuItemSecondary } from '@kbn/discover-utils';
+import { AppMenuRegistry } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getNewSearchAppMenuItem,
@@ -25,10 +27,10 @@ import {
   getShareAppMenuItem,
   getInspectAppMenuItem,
   convertAppMenuItemToTopNavItem,
-  AppMenuDiscoverParams,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
+import { internalStateActions, useInternalStateDispatch } from '../../state_management/redux';
 
 /**
  * Helper function to build the top nav links
@@ -52,6 +54,16 @@ export const useTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
+  const dispatch = useInternalStateDispatch();
+  const [newSearchUrl, setNewSearchUrl] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const fetchData = async () => {
+      const url = await services.locator.getUrl({});
+      setNewSearchUrl(url);
+    };
+    fetchData();
+  }, [services]);
+
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
       isEsqlMode,
@@ -59,10 +71,10 @@ export const useTopNavLinks = ({
       adHocDataViews,
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
         await state.actions.loadDataViewList();
-        state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
+        dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
       },
     }),
-    [isEsqlMode, dataView, adHocDataViews, state]
+    [isEsqlMode, dataView, adHocDataViews, state.actions, dispatch]
   );
 
   const defaultMenu = topNavCustomization?.defaultMenu;
@@ -90,6 +102,7 @@ export const useTopNavLinks = ({
 
       if (!defaultMenu?.newItem?.disabled) {
         const newSearchMenuItem = getNewSearchAppMenuItem({
+          newSearchUrl,
           onNewSearch: () => {
             services.locator.navigate({});
           },
@@ -114,7 +127,7 @@ export const useTopNavLinks = ({
       }
 
       return items;
-    }, [discoverParams, state, services, defaultMenu, onOpenInspector]);
+    }, [discoverParams, state, services, defaultMenu, onOpenInspector, newSearchUrl]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
   const appMenuRegistry = useMemo(() => {
@@ -170,7 +183,7 @@ export const useTopNavLinks = ({
                 shouldShowESQLToDataViewTransitionModal &&
                 !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
               ) {
-                state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
+                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
                 state.actions.transitionFromESQLToDataView(dataView.id ?? '');
               }
@@ -185,7 +198,7 @@ export const useTopNavLinks = ({
       entries.unshift(esqLDataViewTransitionToggle);
     }
 
-    if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
+    if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
       const saveSearch = {
         id: 'save',
         label: i18n.translate('discover.localMenu.saveTitle', {
@@ -213,12 +226,13 @@ export const useTopNavLinks = ({
 
     return entries;
   }, [
-    services,
     appMenuRegistry,
-    state,
-    dataView,
+    services,
+    defaultMenu?.saveItem?.disabled,
     isEsqlMode,
+    dataView,
     shouldShowESQLToDataViewTransitionModal,
-    defaultMenu,
+    dispatch,
+    state,
   ]);
 };

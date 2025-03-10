@@ -32,5 +32,4 @@ export const CAPABILITIES = `${BASE_PATH}/capabilities`;
  */
 export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;
 
-// Saved Objects
-export const promptSavedObjectType = 'security-ai-prompt';
+export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;

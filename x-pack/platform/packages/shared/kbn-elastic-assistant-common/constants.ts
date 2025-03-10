@@ -57,6 +57,6 @@ export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
 // Defend insights
-export const DEFEND_INSIGHTS_TOOL_ID = 'defend-insights';
+export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;

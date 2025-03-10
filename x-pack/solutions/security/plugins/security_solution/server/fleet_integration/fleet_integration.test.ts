@@ -69,7 +69,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
@@ -421,12 +421,15 @@ describe('Fleet integrations', () => {
       );
 
       expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
-        expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
+        expect.objectContaining({
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          meta: undefined,
+        })
       );
 
       expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           tags: [`policy:${postCreatedPolicyConfig.id}`],
           osTypes: ['linux'],
           entries: [
@@ -439,6 +442,7 @@ describe('Fleet integrations', () => {
           ],
           itemId: 'NEW_UUID',
           namespaceType: 'agnostic',
+          meta: undefined,
         })
       );
     });

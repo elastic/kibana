@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import * as i18n from './translations';
-import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
+import React from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../hooks/use_is_prebuilt_rules_customization_enabled';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import { usePrebuiltRulesCustomizationStatus } from '../../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import * as i18n from './translations';
 
 interface CustomizedPrebuiltRuleBadgeProps {
   rule: RuleResponse | null;
@@ -19,9 +20,13 @@ interface CustomizedPrebuiltRuleBadgeProps {
 export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgeProps> = ({
   rule,
 }) => {
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled, customizationDisabledReason } =
+    usePrebuiltRulesCustomizationStatus();
 
-  if (!isPrebuiltRulesCustomizationEnabled) {
+  if (
+    !isRulesCustomizationEnabled &&
+    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.FeatureFlag
+  ) {
     return null;
   }
 
@@ -29,5 +34,9 @@ export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgePr
     return null;
   }
 
-  return <EuiBadge color="hollow">{i18n.MODIFIED_PREBUILT_RULE_LABEL}</EuiBadge>;
+  return (
+    <EuiBadge data-test-subj="modified-prebuilt-rule-badge" color="hollow">
+      {i18n.MODIFIED_PREBUILT_RULE_LABEL}
+    </EuiBadge>
+  );
 };

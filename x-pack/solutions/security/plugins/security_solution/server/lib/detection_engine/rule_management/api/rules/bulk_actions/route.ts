@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
-import type { ConfigType } from '../../../../../../config';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -44,6 +43,7 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // Set a lower limit for bulk edit as the rules client might fail with a "Query
@@ -53,9 +53,7 @@ const MAX_ROUTE_CONCURRENCY = 5;
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  ml: SetupPlugins['ml'],
-  logger: Logger
+  ml: SetupPlugins['ml']
 ) => {
   router.versioned
     .post({
@@ -280,6 +278,14 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.export: {
+              const prebuiltRulesCustomizationStatus =
+                detectionRulesClient.getRuleCustomizationStatus();
+
+              const isPrebuiltRulesExportAllowed =
+                prebuiltRulesCustomizationStatus.isRulesCustomizationEnabled ||
+                prebuiltRulesCustomizationStatus.customizationDisabledReason ===
+                  PrebuiltRulesCustomizationDisabledReason.License;
+
               const exported = await getExportByObjectIds(
                 rulesClient,
                 exceptionsClient,
@@ -287,7 +293,7 @@ export const performBulkActionRoute = (
                 exporter,
                 request,
                 actionsClient,
-                config.experimentalFeatures.prebuiltRulesCustomizationEnabled
+                isPrebuiltRulesExportAllowed
               );
 
               const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;
@@ -301,10 +307,9 @@ export const performBulkActionRoute = (
               });
             }
 
-            // will be processed only when isDryRun === true
-            // during dry run only validation is getting performed and rule is not saved in ES
             case BulkActionTypeEnum.edit: {
               if (isDryRun) {
+                // during dry run only validation is getting performed and rule is not saved in ES
                 const bulkActionOutcome = await initPromisePool({
                   concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                   items: rules,
@@ -313,7 +318,7 @@ export const performBulkActionRoute = (
                       mlAuthz,
                       rule,
                       edit: body.edit,
-                      experimentalFeatures: config.experimentalFeatures,
+                      ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                     });
 
                     return rule;
@@ -332,7 +337,7 @@ export const performBulkActionRoute = (
                   rules,
                   actions: body.edit,
                   mlAuthz,
-                  experimentalFeatures: config.experimentalFeatures,
+                  ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                 });
                 updated = bulkEditResult.rules;
                 skipped = bulkEditResult.skipped;
@@ -348,7 +353,6 @@ export const performBulkActionRoute = (
                 rulesClient,
                 mlAuthz,
                 runPayload: body.run,
-                experimentalFeatures: config.experimentalFeatures,
               });
               errors.push(...bulkActionErrors);
               updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);

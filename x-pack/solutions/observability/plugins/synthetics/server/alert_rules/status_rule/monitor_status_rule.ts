@@ -12,6 +12,7 @@ import { observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { SyntheticsEsClient } from '../../lib';
 import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
@@ -26,6 +27,7 @@ import {
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
@@ -55,7 +57,7 @@ export const registerSyntheticsStatusCheckRule = (
     executor: async (options: StatusRuleExecutorOptions) => {
       apm.setTransactionName('Synthetics Status Rule Executor');
       const { state: ruleState, params, services, spaceId } = options;
-      const { alertsClient, uiSettingsClient } = services;
+      const { alertsClient, uiSettingsClient, scopedClusterClient, savedObjectsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -70,7 +72,15 @@ export const registerSyntheticsStatusCheckRule = (
       const groupBy = params?.condition?.groupBy ?? 'locationId';
       const groupByLocation = groupBy === 'locationId';
 
-      const statusRule = new StatusRuleExecutor(server, syntheticsMonitorClient, options);
+      const esClient = new SyntheticsEsClient(
+        savedObjectsClient,
+        scopedClusterClient.asCurrentUser,
+        {
+          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+        }
+      );
+
+      const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
         ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']

@@ -51,6 +51,7 @@ import { uiSettings } from './ui_settings';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../common/constants';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
+import { getCasesFeatureV3 } from './features/cases_v3';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -103,6 +104,7 @@ export class ObservabilityPlugin
 
     plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -200,6 +202,7 @@ export class ObservabilityPlugin
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
+        isDev: this.initContext.env.mode.dev,
       });
     });
     /**

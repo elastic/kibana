@@ -481,12 +481,14 @@ export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
+  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   dataStreamStatsClient,
+  isFailureStoreEnabled,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -545,6 +547,14 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadFailedDocs: (context) => {
+        if (!isFailureStoreEnabled) {
+          const unsupportedError = {
+            message: 'Failure store is disabled',
+            statusCode: 501,
+          };
+          return Promise.reject(unsupportedError);
+        }
+
         const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsFailedStats({

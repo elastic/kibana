@@ -651,6 +651,10 @@
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
@@ -713,10 +717,6 @@
               {
                 "plugin": "datasetQuality",
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "osquery",
@@ -783,8 +783,12 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -796,11 +800,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/task/field_retention_enrichment_task.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/task/field_retention_enrichment_task.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -809,6 +817,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1011,10 +1031,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
               },
               {
-                "plugin": "observabilityLogsExplorer",
-                "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.test.ts"
               },
@@ -1067,8 +1083,8 @@
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1175,8 +1191,8 @@
                 "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1203,12 +1219,12 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "security",
@@ -1459,16 +1475,64 @@
                 "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1479,8 +1543,12 @@
                 "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "actions",
@@ -1517,6 +1585,22 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1897,8 +1981,8 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "security",
@@ -1985,12 +2069,12 @@
                 "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "@kbn/core",

@@ -9,6 +9,7 @@ import path from 'path';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services as baseServices } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
@@ -52,6 +53,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
     };
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles,
       servers,
       services,

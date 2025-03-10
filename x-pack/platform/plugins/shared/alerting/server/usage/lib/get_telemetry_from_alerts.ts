@@ -8,12 +8,13 @@
 import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { AlertingUsage } from '../types';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -38,16 +39,14 @@ export async function getTotalAlertsCountAggregations({
     const query = {
       index: AAD_INDEX_PATTERN,
       size: 0,
-      body: {
-        query: {
-          match_all: {},
-        },
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'kibana.alert.rule.rule_type_id',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+      query: {
+        match_all: {},
+      },
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'kibana.alert.rule.rule_type_id',
+            size: NUM_ALERTING_RULE_TYPES,
           },
         },
       },
@@ -69,20 +68,10 @@ export async function getTotalAlertsCountAggregations({
     return {
       hasErrors: false,
       count_alerts_total: totalAlertsCount ?? 0,
-      count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations?.by_rule_type_id?.buckets),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalAlertsCountAggregations - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalAlertsCountAggregations`, logger);
 
     return {
       hasErrors: true,

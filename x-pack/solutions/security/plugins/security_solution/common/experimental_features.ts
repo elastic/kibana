@@ -115,14 +115,9 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables filtering of Attack Discovery alerts in a flyout
+   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
    */
-  attackDiscoveryAlertFiltering: false,
-
-  /**
-   * Enables content references (citations) in the AI Assistant
-   */
-  contentReferencesEnabled: false,
+  assistantAttackDiscoverySchedulingEnabled: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -242,9 +237,9 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
-   * Enables the siem migrations feature
+   * Disables the siem migrations feature
    */
-  siemMigrationsEnabled: false,
+  siemMigrationsDisabled: false,
 
   /**
    * Enables the Defend Insights feature
@@ -252,26 +247,15 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: true,
 
   /**
-   * Enables flyout history and new preview navigation
+   * Disables flyout history and new preview navigation
    */
-  newExpandableFlyoutNavigationEnabled: false,
+  newExpandableFlyoutNavigationDisabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enables the Asset Inventory Entity Store feature.
-   * Allows initializing the Universal Entity Store via the API.
-   */
-  assetInventoryStoreEnabled: false,
-
-  /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
 
   /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.

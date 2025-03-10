@@ -6,32 +6,30 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import {
-  apiIsOfType,
-  apiPublishesTitle,
-  apiPublishesUnifiedSearch,
+import type { TimeRange } from '@kbn/es-query';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
+  HasType,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesUnifiedSearch,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { Observable } from 'rxjs';
-import { MapAttributes } from '../../common/content_management';
-import {
+import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { Observable } from 'rxjs';
+import type { MapAttributes } from '../../common/content_management';
+import type {
   LayerDescriptor,
   MapCenterAndZoom,
   MapExtent,
   MapSettings,
 } from '../../common/descriptor_types';
-import { ILayer } from '../classes/layers/layer';
-import { EventHandlers } from '../reducers/non_serializable_instances';
+import type { ILayer } from '../classes/layers/layer';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
 
 export type MapSerializedState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
@@ -72,10 +70,6 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
 
 export const isMapApi = (api: unknown): api is MapApi => {
   return Boolean(
-    api &&
-      apiIsOfType(api, 'map') &&
-      typeof (api as MapApi).getLayerList === 'function' &&
-      apiPublishesTitle(api) &&
-      apiPublishesUnifiedSearch(api)
+    api && (api as HasType)?.type === 'map' && typeof (api as MapApi).getLayerList === 'function'
   );
 };

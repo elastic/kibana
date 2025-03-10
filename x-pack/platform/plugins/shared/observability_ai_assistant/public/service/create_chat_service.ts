@@ -25,7 +25,7 @@ import {
 } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatCompletionChunkEvent, Message, MessageRole } from '../../common';
+import { ChatCompletionChunkEvent } from '../../common';
 import {
   StreamingChatResponseEventType,
   type BufferFlushEvent,
@@ -186,7 +186,6 @@ class ChatService {
 
   async initialize() {
     this.functionRegistry = new Map();
-    const systemMessages: string[] = [];
     const scopePromise = this.apiClient('GET /internal/observability_ai_assistant/functions', {
       signal: this.abortSignal,
       params: {
@@ -196,7 +195,7 @@ class ChatService {
       },
     }).then(({ functionDefinitions, systemMessage }) => {
       functionDefinitions.forEach((fn) => this.functionRegistry.set(fn.name, fn));
-      systemMessages.push(systemMessage);
+      this.systemMessage = systemMessage;
     });
 
     await Promise.all([
@@ -209,8 +208,6 @@ class ChatService {
         });
       }),
     ]);
-
-    this.systemMessage = systemMessages.join('\n');
 
     this.functions$.next(this.getFunctions());
   }
@@ -278,24 +275,17 @@ class ChatService {
     return this.renderFunctionRegistry.has(name);
   };
 
-  public getSystemMessage = (): Message => {
-    return {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.System,
-        content: this.systemMessage,
-      },
-    };
-  };
+  public getSystemMessage = (): string => this.systemMessage;
 
   public chat: ObservabilityAIAssistantChatService['chat'] = (
     name: string,
-    { connectorId, messages, functionCall, functions, signal }
+    { connectorId, systemMessage, messages, functionCall, functions, signal }
   ) => {
     return this.callStreamingApi('POST /internal/observability_ai_assistant/chat', {
       params: {
         body: {
           name,
+          systemMessage,
           messages,
           connectorId,
           functionCall,
@@ -316,6 +306,7 @@ class ChatService {
     getScreenContexts,
     connectorId,
     conversationId,
+    systemMessage,
     messages,
     persist,
     disableFunctions,
@@ -327,6 +318,7 @@ class ChatService {
         getScreenContexts,
         connectorId,
         conversationId,
+        systemMessage,
         messages,
         persist,
         disableFunctions,

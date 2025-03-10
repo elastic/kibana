@@ -109,7 +109,11 @@ export const WorkflowInsightsResults = ({
   const insights = useMemo(() => {
     if (showEmptyResultsCallout) {
       return (
-        <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
+        <CustomEuiCallOut
+          onDismiss={hideEmptyStateCallout}
+          color={'success'}
+          data-test-subj={'workflowInsightsEmptyResultsCallout'}
+        >
           {WORKFLOW_INSIGHTS.issues.emptyResults}
         </CustomEuiCallOut>
       );
@@ -120,7 +124,13 @@ export const WorkflowInsightsResults = ({
             WORKFLOW_INSIGHTS.issues.remediationButton;
 
           return (
-            <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
+            <EuiPanel
+              paddingSize="m"
+              hasShadow={false}
+              hasBorder
+              key={index}
+              data-test-subj={`workflowInsightsResult-${index}`}
+            >
               <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="warning" size="l" color="warning" />
@@ -148,6 +158,7 @@ export const WorkflowInsightsResults = ({
                     position={'top'}
                   >
                     <EuiButtonIcon
+                      data-test-subj={`workflowInsightsResult-${index}-remediation`}
                       isDisabled={!canWriteTrustedApplications}
                       aria-label={ariaLabel}
                       iconType="popout"

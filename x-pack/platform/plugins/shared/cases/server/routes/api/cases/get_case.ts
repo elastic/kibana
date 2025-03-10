@@ -42,8 +42,10 @@ export const getCaseRoute = () =>
           includeComments: false,
         });
 
+        const { comments, ...caseWithoutComments } = res;
+
         return response.ok({
-          body: res,
+          body: caseWithoutComments,
         });
       } catch (error) {
         throw createCaseError({

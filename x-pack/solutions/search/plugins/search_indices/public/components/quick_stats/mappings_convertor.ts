@@ -8,7 +8,7 @@
 import type { MappingProperty, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
 import type { Mappings } from '../../types';
 
-interface VectorFieldTypes {
+export interface VectorFieldTypes {
   semantic_text: number;
   dense_vector: number;
   sparse_vector: number;

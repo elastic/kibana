@@ -8,7 +8,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { postCaseResp, getPostCaseRequest, nullUser } from '../../../../common/lib/mock';
+import {
+  getCaseWithoutCommentsResp,
+  getPostCaseRequest,
+  nullUser,
+} from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
   createCase,
@@ -42,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const data = removeServerGeneratedPropertiesFromCase(theCase);
-      expect(data).to.eql({ ...postCaseResp(), created_by: nullUser });
+      expect(data).to.eql({ ...getCaseWithoutCommentsResp(), created_by: nullUser });
     });
 
     it('should not return a case in the wrong space', async () => {

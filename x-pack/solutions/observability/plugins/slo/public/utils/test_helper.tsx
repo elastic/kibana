@@ -16,6 +16,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
 import { PluginContext } from '../context/plugin_context';
 
@@ -54,7 +55,13 @@ export const render = (component: React.ReactNode) => {
             createExploratoryViewUrl: jest.fn(),
             getAppDataView: jest.fn(),
 
-            ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
+            ExploratoryViewEmbeddable: () => (
+              <div>
+                {i18n.translate('xpack.slo.render.div.embeddableExploratoryViewLabel', {
+                  defaultMessage: 'Embeddable exploratory view',
+                })}
+              </div>
+            ),
           },
         }}
       >

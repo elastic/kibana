@@ -15,9 +15,10 @@ export const allowedExperimentalValues = Object.freeze({
   isMustacheAutocompleteOn: false,
   sentinelOneConnectorOn: true,
   crowdstrikeConnectorOn: true,
-  inferenceConnectorOn: false,
+  inferenceConnectorOff: false,
   crowdstrikeConnectorRTROn: true,
   microsoftDefenderEndpointOn: true,
+  openAIAdditionalHeadersOn: false,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

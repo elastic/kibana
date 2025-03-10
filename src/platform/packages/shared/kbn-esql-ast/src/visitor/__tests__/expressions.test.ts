@@ -190,7 +190,7 @@ test('"visitExpression" does visit WHERE clause args', () => {
 test('"visitExpression" does visit identifier nodes', () => {
   const { ast } = parse(`
     FROM index
-      | RIGHT JOIN a AS b ON c
+      | RIGHT JOIN a ON c
   `);
   const expressions: string[] = [];
   new Visitor()
@@ -206,5 +206,5 @@ test('"visitExpression" does visit identifier nodes', () => {
     })
     .visitQuery(ast);
 
-  expect(expressions.sort()).toEqual(['a', 'as', 'b', 'index']);
+  expect(expressions.sort()).toEqual(['a', 'index']);
 });

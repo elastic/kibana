@@ -607,6 +607,137 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.findEventsBySavedObjectIdsSearchAfter",
+            "type": "Function",
+            "tags": [],
+            "label": "findEventsBySavedObjectIdsSearchAfter",
+            "description": [],
+            "signature": [
+              "(type: string, ids: string[], options?: Partial<",
+              "FindOptionsSearchAfterType",
+              "> | undefined, legacyIds?: string[] | undefined) => Promise<",
+              "QueryEventsBySavedObjectSearchAfterResult",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIdsSearchAfter.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIdsSearchAfter.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIdsSearchAfter.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "FindOptionsSearchAfterType",
+                  "> | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIdsSearchAfter.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "legacyIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.closePointInTime",
+            "type": "Function",
+            "tags": [],
+            "label": "closePointInTime",
+            "description": [],
+            "signature": [
+              "(pitId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.closePointInTime.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pitId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.refreshIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshIndex",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

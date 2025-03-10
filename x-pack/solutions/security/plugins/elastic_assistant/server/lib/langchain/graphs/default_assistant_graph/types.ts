@@ -25,6 +25,7 @@ export interface GraphInputs {
   isStream?: boolean;
   isOssModel?: boolean;
   input: string;
+  provider: string;
   responseLanguage?: string;
 }
 
@@ -37,11 +38,12 @@ export interface AgentState extends AgentStateBase {
   isStream: boolean;
   isOssModel: boolean;
   llmType: string;
+  provider: string;
   responseLanguage: string;
   connectorId: string;
   conversation: ConversationResponse | undefined;
   conversationId: string;
-  contentReferencesEnabled: boolean;
+  formattedTime: string;
 }
 
 export interface NodeParamsBase {

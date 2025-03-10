@@ -7,6 +7,7 @@
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { MockedKeys } from '@kbn/utility-types-jest';
 import { AwaitedProperties } from '@kbn/utility-types';
 import {
@@ -28,7 +29,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
+import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { authenticatedUser } from './user';
 
 export const createMockClients = () => {
@@ -145,7 +146,7 @@ const createElasticAssistantRequestContextMock = (
     getCurrentUser: jest.fn().mockReturnValue(authenticatedUser),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn().mockReturnValue('default'),
-    inference: { getClient: jest.fn() },
+    inference: inferenceMock.createStartContract(),
     llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
     core: clients.core,
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
