@@ -159,7 +159,7 @@ async function waitForAlertsForRule({
       return alerts;
     });
 
-  // This is the generator way of building the program.
+  // This is the generator way of building the program, like async/await; imperative
   // ****************************************************
   const main = Effect.gen(function* () {
     // Logging within the span below
