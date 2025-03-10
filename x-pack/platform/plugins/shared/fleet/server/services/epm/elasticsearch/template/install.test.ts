@@ -129,7 +129,6 @@ describe('EPM index template install', () => {
     }
 
     expect(packageTemplate.settings?.index?.mapping).toHaveProperty('source');
-    // @ts-expect-error esclient mapping out-of-date
     expect(packageTemplate.settings?.index?.mapping?.source).toEqual({ mode: 'synthetic' });
   });
 
@@ -160,7 +159,6 @@ describe('EPM index template install', () => {
     }
 
     expect(packageTemplate.settings?.index?.mapping).toHaveProperty('source');
-    // @ts-expect-error esclient mapping out-of-date
     expect(packageTemplate.settings?.index?.mapping?.source).toEqual({ mode: 'synthetic' });
   });
 

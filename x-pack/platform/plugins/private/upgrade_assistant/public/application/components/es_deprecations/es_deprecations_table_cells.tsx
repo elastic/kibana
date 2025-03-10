@@ -17,7 +17,6 @@ interface Props {
   resolutionTableCell?: React.ReactNode;
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
-  openFlyout: () => void;
 }
 
 const i18nTexts = {
@@ -39,7 +38,6 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   resolutionTableCell,
   fieldName,
   deprecation,
-  openFlyout,
 }) => {
   // "Status column"
   if (fieldName === 'isCritical') {
@@ -49,10 +47,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   // "Issue" column
   if (fieldName === 'message') {
     return (
-      <EuiLink
-        data-test-subj={`deprecation-${deprecation.correctiveAction?.type ?? 'default'}`}
-        onClick={openFlyout}
-      >
+      <EuiLink data-test-subj={`deprecation-${deprecation.correctiveAction?.type ?? 'default'}`}>
         {deprecation.message}
       </EuiLink>
     );

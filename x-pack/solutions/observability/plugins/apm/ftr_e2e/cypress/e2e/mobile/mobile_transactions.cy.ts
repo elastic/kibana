@@ -20,7 +20,8 @@ const mobileTransactionsPageHref = url.format({
   },
 });
 
-describe('Mobile transactions page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/207040
+describe.skip('Mobile transactions page', () => {
   beforeEach(() => {
     cy.loginAsViewerUser();
   });

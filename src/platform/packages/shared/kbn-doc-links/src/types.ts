@@ -320,6 +320,7 @@ export interface DocLinks {
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
     readonly dashboardImportExport: string;
+    readonly legacyOpenSslProvider: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;

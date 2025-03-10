@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Feature } from 'geojson';
+import type { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import type { Batch } from '@loaders.gl/schema';
 import { JSONLoader, type JSONLoaderOptions } from '@loaders.gl/json';

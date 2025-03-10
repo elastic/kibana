@@ -9,6 +9,8 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { buildEqlSearchRequest } from './build_eql_search_request';
+import { getEqlRuleParams } from '../../rule_schema/mocks';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
 
 const emptyFilter = {
   bool: {
@@ -18,21 +20,23 @@ const emptyFilter = {
     must_not: [],
   },
 };
+const index = ['testindex1', 'testindex2'];
+const ruleParams = getEqlRuleParams({ index });
+const sharedParams = getSharedParamsMock({
+  ruleParams,
+  rewrites: { inputIndex: ['testindex1', 'testindex2'] },
+});
 
 describe('buildEqlSearchRequest', () => {
   test('should build a basic request with time range', () => {
     const request = buildEqlSearchRequest({
+      sharedParams,
       query: 'process where true',
-      index: ['testindex1', 'testindex2'],
       from: 'now-5m',
       to: 'now',
       size: 100,
       filters: undefined,
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
       eventCategoryOverride: undefined,
-      exceptionFilter: undefined,
     });
     expect(request).toEqual({
       allow_no_indices: true,
@@ -74,18 +78,18 @@ describe('buildEqlSearchRequest', () => {
 
   test('should build a request with timestamp and event category overrides', () => {
     const request = buildEqlSearchRequest({
+      sharedParams: {
+        ...sharedParams,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
+      },
       query: 'process where true',
-      index: ['testindex1', 'testindex2'],
       from: 'now-5m',
       to: 'now',
       size: 100,
       filters: undefined,
-      primaryTimestamp: 'event.ingested',
-      secondaryTimestamp: '@timestamp',
-      runtimeMappings: undefined,
       eventCategoryOverride: 'event.other_category',
       timestampField: undefined,
-      exceptionFilter: undefined,
     });
     expect(request).toEqual({
       allow_no_indices: true,
@@ -163,18 +167,17 @@ describe('buildEqlSearchRequest', () => {
 
   test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', () => {
     const request = buildEqlSearchRequest({
+      sharedParams: {
+        ...sharedParams,
+        primaryTimestamp: 'event.ingested',
+      },
       query: 'process where true',
-      index: ['testindex1', 'testindex2'],
       from: 'now-5m',
       to: 'now',
       size: 100,
       filters: undefined,
-      primaryTimestamp: 'event.ingested',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
       eventCategoryOverride: 'event.other_category',
       timestampField: undefined,
-      exceptionFilter: undefined,
     });
     expect(request).toEqual({
       allow_no_indices: true,
@@ -225,17 +228,16 @@ describe('buildEqlSearchRequest', () => {
       startedAt: new Date(),
     });
     const request = buildEqlSearchRequest({
+      sharedParams: {
+        ...sharedParams,
+        exceptionFilter: filter,
+      },
       query: 'process where true',
-      index: ['testindex1', 'testindex2'],
       from: 'now-5m',
       to: 'now',
       size: 100,
       filters: undefined,
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
       eventCategoryOverride: undefined,
-      exceptionFilter: filter,
     });
     expect(request).toMatchInlineSnapshot(`
       Object {
@@ -368,16 +370,12 @@ describe('buildEqlSearchRequest', () => {
       },
     ];
     const request = buildEqlSearchRequest({
+      sharedParams,
       query: 'process where true',
-      index: ['testindex1', 'testindex2'],
       from: 'now-5m',
       to: 'now',
       size: 100,
       filters,
-      primaryTimestamp: '@timestamp',
-      secondaryTimestamp: undefined,
-      runtimeMappings: undefined,
-      exceptionFilter: undefined,
     });
     expect(request).toEqual({
       allow_no_indices: true,
@@ -437,36 +435,28 @@ describe('buildEqlSearchRequest', () => {
   describe('handles the tiebreaker field', () => {
     test('should pass a tiebreaker field with a valid value', async () => {
       const request = buildEqlSearchRequest({
+        sharedParams,
         query: 'process where true',
-        index: ['testindex1', 'testindex2'],
         from: 'now-5m',
         to: 'now',
         size: 100,
         filters: undefined,
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-        runtimeMappings: undefined,
         tiebreakerField: 'host.name',
         eventCategoryOverride: undefined,
-        exceptionFilter: undefined,
       });
       expect(request?.body?.tiebreaker_field).toEqual(`host.name`);
     });
 
-    test('should not pass a tiebreaker field with a valid value', async () => {
+    test('should not pass a tiebreaker field with an invalid value', async () => {
       const request = buildEqlSearchRequest({
+        sharedParams,
         query: 'process where true',
-        index: ['testindex1', 'testindex2'],
         from: 'now-5m',
         to: 'now',
         size: 100,
         filters: undefined,
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-        runtimeMappings: undefined,
         tiebreakerField: '',
         eventCategoryOverride: undefined,
-        exceptionFilter: undefined,
       });
       expect(request?.body?.tiebreaker_field).toEqual(undefined);
     });

@@ -10,7 +10,8 @@ import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanst
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPanel, EuiSkeletonTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { isEmpty } from 'lodash';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -32,15 +33,25 @@ interface OwnProps {
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  onConversationSelected: ({
+    cId,
+    cTitle,
+    apiConfig,
+  }: {
+    apiConfig?: ApiConfig;
+    cId: string;
+    cTitle?: string;
+  }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 type Props = OwnProps;
@@ -53,23 +64,25 @@ export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID = 'aiAssistantSettingsMenuC
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
 export const AssistantHeader: React.FC<Props> = ({
-  selectedConversation,
+  chatHistoryVisible,
+  conversations,
+  conversationsLoaded,
   defaultConnector,
+  isAssistantEnabled,
   isDisabled,
   isLoading,
   isSettingsModalVisible,
-  setIsSettingsModalVisible,
   onChatCleared,
-  chatHistoryVisible,
-  setChatHistoryVisible,
   onCloseFlyout,
-  onConversationSelected,
-  conversations,
-  conversationsLoaded,
-  refetchCurrentUserConversations,
   onConversationCreate,
-  isAssistantEnabled,
+  onConversationSelected,
+  refetchCurrentConversation,
+  refetchCurrentUserConversations,
   refetchPrompts,
+  selectedConversation,
+  setChatHistoryVisible,
+  setIsSettingsModalVisible,
+  setPaginationObserver,
 }) => {
   const selectedConnectorId = useMemo(
     () => selectedConversation?.apiConfig?.connectorId,
@@ -77,10 +90,11 @@ export const AssistantHeader: React.FC<Props> = ({
   );
 
   const onConversationChange = useCallback(
-    (updatedConversation: Conversation) => {
+    (updatedConversation: Conversation, apiConfig?: ApiConfig) => {
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,
+        ...(apiConfig ? { apiConfig } : {}),
       });
     },
     [onConversationSelected]
@@ -101,17 +115,14 @@ export const AssistantHeader: React.FC<Props> = ({
               defaultConnector={defaultConnector}
               isDisabled={isDisabled}
               isSettingsModalVisible={isSettingsModalVisible}
-              selectedConversationId={
-                !isEmpty(selectedConversation?.id)
-                  ? selectedConversation?.id
-                  : selectedConversation?.title
-              }
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               onConversationSelected={onConversationSelected}
               conversations={conversations}
               conversationsLoaded={conversationsLoaded}
+              refetchCurrentConversation={refetchCurrentConversation}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               refetchPrompts={refetchPrompts}
+              setPaginationObserver={setPaginationObserver}
             />
           </EuiFlexItem>
 
@@ -147,8 +158,8 @@ export const AssistantHeader: React.FC<Props> = ({
               <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
             ) : (
               <AssistantTitle
-                isDisabled={isDisabled}
-                title={selectedConversation?.title}
+                isDisabled={isDisabled || selectedConversation?.id === ''}
+                title={selectedConversation?.title || NEW_CHAT}
                 selectedConversation={selectedConversation}
                 refetchCurrentUserConversations={refetchCurrentUserConversations}
               />

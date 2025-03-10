@@ -63,11 +63,9 @@ export type CommonDeploymentParams = {
 };
 
 export interface AdaptiveAllocationsParams {
-  adaptive_allocations?: {
-    enabled: boolean;
-    min_number_of_allocations?: number;
-    max_number_of_allocations?: number;
-  };
+  enabled: boolean;
+  min_number_of_allocations?: number;
+  max_number_of_allocations?: number;
 }
 
 export interface StartAllocationParams {
@@ -75,13 +73,13 @@ export interface StartAllocationParams {
   deploymentParams: CommonDeploymentParams;
   adaptiveAllocationsParams?: AdaptiveAllocationsParams;
 }
-
 export interface DeleteModelParams {
   modelId: string;
   options?: { with_pipelines?: boolean; force?: boolean };
 }
-export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
+export interface UpdateAllocationParams {
   number_of_allocations?: number;
+  adaptive_allocations?: AdaptiveAllocationsParams;
 }
 
 /**
@@ -247,7 +245,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
         query: deploymentParams,
-        ...(adaptiveAllocationsParams ? { body: JSON.stringify(adaptiveAllocationsParams) } : {}),
+        ...(adaptiveAllocationsParams
+          ? {
+              body: JSON.stringify({
+                adaptive_allocations: adaptiveAllocationsParams,
+              }),
+            }
+          : {}),
         version: '1',
       });
     },
@@ -294,10 +298,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    trainedModelPipelineSimulate(
-      pipeline: estypes.IngestPipeline,
-      docs: estypes.IngestSimulateDocument[]
-    ) {
+    trainedModelPipelineSimulate(pipeline: estypes.IngestPipeline, docs: estypes.IngestDocument[]) {
       const body = JSON.stringify({
         pipeline,
         docs,
