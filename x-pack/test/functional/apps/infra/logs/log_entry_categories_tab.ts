@@ -61,11 +61,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(() => logsUi.cleanIndices());
 
       it('Shows no data page when indices do not exist', async () => {
-        await logsUi.logEntryCategoriesPage.navigateTo();
+        await retry.tryWithRetries(
+          "retry if indices haven't been refreshed yet",
+          async () => {
+            await logsUi.logEntryCategoriesPage.navigateTo();
 
-        await retry.try(async () => {
-          expect(await logsUi.logEntryCategoriesPage.getNoDataScreen()).to.be.ok();
-        });
+            await retry.try(async () => {
+              expect(await logsUi.logEntryCategoriesPage.getNoDataScreen()).to.be.ok();
+            });
+          },
+          { retryCount: 2 }
+        );
       });
 
       describe('when indices exists', () => {
@@ -78,11 +84,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('shows setup page when indices exist', async () => {
-          await logsUi.logEntryCategoriesPage.navigateTo();
+          await retry.tryWithRetries(
+            "retry if indices haven't been refreshed yet",
+            async () => {
+              await logsUi.logEntryCategoriesPage.navigateTo();
 
-          await retry.try(async () => {
-            expect(await logsUi.logEntryCategoriesPage.getSetupScreen()).to.be.ok();
-          });
+              await retry.try(async () => {
+                expect(await logsUi.logEntryCategoriesPage.getSetupScreen()).to.be.ok();
+              });
+            },
+            { retryCount: 2 }
+          );
         });
 
         it('shows required ml read privileges prompt when the user has not any ml privileges', async () => {
