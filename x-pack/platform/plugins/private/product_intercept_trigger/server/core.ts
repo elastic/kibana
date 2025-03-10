@@ -153,8 +153,13 @@ export class ProductInterceptTriggerCore {
   registerRoutes() {
     this.core.http.registerRouteHandlerContext<ProductInterceptTriggerStatusContext, 'triggerInfo'>(
       'triggerInfo',
-      async (ctx, request) => {
-        let triggerInfo = null;
+      async () => {
+        let triggerInfo: ProductInterceptTriggerStatusContext['triggerInfo'] extends Promise<
+          infer I
+        >
+          ? I
+          : never = null;
+
         let registeredTaskInstance;
 
         if ((registeredTaskInstance = await this.fetchRegisteredTriggerTask())) {
@@ -187,8 +192,6 @@ export class ProductInterceptTriggerCore {
         },
       },
       async ({ triggerInfo }, _request, response) => {
-        const requestTime = new Date().toISOString();
-
         const resolvedTriggerInfo = await triggerInfo;
 
         if (!resolvedTriggerInfo) {
@@ -197,21 +200,30 @@ export class ProductInterceptTriggerCore {
           });
         }
 
+        if (_request.headers['if-none-match'] === String(resolvedTriggerInfo.runs)) {
+          return response.notModified({});
+        }
+
         let diff;
         const configuredIntervalInMs = parseIntervalAsMillisecond(resolvedTriggerInfo.interval);
         // determine better heuristics for wether to trigger the dialog if we missed the last run
-        const nextTrigger =
-          (diff = Date.parse(resolvedTriggerInfo.runAt.toDateString()) - Date.parse(requestTime)) >
-          0
+        const responseExpirationValueInMs =
+          (diff =
+            Date.parse(resolvedTriggerInfo.runAt.toDateString()) -
+            Date.parse(new Date().toISOString())) > 0
             ? diff
             : Math.abs(diff) > configuredIntervalInMs
             ? 0
             : configuredIntervalInMs - Math.abs(diff);
 
         return response.ok({
+          headers: {
+            etag: String(resolvedTriggerInfo.runs),
+            age: String(responseExpirationValueInMs),
+            'cache-control': `private, max-age=${configuredIntervalInMs}, immutable`,
+          },
           body: {
             runs: resolvedTriggerInfo.runs,
-            nextTrigger,
             triggerIntervalInMs: configuredIntervalInMs,
             firstRegisteredAt: resolvedTriggerInfo.firstScheduledAt,
           },
