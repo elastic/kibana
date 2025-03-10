@@ -370,6 +370,77 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.createDetectionRule",
+        "type": "Function",
+        "tags": [],
+        "label": "createDetectionRule",
+        "description": [],
+        "signature": [
+          "({ http, rule, }: { http: ",
+          "HttpSetup",
+          "; rule: ",
+          "RuleCreateProps",
+          "; }) => Promise<",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.RuleResponse",
+            "text": "RuleResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/create_detection_rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.createDetectionRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  rule,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/create_detection_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.createDetectionRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/create_detection_rule.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.createDetectionRule.$1.rule",
+                "type": "Object",
+                "tags": [],
+                "label": "rule",
+                "description": [],
+                "signature": [
+                  "RuleCreateProps"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/create_detection_rule.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.extractErrorMessage",
         "type": "Function",
         "tags": [],
@@ -418,6 +489,39 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.generateBenchmarkRuleTags",
+        "type": "Function",
+        "tags": [],
+        "label": "generateBenchmarkRuleTags",
+        "description": [],
+        "signature": [
+          "(rule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/detection_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.generateBenchmarkRuleTags.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/detection_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.getAbbreviatedNumber",
         "type": "Function",
         "tags": [],
@@ -443,6 +547,39 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/utils/get_abbreviated_number.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.getFindingsDetectionRuleSearchTags",
+        "type": "Function",
+        "tags": [],
+        "label": "getFindingsDetectionRuleSearchTags",
+        "description": [],
+        "signature": [
+          "(cspBenchmarkRule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/detection_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.getFindingsDetectionRuleSearchTags.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "cspBenchmarkRule",
+            "description": [],
+            "signature": [
+              "Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/detection_rules.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1238,6 +1375,42 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.RuleResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.RuleResponse",
+            "text": "RuleResponse"
+          },
+          " extends ",
+          "RuleCreateProps"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.RuleResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/rules/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.Vulnerability",
         "type": "Interface",
         "tags": [],
@@ -1758,6 +1931,36 @@
           "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.DETECTION_RULE_RULES_API_CURRENT_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "DETECTION_RULE_RULES_API_CURRENT_VERSION",
+        "description": [],
+        "signature": [
+          "\"2023-10-31\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.FINDINGS_INDEX_PATTERN",
+        "type": "string",
+        "tags": [],
+        "label": "FINDINGS_INDEX_PATTERN",
+        "description": [],
+        "signature": [
+          "\"logs-cloud_security_posture.findings-default*\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -28,7 +28,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
 
-  describe('test telemetry', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/202564
+  describe.skip('test telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
     const esQueryRuleId: { [key: string]: string } = {};
     const simulator = new OpenAISimulator({
