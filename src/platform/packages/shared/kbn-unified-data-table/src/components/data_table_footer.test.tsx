@@ -124,7 +124,7 @@ describe('UnifiedDataTableFooter', function () {
     expect(findTestSubject(component, 'dscGridSampleSizeFetchMoreLink').exists()).toBe(true);
   });
 
-  it('should not render the load more button where pagination mode is set to load more and but the user has not reached the bottom of the page', () => {
+  it('should not render the load more button where pagination mode is set to singlePage and but the user has not reached the bottom of the page', () => {
     const mockLoadMore = jest.fn();
 
     const component = mountWithIntl(
