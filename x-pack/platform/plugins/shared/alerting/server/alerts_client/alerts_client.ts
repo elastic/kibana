@@ -467,7 +467,6 @@ export class AlertsClient<
             })
           );
         } else {
-          // TODO: Maybe can remove by deleting in activeAlerts
           // skip writing the alert document if the number of consecutive
           // active alerts is less than the rule alertDelay threshold
           if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
