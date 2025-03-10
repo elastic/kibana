@@ -74,6 +74,43 @@ describe('compileConfigStack', () => {
     ]);
   });
 
+  it.each(['search_ai_lake', 'essentials', 'complete'])(
+    'adds all `security` %s tier config to the stack',
+    async (productTier) => {
+      getConfigFromFiles.mockImplementationOnce(() => {
+        return {
+          serverless: 'es',
+          xpack: {
+            securitySolutionServerless: {
+              enabled: true,
+              productTypes: [
+                {
+                  product_line: 'security',
+                  product_tier: productTier,
+                },
+              ],
+            },
+          },
+        };
+      });
+      const configList = compileConfigStack({
+        serverless: 'security',
+        dev: true,
+      }).map(toFileNames);
+
+      expect(configList).toEqual([
+        'serverless.yml',
+        'serverless.security.yml',
+        'kibana.yml',
+        'kibana.dev.yml',
+        'serverless.dev.yml',
+        'serverless.security.dev.yml',
+        `serverless.security.${productTier}.yml`,
+        `serverless.security.${productTier}.dev.yml`,
+      ]);
+    }
+  );
+
   it('defaults to "es" if --serverless and --dev are there', async () => {
     getConfigFromFiles.mockImplementationOnce(() => {
       return {
