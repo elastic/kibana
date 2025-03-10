@@ -6,12 +6,12 @@
  */
 
 import { isPlainObject, partition, toString } from 'lodash';
+import { processCustomFieldListValue } from '../../custom_fields/list';
 import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
 import {
   CustomFieldTypes,
   type CaseCustomFields,
   type CustomFieldsConfiguration,
-  type ListCustomFieldConfiguration,
 } from '../../../common/types/domain';
 import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
@@ -119,18 +119,6 @@ export const buildCustomFieldsForRequest = (
           } as CaseRequestCustomField;
         })
     : [];
-};
-
-const processCustomFieldListValue = (
-  customFieldConfig: ListCustomFieldConfiguration,
-  value: string
-) => {
-  // If the value is not in the options, default to the first option
-  const valueOption =
-    customFieldConfig.options.find((option) => option.key === value) ??
-    customFieldConfig.options[0];
-
-  return { [valueOption.key]: valueOption.label };
 };
 
 export const constructRequiredKibanaPrivileges = (owner: string): string[] => {

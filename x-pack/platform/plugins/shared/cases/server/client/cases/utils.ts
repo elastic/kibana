@@ -24,7 +24,12 @@ import type {
   ExternalService,
   User,
 } from '../../../common/types/domain';
-import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
+import {
+  CaseStatuses,
+  UserActionTypes,
+  AttachmentType,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CaseRequestCustomFields,
@@ -38,6 +43,7 @@ import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
 import * as i18n from './translations';
+import { processCustomFieldListValue } from '../../custom_fields/list';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -474,10 +480,14 @@ export const fillMissingCustomFields = ({
   for (const confCustomField of customFieldsConfiguration) {
     if (!customFieldsKeys.has(confCustomField.key)) {
       if (confCustomField?.defaultValue !== null && confCustomField?.defaultValue !== undefined) {
+        const value =
+          confCustomField.type === CustomFieldTypes.LIST
+            ? processCustomFieldListValue(confCustomField, confCustomField.defaultValue)
+            : confCustomField.defaultValue;
         missingCustomFields.push({
           key: confCustomField.key,
           type: confCustomField.type,
-          value: confCustomField.defaultValue,
+          value,
         } as CaseCustomField);
       } else if (!confCustomField.required) {
         missingCustomFields.push({

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { isString } from 'lodash';
-import type { CustomFieldValue } from '../../common/types/domain';
+import type { CustomFieldValue, ListCustomFieldConfiguration } from '../../common/types/domain';
 import { CasesCustomFieldMappingType } from './types';
 
 export const getCasesListCustomField = () => ({
@@ -23,3 +23,15 @@ export const getCasesListCustomField = () => ({
   },
   getDefaultValue: () => null,
 });
+
+export const processCustomFieldListValue = (
+  customFieldConfig: ListCustomFieldConfiguration,
+  value: string
+) => {
+  // If the value is not in the options, default to the first option
+  const valueOption =
+    customFieldConfig.options.find((option) => option.key === value) ??
+    customFieldConfig.options[0];
+
+  return { [valueOption.key]: valueOption.label };
+};
