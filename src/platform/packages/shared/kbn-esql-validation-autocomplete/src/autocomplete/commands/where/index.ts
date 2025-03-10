@@ -13,7 +13,6 @@ import {
   type ESQLCommand,
   type ESQLSingleAstItem,
   type ESQLFunction,
-  ESQLAst,
 } from '@kbn/esql-ast';
 import { logicalOperators } from '../../../definitions/builtin';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';
@@ -42,7 +41,7 @@ export async function suggest(
   _getSuggestedVariableName: () => string,
   getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullTextAst?: ESQLAst
+  previousCommands?: ESQLCommand[]
 ): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -163,7 +162,7 @@ export async function suggest(
 
     case 'empty_expression':
       // Don't suggest MATCH or QSTR after unsupported commands
-      const priorCommands = fullTextAst?.map((a) => a.name) ?? [];
+      const priorCommands = previousCommands?.map((a) => a.name) ?? [];
       const ignored = [];
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
         ignored.push('match');
@@ -171,7 +170,7 @@ export async function suggest(
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
         ignored.push('qstr');
       }
-      const last = fullTextAst?.[fullTextAst.length - 1];
+      const last = previousCommands?.[previousCommands.length - 1];
       let columnSuggestions: SuggestionRawDefinition[] = [];
       if (!last?.text?.endsWith(`:${EDITOR_MARKER}`)) {
         columnSuggestions = await getColumnsByType('any', [], {

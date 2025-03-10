@@ -8,7 +8,6 @@
  */
 
 import type {
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -195,6 +194,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
+  /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
@@ -206,7 +209,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getSuggestedVariableName: () => string,
     getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-    fullTextAst?: ESQLAst,
+    previousCommands?: ESQLCommand[],
     definition?: CommandDefinition<CommandName>,
     callbacks?: ESQLCallbacks
   ) => Promise<SuggestionRawDefinition[]>;

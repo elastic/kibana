@@ -764,6 +764,8 @@ export interface OperationMetadata {
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
   isStaticValue?: boolean;
+  // Extra metadata to infer array support in an operation
+  hasArraySupport?: boolean;
 }
 
 /**

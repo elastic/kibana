@@ -8,7 +8,7 @@
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,

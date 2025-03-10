@@ -27,6 +27,7 @@ import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export interface NetworkDetailsProps {
   /**
@@ -121,6 +122,7 @@ export const NetworkDetails = ({
       narrowDateRange={narrowDateRange}
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
+      scopeId={SourcererScopeName.default}
     />
   ) : (
     <EmptyPrompt />

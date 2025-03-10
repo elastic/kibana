@@ -13,7 +13,7 @@ exports[`EntryContent should render a nested value 1`] = `
         data-test-subj="EntryContentNestedEntry"
       >
         <span
-          class="euiToken emotion-euiToken-circle-light-s-euiColorVis2"
+          class="euiToken emotion-euiToken-circle-light-s-euiColorVis4"
           data-test-subj="nstedEntryIcon"
         >
           <span

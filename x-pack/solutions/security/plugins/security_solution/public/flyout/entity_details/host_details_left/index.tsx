@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import {
@@ -52,12 +52,17 @@ export const HostDetailsPanel = ({
       : EntityDetailsLeftPanelTab.RISK_INPUTS
   );
 
+  useEffect(() => {
+    if (path?.tab && path.tab !== selectedTabId) {
+      setSelectedTabId(path.tab);
+    }
+  }, [path?.tab, selectedTabId]);
+
   const [tabs] = useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
     const riskScoreTab = isRiskScoreTabAvailable
       ? [getRiskInputTab({ entityName: name, entityType: EntityType.host, scopeId })]
       : [];
-
     // Determine if the Insights tab should be included
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts

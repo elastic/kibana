@@ -71,6 +71,17 @@ components:
             label:
               description: Label of the query
               type: string
+            timerange:
+                description: Time range to select in the time picker.
+                type: object
+                required:
+                  - 'from'
+                  - 'to'
+                properties:
+                  from:
+                    type: string
+                  to:
+                    type: string
 
     SecurityAlertContentReference:
       description: References a security alert

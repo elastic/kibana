@@ -115,7 +115,7 @@ export const policies = [
 /**
  * Utility to filter down the function list for the given type
  * It is mainly driven by the return type, but it can be filtered upon with the last optional argument "paramsTypes"
- * jsut make sure to pass the arguments in the right order
+ * just make sure to pass the arguments in the right order
  * @param command current command context
  * @param expectedReturnType the expected type returned by the function
  * @param functionCategories

@@ -97,7 +97,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
     "@kbn/ebt-tools",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/security-plugin-types-public",

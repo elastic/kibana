@@ -16,7 +16,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
@@ -322,6 +322,7 @@ export const createCustomThresholdExecutor = ({
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
         }),
+        reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
       };
 

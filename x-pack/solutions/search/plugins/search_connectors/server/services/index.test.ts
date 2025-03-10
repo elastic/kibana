@@ -21,9 +21,14 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import {
   createPackagePolicyServiceMock,
+  createMockAgentService,
   createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
-import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
 import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
@@ -74,6 +79,7 @@ describe('AgentlessConnectorsInfraService', () => {
   let esClient: ElasticsearchClientMock;
   let packagePolicyService: jest.Mocked<PackagePolicyClient>;
   let agentPolicyInterface: jest.Mocked<AgentPolicyServiceInterface>;
+  let agentService: jest.Mocked<AgentService>;
   let logger: MockedLogger;
   let service: AgentlessConnectorsInfraService;
 
@@ -82,6 +88,7 @@ describe('AgentlessConnectorsInfraService', () => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     packagePolicyService = createPackagePolicyServiceMock();
     agentPolicyInterface = createMockAgentPolicyService();
+    agentService = createMockAgentService();
     logger = loggerMock.create();
 
     service = new AgentlessConnectorsInfraService(
@@ -89,6 +96,7 @@ describe('AgentlessConnectorsInfraService', () => {
       esClient,
       packagePolicyService,
       agentPolicyInterface,
+      agentService,
       logger
     );
 
@@ -662,24 +670,32 @@ describe('module', () => {
   const githubPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-001',
     agent_policy_ids: ['agent-package-001'],
+    package_policy_name: 'Agentless github_connector',
+    package_name: 'Elastic Connectors',
     connector_settings: githubConnector,
   };
 
   const sharepointPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-002',
     agent_policy_ids: ['agent-package-002'],
+    package_policy_name: 'Agentless spo_connector',
+    package_name: 'Elastic Connectors',
     connector_settings: sharepointConnector,
   };
 
   const mysqlPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-003',
     agent_policy_ids: ['agent-package-003'],
+    package_policy_name: 'Agentless mysql_connector',
+    package_name: 'Elastic Connectors',
     connector_settings: mysqlConnector,
   };
 
   const confluencePackagePolicy: PackagePolicyMetadata = {
     package_policy_id: '000004',
     agent_policy_ids: [],
+    package_policy_name: '',
+    package_name: 'Elastic Connectors',
     connector_settings: confluenceConnectorEmptySettings,
   };
 

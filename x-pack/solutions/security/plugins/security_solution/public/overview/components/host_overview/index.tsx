@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -59,7 +59,7 @@ interface HostSummaryProps {
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
@@ -179,7 +179,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true })
+              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true, scopeId })
               : getEmptyTagValue(),
         },
         {
@@ -205,7 +205,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, indexNames, hostName, isDraggable]
+      [data, indexNames, hostName, isDraggable, scopeId]
     );
     const firstColumn = useMemo(
       () =>

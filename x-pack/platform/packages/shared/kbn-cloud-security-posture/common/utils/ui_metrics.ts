@@ -10,8 +10,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
 
-export const MISCONFIGURATION_INSIGHT = 'misconfiguration-insight' as const;
-export const VULNERABILITIES_INSIGHT = 'vulnerabilities-insight' as const;
+export const MISCONFIGURATION_INSIGHT = 'misconfiguration-insight-v2' as const;
+export const VULNERABILITIES_INSIGHT = 'vulnerabilities-insight-v2' as const;
 export const MISCONFIGURATION_INSIGHT_HOST_DETAILS =
   `${MISCONFIGURATION_INSIGHT}-host-details` as const;
 export const MISCONFIGURATION_INSIGHT_USER_DETAILS =

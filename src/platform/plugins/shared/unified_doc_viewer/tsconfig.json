@@ -38,7 +38,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/management-settings-ids",
     "@kbn/apm-types",
-    "@kbn/event-stacktrace"
+    "@kbn/event-stacktrace",
+    "@kbn/data-view-utils"
 
   ],
   "exclude": [

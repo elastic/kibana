@@ -124,12 +124,14 @@ describe('<CspPolicyTemplateForm />', () => {
     edit = false,
     packageInfo = {} as PackageInfo,
     isAgentlessEnabled,
+    integrationToEnable,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     isAgentlessEnabled?: boolean;
+    integrationToEnable?: string;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -143,6 +145,7 @@ describe('<CspPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={true}
               isAgentlessEnabled={isAgentlessEnabled}
+              integrationToEnable={integrationToEnable}
             />
           )}
           {!edit && (
@@ -152,6 +155,7 @@ describe('<CspPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={false}
               isAgentlessEnabled={isAgentlessEnabled}
+              integrationToEnable={integrationToEnable}
             />
           )}
         </TestProvider>
@@ -421,6 +425,89 @@ describe('<CspPolicyTemplateForm />', () => {
           enabled: input.policy_template === 'kspm',
         })),
         name: 'kspm-2',
+      },
+    });
+  });
+
+  it('KSPM - calls onChange with isExtensionLoaded the second time after increment of package version', () => {
+    const policy = getMockPolicyK8s();
+
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'kspm',
+    }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'kspm',
+    });
+
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponseWithRefetch({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
+
+    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+      createReactQueryResponseWithRefetch({
+        status: 'success',
+        data: {
+          items: [getPosturePolicy(getMockPolicyEKS(), CLOUDBEAT_EKS)],
+        },
+      })
+    );
+
+    render(
+      <WrappedComponent
+        newPolicy={policy}
+        packageInfo={{ name: 'kspm' } as PackageInfo}
+        onChange={onChange}
+        integrationToEnable="kspm"
+      />
+    );
+
+    // 1st call happens on mount and selects the default policy template enabled input
+    expect(onChange).nthCalledWith(1, {
+      isExtensionLoaded: undefined,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens on mount and increments kspm template enabled input
+    expect(onChange).nthCalledWith(2, {
+      isExtensionLoaded: undefined,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.type === 'cloudbeat/cis_k8s',
+        })),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    /*
+      3rd call happens when policies are fetched and the package version is incremented 
+      in that case isExtensionLoaded is set to 'true'
+    */
+    expect(onChange).nthCalledWith(3, {
+      isExtensionLoaded: true,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.policy_template === 'kspm',
+        })),
+        name: 'kspm-1',
       },
     });
   });
@@ -1169,7 +1256,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1191,7 +1277,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1208,7 +1293,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByTestId } = render(
@@ -1228,7 +1312,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByRole } = render(
@@ -1247,7 +1330,6 @@ describe('<CspPolicyTemplateForm />', () => {
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.project_id': { value: 'a' },
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
@@ -1289,7 +1371,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1305,7 +1386,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1321,7 +1401,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { queryByLabelText, queryByTestId } = render(
@@ -1337,7 +1416,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(

@@ -171,6 +171,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
       inferenceApiCreate: `${ELASTICSEARCH_DOCS}put-inference-api.html`,
+      inferenceApisConfigureChunking: `${ELASTICSEARCH_DOCS}inference-apis.html#infer-chunking-config`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
@@ -299,6 +300,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      unfreezeApi: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
@@ -443,6 +445,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html`,
+      updatePrebuiltDetectionRules: isServerless
+        ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
+        : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -454,7 +459,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
-      legacyBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

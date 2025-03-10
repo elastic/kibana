@@ -89,8 +89,8 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
     return visitAllImportStatements((req, { node, importer, type }) => {
       if (
         req === null ||
-        // we can ignore imports using the raw-loader, they will need to be resolved but can be managed on a case by case basis
-        req.startsWith('!!raw-loader') ||
+        // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
+        req.endsWith('?raw') ||
         // type only imports can stretch across all the boundaries
         isTypeOnlyImport(importer)
       ) {

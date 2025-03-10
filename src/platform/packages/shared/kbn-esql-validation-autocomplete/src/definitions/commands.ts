@@ -485,6 +485,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
     modes: [],
+    preview: true,
     signature: {
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
@@ -557,6 +558,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
       defaultMessage: 'Join table with another table.',
     }),
+    preview: true,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
       // TODO: Uncomment when other join types are implemented
@@ -564,12 +566,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
-    options: [],
     modes: [],
     signature: {
-      multipleParams: false,
+      multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    options: [onOption],
     suggest: suggestForJoin,
   },
 ];

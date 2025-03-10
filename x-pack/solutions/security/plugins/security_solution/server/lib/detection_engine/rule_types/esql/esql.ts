@@ -28,9 +28,10 @@ import { rowToDocument, mergeEsqlResultInSource } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { CreateRuleOptions, RunOpts, SignalSource } from '../types';
+import type { CreateRuleOptions, SecuritySharedParams, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { checkErrorDetails } from '../utils/check_error_details';
 import * as i18n from '../translations';
 
 import {
@@ -47,37 +48,35 @@ import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_a
 import type { ExperimentalFeatures } from '../../../../../common';
 
 export const esqlExecutor = async ({
-  runOpts: {
-    completeRule,
-    tuple,
-    ruleExecutionLogger,
-    bulkCreate,
-    mergeStrategy,
-    primaryTimestamp,
-    secondaryTimestamp,
-    exceptionFilter,
-    unprocessedExceptions,
-    alertTimestampOverride,
-    publicBaseUrl,
-    alertWithSuppression,
-    intendedTimestamp,
-  },
+  sharedParams,
   services,
   state,
-  spaceId,
   experimentalFeatures,
   licensing,
   scheduleNotificationResponseActionsService,
 }: {
-  runOpts: RunOpts<EsqlRuleParams>;
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   state: Record<string, unknown>;
-  spaceId: string;
-  version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }) => {
+  const {
+    completeRule,
+    tuple,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    unprocessedExceptions,
+    ruleExecutionLogger,
+    spaceId,
+    mergeStrategy,
+    alertTimestampOverride,
+    publicBaseUrl,
+    intendedTimestamp,
+    bulkCreate,
+  } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
   /**
@@ -209,17 +208,12 @@ export const esqlExecutor = async ({
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
+            sharedParams,
             enrichedEvents: syntheticHits,
             toReturn: result,
-            wrapHits,
-            bulkCreate,
             services,
-            ruleExecutionLogger,
-            tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            alertTimestampOverride,
-            alertWithSuppression,
             experimentalFeatures,
             buildReasonMessage: buildReasonMessageForEsqlAlert,
             mergeSourceAndFields: true,
@@ -274,6 +268,9 @@ export const esqlExecutor = async ({
         size += tuple.maxSignals;
       }
     } catch (error) {
+      if (checkErrorDetails(error).isUserError) {
+        result.userError = true;
+      }
       result.errors.push(error.message);
       result.success = false;
     }

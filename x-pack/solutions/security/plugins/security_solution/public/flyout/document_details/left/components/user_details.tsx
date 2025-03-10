@@ -26,13 +26,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -69,9 +71,13 @@ import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
+const USER_DETAILS_INSIGHTS_ID = 'user-details-insights';
 
 const UserOverviewManage = manageQuery(UserOverview);
 const RelatedHostsManage = manageQuery(InspectButtonContainer);
@@ -109,6 +115,14 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
+
   const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -137,6 +151,41 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
       panel: 'preview',
     });
   }, [openPreviewPanel, userName, scopeId, telemetry]);
+
+  const filterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
+
+  const { data: userRisk } = useRiskScore({
+    filterQuery,
+    riskEntity: EntityType.user,
+    timerange,
+  });
+  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    EntityIdentifierFields.userName,
+    userName
+  );
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: EntityIdentifierFields.userName,
+    value: userName,
+    to,
+    from,
+    queryId: USER_DETAILS_INSIGHTS_ID,
+  });
+
+  const { openDetailsPanel } = useNavigateToUserDetails({
+    userName,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true, // setting to true to always open a new user flyout
+    contextID: USER_DETAILS_INSIGHTS_ID,
+  });
 
   const [isUserLoading, { inspect, userDetails, refetch }] = useObservedUserDetails({
     id: userDetailsQueryId,
@@ -340,12 +389,14 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
             fieldName={'user.name'}
             name={userName}
             direction="column"
+            openDetailsPanel={openDetailsPanel}
             data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
           />
           <MisconfigurationsInsight
             fieldName={'user.name'}
             name={userName}
             direction="column"
+            openDetailsPanel={openDetailsPanel}
             data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
             telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
           />

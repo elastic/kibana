@@ -33,7 +33,7 @@ export const deprecationBadgeDescription = i18n.translate(
   'xpack.observabilityLogsExplorer.deprecationBadgeDescription',
   {
     defaultMessage:
-      'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover which now includes their functionality plus more features and better performance.',
+      'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover and enable the new Observability solution for an improved logs experience.',
   }
 );
 

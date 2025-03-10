@@ -63,6 +63,7 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
+import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -308,6 +309,9 @@ async function createSetupSideEffects(
 
   logger.debug('Backfilling package policy supports_agentless field');
   await backfillPackagePolicySupportsAgentless(esClient);
+
+  logger.debug('Update deprecated _source.mode in component templates');
+  await updateDeprecatedComponentTemplates(esClient);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

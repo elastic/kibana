@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { LegendItem } from './draggable_legend_item';
 import { DraggableLegendItem } from './draggable_legend_item';
@@ -16,32 +16,40 @@ import { DraggableLegendItem } from './draggable_legend_item';
 export const MIN_LEGEND_HEIGHT = 175;
 export const DEFAULT_WIDTH = 165; // px
 
-const DraggableLegendContainer = styled.div<{ height: number; $minWidth: number }>`
-  height: ${({ height }) => `${height}px`};
-  overflow: auto;
-  scrollbar-width: thin;
-  width: 100%;
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
-    width: 165px;
-  }
-  min-width: ${({ $minWidth }) => `${$minWidth}px`};
+const useStyles = (height: number, minWidth: number) => {
+  const { euiTheme } = useEuiTheme();
 
-  &::-webkit-scrollbar {
-    height: ${({ theme }) => theme.eui.euiScrollBar};
-    width: ${({ theme }) => theme.eui.euiScrollBar};
-  }
+  return {
+    draggableLegendContainer: css`
+      height: ${height}px;
+      overflow: auto;
+      scrollbar-width: thin;
+      width: 100%;
 
-  &::-webkit-scrollbar-thumb {
-    background-clip: content-box;
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
-    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
-  }
+      @media only screen and (min-width: ${euiTheme.breakpoint.m}) {
+        width: 165px;
+      }
 
-  &::-webkit-scrollbar-corner,
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-`;
+      min-width: ${minWidth}px;
+
+      &::-webkit-scrollbar {
+        height: ${euiTheme.size.base};
+        width: ${euiTheme.size.base};
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-clip: content-box;
+        background-color: ${rgba(euiTheme.colors.darkShade, 0.5)};
+        border: ${euiTheme.border.radius.small} solid transparent;
+      }
+
+      &::-webkit-scrollbar-corner,
+      &::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+    `,
+  };
+};
 
 const DraggableLegendComponent: React.FC<{
   className?: string;
@@ -49,16 +57,17 @@ const DraggableLegendComponent: React.FC<{
   legendItems: LegendItem[];
   minWidth?: number;
 }> = ({ className, height = 0, legendItems, minWidth = DEFAULT_WIDTH }) => {
+  const styles = useStyles(height === 0 ? MIN_LEGEND_HEIGHT : height, minWidth);
+
   if (legendItems.length === 0) {
     return null;
   }
 
   return (
-    <DraggableLegendContainer
+    <div
+      css={styles.draggableLegendContainer}
       className={className}
       data-test-subj="draggable-legend"
-      height={height === 0 ? MIN_LEGEND_HEIGHT : height}
-      $minWidth={minWidth}
     >
       <EuiText size="xs">
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -70,7 +79,7 @@ const DraggableLegendComponent: React.FC<{
           ))}
         </EuiFlexGroup>
       </EuiText>
-    </DraggableLegendContainer>
+    </div>
   );
 };
 
