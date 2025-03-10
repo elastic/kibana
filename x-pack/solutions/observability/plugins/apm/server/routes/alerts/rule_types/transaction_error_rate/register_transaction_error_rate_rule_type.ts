@@ -28,6 +28,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -331,7 +332,13 @@ export function registerTransactionErrorRateRuleType({
         const recoveredAlertId = recoveredAlert.alert.getId();
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
-        const groupByFields: Record<string, string> = allGroupByFields.reduce(
+
+        const ruleParamsOfRecoveredAlert = alertHits?.[
+          ALERT_RULE_PARAMETERS
+        ] as TransactionErrorRateRuleTypeParams;
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+
+        const groupByFields: Record<string, string> = groupByFieldsOfRecoveredAlert.reduce(
           (acc, sourceField: string) => {
             if (alertHits?.[sourceField] !== undefined) {
               acc[sourceField] = alertHits[sourceField];

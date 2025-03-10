@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
   ALERT_GROUP,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
@@ -301,12 +302,23 @@ export const createCustomThresholdExecutor = ({
     alertsClient.setAlertLimitReached(hasReachedLimit);
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-    const groupByKeysObjectForRecovered = getFormattedGroupBy(
-      params.groupBy,
-      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-    );
+    let groupingObjectForRecovered: Record<string, object> = {};
 
-    const groupingObjectForRecovered = getGroupByObject(
+    // extracing group by fields from kibana.alert.rule.params,
+    // since all recovered alert documents will have same group by fields,
+    // we are only checking first recovered alert document
+    if (recoveredAlerts.length > 0) {
+      const alertHit = recoveredAlerts[0].hit;
+      const ruleParamsOfRecoveredAlert = alertHit?.[ALERT_RULE_PARAMETERS] as EvaluatedRuleParams;
+      const groupByFields = ruleParamsOfRecoveredAlert?.groupBy;
+
+      groupingObjectForRecovered = getGroupByObject(
+        groupByFields,
+        new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
+      );
+    }
+
+    const groupByKeysObjectForRecovered = getFormattedGroupBy(
       params.groupBy,
       new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
     );
