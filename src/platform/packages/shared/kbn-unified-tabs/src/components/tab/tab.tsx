@@ -159,6 +159,7 @@ function getTabContainerCss(
   // TODO: remove the usage of deprecated colors
 
   return css`
+    display: inline-flex;
     border-right: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.lightShade};
     height: ${euiTheme.size.xl};

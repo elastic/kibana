@@ -29,9 +29,16 @@ export default {
   },
 };
 
+const tabsSizeConfig = {
+  isScrollable: false,
+  regularTabMaxWidth: 280,
+  regularTabMinWidth: 96,
+};
+
 const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
   <Tab
     {...args}
+    tabsSizeConfig={tabsSizeConfig}
     onLabelEdited={asyncAction('onLabelEdited')}
     onSelect={asyncAction('onSelect')}
     onClose={asyncAction('onClose')}
