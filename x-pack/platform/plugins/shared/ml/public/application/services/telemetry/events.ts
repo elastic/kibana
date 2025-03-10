@@ -6,6 +6,7 @@
  */
 
 import type { SchemaObject } from '@elastic/ebt';
+import type { TrainedModelsModelTestedEbtProps } from './types';
 import {
   TrainedModelsTelemetryEventTypes,
   type TrainedModelsDeploymentEbtProps,
@@ -89,6 +90,36 @@ const trainedModelsModelDownloadSchema: SchemaObject<TrainedModelsModelDownloadE
     },
   };
 
+const trainedModelsModelTestedSchema: SchemaObject<TrainedModelsModelTestedEbtProps>['properties'] =
+  {
+    model_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the trained model',
+      },
+    },
+    model_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the trained model',
+        optional: true,
+      },
+    },
+    task_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the task',
+        optional: true,
+      },
+    },
+    result: {
+      type: 'keyword',
+      _meta: {
+        description: 'The result of the task',
+      },
+    },
+  };
+
 const trainedModelsDeploymentCreatedEventType: TrainedModelsTelemetryEvent = {
   eventType: TrainedModelsTelemetryEventTypes.DEPLOYMENT_CREATED,
   schema: trainedModelsDeploymentSchema,
@@ -104,8 +135,14 @@ const trainedModelsDeploymentUpdatedEventType: TrainedModelsTelemetryEvent = {
   schema: trainedModelsDeploymentSchema,
 };
 
+const trainedModelsModelTestedEventType: TrainedModelsTelemetryEvent = {
+  eventType: TrainedModelsTelemetryEventTypes.MODEL_TESTED,
+  schema: trainedModelsModelTestedSchema,
+};
+
 export const trainedModelsEbtEvents = {
   trainedModelsDeploymentCreatedEventType,
   trainedModelsModelDownloadEventType,
   trainedModelsDeploymentUpdatedEventType,
+  trainedModelsModelTestedEventType,
 };
