@@ -20,6 +20,7 @@ import React, {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
+import { css } from '@emotion/react';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import {
   EuiBadge,
@@ -32,6 +33,7 @@ import {
   EuiPortal,
   EuiShowFor,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   useExistingFieldsFetcher,
@@ -119,6 +121,7 @@ const UnifiedFieldListSidebarContainer = memo(
         onFieldEdited,
         additionalFilters,
       } = props;
+      const { euiTheme } = useEuiTheme();
       const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
         createStateService({ options: getCreationOptions() })
       );
@@ -287,7 +290,12 @@ const UnifiedFieldListSidebarContainer = memo(
       const renderButtonVariant = () => {
         return (
           <>
-            <div className="unifiedFieldListSidebar__mobile">
+            <div
+              css={css`
+                width: 100%;
+                padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+              `}
+            >
               <EuiButton
                 {...buttonPropsToTriggerFlyout}
                 contentProps={{
@@ -302,7 +310,10 @@ const UnifiedFieldListSidebarContainer = memo(
                   defaultMessage="Fields"
                 />
                 <EuiBadge
-                  className="unifiedFieldListSidebar__mobileBadge"
+                  css={css`
+                    margin-left: ${euiTheme.size.s};
+                    vertical-align: text-bottom;
+                  `}
                   color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
                 >
                   {!workspaceSelectedFieldNames?.length ||
