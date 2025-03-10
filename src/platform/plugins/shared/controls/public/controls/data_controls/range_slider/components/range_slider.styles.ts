@@ -50,18 +50,12 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       &:has(input:invalid) {
         --euiFormControlStateColor: ${euiTheme.colors.danger};
       }
-
-      /* Remove the append background so the caution icon looks more natural */
-      .euiFormControlLayout__append {
-      }
     `,
 
     // Inputs
     fieldNumbers: {
       rangeSliderFieldNumber: css`
         font-weight: ${euiTheme.font.weight.medium};
-        background-color: transparent;
-
         &:placeholder-shown,
         &::placeholder {
           font-weight: ${euiTheme.font.weight.regular};
@@ -70,10 +64,14 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       `,
       invalid: css`
         &:not(:invalid) {
-          color: ${euiTheme.colors.textWarning};
+          &::placeholder {
+            color: ${euiTheme.colors.textWarning};
+          }
         }
         &:invalid {
-          color: ${euiTheme.colors.textDanger};
+          &::placeholder {
+            color: ${euiTheme.colors.textDanger};
+          }
         }
       `,
       // unset the red underline for values between steps
