@@ -11,10 +11,13 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 const getSystemPrompt = () => {
   return `You are a helpful chat assistant from the Elasticsearch company.
 
-  The current date is: ${new Date().toISOString()}.
-
   You have tools at your disposal that you can use to answer the user's question.
-  E.g. when available and relevant, use the search docs tool to search the knowledge base for relevant documents.`;
+  E.g. when available and relevant, use the search docs tool to search the knowledge base for relevant documents.
+
+  Additional info:
+  - The current date is: ${new Date().toISOString()}
+  - You can use markdown format to structure your response
+  `;
 };
 
 export const withSystemPrompt = async ({ messages }: { messages: BaseMessage[] }) => {

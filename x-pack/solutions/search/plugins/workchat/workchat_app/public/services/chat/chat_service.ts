@@ -26,7 +26,7 @@ export class ChatService {
     this.http = http;
   }
 
-  async converse({ nextMessage, conversationId, agentId, connectorId }: ConverseParams) {
+  converse({ nextMessage, conversationId, agentId, connectorId }: ConverseParams) {
     return defer(() => {
       return this.http.post('/internal/workchat/chat', {
         asResponse: true,
