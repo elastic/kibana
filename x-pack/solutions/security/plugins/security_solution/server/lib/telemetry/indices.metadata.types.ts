@@ -47,11 +47,22 @@ export interface IndicesStats {
 
 export interface IndexStats {
   index_name: string;
+
   query_total?: number;
   query_time_in_millis?: number;
+
+  // values for primary shards
+  docs_count_primaries?: number;
+  docs_deleted_primaries?: number;
+  docs_total_size_in_bytes_primaries?: number;
+
+  // values for primary and replica shards
   docs_count?: number;
   docs_deleted?: number;
   docs_total_size_in_bytes?: number;
+
+  index_failed?: number;
+  index_failed_due_to_version_conflict?: number;
 }
 
 export interface Index {
