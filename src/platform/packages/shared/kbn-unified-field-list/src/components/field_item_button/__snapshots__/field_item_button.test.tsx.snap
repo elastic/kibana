@@ -11,7 +11,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly 1`] = `
   dataTestSubj="field-bytes-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
@@ -50,7 +60,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly for Records (Lens fie
   dataTestSubj="field-___records___-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
@@ -89,7 +109,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly for search with space
   dataTestSubj="field-script date-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
@@ -127,7 +157,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly for text-based column
   dataTestSubj="field-agent-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
@@ -164,7 +204,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly for wildcard search 1
   dataTestSubj="field-script date-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
@@ -202,7 +252,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly when a conflict field
   dataTestSubj="field-custom_user_field-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
@@ -255,7 +315,17 @@ exports[`UnifiedFieldList FieldItemButton renders properly when empty 1`] = `
   dataTestSubj="field-script date-showDetails"
   fieldIcon={
     <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+      css={
+        Object {
+          "map": undefined,
+          "name": "cssveg",
+          "next": undefined,
+          "styles": "
+  position: relative;
+",
+          "toString": [Function],
+        }
+      }
     >
       <div
         className="unifiedFieldListItemButton__fieldIcon"
