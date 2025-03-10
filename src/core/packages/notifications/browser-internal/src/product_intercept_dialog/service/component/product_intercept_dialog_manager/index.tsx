@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { EuiTourStep, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { ProductIntercept } from '@kbn/core-notifications-browser';
-import { EventReporter } from './telemetry';
+import { EventReporter } from '../../telemetry';
 
 interface ProductInterceptDialogManagerProps {
   eventReporter: EventReporter;
@@ -45,6 +45,11 @@ export function ProductInterceptDialogManager({
     <EuiTourStep
       buffer={24}
       isOpen={true}
+      // panelClassName={css`
+      //   background: red;
+      //   left: unset;
+      //   right: 1%;
+      //   `}
       title={productIntercepts[0].steps?.[currentStepIndex - 1].title}
       content={productIntercepts[0].steps?.[currentStepIndex - 1].content}
       stepsTotal={productIntercepts[0].steps.length}
@@ -56,7 +61,7 @@ export function ProductInterceptDialogManager({
       anchorPosition="rightDown"
       decoration="none"
       onFinish={() => {
-        // TODO: send collated data to telemetry service
+        // TODO: send collated data to telemetry service using the eventReporter
       }}
       footerAction={[
         <EuiButtonEmpty onClick={dismissProductIntercept}>
@@ -71,7 +76,7 @@ export function ProductInterceptDialogManager({
         </EuiButton>,
       ]}
     >
-      <div style={{ display: 'contents', width: '100%' }} />
+      <div data-test-subj="interceptDialogAnchor" style={{ display: 'contents', width: '100%' }} />
     </EuiTourStep>
   ) : null;
 }
