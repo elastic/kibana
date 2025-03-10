@@ -69,7 +69,6 @@ export const defaultExpression: MetricExpression = {
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
-
   const {
     data,
     dataViews,
@@ -362,7 +361,7 @@ export default function Expressions(props: Props) {
       label: string;
     }>
   >();
-
+  
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<{ label: string; value: string }> | undefined
   >(

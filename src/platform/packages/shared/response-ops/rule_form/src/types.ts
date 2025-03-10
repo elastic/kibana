@@ -24,6 +24,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+
 import {
   MinimumScheduleInterval,
   Rule,
@@ -52,6 +55,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   throttle?: Rule<Params>['throttle'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
   flapping?: Rule<Params>['flapping'];
+  dashboards?: string[];
 }
 
 export interface RuleFormPlugins {
@@ -70,6 +74,8 @@ export interface RuleFormPlugins {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
+  dashboard: DashboardStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 export interface RuleFormState<
