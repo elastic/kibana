@@ -15,15 +15,21 @@ export const esIndicesStateCheck = async (
   asCurrentUser: ElasticsearchClient,
   indices: string[]
 ): Promise<StatusCheckResult> => {
-  const response = await asCurrentUser.indices.resolveIndex({
+  const resolveIndexPromise = asCurrentUser.indices.resolveIndex({
     name: '*',
     expand_wildcards: 'all',
   });
 
+  const rollupCapsPromise = asCurrentUser.rollup.getRollupCaps();
+
+  const [resolveIndex, rollups] = await Promise.all([resolveIndexPromise, rollupCapsPromise]);
+  const rollupIndices = Object.keys(rollups);
+  resolveIndex.indices = resolveIndex.indices.filter((index) => !rollupIndices.includes(index.name));
+
   const result: StatusCheckResult = {};
 
   indices.forEach((index) => {
-    result[index] = getIndexState(index, response as ResolveIndexResponseFromES);
+    result[index] = getIndexState(index, resolveIndex as ResolveIndexResponseFromES);
   });
 
   return result;
