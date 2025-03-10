@@ -45,11 +45,6 @@ export const postActionsConnectorExecuteRoute = (
           requiredPrivileges: ['elasticAssistant'],
         },
       },
-      options: {
-        timeout: {
-          idleSocket: 10 * 60 * 1000,
-        },
-      },
     })
     .addVersion(
       {
