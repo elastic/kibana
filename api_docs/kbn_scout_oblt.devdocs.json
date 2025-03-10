@@ -701,7 +701,23 @@
             "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ScoutLogger.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "workerContext",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -729,6 +745,55 @@
                 "description": [
                   "unique name of the service"
                 ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ScoutLogger.serviceMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "serviceMessage",
+            "description": [
+              "\nUsed to log a message for a service/fixture"
+            ],
+            "signature": [
+              "(name: string, message: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ScoutLogger.serviceMessage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ScoutLogger.serviceMessage.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
                 "signature": [
                   "string"
                 ],
