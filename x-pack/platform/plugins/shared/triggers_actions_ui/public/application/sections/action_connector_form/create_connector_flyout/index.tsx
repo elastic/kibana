@@ -23,7 +23,6 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 
-import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,6 +33,8 @@ import {
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   EndpointSecurityConnectorFeatureId,
+  getConnectorCompatibility,
+  getConnectorFeatureName,
 } from '@kbn/actions-plugin/common';
 import {
   ActionConnector,

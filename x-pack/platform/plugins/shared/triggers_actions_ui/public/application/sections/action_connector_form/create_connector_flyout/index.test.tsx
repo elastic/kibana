@@ -425,8 +425,8 @@ describe('CreateConnectorFlyout', () => {
   });
 
   describe('Filters', () => {
-    it('does display search field', async () => {
-      const { getByTestId } = appMockRenderer.render(
+    it('displays search field', async () => {
+      appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -436,11 +436,11 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      expect(getByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('createConnectorsModalSearch')).toBeInTheDocument();
     });
 
-    it('does display compatibility filter', async () => {
-      const { getByTestId } = appMockRenderer.render(
+    it('displays compatibility filter', async () => {
+      appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -450,7 +450,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      expect(getByTestId('compatibilityFilterBtn')).toBeInTheDocument();
+      expect(screen.getByTestId('compatibilityFilterBtn')).toBeInTheDocument();
     });
   });
 
