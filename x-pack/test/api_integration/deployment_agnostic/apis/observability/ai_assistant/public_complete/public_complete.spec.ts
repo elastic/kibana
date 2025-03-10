@@ -14,7 +14,6 @@ import {
   MessageAddEvent,
   type StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import type OpenAI from 'openai';
 import { type InstructionOrPlainText } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
