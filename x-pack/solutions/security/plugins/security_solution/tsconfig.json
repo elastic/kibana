@@ -241,7 +241,6 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/security-ai-prompts",
-    "@kbn/security-solution-plugin",
     "@kbn/inference-common",
     "@kbn/esql-ast"
   ]
