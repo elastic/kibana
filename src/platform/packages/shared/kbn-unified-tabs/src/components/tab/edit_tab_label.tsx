@@ -8,14 +8,9 @@
  */
 
 import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
-import { EuiFieldText, keys } from '@elastic/eui';
+import { EuiFieldText, keys, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TabItem } from '../../types';
-
-const compressedInputCss = css`
-  block-size: 28px;
-  margin-top: 4px;
-`;
 
 enum SubmitState {
   initial = 'initial',
@@ -30,6 +25,7 @@ export interface EditTabLabelProps {
 }
 
 export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited, onExit }) => {
+  const { euiTheme } = useEuiTheme();
   const [value, setValue] = useState<string>(item.label);
   const [submitState, setSubmitState] = useState<SubmitState>(SubmitState.initial);
   const [inputNode, setInputNode] = useState<HTMLInputElement | null>(null);
@@ -87,7 +83,10 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
     <EuiFieldText
       inputRef={setInputNode}
       data-test-subj={`unifiedTabs_editTabLabelInput_${item.id}`}
-      css={compressedInputCss}
+      css={css`
+        block-size: 28px;
+        margin-top: ${euiTheme.size.xs};
+      `}
       compressed
       value={value}
       isLoading={submitState === SubmitState.submitting}
