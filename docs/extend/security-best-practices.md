@@ -17,10 +17,10 @@ XSS is a class of attacks where malicious scripts are injected into vulnerable w
 
 * Check for dangerous functions or assignments that can result in unescaped user input in the browser DOM. Avoid using:
 
-    * **React:** [`dangerouslySetInnerHtml`](https://reactjs.org/docs/dom-elements.md#dangerouslysetinnerhtml).
+    * **React:** [`dangerouslySetInnerHtml`](https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml).
     * **Browser DOM:** `Element.innerHTML` and `Element.outerHTML`.
 
-* If using the aforementioned unsafe functions or assignments is absolutely necessary, follow [these XSS prevention rules](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md#xss-prevention-rules) to ensure that user input is not inserted into unsafe locations and that it is escaped properly.
+* If using the aforementioned unsafe functions or assignments is absolutely necessary, follow [these XSS prevention rules](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#xss-prevention-rules) to ensure that user input is not inserted into unsafe locations and that it is escaped properly.
 * Use EUI components to build your UI, particularly when rendering `href` links. Otherwise, sanitize user input before rendering links to ensure that they do not use the `javascript:` protocol.
 * Don’t use the `eval`, `Function`, and `_.template` functions — these are restricted by ESLint rules.
 * Be careful when using `setTimeout` and `setInterval` in client-side code. If an attacker can manipulate the arguments and pass a string to one of these, it is evaluated dynamically, which is equivalent to the dangerous `eval` function.
@@ -30,7 +30,7 @@ XSS is a class of attacks where malicious scripts are injected into vulnerable w
 
 [*OWASP reference for CSRF*](https://owasp.org/www-community/attacks/csrf)
 
-CSRF is a class of attacks where a user is forced to execute an action on a vulnerable website that they’re logged into, usually without their knowledge. {{kib}} defends against this by requiring [custom request headers](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#use-of-custom-request-headers) for API endpoints. For more information, see [API Request Headers](https://www.elastic.co/guide/en/kibana/current/api.html#api-request-headers).
+CSRF is a class of attacks where a user is forced to execute an action on a vulnerable website that they’re logged into, usually without their knowledge. {{kib}} defends against this by requiring [custom request headers](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#use-of-custom-request-headers) for API endpoints. For more information, see [API Request Headers](https://www.elastic.co/guide/en/kibana/current/api.html#api-request-headers).
 
 **Best practices**
 

@@ -755,7 +755,7 @@ Packaging tests use Vagrant virtual machines as hosts and Ansible for provisioni
 
 ### Setup [_setup]
 
-* [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.md)
+* [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
     ```
     # Ubuntu
@@ -818,7 +818,7 @@ vagrant destroy <hostname>
 
 **Note:** IE11 is not supported from 7.9 onwards.
 
-* [Download VMWare Fusion](http://www.vmware.com/products/fusion/fusion-evaluation.md).
+* [Download VMWare Fusion](http://www.vmware.com/products/fusion/fusion-evaluation.html).
 * [Download IE virtual machines](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads) for VMWare.
 * Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 * Right-click on the virtual machine you just added to your library and select "`Snapshots…`", and then click the "`Take`" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.

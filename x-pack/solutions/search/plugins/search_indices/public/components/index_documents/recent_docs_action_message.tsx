@@ -10,8 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
-
-import { DEFAULT_PAGE_SIZE } from './constants';
+import { DEFAULT_DOCUMENT_PAGE_SIZE } from '../../constants';
 
 export interface RecentDocsActionMessageProps {
   indexName: string;
@@ -40,7 +39,7 @@ export const RecentDocsActionMessage: React.FC<RecentDocsActionMessageProps> = (
               defaultMessage:
                 'You are viewing the {pageSize} most recently ingested documents in this index. To see all documents, view in',
               values: {
-                pageSize: DEFAULT_PAGE_SIZE,
+                pageSize: DEFAULT_DOCUMENT_PAGE_SIZE,
               },
             })}{' '}
             <EuiLink onClick={onClick}>
