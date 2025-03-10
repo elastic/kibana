@@ -64,7 +64,6 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
               promptContext={promptContext}
             />
           </EuiFlexItem>
-          <EuiFlexItem>{'Recommended action'}</EuiFlexItem>
           <EuiFlexItem>{'Highlighted fields'}</EuiFlexItem>
           <EuiFlexItem>
             <AttackDiscoveryWidget id={doc.id} />
