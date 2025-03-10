@@ -102,7 +102,7 @@ describe('UnifiedDataTableFooter', function () {
     expect(mockLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  it('should render the load more button where pagination mode is set to load more and user has reached the bottom of the page', () => {
+  it('should render the load more button where pagination mode is set to singlePage and user has reached the bottom of the page', () => {
     const mockLoadMore = jest.fn();
 
     const component = mountWithIntl(
