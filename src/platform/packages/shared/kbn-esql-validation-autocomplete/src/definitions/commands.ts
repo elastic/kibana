@@ -28,6 +28,8 @@ import {
 import { ENRICH_MODES } from './settings';
 
 import { type CommandDefinition } from './types';
+import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
@@ -40,7 +42,8 @@ import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
-import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -286,6 +289,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -438,6 +442,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',
