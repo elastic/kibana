@@ -42,6 +42,12 @@ export type {
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
+export { langchainMessageToInferenceMessage } from './impl/utils/langchain_message_to_inference_message';
+export {
+  langchainToolToInferenceTool,
+  langchainToolsToInferenceTools,
+} from './impl/utils/langchain_tool_to_inference_tool';
+export { nlToEsqlTaskEventToLangchainMessage } from './impl/utils/nl_to_esql_task_event_to_langchain_message';
 export * from './constants';
 
 /** currently the same shape as "fields" property in the ES response */
