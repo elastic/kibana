@@ -501,7 +501,7 @@ export class AlertsClient<
                 ActionGroupIds,
                 RecoveryActionGroupId
               >({
-                alert: this.trackedAlerts.active[id],
+                alert: this.trackedAlerts.get(id),
                 legacyAlert: currentRecoveredAlerts[id],
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
@@ -511,7 +511,7 @@ export class AlertsClient<
                 kibanaVersion: this.options.kibanaVersion,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
-                alert: this.trackedAlerts.active[id],
+                alert: this.trackedAlerts.get(id),
                 legacyRawAlert: recoveredAlertsToReturn[id],
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
