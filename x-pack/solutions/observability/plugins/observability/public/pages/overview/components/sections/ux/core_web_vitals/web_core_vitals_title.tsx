@@ -68,7 +68,9 @@ export function WebCoreVitalsTitle({
             external
             target="_blank"
           >
-            Learn more
+            {i18n.translate('xpack.observability.ux.dashboard.webCoreVitals.tooltip', {
+              defaultMessage: 'Learn more',
+            })}
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
