@@ -816,6 +816,61 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getInheritedFieldsFromAncestors",
+        "type": "Function",
+        "tags": [],
+        "label": "getInheritedFieldsFromAncestors",
+        "description": [],
+        "signature": [
+          "(ancestors: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamDefinition",
+            "text": "WiredStreamDefinition"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.InheritedFieldDefinition",
+            "text": "InheritedFieldDefinition"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getInheritedFieldsFromAncestors.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "ancestors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStreamDefinition",
+                "text": "WiredStreamDefinition"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getParentId",
         "type": "Function",
         "tags": [],
@@ -1289,15 +1344,7 @@
             "section": "def-common.ProcessorDefinition",
             "text": "ProcessorDefinition"
           },
-          ">(value: TValue) => value is Extract<TValue, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.DissectProcessorDefinition",
-            "text": "DissectProcessorDefinition"
-          },
-          ">"
+          ">(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
@@ -1473,15 +1520,7 @@
             "section": "def-common.ProcessorDefinition",
             "text": "ProcessorDefinition"
           },
-          ">(value: TValue) => value is Extract<TValue, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GrokProcessorDefinition",
-            "text": "GrokProcessorDefinition"
-          },
-          ">"
+          ">(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
@@ -2313,7 +2352,7 @@
             "label": "operator",
             "description": [],
             "signature": [
-              "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\""
+              "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
             "deprecated": false,
@@ -2694,6 +2733,42 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupObjectGetResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupObjectGetResponse",
+        "description": [
+          "\nGroup object get response"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GroupObjectGetResponse.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.GroupBase",
+                "text": "GroupBase"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.GroupStreamDefinitionBase",
         "type": "Interface",
         "tags": [],
@@ -2814,6 +2889,276 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IlmPolicyDeletePhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmPolicyDeletePhase",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyDeletePhase.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"delete\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyDeletePhase.min_age",
+            "type": "string",
+            "tags": [],
+            "label": "min_age",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IlmPolicyHotPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmPolicyHotPhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IlmPolicyHotPhase",
+            "text": "IlmPolicyHotPhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IlmPolicyPhase",
+            "text": "IlmPolicyPhase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyHotPhase.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"hot\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyHotPhase.rollover",
+            "type": "Object",
+            "tags": [],
+            "label": "rollover",
+            "description": [],
+            "signature": [
+              "{ max_size?: string | number | undefined; max_primary_shard_size?: string | number | undefined; max_age?: string | undefined; max_docs?: number | undefined; max_primary_shard_docs?: number | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IlmPolicyPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmPolicyPhase",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhase.name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"delete\" | \"warm\" | \"hot\" | \"frozen\" | \"cold\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhase.size_in_bytes",
+            "type": "number",
+            "tags": [],
+            "label": "size_in_bytes",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhase.min_age",
+            "type": "string",
+            "tags": [],
+            "label": "min_age",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IlmPolicyPhases",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmPolicyPhases",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhases.hot",
+            "type": "Object",
+            "tags": [],
+            "label": "hot",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IlmPolicyHotPhase",
+                "text": "IlmPolicyHotPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhases.warm",
+            "type": "Object",
+            "tags": [],
+            "label": "warm",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IlmPolicyPhase",
+                "text": "IlmPolicyPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhases.cold",
+            "type": "Object",
+            "tags": [],
+            "label": "cold",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IlmPolicyPhase",
+                "text": "IlmPolicyPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhases.frozen",
+            "type": "Object",
+            "tags": [],
+            "label": "frozen",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IlmPolicyPhase",
+                "text": "IlmPolicyPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IlmPolicyPhases.delete",
+            "type": "Object",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IlmPolicyDeletePhase",
+                "text": "IlmPolicyDeletePhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3166,7 +3511,7 @@
         "tags": [],
         "label": "RecursiveRecord",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/core.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3204,7 +3549,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/core.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3594,7 +3939,15 @@
                 "section": "def-common.FieldDefinition",
                 "text": "FieldDefinition"
               },
-              "; }"
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
             "deprecated": false,
@@ -3781,7 +4134,7 @@
         "label": "BinaryOperator",
         "description": [],
         "signature": [
-          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\""
+          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
         "deprecated": false,
@@ -3837,6 +4190,21 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.dissectProcessorDefinitionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "dissectProcessorDefinitionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3929,6 +4297,105 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.FlattenRecord",
+        "type": "Type",
+        "tags": [],
+        "label": "FlattenRecord",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          "[]; [x: number]: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          "[]; [x: symbol]: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.grokProcessorDefinitionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "grokProcessorDefinitionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupObjectUpsertRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "GroupObjectUpsertRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupObjectGetResponse",
+            "text": "GroupObjectGetResponse"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4199,6 +4666,21 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.PhaseName",
+        "type": "Type",
+        "tags": [],
+        "label": "PhaseName",
+        "description": [],
+        "signature": [
+          "\"delete\" | \"warm\" | \"hot\" | \"frozen\" | \"cold\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.Primitive",
         "type": "Type",
         "tags": [],
@@ -4207,7 +4689,7 @@
         "signature": [
           "string | number | boolean | null | undefined"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/core.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4272,6 +4754,28 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ProcessorDefinitionWithId",
+        "type": "Type",
+        "tags": [],
+        "label": "ProcessorDefinitionWithId",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ProcessorDefinition",
+            "text": "ProcessorDefinition"
+          },
+          " & { id: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.ProcessorType",
         "type": "Type",
         "tags": [],
@@ -4301,6 +4805,57 @@
             "section": "def-common.ProcessorType",
             "text": "ProcessorType"
           }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.SampleDocument",
+        "type": "Type",
+        "tags": [],
+        "label": "SampleDocument",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.satisfies",
+        "type": "Any",
+        "tags": [],
+        "label": "satisfies",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.Schema",
+        "type": "Any",
+        "tags": [],
+        "label": "Schema",
+        "description": [],
+        "signature": [
+          "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
@@ -4467,6 +5022,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.z",
+        "type": "Any",
+        "tags": [],
+        "label": "z",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -4590,37 +5160,6 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/conditions/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.dissectProcessorDefinitionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "dissectProcessorDefinitionSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.DissectProcessorDefinition",
-            "text": "DissectProcessorDefinition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.DissectProcessorDefinition",
-            "text": "DissectProcessorDefinition"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4794,10 +5333,10 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.grokProcessorDefinitionSchema",
+        "id": "def-common.flattenRecord",
         "type": "Object",
         "tags": [],
-        "label": "grokProcessorDefinitionSchema",
+        "label": "flattenRecord",
         "description": [],
         "signature": [
           "Zod.ZodType<",
@@ -4805,20 +5344,20 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GrokProcessorDefinition",
-            "text": "GrokProcessorDefinition"
+            "section": "def-common.FlattenRecord",
+            "text": "FlattenRecord"
           },
           ", Zod.ZodTypeDef, ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GrokProcessorDefinition",
-            "text": "GrokProcessorDefinition"
+            "section": "def-common.FlattenRecord",
+            "text": "FlattenRecord"
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4850,6 +5389,53 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.groupObjectUpsertRequestSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "groupObjectUpsertRequestSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ group: Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupBase",
+            "text": "GroupBase"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupBase",
+            "text": "GroupBase"
+          },
+          ">; }, \"strip\", Zod.ZodTypeAny, { group: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupBase",
+            "text": "GroupBase"
+          },
+          "; }, { group: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupBase",
+            "text": "GroupBase"
+          },
+          "; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5357,7 +5943,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/core.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5395,6 +5981,37 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.processorWithIdDefinitionSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "processorWithIdDefinitionSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ProcessorDefinitionWithId",
+            "text": "ProcessorDefinitionWithId"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ProcessorDefinitionWithId",
+            "text": "ProcessorDefinitionWithId"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.recursiveRecord",
         "type": "Object",
         "tags": [],
@@ -5419,7 +6036,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/core.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5451,6 +6068,37 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.sampleDocument",
+        "type": "Object",
+        "tags": [],
+        "label": "sampleDocument",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

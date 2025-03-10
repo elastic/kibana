@@ -18,27 +18,3 @@ export const streamDefinitionSchema: z.Schema<StreamDefinition> = z.union([
 ]);
 
 export const isStreamDefinition = createIsNarrowSchema(z.unknown(), streamDefinitionSchema);
-
-export type Primitive = string | number | boolean | null | undefined;
-
-export const primitive: z.ZodType<Primitive> = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
-  z.null(),
-  z.undefined(),
-]);
-
-export interface RecursiveRecord {
-  [key: PropertyKey]: Primitive | Primitive[] | RecursiveRecord;
-}
-
-export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(primitive), recursiveRecord]))
-);
-
-export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[]>;
-
-export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
-  z.union([primitive, z.array(primitive)])
-);

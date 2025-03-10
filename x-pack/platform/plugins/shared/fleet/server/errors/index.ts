@@ -62,6 +62,12 @@ export class AgentlessAgentDeleteError extends FleetError {
     super(`Error deleting agentless agent in Fleet, ${message}`);
   }
 }
+
+export class AgentlessAgentUpgradeError extends FleetError {
+  constructor(message: string) {
+    super(`Error upgrading agentless agent in Fleet, ${message}`);
+  }
+}
 export class AgentlessAgentConfigError extends FleetError {
   constructor(message: string) {
     super(`Error validating Agentless API configuration in Fleet, ${message}`);

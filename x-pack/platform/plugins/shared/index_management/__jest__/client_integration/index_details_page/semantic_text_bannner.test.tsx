@@ -42,6 +42,10 @@ describe('When semantic_text is enabled', () => {
     expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
       'semantic_text field type now available!'
     );
+
+    expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
+      'Documents will be automatically chunked to fit model context limits, to avoid truncation.'
+    );
   });
 
   it('should hide the banner if dismiss is clicked', async () => {

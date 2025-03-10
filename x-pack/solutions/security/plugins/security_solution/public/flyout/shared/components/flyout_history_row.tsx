@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   type EuiIconProps,
   useEuiTheme,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -32,6 +33,7 @@ import {
   NETWORK_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   USER_HISTORY_ROW_TEST_ID,
+  HISTORY_ROW_LOADING_TEST_ID,
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 
@@ -99,7 +101,7 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
  * Row item for a document details
  */
 export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
-  const { dataFormattedForFieldBrowser, getFieldsData } = useEventDetails({
+  const { dataFormattedForFieldBrowser, getFieldsData, loading } = useEventDetails({
     eventId: String(item?.panel?.params?.id),
     indexName: String(item?.panel?.params?.indexName),
   });
@@ -122,6 +124,7 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
       title={title}
       icon={isAlert ? 'warning' : 'analyzeEvent'}
       name={isAlert ? 'Alert' : 'Event'}
+      isLoading={loading}
       dataTestSubj={DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID}
     />
   );
@@ -171,7 +174,7 @@ const RowTitle: FC<RowTitleProps> = memo(({ type, value }) => {
  */
 export const RuleHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
   const ruleId = String(item?.panel?.params?.ruleId);
-  const { rule } = useRuleDetails({ ruleId });
+  const { rule, loading } = useRuleDetails({ ruleId });
 
   return (
     <GenericHistoryRow
@@ -180,6 +183,7 @@ export const RuleHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) 
       title={rule?.name ?? ''}
       icon={'indexSettings'}
       name={'Rule'}
+      isLoading={loading}
       dataTestSubj={RULE_HISTORY_ROW_TEST_ID}
     />
   );
@@ -203,6 +207,10 @@ interface GenericHistoryRowProps extends FlyoutHistoryRowProps {
    */
   name: string;
   /**
+   * Whether the row is loading
+   */
+  isLoading?: boolean;
+  /**
    * Data test subject
    */
   dataTestSubj?: string;
@@ -212,12 +220,20 @@ interface GenericHistoryRowProps extends FlyoutHistoryRowProps {
  * Row item for a generic history row where the title is accessible in flyout params
  */
 export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
-  ({ item, index, title, icon, name, dataTestSubj }) => {
+  ({ item, index, title, icon, name, isLoading, dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
     const { openFlyout } = useExpandableFlyoutApi();
     const onClick = useCallback(() => {
       openFlyout({ right: item.panel });
     }, [openFlyout, item.panel]);
+
+    if (isLoading) {
+      return (
+        <EuiContextMenuItem key={index} data-test-subj={HISTORY_ROW_LOADING_TEST_ID}>
+          <EuiSkeletonText lines={1} isLoading size="s" />
+        </EuiContextMenuItem>
+      );
+    }
 
     return (
       <EuiContextMenuItem

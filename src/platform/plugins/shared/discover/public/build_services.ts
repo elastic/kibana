@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import type {
   Capabilities,
   ChromeStart,
@@ -60,8 +60,9 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -140,6 +141,7 @@ export interface DiscoverServices {
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 export const buildServices = memoize(
@@ -233,6 +235,7 @@ export const buildServices = memoize(
       ebtManager,
       fieldsMetadata: plugins.fieldsMetadata,
       logsDataAccess: plugins.logsDataAccess,
+      embeddableEnhanced: plugins.embeddableEnhanced,
     };
   }
 );

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 
