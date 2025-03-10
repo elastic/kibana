@@ -406,10 +406,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     }
   }, [isSelectAllChecked, onSelectPage, selectAll]);
 
+  const controlColumnsToTransform = useMemo(() => {
+    return showCheckboxes
+      ? [[checkBoxControlColumn, ...leadingControlColumns]]
+      : [leadingControlColumns];
+  }, [showCheckboxes, leadingControlColumns]);
+
   const [transformedLeadingControlColumns] = useMemo(() => {
-    return [
-      showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
-    ].map((controlColumns) =>
+    return controlColumnsToTransform.map((controlColumns) =>
       transformControlColumns({
         columnHeaders,
         controlColumns,
@@ -434,7 +438,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     );
   }, [
     showCheckboxes,
-    leadingControlColumns,
     columnHeaders,
     nonDeletedEvents,
     fieldBrowserOptions,
@@ -450,6 +453,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     setEventsLoading,
     setEventsDeleted,
     itemsPerPage,
+    controlColumnsToTransform,
   ]);
 
   const alertBulkActions = useAlertBulkActions({

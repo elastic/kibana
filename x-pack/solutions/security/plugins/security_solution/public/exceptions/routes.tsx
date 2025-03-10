@@ -19,24 +19,19 @@ import { ListsDetailView, SharedLists } from './pages';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const ExceptionsRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.exceptions}>
-      <SharedLists />
-      <SpyRoute pageName={SecurityPageName.exceptions} />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.exceptions}>
+    <SharedLists />
+    <SpyRoute pageName={SecurityPageName.exceptions} />
+  </TrackApplicationView>
 );
 
 const ExceptionsListDetailRoute = () => (
-  <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.exceptions}>
-      <ListsDetailView />
-    </SecurityRoutePageWrapper>
-  </PluginTemplateWrapper>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.exceptions}>
+    <ListsDetailView />
+  </SecurityRoutePageWrapper>
 );
 
 const ExceptionsContainerComponent: React.FC = () => {
@@ -53,11 +48,11 @@ const ExceptionsContainerComponent: React.FC = () => {
 
 const Exceptions = React.memo(ExceptionsContainerComponent);
 
-const renderExceptionsRoutes = () => <Exceptions />;
+// const renderExceptionsRoutes = () => <Exceptions />;
 
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
-    render: renderExceptionsRoutes,
+    component: Exceptions,
   },
 ];

@@ -26,7 +26,7 @@ import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
-interface Props {
+export interface AppContainerProps {
   /** Path application is mounted on without the global basePath */
   appPath: string;
   appId: string;
@@ -40,7 +40,7 @@ interface Props {
   showPlainSpinner?: boolean;
 }
 
-export const AppContainer: FC<Props> = ({
+export const AppContainer: FC<AppContainerProps> = ({
   mounter,
   appId,
   appPath,
@@ -51,7 +51,7 @@ export const AppContainer: FC<Props> = ({
   setIsMounting,
   theme$,
   showPlainSpinner,
-}: Props) => {
+}: AppContainerProps) => {
   const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
