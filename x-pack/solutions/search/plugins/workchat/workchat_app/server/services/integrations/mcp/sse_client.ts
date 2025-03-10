@@ -2,6 +2,13 @@ import { EventSource, type ErrorEvent, type EventSourceInit } from "eventsource"
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { JSONRPCMessage, JSONRPCMessageSchema } from "@modelcontextprotocol/sdk/types.js";
 
+/***
+ * Taken from https://github.com/modelcontextprotocol/typescript-sdk/blob/main/src/client/sse.ts
+ * 
+ * TODO: remove this once figured out how to import the auth package 
+ */
+
+
 export class SseError extends Error {
   constructor(
     public readonly code: number | undefined,
