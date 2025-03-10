@@ -34,14 +34,8 @@ export const defaultExclusions: DataSourceExclusions = {
   '.logs-osquery_manager.action.responses-*': ['readOnly'],
   '.logs-endpoint.diagnostic.collection-*': ['readOnly'],
   'kibana_sample_data_*': ['readOnly'],
-  '.ent-search*': ['readOnly'],
-  'monitoring-ent-search-*': ['readOnly'],
-  'app-search-*': ['readOnly'],
-  'metricbeat-ent-search-*': ['readOnly'],
-  'enterprise-search-*': ['readOnly'],
-  'elastic-analytics-collections': ['readOnly'],
+  '.app-search-*': ['readOnly'],
   '.elastic-connectors*': ['readOnly'],
-  'logs-elastic_analytics.events-*': ['readOnly'],
 };
 
 /**
