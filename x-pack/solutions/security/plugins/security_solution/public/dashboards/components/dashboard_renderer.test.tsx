@@ -6,7 +6,6 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 
 import { TestProviders } from '../../common/mock';
@@ -57,7 +56,7 @@ describe('DashboardRenderer', () => {
     expect(input).toEqual(
       expect.objectContaining({
         timeRange: props.timeRange,
-        viewMode: ViewMode.VIEW,
+        viewMode: 'view',
         query: undefined,
         filters: undefined,
       })
