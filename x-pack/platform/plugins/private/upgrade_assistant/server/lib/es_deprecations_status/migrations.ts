@@ -9,9 +9,9 @@ import type {
   MigrationDeprecationsResponse,
   MigrationDeprecationsDeprecation,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import _ from 'lodash';
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
@@ -32,10 +32,23 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
+interface BaseMigrationDeprecation {
+  index?: string;
+  type: keyof EsDeprecations;
+  details?: string;
+  message: string;
+  url: string;
+  isCritical: boolean;
+  metadata?: Record<string, any>;
+  resolveDuringUpgrade: boolean;
+  isFrozenIndex?: boolean;
+  isInDataStream?: boolean;
+}
+
 const createBaseMigrationDeprecation = (
   migrationDeprecation: MigrationDeprecationsDeprecation,
   { deprecationType, indexName }: { deprecationType: keyof EsDeprecations; indexName?: string }
-) => {
+): BaseMigrationDeprecation => {
   const {
     details,
     message,
@@ -52,6 +65,7 @@ const createBaseMigrationDeprecation = (
     message,
     url,
     isCritical: level === 'critical',
+    ...(metadata?.is_in_data_stream && { isInDataStream: metadata?.is_in_data_stream }),
     metadata,
     resolveDuringUpgrade,
   };
@@ -117,24 +131,54 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     ...clusterSettingsMigrations,
     ...mlSettingsMigrations,
     ...nodeSettingsMigrations,
-    ...indexSettingsMigrations,
+    ...enrichIndexSettingsMigrations(indexSettingsMigrations),
     ...dataStreamsMigrations,
     ...ilmPoliciesMigrations,
     ...templatesMigrations,
   ].flat();
 };
 
+const enrichIndexSettingsMigrations = (
+  deprecations: BaseMigrationDeprecation[]
+): BaseMigrationDeprecation[] => {
+  const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
+
+  const deprecationsWithIndex = deprecations.filter(({ index }) => Boolean(index));
+  // we do a first pass to store all the index deprecations in a Map
+
+  deprecationsWithIndex.forEach((deprecation) => {
+    const indexDeprecations = deprecationsByIndex.get(deprecation.index!) ?? [];
+    indexDeprecations.push(deprecation);
+    deprecationsByIndex.set(deprecation.index!, indexDeprecations);
+  });
+
+  // in a second pass, we update the deprecation info
+  deprecationsWithIndex.forEach((deprecation) => {
+    // check if a given deprecation is a "frozen index deprecation"
+    const isFrozenIndex = isFrozenDeprecation(deprecation.message, deprecation.index);
+
+    // update all deprecations for the same index
+    if (isFrozenIndex) {
+      deprecationsByIndex
+        .get(deprecation.index!)!
+        .forEach((indexDeprecation) => (indexDeprecation.isFrozenIndex = true));
+    }
+  });
+
+  return deprecations;
+};
+
 export const getEnrichedDeprecations = async (
-  dataClient: IScopedClusterClient
+  dataClient: ElasticsearchClient
 ): Promise<EnrichedDeprecationInfo[]> => {
-  const deprecations = (await dataClient.asCurrentUser.migration.deprecations()) as EsDeprecations;
-  const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
+  const deprecations = (await dataClient.migration.deprecations()) as EsDeprecations;
+  const systemIndices = await getESSystemIndicesMigrationStatus(dataClient);
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
   const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
   const indexSettingsIndexStates = indexSettingsIndexNames.length
-    ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
+    ? await esIndicesStateCheck(dataClient, indexSettingsIndexNames)
     : {};
 
   const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
@@ -169,7 +213,8 @@ export const getEnrichedDeprecations = async (
         deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
-        deprecation.index
+        deprecation.index,
+        deprecation.isFrozenIndex
       );
 
       // Early exclusion of deprecations
@@ -206,23 +251,22 @@ export const getEnrichedDeprecations = async (
       return enrichedDeprecation;
     })
     .filter((deprecation) => {
-      if (isFrozenDeprecation(deprecation.message, deprecation.index)) {
-        // frozen indices are created in 7.x, so they are old / incompatible as well
-        // no need to bubble up this deprecation IF THERE IS ANOTHER CRITICAL ONE FOR THE SAME INDEX
-        // in that case, in the critical deprecation we will propose:
-        // - reindexing => the new index will not be frozen
-        // - updating index => the operation will unfreeze the index (see routes/update_index.ts)
-        const indexDeprecations = deprecationsByIndex.get(deprecation.index!);
-        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations?.find(
-          (elem) =>
-            elem.type === 'index_settings' &&
-            elem.index === deprecation.index &&
-            elem.correctiveAction?.type === 'reindex' &&
-            elem.isCritical
-        );
-        if (oldIndexDeprecation) {
-          return false;
-        }
+      // Filter out a deprecation IF THE AFFECTED INDEX IS A DATA_STREAM'S BACKING INDEX
+      // Frozen indices are created in 7.x, so they are old / incompatible as well. Thus we can assume there is
+      // an "old data_stream" deprecation that will take care of unfreezing this index
+      if (
+        isFrozenDeprecation(deprecation.message, deprecation.index) &&
+        deprecation.isInDataStream
+      ) {
+        return false;
+      }
+
+      // Filter out deprecations for indices that are frozen, other than the frozen index deprecation itself
+      if (
+        deprecation.isFrozenIndex &&
+        !isFrozenDeprecation(deprecation.message, deprecation.index)
+      ) {
+        return false;
       }
 
       return true;

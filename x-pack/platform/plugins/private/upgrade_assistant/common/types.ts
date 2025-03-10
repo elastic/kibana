@@ -56,6 +56,7 @@ export interface ReindexStatusResponse {
     aliases: string[];
     isReadonly: boolean;
     isFrozen: boolean;
+    isInDataStream: boolean;
   };
   warnings?: IndexWarning[];
   reindexOp?: ReindexOperation;
@@ -265,6 +266,8 @@ export interface EnrichedDeprecationInfo
     | DataStreamsAction
     | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
+  isFrozenIndex?: boolean;
+  isInDataStream?: boolean;
 }
 
 export interface CloudBackupStatus {

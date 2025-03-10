@@ -33,14 +33,15 @@ export interface ReindexState {
     aliases: string[];
     isFrozen: boolean;
     isReadonly: boolean;
+    isInDataStream: boolean;
   };
 }
 
 const getReindexState = (
   reindexState: ReindexState,
   { reindexOp, warnings, hasRequiredPrivileges, meta: updatedMeta }: ReindexStatusResponse
-) => {
-  const meta = { ...(updatedMeta ?? reindexState.meta) };
+): ReindexState => {
+  const meta = { ...reindexState.meta, ...updatedMeta };
   // Once we have received an array of existing aliases, we won't update the meta value anymore because
   // when we'll delete the original alias during the reindex process there won't be any aliases pointing
   // to it anymore and the last reindex step (Update existing aliases) would be suddenly removed.
@@ -108,7 +109,17 @@ const getReindexState = (
   return newReindexState;
 };
 
-export const useReindex = ({ indexName, api }: { indexName: string; api: ApiService }) => {
+export const useReindex = ({
+  indexName,
+  isFrozen,
+  isInDataStream,
+  api,
+}: {
+  indexName: string;
+  isFrozen: boolean;
+  isInDataStream: boolean;
+  api: ApiService;
+}) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
     errorMessage: null,
@@ -118,8 +129,9 @@ export const useReindex = ({ indexName, api }: { indexName: string; api: ApiServ
       // these properties will be known after fetching the reindexStatus
       reindexName: '',
       aliases: [],
-      isFrozen: false,
-      isReadonly: false,
+      isFrozen,
+      isInDataStream,
+      isReadonly: false, // we don't have this information in the deprecation list
     },
   });
 

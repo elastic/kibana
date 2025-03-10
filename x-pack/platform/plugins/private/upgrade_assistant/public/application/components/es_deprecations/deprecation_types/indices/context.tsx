@@ -46,6 +46,8 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   const { reindexState, startReindex, cancelReindex } = useReindex({
     indexName,
     api,
+    isInDataStream: Boolean(deprecation.isInDataStream),
+    isFrozen: Boolean(deprecation.isFrozenIndex),
   });
 
   const { updateIndexState, updateIndex } = useUpdateIndex({

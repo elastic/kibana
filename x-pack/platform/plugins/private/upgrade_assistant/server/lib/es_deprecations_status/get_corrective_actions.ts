@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 
 interface Action {
   action_type: 'remove_settings';
@@ -59,7 +59,8 @@ export const getCorrectiveAction = (
   deprecationType: EnrichedDeprecationInfo['type'],
   message: string,
   metadata: EsMetadata,
-  indexName?: string
+  indexName?: string,
+  isFrozenIndex?: boolean
 ): EnrichedDeprecationInfo['correctiveAction'] => {
   const indexSettingDeprecation = metadata?.actions?.find(
     (action) => action.action_type === 'remove_settings' && indexName
@@ -70,7 +71,7 @@ export const getCorrectiveAction = (
   const requiresReindexAction = ES_INDEX_MESSAGES_REQUIRING_REINDEX.some((regexp) =>
     regexp.test(message)
   );
-  const requiresUnfreezeAction = isFrozenDeprecation(message, indexName);
+  const requiresUnfreezeAction = Boolean(isFrozenIndex);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
@@ -109,17 +110,17 @@ export const getCorrectiveAction = (
     };
   }
 
+  if (requiresUnfreezeAction) {
+    return {
+      type: 'unfreeze',
+    };
+  }
+
   if (requiresReindexAction) {
     const transformIds = (metadata as IndexActionMetadata)?.transform_ids;
     return {
       type: 'reindex',
       ...(transformIds?.length ? { transformIds } : {}),
-    };
-  }
-
-  if (requiresUnfreezeAction) {
-    return {
-      type: 'unfreeze',
     };
   }
 

@@ -50,6 +50,7 @@ describe('ReindexDetailsFlyoutStep', () => {
     meta: {
       indexName: 'some_index',
       aliases: [],
+      isInDataStream: false,
       isFrozen: false,
       isReadonly: false,
       reindexName: 'some_index-reindexed-for-9',
