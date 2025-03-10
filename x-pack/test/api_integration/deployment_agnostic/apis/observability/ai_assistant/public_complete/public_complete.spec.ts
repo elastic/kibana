@@ -17,6 +17,7 @@ import {
 import type OpenAI from 'openai';
 import { type InstructionOrPlainText } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
+import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
   createLlmProxy,
   LlmProxy,
@@ -72,7 +73,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const titleSimulator = await titleSimulatorPromise;
       const conversationSimulator = await conversationSimulatorPromise;
@@ -156,7 +157,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('after adding an instruction', () => {
-      let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
+      let body: ChatCompletionStreamParams;
 
       before(async () => {
         const { conversationSimulator } = await addInterceptorsAndCallComplete({

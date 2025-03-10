@@ -11,20 +11,17 @@ import React from 'react';
 export function StreamsAppPageHeader({
   title,
   children,
-  verticalPaddingSize = 'l',
 }: {
   title: React.ReactNode;
   children?: React.ReactNode;
-  verticalPaddingSize?: 'none' | 'l';
 }) {
   const theme = useEuiTheme().euiTheme;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="none">
       <EuiPageHeader
         className={css`
-          padding: ${verticalPaddingSize === 'none' ? 0 : theme.size[verticalPaddingSize]}
-            ${theme.size.l};
+          padding: ${theme.size.m} ${theme.size.l};
         `}
       >
         {title}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { NewChat } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -19,6 +19,7 @@ import {
 } from '../../translations';
 import { useDataQualityContext } from '../../data_quality_context';
 import { ASK_ASSISTANT } from './translations';
+import { getFormattedCheckTime } from '../../data_quality_details/indices_details/pattern/index_check_flyout/utils/get_formatted_check_time';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -34,18 +35,22 @@ const useStyles = () => {
 interface Props {
   markdownComment: string;
   indexName: string;
+  checkedAt?: number;
 }
 
-const ChatActionComponent: FC<Props> = ({ indexName, markdownComment }) => {
+const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, checkedAt }) => {
+  const chatTitle = useMemo(() => {
+    return `${indexName} - ${getFormattedCheckTime(checkedAt)}`;
+  }, [checkedAt, indexName]);
+
   const styles = useStyles();
   const { isAssistantEnabled } = useDataQualityContext();
   const getPromptContext = useCallback(async () => markdownComment, [markdownComment]);
-
   return (
     <NewChat
       asLink={true}
       category="data-quality-dashboard"
-      conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
+      conversationTitle={chatTitle ?? DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
       description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
       getPromptContext={getPromptContext}
       suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
