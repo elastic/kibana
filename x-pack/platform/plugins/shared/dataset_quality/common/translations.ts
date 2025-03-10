@@ -701,3 +701,17 @@ export const failedDocsErrorsColumnName = i18n.translate(
     defaultMessage: 'Error messages',
   }
 );
+
+export const readMore = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.message.readMore',
+  {
+    defaultMessage: 'Read more',
+  }
+);
+
+export const readLess = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.message.readLess',
+  {
+    defaultMessage: 'Read less',
+  }
+);

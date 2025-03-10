@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -22,15 +22,28 @@ import {
   degradedFieldMaximumCharacterLimitColumnName,
   degradedFieldPotentialCauseColumnName,
   degradedFieldValuesColumnName,
+  readLess,
+  readMore,
 } from '../../../../../common/translations';
 
+const MAX_CHAR_LENGTH = 200;
+
 export const DegradedFieldInfo = () => {
+  const [expandedValues, setExpandedValues] = useState<{ [key: number]: boolean }>({});
+
   const {
     degradedFieldValues,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
     degradedFieldAnalysis,
   } = useQualityIssues();
+
+  const handleToggleExpansion = (idx: number) => {
+    setExpandedValues((prev) => ({
+      ...prev,
+      [idx]: !prev[idx],
+    }));
+  };
 
   return (
     <>
@@ -113,9 +126,32 @@ export const DegradedFieldInfo = () => {
                 grow={2}
               >
                 <EuiBadgeGroup gutterSize="s">
-                  {degradedFieldValues?.values.map((value, idx) => (
-                    <EuiCode key={idx}>{value}</EuiCode>
-                  ))}
+                  {degradedFieldValues?.values.map((value, idx) => {
+                    const isExpanded = expandedValues[idx] || false;
+                    const truncatedText = isExpanded
+                      ? value
+                      : `${value.slice(0, MAX_CHAR_LENGTH)}${'... '}`;
+                    const shouldShowToggle = value.length > MAX_CHAR_LENGTH;
+
+                    return (
+                      <div key={idx} css={{ lineHeight: '1.6' }}>
+                        <EuiFlexGroup direction="column" gutterSize="none">
+                          <EuiCode>{truncatedText}</EuiCode>
+                          {shouldShowToggle && (
+                            <EuiCode>
+                              <button
+                                onClick={() => handleToggleExpansion(idx)}
+                                color="primary"
+                                css={{ fontWeight: 'bold' }}
+                              >
+                                {isExpanded ? readLess : readMore}
+                              </button>
+                            </EuiCode>
+                          )}
+                        </EuiFlexGroup>
+                      </div>
+                    );
+                  })}
                 </EuiBadgeGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
