@@ -10,9 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { UnifiedDocViewerTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DATASTREAM_TYPE_FIELD, PROCESSOR_EVENT_FIELD, getFieldValue } from '@kbn/discover-utils';
-import { DocViewerExtensionParams, DocViewerExtension } from '../../../../types';
+import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../types';
 
 export const getDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
