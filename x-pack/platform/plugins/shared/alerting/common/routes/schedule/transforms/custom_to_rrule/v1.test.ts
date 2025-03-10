@@ -27,25 +27,6 @@ describe('transformCustomScheduleToRRule', () => {
     });
   });
 
-  it('transforms duration as indefinite correctly', () => {
-    expect(
-      transformCustomScheduleToRRule({ duration: '-1', start: '2021-05-10T00:00:00.000Z' })
-    ).toEqual({
-      duration: -1,
-      rRule: {
-        bymonth: undefined,
-        bymonthday: undefined,
-        byweekday: undefined,
-        count: undefined,
-        dtstart: '2021-05-10T00:00:00.000Z',
-        freq: undefined,
-        interval: undefined,
-        tzid: 'UTC',
-        until: undefined,
-      },
-    });
-  });
-
   it('transforms start date and tzid correctly', () => {
     expect(
       transformCustomScheduleToRRule({

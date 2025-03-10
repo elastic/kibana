@@ -10,21 +10,22 @@ import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../../lib/errors/rule_type_disabled';
+import { SanitizedRule } from '../../../../../../common';
 import { snoozeRuleRoute } from './snooze_rule_route';
-import { SanitizedRule } from '@kbn/alerting-types';
 
 const rulesClient = rulesClientMock.create();
+const mockedUUID = 'schedule-id-1';
 jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-beforeEach(() => {
-  jest.resetAllMocks();
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('schedule-id-1'),
+}));
 
 const schedule = {
   custom: {
-    duration: '240h',
+    duration: '10d',
     start: '2021-03-07T00:00:00.000Z',
     recurring: {
       occurrences: 1,
@@ -52,7 +53,7 @@ const mockedRule = {
   snoozeSchedule: [
     {
       duration: 864000000,
-      id: 'random-schedule-id',
+      id: mockedUUID,
       rRule: {
         count: 1,
         tzid: 'UTC',
@@ -65,6 +66,10 @@ const mockedRule = {
 rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
 
 describe('snoozeAlertRoute', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -112,78 +117,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {
-        schedule: { custom: { ...schedule.custom, timezone: 'UTC' }, id: 'random-schedule-id' },
-      },
-    });
-  });
-
-  it('also snoozes an alert when passed snoozeEndTime of -1', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    snoozeRuleRoute(router, licenseState);
-
-    const [config, handler] = router.post.mock.calls[0];
-
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
-
-    rulesClient.snooze.mockResolvedValueOnce({
-      ...mockedRule,
-      snoozeSchedule: [
-        {
-          duration: -1,
-          id: 'random-schedule-id',
-          rRule: {
-            count: 1,
-            tzid: 'UTC',
-            dtstart: '2021-03-07T00:00:00.000Z',
-          },
-        },
-      ],
-    } as unknown as SanitizedRule);
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: {
-          id: '1',
-        },
-        body: {
-          schedule: {
-            custom: {
-              ...schedule.custom,
-              duration: '-1',
-            },
-          },
-        },
-      },
-      ['noContent']
-    );
-
-    expect(await handler(context, req, res)).toEqual(undefined);
-
-    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.duration).toEqual(-1);
-    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
-      Object {
-        "bymonth": undefined,
-        "bymonthday": undefined,
-        "byweekday": undefined,
-        "count": 1,
-        "dtstart": "2021-03-07T00:00:00.000Z",
-        "freq": undefined,
-        "interval": undefined,
-        "tzid": "UTC",
-        "until": undefined,
-      }
-    `);
-
-    expect(res.ok).toHaveBeenCalledWith({
-      body: {
-        schedule: {
-          custom: { ...schedule.custom, timezone: 'UTC', duration: '-1' },
-          id: 'random-schedule-id',
-        },
+        schedule: { custom: { ...schedule.custom, timezone: 'UTC' }, id: mockedUUID },
       },
     });
   });
@@ -203,7 +137,7 @@ describe('snoozeAlertRoute', () => {
       snoozeSchedule: [
         {
           duration: 864000000,
-          id: 'random-schedule-id',
+          id: mockedUUID,
           rRule: {
             tzid: 'America/New_York',
             dtstart: '2021-03-07T00:00:00.000Z',
@@ -225,7 +159,7 @@ describe('snoozeAlertRoute', () => {
         body: {
           schedule: {
             custom: {
-              duration: '240h',
+              duration: '10d',
               start: '2021-03-07T00:00:00.000Z',
               timezone: 'America/New_York',
               recurring: {
@@ -263,7 +197,7 @@ describe('snoozeAlertRoute', () => {
       body: {
         schedule: {
           custom: {
-            duration: '240h',
+            duration: '10d',
             start: '2021-03-07T00:00:00.000Z',
             timezone: 'America/New_York',
             recurring: {
@@ -272,7 +206,7 @@ describe('snoozeAlertRoute', () => {
               onWeekDay: ['MO'],
             },
           },
-          id: 'random-schedule-id',
+          id: mockedUUID,
         },
       },
     });
@@ -293,7 +227,7 @@ describe('snoozeAlertRoute', () => {
       snoozeSchedule: [
         {
           duration: 864000000,
-          id: 'random-schedule-id',
+          id: mockedUUID,
           rRule: {
             count: 5,
             dtstart: '2021-03-07T00:00:00.000Z',
@@ -316,7 +250,7 @@ describe('snoozeAlertRoute', () => {
         body: {
           schedule: {
             custom: {
-              duration: '240h',
+              duration: '10d',
               start: '2021-03-07T00:00:00.000Z',
               recurring: {
                 every: '1y',
@@ -362,7 +296,7 @@ describe('snoozeAlertRoute', () => {
       body: {
         schedule: {
           custom: {
-            duration: '240h',
+            duration: '10d',
             start: '2021-03-07T00:00:00.000Z',
             recurring: {
               every: '1y',
@@ -372,10 +306,29 @@ describe('snoozeAlertRoute', () => {
             },
             timezone: 'UTC',
           },
-          id: 'random-schedule-id',
+          id: mockedUUID,
         },
       },
     });
+  });
+
+  it('throws error when body does not include custom schedule', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    snoozeRuleRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { params: { id: '1' }, body: { schedule: { duration: '1h' } } },
+      ['ok', 'forbidden']
+    );
+
+    await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Custom schedule is required"`
+    );
   });
 
   it('ensures the rule type gets validated for the license', async () => {

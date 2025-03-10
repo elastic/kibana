@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { snoozeRuleRoute } from './snooze_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../../lib/errors/rule_type_disabled';
+import { SanitizedRule } from '../../../../../../common';
+import { snoozeRuleRoute } from './snooze_rule_route';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../../lib/license_api_access', () => ({
@@ -30,6 +31,36 @@ const SNOOZE_SCHEDULE = {
   duration: 864000000,
 };
 
+const mockedRule = {
+  apiKeyOwner: 'api-key-owner',
+  consumer: 'bar',
+  createdBy: 'elastic',
+  updatedBy: 'elastic',
+  enabled: true,
+  id: '1',
+  name: 'abc',
+  alertTypeId: '1',
+  tags: ['foo'],
+  throttle: '10m',
+  schedule: { interval: '12s' },
+  params: {
+    otherField: false,
+  },
+  createdAt: new Date('2019-02-12T21:01:22.479Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  snoozeSchedule: [
+    {
+      duration: 864000000,
+      id: 'random-schedule-id',
+      rRule: {
+        count: 1,
+        tzid: 'UTC',
+        dtstart: '2021-03-07T00:00:00.000Z',
+      },
+    },
+  ],
+};
+
 describe('snoozeAlertRoute', () => {
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
@@ -41,7 +72,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
 
-    rulesClient.snoozeInternal.mockResolvedValueOnce();
+    rulesClient.snooze.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -58,8 +89,8 @@ describe('snoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.snoozeInternal).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snoozeInternal.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
+    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -88,7 +119,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
 
-    rulesClient.snoozeInternal.mockResolvedValueOnce();
+    rulesClient.snooze.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -108,8 +139,8 @@ describe('snoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.snoozeInternal).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snoozeInternal.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
+    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -136,9 +167,7 @@ describe('snoozeAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.snoozeInternal.mockRejectedValue(
-      new RuleTypeDisabledError('Fail', 'license_invalid')
-    );
+    rulesClient.snooze.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

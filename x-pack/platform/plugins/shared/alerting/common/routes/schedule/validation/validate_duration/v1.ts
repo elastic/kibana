@@ -10,9 +10,6 @@ import { DURATION_REGEX } from '../../constants';
 
 export const validateDuration = (duration: string) => {
   const durationRegexp = new RegExp(DURATION_REGEX, 'g');
-  if (duration === '-1') {
-    return;
-  }
 
   if (!durationRegexp.test(duration)) {
     return `Invalid schedule duration format: ${duration}`;

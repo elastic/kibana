@@ -63,17 +63,6 @@ describe('validateSchedule', () => {
     ).toEqual('Recurrence every 1d must be longer than the duration 2d.');
   });
 
-  it('throws error when recurring schedule provided with indefinite duration', () => {
-    expect(
-      validateSchedule({
-        duration: '-1',
-        recurring: { every: '1M' },
-      })
-    ).toEqual(
-      'The duration of -1 represents indefinite schedule. Recurring schedules cannot be set when the duration is -1.'
-    );
-  });
-
   it('throws error when recurring end and occurrences both are provided', () => {
     expect(
       validateSchedule({

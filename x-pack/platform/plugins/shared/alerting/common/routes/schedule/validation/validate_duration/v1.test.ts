@@ -23,8 +23,8 @@ describe('validateDuration', () => {
     expect(validateDuration('5d')).toBeUndefined();
   });
 
-  it('validates indefinite duration correctly', () => {
-    expect(validateDuration('-1')).toBeUndefined();
+  it('throws error when duration is -1', () => {
+    expect(validateDuration('-1')).toEqual('Invalid schedule duration format: -1');
   });
 
   it('throws error when invalid unit', () => {

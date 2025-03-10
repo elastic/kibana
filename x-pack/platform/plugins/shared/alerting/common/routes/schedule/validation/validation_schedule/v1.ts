@@ -14,7 +14,7 @@ export const validateSchedule = (schedule: {
 }) => {
   const { duration, recurring } = schedule;
   const { end, occurrences, every } = recurring ?? {};
-  if (every && duration !== '-1') {
+  if (every) {
     const [, interval, frequency] = every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
     const [, durationNumber, durationUnit] = duration.match(DURATION_REGEX) ?? [];
 
@@ -29,10 +29,6 @@ export const validateSchedule = (schedule: {
     if (intervalInDays && interval && durationInDays >= intervalInDays) {
       return `Recurrence every ${every} must be longer than the duration ${duration}.`;
     }
-  }
-
-  if (duration === '-1' && recurring) {
-    return `The duration of -1 represents indefinite schedule. Recurring schedules cannot be set when the duration is -1.`;
   }
 
   if (end && occurrences) {

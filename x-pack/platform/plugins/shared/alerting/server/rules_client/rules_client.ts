@@ -14,12 +14,7 @@ import { RulesClientContext } from './types';
 import { cloneRule, CloneRuleParams } from '../application/rule/methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
-import {
-  snoozeRule,
-  snoozeRuleInternal,
-  type SnoozeRuleOptions,
-  type SnoozeRule,
-} from '../application/rule/methods/snooze';
+import { snoozeRule, type SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { getRule, GetRuleParams } from '../application/rule/methods/get';
 import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
@@ -183,8 +178,7 @@ export class RulesClient {
   public disableRule = (params: DisableRuleParams) => disableRule(this.context, params);
   public enableRule = (params: EnableRuleParams) => enableRule(this.context, params);
 
-  public snoozeInternal = (options: SnoozeRuleOptions) => snoozeRuleInternal(this.context, options);
-  public snooze = (options: SnoozeRule) => snoozeRule(this.context, options);
+  public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);

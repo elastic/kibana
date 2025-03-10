@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { v4 } from 'uuid';
 import { IRouter } from '@kbn/core/server';
 import {
   type SnoozeParams,
@@ -22,7 +23,7 @@ import {
   transformCustomScheduleToRRule,
   transformRRuleToCustomSchedule,
 } from '../../../../../../common/routes/schedule';
-import type { SnoozeRule } from '../../../../../application/rule/methods/snooze';
+import type { SnoozeRuleOptions } from '../../../../../application/rule/methods/snooze';
 
 export const snoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -72,29 +73,28 @@ export const snoozeRuleRoute = (
 
         const { rRule, duration } = transformCustomScheduleToRRule(customSchedule);
 
-        const snoozeSchedule = {
-          duration,
-          rRule: rRule as SnoozeRule['snoozeSchedule']['rRule'],
-        };
+        const snoozeScheduleId = v4();
 
         try {
           const snoozedRule = await rulesClient.snooze({
             ...params,
-            snoozeSchedule,
+            snoozeSchedule: {
+              duration,
+              rRule: rRule as SnoozeRuleOptions['snoozeSchedule']['rRule'],
+              id: snoozeScheduleId,
+            },
           });
 
-          const createdSchedule = {
-            id: (snoozedRule?.snoozeSchedule?.length
-              ? snoozedRule?.snoozeSchedule[snoozedRule.snoozeSchedule.length - 1].id
-              : '') as string,
-            custom: transformRRuleToCustomSchedule(
-              snoozedRule?.snoozeSchedule?.[snoozedRule.snoozeSchedule.length - 1]
-            ),
-          };
+          const createdSchedule = snoozedRule.snoozeSchedule?.find(
+            (schedule) => schedule.id === snoozeScheduleId
+          );
 
           const response: SnoozeResponse = {
             body: {
-              schedule: createdSchedule,
+              schedule: {
+                id: snoozeScheduleId,
+                custom: transformRRuleToCustomSchedule(createdSchedule),
+              },
             },
           };
 

@@ -27,10 +27,6 @@ const transformEveryToFrequency = (frequency?: string) => {
 };
 
 const getDurationInMilliseconds = (duration: string): number => {
-  if (duration === '-1') {
-    return -1;
-  }
-
   const [, durationNumber, durationUnit] = duration.match(DURATION_REGEX) ?? [];
 
   return moment

@@ -27,8 +27,9 @@ const transformFrequencyToEvery = (frequency: Frequency) => {
 };
 
 const getDurationInString = (duration: number): string => {
-  if (duration === -1) {
-    return '-1';
+  const durationInDays = moment.duration(duration, 'milliseconds').asDays();
+  if (durationInDays > 1) {
+    return `${durationInDays}d`;
   }
 
   const durationInHours = moment.duration(duration, 'milliseconds').asHours();

@@ -32,7 +32,6 @@ export { includeFieldsRequiredForAuthentication } from './include_fields_require
 export { getAndValidateCommonBulkOptions } from './get_and_validate_common_bulk_options';
 export {
   getSnoozeAttributes,
-  getInternalSnoozeAttributes,
   getBulkSnooze,
   getUnsnoozeAttributes,
   getBulkUnsnooze,

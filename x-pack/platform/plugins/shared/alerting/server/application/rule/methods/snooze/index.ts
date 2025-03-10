@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export type { SnoozeRuleOptions } from './internal/types';
-export type { SnoozeRule } from './external/types';
-export { snoozeRule as snoozeRuleInternal } from './internal/snooze_rule';
-export { snoozeRule } from './external/snooze_rule';
+export type { SnoozeRuleOptions } from './types';
+
+export { snoozeRule } from './snooze_rule';

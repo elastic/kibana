@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesClientContext } from '../../../../../rules_client';
+import { RulesClientContext } from '../../../../rules_client';
 import { snoozeRule } from './snooze_rule';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SnoozeRuleOptions } from './types';

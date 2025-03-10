@@ -40,7 +40,7 @@ export const snoozeRuleRoute = (
         const params: SnoozeRuleRequestInternalParamsV1 = req.params;
         const body = transformSnoozeBodyV1(req.body);
         try {
-          await rulesClient.snoozeInternal({ ...params, ...body });
+          await rulesClient.snooze({ ...params, ...body });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleMutedError) {

@@ -87,6 +87,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             id: response.body.schedule.id,
             custom: {
               ...snoozeSchedule.schedule.custom,
+              duration: '10d',
               timezone: 'UTC',
             },
           },
@@ -100,84 +101,6 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(rRule.dtstart).to.eql(NOW);
         expect(duration).to.eql(864000000);
         expect(updatedAlert.mute_all).to.eql(false);
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest,
-          spaceId: Spaces.space1.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: createdRule.id,
-        });
-      });
-    });
-
-    describe('handle snooze rule request appropriately when duration is -1', function () {
-      this.tags('skipFIPS');
-      it('should handle snooze rule request appropriately when duration is -1', async () => {
-        const { body: createdConnector } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'MY Connector',
-            connector_type_id: 'test.noop',
-            config: {},
-            secrets: {},
-          })
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
-
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              enabled: false,
-              actions: [
-                {
-                  id: createdConnector.id,
-                  group: 'default',
-                  params: {},
-                },
-              ],
-            })
-          )
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-          schedule: {
-            custom: {
-              duration: '-1',
-              start: NOW,
-            },
-          },
-        });
-
-        expect(response.statusCode).to.eql(200);
-        expect(response.body).to.eql({
-          schedule: {
-            id: response.body.schedule.id,
-            custom: {
-              duration: '-1',
-              start: NOW,
-              timezone: 'UTC',
-            },
-          },
-        });
-        const { body: updatedAlert } = await supertestWithoutAuth
-          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-        expect(updatedAlert.snooze_schedule).to.eql([
-          {
-            duration: -1,
-            id: response.body.schedule.id,
-            rRule: {
-              dtstart: NOW,
-              tzid: 'UTC',
-            },
-          },
-        ]);
-        expect(updatedAlert.mute_all).to.eql(true);
         // Ensure AAD isn't broken
         await checkAAD({
           supertest,
@@ -424,6 +347,34 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
           '[request body.schedule.custom.duration]: Invalid schedule duration format: invalid'
+        );
+      });
+
+      it('should return 400 if the duration is -1', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          schedule: {
+            custom: {
+              start: snoozeSchedule.schedule.custom.start,
+              duration: '-1',
+            },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          '[request body.schedule.custom.duration]: Invalid schedule duration format: -1'
         );
       });
 
