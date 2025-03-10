@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
@@ -66,16 +66,8 @@ async function fetchLinkedChildrenOfSpan({
             bool: {
               minimum_should_match: 1,
               should: [
-                {
-                  term: {
-                    [SPAN_LINKS_TRACE_ID]: traceId,
-                  },
-                },
-                {
-                  term: {
-                    [LINKS_TRACE_ID]: traceId,
-                  },
-                },
+                ...termQuery(SPAN_LINKS_TRACE_ID, traceId),
+                ...termQuery(LINKS_TRACE_ID, traceId),
               ],
             },
           },
@@ -85,16 +77,8 @@ async function fetchLinkedChildrenOfSpan({
                   bool: {
                     minimum_should_match: 1,
                     should: [
-                      {
-                        term: {
-                          [SPAN_LINKS_SPAN_ID]: spanId,
-                        },
-                      },
-                      {
-                        term: {
-                          [LINKS_SPAN_ID]: spanId,
-                        },
-                      },
+                      ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
+                      ...termQuery(LINKS_SPAN_ID, spanId),
                     ],
                   },
                 },

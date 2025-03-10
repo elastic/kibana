@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -57,7 +57,8 @@ export async function getLinkedParentsOfSpan({
           { term: { [TRACE_ID]: traceId } },
           {
             bool: {
-              should: [{ exists: { field: SPAN_LINKS } }, { exists: { field: LINKS_SPAN_ID } }],
+
+              should: [...existsQuery(SPAN_LINKS), ...existsQuery(LINKS_SPAN_ID)],
               minimum_should_match: 1,
             },
           },
