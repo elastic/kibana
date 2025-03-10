@@ -41,7 +41,12 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
   const handleSelectOptions = (options: EuiSelectableOption[]) => {
     setSelectedTempIndices(
-      options.filter((option) => option.checked === 'on').map((option) => option.label)
+      Array.from(
+        new Set([
+          ...options.filter((option) => option.checked === 'on').map((option) => option.label),
+          ...selectedTempIndices,
+        ])
+      )
     );
   };
   const handleSearchChange = (searchValue: string) => {
