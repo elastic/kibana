@@ -30,19 +30,12 @@ export function RelatedAlerts({ alert }: Props) {
 
   const esQuery: QueryDslQueryContainer = {
     bool: {
-      must: [
-        {
-          term: {
-            'kibana.alert.status': 'active',
-          },
-        },
-      ],
       filter: [
         {
           range: {
             'kibana.alert.start': {
-              gte: '2025-03-10T14:08:04.011Z',
-              lte: '2025-03-10T17:08:04.011Z',
+              gte: '2025-03-10T10:08:04.011Z',
+              lte: '2025-03-10T18:08:04.011Z',
             },
           },
         },
@@ -50,7 +43,7 @@ export function RelatedAlerts({ alert }: Props) {
       should: [
         {
           bool: {
-            boost: 2.0,
+            boost: 10.0,
             must: [
               {
                 term: {
@@ -69,7 +62,7 @@ export function RelatedAlerts({ alert }: Props) {
           term: {
             'kibana.alert.rule.uuid': {
               value: 'a849eff1-2712-4102-b36c-acc3354cf538',
-              boost: 1,
+              boost: 1.0,
             },
           },
         },
@@ -79,13 +72,12 @@ export function RelatedAlerts({ alert }: Props) {
               {
                 exp: {
                   'kibana.alert.start': {
-                    origin: '2025-03-10T17:02:16.399Z',
-                    scale: '5m',
-                    offset: '5m',
+                    origin: '2025-03-10T16:08:04.011Z',
+                    scale: '10m',
+                    offset: '10m',
                     decay: 0.5,
                   },
                 },
-                weight: 5,
               },
               {
                 script_score: {
@@ -109,7 +101,6 @@ export function RelatedAlerts({ alert }: Props) {
                     },
                   },
                 },
-                weight: 5,
               },
               {
                 script_score: {
@@ -143,7 +134,6 @@ export function RelatedAlerts({ alert }: Props) {
                     },
                   },
                 },
-                weight: 10,
               },
             ],
             boost_mode: 'sum',

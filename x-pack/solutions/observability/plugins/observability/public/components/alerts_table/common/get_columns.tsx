@@ -48,7 +48,7 @@ export const getColumns = (
       }),
       id: '_score',
       schema: 'numeric',
-      initialWidth: 70,
+      initialWidth: 100,
     },
     {
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
