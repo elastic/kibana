@@ -169,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:indices-metadata-telemetry',
+        'security:ingest-pipelines-stats-telemetry',
         'security:telemetry-configuration',
         'security:telemetry-detection-rules',
         'security:telemetry-diagnostic-timelines',

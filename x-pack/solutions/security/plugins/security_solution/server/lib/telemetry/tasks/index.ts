@@ -17,6 +17,7 @@ import { createTelemetryConfigurationTaskConfig } from './configuration';
 import { telemetryConfiguration } from '../configuration';
 import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
 import { createTelemetryIndicesMetadataTaskConfig } from './indices.metadata';
+import { createIngestStatsTaskConfig } from './ingest_pipelines_stats';
 
 export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [
@@ -32,5 +33,6 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     createTelemetryConfigurationTaskConfig(),
     createTelemetryFilterListArtifactTaskConfig(),
     createTelemetryIndicesMetadataTaskConfig(),
+    createIngestStatsTaskConfig(),
   ];
 }
