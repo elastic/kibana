@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiToolTip,
+  euiBreakpoint,
+  UseEuiTheme,
+} from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
@@ -131,8 +138,8 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             })}
           >
             <EuiButton
-              className="gphSearchBar__datasourceButton"
               data-test-subj="graphDatasourceButton"
+              css={styles}
               onClick={() => {
                 confirmWipeWorkspace(
                   () =>
@@ -209,6 +216,15 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     </form>
   );
 }
+
+const styles = (euiThemeContext: UseEuiTheme) => `
+  max-width: 320px;
+  
+  ${euiBreakpoint(euiThemeContext, ['xs', 's'])} {
+    width: 100%;
+    max-width: none;
+  }
+`;
 
 export const SearchBar = connect(
   (state: GraphState) => {

@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { Workspace } from '../../types';
+import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
 
 interface SelectStyleProps {
   workspace: Workspace;
@@ -17,8 +18,8 @@ interface SelectStyleProps {
 
 export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
   return (
-    <div className="gphSidebar__panel">
-      <div className="gphSidebar__header">
+    <div css={gphSidebarPanel}>
+      <div css={gphSidebarHeaderStyles}>
         <EuiIcon type="brush" size="s" />{' '}
         {i18n.translate('xpack.graph.sidebar.styleVerticesTitle', {
           defaultMessage: 'Style selected vertices',

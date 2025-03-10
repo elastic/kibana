@@ -11,6 +11,7 @@ import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
+import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;
@@ -40,8 +41,8 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
   };
 
   return (
-    <div className="gphSidebar__panel">
-      <div className="gphSidebar__header">
+    <div css={gphSidebarPanel}>
+      <div css={gphSidebarHeaderStyles}>
         <IconRenderer icon={selectedNode.icon} color={euiTheme.colors.darkShade} />{' '}
         {selectedNode.data.field} {selectedNode.data.term}
       </div>

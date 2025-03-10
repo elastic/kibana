@@ -8,9 +8,12 @@
 import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
+import { css } from '@emotion/react';
+import { UseEuiTheme, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
+import { noUserSelectStyles } from '../../styles';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;
@@ -51,6 +54,8 @@ export function GraphVisualization({
   onSetMergeCandidates,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
+
+  const euiThemeContext = useEuiTheme();
 
   const nodeClick = (n: WorkspaceNode, event: React.MouseEvent) => {
     // Selection logic - shift key+click helps selects multiple nodes
@@ -96,7 +101,9 @@ export function GraphVisualization({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      // TODO: className gphGraph is used on test, remove class and update snapchot
       className="gphGraph"
+      css={styles.graph}
       width="100%"
       height="100%"
       pointerEvents="all"
@@ -112,18 +119,25 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => (
-              <g key={makeEdgeId(edge)} className="gphEdge--wrapper">
+              // TODO: Delete gphEdge--wrapper and update snapshots
+              <g key={makeEdgeId(edge)} className="gphEdge--wrapper" css={styles.edgeWrapper}>
                 {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                 <line
                   x1={edge.topSrc.kx}
                   y1={edge.topSrc.ky}
                   x2={edge.topTarget.kx}
                   y2={edge.topTarget.ky}
-                  className={classNames('gphEdge', {
-                    'gphEdge--selected': edge.isSelected,
-                  })}
+                  // NOTE: className gphEdge is used in tests and for applying hover styles
+                  className="gphEdge"
                   strokeLinecap="round"
-                  style={{ strokeWidth: edge.width }}
+                  css={[
+                    styles.edge(euiThemeContext, edge.width),
+                    edge.isSelected &&
+                      css({
+                        stroke: euiThemeContext.euiTheme.colors.darkShade,
+                        strokeOpacity: 0.95,
+                      }),
+                  ]}
                 />
                 <line
                   x1={edge.topSrc.kx}
@@ -133,10 +147,12 @@ export function GraphVisualization({
                   onClick={() => {
                     edgeClick(edge);
                   }}
+                  // className gphEdge is used in tests
                   className="gphEdge gphEdge--clickable"
-                  style={{
-                    strokeWidth: Math.max(edge.width, 15),
-                  }}
+                  css={[
+                    styles.edge(euiThemeContext, Math.max(edge.width, 15)),
+                    styles.edgeClickable,
+                  ]}
                 />
               </g>
             ))}
@@ -160,16 +176,26 @@ export function GraphVisualization({
                       e.preventDefault();
                     }
                   }}
+                  // className gphNode is used in tests
                   className="gphNode"
+                  css={css({ cursor: 'pointer' })}
                 >
                   <circle
                     cx={kx}
                     cy={ky}
                     r={node.scaledSize}
+                    // TODO: Update snapshots
                     className={classNames('gphNode__circle', {
                       'gphNode__circle--selected': node.isSelected,
                     })}
-                    style={{ fill: node.color }}
+                    css={[
+                      css({ fill: node.color }),
+                      node.isSelected &&
+                        css({
+                          strokeWidth: euiThemeContext.euiTheme.size.xs,
+                          stroke: `transparentize(${euiThemeContext.euiTheme.colors.primary}, .25)`,
+                        }),
+                    ]}
                   />
                   <IconRenderer
                     icon={node.icon}
@@ -180,7 +206,9 @@ export function GraphVisualization({
 
                   {node.label.length < 30 && (
                     <text
+                      // TODO: delete class
                       className="gphNode__label"
+                      css={[svgTextStyles, css({ cursor: 'pointer' })]}
                       textAnchor="middle"
                       transform="translate(0,22)"
                       x={kx}
@@ -197,7 +225,16 @@ export function GraphVisualization({
                       x={kx}
                       y={ky}
                     >
-                      <p className="gphNode__label gphNode__label--html gphNoUserSelect">
+                      <p
+                        // TODO: Delete classNames
+                        className="gphNode__label gphNode__label--html gphNoUserSelect"
+                        css={[
+                          svgTextStyles,
+                          css({ textAlign: 'center', cursor: 'pointer' }),
+                          euiTextTruncate(),
+                          noUserSelectStyles,
+                        ]}
+                      >
                         {node.label}
                       </p>
                     </foreignObject>
@@ -207,13 +244,23 @@ export function GraphVisualization({
                     <g>
                       <circle
                         r="5"
+                        // TODO: Delete class
                         className="gphNode__markerCircle"
+                        css={styles.nodeMarkerCircle}
                         transform="translate(10,10)"
                         cx={kx}
                         cy={ky}
                       />
                       <text
+                        // TODO: Delete class
                         className="gphNode__markerText"
+                        css={[
+                          svgTextStyles,
+                          css({
+                            fontSize: `calc(${euiThemeContext.euiTheme.size.s} - 2px)`,
+                            fill: euiThemeContext.euiTheme.colors.emptyShade,
+                          }),
+                        ]}
                         textAnchor="middle"
                         transform="translate(10,12)"
                         x={kx}
@@ -230,3 +277,42 @@ export function GraphVisualization({
     </svg>
   );
 }
+
+const svgTextStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    fontFamily: euiTheme.font.family,
+    fontSize: euiTheme.size.s,
+    lineHeight: euiTheme.size.m,
+    fill: euiTheme.colors.darkShade,
+    color: euiTheme.colors.darkShade,
+  });
+
+const styles = {
+  graph: css({
+    flex: 1,
+    overflow: 'hidden',
+  }),
+  edgeWrapper: css({
+    '&:hover .gphEdge': {
+      strokeOpacity: 0.95,
+      cursor: 'pointer',
+    },
+  }),
+  edge: ({ euiTheme }: UseEuiTheme, edgeWidth = 2) =>
+    css({
+      fill: euiTheme.colors.mediumShade,
+      stroke: euiTheme.colors.mediumShade,
+      strokeWidth: edgeWidth,
+      strokeOpacity: 0.5,
+      fontSize: `calc(${euiTheme.size.s} - 2px)`,
+    }),
+  edgeClickable: css({
+    fill: 'transparent',
+    opacity: 0,
+  }),
+  nodeMarkerCircle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fill: euiTheme.colors.darkShade,
+      stroke: euiTheme.colors.emptyShade,
+    }),
+};
