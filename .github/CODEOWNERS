@@ -1126,6 +1126,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /test/examples/partial_results @elastic/kibana-data-discovery
 /test/examples/search @elastic/kibana-data-discovery
 /test/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/test/examples/unified_tabs_examples @elastic/kibana-data-discovery
 /test/functional/apps/context @elastic/kibana-data-discovery
 /test/functional/apps/discover @elastic/kibana-data-discovery
 /test/functional/apps/management/ccs_compatibility/_data_views_ccs.ts @elastic/kibana-data-discovery
@@ -1688,6 +1689,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/services/data_grid.ts @elastic/appex-qa
 /test/functional/services/combo_box.ts @elastic/appex-qa
 /test/functional/page_objects/unified_field_list.ts @elastic/appex-qa
+/test/functional/page_objects/unified_tabs.ts @elastic/appex-qa
 /test/functional/page_objects/time_picker.ts @elastic/appex-qa
 /test/functional/page_objects/index.ts @elastic/appex-qa
 /test/functional/page_objects/header_page.ts @elastic/appex-qa
