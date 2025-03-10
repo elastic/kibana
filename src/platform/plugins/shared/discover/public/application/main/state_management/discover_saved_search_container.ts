@@ -116,6 +116,12 @@ export interface DiscoverSavedSearchContainer {
    */
   set: (savedSearch: SavedSearch) => SavedSearch;
   /**
+   * Similar to set, but does not reset the initial state,
+   * ensuring unsaved changes are tracked
+   * @param nextSavedSearch
+   */
+  assignNextSavedSearch: (nextSavedSearch: SavedSearch) => void;
+  /**
    * Updates the current state of the saved search
    * @param params
    */
@@ -331,6 +337,7 @@ export function getSavedSearchContainer({
     new: newSavedSearch,
     persist,
     set,
+    assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
     updateTimeRange,
     updateWithFilterManagerFilters,
