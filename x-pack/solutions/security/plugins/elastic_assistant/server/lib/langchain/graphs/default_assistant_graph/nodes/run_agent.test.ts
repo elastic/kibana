@@ -18,7 +18,7 @@ jest.mock('../../../../prompt', () => ({
 }));
 
 const agentState = {
-  messages: [new AIMessage({ content: 'This message contains a reference {reference(1234)}' })],
+  chatHistory: [new AIMessage({ content: 'This message contains a reference {reference(1234)}' })],
   formattedTime: 'mockFormattedTime',
 } as unknown as AgentState;
 
