@@ -145,16 +145,18 @@ async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
+  const fetch = Effect.promise(() => getAlertByRuleId({ es, ruleId }));
+  const throwWhenLessThan = (alerts: ApmAlertFields[]) =>
+    Effect.try(() => {
+      const actualAlertCount = alerts.length;
+      if (actualAlertCount < minimumAlertCount)
+        throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
+      return alerts;
+    });
+
   const main = Effect.gen(function* () {
     yield* Effect.log(`Searching for rules`);
-    return yield* Effect.promise(() =>
-      getAlertByRuleId({ es, ruleId }).then((alerts) => {
-        const actualAlertCount = alerts.length;
-        if (actualAlertCount < minimumAlertCount)
-          throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
-        return alerts;
-      })
-    );
+    return yield* Effect.flatMap(fetch, throwWhenLessThan);
   }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
 
   return await Effect.runPromise(Effect.retry(main, { times: 50 }));
