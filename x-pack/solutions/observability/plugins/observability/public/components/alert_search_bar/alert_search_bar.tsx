@@ -43,6 +43,7 @@ export function ObservabilityAlertSearchBar({
   kuery,
   rangeFrom,
   rangeTo,
+  onControlApiAvailable,
   services: {
     AlertsSearchBar,
     timeFilterService,
@@ -185,6 +186,7 @@ export function ObservabilityAlertSearchBar({
               storage: Storage,
             }}
             ControlGroupRenderer={ControlGroupRenderer}
+            onInit={onControlApiAvailable}
           />
         )}
       </EuiFlexItem>

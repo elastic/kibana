@@ -10,7 +10,12 @@ import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
@@ -18,6 +23,7 @@ import {
   IKbnUrlStateStorage,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
+import { setStatusOnControlConfigs } from '../../../utils/alert_controls/set_status_on_control_configs';
 import { datemathStringRT } from '../../../utils/datemath';
 import { ALERT_STATUS_ALL } from '../../../../common/constants';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
@@ -37,6 +43,7 @@ export const alertSearchBarState = t.partial({
     t.literal(ALERT_STATUS_ACTIVE),
     t.literal(ALERT_STATUS_RECOVERED),
     t.literal(ALERT_STATUS_ALL),
+    t.literal(ALERT_STATUS_UNTRACKED),
   ]),
 });
 
@@ -196,14 +203,12 @@ function initializeUrlAndStateContainer(
 
   // This part is for backward compatibility. Previously, we saved status in the status query
   // parameter. Now, we save it in the controlConfigs.
-  if (validUrlState.status !== undefined && validUrlState.controlConfigs) {
-    const statusControl = validUrlState.controlConfigs.find(
-      (control) => control.fieldName === ALERT_STATUS
+  if (validUrlState.status) {
+    validUrlState.controlConfigs = setStatusOnControlConfigs(
+      validUrlState.status,
+      validUrlState.controlConfigs ?? DEFAULT_CONTROLS
     );
-    if (statusControl) {
-      statusControl.selectedOptions = [validUrlState.status];
-      validUrlState.status = undefined;
-    }
+    validUrlState.status = undefined;
   }
 
   const currentState = {

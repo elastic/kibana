@@ -13,6 +13,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
+import { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -44,6 +45,7 @@ interface Props {
   ruleType: any;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   onSetTabId: (tabId: TabId) => void;
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 }
 
 const tableColumns = getColumns();
@@ -57,6 +59,7 @@ export function RuleDetailsTabs({
   ruleType,
   onSetTabId,
   onEsQueryChange,
+  onControlApiAvailable,
 }: Props) {
   const {
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
@@ -90,6 +93,7 @@ export function RuleDetailsTabs({
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
             defaultFilters={ruleFilters.current}
             disableLocalStorageSync={true}
+            onControlApiAvailable={onControlApiAvailable}
           />
           <EuiSpacer size="s" />
 

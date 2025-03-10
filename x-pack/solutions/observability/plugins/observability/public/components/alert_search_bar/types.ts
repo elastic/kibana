@@ -6,7 +6,7 @@
  */
 
 import { ReactElement } from 'react';
-import { type FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { type FilterControlConfig, FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { type NotificationsStart, ToastsStart } from '@kbn/core-notifications-browser';
 import {
@@ -91,4 +91,5 @@ interface CommonAlertSearchBarProps {
   appName: string;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   defaultFilters?: Filter[];
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 }
