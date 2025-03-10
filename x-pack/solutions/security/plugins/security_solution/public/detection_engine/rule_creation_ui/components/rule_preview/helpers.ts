@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { FieldsMap } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
 
 import type { FieldValueQueryBar } from '../query_bar_field';
@@ -96,10 +97,17 @@ const isThreatMatchPreviewDisabled = ({
   return false;
 };
 
+export const isEveryThresholdFieldValid = (fields: FieldsMap): boolean =>
+  fields['threshold.field']?.isValid &&
+  fields['threshold.value']?.isValid &&
+  fields['threshold.cardinality.field']?.isValid &&
+  fields['threshold.cardinality.value']?.isValid;
+
 export const getIsRulePreviewDisabled = ({
   ruleType,
   isQueryBarValid,
   isThreatQueryBarValid,
+  isThresholdValid,
   index,
   dataViewId,
   dataSourceType,
@@ -112,6 +120,7 @@ export const getIsRulePreviewDisabled = ({
   ruleType: Type;
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
+  isThresholdValid: boolean;
   index: string[];
   dataViewId: string | undefined;
   dataSourceType: DataSourceType;
@@ -125,7 +134,7 @@ export const getIsRulePreviewDisabled = ({
     return isEsqlPreviewDisabled({ isQueryBarValid, queryBar });
   }
   if (ruleType === 'machine_learning') {
-    return !machineLearningJobId ?? machineLearningJobId?.length === 0;
+    return machineLearningJobId === undefined || machineLearningJobId.length === 0;
   }
   if (
     !isQueryBarValid ||
@@ -145,7 +154,10 @@ export const getIsRulePreviewDisabled = ({
     return isEmpty(queryBar.query.query);
   }
   if (ruleType === 'query' || ruleType === 'threshold') {
-    return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
+    return (
+      (isEmpty(queryBar.query.query) && isEmpty(queryBar.filters)) ||
+      (ruleType === 'threshold' && !isThresholdValid)
+    );
   }
   if (ruleType === 'new_terms') {
     return isNewTermsPreviewDisabled(newTermsFields);

@@ -7,7 +7,13 @@
 
 import moment from 'moment';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { isNoisy, getTimeframeOptions, getIsRulePreviewDisabled } from './helpers';
+import {
+  isNoisy,
+  getTimeframeOptions,
+  getIsRulePreviewDisabled,
+  isEveryThresholdFieldValid,
+} from './helpers';
+import type { FieldsMap } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 describe('query_preview/helpers', () => {
   const timeframeEnd = moment();
@@ -90,6 +96,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: [],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -109,6 +116,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: false,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -128,6 +136,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -147,6 +156,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -166,6 +176,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -183,6 +194,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -200,6 +212,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'eql',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -217,6 +230,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'new_terms',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -234,6 +248,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'threat_match',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -253,6 +268,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'eql',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -274,6 +290,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'eql',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -304,6 +321,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'eql',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -325,6 +343,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'eql',
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
+        isThresholdValid: false,
         index: ['test-*'],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -347,6 +366,7 @@ describe('query_preview/helpers', () => {
         ruleType: 'machine_learning',
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
+        isThresholdValid: false,
         index: [],
         dataViewId: undefined,
         dataSourceType: DataSourceType.IndexPatterns,
@@ -357,6 +377,90 @@ describe('query_preview/helpers', () => {
         newTermsFields: [],
       });
       expect(isDisabled).toEqual(false);
+    });
+
+    test('disabled for ML rule when machine learning job id is empty', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'machine_learning',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        isThresholdValid: false,
+        index: [],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: '' }, saved_id: null },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('enabled when threshold rule with non empty query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threshold',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        isThresholdValid: true,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: 'any where true', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(false);
+    });
+
+    test('disabled when threshold rule with empty query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threshold',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        isThresholdValid: true,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: '', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when threshold rule with invalid threshold', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threshold',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        isThresholdValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: 'any where true', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
     });
   });
 
@@ -384,6 +488,35 @@ describe('query_preview/helpers', () => {
       const options = getTimeframeOptions('threshold');
 
       expect(options).toEqual([{ value: 'h', text: 'Last hour' }]);
+    });
+  });
+
+  describe('isEveryThresholdFieldValud', () => {
+    const fieldLabels = [
+      'threshold.field',
+      'threshold.value',
+      'threshold.cardinality.field',
+      'threshold.cardinality.value',
+    ];
+    const allFieldsValid = fieldLabels.reduce((acc, label) => {
+      acc[label] = { isValid: true };
+      return acc;
+    }, {} as Record<string, { isValid: boolean }>) as unknown as FieldsMap;
+
+    test('returns true if all fields are valid', () => {
+      const isValid = isEveryThresholdFieldValid(allFieldsValid);
+
+      expect(isValid).toEqual(true);
+    });
+
+    test.each(fieldLabels)('returns false if a field is invalid', (fieldLabel) => {
+      const fields = {
+        ...allFieldsValid,
+        // Override the field that should be invalid for this test case
+        [fieldLabel]: { isValid: false },
+      } as unknown as FieldsMap;
+
+      expect(isEveryThresholdFieldValid(fields)).toEqual(false);
     });
   });
 });
