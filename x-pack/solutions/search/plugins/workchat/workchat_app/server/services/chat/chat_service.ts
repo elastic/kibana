@@ -29,9 +29,10 @@ import {
   conversationUpdatedEvent,
   isMessageEvent,
 } from '../../../common/utils/chat_events';
+import { createChatError, isChatError } from '../../../common/errors';
 import { userMessageEvent, messageEvent } from '../../../common/utils/conversation';
-import { ChatEvent } from '../../../common/chat_events';
-import { Conversation, ConversationEvent } from '../../../common/conversations';
+import type { ChatEvent } from '../../../common/chat_events';
+import type { Conversation, ConversationEvent } from '../../../common/conversations';
 import { AgentFactory } from '../orchestration';
 import { ConversationService, ConversationClient } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
@@ -138,11 +139,16 @@ export class ChatService {
             });
 
         return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
-          shareReplay(),
           catchError((err) => {
-            logError('[main]', err);
-            return throwError(() => err);
-          })
+            logError('main observable', err);
+            return throwError(() => {
+              if (isChatError(err)) {
+                return err;
+              }
+              return createChatError('internalError', err.message, {});
+            });
+          }),
+          shareReplay()
         );
       })
     );

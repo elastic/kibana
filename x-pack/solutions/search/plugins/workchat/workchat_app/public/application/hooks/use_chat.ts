@@ -7,6 +7,7 @@
 
 import { useCallback, useState, useMemo } from 'react';
 import type { ConversationCreatedEvent } from '../../../common/chat_events';
+import type { ChatError } from '../../../common/errors';
 import type { ConversationEvent } from '../../../common/conversations';
 import { assistantMessageEvent, userMessageEvent } from '../../../common/utils/conversation';
 import { useWorkChatServices } from './use_workchat_service';
@@ -16,7 +17,7 @@ interface UseChatProps {
   agentId: string;
   connectorId?: string;
   onConversationUpdate: (changes: ConversationCreatedEvent['conversation']) => void;
-  onError?: (error: any) => void;
+  onError?: (error: ChatError) => void;
 }
 
 export type ChatStatus = 'ready' | 'loading' | 'error';
@@ -67,6 +68,7 @@ export const useChat = ({
           setStatus('ready');
         },
         error: (err) => {
+          setPendingMessage('');
           setStatus('error');
           onError?.(err);
         },

@@ -33,6 +33,7 @@ export interface ConversationClient {
 export class ConversationClientImpl implements ConversationClient {
   private readonly client: SavedObjectsClientContract;
   private readonly user: ClientUser;
+  // @ts-expect-error will be used at some point
   private readonly logger: Logger;
 
   constructor({ client, user, logger }: ConversationClientOptions) {

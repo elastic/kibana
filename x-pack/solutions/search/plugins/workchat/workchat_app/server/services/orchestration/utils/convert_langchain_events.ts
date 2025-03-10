@@ -8,7 +8,7 @@
 import { mergeMap, OperatorFunction, of, EMPTY } from 'rxjs';
 import { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import { ChatEvent } from '../../../../common/chat_events';
+import { AgentRunEvents } from '../types';
 import { extractTextContent, messageFromLangchain } from './from_langchain_messages';
 
 function filterMap<T, R>(project: (value: T) => R | undefined | null): OperatorFunction<T, R> {
@@ -22,10 +22,10 @@ export const langchainToChatEvents = ({
   runName,
 }: {
   runName: string;
-}): OperatorFunction<LangchainStreamEvent, ChatEvent> => {
+}): OperatorFunction<LangchainStreamEvent, AgentRunEvents> => {
   return (langchain$) => {
     return langchain$.pipe(
-      filterMap<LangchainStreamEvent, ChatEvent>((event) => {
+      filterMap<LangchainStreamEvent, AgentRunEvents>((event) => {
         if (event.event === 'on_chat_model_stream') {
           const chunk: AIMessageChunk = event.data.chunk;
           const content = extractTextContent(chunk);

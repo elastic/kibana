@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import { Observable, from, filter, shareReplay } from 'rxjs';
+import { from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ChatEvent } from '../../../common/chat_events';
-import type { ConversationEvent } from '../../../common/conversations';
 import { IntegrationsService } from '../integrations/integrations_service';
 import { getLCTools } from '../integrations/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
-
-interface AgentRunOptions {
-  previousEvents: ConversationEvent[];
-}
-
-interface AgentRunResult {
-  /**
-   * Live events that can be streamed back to the UI
-   */
-  events$: Observable<ChatEvent>;
-}
-
-export interface Agent {
-  run(options: AgentRunOptions): Promise<AgentRunResult>;
-}
+import type { Agent, AgentRunResult } from './types';
 
 export const createAgent = async ({
   agentId,
