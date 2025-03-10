@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { last } from 'lodash';
 import { Effect } from 'effect';
 
@@ -23,9 +23,10 @@ export async function getLatestVersion(): Promise<string> {
   );
 }
 
-function validate(response) {
+function validate(response: AxiosResponse) {
+  // @ts-ignore
   return last((response.data.versions as string[]).filter(includesSnapShot)) || DEFAULT_VERSION;
 }
-function includesSnapShot(v) {
+function includesSnapShot(v: string[]) {
   return v.includes('-SNAPSHOT');
 }
