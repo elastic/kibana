@@ -131,9 +131,12 @@ export function MarkerBody({
     <div
       className="xyDecorationRotatedWrapper"
       data-test-subj="xyVisAnnotationText"
-      css={{
-        width: LINES_MARKER_SIZE,
-      }}
+      css={[
+        xyDecorationRotatedWrapperStyles,
+        {
+          maxWidth: LINES_MARKER_SIZE,
+        },
+      ]}
     >
       <div
         className="eui-textTruncate xyDecorationRotatedWrapper__label"
@@ -252,3 +255,22 @@ const styles = {
     },
   }),
 };
+
+const xyDecorationRotatedWrapperStyles = css({
+  display: 'inline-block',
+  overflow: 'hidden',
+  lineHeight: 1.5,
+
+  '& .xyDecorationRotatedWrapper__label': {
+    display: 'inline-block',
+    whiteSpace: 'nowrap',
+    transform: 'translate(0, 100%) rotate(-90deg)',
+    transformOrigin: '0 0',
+
+    '&::after': {
+      content: '""',
+      float: 'left',
+      marginTop: '100%',
+    },
+  },
+});

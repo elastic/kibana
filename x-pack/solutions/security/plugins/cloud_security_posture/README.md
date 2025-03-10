@@ -47,6 +47,10 @@ node scripts/i18n_check.js
 > i18n should run on project scope as it checks translations files outside of our plugin.
 >
 > Fixes can be applied using the --fix flag
+> 1. We shouldn't manually add/update/delete the localization files, nor change the translated strings.
+> 2. The script will remove unused labels.
+> 3. Regarding adding labels - this happens regularly and automated for the whole Kibana repository outside of our flows.
+
 
 Run [**Unit Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing):
 
