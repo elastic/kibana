@@ -4,19 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useMemo } from 'react';
+import * as uuid from 'uuid';
 import {
   type GroupOption,
   type GroupingAggregation,
   type NamedAggregation,
   isNoneGroup,
   getGroupingQuery,
+  useGrouping,
 } from '@kbn/grouping';
 import { parseGroupingQuery, type GroupPanelRenderer, type GetGroupStats } from '@kbn/grouping/src';
-import { useMemo } from 'react';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
+import {
+  GROUP_BY_CLICK,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { useDataViewContext } from '../../hooks/data_view_context';
-import type { AssetsBaseURLQuery } from '../../hooks/use_asset_inventory_data_table';
+import type {
+  AssetInventoryDataTableResult,
+  AssetsBaseURLQuery,
+} from '../../hooks/use_asset_inventory_data_table';
 import {
   ASSET_GROUPING_OPTIONS,
   ASSET_FIELDS,
@@ -24,7 +34,6 @@ import {
 } from '../../constants';
 
 // TODO Copy-pasted from '@kbn/cloud-security-posture-plugin/public/components/use_cloud_security_grouping';
-import { useCloudSecurityGrouping } from './use_cloud_security_grouping';
 import {
   type AssetsGroupingAggregation,
   type AssetsRootGroupingAggregation,
@@ -34,6 +43,8 @@ import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './t
 
 // TODO Remove?
 export const ASSETS_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
+
+const MAX_GROUPING_LEVELS = 3;
 
 // TODO Move to other file?
 export const defaultGroupingOptions: GroupOption[] = [
@@ -173,56 +184,60 @@ export const isAssetsRootGroupingAggregation = (
  * Utility hook to get the latest assets grouping data for the assets page
  */
 export const useAssetInventoryGrouping = ({
+  state,
   groupPanelRenderer,
   getGroupStats,
-  groupingLevel = 0,
+  // groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
+  state: AssetInventoryDataTableResult;
   groupPanelRenderer?: GroupPanelRenderer<AssetsGroupingAggregation>;
   getGroupStats?: GetGroupStats<AssetsGroupingAggregation>;
-  groupingLevel?: number;
+  // groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
 }) => {
+  const { query, setUrlQuery, pageSize, pageIndex, onChangePage } = state;
   const { dataView } = useDataViewContext();
 
-  const {
-    activePageIndex,
-    grouping,
-    pageSize,
-    query,
-    onChangeGroupsItemsPerPage,
-    onChangeGroupsPage,
-    urlQuery,
-    setUrlQuery,
-    uniqueValue,
-    isNoneSelected,
-    onResetFilters,
-    error,
-    filters,
-    setActivePageIndex,
-  } = useCloudSecurityGrouping({
-    dataView,
-    groupingTitle,
+  const grouping = useGrouping({
+    componentProps: {
+      unit: assetsUnit,
+      groupPanelRenderer,
+      getGroupStats,
+      groupsUnit: assetGroupsUnit,
+    },
     defaultGroupingOptions,
-    getDefaultQuery,
-    unit: assetsUnit,
-    groupPanelRenderer,
-    getGroupStats,
-    groupingLocalStorageKey: LOCAL_STORAGE_ASSETS_GROUPING_KEY,
-    groupingLevel,
-    groupsUnit: assetGroupsUnit,
+    fields: dataView.fields,
+    groupingId: LOCAL_STORAGE_ASSETS_GROUPING_KEY,
+    maxGroupingLevels: MAX_GROUPING_LEVELS,
+    title: groupingTitle,
+    onGroupChange: ({ groupByFields }) => {
+      onChangePage(0);
+      setUrlQuery({
+        groupBy: groupByFields,
+      });
+      // TODO Keep line below?
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GROUP_BY_CLICK);
+    },
   });
+
+  // const selectedGroup = groupingLevel
+  //   ? grouping.selectedGroups[groupingLevel]
+  //   : grouping.selectedGroups[0];
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
+  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
+  // This is recommended by the grouping component to cover an edge case where `selectedGroup` has multiple values
+  const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
   const groupingQuery = getGroupingQuery({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    pageNumber: activePageIndex * pageSize,
+    pageNumber: pageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
@@ -260,19 +275,19 @@ export const useAssetInventoryGrouping = ({
     groupData,
     grouping,
     isFetching,
-    activePageIndex,
-    setActivePageIndex,
-    pageSize,
+    // activePageIndex,
+    // setActivePageIndex,
+    // pageSize,
     selectedGroup,
-    onChangeGroupsItemsPerPage,
-    onChangeGroupsPage,
-    urlQuery,
-    setUrlQuery,
+    // onChangeGroupsItemsPerPage,
+    // onChangeGroupsPage,
+    // urlQuery,
+    // setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,
-    onResetFilters,
-    filters,
-    error,
+    // onResetFilters,
+    // filters,
+    // error,
     isEmptyResults,
   };
 };

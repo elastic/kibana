@@ -13,6 +13,7 @@ import { groupPanelRenderer, groupStatsRenderer } from './grouping/asset_invento
 import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
 
 interface SubGroupingProps {
+  state: AssetInventoryDataTableResult;
   renderChildComponent: (groupFilters: Filter[]) => JSX.Element;
   groupingLevel: number;
   parentGroupFilters?: string;
@@ -21,6 +22,7 @@ interface SubGroupingProps {
 }
 
 const SubGrouping = ({
+  state,
   renderChildComponent,
   groupingLevel,
   parentGroupFilters,
@@ -31,16 +33,17 @@ const SubGrouping = ({
     groupData,
     grouping,
     isFetching,
-    activePageIndex,
-    pageSize,
-    onChangeGroupsItemsPerPage,
-    onChangeGroupsPage,
+    // activePageIndex,
+    // pageSize,
+    // onChangeGroupsItemsPerPage,
+    // onChangeGroupsPage,
     // isGroupLoading,
-    setActivePageIndex,
+    // setActivePageIndex,
   } = useAssetInventoryGrouping({
+    state,
     groupPanelRenderer,
     getGroupStats: groupStatsRenderer,
-    groupingLevel,
+    // groupingLevel,
     selectedGroup,
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
   });
@@ -50,7 +53,7 @@ const SubGrouping = ({
    * It is needed because the grouping number of pages can change according to the selected group
    */
   useEffect(() => {
-    setActivePageIndex(0);
+    state.onChangePage(0); // setActivePageIndex(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
@@ -59,11 +62,15 @@ const SubGrouping = ({
       data={groupData}
       grouping={grouping}
       renderChildComponent={renderChildComponent}
-      onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
-      onChangeGroupsPage={onChangeGroupsPage}
-      activePageIndex={activePageIndex}
+      // onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
+      onChangeGroupsItemsPerPage={state.onChangeItemsPerPage}
+      // onChangeGroupsPage={onChangeGroupsPage}
+      onChangeGroupsPage={state.onChangePage}
+      // activePageIndex={activePageIndex}
+      activePageIndex={state.pageIndex}
       isFetching={isFetching}
-      pageSize={pageSize}
+      // pageSize={pageSize}
+      pageSize={state.pageSize}
       selectedGroup={selectedGroup}
       // TODO isGroupLoading is not used nor expected by AssetInventoryGrouping
       // isGroupLoading={isGroupLoading}
@@ -133,6 +140,7 @@ const renderChildComponent = ({
   }
   return (
     <SubGrouping
+      state={state}
       renderChildComponent={getChildComponent}
       selectedGroup={selectedGroupOptions[level]}
       groupingLevel={level}
@@ -147,13 +155,15 @@ export interface AssetInventoryTableSectionProps {
 }
 
 export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
-  // const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
-  //   useAssetInventoryGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
-
-  const { grouping, error, isEmptyResults } = useAssetInventoryGrouping({
+  const { grouping } = useAssetInventoryGrouping({
+    state,
     groupPanelRenderer,
     getGroupStats: groupStatsRenderer,
   });
+
+  // if (isEmptyResults) {
+
+  // }
 
   return (
     <div>
