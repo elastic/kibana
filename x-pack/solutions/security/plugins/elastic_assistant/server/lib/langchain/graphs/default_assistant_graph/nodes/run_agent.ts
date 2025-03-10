@@ -9,14 +9,13 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
+import { AgentAction, AgentFinish } from 'langchain/agents';
+import { v4 as uuidv4 } from 'uuid';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
-import { AgentAction, AgentFinish } from 'langchain/agents';
-import { v4 as uuidv4 } from 'uuid';
-
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
@@ -54,23 +53,24 @@ export async function runAgent({
   const userPrompt =
     state.llmType === 'gemini'
       ? await getPrompt({
-        actionsClient,
-        connectorId: state.connectorId,
-        promptId: promptDictionary.userPrompt,
-        promptGroupId: promptGroupId.aiAssistant,
-        provider: 'gemini',
-        savedObjectsClient,
-      })
+          actionsClient,
+          connectorId: state.connectorId,
+          promptId: promptDictionary.userPrompt,
+          promptGroupId: promptGroupId.aiAssistant,
+          provider: 'gemini',
+          savedObjectsClient,
+        })
       : '';
   const result = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
       {
         ...state,
-        knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${knowledgeHistory?.length
-          ? JSON.stringify(knowledgeHistory.map((e) => e.text))
-          : NO_KNOWLEDGE_HISTORY
-          }`,
+        knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
+          knowledgeHistory?.length
+            ? JSON.stringify(knowledgeHistory.map((e) => e.text))
+            : NO_KNOWLEDGE_HISTORY
+        }`,
         // prepend any user prompt (gemini)
         input: `${userPrompt}${state.input}`,
         chat_history: sanitizeChatHistory(state.chatHistory), // TODO: Message de-dupe with ...state spread
@@ -81,7 +81,7 @@ export async function runAgent({
   const newMessages: BaseMessage[] = [];
 
   if (result?.tool != null) {
-    const agentAction = result as AgentAction
+    const agentAction = result as AgentAction;
     const toolMessage = new AIMessage({
       content: agentAction.log,
       tool_calls: [
@@ -89,13 +89,13 @@ export async function runAgent({
           name: agentAction.tool,
           args: agentAction.toolInput as Record<string, any>,
           id: uuidv4(),
-        }
-      ]
+        },
+      ],
     });
 
-    newMessages.push(toolMessage)
+    newMessages.push(toolMessage);
   } else if (result?.returnValues != null) {
-    const agentFinish = result as AgentFinish
+    const agentFinish = result as AgentFinish;
     const aiMessage = new AIMessage({
       content: agentFinish.returnValues.output,
     });
