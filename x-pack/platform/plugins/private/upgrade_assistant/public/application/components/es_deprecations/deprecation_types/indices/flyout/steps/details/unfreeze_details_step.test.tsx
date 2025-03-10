@@ -44,6 +44,7 @@ describe('UnfreezeDetailsFlyoutStep', () => {
       aliases: [],
       isFrozen: true,
       isReadonly: true,
+      isInDataStream: false,
       reindexName: 'some_index-reindexed-for-9',
     },
     hasRequiredPrivileges: true,
@@ -56,7 +57,7 @@ describe('UnfreezeDetailsFlyoutStep', () => {
     failedBefore: false,
   };
 
-  it('renders', () => {
+  it('renders all options for non data stream backing indices', () => {
     const wrapper = shallow(
       <UnfreezeDetailsFlyoutStep
         closeFlyout={jest.fn()}
@@ -108,7 +109,7 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                     >
                       <Memo(MemoizedFormattedMessage)
                         defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option3.description"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.alternativeOption.description"
                         values={
                           Object {
                             "indexManagementLinkHtml": <EuiLink
@@ -123,7 +124,7 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                         }
                       />
                     </EuiText>,
-                    "title": "Option 3: Delete index",
+                    "title": "Alternatively: Manually delete index",
                   },
                 ]
               }
@@ -172,6 +173,127 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                     />
                   </EuiButton>
                 </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    data-test-subj="startIndexReadonlyButton"
+                    disabled={false}
+                    fill={true}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      data-test-subj="startIndexReadonlyButton"
+                      defaultMessage="Unfreeze"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreezeIndexButton"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </Fragment>
+    `);
+  });
+
+  it('does NOT render Reindex option for data stream backing indices', () => {
+    const backingIndexReindexState = {
+      ...defaultReindexState,
+      meta: {
+        ...defaultReindexState.meta,
+        isInDataStream: true,
+      },
+    };
+
+    const wrapper = shallow(
+      <UnfreezeDetailsFlyoutStep
+        closeFlyout={jest.fn()}
+        startReindex={jest.fn()}
+        unfreeze={jest.fn()}
+        reindexState={backingIndexReindexState}
+        updateIndexState={defaultUpdateIndexState}
+      />
+    );
+
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              <MemoizedFormattedMessage
+                defaultMessage="This index is frozen. Frozen indices will no longer be supported after the upgrade. Choose one of the following options:"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.frozenIndexText"
+              />
+            </p>
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <EuiText
+                      size="m"
+                    >
+                      <Memo(MemoizedFormattedMessage)
+                        defaultMessage="Unfreeze this index and make it read-only. This ensures that the index will remain compatible with the next major version."
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option1.description"
+                      />
+                    </EuiText>,
+                    "title": "Option 1: Unfreeze index",
+                  },
+                  Object {
+                    "description": <EuiText
+                      size="m"
+                    >
+                      <Memo(MemoizedFormattedMessage)
+                        defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.alternativeOption.description"
+                        values={
+                          Object {
+                            "indexManagementLinkHtml": <EuiLink
+                              href="undefined"
+                            >
+                              <Memo(MemoizedFormattedMessage)
+                                defaultMessage="Index Management"
+                                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
+                              />
+                            </EuiLink>,
+                          }
+                        }
+                      />
+                    </EuiText>,
+                    "title": "Alternatively: Manually delete index",
+                  },
+                ]
+              }
+              rowGutterSize="m"
+            />
+          </EuiText>
+          <EuiSpacer />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                flush="left"
+                iconType="cross"
+                onClick={[MockFunction]}
+              >
+                <MemoizedFormattedMessage
+                  defaultMessage="Close"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiFlexGroup
+                gutterSize="s"
+              >
                 <EuiFlexItem
                   grow={false}
                 >

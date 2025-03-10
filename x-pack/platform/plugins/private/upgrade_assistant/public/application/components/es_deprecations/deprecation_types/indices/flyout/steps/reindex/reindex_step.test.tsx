@@ -61,6 +61,7 @@ describe('ReindexStep', () => {
         aliases: [],
         isReadonly: false,
         isFrozen: false,
+        isInDataStream: false,
       },
     } as ReindexState,
   };

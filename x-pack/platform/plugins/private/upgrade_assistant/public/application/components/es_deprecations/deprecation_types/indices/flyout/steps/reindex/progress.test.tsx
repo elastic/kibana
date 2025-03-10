@@ -30,6 +30,7 @@ describe('ReindexProgress', () => {
               aliases: [],
               isFrozen: false,
               isReadonly: false,
+              isInDataStream: false,
             },
           } as ReindexState
         }
@@ -179,6 +180,7 @@ describe('ReindexProgress', () => {
               aliases: [],
               isFrozen: true,
               isReadonly: false,
+              isInDataStream: false,
             },
           } as ReindexState
         }
