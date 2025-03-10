@@ -7,7 +7,7 @@
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
