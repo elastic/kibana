@@ -1530,6 +1530,9 @@ describe('Task Runner', () => {
         { tags: ['1', 'test'] }
       );
 
+      alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
       testAlertingEventLogCalls({
         activeAlerts: 1,
         recoveredAlerts: 1,
