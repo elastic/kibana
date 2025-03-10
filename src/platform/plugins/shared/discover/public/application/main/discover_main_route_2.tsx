@@ -165,7 +165,7 @@ export const DiscoverMainRoute2 = ({
     return <DiscoverError error={mainInitializationState.error} />;
   }
 
-  if (!mainInitializationState.value.hasESData) {
+  if (!mainInitializationState.value.hasESData && !mainInitializationState.value.hasUserDataView) {
     return (
       <NoDataPage
         {...mainInitializationState.value}
