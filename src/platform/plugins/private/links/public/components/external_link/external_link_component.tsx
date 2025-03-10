@@ -19,6 +19,7 @@ import {
   EXTERNAL_LINK_TYPE,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_WRAP,
   LinksTextOverflowType,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
@@ -50,9 +51,10 @@ export const ExternalLinkComponent = ({
 
   return (
     <EuiListGroupItem
+      // css={{ minWidth: '50px' }}
       size="s"
       external
-      wrapText={textOverflow === 'textOverflowWrap'}
+      wrapText={textOverflow === LINK_TEXT_OVERFLOW_WRAP}
       color="text"
       isDisabled={Boolean(link.error)}
       className={'linksPanelLink'}

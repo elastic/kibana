@@ -24,3 +24,4 @@ export const LINKS_VERTICAL_LAYOUT = 'vertical';
  */
 export const LINK_TEXT_OVERFLOW_WRAP = 'textOverflowWrap';
 export const LINK_TEXT_OVERFLOW_ELLIPSIS = 'textOverflowEllipsis';
+export const LINK_TEST_OVERFLOW_SCROLL = 'textOverflowScroll';

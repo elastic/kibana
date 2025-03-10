@@ -103,14 +103,14 @@ describe('LinksEditor', () => {
   test('shows text overflow button group', async () => {
     renderEditor();
     expect(
-      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
+      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`)
     ).toBeInTheDocument();
-    expect(
-      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
-    ).toHaveTextContent(LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel());
     expect(screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`)).toHaveTextContent(
       LinksStrings.editor.linkEditor.getTextOverflowWrapLabel()
     );
+    expect(
+      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
+    ).toHaveTextContent(LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel());
   });
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
@@ -121,13 +121,12 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
-    
+
     expect(onSaveToLibrary).toHaveBeenCalledWith(
       orderedLinks,
       LINKS_VERTICAL_LAYOUT,
-      LINK_TEXT_OVERFLOW_ELLIPSIS
+      LINK_TEXT_OVERFLOW_WRAP
     );
-
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
@@ -142,7 +141,7 @@ describe('LinksEditor', () => {
     expect(onAddToDashboard).toHaveBeenCalledWith(
       orderedLinks,
       LINKS_VERTICAL_LAYOUT,
-      LINK_TEXT_OVERFLOW_ELLIPSIS
+      LINK_TEXT_OVERFLOW_WRAP
     );
   });
 });
