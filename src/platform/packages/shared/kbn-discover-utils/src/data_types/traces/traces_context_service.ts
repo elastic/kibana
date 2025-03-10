@@ -40,7 +40,7 @@ export const createTracesContextService = async ({
     const allIndices = [transaction, span].flatMap((index) => index.split(','));
     const uniqueIndices = Array.from(new Set(allIndices));
 
-    traces = uniqueIndices.join();
+    traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.concat(uniqueIndices).join();
     allowedDataSources = allowedDataSources.concat(createRegExpPatternFrom(uniqueIndices, 'data'));
   } else {
     traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
