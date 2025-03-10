@@ -12,6 +12,9 @@ import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_groupi
 import { groupPanelRenderer, groupStatsRenderer } from './grouping/asset_inventory_group_renderer';
 import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
 
+// TODO Move to constants?
+const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
+
 interface SubGroupingProps {
   state: AssetInventoryDataTableResult;
   renderChildComponent: (groupFilters: Filter[]) => JSX.Element;
@@ -103,7 +106,6 @@ const renderChildComponent = ({
         state={state}
         groupSelectorComponent={groupSelectorComponent}
         // nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-        // showDistributionBar={selectedGroupOptions.includes('none')}
       />
     );
   }
@@ -126,15 +128,15 @@ const renderChildComponent = ({
   } else {
     getChildComponent = (currentGroupFilters: Filter[]) => {
       return (
-        <AssetInventoryDataTable
-          state={state}
-          // nonPersistedFilters={[
-          //   ...currentGroupFilters,
-          //   ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
-          // ]}
-          // height={DEFAULT_GROUPING_TABLE_HEIGHT}
-          // showDistributionBar={selectedGroupOptions.includes('none')}
-        />
+        <div css={{ height: `${DEFAULT_GROUPING_TABLE_HEIGHT}px` }}>
+          <AssetInventoryDataTable
+            state={state}
+            // nonPersistedFilters={[
+            //   ...currentGroupFilters,
+            //   ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
+            // ]}
+          />
+        </div>
       );
     };
   }
