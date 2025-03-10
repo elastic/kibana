@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// for API tests
-export { getAggregatedCriticalPathRootNodes } from './critical_path/get_aggregated_critical_path_root_nodes';
+export * from './rule_conditions';
+export * from './rule_conditions_group';
