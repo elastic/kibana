@@ -102,11 +102,7 @@ const renderChildComponent = ({
 
   if (currentSelectedGroup === 'none') {
     return (
-      <AssetInventoryDataTable
-        state={state}
-        groupSelectorComponent={groupSelectorComponent}
-        // nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-      />
+      <AssetInventoryDataTable state={state} groupSelectorComponent={groupSelectorComponent} />
     );
   }
 
@@ -127,15 +123,27 @@ const renderChildComponent = ({
     };
   } else {
     getChildComponent = (currentGroupFilters: Filter[]) => {
+      const combinedFilters = [
+        ...currentGroupFilters,
+        ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
+      ]
+        .map(({ query }) => (query.match_phrase ? query : null))
+        .filter(Boolean);
+
+      const newState = {
+        ...state,
+        query: {
+          ...state.query,
+          bool: {
+            ...state.query.bool,
+            filter: [...state.query.bool.filter, ...combinedFilters],
+          },
+        },
+      };
+
       return (
         <div css={{ height: `${DEFAULT_GROUPING_TABLE_HEIGHT}px` }}>
-          <AssetInventoryDataTable
-            state={state}
-            // nonPersistedFilters={[
-            //   ...currentGroupFilters,
-            //   ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
-            // ]}
-          />
+          <AssetInventoryDataTable state={newState} />
         </div>
       );
     };
