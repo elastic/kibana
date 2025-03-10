@@ -58,12 +58,13 @@ export class WorkChatAppPlugin
 
   public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
 
-    const { wciSalesforce } = pluginsDependencies;
+    const { wciSalesforce, wciCustomIndex } = pluginsDependencies;
 
     const integrationsService = new IntegrationsService({
       logger: this.logger.get('services.integrationsService'),
       integrationPlugins: [
-        wciSalesforce.integration
+        wciSalesforce.integration,
+        wciCustomIndex.integration
       ]
     });
 

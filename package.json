@@ -1019,6 +1019,7 @@
     "@kbn/visualizations-plugin": "link:src/platform/plugins/shared/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
     "@kbn/wci-common": "link:x-pack/solutions/search/packages/workchat/wci-common",
+    "@kbn/wci-custom-index": "link:x-pack/solutions/search/plugins/workchat/wci_custom_index",
     "@kbn/wci-salesforce": "link:x-pack/solutions/search/plugins/workchat/wci_salesforce",
     "@kbn/workchat-app": "link:x-pack/solutions/search/plugins/workchat/workchat_app",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",

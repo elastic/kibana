@@ -20,6 +20,7 @@ export interface WorkChatAppPluginSetupDependencies {}
 export interface WorkChatAppPluginStartDependencies {
   inference: InferenceServerStart;
   wciSalesforce: WCISalesforcePluginStart;
+  wciCustomIndex: WCISalesforcePluginStart;
 }
 
 export type IntegrationToolInputSchema = Tool['inputSchema'];

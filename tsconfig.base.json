@@ -2102,6 +2102,8 @@
       "@kbn/watcher-plugin/*": ["x-pack/platform/plugins/private/watcher/*"],
       "@kbn/wci-common": ["x-pack/solutions/search/packages/workchat/wci-common"],
       "@kbn/wci-common/*": ["x-pack/solutions/search/packages/workchat/wci-common/*"],
+      "@kbn/wci-custom-index": ["x-pack/solutions/search/plugins/workchat/wci_custom_index"],
+      "@kbn/wci-custom-index/*": ["x-pack/solutions/search/plugins/workchat/wci_custom_index/*"],
       "@kbn/wci-salesforce": ["x-pack/solutions/search/plugins/workchat/wci_salesforce"],
       "@kbn/wci-salesforce/*": ["x-pack/solutions/search/plugins/workchat/wci_salesforce/*"],
       "@kbn/web-worker-stub": ["packages/kbn-web-worker-stub"],

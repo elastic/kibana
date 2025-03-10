@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/wci-custom-index",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "description": "WorkChat Custom Index Integration plugin",
+  "plugin": {
+    "id": "wciCustomIndex",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "wciCustomIndex"],
+    "requiredPlugins": ["inference"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+} 

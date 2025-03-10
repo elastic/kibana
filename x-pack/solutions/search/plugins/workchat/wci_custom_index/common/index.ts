@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
- 
-export enum IntegrationTypes {
-    Salesforce = 'salesforce',
-    CustomIndex = 'custom_index',
-}
+
+export const PLUGIN_ID = 'wciCustomIndex';
+export const PLUGIN_NAME = 'wciCustomIndex'; 

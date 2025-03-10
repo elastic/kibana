@@ -8086,6 +8086,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/wci-custom-index@link:x-pack/solutions/search/plugins/workchat/wci_custom_index":
+  version "0.0.0"
+  uid ""
+
 "@kbn/wci-salesforce@link:x-pack/solutions/search/plugins/workchat/wci_salesforce":
   version "0.0.0"
   uid ""

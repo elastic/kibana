@@ -22,7 +22,33 @@ const IntegrationsSO: IntegrationModel[] = [
         type: 'salesforce' as IntegrationTypes,
         configuration: {}
     },
-
+    {
+        id: '2',
+        configuration: {
+            url: "http://127.0.0.1:3001/sse",
+        },
+        isInternal: false
+    },
+    {
+        id: '3',
+        isInternal: false,
+        type: 'custom_index' as IntegrationTypes,
+        configuration: {
+            index: "support-hub-questions",
+            description: "Knowledge base articles",
+            fields: {
+                filterFields: [
+                    { field: "status", type: "keyword", aggs: true, description: "Status of the article" },
+                    { field: "tags", type: "keyword", aggs: true, description: "Tags of the article" },
+                    { field: "created", type: "date", aggs: false, description: "Date the article was created" }
+                ],
+                contextFields: [
+                    { field: "description", type: "keyword", description: "Description of the article" }
+                ]
+            },
+            queryTemplate: '{"query":{"semantic":{"query":"{query}","field":"content"}}}'
+        }
+    }
 ]
 
 function getIntegration(integrationModel: IntegrationModel, integrationPlugins: IntegrationPlugin[]): Integration {
