@@ -80,8 +80,12 @@ const createMatchesIndicesValidator = ({
     }
 
     // A rollup index pattern needs to match one and only one rollup index.
-    const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter((matchedIndex) =>
-      rollupIndices.includes(matchedIndex.name)
+    const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter(
+      (matchedIndex) =>
+        rollupIndices.includes(matchedIndex.name) ||
+        // alias case
+        (matchedIndex.item.indices?.length === 1 &&
+          rollupIndices.includes(matchedIndex.item.indices[0]))
     );
 
     if (!rollupIndexMatches.length) {
