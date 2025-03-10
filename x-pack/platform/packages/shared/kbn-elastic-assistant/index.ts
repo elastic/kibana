@@ -160,4 +160,4 @@ export {
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
 
-export { AlertSummary, SuggestedPrompts } from './impl/alerts';
+export { AlertSummary, SuggestedPrompts, AttackDiscoveryWidget } from './impl/alerts';

@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertSummary, SuggestedPrompts } from '@kbn/elastic-assistant';
+import { AlertSummary, SuggestedPrompts, AttackDiscoveryWidget } from '@kbn/elastic-assistant';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { getRawData } from '../../assistant/helpers';
 import { useAIForSOCDetailsContext } from './context';
@@ -61,7 +61,9 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
           </EuiFlexItem>
           <EuiFlexItem>{'Recommended action'}</EuiFlexItem>
           <EuiFlexItem>{'Highlighted fields'}</EuiFlexItem>
-          <EuiFlexItem>{'Attack Discovery'}</EuiFlexItem>
+          <EuiFlexItem>
+            <AttackDiscoveryWidget id={doc.id} />
+          </EuiFlexItem>
           <EuiFlexItem>{'AI Assistant'}</EuiFlexItem>
           <EuiFlexItem>
             <SuggestedPrompts

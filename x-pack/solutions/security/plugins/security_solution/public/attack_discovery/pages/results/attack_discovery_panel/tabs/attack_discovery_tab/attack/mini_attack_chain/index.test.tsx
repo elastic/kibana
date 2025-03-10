@@ -8,7 +8,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import type { TacticMetadata } from '../../../../../../../helpers';
 import { getTacticMetadata } from '../../../../../../../helpers';
 import { mockAttackDiscovery } from '../../../../../../mock/mock_attack_discovery';
 import { MiniAttackChain } from '.';
@@ -16,7 +15,7 @@ import { MiniAttackChain } from '.';
 describe('MiniAttackChain', () => {
   it('displays the expected number of circles', () => {
     // get detected tactics from the attack discovery:
-    const tacticMetadata: TacticMetadata[] = getTacticMetadata(mockAttackDiscovery);
+    const tacticMetadata = getTacticMetadata(mockAttackDiscovery);
     expect(tacticMetadata.length).toBeGreaterThan(0); // test pre-condition
 
     render(<MiniAttackChain attackDiscovery={mockAttackDiscovery} />);
