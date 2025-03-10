@@ -30,11 +30,11 @@ export const PersistNoteRouteRequestBody = z.object({
    */
   note: BareNote,
   /**
-   * The `savedObjectId` of the Note
+   * The `savedObjectId` of the note
    */
   noteId: z.string().nullable().optional(),
   /**
-   * The version of the Note
+   * The version of the note
    */
   version: z.string().nullable().optional(),
 });

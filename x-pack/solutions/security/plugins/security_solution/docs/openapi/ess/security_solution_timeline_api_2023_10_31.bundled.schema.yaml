@@ -111,7 +111,7 @@ paths:
         - Security Timeline API
         - access:securitySolution
     patch:
-      description: Add a Note to a Timeline or update an existing Note.
+      description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -123,12 +123,12 @@ paths:
                   $ref: '#/components/schemas/BareNote'
                   description: The note to add or update.
                 noteId:
-                  description: The `savedObjectId` of the Note
+                  description: The `savedObjectId` of the note
                   example: 709f99c6-89b6-4953-9160-35945c8e174e
                   nullable: true
                   type: string
                 version:
-                  description: The version of the Note
+                  description: The version of the note
                   example: WzQ2LDFd
                   nullable: true
                   type: string
@@ -143,7 +143,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseNote'
           description: Indicates the note was successfully created.
-      summary: Add or update a Note
+      summary: Add or update a note
       tags:
         - Security Timeline API
         - access:securitySolution
@@ -158,18 +158,18 @@ paths:
               type: object
               properties:
                 eventId:
-                  description: The `_id` of the associated event for this Pinned Event.
+                  description: The `_id` of the associated event for this pinned event.
                   example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
                   type: string
                 pinnedEventId:
-                  description: The `savedObjectId` of the Pinned Event you want to unpin.
+                  description: The `savedObjectId` of the pinned event you want to unpin.
                   example: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
                   nullable: true
                   type: string
                 timelineId:
                   description: >-
                     The `savedObjectId` of the timeline that you want this
-                    Pinned Event unpinned from.
+                    pinned event unpinned from.
                   example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   type: string
               required:
@@ -922,18 +922,18 @@ components:
         - type: object
           properties:
             eventId:
-              description: The `_id` of the associated event for this Note.
+              description: The `_id` of the associated event for this note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
               nullable: true
               type: string
             note:
-              description: The text of the Note
+              description: The text of the note
               example: This is an example text
               nullable: true
               type: string
             timelineId:
               description: >-
-                The `savedObjectId` of the Timeline that this Note is associated
+                The `savedObjectId` of the Timeline that this note is associated
                 with
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
@@ -945,12 +945,12 @@ components:
         - type: object
           properties:
             eventId:
-              description: The `_id` of the associated event for this Pinned Event.
+              description: The `_id` of the associated event for this pinned event.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
               type: string
             timelineId:
               description: >-
-                The `savedObjectId` of the timeline that this Pinned Event is
+                The `savedObjectId` of the timeline that this pinned event is
                 associated with
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
@@ -1258,11 +1258,11 @@ components:
         - type: object
           properties:
             noteId:
-              description: The `savedObjectId` of the Note
+              description: The `savedObjectId` of the note
               example: 709f99c6-89b6-4953-9160-35945c8e174e
               type: string
             version:
-              description: The version of the Note
+              description: The version of the note
               example: WzQ2LDFd
               type: string
           required:
@@ -1272,22 +1272,22 @@ components:
       type: object
       properties:
         created:
-          description: The time the Note was created, using a 13-digit Epoch timestamp.
+          description: The time the note was created, using a 13-digit Epoch timestamp.
           example: 1587468588922
           nullable: true
           type: number
         createdBy:
-          description: The user who created the Note.
+          description: The user who created the note.
           example: casetester
           nullable: true
           type: string
         updated:
-          description: The last time the Note was updated, using a 13-digit Epoch timestamp
+          description: The last time the note was updated, using a 13-digit Epoch timestamp
           example: 1741344876825
           nullable: true
           type: number
         updatedBy:
-          description: The user who last updated the Note
+          description: The user who last updated the note
           example: casetester
           nullable: true
           type: string
@@ -1309,11 +1309,11 @@ components:
         - type: object
           properties:
             pinnedEventId:
-              description: The `savedObjectId` of this Pinned Event
+              description: The `savedObjectId` of this pinned event
               example: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
               type: string
             version:
-              description: The version of this Pinned Event
+              description: The version of this pinned event
               example: WzQ2LDFe
               type: string
           required:
@@ -1324,25 +1324,25 @@ components:
       properties:
         created:
           description: >-
-            The time the Pinned Event was created, using a 13-digit Epoch
+            The time the pinned event was created, using a 13-digit Epoch
             timestamp.
           example: 1587468588922
           nullable: true
           type: number
         createdBy:
-          description: The user who created the Pinned Event.
+          description: The user who created the pinned event.
           example: casetester
           nullable: true
           type: string
         updated:
           description: >-
-            The last time the Pinned Event was updated, using a 13-digit Epoch
+            The last time the pinned event was updated, using a 13-digit Epoch
             timestamp
           example: 1741344876825
           nullable: true
           type: number
         updatedBy:
-          description: The user who last updated the Pinned Event
+          description: The user who last updated the pinned event
           example: casetester
           nullable: true
           type: string
@@ -1706,14 +1706,14 @@ components:
         - type: object
           properties:
             eventIdToNoteIds:
-              description: A list of all the Notes that are associated to this Timeline.
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Note'
               nullable: true
               type: array
             noteIds:
               description: >-
-                A list of all the ids of Notes that are associated to this
+                A list of all the ids of notes that are associated to this
                 Timeline.
               example:
                 - 709f99c6-89b6-4953-9160-35945c8e174e
@@ -1722,14 +1722,14 @@ components:
               nullable: true
               type: array
             notes:
-              description: A list of all the Notes that are associated to this Timeline.
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Note'
               nullable: true
               type: array
             pinnedEventIds:
               description: >-
-                A list of all the ids of Pinned Events that are associated to
+                A list of all the ids of pinned events that are associated to
                 this Timeline.
               example:
                 - 983f99c6-89b6-4953-9160-35945c8a194f
@@ -1739,7 +1739,7 @@ components:
               type: array
             pinnedEventsSaveObject:
               description: >-
-                A list of all the Pinned Events that are associated to this
+                A list of all the pinned events that are associated to this
                 Timeline.
               items:
                 $ref: '#/components/schemas/PinnedEvent'

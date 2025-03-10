@@ -233,19 +233,19 @@ components:
             eventIdToNoteIds:
               type: array
               nullable: true
-              description: A list of all the Notes that are associated to this Timeline.
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Note'
             notes:
               type: array
               nullable: true
-              description: A list of all the Notes that are associated to this Timeline.
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Note'
             noteIds:
               type: array
               nullable: true
-              description: A list of all the ids of Notes that are associated to this Timeline.
+              description: A list of all the ids of notes that are associated to this Timeline.
               items:
                 type: string
               example:
@@ -253,7 +253,7 @@ components:
             pinnedEventIds:
               type: array
               nullable: true
-              description: A list of all the ids of Pinned Events that are associated to this Timeline.
+              description: A list of all the ids of pinned events that are associated to this Timeline.
               items:
                 type: string
               example:
@@ -261,7 +261,7 @@ components:
             pinnedEventsSaveObject:
               type: array
               nullable: true
-              description: A list of all the Pinned Events that are associated to this Timeline.
+              description: A list of all the pinned events that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/PinnedEvent'
     ResolvedTimeline:
@@ -429,22 +429,22 @@ components:
         created:
           type: number
           nullable: true
-          description: The time the Note was created, using a 13-digit Epoch timestamp.
+          description: The time the note was created, using a 13-digit Epoch timestamp.
           example: 1587468588922
         createdBy:
           type: string
           nullable: true
-          description: The user who created the Note.
+          description: The user who created the note.
           example: casetester
         updated:
           type: number
           nullable: true
-          description: The last time the Note was updated, using a 13-digit Epoch timestamp
+          description: The last time the note was updated, using a 13-digit Epoch timestamp
           example: 1741344876825
         updatedBy:
           type: string
           nullable: true
-          description: The user who last updated the Note
+          description: The user who last updated the note
           example: casetester
     BareNoteWithoutExternalRefs:
       allOf:
@@ -454,16 +454,16 @@ components:
             eventId:
               type: string
               nullable: true
-              description: The `_id` of the associated event for this Note.
+              description: The `_id` of the associated event for this note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             note:
               type: string
               nullable: true
-              description: The text of the Note
+              description: The text of the note
               example: This is an example text
             timelineId:
               type: string
-              description: The `savedObjectId` of the timeline that this Note is associated with
+              description: The `savedObjectId` of the timeline that this note is associated with
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     BareNote:
       allOf:
@@ -474,16 +474,16 @@ components:
             eventId:
               type: string
               nullable: true
-              description: The `_id` of the associated event for this Note.
+              description: The `_id` of the associated event for this note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             note:
               type: string
               nullable: true
-              description: The text of the Note
+              description: The text of the note
               example: This is an example text
             timelineId:
               type: string
-              description: The `savedObjectId` of the Timeline that this Note is associated with
+              description: The `savedObjectId` of the Timeline that this note is associated with
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     Note:
       allOf:
@@ -493,11 +493,11 @@ components:
           properties:
             noteId:
               type: string
-              description: The `savedObjectId` of the Note
+              description: The `savedObjectId` of the note
               example: 709f99c6-89b6-4953-9160-35945c8e174e
             version:
               type: string
-              description: The version of the Note
+              description: The version of the note
               example: WzQ2LDFd
     RowRendererId:
       type: string
@@ -638,22 +638,22 @@ components:
         created:
           type: number
           nullable: true
-          description: The time the Pinned Event was created, using a 13-digit Epoch timestamp.
+          description: The time the pinned event was created, using a 13-digit Epoch timestamp.
           example: 1587468588922
         createdBy:
           type: string
           nullable: true
-          description: The user who created the Pinned Event.
+          description: The user who created the pinned event.
           example: casetester
         updated:
           type: number
           nullable: true
-          description: The last time the Pinned Event was updated, using a 13-digit Epoch timestamp
+          description: The last time the pinned event was updated, using a 13-digit Epoch timestamp
           example: 1741344876825
         updatedBy:
           type: string
           nullable: true
-          description: The user who last updated the Pinned Event
+          description: The user who last updated the pinned event
           example: casetester
     BarePinnedEvent:
       allOf:
@@ -663,11 +663,11 @@ components:
           properties:
             eventId:
               type: string
-              description: The `_id` of the associated event for this Pinned Event.
+              description: The `_id` of the associated event for this pinned event.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             timelineId:
               type: string
-              description: The `savedObjectId` of the timeline that this Pinned Event is associated with
+              description: The `savedObjectId` of the timeline that this pinned event is associated with
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     PinnedEvent:
       allOf:
@@ -677,11 +677,11 @@ components:
           properties:
             pinnedEventId:
               type: string
-              description: The `savedObjectId` of this Pinned Event
+              description: The `savedObjectId` of this pinned event
               example: '10r1929b-0af7-42bd-85a8-56e234f98h2f3'
             version:
               type: string
-              description: The version of this Pinned Event
+              description: The version of this pinned event
               example: WzQ2LDFe
     Sort:
       oneOf:

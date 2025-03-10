@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Pinned Event API
+  title: Elastic Security - Timeline - pinned event API
   version: '2023-10-31'
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/_pin_an_event_to_an_existing_timeline.html
@@ -26,16 +26,16 @@ paths:
               properties:
                 eventId:
                   type: string
-                  description: The `_id` of the associated event for this Pinned Event.
+                  description: The `_id` of the associated event for this pinned event.
                   example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
                 timelineId:
                   type: string
-                  description: The `savedObjectId` of the timeline that you want this Pinned Event unpinned from.
+                  description: The `savedObjectId` of the timeline that you want this pinned event unpinned from.
                   example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
                 pinnedEventId:
                   type: string
                   nullable: true
-                  description: The `savedObjectId` of the Pinned Event you want to unpin.
+                  description: The `savedObjectId` of the pinned event you want to unpin.
                   example: '10r1929b-0af7-42bd-85a8-56e234f98h2f3'
       responses:
         '200':

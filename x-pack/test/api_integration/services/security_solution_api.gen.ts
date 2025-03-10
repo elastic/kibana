@@ -1289,7 +1289,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Add a Note to a Timeline or update an existing Note.
+     * Add a note to a Timeline or update an existing note.
      */
     persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
       return supertest

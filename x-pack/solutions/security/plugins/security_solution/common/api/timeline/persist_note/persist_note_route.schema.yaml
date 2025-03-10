@@ -11,8 +11,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PersistNoteRoute
-      summary: Add or update a Note
-      description: Add a Note to a Timeline or update an existing Note.
+      summary: Add or update a note
+      description: Add a note to a Timeline or update an existing note.
       tags:
         - access:securitySolution
       requestBody:
@@ -30,12 +30,12 @@ paths:
                 noteId:
                   type: string
                   nullable: true
-                  description: The `savedObjectId` of the Note
+                  description: The `savedObjectId` of the note
                   example: 709f99c6-89b6-4953-9160-35945c8e174e
                 version:
                   type: string
                   nullable: true
-                  description: The version of the Note
+                  description: The version of the note
                   example: WzQ2LDFd
       responses:
         '200':

@@ -1856,7 +1856,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Add a Note to a Timeline or update an existing Note.
+   * Add a note to a Timeline or update an existing note.
    */
   async persistNoteRoute(props: PersistNoteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);

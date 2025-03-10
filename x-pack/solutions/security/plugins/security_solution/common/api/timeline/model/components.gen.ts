@@ -314,19 +314,19 @@ export const SavedTimelineWithSavedObjectId = SavedTimeline.merge(
 export type NoteCreatedAndUpdatedMetadata = z.infer<typeof NoteCreatedAndUpdatedMetadata>;
 export const NoteCreatedAndUpdatedMetadata = z.object({
   /**
-   * The time the Note was created, using a 13-digit Epoch timestamp.
+   * The time the note was created, using a 13-digit Epoch timestamp.
    */
   created: z.number().nullable().optional(),
   /**
-   * The user who created the Note.
+   * The user who created the note.
    */
   createdBy: z.string().nullable().optional(),
   /**
-   * The last time the Note was updated, using a 13-digit Epoch timestamp
+   * The last time the note was updated, using a 13-digit Epoch timestamp
    */
   updated: z.number().nullable().optional(),
   /**
-   * The user who last updated the Note
+   * The user who last updated the note
    */
   updatedBy: z.string().nullable().optional(),
 });
@@ -335,15 +335,15 @@ export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The `_id` of the associated event for this Note.
+     * The `_id` of the associated event for this note.
      */
     eventId: z.string().nullable().optional(),
     /**
-     * The text of the Note
+     * The text of the note
      */
     note: z.string().nullable().optional(),
     /**
-     * The `savedObjectId` of the Timeline that this Note is associated with
+     * The `savedObjectId` of the Timeline that this note is associated with
      */
     timelineId: z.string(),
   })
@@ -353,11 +353,11 @@ export type Note = z.infer<typeof Note>;
 export const Note = BareNote.merge(
   z.object({
     /**
-     * The `savedObjectId` of the Note
+     * The `savedObjectId` of the note
      */
     noteId: z.string(),
     /**
-     * The version of the Note
+     * The version of the note
      */
     version: z.string(),
   })
@@ -368,19 +368,19 @@ export type PinnedEventCreatedAndUpdatedMetadata = z.infer<
 >;
 export const PinnedEventCreatedAndUpdatedMetadata = z.object({
   /**
-   * The time the Pinned Event was created, using a 13-digit Epoch timestamp.
+   * The time the pinned event was created, using a 13-digit Epoch timestamp.
    */
   created: z.number().nullable().optional(),
   /**
-   * The user who created the Pinned Event.
+   * The user who created the pinned event.
    */
   createdBy: z.string().nullable().optional(),
   /**
-   * The last time the Pinned Event was updated, using a 13-digit Epoch timestamp
+   * The last time the pinned event was updated, using a 13-digit Epoch timestamp
    */
   updated: z.number().nullable().optional(),
   /**
-   * The user who last updated the Pinned Event
+   * The user who last updated the pinned event
    */
   updatedBy: z.string().nullable().optional(),
 });
@@ -389,11 +389,11 @@ export type BarePinnedEvent = z.infer<typeof BarePinnedEvent>;
 export const BarePinnedEvent = PinnedEventCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The `_id` of the associated event for this Pinned Event.
+     * The `_id` of the associated event for this pinned event.
      */
     eventId: z.string(),
     /**
-     * The `savedObjectId` of the timeline that this Pinned Event is associated with
+     * The `savedObjectId` of the timeline that this pinned event is associated with
      */
     timelineId: z.string(),
   })
@@ -403,11 +403,11 @@ export type PinnedEvent = z.infer<typeof PinnedEvent>;
 export const PinnedEvent = BarePinnedEvent.merge(
   z.object({
     /**
-     * The `savedObjectId` of this Pinned Event
+     * The `savedObjectId` of this pinned event
      */
     pinnedEventId: z.string(),
     /**
-     * The version of this Pinned Event
+     * The version of this pinned event
      */
     version: z.string(),
   })
@@ -417,23 +417,23 @@ export type TimelineResponse = z.infer<typeof TimelineResponse>;
 export const TimelineResponse = SavedTimeline.merge(SavedTimelineWithSavedObjectId).merge(
   z.object({
     /**
-     * A list of all the Notes that are associated to this Timeline.
+     * A list of all the notes that are associated to this Timeline.
      */
     eventIdToNoteIds: z.array(Note).nullable().optional(),
     /**
-     * A list of all the Notes that are associated to this Timeline.
+     * A list of all the notes that are associated to this Timeline.
      */
     notes: z.array(Note).nullable().optional(),
     /**
-     * A list of all the ids of Notes that are associated to this Timeline.
+     * A list of all the ids of notes that are associated to this Timeline.
      */
     noteIds: z.array(z.string()).nullable().optional(),
     /**
-     * A list of all the ids of Pinned Events that are associated to this Timeline.
+     * A list of all the ids of pinned events that are associated to this Timeline.
      */
     pinnedEventIds: z.array(z.string()).nullable().optional(),
     /**
-     * A list of all the Pinned Events that are associated to this Timeline.
+     * A list of all the pinned events that are associated to this Timeline.
      */
     pinnedEventsSaveObject: z.array(PinnedEvent).nullable().optional(),
   })
@@ -490,15 +490,15 @@ export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternal
 export const BareNoteWithoutExternalRefs = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The `_id` of the associated event for this Note.
+     * The `_id` of the associated event for this note.
      */
     eventId: z.string().nullable().optional(),
     /**
-     * The text of the Note
+     * The text of the note
      */
     note: z.string().nullable().optional(),
     /**
-     * The `savedObjectId` of the timeline that this Note is associated with
+     * The `savedObjectId` of the timeline that this note is associated with
      */
     timelineId: z.string().optional(),
   })
