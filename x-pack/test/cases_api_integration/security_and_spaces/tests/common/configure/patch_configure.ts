@@ -87,6 +87,27 @@ export default ({ getService }: FtrProviderContext): void => {
           required: false,
           defaultValue: true,
         },
+        {
+          key: 'list_field_1',
+          label: '#5',
+          type: CustomFieldTypes.LIST,
+          required: false,
+          options: [
+            { key: '0', label: 'A' },
+            { key: '1', label: 'B' },
+          ],
+        },
+        {
+          key: 'list_field_2',
+          label: '#6',
+          type: CustomFieldTypes.LIST,
+          required: true,
+          options: [
+            { key: '0', label: 'A' },
+            { key: '1', label: 'B' },
+          ],
+          defaultValue: '1',
+        },
       ] as ConfigurationPatchRequest['customFields'];
       const configuration = await createConfiguration(supertest);
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
@@ -249,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
-        customFields: customFieldsConfiguration,
+        customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
         templates: mockTemplates as ConfigurationPatchRequest['templates'],
       });
 

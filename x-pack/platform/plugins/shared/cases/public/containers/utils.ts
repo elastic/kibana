@@ -36,6 +36,7 @@ import type {
   Cases,
   Configuration,
   Configurations,
+  CustomFieldsConfiguration,
   User,
   UserActions,
 } from '../../common/types/domain';
@@ -173,7 +174,8 @@ export const constructReportersFilter = (reporters: User[]) => {
 };
 
 export const constructCustomFieldsFilter = (
-  optionKeysByCustomFieldKey: FilterOptions['customFields']
+  optionKeysByCustomFieldKey: FilterOptions['customFields'],
+  customFieldsConfiguration: CustomFieldsConfiguration
 ) => {
   if (!optionKeysByCustomFieldKey || Object.keys(optionKeysByCustomFieldKey).length === 0) {
     return {};
@@ -185,8 +187,10 @@ export const constructCustomFieldsFilter = (
 
   for (const [customFieldKey, customField] of Object.entries(optionKeysByCustomFieldKey)) {
     const { type, options: selectedOptions } = customField;
-    if (customFieldsBuilder[type]) {
-      const { filterOptions: customFieldFilterOptionsConfig = [] } = customFieldsBuilder[type]();
+    const configuration = customFieldsConfiguration.find((config) => config.key === customFieldKey);
+    if (customFieldsBuilder[type] && configuration) {
+      const { getFilterOptions } = customFieldsBuilder[type]();
+      const customFieldFilterOptionsConfig = getFilterOptions?.(configuration) ?? [];
       const values = selectedOptions
         .map((selectedOption) => {
           const filterOptionConfig = customFieldFilterOptionsConfig.find(
