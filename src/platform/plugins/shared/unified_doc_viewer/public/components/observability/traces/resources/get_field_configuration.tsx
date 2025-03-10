@@ -25,58 +25,52 @@ import { Timestamp } from '../components/timestamp';
 import { HttpStatusCode } from '../components/http_status_code';
 import { TransactionNameLink } from '../components/transaction_name_link';
 
-export interface FieldConfiguration<T> {
-  title: string;
-  content: (value: T | undefined) => React.ReactNode;
-  value: T | undefined;
-  fieldMetadata?: PartialFieldMetadataPlain;
-}
+export type FieldConfigValue = string | number | undefined;
 
-export interface CommonFieldConfiguration {
-  [TRANSACTION_NAME_FIELD]: FieldConfiguration<string>;
-  [SERVICE_NAME_FIELD]: FieldConfiguration<string>;
-  [TRACE_ID_FIELD]: FieldConfiguration<string>;
-  [TIMESTAMP_FIELD]: FieldConfiguration<number>;
-  [HTTP_RESPONSE_STATUS_CODE_FIELD]: FieldConfiguration<number>;
+export interface FieldConfiguration {
+  title: string;
+  content: (value: FieldConfigValue) => React.ReactNode;
+  value: FieldConfigValue;
+  fieldMetadata?: PartialFieldMetadataPlain;
 }
 
 export const getCommonFieldConfiguration = (
   attributes: TraceDocumentOverview
-): CommonFieldConfiguration => {
+): Record<string, FieldConfiguration> => {
   return {
     [TRANSACTION_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.transactionName.title', {
         defaultMessage: 'Transaction name',
       }),
-      content: (value) =>
-        value && (
-          <TransactionNameLink
-            serviceName={attributes[SERVICE_NAME_FIELD]}
-            transactionName={value}
-          />
-        ),
+      content: (value) => (
+        <TransactionNameLink
+          serviceName={attributes[SERVICE_NAME_FIELD]}
+          transactionName={value as string}
+        />
+      ),
       value: attributes[TRANSACTION_NAME_FIELD],
     },
     [SERVICE_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.service.title', {
         defaultMessage: 'Service',
       }),
-      content: (value) =>
-        value && <ServiceNameLink serviceName={value} agentName={attributes[AGENT_NAME_FIELD]} />,
+      content: (value) => (
+        <ServiceNameLink serviceName={value as string} agentName={attributes[AGENT_NAME_FIELD]} />
+      ),
       value: attributes[SERVICE_NAME_FIELD],
     },
     [TRACE_ID_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.traceId.title', {
         defaultMessage: 'Trace ID',
       }),
-      content: (value) => value && <TraceIdLink traceId={value} />,
+      content: (value) => <TraceIdLink traceId={value as string} />,
       value: attributes[TRACE_ID_FIELD],
     },
     [TIMESTAMP_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
-      content: (value) => value && <Timestamp timestamp={value} />,
+      content: (value) => <Timestamp timestamp={value as number} />,
       value: attributes[TIMESTAMP_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
@@ -86,7 +80,7 @@ export const getCommonFieldConfiguration = (
           defaultMessage: 'Status code',
         }
       ),
-      content: (value) => value && <HttpStatusCode code={value} />,
+      content: (value) => <HttpStatusCode code={value as number} />,
       value: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
   };
