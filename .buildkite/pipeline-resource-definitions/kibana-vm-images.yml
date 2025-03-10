@@ -27,17 +27,24 @@ spec:
       provider_settings:
         trigger_mode: none
       schedules:
-        daily kibana image build:
+        daily kibana base image build:
           branch: main
           cronline: '0 0 * * *'
           env:
-            IMAGES_CONFIG: kibana/images.yml
-          message: Builds Kibana VM images daily
+            IMAGES_CONFIG: kibana/base_image.yml
+          message: Builds Kibana VM base image daily
+        daily kibana cache layer build:
+          branch: main
+          cronline: '0 1 * * *' # make sure this runs after the daily kibana base image build
+          env:
+            IMAGES_CONFIG: kibana/image_cache.yml
+            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
+          message: Builds Kibana VM cache warmup daily
         daily kibana fips image build:
           branch: main
-          cronline: '0 4 * * *' # make sure this runs after the daily kibana image build
+          cronline: '0 4 * * *' # make sure this runs after the daily kibana cache image build
           env:
-            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/images.yml'
+            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/image_cache.yml'
             IMAGES_CONFIG: kibana/fips.yml
           message: Builds Kibana FIPS VM image daily
       teams:
