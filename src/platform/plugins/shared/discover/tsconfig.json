@@ -100,7 +100,8 @@
     "@kbn/esql-ast",
     "@kbn/discover-shared-plugin",
     "@kbn/response-ops-rule-form",
-    "@kbn/embeddable-enhanced-plugin"
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/shared-ux-page-analytics-no-data-types"
   ],
   "exclude": ["target/**/*"]
 }
