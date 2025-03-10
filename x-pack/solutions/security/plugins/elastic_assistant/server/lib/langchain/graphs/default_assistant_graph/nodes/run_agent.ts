@@ -7,7 +7,7 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { BaseMessage } from '@langchain/core/messages';
+import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
@@ -59,7 +59,7 @@ export async function runAgent({
           savedObjectsClient,
         })
       : '';
-  const agentOutcome = await agentRunnable
+  const result = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
       {
@@ -71,13 +71,31 @@ export async function runAgent({
         }`,
         // prepend any user prompt (gemini)
         input: `${userPrompt}${state.input}`,
-        chat_history: sanitizeChatHistory(state.messages), // TODO: Message de-dupe with ...state spread
+        chat_history: sanitizeChatHistory(state.chatHistory), // TODO: Message de-dupe with ...state spread
       },
       config
     );
 
+  const newMessages: BaseMessage[] = [];
+
+  if (result?.[0]?.messageLog && Array.isArray(result[0].messageLog)) {
+    const containsUnknownMessage = result[0].messageLog.some((message: unknown) => !(message instanceof BaseMessage))
+    if (containsUnknownMessage) {
+      throw new Error('Invalid message type in messageLog');
+    }
+    newMessages.push(...result[0].messageLog as BaseMessage[]);
+  }
+
+  if (result?.returnValues?.output) {
+    const aiMessage = new AIMessage({
+      content: result.returnValues.output,
+    });
+
+    newMessages.push(aiMessage);
+  }
+
   return {
-    agentOutcome,
+    messages: newMessages,
     lastNode: NodeType.AGENT,
   };
 }

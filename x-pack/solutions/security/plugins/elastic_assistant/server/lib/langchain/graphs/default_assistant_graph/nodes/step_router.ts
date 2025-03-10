@@ -18,10 +18,16 @@ import { NEW_CHAT } from '../../../../../routes/helpers';
 export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
-      if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-        return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
+      const { messages } = state;
+      const lastMessage = messages[messages.length - 1];
+      if (
+        'tool_calls' in lastMessage &&
+        Array.isArray(lastMessage.tool_calls) &&
+        lastMessage.tool_calls?.length
+      ) {
+        return NodeType.TOOLS;
       }
-      return NodeType.TOOLS;
+      return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
 
     case NodeType.GET_PERSISTED_CONVERSATION:
       if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {

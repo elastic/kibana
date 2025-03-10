@@ -15,13 +15,13 @@ import { Replacements } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
 import { stepRouter } from './nodes/step_router';
 import { modelInput } from './nodes/model_input';
 import { runAgent } from './nodes/run_agent';
-import { executeTools } from './nodes/execute_tools';
 import { generateChatTitle } from './nodes/generate_chat_title';
 import { getPersistedConversation } from './nodes/get_persisted_conversation';
 import { persistConversationChanges } from './nodes/persist_conversation_changes';
@@ -69,6 +69,8 @@ export const getDefaultAssistantGraph = ({
 
     const stateAnnotation = getStateAnnotation({ getFormattedTime });
 
+    const toolNodeForGraph = new ToolNode(tools);
+
     // Put together a new graph using default state from above
     const graph = new StateGraph(stateAnnotation)
       .addNode(NodeType.GET_PERSISTED_CONVERSATION, (state: AgentState) =>
@@ -98,9 +100,7 @@ export const getDefaultAssistantGraph = ({
           kbDataClient: dataClients?.kbDataClient,
         })
       )
-      .addNode(NodeType.TOOLS, (state: AgentState) =>
-        executeTools({ ...nodeParams, config: { signal }, state, tools })
-      )
+      .addNode(NodeType.TOOLS, toolNodeForGraph)
       .addNode(NodeType.RESPOND, (state: AgentState) =>
         respond({ ...nodeParams, config: { signal }, state, model: createLlmInstance() })
       )
