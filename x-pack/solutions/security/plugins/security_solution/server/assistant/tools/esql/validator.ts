@@ -20,7 +20,7 @@ interface ValidateEsqlResult {
   isValid: boolean;
   query: string;
   parsingErrors?: EditorError[];
-  executionError?: any;
+  executionError?: unknown;
 }
 
 export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }) => {
@@ -140,6 +140,10 @@ const validateEsql = async (
   };
 };
 
-const extractErrorMessage = (error: any): string => {
-  return error.message || `Unknown error`;
+const extractErrorMessage = (error: unknown): string => {
+  if(error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return `Unknown error`;
 };

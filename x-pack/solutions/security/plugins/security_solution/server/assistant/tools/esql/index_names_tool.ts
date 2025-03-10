@@ -25,8 +25,8 @@ export const getIndexNamesTool = ({ esClient }: { esClient: ElasticsearchClient 
         .then((response) =>
           response
             .map((index) => index.index)
-            .filter((index) => index != undefined)
-            .toSorted()
+            .filter((index) => !!index)
+            .sort()
         );
       return `These are the names of the available indeces. To query them, you must use the full index name verbatim.\n\n${indexNames.join(
         '\n'

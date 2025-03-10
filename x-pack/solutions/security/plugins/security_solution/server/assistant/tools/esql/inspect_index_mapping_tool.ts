@@ -61,6 +61,9 @@ Output:
 \`\`\``,
 };
 
+type GetEntriesAtKeyMapping = { [key: string]: GetEntriesAtKeyMapping | undefined | string } | undefined | string;
+
+
 export const getInspectIndexMappingTool = ({ esClient }: { esClient: ElasticsearchClient }) => {
   return tool(
     async ({ indexName, propertyKey }) => {
@@ -68,7 +71,7 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
         index: indexName,
       });
 
-      const entriesAtKey = getEntriesAtKey(indexMapping[indexName], propertyKey.split('.'));
+      const entriesAtKey = getEntriesAtKey(indexMapping[indexName] as unknown as GetEntriesAtKeyMapping, propertyKey.split('.'));
       const result = formatEntriesAtKey(entriesAtKey);
 
       return `Object at ${propertyKey} \n${JSON.stringify(result, null, 2)}`;
@@ -89,13 +92,17 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
 };
 
 const getEntriesAtKey = (
-  mapping: Record<string, any> | undefined,
+  mapping: GetEntriesAtKeyMapping,
   keys: string[]
-): Record<string, any> | undefined => {
+): GetEntriesAtKeyMapping => {
   if (mapping === undefined) {
-    return;
+    return undefined;
   }
   if (keys.length === 0) {
+    return mapping;
+  }
+
+  if (typeof mapping !== 'object') {
     return mapping;
   }
 
@@ -107,7 +114,7 @@ const getEntriesAtKey = (
   return getEntriesAtKey(mapping[key], keys);
 };
 
-const formatEntriesAtKey = (mapping: Record<string, any> | undefined): Record<string, string> => {
+const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping): Record<string, string> => {
   if (mapping === undefined) {
     return {};
   }

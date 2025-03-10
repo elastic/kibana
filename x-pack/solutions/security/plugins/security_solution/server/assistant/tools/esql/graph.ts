@@ -6,11 +6,10 @@
  */
 
 import type { StructuredToolInterface } from '@langchain/core/tools';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import { getIndexNamesTool } from './index_names_tool';
 import { EsqlSelfHealingAnnotation } from './state';
 import { ESQL_VALIDATOR_NODE, NL_TO_ESQL_AGENT_NODE, TOOLS_NODE } from './constants';

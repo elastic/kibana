@@ -12,10 +12,9 @@ import {
   nlToEsqlTaskEventToLangchainMessage,
 } from '@kbn/elastic-assistant-common';
 import type { StructuredToolInterface } from '@langchain/core/tools';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import type { ChatCompletionMessageEvent } from '@kbn/inference-common';
 import { Command } from '@langchain/langgraph';
 import type { EsqlSelfHealingAnnotation } from './state';
