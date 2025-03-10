@@ -12,13 +12,13 @@ export const ERROR_MESSAGES = {
     defaultMessage: 'Term cannot be empty.',
   }),
   empty_to_term: i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.invalidMapTo', {
-    defaultMessage: 'Cannot have empty terms.',
+    defaultMessage: 'Terms cannot be empty.',
   }),
   term_exists: i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.termExists', {
-    defaultMessage: 'Term already exists',
+    defaultMessage: 'Term already exists.',
   }),
   multiple_explicit_separator: i18n.translate(
     'xpack.searchSynonyms.synonymsSetRuleFlyout.invalidMapTo',
-    { defaultMessage: 'Cannot have explicit separator "=>" in terms.' }
+    { defaultMessage: 'Explicit separator "=>" is not allowed in terms.' }
   ),
 };

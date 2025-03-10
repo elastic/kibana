@@ -367,7 +367,7 @@ describe('useFlyoutState hook', () => {
         await waitFor(() => {
           expect(result.current.isFromTermsInvalid).toBe(true);
           expect(result.current.fromTermErrors).toEqual([
-            'Cannot have explicit separator "=>" in terms.',
+            'Explicit separator "=>" is not allowed in terms.',
           ]);
           expect(canSave).toBe(false);
         });
@@ -391,7 +391,7 @@ describe('useFlyoutState hook', () => {
         });
         await waitFor(() => {
           expect(result.current.isFromTermsInvalid).toBe(true);
-          expect(result.current.fromTermErrors).toEqual(['Term already exists']);
+          expect(result.current.fromTermErrors).toEqual(['Term already exists.']);
           expect(canSave).toBe(false);
         });
       });
@@ -417,7 +417,7 @@ describe('useFlyoutState hook', () => {
         });
         await waitFor(() => {
           expect(result.current.isMapToTermsInvalid).toBe(true);
-          expect(result.current.mapToTermErrors).toEqual(['Cannot have empty terms.']);
+          expect(result.current.mapToTermErrors).toEqual(['Terms cannot be empty.']);
           expect(canSave).toBe(false);
         });
       });
@@ -442,7 +442,7 @@ describe('useFlyoutState hook', () => {
         await waitFor(() => {
           expect(result.current.isMapToTermsInvalid).toBe(true);
           expect(result.current.mapToTermErrors).toEqual([
-            'Cannot have explicit separator "=>" in terms.',
+            'Explicit separator "=>" is not allowed in terms.',
           ]);
           expect(canSave).toBe(false);
         });
@@ -466,7 +466,7 @@ describe('useFlyoutState hook', () => {
         });
         await waitFor(() => {
           expect(result.current.isMapToTermsInvalid).toBe(true);
-          expect(result.current.mapToTermErrors).toEqual(['Cannot have empty terms.']);
+          expect(result.current.mapToTermErrors).toEqual(['Terms cannot be empty.']);
           expect(canSave).toBe(false);
         });
       });
