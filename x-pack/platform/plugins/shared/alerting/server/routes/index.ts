@@ -38,7 +38,7 @@ import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
 import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_api_key_route';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
 import { snoozeRuleRoute } from './rule/apis/snooze';
-import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
+import { unsnoozeRuleRoute, unsnoozeRuleInternalRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
@@ -123,6 +123,7 @@ export function defineRoutes(opts: RouteOptions) {
   bulkDisableRulesRoute({ router, licenseState });
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
+  unsnoozeRuleInternalRoute(router, licenseState);
   cloneRuleRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
   registerRulesValueSuggestionsRoute(router, licenseState, config$!);

@@ -130,7 +130,7 @@ export class AlertUtils {
     return request;
   }
 
-  public getUnsnoozeRequest(alertId: string) {
+  public getUnsnoozeInternalRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_unsnooze`)
       .set('kbn-xsrf', 'foo')
@@ -138,6 +138,19 @@ export class AlertUtils {
       .send({
         schedule_ids: [alertId],
       });
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getUnsnoozeRequest(alertId: string, scheduleId: string) {
+    const request = this.supertestWithoutAuth
+      .delete(
+        `${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/snooze_schedule/${scheduleId}`
+      )
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }
