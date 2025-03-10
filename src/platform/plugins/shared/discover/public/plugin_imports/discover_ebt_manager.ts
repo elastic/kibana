@@ -20,7 +20,7 @@ import {
   FIELD_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
-} from './register_discover_analytics';
+} from './discover_ebt_manager_registrations';
 
 type FilterOperation = '+' | '-' | '_exists_';
 

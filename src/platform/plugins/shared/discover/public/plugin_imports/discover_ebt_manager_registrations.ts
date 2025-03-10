@@ -32,7 +32,7 @@ export const CONTEXTUAL_PROFILE_ID = 'profileId';
  * This function is statically imported since analytics registrations must happen at setup,
  * while the EBT manager is loaded dynamically when needed to avoid page load bundle bloat
  */
-export const registerDiscoverAnalytics = (
+export const registerDiscoverEBTManagerAnalytics = (
   core: CoreSetup<DiscoverStartPlugins>,
   discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>
 ) => {

@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DiscoverEBTContextProps, DiscoverEBTManager } from './discover_ebt_manager';
-import { registerDiscoverAnalytics } from './register_discover_analytics';
+import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
@@ -42,7 +42,7 @@ describe('DiscoverEBTManager', () => {
 
   describe('register', () => {
     it('should register the context provider and custom events', () => {
-      registerDiscoverAnalytics(coreSetupMock, discoverEbtContext$);
+      registerDiscoverEBTManagerAnalytics(coreSetupMock, discoverEbtContext$);
 
       discoverEBTContextManager.initialize({
         core: coreSetupMock,

@@ -62,7 +62,7 @@ import type {
 } from './plugin_imports/discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
-import { registerDiscoverAnalytics } from './plugin_imports/register_discover_analytics';
+import { registerDiscoverEBTManagerAnalytics } from './plugin_imports/discover_ebt_manager_registrations';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -165,6 +165,8 @@ export class DiscoverPlugin
       return ebtManager;
     });
 
+    registerDiscoverEBTManagerAnalytics(core, this.discoverEbtContext$);
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -229,7 +231,6 @@ export class DiscoverPlugin
     }
 
     forwardLegacyUrls(plugins.urlForwarding);
-    registerDiscoverAnalytics(core, this.discoverEbtContext$);
     this.registerEmbeddable(core, plugins);
 
     return { locator: this.locator };
