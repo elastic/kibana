@@ -30,7 +30,14 @@ const tooltip = {
 export const OnboardingCardBadge = React.memo<PropsWithChildren<{ badge: CardBadge }>>(
   ({ badge }) => {
     if (badge === 'beta') {
-      return <EuiBetaBadge label={label.beta} iconType="beta" tooltipContent={tooltip.beta} />;
+      return (
+        <EuiBetaBadge
+          label={label.beta}
+          iconType="beta"
+          tooltipContent={tooltip.beta}
+          data-test-subj="onboardingCardBadge"
+        />
+      );
     }
     if (badge === 'tech_preview') {
       return (
@@ -38,10 +45,11 @@ export const OnboardingCardBadge = React.memo<PropsWithChildren<{ badge: CardBad
           label={label.techPreview}
           iconType="beaker"
           tooltipContent={tooltip.techPreview}
+          data-test-subj="onboardingCardBadge"
         />
       );
     }
-    return <EuiBadge {...badge} />;
+    return <EuiBadge {...badge} data-test-subj="onboardingCardBadge" />;
   }
 );
 OnboardingCardBadge.displayName = 'OnboardingCardBadge';
