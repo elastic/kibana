@@ -65,6 +65,9 @@ webpackstats.json
 !/config/serverless.es.yml
 !/config/serverless.oblt.yml
 !/config/serverless.security.yml
+!/config/serverless.security.essentials.yml
+!/config/serverless.security.complete.yml
+!/config/serverless.security.search_ai_lake.yml
 !/config/node.options
 coverage
 !/test/common/fixtures/plugins/coverage
