@@ -8,7 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
@@ -65,7 +65,7 @@ export function PassiveMap(props: Props) {
                 },
                 filters: [],
                 hidePanelTitles: true,
-                viewMode: ViewMode.VIEW,
+                viewMode: 'view',
                 isLayerTOCOpen: false,
                 mapSettings: {
                   disableInteractive: false,
