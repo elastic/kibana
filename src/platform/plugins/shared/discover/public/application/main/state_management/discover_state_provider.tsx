@@ -9,9 +9,9 @@
 
 import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverAppStateProvider } from './discover_app_state_container';
-import { DiscoverStateContainer } from './discover_state';
+import type { DiscoverStateContainer } from './discover_state';
 import { InternalStateProvider } from './redux';
 
 function createStateHelpers() {
