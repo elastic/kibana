@@ -9,8 +9,8 @@
 
 import { KibanaSolutions } from '@kbn/constants';
 
-export const aggregationGroups = [
-  KibanaSolutions.flatMap((solution) => [
+export const aggregationGroups: string[] = [
+  ...KibanaSolutions.flatMap((solution) => [
     `x-pack/solutions/${solution}/plugins`,
     `x-pack/solutions/${solution}/packages`,
   ]),
@@ -27,7 +27,7 @@ export const aggregationGroups = [
   'test',
 ];
 
-export const excludePaths = [
+export const excludePaths: string[] = [
   '(^|/)target($|/)',
   '^kbn',
   '^@kbn',
