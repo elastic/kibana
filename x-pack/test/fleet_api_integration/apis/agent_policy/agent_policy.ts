@@ -2038,7 +2038,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('POST /internal/fleet/agent_and_package_policies', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/213370
+    describe.skip('POST /internal/fleet/agent_and_package_policies', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
