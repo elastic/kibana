@@ -13,6 +13,7 @@ export type {
   JsonArray,
   JsonValue,
   JsonObject,
+  SerializableArray,
   SerializableRecord,
   Serializable,
 } from './src/serializable';
