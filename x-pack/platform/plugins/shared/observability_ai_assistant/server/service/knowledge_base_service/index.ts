@@ -19,6 +19,7 @@ import {
 } from '../../../common/types';
 import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import { getSpaceQuery } from '../util/get_space_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
@@ -260,13 +261,11 @@ export class KnowledgeBaseService {
     sortBy,
     sortDirection,
     namespace,
-    user,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
     namespace: string;
-    user?: { name: string; id?: string };
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
@@ -290,10 +289,8 @@ export class KnowledgeBaseService {
                   must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
                 },
               },
-              ...getAccessQuery({
-                user,
-                namespace,
-              }),
+              // filter by space
+              ...getSpaceQuery({ namespace }),
             ],
           },
         },

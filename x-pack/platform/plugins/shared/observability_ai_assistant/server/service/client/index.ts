@@ -774,7 +774,6 @@ export class ObservabilityAIAssistantClient {
       sortBy,
       sortDirection,
       namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
     });
   };
 

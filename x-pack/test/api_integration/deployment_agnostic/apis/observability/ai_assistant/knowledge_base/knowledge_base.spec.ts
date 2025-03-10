@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     sortDirection?: 'asc' | 'desc';
     spaceId?: string;
     role?: 'admin' | 'editor' | 'viewer';
-  } = {}) {
+  } = {}): Promise<KnowledgeBaseEntry[]> {
     const res = await observabilityAIAssistantAPIClient[role]({
       endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
       params: {
@@ -224,14 +224,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             body: {
               entries: [
                 {
-                  id: `1_${SPACE_A_ID}_public`,
-                  title: `Public Entry in ${SPACE_A_NAME} by Admin`,
+                  id: 'my-doc-1',
+                  title: `Entry in ${SPACE_A_NAME} by Admin 1`,
                   text: `This is a public entry in ${SPACE_A_NAME} created by Admin`,
                   public: true,
                 },
                 {
-                  id: `2_${SPACE_A_ID}_private`,
-                  title: `Private Entry in ${SPACE_A_NAME} by Admin`,
+                  id: 'my-doc-2',
+                  title: `Entry in ${SPACE_A_NAME} by Admin 2`,
                   text: `This is a private entry in ${SPACE_A_NAME} created by Admin`,
                   public: false,
                 },
@@ -248,14 +248,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             body: {
               entries: [
                 {
-                  id: `1_${SPACE_B_ID}_public`,
-                  title: `Public Entry in ${SPACE_B_NAME} by Admin`,
+                  id: 'my-doc-3',
+                  title: `Entry in ${SPACE_B_NAME} by Admin 3`,
                   text: `This is a public entry in ${SPACE_B_NAME} created by Admin`,
                   public: true,
                 },
                 {
-                  id: `2_${SPACE_B_ID}_private`,
-                  title: `Private Entry in ${SPACE_B_NAME} by Admin`,
+                  id: 'my-doc-4',
+                  title: `Entry in ${SPACE_B_NAME} by Admin 4`,
                   text: `This is a private entry in ${SPACE_B_NAME} created by Admin`,
                   public: false,
                 },
@@ -265,31 +265,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           spaceId: SPACE_B_ID,
         });
         expect(importStatusForSpaceB).to.be(200);
-
-        const { status: editorImportStatusForSpaceB } =
-          await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
-            params: {
-              body: {
-                entries: [
-                  {
-                    id: `3_${SPACE_B_ID}_public`,
-                    title: `Public Entry in ${SPACE_B_NAME} by Editor`,
-                    text: `This is a public entry in ${SPACE_B_NAME} created by Editor`,
-                    public: true,
-                  },
-                  {
-                    id: `4_${SPACE_B_ID}_private`,
-                    title: `Private Entry in ${SPACE_B_NAME} by Editor`,
-                    text: `This is a private entry in ${SPACE_B_NAME} created by Editor`,
-                    public: false,
-                  },
-                ],
-              },
-            },
-            spaceId: SPACE_B_ID,
-          });
-        expect(editorImportStatusForSpaceB).to.be(200);
       });
 
       after(async () => {
@@ -297,60 +272,55 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('ensures users can only access entries relevant to their namespace', async () => {
-        // User (admin) in space A should only see public entries in space A and their own entries in Space A
+        // User (admin) in space A should only see entries in space A
         const spaceAEntries = await getEntries({
-          sortBy: 'id',
-          sortDirection: 'desc',
           role: 'admin',
           spaceId: SPACE_A_ID,
         });
 
         expect(spaceAEntries.length).to.be(2);
 
-        expect(spaceAEntries[0].id).to.equal('2_space_a_private');
-        expect(spaceAEntries[0].public).to.be(false);
-        expect(spaceAEntries[0].title).to.equal('Private Entry in Space A by Admin');
+        expect(spaceAEntries[0].id).to.equal('my-doc-1');
+        expect(spaceAEntries[0].public).to.be(true);
+        expect(spaceAEntries[0].title).to.equal('Entry in Space A by Admin 1');
 
-        expect(spaceAEntries[1].id).to.equal('1_space_a_public');
-        expect(spaceAEntries[1].public).to.be(true);
-        expect(spaceAEntries[1].title).to.equal('Public Entry in Space A by Admin');
+        expect(spaceAEntries[1].id).to.equal('my-doc-2');
+        expect(spaceAEntries[1].public).to.be(false);
+        expect(spaceAEntries[1].title).to.equal('Entry in Space A by Admin 2');
 
-        // User (admin) in space B should only see public entries in space B and their own entries in Space B
+        // User (admin) in space B should only see entries in space B
         const spaceBEntries = await getEntries({
-          sortBy: 'id',
-          sortDirection: 'desc',
           role: 'admin',
           spaceId: SPACE_B_ID,
         });
 
-        expect(spaceBEntries.length).to.be(3);
+        expect(spaceBEntries.length).to.be(2);
 
-        expect(spaceBEntries[0].id).to.equal('3_space_b_public');
+        expect(spaceBEntries[0].id).to.equal('my-doc-3');
         expect(spaceBEntries[0].public).to.be(true);
-        expect(spaceBEntries[0].title).to.equal('Public Entry in Space B by Editor');
+        expect(spaceBEntries[0].title).to.equal('Entry in Space B by Admin 3');
 
-        expect(spaceBEntries[1].id).to.equal('2_space_b_private');
+        expect(spaceBEntries[1].id).to.equal('my-doc-4');
         expect(spaceBEntries[1].public).to.be(false);
-        expect(spaceBEntries[1].title).to.equal('Private Entry in Space B by Admin');
-
-        expect(spaceBEntries[2].id).to.equal('1_space_b_public');
-        expect(spaceBEntries[2].public).to.be(true);
-        expect(spaceBEntries[2].title).to.equal('Public Entry in Space B by Admin');
+        expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
       });
 
-      it('editor should only have access to public entries in space A', async () => {
-        const spaceAEntries = await getEntries({
-          sortBy: 'id',
-          sortDirection: 'desc',
+      it('should allow a user who is not the owner of the entries to access entries relevant to their namespace', async () => {
+        // User (editor) in space B should only see entries in space B
+        const spaceBEntries = await getEntries({
           role: 'editor',
-          spaceId: SPACE_A_ID,
+          spaceId: SPACE_B_ID,
         });
 
-        expect(spaceAEntries.length).to.be(1);
+        expect(spaceBEntries.length).to.be(2);
 
-        expect(spaceAEntries[0].id).to.equal('1_space_a_public');
-        expect(spaceAEntries[0].public).to.be(true);
-        expect(spaceAEntries[0].title).to.equal('Public Entry in Space A by Admin');
+        expect(spaceBEntries[0].id).to.equal('my-doc-3');
+        expect(spaceBEntries[0].public).to.be(true);
+        expect(spaceBEntries[0].title).to.equal('Entry in Space B by Admin 3');
+
+        expect(spaceBEntries[1].id).to.equal('my-doc-4');
+        expect(spaceBEntries[1].public).to.be(false);
+        expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
       });
     });
 
