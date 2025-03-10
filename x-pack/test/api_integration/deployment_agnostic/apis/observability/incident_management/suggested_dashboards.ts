@@ -114,6 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       await esDeleteAllIndices(dataForgeIndices);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
+      await kibanaServer.savedObjects.cleanStandardList();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
     });
 
