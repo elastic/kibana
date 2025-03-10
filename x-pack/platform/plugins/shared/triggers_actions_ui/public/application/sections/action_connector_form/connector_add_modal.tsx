@@ -7,7 +7,6 @@
 
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import {
   EuiModal,
   EuiButton,
@@ -24,7 +23,9 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import './connector_add_modal.scss';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import {
@@ -93,10 +94,6 @@ const ConnectorAddModal = ({
   const setResetForm = (reset: ResetForm) => {
     resetConnectorForm.current = reset;
   };
-
-  const actConnectorModalCss = css`
-    z-index: 9000;
-  `;
 
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
@@ -224,8 +221,10 @@ const ConnectorAddModal = ({
   return (
     <EuiModal
       className="actConnectorModal"
+      css={css`
+        z-index: 9000;
+      `}
       data-test-subj="connectorAddModal"
-      css={actConnectorModalCss}
       onClose={closeModal}
       style={{ width: actionTypeRegistry.get(actionType.id).modalWidth }}
       aria-labelledby={modalTitleId}

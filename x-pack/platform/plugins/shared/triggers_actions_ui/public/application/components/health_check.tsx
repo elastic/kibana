@@ -6,11 +6,12 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
+import { css } from '@emotion/react';
 import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -42,6 +43,19 @@ export const HealthCheck: FC<PropsWithChildren<Props>> = ({
   const { http, docLinks } = useKibana().services;
   const { setLoadingHealthCheck } = useHealthContext();
   const [alertingHealth, setAlertingHealth] = React.useState<Option<HealthStatus>>(none);
+  const { euiTheme } = useEuiTheme();
+
+  const warningCss = css`
+    .alertingHealthCheck__body {
+      padding-left: calc(${euiTheme.size.base} * 2);
+      padding-right: calc(${euiTheme.size.base} * 2);
+    }
+    
+    .alertingFlyoutHealthCheck__body {
+      padding-left: calc(${euiTheme.size.base} * 2);
+      padding-right: calc(${euiTheme.size.base} * 2);
+      margin-top: ${euiTheme.size.base}
+  `;
 
   React.useEffect(() => {
     (async function () {

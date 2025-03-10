@@ -8,7 +8,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -47,13 +46,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
   const { euiTheme } = useEuiTheme();
-
-  const addMessageVariablesCss = [
-    css({
-      maxHeight: `calc(${euiTheme.size.base} * 20)`,
-      maxWidth: `calc(${euiTheme.size.base} * 20)`,
-    }),
-  ];
 
   const messageVariablesObject: Record<string, ActionVariable> | undefined = useMemo(
     () =>
@@ -174,7 +166,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       closePopover={() => setIsVariablesPopoverOpen(false)}
       panelPaddingSize="s"
       anchorPosition="upRight"
-      css={addMessageVariablesCss}
       panelStyle={{ minWidth: 350 }}
     >
       <EuiSelectable
