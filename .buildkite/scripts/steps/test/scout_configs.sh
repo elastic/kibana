@@ -64,6 +64,7 @@ if [[ -z "$RUN_MODE_LIST" ]]; then
   exit 1
 fi
 
+results=()
 failedConfigs=()
 configWithoutTests=()
 passedConfigs=()
