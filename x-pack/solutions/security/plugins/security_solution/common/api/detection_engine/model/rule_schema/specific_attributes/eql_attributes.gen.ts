@@ -20,7 +20,7 @@ export type EventCategoryOverride = z.infer<typeof EventCategoryOverride>;
 export const EventCategoryOverride = z.string();
 
 /**
- * Contains the event timestamp used for sorting a sequence of events
+ * Contains the event timestamp used for sorting a sequence of events. This is different from timestamp_override, which is used for querying events within a range. Defaults to the @timestamp ECS field.
  */
 export type TimestampField = z.infer<typeof TimestampField>;
 export const TimestampField = z.string();
