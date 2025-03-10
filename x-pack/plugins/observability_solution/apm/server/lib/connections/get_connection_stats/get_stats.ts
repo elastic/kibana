@@ -180,27 +180,51 @@ async function getConnectionStats({
               },
             ] as const),
           },
-          ...statsAggs,
-          ...(withTimeseries
-            ? {
-                timeseries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: getBucketSize({
-                      start: startWithOffset,
-                      end: endWithOffset,
-                      numBuckets,
-                      minBucketSize: 60,
-                    }).intervalString,
-                    extended_bounds: {
-                      min: startWithOffset,
-                      max: endWithOffset,
-                    },
+          aggs: {
+            sample: {
+              top_metrics: {
+                size: 1,
+                metrics: asMutableArray([
+                  {
+                    field: SERVICE_ENVIRONMENT,
                   },
-                  aggs: statsAggs,
+                  {
+                    field: AGENT_NAME,
+                  },
+                  {
+                    field: SPAN_TYPE,
+                  },
+                  {
+                    field: SPAN_SUBTYPE,
+                  },
+                ] as const),
+                sort: {
+                  '@timestamp': 'desc',
                 },
-              }
-            : undefined),
+              },
+            },
+            ...statsAggs,
+            ...(withTimeseries
+              ? {
+                  timeseries: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: getBucketSize({
+                        start: startWithOffset,
+                        end: endWithOffset,
+                        numBuckets,
+                        minBucketSize: 60,
+                      }).intervalString,
+                      extended_bounds: {
+                        min: startWithOffset,
+                        max: endWithOffset,
+                      },
+                    },
+                    aggs: statsAggs,
+                  },
+                }
+              : undefined),
+          },
         },
       },
     },
