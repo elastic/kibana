@@ -1304,7 +1304,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             }
             inputs = _compilePackagePolicyInputs(
               pkgInfo,
-              packagePolicy.vars || {},
+              restOfPackagePolicy.vars || {},
               inputs,
               assetsMap
             );
@@ -1318,7 +1318,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               };
             }
 
-            if (oldPackagePolicy.package && oldPackagePolicy.package.version !== pkgInfo.version) {
+            if (
+              pkgInfo &&
+              pkgInfo.type === 'input' &&
+              oldPackagePolicy.package &&
+              oldPackagePolicy.package.version !== pkgInfo.version
+            ) {
               const oldPkgInfoAndAsset = packageInfosandAssetsMap.get(
                 `${oldPackagePolicy.package.name}-${oldPackagePolicy.package.version}`
               );
