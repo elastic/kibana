@@ -12,11 +12,9 @@ import { ClassicStreamDetailManagement } from './classic';
 export function StreamDetailManagement({
   definition,
   refreshDefinition,
-  isLoadingDefinition,
 }: {
   definition?: IngestStreamGetResponse;
   refreshDefinition: () => void;
-  isLoadingDefinition: boolean;
 }) {
   if (!definition) {
     return null;
@@ -24,11 +22,7 @@ export function StreamDetailManagement({
 
   if (isWiredStreamGetResponse(definition)) {
     return (
-      <WiredStreamDetailManagement
-        definition={definition}
-        refreshDefinition={refreshDefinition}
-        isLoadingDefinition={isLoadingDefinition}
-      />
+      <WiredStreamDetailManagement definition={definition} refreshDefinition={refreshDefinition} />
     );
   }
 
