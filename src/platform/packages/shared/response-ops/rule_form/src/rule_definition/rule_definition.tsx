@@ -144,15 +144,23 @@ export const RuleDefinition = () => {
     }>
   >();
   
-  // TODO get the title from the dashboard service
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<{ label: string; value: string }> | undefined
-  >(
-    params.dashboards?.map((dashboard) => ({
-      label: dashboard.title,
-      value: dashboard.id,
-    }))
-  );
+  >();
+  
+  useEffect(() => {
+    const fetchDashboardTitles = async () => {
+      const dashboardsWithTitles = await Promise.all(
+        (params.dashboards ?? []).map(async (dashboard) => ({
+          label: (await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id)).attributes.title,
+          value: dashboard.id,
+        }))
+      );
+      setSelectedDashboards(dashboardsWithTitles);
+    };
+
+    fetchDashboardTitles();
+  }, [params.dashboards, dashboardService]);
 
   const onChange = (selectedOptions: any[]) => {
     setSelectedDashboards(selectedOptions);
