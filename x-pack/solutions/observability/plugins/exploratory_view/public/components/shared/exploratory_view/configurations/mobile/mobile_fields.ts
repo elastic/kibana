@@ -6,6 +6,15 @@
  */
 
 import {
+  ATTR_HOST_OS_FULL,
+  ATTR_HOST_OS_PLATFORM,
+  ATTR_NETWORK_CARRIER_ICC,
+  ATTR_NETWORK_CARRIER_NAME,
+  ATTR_NETWORK_CONNECTION_TYPE,
+  ATTR_SERVICE_VERSION,
+  ATTR_URL_FULL,
+} from '@kbn/observability-ui-semantic-conventions';
+import {
   CARRIER_LOCATION,
   CARRIER_NAME,
   CONNECTION_TYPE,
@@ -17,12 +26,12 @@ import {
 } from '../constants/labels';
 
 export const MobileFields: Record<string, string> = {
-  'host.os.platform': OS_PLATFORM,
-  'host.os.full': HOST_OS,
-  'service.version': SERVICE_VERSION,
-  'network.carrier.icc': CARRIER_LOCATION,
-  'network.carrier.name': CARRIER_NAME,
-  'network.connection_type': CONNECTION_TYPE,
+  [ATTR_HOST_OS_PLATFORM]: OS_PLATFORM,
+  [ATTR_HOST_OS_FULL]: HOST_OS,
+  [ATTR_SERVICE_VERSION]: SERVICE_VERSION,
+  [ATTR_NETWORK_CARRIER_ICC]: CARRIER_LOCATION,
+  [ATTR_NETWORK_CARRIER_NAME]: CARRIER_NAME,
+  [ATTR_NETWORK_CONNECTION_TYPE]: CONNECTION_TYPE,
   'labels.device_model': DEVICE_MODEL,
-  'url.full': URL_LABEL,
+  [ATTR_URL_FULL]: URL_LABEL,
 };

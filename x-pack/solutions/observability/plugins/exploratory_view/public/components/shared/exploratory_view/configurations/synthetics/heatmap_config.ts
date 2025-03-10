@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  ATTR_OBSERVER_GEO_NAME,
+  ATTR_TAGS,
+  ATTR_TIMESTAMP,
+  ATTR_URL_FULL,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
 import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
@@ -20,7 +26,7 @@ export function getSyntheticsHeatmapConfig({ dataView }: ConfigProps): SeriesCon
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: ATTR_TIMESTAMP,
     },
     yAxisColumns: [
       {
@@ -29,12 +35,12 @@ export function getSyntheticsHeatmapConfig({ dataView }: ConfigProps): SeriesCon
       },
     ],
     hasOperationType: false,
-    filterFields: ['observer.geo.name', 'monitor.type', 'tags', 'url.full'],
-    breakdownFields: ['observer.geo.name', 'monitor.type', 'monitor.name', SYNTHETICS_STEP_NAME],
+    filterFields: [ATTR_OBSERVER_GEO_NAME, 'monitor.type', ATTR_TAGS, ATTR_URL_FULL],
+    breakdownFields: [ATTR_OBSERVER_GEO_NAME, 'monitor.type', 'monitor.name', SYNTHETICS_STEP_NAME],
     baseFilters: [],
     definitionFields: [
       { field: 'monitor.name' },
-      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
+      { field: ATTR_URL_FULL, filters: buildExistsFilter('summary.up', dataView) },
     ],
     metricOptions: [
       {

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ATTR_PROCESS_THREAD_NAME,
+  ATTR_STACKTRACE_ID,
+} from '@kbn/observability-ui-semantic-conventions';
+
 describe('Differential Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
@@ -159,11 +164,11 @@ describe('Differential Functions page', () => {
       cy.get('[data-test-subj="comparison_frame"]').contains('vmlinux');
 
       cy.addKqlFilter({
-        key: 'process.thread.name',
+        key: ATTR_PROCESS_THREAD_NAME,
         value: '108795321966692',
       });
       cy.addKqlFilter({
-        key: 'Stacktrace.id',
+        key: ATTR_STACKTRACE_ID,
         value: '-7DvnP1mizQYw8mIIpgbMg',
         dataTestSubj: 'profilingComparisonUnifiedSearchBar',
       });

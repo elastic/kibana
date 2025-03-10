@@ -11,8 +11,12 @@ import { UnionToIntersection, ValuesType } from 'utility-types';
 
 /**
  * Profiling Elasticsearch fields
+ *
+ * These are not exported. They are defined as literals here to make the types below work.
+ * Use @kbn/observability-ui-semantic-conventions outside of this file to access
+ * field names.
  */
-export enum ProfilingESField {
+enum ProfilingESField {
   Timestamp = '@timestamp',
   ContainerName = 'container.name',
   ProcessThreadName = 'process.thread.name',

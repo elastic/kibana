@@ -9,7 +9,6 @@
 
 export { decodeStackTraceResponse } from './common/stack_traces';
 export { createFlameGraph } from './common/flamegraph';
-export { ProfilingESField } from './common/elasticsearch';
 export {
   groupStackFrameMetadataByStackTrace,
   describeFrameType,

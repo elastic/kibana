@@ -4,6 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import {
+  ATTR_PROCESSOR_EVENT,
+  ATTR_TRANSACTION_DURATION_US,
+  ATTR_TRANSACTION_TYPE,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { mockDataView } from '../../rtl_helpers';
 import { RECORDS_FIELD } from '../constants';
 
@@ -59,15 +66,14 @@ export const sampleAttribute = {
                   type: 'histogram',
                 },
                 scale: 'interval',
-                sourceField: 'transaction.duration.us',
+                sourceField: ATTR_TRANSACTION_DURATION_US,
               },
               'y-axis-column-layer0-0': {
                 customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                  query: `${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *`,
                 },
                 isBucketed: false,
                 label: 'test-series',
@@ -79,8 +85,7 @@ export const sampleAttribute = {
                       decimals: 0,
                     },
                   },
-                  formula:
-                    "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                  formula: `count(kql='${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *') / overall_sum(count(kql='${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *'))`,
                   isFormulaBroken: false,
                 },
                 references: ['y-axis-column-layer0X3'],
@@ -90,8 +95,7 @@ export const sampleAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                  query: `${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *`,
                 },
                 isBucketed: false,
                 label: 'Part of Pages loaded',
@@ -109,8 +113,7 @@ export const sampleAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                  query: `${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *`,
                 },
                 isBucketed: false,
                 label: 'Part of Pages loaded',
@@ -147,7 +150,7 @@ export const sampleAttribute = {
                       min: 0,
                     },
                     name: 'divide',
-                    text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                    text: `count(kql='${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *') / overall_sum(count(kql='${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT}: ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : *'))`,
                     type: 'function',
                   },
                 },
@@ -176,7 +179,7 @@ export const sampleAttribute = {
                   percentile: 50,
                 },
                 scale: 'ratio',
-                sourceField: 'transaction.duration.us',
+                sourceField: ATTR_TRANSACTION_DURATION_US,
               },
               '75th-percentile-reference-line-layer0-reference-lines': {
                 customLabel: true,
@@ -188,7 +191,7 @@ export const sampleAttribute = {
                   percentile: 75,
                 },
                 scale: 'ratio',
-                sourceField: 'transaction.duration.us',
+                sourceField: ATTR_TRANSACTION_DURATION_US,
               },
               '90th-percentile-reference-line-layer0-reference-lines': {
                 customLabel: true,
@@ -200,7 +203,7 @@ export const sampleAttribute = {
                   percentile: 90,
                 },
                 scale: 'ratio',
-                sourceField: 'transaction.duration.us',
+                sourceField: ATTR_TRANSACTION_DURATION_US,
               },
               '95th-percentile-reference-line-layer0-reference-lines': {
                 customLabel: true,
@@ -212,7 +215,7 @@ export const sampleAttribute = {
                   percentile: 95,
                 },
                 scale: 'ratio',
-                sourceField: 'transaction.duration.us',
+                sourceField: ATTR_TRANSACTION_DURATION_US,
               },
               '99th-percentile-reference-line-layer0-reference-lines': {
                 customLabel: true,
@@ -224,7 +227,7 @@ export const sampleAttribute = {
                   percentile: 99,
                 },
                 scale: 'ratio',
-                sourceField: 'transaction.duration.us',
+                sourceField: ATTR_TRANSACTION_DURATION_US,
               },
             },
             incompleteColumns: {},
@@ -235,8 +238,7 @@ export const sampleAttribute = {
     filters: [],
     query: {
       language: 'kuery',
-      query:
-        'transaction.type: page-load and processor.event: transaction and transaction.type : * and transaction.duration.us < 60000000',
+      query: `${ATTR_TRANSACTION_TYPE}: page-load and ${ATTR_PROCESSOR_EVENT} : ${PROCESSOR_EVENT_VALUE_TRANSACTION} and ${ATTR_TRANSACTION_TYPE} : * and ${ATTR_TRANSACTION_DURATION_US} < 60000000`,
     },
     visualization: {
       axisTitlesVisibilitySettings: {
