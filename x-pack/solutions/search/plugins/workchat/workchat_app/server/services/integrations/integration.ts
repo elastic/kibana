@@ -5,87 +5,74 @@
  * 2.0.
  */
 
-import { IntegrationPlugin } from "@kbn/wci-common";
-import { InternalIntegrationServices } from "@kbn/wci-common";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { SSEClientTransport } from "./mcp/sse_client";
-
+import { IntegrationPlugin } from '@kbn/wci-common';
+import { InternalIntegrationServices } from '@kbn/wci-common';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { SSEClientTransport } from './mcp/sse_client';
 
 export interface Integration {
-    id: string;
-    configuration: Record<string, any>;
-
-    connect(services: InternalIntegrationServices): Client;
+  id: string;
+  configuration: Record<string, any>;
+  connect(services: InternalIntegrationServices): Promise<Client>;
 }
 
 export class InternalIntegration implements Integration {
-    public id: string;
-    typeInstance: IntegrationPlugin;
-    configuration: Record<string, any>;
+  public id: string;
+  typeInstance: IntegrationPlugin;
+  configuration: Record<string, any>;
 
-    constructor(
-        id: string,
-        typeInstance: IntegrationPlugin,
-        configuration: Record<string, any>
-    ) {
-        this.id = id;
-        this.typeInstance = typeInstance;
-        this.configuration = configuration;
-    }
+  constructor(id: string, typeInstance: IntegrationPlugin, configuration: Record<string, any>) {
+    this.id = id;
+    this.typeInstance = typeInstance;
+    this.configuration = configuration;
+  }
 
-    connect(services: InternalIntegrationServices): Client {
+  async connect(services: InternalIntegrationServices): Promise<Client> {
+    const mcpServer = this.typeInstance.mcpServer(this.configuration, services);
 
-        const mcpServer = this.typeInstance.mcpServer(this.configuration, services);
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
-        const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({
+      name: this.id,
+      version: '1.0.0',
+    });
 
-        const client = new Client({
-            name: this.id,
-            version: "1.0.0"
-        });
+    await mcpServer.connect(clientTransport);
+    await client.connect(serverTransport);
 
-        mcpServer.connect(clientTransport);
-        client.connect(serverTransport);
-
-        return client;
-    }
-
+    return client;
+  }
 }
 
 export class ExternalIntegration implements Integration {
-    public id: string;
-    configuration: Record<string, any>;
+  public id: string;
+  configuration: Record<string, any>;
 
-    constructor(
-        id: string,
-        configuration: Record<string, any>
-    ) {
-        this.id = id;
-        this.configuration = configuration;
-    }
+  constructor(id: string, configuration: Record<string, any>) {
+    this.id = id;
+    this.configuration = configuration;
+  }
 
-    connect(): Client {
-        const transport = new SSEClientTransport(new URL(this.configuration.url));
+  async connect(): Promise<Client> {
+    const transport = new SSEClientTransport(new URL(this.configuration.url));
 
-          const client = new Client(
-            {
-              name: this.id,
-              version: "1.0.0"
-            },
-            {
-              capabilities: {
-                prompts: {},
-                resources: {},
-                tools: {}
-              }
-            }
-          );
+    const client = new Client(
+      {
+        name: this.id,
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          prompts: {},
+          resources: {},
+          tools: {},
+        },
+      }
+    );
 
-          client.connect(transport);
+    await client.connect(transport);
 
-          return client;
-    }
-
-
+    return client;
+  }
 }

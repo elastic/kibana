@@ -8,7 +8,7 @@
 import { from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { IntergrationsSession } from '../integrations/integrations_service';
+import { IntegrationsSession } from '../integrations/integrations_session';
 import { getLCTools } from '../integrations/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
@@ -21,7 +21,7 @@ export const createAgent = async ({
 }: {
   agentId: string;
   chatModel: InferenceChatModel;
-  integrationsSession: IntergrationsSession;
+  integrationsSession: IntegrationsSession;
 }): Promise<Agent> => {
   const integrationTools = await getLCTools(integrationsSession);
 
