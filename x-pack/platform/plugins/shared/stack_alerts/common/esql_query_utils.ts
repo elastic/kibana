@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { entries, findLastIndex, intersection } from 'lodash';
+import { entries, findLastIndex, intersection, isNil } from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import { type ESQLAstCommand, parse, ESQLCommandOption } from '@kbn/esql-ast';
@@ -100,19 +100,25 @@ export const toGroupedEsqlQueryHits = (table: EsqlTable, alertId: string[]): Esq
   const rows: EsqlDocument[] = [];
   const groupedHits = table.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(table.columns, row);
-    const id = alertId.map((a) => document[a] ?? 'undefined').join(',');
-    const hit = {
-      _id: ESQL_DOCUMENT_ID,
-      _index: '',
-      _source: document,
-    };
-    if (acc[id]) {
-      duplicateAlertIds.add(id);
-      acc[id].push(hit);
-    } else {
-      acc[id] = [hit];
+    const id = alertId
+      .filter((a) => !isNil(document[a]))
+      .map((a) => document[a])
+      .join(',');
+
+    if (id) {
+      const hit = {
+        _id: ESQL_DOCUMENT_ID,
+        _index: '',
+        _source: document,
+      };
+      if (acc[id]) {
+        duplicateAlertIds.add(id);
+        acc[id].push(hit);
+      } else {
+        acc[id] = [hit];
+      }
+      rows.push({ [ALERT_ID_COLUMN]: id, ...document });
     }
-    rows.push({ [ALERT_ID_COLUMN]: id, ...document });
     return acc;
   }, {});
 

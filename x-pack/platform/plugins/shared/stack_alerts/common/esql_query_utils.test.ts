@@ -23,6 +23,7 @@ describe('ESQL query utils', () => {
   const value1 = ['2023-07-12T13:32:04.174Z', '1.8.0', null];
   const value2 = ['2025-07-12T13:32:04.174Z', '1.2.0', '400'];
   const value3 = ['2025-07-12T13:32:04.174Z', '1.2.0', '200'];
+  const value4 = ['2025-07-12T13:32:04.174Z', '1.2.0', null];
 
   describe('rowToDocument', () => {
     it('correctly converts ESQL row to document', () => {
@@ -256,6 +257,175 @@ describe('ESQL query utils', () => {
         isGroupAgg: true,
       });
       expect(duplicateAlertIds.size).toBe(1);
+    });
+    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', () => {
+      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+        {
+          columns,
+          values: [value1, value2, value4],
+        },
+        ['error.code']
+      );
+      expect(results).toEqual({
+        esResult: {
+          _shards: { failed: 0, successful: 0, total: 0 },
+          aggregations: {
+            groupAgg: {
+              buckets: [
+                {
+                  doc_count: 1,
+                  key: '400',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'esql_query_document',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': '400',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          hits: { hits: [] },
+          timed_out: false,
+          took: 0,
+        },
+        isCountAgg: false,
+        isGroupAgg: true,
+      });
+      expect(rows).toEqual([
+        {
+          '@timestamp': '2025-07-12T13:32:04.174Z',
+          'Alert ID': '400',
+          'ecs.version': '1.2.0',
+          'error.code': '400',
+        },
+      ]);
+      expect(cols).toEqual([
+        { actions: false, id: 'Alert ID' },
+        { actions: false, id: '@timestamp' },
+        { actions: false, id: 'ecs.version' },
+        { actions: false, id: 'error.code' },
+      ]);
+      expect(duplicateAlertIds.size).toBe(0);
+    });
+
+    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', () => {
+      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+        {
+          columns,
+          values: [value1, value2, value4],
+        },
+        ['error.code', 'ecs.version']
+      );
+      expect(results).toEqual({
+        esResult: {
+          _shards: { failed: 0, successful: 0, total: 0 },
+          aggregations: {
+            groupAgg: {
+              buckets: [
+                {
+                  doc_count: 1,
+                  key: '1.8.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'esql_query_document',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2023-07-12T13:32:04.174Z',
+                            'ecs.version': '1.8.0',
+                            'error.code': null,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  doc_count: 1,
+                  key: '400,1.2.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'esql_query_document',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': '400',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  doc_count: 1,
+                  key: '1.2.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'esql_query_document',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': null,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          hits: { hits: [] },
+          timed_out: false,
+          took: 0,
+        },
+        isCountAgg: false,
+        isGroupAgg: true,
+      });
+      expect(rows).toEqual([
+        {
+          '@timestamp': '2023-07-12T13:32:04.174Z',
+          'Alert ID': '1.8.0',
+          'ecs.version': '1.8.0',
+          'error.code': null,
+        },
+        {
+          '@timestamp': '2025-07-12T13:32:04.174Z',
+          'Alert ID': '400,1.2.0',
+          'ecs.version': '1.2.0',
+          'error.code': '400',
+        },
+        {
+          '@timestamp': '2025-07-12T13:32:04.174Z',
+          'Alert ID': '1.2.0',
+          'ecs.version': '1.2.0',
+          'error.code': null,
+        },
+      ]);
+      expect(cols).toEqual([
+        { actions: false, id: 'Alert ID' },
+        { actions: false, id: '@timestamp' },
+        { actions: false, id: 'ecs.version' },
+        { actions: false, id: 'error.code' },
+      ]);
+      expect(duplicateAlertIds.size).toBe(0);
     });
   });
 
