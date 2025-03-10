@@ -197,9 +197,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         [exception]
       );
 
-      const [areConditionsValid, setAreConditionsValid] = useState(
-        !!exception.entries.length || false
-      );
+      const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
       // compute this for initial render only
       const existingComments = useMemo<ExceptionListItemSchema['comments']>(
         () => (exception as ExceptionListItemSchema)?.comments,
