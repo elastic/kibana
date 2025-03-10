@@ -15,7 +15,7 @@ import { TRANSACTION_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-ut
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
-import { getSpanFieldConfiguration } from '../resources/get_span_field_configuration';
+import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanSummary } from './sub_components/span_summary';
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;

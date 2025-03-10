@@ -16,8 +16,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { asDuration } from '../utils';
-import { FieldConfiguration, getCommonFieldConfiguration } from './get_field_configuration';
+import { asDuration } from '../../utils';
+import {
+  FieldConfiguration,
+  getCommonFieldConfiguration,
+} from '../../resources/get_field_configuration';
 
 export const getTransactionFieldConfiguration = (
   attributes: TraceDocumentOverview

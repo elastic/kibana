@@ -19,9 +19,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { DependencyNameLink } from '../doc_viewer_span_overview/sub_components/dependency_name_link';
-import { FieldConfiguration, getCommonFieldConfiguration } from './get_field_configuration';
-import { asDuration } from '../utils';
+import { DependencyNameLink } from '../sub_components/dependency_name_link';
+import {
+  FieldConfiguration,
+  getCommonFieldConfiguration,
+} from '../../resources/get_field_configuration';
+import { asDuration } from '../../utils';
 
 export const getSpanFieldConfiguration = (
   attributes: TraceDocumentOverview

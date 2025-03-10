@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { getTraceDocumentOverview } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
-import { getTransactionFieldConfiguration } from '../resources/get_transaction_field_configuration';
+import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
 import { TransactionSummary } from './sub_components/transaction_summary';
 export type TransactionOverviewProps = DocViewRenderProps;
 
