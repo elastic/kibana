@@ -42,6 +42,7 @@ import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
+  ENABLE_ASSET_INVENTORY_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -253,6 +254,23 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solution: 'security',
     },
+    [ENABLE_ASSET_INVENTORY_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
+        defaultMessage: 'Enable Security Asset Inventory',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
+        {
+          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+          values: { em: (chunks) => `<em>${chunks}</em>` },
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
         defaultMessage: 'Rules auto refresh',
@@ -381,7 +399,7 @@ export const initUiSettings = (
       value: DEFAULT_MAX_UNASSOCIATED_NOTES,
       schema: schema.number({
         min: 1,
-        max: 1000,
+        max: 10000,
         defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
       }),
       category: [APP_ID],
