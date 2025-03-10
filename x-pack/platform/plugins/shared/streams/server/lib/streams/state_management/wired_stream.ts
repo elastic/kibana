@@ -286,10 +286,12 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       },
       {
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: generateIngestPipeline(this._updated_definition.name, this._updated_definition),
       },
       {
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: generateReroutePipeline({
           definition: this._updated_definition,
         }),
@@ -359,6 +361,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     if (this._routingChanged) {
       actions.push({
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: generateReroutePipeline({
           definition: this._updated_definition,
         }),
@@ -367,6 +370,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     if (this._processingChanged) {
       actions.push({
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: generateIngestPipeline(this._updated_definition.name, this._updated_definition),
       });
     }

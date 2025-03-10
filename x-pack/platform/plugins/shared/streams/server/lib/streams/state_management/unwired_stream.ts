@@ -237,6 +237,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       };
       executionPlan.push({
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: set(
           { ...targetPipeline, id: targetPipelineName },
           'processors',
@@ -252,6 +253,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     if (this._updated_definition.ingest.processing.length > 0) {
       actions.push({
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: generateIngestPipeline(this._updated_definition.name, this._updated_definition),
       });
     }
@@ -279,6 +281,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     if (this._processingChanged && this._updated_definition.ingest.processing.length > 0) {
       actions.push({
         type: 'upsert_ingest_pipeline',
+        stream: this.definition.name,
         request: generateIngestPipeline(this._updated_definition.name, this._updated_definition),
       });
       actions.push(...(await this.ensureStreamManagedPipelineReference()));
