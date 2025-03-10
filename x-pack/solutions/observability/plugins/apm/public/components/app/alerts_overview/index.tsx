@@ -19,6 +19,7 @@ import {
 } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { isEnvironmentDefined } from '../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { push } from '../../shared/links/url_helpers';
 
@@ -64,7 +65,7 @@ export function AlertsOverview() {
       },
     ];
 
-    if (environment) {
+    if (isEnvironmentDefined(environment)) {
       filters.push({
         query: {
           match_phrase: {
