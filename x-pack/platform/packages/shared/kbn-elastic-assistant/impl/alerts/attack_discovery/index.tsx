@@ -47,7 +47,7 @@ export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
 
   return (
     <>
-      <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
+      <EuiTitle size={'s'}>
         <h2>{i18n.ATTACK_DISCOVERY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -80,7 +80,19 @@ export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
           </EuiButtonEmpty>
         </EuiPanel>
       ) : (
-        'No attack discovery exists'
+        <EuiPanel
+          css={css`
+            margin: ${euiTheme.size.s} 0;
+          `}
+          paddingSize="m"
+          hasBorder
+        >
+          <EuiPanel color="subdued" hasBorder={true}>
+            <EuiText size="s">
+              <p>{i18n.NO_RESULTS}</p>
+            </EuiText>
+          </EuiPanel>
+        </EuiPanel>
       )}
     </>
   );

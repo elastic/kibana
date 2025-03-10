@@ -105,7 +105,7 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
   }, [abortStream]);
   return (
     <>
-      <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
+      <EuiTitle size={'s'}>
         <h2>{i18n.AI_SUMMARY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
