@@ -54,12 +54,12 @@ describe('helpers', () => {
   });
 
   describe('isCORSError', () => {
-    test('should return true if the error is CORSError', async () => {
+    test('should return true if the error is CORSError', () => {
       const error = new CORSError('cors error');
       expect(isCORSError(error)).toBeTruthy();
     });
 
-    test('should return false if there is no error', async () => {
+    test('should return false if there is no error', () => {
       expect(isCORSError(new Error())).toBeFalsy();
     });
   });
