@@ -1757,7 +1757,7 @@ describe('Task Runner', () => {
         recovered: { count: 0, data: [] },
       });
 
-      alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
+      alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
       const taskRunner = new TaskRunner({
