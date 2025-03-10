@@ -47,3 +47,10 @@ export const ATTACK_CHAIN_TOOLTIP = (tacticsCount: number) =>
       values: { tacticsCount },
     }
   );
+
+export const NO_RESULTS = i18n.translate(
+  'xpack.elasticAssistant.alertSummary.attackDiscovery.noResults',
+  {
+    defaultMessage: 'Not part of any attack discoveries',
+  }
+);
