@@ -14,6 +14,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type {
+  FindFileStructureResponse,
   IngestPipeline,
   InitializeImportResponse,
 } from '@kbn/file-upload-plugin/common/types';
@@ -31,7 +32,12 @@ import {
 } from '../../application/file_data_visualizer/components/import_view/import';
 import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
 import type { FileClash } from './merge_tools';
-import { createMergedMappings, getFormatClashes, getMappingClashInfo } from './merge_tools';
+import {
+  CLASH_ERROR_TYPE,
+  createMergedMappings,
+  getFormatClashes,
+  getMappingClashInfo,
+} from './merge_tools';
 
 export enum STATUS {
   NA,
@@ -56,7 +62,7 @@ export interface UploadStatus {
   errors: Array<{ title: string; error: any }>;
 }
 
-export class FileManager {
+export class FileUploadManager {
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
   public readonly fileAnalysisStatus$: Observable<FileAnalysis[]> = this.files$.pipe(
@@ -64,6 +70,8 @@ export class FileManager {
       files.length > 0 ? combineLatest(files.map((file) => file.fileStatus$)) : of([])
     )
   );
+  private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
+
   private mappingsCheckSubscription: Subscription;
   private settings;
   private mappings: MappingTypeMapping | null = null;
@@ -93,17 +101,29 @@ export class FileManager {
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
+    private existingIndexName: string | null = null,
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
+    if (this.existingIndexName !== null) {
+      this.loadExistingIndexMappings();
+      this.autoCreateDataView = false;
+    }
+
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.settings = indexSettingsOverride ?? {};
 
-    this.mappingsCheckSubscription = this.fileAnalysisStatus$.subscribe((statuses) => {
+    this.mappingsCheckSubscription = combineLatest([
+      this.fileAnalysisStatus$,
+      this.existingIndexMappings$,
+    ]).subscribe(([statuses, existingIndexMappings]) => {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
-      if (allFilesAnalyzed) {
+      const isExistingMappingsReady =
+        this.existingIndexName === null || existingIndexMappings !== null;
+
+      if (allFilesAnalyzed && isExistingMappingsReady) {
         this.analysisValid$.next(true);
         const uploadStatus = this.uploadStatus$.getValue();
         if (uploadStatus.fileImport === STATUS.STARTED) {
@@ -117,8 +137,17 @@ export class FileManager {
         }
 
         const { formatsOk, fileClashes } = this.getFormatClashes();
-        const { mappingClashes, mergedMappings } = this.createMergedMappings();
-        const mappingsOk = mappingClashes.length === 0;
+        const { mappingClashes, mergedMappings, existingIndexChecks } = this.createMergedMappings();
+        // eslint-disable-next-line no-console
+        console.log('existingIndexChecks', existingIndexChecks);
+
+        let mappingsOk = mappingClashes.length === 0;
+        if (existingIndexChecks !== undefined) {
+          mappingsOk = mappingsOk && existingIndexChecks.mappingClashes.length === 0;
+          // mappingsOk = mappingsOk && existingIndexChecks.unmappedFields.length < 5;
+          // mappingsOk = mappingsOk && existingIndexChecks.newFieldsPerFile.length < 5;
+        }
+
         if (formatsOk === false) {
           this.setStatus({
             fileClashes,
@@ -130,12 +159,10 @@ export class FileManager {
           this.setStatus({
             fileClashes: [],
           });
-        } else {
-          this.setStatus({
-            fileClashes: getMappingClashInfo(mappingClashes, statuses),
-          });
         }
+
         this.setStatus({
+          fileClashes: getMappingClashInfo(mappingClashes, existingIndexChecks, statuses),
           analysisOk: mappingsOk && formatsOk,
         });
       }
@@ -184,7 +211,7 @@ export class FileManager {
     const filesToDestroy: FileWrapper[] = [];
     const files = this.getFiles();
     const newFiles = files.filter((file, i) => {
-      if (fileClashes[i].clash) {
+      if (fileClashes[i].clash === CLASH_ERROR_TYPE.ERROR) {
         filesToDestroy.push(files[i]);
         return false;
       }
@@ -198,6 +225,14 @@ export class FileManager {
     });
   }
 
+  public getExistingIndexName() {
+    return this.existingIndexName;
+  }
+
+  public isExistingIndexUpload() {
+    return this.existingIndexName !== null;
+  }
+
   public getFiles() {
     return this.files$.getValue();
   }
@@ -208,7 +243,7 @@ export class FileManager {
   } {
     const files = this.getFiles();
     const fileClashes = getFormatClashes(files);
-    const formatsOk = fileClashes.every((file) => file.clash === false);
+    const formatsOk = fileClashes.every((file) => file.clash === CLASH_ERROR_TYPE.NONE);
 
     if (formatsOk) {
       this.commonFileFormat = formatsOk ? files[0].getStatus().results!.format : null;
@@ -221,7 +256,10 @@ export class FileManager {
 
   private createMergedMappings() {
     const files = this.getFiles();
-    return createMergedMappings(files);
+    return createMergedMappings(
+      files,
+      this.existingIndexMappings$.getValue() as FindFileStructureResponse['mappings']
+    );
   }
 
   private getPipelines(): Array<IngestPipeline | undefined> {
@@ -275,7 +313,8 @@ export class FileManager {
         indexName,
         this.settings,
         this.mappings,
-        this.pipelines
+        this.pipelines,
+        this.isExistingIndexUpload()
       );
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
@@ -475,6 +514,25 @@ export class FileManager {
           },
         });
       });
+    }
+  }
+
+  private async loadExistingIndexMappings() {
+    if (this.existingIndexName === null) {
+      return;
+    }
+    try {
+      const { mappings } = await this.http.fetch<{ mappings: MappingTypeMapping }>(
+        `/api/index_management/mapping/${this.existingIndexName}`,
+        {
+          method: 'GET',
+          version: '1',
+        }
+      );
+
+      this.existingIndexMappings$.next(mappings);
+    } catch (e) {
+      this.existingIndexMappings$.next(null);
     }
   }
 }

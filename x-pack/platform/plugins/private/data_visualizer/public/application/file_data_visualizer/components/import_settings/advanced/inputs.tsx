@@ -19,10 +19,26 @@ interface JsonEditorProps {
   data: string;
   onChange(value: string): void;
   indexName?: string;
+  showTitle?: boolean;
 }
 
-export const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
-  return (
+export const IndexSettings: FC<JsonEditorProps> = ({
+  initialized,
+  data,
+  onChange,
+  showTitle = true,
+}) => {
+  const editor = (
+    <JsonEditor
+      mode={EDITOR_MODE.JSON}
+      readOnly={initialized === true}
+      value={data}
+      height={EDITOR_HEIGHT}
+      onChange={onChange}
+    />
+  );
+
+  return showTitle ? (
     <EuiFormRow
       label={
         <FormattedMessage
@@ -32,19 +48,30 @@ export const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange
       }
       fullWidth
     >
-      <JsonEditor
-        mode={EDITOR_MODE.JSON}
-        readOnly={initialized === true}
-        value={data}
-        height={EDITOR_HEIGHT}
-        onChange={onChange}
-      />
+      {editor}
     </EuiFormRow>
+  ) : (
+    editor
   );
 };
 
-export const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange, indexName }) => {
-  return (
+export const Mappings: FC<JsonEditorProps> = ({
+  initialized,
+  data,
+  onChange,
+  indexName,
+  showTitle = true,
+}) => {
+  const editor = (
+    <JsonEditor
+      mode={EDITOR_MODE.JSON}
+      readOnly={initialized === true}
+      value={data}
+      height={EDITOR_HEIGHT}
+      onChange={onChange}
+    />
+  );
+  return showTitle ? (
     <EuiFormRow
       label={
         indexName ? (
@@ -62,19 +89,29 @@ export const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange, ind
       }
       fullWidth
     >
-      <JsonEditor
-        mode={EDITOR_MODE.JSON}
-        readOnly={initialized === true}
-        value={data}
-        height={EDITOR_HEIGHT}
-        onChange={onChange}
-      />
+      {editor}
     </EuiFormRow>
+  ) : (
+    editor
   );
 };
 
-export const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
-  return (
+export const IngestPipeline: FC<JsonEditorProps> = ({
+  initialized,
+  data,
+  onChange,
+  showTitle = true,
+}) => {
+  const editor = (
+    <JsonEditor
+      mode={EDITOR_MODE.JSON}
+      readOnly={initialized === true}
+      value={data}
+      height={EDITOR_HEIGHT}
+      onChange={onChange}
+    />
+  );
+  return showTitle ? (
     <EuiFormRow
       label={
         <FormattedMessage
@@ -84,13 +121,9 @@ export const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChang
       }
       fullWidth
     >
-      <JsonEditor
-        mode={EDITOR_MODE.JSON}
-        readOnly={initialized === true}
-        value={data}
-        height={EDITOR_HEIGHT}
-        onChange={onChange}
-      />
+      {editor}
     </EuiFormRow>
+  ) : (
+    editor
   );
 };

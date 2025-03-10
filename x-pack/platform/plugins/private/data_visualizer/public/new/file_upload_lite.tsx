@@ -5,51 +5,63 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import type { FileUploadResults } from '@kbn/file-upload-common';
-import type { FlyoutContent } from '@kbn/file-upload-common/src/types';
+import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
+import type { CoreStart } from '@kbn/core/public';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
-import { getCoreStart, getPluginsStart } from '../kibana_services';
 import { FileUploadLiteView } from './file_upload_lite_view';
+import { FileUploadManager } from './file_manager/file_manager';
+import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
 
 export interface Props {
+  coreStart: CoreStart;
+  plugins: DataVisualizerStartDependencies;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
-  setUploadResults?: (results: FileUploadResults) => void;
-  autoAddInference?: string;
-  autoCreateDataView?: boolean;
-  indexSettings?: IndicesIndexSettings;
-  initialIndexName?: string;
-  flyoutContent?: FlyoutContent;
+  props: OpenFileUploadLiteContext;
   onClose?: () => void;
 }
 
 export const FileDataVisualizerLite: FC<Props> = ({
+  coreStart,
+  plugins,
   getAdditionalLinks,
   resultLinks,
-  setUploadResults,
-  autoAddInference,
-  autoCreateDataView,
-  indexSettings,
-  initialIndexName,
-  flyoutContent,
+  props,
   onClose,
 }) => {
-  const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, fileUpload, cloud, fieldFormats } = getPluginsStart();
   const services = {
     ...coreStart,
-    data,
-    maps,
-    embeddable,
-    share,
-    fileUpload,
-    fieldFormats,
+    ...plugins,
   };
+  const { data, fileUpload, cloud } = services;
+
+  const { existingIndex, autoAddInference, autoCreateDataView, indexSettings } = props;
+  const fileUploadManager = useMemo(
+    () =>
+      new FileUploadManager(
+        fileUpload,
+        coreStart.http,
+        data.dataViews,
+        existingIndex ?? null,
+        autoAddInference ?? null,
+        autoCreateDataView,
+        true,
+        indexSettings
+      ),
+    [
+      autoAddInference,
+      autoCreateDataView,
+      coreStart.http,
+      data.dataViews,
+      existingIndex,
+      fileUpload,
+      indexSettings,
+    ]
+  );
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider ?? EmptyContext;
@@ -59,18 +71,10 @@ export const FileDataVisualizerLite: FC<Props> = ({
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileUploadLiteView
-            dataStart={data}
-            http={coreStart.http}
-            fileUpload={fileUpload}
+            fileUploadManager={fileUploadManager}
             getAdditionalLinks={getAdditionalLinks}
             resultLinks={resultLinks}
-            capabilities={coreStart.application.capabilities}
-            setUploadResults={setUploadResults}
-            autoAddInference={autoAddInference}
-            autoCreateDataView={autoCreateDataView}
-            indexSettings={indexSettings}
-            initialIndexName={initialIndexName}
-            flyoutContent={flyoutContent}
+            props={props}
             onClose={onClose}
           />
         </CloudContext>
