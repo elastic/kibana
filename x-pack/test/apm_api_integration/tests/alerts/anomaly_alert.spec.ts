@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await ml.cleanMlIndices();
       }
 
-      describe.only('with ml jobs', () => {
+      describe('with ml jobs', () => {
         let createdRule: Awaited<ReturnType<typeof createApmRule>>;
 
         before(async () => {
