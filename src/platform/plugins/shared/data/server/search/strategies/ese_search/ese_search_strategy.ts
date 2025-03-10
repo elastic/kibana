@@ -167,7 +167,7 @@ export const enhancedEsSearchStrategyProvider = (
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { ignore_unavailable, ...params } = {
+    const { ignore_unavailable, preference, ...params } = {
       ...querystring,
       ...request.params,
       index: request.params.index,
@@ -179,7 +179,7 @@ export const enhancedEsSearchStrategyProvider = (
           ...params,
           // Not defined in the spec, and the client places it in the body.
           // This workaround allows us to force it as a query parameter.
-          querystring: { ignore_unavailable },
+          querystring: { ...params.querystring, ignore_unavailable, preference },
         },
         {
           signal: options?.abortSignal,
