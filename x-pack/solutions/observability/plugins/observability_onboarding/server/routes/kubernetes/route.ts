@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
-import { firstValueFrom } from 'rxjs';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -17,14 +16,15 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import { createManagedServiceApiKey } from '../../lib/api_key/create_managed_service_api_key';
+import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
+import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
   onboardingId: string;
   elasticsearchUrl: string;
   elasticAgentVersionInfo: ElasticAgentVersionInfo;
-  managedServiceUrl: string;
+  managedOtlpServiceUrl: string;
 }
 
 export interface HasKubernetesDataRouteResponse {
@@ -43,15 +43,8 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
         'Authorization is checked by custom logic using Elasticsearch client and by the Package Service client',
     },
   },
-  async handler({
-    context,
-    request,
-    params,
-    plugins,
-    services,
-    kibanaVersion,
-    config,
-  }): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
+  async handler(resources): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
+    const { context, request, params, plugins, services, kibanaVersion, config } = resources;
     const {
       elasticsearch: { client },
     } = await context.core;
@@ -68,7 +61,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const packageClient = fleetPluginStart.packageService.asScoped(request);
     const apiKeyPromise =
       config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
-        ? createManagedServiceApiKey(
+        ? createManagedOtlpServiceApiKey(
             client.asCurrentUser,
             `ingest-otel-k8s-${new Date().toISOString()}`
           )
@@ -90,16 +83,13 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
-    const managedServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((apmConfig) => {
-      return apmConfig.managedServiceUrl;
-    });
 
     return {
       onboardingId: uuidv4(),
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
-      managedServiceUrl,
+      managedOtlpServiceUrl: await getManagedOtlpServiceUrl(resources),
     };
   },
 });

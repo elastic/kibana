@@ -10,7 +10,3 @@ export interface ElasticAgentVersionInfo {
   agentBaseVersion: string;
   agentDockerImageVersion: string;
 }
-
-export interface APMApiKeyResponse {
-  agentKey: { name: string; encoded: string };
-}

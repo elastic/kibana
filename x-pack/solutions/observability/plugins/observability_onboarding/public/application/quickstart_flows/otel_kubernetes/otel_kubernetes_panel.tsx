@@ -27,13 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import { type ObservabilityOnboardingAppServices } from '../../..';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
-import { useOtelIngestEndpointUrl } from '../shared/use_otel_ingest_endpoint_url';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
 const OTEL_KUBE_STACK_VERSION = '0.3.9';
@@ -62,10 +61,8 @@ export const OtelKubernetesPanel: React.FC = () => {
       });
     }
   }, [data, onPageReady]);
-  const ingestEndpointUrl = useOtelIngestEndpointUrl({
-    elasticsearchUrl: data?.elasticsearchUrl,
-    managedServiceUrl: data?.managedServiceUrl,
-  });
+
+  const ingestEndpointUrl = isServerless ? data?.managedOtlpServiceUrl : data?.elasticsearchUrl;
 
   if (error) {
     return (

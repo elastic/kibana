@@ -7,7 +7,7 @@
 
 import { type ElasticsearchClient } from '@kbn/core/server';
 
-export function createManagedServiceApiKey(esClient: ElasticsearchClient, name: string) {
+export function createManagedOtlpServiceApiKey(esClient: ElasticsearchClient, name: string) {
   return esClient.security.createApiKey({
     name,
     role_descriptors: {
