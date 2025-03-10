@@ -16,12 +16,12 @@ import {
   useDiscoverCustomization$,
   useDiscoverCustomizationService,
 } from './customization_provider';
-import {
-  createCustomizationService,
+import type {
   DiscoverCustomization,
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
+import { createCustomizationService } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {
   it('should provide customization service', async () => {
