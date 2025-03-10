@@ -27,12 +27,12 @@ describe('getManagedOtlpServiceUrl()', () => {
     expect(result).toBe('');
   });
 
-  it('returns managed OTLP service URL endpoint by converting APM managed service URL', async () => {
+  it('returns managed OTLP service URL endpoint by converting APM managed service URL and adding port number', async () => {
     const plugins = {
       apm: {
         setup: {
           config$: of({
-            managedServiceUrl: 'https://e2e-tests-c045db.apm.us-east-1.aws.elastic.cloud:443',
+            managedServiceUrl: 'https://e2e-tests-c045db.apm.us-east-1.aws.elastic.cloud',
           }),
         },
       },
