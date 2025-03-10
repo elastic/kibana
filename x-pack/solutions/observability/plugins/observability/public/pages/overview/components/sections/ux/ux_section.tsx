@@ -108,12 +108,14 @@ export function UXSection({ bucketSize }: Props) {
         />
       </div>
 
-      <CoreVitals
-        data={coreWebVitals}
-        loading={isLoading}
-        displayServiceName={true}
-        serviceName={serviceName}
-      />
+      <div style={{ marginTop: 24 }}>
+        <CoreVitals
+          data={coreWebVitals}
+          loading={isLoading}
+          displayServiceName={true}
+          serviceName={serviceName}
+        />
+      </div>
     </SectionContainer>
   );
 }

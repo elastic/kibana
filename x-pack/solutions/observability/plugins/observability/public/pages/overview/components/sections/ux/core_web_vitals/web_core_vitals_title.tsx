@@ -54,43 +54,24 @@ export function WebCoreVitalsTitle({
 
   return (
     <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h3>
-            {CORE_WEB_VITALS}
-            <EuiPopover
-              isOpen={isPopoverOpen}
-              button={
-                <EuiButtonIcon
-                  data-test-subj="o11yWebCoreVitalsTitleButton"
-                  aria-label={helpAriaLabel}
-                  onClick={() => setIsPopoverOpen(true)}
-                  color={'text'}
-                  iconType={'questionInCircle'}
-                />
-              }
-              closePopover={closePopover}
-            >
-              <div>
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.observability.ux.dashboard.webCoreVitals.help"
-                    defaultMessage="Learn more about"
-                  />{' '}
-                  <EuiLink
-                    data-test-subj="o11yWebCoreVitalsTitleLink"
-                    href="https://web.dev/vitals/"
-                    external
-                    target="_blank"
-                  >
-                    {CORE_WEB_VITALS}
-                  </EuiLink>
-                </EuiText>
-              </div>
-            </EuiPopover>
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
+      <EuiFlexGroup gutterSize="none" direction="row" alignItems="center">
+        <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+          <EuiTitle size="xs">
+            <h3>{CORE_WEB_VITALS}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            style={{ fontSize: 14 }}
+            data-test-subj="o11yWebCoreVitalsTitleLink"
+            href="https://web.dev/vitals/"
+            external
+            target="_blank"
+          >
+            Learn more
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {displayTrafficMetric && totalPageViews > 0 && (
         <EuiFlexItem grow={false}>
           {loading ? (
