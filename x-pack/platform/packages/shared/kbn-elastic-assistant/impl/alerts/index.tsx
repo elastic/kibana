@@ -8,3 +8,4 @@
 export { AlertSummary } from './alert_summary';
 export { SuggestedPrompts } from './suggested_prompts';
 export { AttackDiscoveryWidget } from './attack_discovery';
+export { Conversations } from './conversations';
