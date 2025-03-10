@@ -18,10 +18,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import { showErrorDialog, ToastsService } from './toasts';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
-import {
-  ProductInterceptService,
-  EventReporter as ProductInterceptEventReporter,
-} from './product_intercept_dialog';
+import { ProductInterceptService } from './product_intercept_dialog';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -87,11 +84,12 @@ export class NotificationsService {
           ...startDeps,
         }),
       productIntercepts: this.productIntercepts.start({
-        eventReporter: new ProductInterceptEventReporter({ analytics: startDeps.analytics }),
         overlays,
         targetDomElement: (() => {
-          // create container to hold product intercept dialog
-          const productInterceptContainer = document.createElement('div');
+          // create container to mount product intercept dialog into
+          const productInterceptContainer = Object.assign(document.createElement('div'), {
+            id: 'productInterceptMountPoint',
+          });
           targetDomElement.appendChild(productInterceptContainer);
           return productInterceptContainer;
         })(),

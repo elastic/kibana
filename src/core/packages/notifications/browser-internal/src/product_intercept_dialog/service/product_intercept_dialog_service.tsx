@@ -17,9 +17,9 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
-import { ProductInterceptDialogManager } from './product_intercept_dialog_manager';
+import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
 
-import { EventReporter } from './product_intercept_dialog_manager/telemetry';
+import { EventReporter as ProductInterceptEventReporter } from './telemetry';
 
 interface ProductInterceptServiceStartDeps {
   analytics: AnalyticsServiceStart;
@@ -27,13 +27,13 @@ interface ProductInterceptServiceStartDeps {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  eventReporter: EventReporter;
   targetDomElement: HTMLElement;
 }
 
 export class ProductInterceptDialogService {
   private api?: ProductInterceptDialogApi;
   private targetDomElement?: HTMLElement;
+  private eventReporter?: ProductInterceptEventReporter;
 
   setup() {
     this.api = new ProductInterceptDialogApi();
@@ -41,18 +41,16 @@ export class ProductInterceptDialogService {
     return this.api!;
   }
 
-  public start({
-    targetDomElement,
-    eventReporter,
-    ...startDeps
-  }: ProductInterceptServiceStartDeps) {
+  public start({ targetDomElement, ...startDeps }: ProductInterceptServiceStartDeps) {
     this.api!.init({ ...startDeps });
     this.targetDomElement = targetDomElement;
+
+    this.eventReporter = new ProductInterceptEventReporter({ analytics: startDeps.analytics });
 
     render(
       <KibanaRenderContextProvider {...startDeps}>
         <ProductInterceptDialogManager
-          {...{ eventReporter, productIntercepts$: this.api!.get$() }}
+          {...{ eventReporter: this.eventReporter, productIntercepts$: this.api!.get$() }}
         />
       </KibanaRenderContextProvider>,
       this.targetDomElement
