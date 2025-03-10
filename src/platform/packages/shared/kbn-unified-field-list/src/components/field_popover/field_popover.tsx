@@ -14,7 +14,6 @@ import {
   EuiPopover,
   EuiPopoverProps,
   EuiPopoverTitle,
-  useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -33,7 +32,6 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   renderFooter,
   ...otherPopoverProps
 }) => {
-  const { euiTheme } = useEuiTheme();
   let header: React.ReactNode | null = null;
   let content: React.ReactNode | null = null;
   let footer: React.ReactNode | null = null;
@@ -71,7 +69,7 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       data-test-subj="fieldPopover"
       panelClassName="unifiedFieldList__fieldPopover__fieldPopoverPanel"
       panelProps={{
-        css: css`
+        css: ({ euiTheme }: UseEuiTheme) => css`
           min-width: ${euiTheme.size.xxl} * 6.5 !important;
           max-width: ${euiTheme.size.xxl} * 10 !important;
 
