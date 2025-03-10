@@ -16,7 +16,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.disableInstrumentations.label', {
       defaultMessage: 'Disable instrumentations',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.disableInstrumentations.description', {
+    description: i18n.translate('xpack.apm.agentConfig.edot.disableInstrumentations.description', {
       defaultMessage:
         'Comma-separated list of modules to disable instrumentation for.\n' +
         'When instrumentation is disabled for a module, no spans will be collected for that module.\n' +
