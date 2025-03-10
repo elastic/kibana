@@ -5,35 +5,29 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { StructuredTool, tool as langchainTool } from '@langchain/core/tools';
-import { jsonSchemaToZod, JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import { IntegrationTool } from '../../types';
-import { IntegrationsService } from './integrations_service';
+import { IntegrationTool } from "../../types";
+import { StructuredTool, tool } from "@langchain/core/tools";
+import { jsonSchemaToZod } from "@n8n/json-schema-to-zod";
+import { IntergrationsSession } from "./integrations_session";
 
-export async function getLCTools(
-  integrationService: IntegrationsService
-): Promise<StructuredTool[]> {
-  const tools = await integrationService.getAllTools();
-  return tools.map((tool) => {
-    return convertToLCTool(tool, async (input) => {
-      const result = await integrationService.executeTool(tool.name, input);
-      return JSON.stringify(result);
-    });
-  });
+export async function getLCTools(integrationsSession: IntergrationsSession): Promise<StructuredTool[]> {
+    const tools = await integrationsSession.getAllTools();
+    return tools.map(tool => convertToLCTool(tool, async (input) => {
+        const result = await integrationsSession.executeTool(tool.name, input);
+        return JSON.stringify(result);
+    }));
 }
 
-function convertToLCTool(
-  integrationTool: IntegrationTool,
-  action: (input: any) => Promise<string>
-): StructuredTool {
-  const schema = jsonSchemaToZod(
-    integrationTool.inputSchema as unknown as JsonSchemaObject
-  ) as z.ZodObject<any>;
+function convertToLCTool(integrationTool: IntegrationTool, action: (input: any) => Promise<string>): StructuredTool {
 
-  return langchainTool(action, {
-    name: integrationTool.name,
-    description: integrationTool.description,
-    schema,
-  });
+  const schema = jsonSchemaToZod(integrationTool.inputSchema);
+
+  return tool(
+    action,
+    {
+      name: integrationTool.name,
+      description: integrationTool.description,
+      schema: schema,
+    }
+  )
 }

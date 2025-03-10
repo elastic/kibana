@@ -36,6 +36,7 @@ import type { Conversation, ConversationEvent } from '../../../common/conversati
 import { AgentFactory } from '../orchestration';
 import { ConversationService, ConversationClient } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
+import { InternalIntegrationServices } from '@kbn/wci-common';
 
 interface ChatServiceOptions {
   logger: Logger;
@@ -63,12 +64,14 @@ export class ChatService {
     connectorId,
     request,
     nextUserMessage,
+    internalServices,
   }: {
     agentId: string;
     connectorId: string;
     conversationId?: string;
     nextUserMessage: string;
     request: KibanaRequest;
+    internalServices: InternalIntegrationServices;
   }) {
     const logError = (source: string, err: Error) => {
       this.logger.error(`Error during converse from ${source}:\n${err.stack ?? err.message}`);

@@ -46,6 +46,10 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
           agentId,
           nextUserMessage: nextMessage,
           conversationId,
+          internalServices: {
+            elasticsearchClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+            logger,
+          }
         });
 
         return res.ok({

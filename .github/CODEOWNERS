@@ -968,6 +968,7 @@ x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
+x-pack/solutions/search/packages/workchat/wci-common @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
@@ -979,6 +980,7 @@ x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
+x-pack/solutions/search/plugins/workchat/wci_salesforce @elastic/search-kibana
 x-pack/solutions/search/plugins/workchat/workchat_app @elastic/search-kibana
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting

@@ -10,9 +10,8 @@ import { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool } from '@langchain/core/tools';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 import { withSystemPrompt } from './prompts';
-
 export const createAgentGraph = async ({
   agentId,
   chatModel,
@@ -35,7 +34,7 @@ export const createAgentGraph = async ({
 
   const tools = [...integrationTools];
 
-  const toolNode = new ToolNode<typeof StateAnnotation.State>(tools);
+  const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({
     tags: ['workflow', `agent:${agentId}`],
@@ -59,10 +58,17 @@ export const createAgentGraph = async ({
     return '__end__';
   };
 
+  const toolHandler = async (state: typeof StateAnnotation.State) => {
+    const toolNodeResult = await toolNode.invoke(state.addedMessages);
+    return {
+      addedMessages: [...state.addedMessages, ...toolNodeResult],
+    };
+  };
+
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addEdge('__start__', 'agent')
-    .addNode('tools', toolNode)
+    .addNode('tools', toolHandler)
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue)
     .compile();
