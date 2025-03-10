@@ -4365,6 +4365,244 @@
         ]
       }
     },
+    "/api/alerting/rule/{id}/snooze_schedule": {
+      "post": {
+        "operationId": "post-alerting-rule-id-snooze-schedule",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Identifier of the rule.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "schedule": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "custom": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "duration": {
+                            "description": "Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: '5h', '30m', '5000s'.",
+                            "type": "string"
+                          },
+                          "recurring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "end": {
+                                "description": "End date of recurrence of the schedule in ISO 8601 format.",
+                                "type": "string"
+                              },
+                              "every": {
+                                "description": "Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: '15d', '2w', '3m', '1y'.",
+                                "type": "string"
+                              },
+                              "occurrences": {
+                                "description": "Total number of recurrences of the schedule.",
+                                "minimum": 1,
+                                "type": "number"
+                              },
+                              "onMonth": {
+                                "description": "Specific months for recurrence of the schedule. Valid values are 1-12.",
+                                "items": {
+                                  "maximum": 12,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onMonthDay": {
+                                "description": "Specific days of the month for recurrence of the schedule. Valid values are 1-31.",
+                                "items": {
+                                  "maximum": 31,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onWeekDay": {
+                                "description": "Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "start": {
+                            "description": "Start date and time of the schedule in ISO 8601 format.",
+                            "type": "string"
+                          },
+                          "timezone": {
+                            "description": "Timezone of the schedule. The default timezone is UTC.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "duration"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "schedule"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "body": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "schedule": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "custom": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "duration": {
+                                  "description": "Duration of the schedule. It allows values in <integer><unit> format. <unit> is one of h|m|s for hours, minutes, seconds. Examples: '5h', '30m', '5000s'.",
+                                  "type": "string"
+                                },
+                                "recurring": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "end": {
+                                      "description": "End date of recurrence of the schedule in ISO 8601 format.",
+                                      "type": "string"
+                                    },
+                                    "every": {
+                                      "description": "Recurrence interval and frequency of the schedule. It allows values in <integer><unit> format. <unit> is one of d|w|M|y for days, weeks, months, years. Example: '15d', '2w', '3m', '1y'.",
+                                      "type": "string"
+                                    },
+                                    "occurrences": {
+                                      "description": "Total number of recurrences of the schedule.",
+                                      "minimum": 1,
+                                      "type": "number"
+                                    },
+                                    "onMonth": {
+                                      "description": "Specific months for recurrence of the schedule. Valid values are 1-12.",
+                                      "items": {
+                                        "maximum": 12,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "minItems": 1,
+                                      "type": "array"
+                                    },
+                                    "onMonthDay": {
+                                      "description": "Specific days of the month for recurrence of the schedule. Valid values are 1-31.",
+                                      "items": {
+                                        "maximum": 31,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "minItems": 1,
+                                      "type": "array"
+                                    },
+                                    "onWeekDay": {
+                                      "description": "Specific days of the week ['MO','TU'...] or nth day of month ['+1MO', '-3FR', '+2WE', '-4SA'] for recurrence of the schedule.",
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "minItems": 1,
+                                      "type": "array"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "start": {
+                                  "description": "Start date and time of the schedule in ISO 8601 format.",
+                                  "type": "string"
+                                },
+                                "timezone": {
+                                  "description": "Timezone of the schedule. The default timezone is UTC.",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "start",
+                                "duration"
+                              ],
+                              "type": "object"
+                            },
+                            "id": {
+                              "description": "Identifier of the snooze schedule.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "schedule"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "body"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given id does not exist."
+          }
+        },
+        "summary": "Schedule a snooze for the rule",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
