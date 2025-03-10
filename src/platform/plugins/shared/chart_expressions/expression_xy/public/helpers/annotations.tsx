@@ -142,7 +142,7 @@ function NumberIcon({ number }: { number: number }) {
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" css={[useEuiFontSize('xxxs'), styles.numberIconText]}>
+      <EuiText color="ghost" css={[css(useEuiFontSize('xxxs')), styles.numberIconText]}>
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
