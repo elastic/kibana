@@ -148,8 +148,8 @@ async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
-  // :: Effect.Effect<ApmAlertFields[], never, never>
-  const fetch = Effect.promise(() => getAlertByRuleId({ es, ruleId }));
+  // :: Effect.Effect<ApmAlertFields[], UnknownException, never>
+  const fetch = Effect.tryPromise(() => getAlertByRuleId({ es, ruleId }));
   // :: (alerts: ApmAlertFields[]) => Effect.Effect<ApmAlertFields[], UnknownException, never>
   const throwWhenLessThan = (alerts: ApmAlertFields[]) =>
     Effect.try(() => {
