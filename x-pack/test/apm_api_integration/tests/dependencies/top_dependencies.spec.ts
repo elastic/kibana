@@ -74,7 +74,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is generated', () => {
       let topDependencies: TopDependencies;
       let topDependenciesStats: TopDependenciesStatistics;
-      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
         await generateData({ apmSynthtraceEsClient, start, end });
