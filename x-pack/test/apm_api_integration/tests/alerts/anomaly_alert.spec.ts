@@ -145,8 +145,8 @@ async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
-  // :: Effect.Effect<ApmAlertFields[], TimeoutException, never>
   const main = Effect.gen(function* () {
+    yield* Effect.log(`Searching for rules`);
     return yield* Effect.promise(() =>
       getAlertByRuleId({ es, ruleId }).then((alerts) => {
         const actualAlertCount = alerts.length;
@@ -155,7 +155,7 @@ async function waitForAlertsForRule({
         return alerts;
       })
     );
-  }).pipe(Effect.timeout('30 seconds'));
+  }).pipe(Effect.timeout('2 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
 
-  return await Effect.runPromise(Effect.retry(main, { times: 100 }));
+  return await Effect.runPromise(Effect.retry(main, { times: 2 }));
 }
