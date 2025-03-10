@@ -15,8 +15,6 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiComboBox,
   EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
@@ -26,7 +24,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleSpecificFlappingProperties, RuleTypeParams } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
@@ -57,6 +54,7 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
+import { RuleDashboards} from './rule_dashboards';
 import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
 
 export const RuleDefinition = () => {
@@ -86,9 +84,8 @@ export const RuleDefinition = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { charts, data, dataViews, unifiedSearch, docLinks, application, dashboard: dashboardService, featureFlags } = plugins;
+  const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
 
-  const isLinkedDashboardsEnabled = featureFlags.getBooleanValue('rca.linkedDashboards', false);
   const {
     capabilities: { rulesSettings },
   } = application;
@@ -136,59 +133,6 @@ export const RuleDefinition = () => {
 
     return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
   }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
-
-  const [dashboardList, setDashboardList] = useState<
-    Array<{
-      value: string;
-      label: string;
-    }>
-  >();
-  
-  const [selectedDashboards, setSelectedDashboards] = useState<
-    Array<{ label: string; value: string }> | undefined
-  >();
-  
-  useEffect(() => {
-    const fetchDashboardTitles = async () => {
-      const dashboardsWithTitles = await Promise.all(
-        (params.dashboards ?? []).map(async (dashboard) => ({
-          label: (await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id)).attributes.title,
-          value: dashboard.id,
-        }))
-      );
-      setSelectedDashboards(dashboardsWithTitles);
-    };
-
-    fetchDashboardTitles();
-  }, [params.dashboards, dashboardService]);
-
-  const onChange = (selectedOptions: any[]) => {
-    setSelectedDashboards(selectedOptions);
-    dispatch({
-      type: 'setParamsProperty',
-      payload: {
-        property: 'dashboards',
-        value: selectedOptions.map((selectedOption) => ({ id: selectedOption.value, title: selectedOption.label }))
-      },
-    });
-  };
-
-  const getDashboardItem = (dashboard: DashboardItem) => ({
-    value: dashboard.id,
-    label: dashboard.attributes.title,
-  });
-
-  const loadDashboards = useCallback(async () => {
-    const dashboards = await dashboardServiceProvider(dashboardService).fetchDashboards();
-    const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
-      getDashboardItem(dashboard)
-    );
-    setDashboardList(dashboardOptions);
-  }, [dashboardService]);
-
-  useEffect(() => {
-    loadDashboards();
-  }, [loadDashboards]);
 
   const RuleParamsExpressionComponent = selectedRuleTypeModel.ruleParamsExpression ?? null;
 
@@ -317,30 +261,7 @@ export const RuleDefinition = () => {
           </Suspense>
         )}
       </EuiSplitPanel.Inner>
-      { isLinkedDashboardsEnabled && (
-        <EuiSplitPanel.Inner>
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <EuiTitle size="xs">
-                <h6>
-                  <FormattedMessage
-                    id="xpack.observability.customThreshold.rule.alertFlyout.linkDashboards"
-                    defaultMessage="Link dashboard(s)"
-                  />
-                </h6>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiComboBox
-                fullWidth
-                options={dashboardList}
-                selectedOptions={selectedDashboards}
-                onChange={onChange}
-              />
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-
-        </EuiSplitPanel.Inner>
-      )}
+      <RuleDashboards plugins={plugins} />
       <EuiSplitPanel.Inner>
         <EuiDescribedFormGroup
           fullWidth
