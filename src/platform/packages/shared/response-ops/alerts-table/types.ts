@@ -391,13 +391,9 @@ export interface PublicAlertsDataGridProps
    */
   hideBulkActions?: boolean;
   /**
-   * A getter to customize the bulk actions menu items
-   * based on the current alerts search query used
+   * An array of bulk actions to be displayed in the table
    */
-  getBulkActions?: (
-    query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
-    refresh: () => void
-  ) => BulkActionsPanelConfig[];
+  externalBulkActions?: BulkActionsPanelConfig[];
   /**
    * Width of the actions column
    */
