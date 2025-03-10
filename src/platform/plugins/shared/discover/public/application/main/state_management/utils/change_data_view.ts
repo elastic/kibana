@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SortOrder } from '@kbn/saved-search-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import { DiscoverAppStateContainer } from '../discover_app_state_container';
+import type { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
 import { internalStateActions, type InternalStateStore, type RuntimeStateManager } from '../redux';
 
