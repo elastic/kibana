@@ -20,6 +20,12 @@ const tabItem = {
 const tabContentId = 'test-content-id';
 const tabButtonTestSubj = `unifiedTabs_selectTabBtn_${tabItem.id}`;
 
+const tabsSizeConfig = {
+  isScrollable: false,
+  regularTabMaxWidth: 280,
+  regularTabMinWidth: 96,
+};
+
 describe('Tab', () => {
   it('renders tab', async () => {
     const onLabelEdited = jest.fn();
@@ -29,6 +35,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         onLabelEdited={onLabelEdited}
@@ -70,6 +77,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         getTabMenuItems={getTabMenuItems}
@@ -98,6 +106,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         onLabelEdited={onLabelEdited}
@@ -130,6 +139,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         onLabelEdited={onLabelEdited}

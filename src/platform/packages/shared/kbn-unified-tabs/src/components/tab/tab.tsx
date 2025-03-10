@@ -119,7 +119,7 @@ export const Tab: React.FC<TabProps> = ({
               onClick={onSelectEvent}
               onDoubleClick={() => setIsInlineEditActive(true)}
             >
-              <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme, tabsSizeConfig)}>
+              <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
               </EuiText>
             </button>
@@ -224,7 +224,7 @@ function getTabButtonCss(euiTheme: EuiThemeComputed) {
   `;
 }
 
-function getTabLabelCss(euiTheme: EuiThemeComputed, tabsSizeConfig: TabsSizeConfig) {
+function getTabLabelCss(euiTheme: EuiThemeComputed) {
   return css`
     padding-right: ${euiTheme.size.s};
     white-space: nowrap;
