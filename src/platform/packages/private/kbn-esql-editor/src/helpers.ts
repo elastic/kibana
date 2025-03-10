@@ -63,7 +63,10 @@ export const useDebounceWithOptions = (
   );
 };
 
-const quotedWarningMessageRegexp = /"(.*?)"/g;
+// Quotes can be used as separators for multiple warnings unless
+// they are escaped with backslashes. This regexp will match any
+// quoted string that is not escaped.
+const quotedWarningMessageRegexp = /(?<!\\)"(.*?)(?<!\\)"/g;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
   if (quotedWarningMessageRegexp.test(warning)) {

@@ -202,6 +202,36 @@ describe('helpers', function () {
         },
       ]);
     });
+
+    it('should return the correct array of warningsif the quotes are escaped (at that case we dont have a new warning)', function () {
+      const warning = `299 Elasticsearch-9.1.0 "No limit defined, adding default limit of [1000]", "Line 1:9: evaluation of [TO_LOWER([\\"FOO\\", \\"BAR\\"])] failed", "Line 1:9: java.lang.IllegalArgumentException: single-value function encountered multi-value"`;
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message: 'No limit defined, adding default limit of [1000]',
+          severity: 4,
+          startColumn: 1,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 40,
+          endLineNumber: 1,
+          message: 'evaluation of [TO_LOWER([\\FOO\\, \\BAR\\])] failed',
+          severity: 4,
+          startColumn: 9,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 18,
+          endLineNumber: 1,
+          message: 'single-value function encountered multi-value',
+          severity: 4,
+          startColumn: 9,
+          startLineNumber: 1,
+        },
+      ]);
+    });
   });
 
   describe('getIndicesList', function () {
