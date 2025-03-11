@@ -26,7 +26,7 @@ export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_RE
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
 export const CONNECTOR_USAGE_TYPE = `connector_request_body_bytes`;
 export const CONNECTOR_USAGE_REPORTING_SOURCE_ID = `task-connector-usage-report`;
-export const MAX_PUSH_ATTEMPTS = 5;
+export const MAX_PUSH_ATTEMPTS = 1;
 
 export class ConnectorUsageReportingTask {
   private readonly logger: Logger;
