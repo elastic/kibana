@@ -190,6 +190,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       )}
       <EuiSpacer size="m" />
       <SSLFormSection
+        type={inputs.typeInput.value}
         inputs={inputs}
         useSecretsStorage={enableSSLSecrets && useSecretsStorage}
         isConvertedToSecret={isConvertedToSecret.sslKey}
