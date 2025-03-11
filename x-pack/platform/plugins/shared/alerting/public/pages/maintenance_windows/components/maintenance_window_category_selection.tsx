@@ -61,7 +61,7 @@ export const MaintenanceWindowSolutionSelection = (
   const options = useMemo(() => {
     return RADIO_OPTIONS.map((option) => ({
       ...option,
-      disabled: !availableSolutions.includes(option.id), // try to disable and see how it looks
+      disabled: !availableSolutions.includes(option.id),
     })).sort((a, b) => a.id.localeCompare(b.id));
   }, [availableSolutions]);
 
@@ -98,7 +98,7 @@ export const MaintenanceWindowSolutionSelection = (
 
   return (
     isScopedQueryEnabled && (
-      <EuiFlexGroup data-test-subj="maintenanceWindowSOLUTIONSelection">
+      <EuiFlexGroup data-test-subj="maintenanceWindowSolutionSelection">
         <EuiFlexItem>
           <EuiText size="s">
             <h4>{i18n.CREATE_FORM_SOLUTION_SELECTION_TITLE}</h4>

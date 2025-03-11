@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { within, fireEvent, waitFor } from '@testing-library/react';
+import { within, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import {
   CreateMaintenanceWindowFormProps,
@@ -16,6 +17,10 @@ import {
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../services/rule_api', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
 }));
 
 const { loadRuleTypes } = jest.requireMock('../../../services/rule_api');
@@ -48,6 +53,13 @@ describe('CreateMaintenanceWindowForm', () => {
         unifiedSearch: {
           ui: {
             SearchBar: <div />,
+          },
+        },
+        data: {
+          dataViews: {
+            get: jest.fn(),
+            getIdsWithTitle: jest.fn().mockResolvedValue([]),
+            getDefaultDataView: jest.fn(),
           },
         },
       },
@@ -148,8 +160,8 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it.only('should initialize MWs with selected category ids properly', async () => {
-    const result = appMockRenderer.render(
+  it('should initialize MW with selected solution id properly', async () => {
+    appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
         initialValue={{
@@ -170,62 +182,58 @@ describe('CreateMaintenanceWindowForm', () => {
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowSolutionSelectionLoading')
       ).not.toBeInTheDocument();
     });
 
     await waitFor(() => {
-      expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
+      expect(screen.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
     });
-    // const observabilityInput = within(
-    //   result.getByTestId('maintenanceWindowCategorySelection')
-    // ).getByTestId('option-observability');
-    // const securityInput = within(
-    //   result.getByTestId('maintenanceWindowCategorySelection')
-    // ).getByTestId('option-securitySolution');
-    // const managementInput = within(
-    //   result.getByTestId('maintenanceWindowCategorySelection')
-    // ).getByTestId('option-management');
 
-    // expect(observabilityInput).toBeChecked();
-    // expect(managementInput).toBeChecked();
-    // expect(securityInput).not.toBeChecked();
+    const observabilityInput = screen.getByLabelText('Observability rules');
+    const securityInput = screen.getByLabelText('Security rules');
+    const managementInput = screen.getByLabelText('Stack rules');
+
+    expect(observabilityInput).toBeChecked();
+    expect(managementInput).not.toBeChecked();
+    expect(securityInput).not.toBeChecked();
   });
 
-  it('can select category IDs', async () => {
+  it('can select one in the time solution id', async () => {
+    const user = userEvent.setup();
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
       ).not.toBeInTheDocument();
     });
 
-    const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-observability');
-    const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-securitySolution');
-    const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-management');
+    await waitFor(() => {
+      expect(screen.queryByTestId('maintenanceWindowSolutionSelection')).not.toBeInTheDocument();
+    });
 
-    expect(observabilityInput).toBeChecked();
-    expect(securityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
+    const switchContainer = screen.getByTestId('maintenanceWindowScopedQuerySwitch');
+    const scopedQueryToggle = within(switchContainer).getByRole('switch');
 
-    fireEvent.click(observabilityInput);
+    expect(scopedQueryToggle).not.toBeChecked();
+    await user.click(scopedQueryToggle);
+    expect(scopedQueryToggle).toBeChecked();
+
+    const observabilityInput = screen.getByLabelText('Observability rules');
+    const securityInput = screen.getByLabelText('Security rules');
+    const managementInput = screen.getByLabelText('Stack rules');
+
+    await user.click(securityInput);
 
     expect(observabilityInput).not.toBeChecked();
+    expect(managementInput).not.toBeChecked();
     expect(securityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
 
-    fireEvent.click(securityInput);
-    fireEvent.click(observabilityInput);
+    await user.click(observabilityInput);
 
     expect(observabilityInput).toBeChecked();
+    expect(managementInput).not.toBeChecked();
     expect(securityInput).not.toBeChecked();
-    expect(managementInput).toBeChecked();
   });
 });

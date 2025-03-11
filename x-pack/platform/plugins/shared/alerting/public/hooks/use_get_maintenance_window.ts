@@ -19,6 +19,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
+
     return {
       maintenanceWindow: convertFromMaintenanceWindowToForm(maintenanceWindow),
       hasOldChosenSolutions:

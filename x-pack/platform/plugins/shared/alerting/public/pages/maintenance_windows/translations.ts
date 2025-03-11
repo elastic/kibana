@@ -670,14 +670,15 @@ export const ARCHIVE_SUBTITLE = i18n.translate(
 export const SOLUTION_CONFIG_REMOVAL_WARNING_TITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.title',
   {
-    defaultMessage: 'Solution specific configuration will be removed.',
+    defaultMessage: 'Support for multiple solution categories is removed.',
   }
 );
 
 export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
   {
-    defaultMessage: 'Solution specific configuration will be removed.',
+    defaultMessage:
+      'The maintenance window will affect rules in all solutions unless you add a filter.',
   }
 );
 
