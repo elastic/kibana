@@ -24,6 +24,7 @@ function generator({ imageFlavor }: TemplateContext) {
   server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   monitoring.ui.container.elasticsearch.enabled: true
+  xpack.security.fipsMode.enabled: true
   `);
 }
 
