@@ -15,7 +15,7 @@ import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
 
 import { deleteFleetProxy } from './fleet_proxies';
-import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
+import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
@@ -24,14 +24,9 @@ jest.mock('./download_source');
 jest.mock('./fleet_server_host');
 jest.mock('./app_context');
 
-const mockedListFleetServerHostsForProxyId = listFleetServerHostsForProxyId as jest.MockedFunction<
-  typeof listFleetServerHostsForProxyId
+const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+  typeof fleetServerHostService
 >;
-
-const mockedUpdateFleetServerHost = updateFleetServerHost as jest.MockedFunction<
-  typeof updateFleetServerHost
->;
-
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
   typeof downloadSourceService
@@ -61,7 +56,8 @@ describe('Fleet proxies service', () => {
     mockedDownloadSourceService.listAllForProxyId.mockReset();
     mockedOutputService.update.mockReset();
     soClientMock.delete.mockReset();
-    mockedUpdateFleetServerHost.mockReset();
+    mockedFleetServerHostService.update.mockReset();
+    mockedFleetServerHostService.listAllForProxyId.mockReset();
     mockedDownloadSourceService.listAllForProxyId.mockImplementation(async () => ({
       items: [],
       total: 0,
@@ -93,7 +89,7 @@ describe('Fleet proxies service', () => {
         perPage: 10,
       };
     });
-    mockedListFleetServerHostsForProxyId.mockImplementation(async (_, proxyId) => {
+    mockedFleetServerHostService.listAllForProxyId.mockImplementation(async (_, proxyId) => {
       if (proxyId === PROXY_IDS.RELATED_PRECONFIGURED) {
         return {
           items: [
@@ -178,7 +174,7 @@ describe('Fleet proxies service', () => {
         fromPreconfiguration: true,
       });
       expect(mockedOutputService.update).toBeCalled();
-      expect(mockedUpdateFleetServerHost).toBeCalled();
+      expect(mockedFleetServerHostService.update).toBeCalled();
       expect(soClientMock.delete).toBeCalled();
     });
   });
