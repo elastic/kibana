@@ -464,7 +464,7 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
-        test('should log but not throw if query returns error', async () => {
+        test('should log an error and throw if query returns error', async () => {
           clusterClient.search.mockImplementation(() => {
             throw new Error('search failed!');
           });
