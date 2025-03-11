@@ -46,8 +46,6 @@ export const getNlToEsqlAgent = ({
       })
     )) as ChatCompletionMessageEvent;
 
-    console.log(responseToLangchainMessage(result))
-
     return new Command({
       update: {
         messages: [responseToLangchainMessage(result)],
