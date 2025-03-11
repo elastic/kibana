@@ -90,6 +90,7 @@ export class TriggersActionsUiExamplePlugin
 
         try {
           await taskManagerStart.remove(id);
+          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         return res.ok();
@@ -111,6 +112,7 @@ export class TriggersActionsUiExamplePlugin
 
         try {
           await taskManagerStart.bulkRemove(ids);
+          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         return res.ok();
@@ -137,29 +139,29 @@ export class TriggersActionsUiExamplePlugin
             services[0].http.basePath.set(fakeRequest, path);
 
             // Getting access to scoped clients using the API key
-            const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest, {
-              includedHiddenTypes: ['task'],
-            });
+            // const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest, {
+            //   includedHiddenTypes: ['task'],
+            // });
 
-            const savedObjectsRepositoryClient = services[0].savedObjects.createInternalRepository([
-              'task',
-            ]);
+            // const savedObjectsRepositoryClient = services[0].savedObjects.createInternalRepository([
+            //   'task',
+            // ]);
 
-            const task = await savedObjectsClient.get('task', taskInstance.id);
-            const encryptedTask = await savedObjectsRepositoryClient.get('task', taskInstance.id);
+            // const task = await savedObjectsClient.get('task', taskInstance.id);
+            // const encryptedTask = await savedObjectsRepositoryClient.get('task', taskInstance.id);
 
-            console.log(
-              'Fetched task with decrypted scoped API key',
-              JSON.stringify(taskInstance, null, 2)
-            );
-            console.log(
-              'Fetched task with missing scoped API key',
-              JSON.stringify(task.attributes, null, 2)
-            );
-            console.log(
-              'Fetched task with encrypted scoped API key',
-              JSON.stringify(encryptedTask.attributes, null, 2)
-            );
+            // console.log(
+            //   'Fetched task with decrypted scoped API key',
+            //   JSON.stringify(taskInstance, null, 2)
+            // );
+            // console.log(
+            //   'Fetched task with missing scoped API key',
+            //   JSON.stringify(task.attributes, null, 2)
+            // );
+            // console.log(
+            //   'Fetched task with encrypted scoped API key',
+            //   JSON.stringify(encryptedTask.attributes, null, 2)
+            // );
 
             return {
               state: {},
