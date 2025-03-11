@@ -113,7 +113,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
         expect(body).to.be(
-          '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null,"dateL":"2023-04-20T04:13:17.858Z"}'
+          '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null,"dateL":"2023-04-20T04:13:17.858Z","encodeableUrl":"https://www.elastic.co?foo=bar&amp;baz= qux"}'
         );
       });
 
