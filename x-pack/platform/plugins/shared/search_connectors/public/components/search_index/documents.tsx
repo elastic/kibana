@@ -15,6 +15,11 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
+import {
+  DocumentList,
+  DocumentsOverview,
+  INDEX_DOCUMENTS_META_DEFAULT,
+} from '@kbn/search-index-documents';
 
 import { Status } from '../../../common/types/api';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
@@ -25,7 +30,6 @@ import {
   AccessControlIndexSelector,
   AccessControlSelectorOption,
 } from './access_control_index_selector/access_control_index_selector';
-import { INDEX_DOCUMENTS_META_DEFAULT } from '../../types';
 import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
 const DEFAULT_PAGINATION = {

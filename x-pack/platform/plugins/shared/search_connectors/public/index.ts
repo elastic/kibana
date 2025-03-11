@@ -33,6 +33,9 @@ export {
   EuiBadgeTo,
 } from './components/shared/react_router_helpers';
 
+export { ConvertConnectorModal } from './components/shared/convert_connector_modal/convert_connector_modal';
+export { SyncsContextMenu } from './components/shared/header_actions/syncs_context_menu';
+
 export {
   ConnectorSyncRules,
   ConnectorScheduling,
@@ -40,6 +43,8 @@ export {
   ConnectorNameAndDescriptionFlyout,
   ConnectorOverviewPanels,
 } from './components/search_index/connector';
+
+export { DefaultSettingsFlyout } from './components/settings/default_settings_flyout';
 
 export {
   SyncJobs,

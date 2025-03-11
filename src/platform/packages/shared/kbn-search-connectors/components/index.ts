@@ -9,3 +9,4 @@
 
 export * from './configuration';
 export * from './sync_jobs';
+export * from './decorative_horizontal_stepper';

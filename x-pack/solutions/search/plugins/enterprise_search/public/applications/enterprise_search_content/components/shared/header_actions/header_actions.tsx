@@ -9,12 +9,12 @@ import React from 'react';
 
 import { Connector } from '@kbn/search-connectors';
 
+import { SyncsContextMenu } from '@kbn/search-connectors-plugin/public';
+
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 import { isConnectorIndex, getIngestionMethod } from '../../../utils/indices';
 
 import { SearchPlaygroundPopover } from '../../search_index/components/header_actions/search_playground_popover';
-
-import { SyncsContextMenu } from './syncs_context_menu';
 
 // Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left
 export const getHeaderActions = (

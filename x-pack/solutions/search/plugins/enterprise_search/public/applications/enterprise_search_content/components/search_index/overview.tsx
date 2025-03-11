@@ -19,13 +19,12 @@ import {
   ConvertConnectorLogic,
   SyncJobs,
   IndexViewLogic,
+  ConvertConnectorModal,
 } from '@kbn/search-connectors-plugin/public';
 
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { isApiIndex, isConnectorIndex } from '../../utils/indices';
-
-import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 
 import { ApiTotalStats } from './api_total_stats';
 import { ConnectorTotalStats } from './connector_total_stats';

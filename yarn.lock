@@ -7055,7 +7055,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-index-documents@link:x-pack/solutions/search/packages/kbn-search-index-documents":
+"@kbn/search-index-documents@link:x-pack/platform/packages/shared/kbn-search-index-documents":
   version "0.0.0"
   uid ""
 

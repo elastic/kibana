@@ -42,7 +42,6 @@ import { stripSearchPrefix } from '../../utils/strip_search_prefix';
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
-  const { indexMappingComponent } = useValues(KibanaLogic);
 
   const IndexMappingComponent = useMemo(() => indexMappingComponent, []);
 

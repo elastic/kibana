@@ -2,6 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/search-index-documents",
   "owner": "@elastic/search-kibana",
-  "group": "search",
-  "visibility": "private"
+  "group": "platform",
+  "visibility": "shared"
 }

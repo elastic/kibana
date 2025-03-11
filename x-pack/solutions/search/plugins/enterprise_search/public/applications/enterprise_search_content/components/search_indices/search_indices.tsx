@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+import { DefaultSettingsFlyout, EuiLinkTo } from '@kbn/search-connectors-plugin/public';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -31,8 +31,6 @@ import { handlePageChange } from '../../../shared/table_pagination';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 // import { CannotConnect } from '../search_index/components/cannot_connect';
-import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
-
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
 import { IndicesTable } from './indices_table';
