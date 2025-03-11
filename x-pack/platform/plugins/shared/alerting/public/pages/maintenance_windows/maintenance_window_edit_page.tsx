@@ -24,7 +24,7 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit);
 
   const { maintenanceWindowId } = useParams<{ maintenanceWindowId: string }>();
-  const { maintenanceWindow, hasSeveralChosenSolutions, isLoading, isError } =
+  const { maintenanceWindow, showMultipleSolutionsWarning, isLoading, isError } =
     useGetMaintenanceWindow(maintenanceWindowId);
 
   if (isError) {
@@ -39,9 +39,13 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
     <EuiPageSection restrictWidth={true}>
       <PageHeader showBackButton={true} title={i18n.EDIT_MAINTENANCE_WINDOW} />
       <EuiSpacer size="xl" />
-      {hasSeveralChosenSolutions && (
+      {showMultipleSolutionsWarning && (
         <>
-          <EuiCallOut title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE} color="warning">
+          <EuiCallOut
+            data-test-subj="maintenanceWindowMultipleSolutionsWarning"
+            title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+            color="warning"
+          >
             <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
           </EuiCallOut>
           <EuiSpacer size="xl" />

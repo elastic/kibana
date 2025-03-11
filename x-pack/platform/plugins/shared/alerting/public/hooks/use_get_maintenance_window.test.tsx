@@ -66,8 +66,7 @@ describe('useGetMaintenanceWindow', () => {
 
     await waitFor(() =>
       expect(result.current).toEqual({
-        isLoading: true,
-        hasOldChosenSolutions: false,
+        showMultipleSolutionsWarning: false,
         isError: false,
         isLoading: false,
         maintenanceWindow: undefined,
@@ -86,8 +85,7 @@ describe('useGetMaintenanceWindow', () => {
 
     await waitFor(() =>
       expect(result.current).toEqual({
-        isLoading: true,
-        hasOldChosenSolutions: true,
+        showMultipleSolutionsWarning: true,
         isError: false,
         isLoading: false,
         maintenanceWindow: undefined,

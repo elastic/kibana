@@ -22,7 +22,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
     return {
       maintenanceWindow: convertFromMaintenanceWindowToForm(maintenanceWindow),
-      hasOldChosenSolutions:
+      showMultipleSolutionsWarning:
         maintenanceWindow.categoryIds && maintenanceWindow.categoryIds.length < 3,
     };
   };
@@ -46,7 +46,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
   return {
     maintenanceWindow: data?.maintenanceWindow,
-    hasOldChosenSolutions: data?.hasOldChosenSolutions,
+    showMultipleSolutionsWarning: data?.showMultipleSolutionsWarning,
     isLoading: isLoading || isInitialLoading,
     isError,
   };
