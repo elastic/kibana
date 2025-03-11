@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
+import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import {
   RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_ALERTS_TAB,
@@ -61,15 +61,36 @@ describe('RuleDetailsLocator', () => {
   });
 
   it('should return correct url when controlConfigs is provided', async () => {
-    const updatedControlConfigs = [...DEFAULT_CONTROLS];
-    updatedControlConfigs[0].selectedOptions = ['untracked'];
+    const mockedControlConfigs = [
+      {
+        title: 'Status',
+        fieldName: ALERT_STATUS,
+        selectedOptions: ['untracked'],
+        hideActionBar: true,
+        persist: true,
+        hideExists: true,
+      },
+      {
+        title: 'Rule',
+        fieldName: ALERT_RULE_NAME,
+        hideExists: true,
+      },
+      {
+        title: 'Group',
+        fieldName: 'kibana.alert.group.value',
+      },
+      {
+        title: 'Tags',
+        fieldName: 'tags',
+      },
+    ];
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
       tabId: RULE_DETAILS_ALERTS_TAB,
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',
-      controlConfigs: updatedControlConfigs,
+      controlConfigs: mockedControlConfigs,
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
