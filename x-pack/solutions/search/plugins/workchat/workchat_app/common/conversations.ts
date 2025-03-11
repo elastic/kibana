@@ -19,6 +19,16 @@ export interface Conversation {
   events: ConversationEvent[];
 }
 
+/**
+ * Summary of conversation, e.g. for the conversation listing
+ */
+export interface ConversationSummary {
+  id: string;
+  agentId: string;
+  title: string;
+  lastUpdated: string;
+}
+
 export type ConversationCreateRequest = Omit<Conversation, 'id' | 'lastUpdated' | 'user'> & {
   id?: string;
 };

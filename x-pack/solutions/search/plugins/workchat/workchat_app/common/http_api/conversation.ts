@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Conversation } from '../conversations';
+import type { Conversation, ConversationSummary } from '../conversations';
 
 export interface ListConversationPayload {}
 
 export interface ListConversationResponse {
-  conversations: Conversation[];
+  conversations: ConversationSummary[];
 }
 
 export type GetConversationResponse = Conversation;

@@ -6,13 +6,13 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import type { Conversation } from '../../../common/conversations';
+import type { ConversationSummary } from '../../../common/conversations';
 import { useWorkChatServices } from './use_workchat_service';
 
 export const useConversationList = () => {
   const { conversationService } = useWorkChatServices();
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
