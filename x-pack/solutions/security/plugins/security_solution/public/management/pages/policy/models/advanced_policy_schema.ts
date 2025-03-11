@@ -2121,7 +2121,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
       }
     ),
   },
@@ -2132,7 +2132,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
       }
     ),
   },
@@ -2143,7 +2143,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
       }
     ),
   },
