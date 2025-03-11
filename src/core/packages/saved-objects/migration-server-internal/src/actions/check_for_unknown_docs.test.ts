@@ -50,7 +50,13 @@ describe('checkForUnknownDocs', () => {
       excludeOnUpgradeQuery,
     });
 
-    await expect(task()).resolves.not.toThrow();
+    const result = await task();
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual(
+      expect.objectContaining({
+        type: 'retryable_es_client_error',
+      })
+    );
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
   });
@@ -79,7 +85,13 @@ describe('checkForUnknownDocs', () => {
       excludeOnUpgradeQuery,
     });
 
-    await expect(task()).resolves.not.toThrow();
+    const result = await task();
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual(
+      expect.objectContaining({
+        type: 'retryable_es_client_error',
+      })
+    );
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).not.toHaveBeenCalled();
   });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as Either from 'fp-ts/lib/Either';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as errorHandlers from './catch_retryable_es_client_errors';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -62,8 +63,14 @@ describe('pickupUpdatedMappings', () => {
     );
 
     const task = pickupUpdatedMappings(client, 'my_index', 1000);
-    // Shouldn't throw because the second handler can retry 503 responses
-    await expect(task()).resolves.not.toThrow();
+    const result = await task();
+
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual(
+      expect.objectContaining({
+        type: 'retryable_es_client_error',
+      })
+    );
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
   });
@@ -87,8 +94,14 @@ describe('pickupUpdatedMappings', () => {
     );
 
     const task = pickupUpdatedMappings(client, 'my_index', 1000);
-    // Shouldn't throw because the first handler can retry search_phase_execution_exception responses
-    await expect(task()).resolves.not.toThrow();
+    const result = await task();
+
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual(
+      expect.objectContaining({
+        type: 'retryable_es_client_error',
+      })
+    );
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).not.toBeCalled();
   });
