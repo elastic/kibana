@@ -9,6 +9,7 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const dataConfig = {
   rate: 20,
+  errorRate: 5,
   transaction: {
     name: 'GET /api/product/list',
     duration: 1000,
@@ -33,26 +34,45 @@ export async function generateData({
   const instance = apm
     .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
     .instance('instance-a');
-  const { rate, transaction, span } = dataConfig;
+  const { rate, transaction, span, errorRate } = dataConfig;
 
-  await apmSynthtraceEsClient.index(
-    timerange(start, end)
-      .interval('1m')
-      .rate(rate)
-      .generator((timestamp) =>
-        instance
-          .transaction({ transactionName: transaction.name })
-          .timestamp(timestamp)
-          .duration(transaction.duration)
-          .success()
-          .children(
-            instance
-              .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
-              .duration(transaction.duration)
-              .success()
-              .destination(span.destination)
-              .timestamp(timestamp)
-          )
-      )
-  );
+  const successfulEvents = timerange(start, end)
+    .interval('1m')
+    .rate(rate)
+    .generator((timestamp) =>
+      instance
+        .transaction({ transactionName: transaction.name })
+        .timestamp(timestamp)
+        .duration(transaction.duration)
+        .success()
+        .children(
+          instance
+            .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
+            .duration(transaction.duration)
+            .success()
+            .destination(span.destination)
+            .timestamp(timestamp)
+        )
+    );
+
+  const failureEvents = timerange(start, end)
+    .interval('1m')
+    .rate(errorRate)
+    .generator((timestamp) =>
+      instance
+        .transaction({ transactionName: transaction.name })
+        .timestamp(timestamp)
+        .duration(transaction.duration)
+        .failure()
+        .children(
+          instance
+            .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
+            .duration(transaction.duration)
+            .failure()
+            .destination(span.destination)
+            .timestamp(timestamp)
+        )
+    );
+
+  await apmSynthtraceEsClient.index([successfulEvents, failureEvents]);
 }
