@@ -100,6 +100,7 @@ describe('ReindexProgress', () => {
                         "aliases": Array [],
                         "indexName": "foo",
                         "isFrozen": false,
+                        "isInDataStream": false,
                         "isReadonly": false,
                         "reindexName": "reindexed-foo",
                       },
