@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiFlyout,
   EuiHorizontalRule,
 } from '@elastic/eui';
 
