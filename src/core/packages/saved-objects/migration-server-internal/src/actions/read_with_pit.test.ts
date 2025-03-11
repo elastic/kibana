@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { readWithPit } from './read_with_pit';
-
-jest.mock('./catch_retryable_es_client_errors');
+import * as errorHandlers from './catch_retryable_es_client_errors';
 
 describe('readWithPit', () => {
   beforeEach(() => {
@@ -20,12 +18,7 @@ describe('readWithPit', () => {
   });
   it('calls esClient.search with the appropriate params', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          total: 0,
-          hits: [],
-        },
-      })
+      Promise.resolve({ hits: { hits: [] } })
     );
 
     await readWithPit({
@@ -97,17 +90,85 @@ describe('readWithPit', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
+    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseException = jest.spyOn(
+      errorHandlers,
+      'catchRetryableSearchPhaseExecutionException'
+    );
+
     const task = readWithPit({
       client,
       pitId: 'pitId',
       query: { match_all: {} },
       batchSize: 10_000,
     });
-    try {
-      await task();
-    } catch (e) {
-      /** ignore */
-    }
-    expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+
+    // Shouldn't throw because the second handler can retry 503 responses
+    await expect(task()).resolves.not.toThrow();
+    expect(catchSearchPhaseException).toHaveBeenCalledWith(retryableError);
+    expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
+  });
+
+  it('calls catchRetryableSearchPhaseExecutionException when the promise rejects', async () => {
+    // Create a mock client that rejects all methods with a search_phase_execution_exception
+    // response.
+    const retryableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        body: { error: { type: 'search_phase_execution_exception' } },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
+
+    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseException = jest.spyOn(
+      errorHandlers,
+      'catchRetryableSearchPhaseExecutionException'
+    );
+
+    const task = readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    });
+
+    // Shouldn't throw because the first handler can retry search_phase_execution_exception responses
+    await expect(task()).resolves.not.toThrow();
+    expect(catchSearchPhaseException).toHaveBeenCalledWith(retryableError);
+    expect(catchClientErrorsSpy).not.toHaveBeenCalled();
+  });
+
+  it('throws if neither handler can retry', async () => {
+    // Create a mock client that rejects all methods with a 502 status code
+    // response.
+    const retryableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 502,
+        body: { error: { type: 'es_type', reason: 'es_reason' } },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
+
+    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseException = jest.spyOn(
+      errorHandlers,
+      'catchRetryableSearchPhaseExecutionException'
+    );
+
+    const task = readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    });
+
+    // Should throw because both handlers can't retry 502 responses
+    await expect(task()).rejects.toThrow();
+    expect(catchSearchPhaseException).toHaveBeenCalledWith(retryableError);
+    expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
   });
 });
