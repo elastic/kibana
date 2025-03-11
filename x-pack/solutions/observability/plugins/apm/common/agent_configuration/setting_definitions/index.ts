@@ -12,7 +12,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
-import { isRumOrMobileAgentName } from '../../agent_name';
+import { isEDOTAgentName, isRumOrMobileAgentName } from '../../agent_name';
 import { floatThreeDecimalPlacesRt } from '../runtime_types/float_three_decimal_places_rt';
 import { floatFourDecimalPlacesRt } from '../runtime_types/float_four_decimal_places_rt';
 import type { RawSettingDefinition, SettingDefinition } from './types';
@@ -112,9 +112,11 @@ export function filterByAgent(agentName?: AgentName) {
         return false;
       }
 
-      // only options that apply to every agent (ignoring RUM) should be returned
+      // only options that apply to every agent (ignoring RUM and EDOT) should be returned
       if (setting.excludeAgents) {
-        return setting.excludeAgents.every(isRumOrMobileAgentName);
+        return setting.excludeAgents.every(
+          (agent) => isRumOrMobileAgentName(agent) || isEDOTAgentName(agent)
+        );
       }
 
       return true;

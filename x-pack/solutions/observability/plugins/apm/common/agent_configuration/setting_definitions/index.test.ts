@@ -189,6 +189,13 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('iOS/swift')).toEqual(['recording', 'session_sample_rate']);
     });
 
+    it('opentelemetry/java/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual([
+        'disable_instrumentations',
+        'recording',
+      ]);
+    });
+
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual(
         expect.arrayContaining(['transaction_max_spans', 'transaction_sample_rate'])

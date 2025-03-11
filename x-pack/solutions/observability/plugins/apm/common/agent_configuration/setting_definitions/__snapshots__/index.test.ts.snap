@@ -88,6 +88,11 @@ Array [
     "validationName": "string",
   },
   Object {
+    "key": "disable_instrumentations",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "disable_outgoing_tracecontext_headers",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
