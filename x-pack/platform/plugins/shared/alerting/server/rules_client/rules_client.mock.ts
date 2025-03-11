@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { AlertingAuthorization } from '../authorization';
+import type { AlertingAuthorization } from '../authorization';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import type { ConstructorOptions } from './rules_client';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';

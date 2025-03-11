@@ -12,7 +12,7 @@ import {
   setFlappingHistoryAndTrackedAlerts,
 } from './set_flapping_history_and_tracked_alerts';
 import { Alert } from '../../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../types';
+import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   DISABLE_FLAPPING_SETTINGS,
