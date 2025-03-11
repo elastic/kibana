@@ -7,9 +7,9 @@
 
 import { AsyncLocalStorage } from 'async_hooks';
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
-import type { AssetsMap } from '../../../../common/types';
+import type { AssetsMap, PackagePolicyAssetsMap } from '../../../../common/types';
 
 import type { PackageInfo } from '../../../../common';
 
@@ -17,11 +17,14 @@ const cacheStore = new AsyncLocalStorage<CacheSession>();
 
 const PACKAGE_INFO_CACHE_SIZE = 20;
 const PACKAGE_ASSETS_MAP_CACHE_SIZE = 1;
+const AGENT_TEMPLATE_ASSETS_MAP_CACHE_SIZE = 5;
 
 class CacheSession {
   private _packageInfoCache?: LRUCache<string, PackageInfo>;
 
   private _packageAssetsMap?: LRUCache<string, AssetsMap>;
+
+  private _agentTemplateAssetsMap?: LRUCache<string, PackagePolicyAssetsMap>;
 
   getPackageInfoCache() {
     if (!this._packageInfoCache) {
@@ -39,6 +42,15 @@ class CacheSession {
       });
     }
     return this._packageAssetsMap;
+  }
+
+  getAgentTemplateAssetsMapCache() {
+    if (!this._agentTemplateAssetsMap) {
+      this._agentTemplateAssetsMap = new LRUCache<string, PackagePolicyAssetsMap>({
+        max: AGENT_TEMPLATE_ASSETS_MAP_CACHE_SIZE,
+      });
+    }
+    return this._agentTemplateAssetsMap;
   }
 }
 
@@ -62,6 +74,21 @@ export function setPackageAssetsMapCache(
   return cacheStore
     .getStore()
     ?.getPackageAssetsMapCache()
+    ?.set(`${pkgName}:${pkgVersion}`, assetsMap);
+}
+
+export function getAgentTemplateAssetsMapCache(pkgName: string, pkgVersion: string) {
+  return cacheStore.getStore()?.getAgentTemplateAssetsMapCache()?.get(`${pkgName}:${pkgVersion}`);
+}
+
+export function setAgentTemplateAssetsMapCache(
+  pkgName: string,
+  pkgVersion: string,
+  assetsMap: PackagePolicyAssetsMap
+) {
+  return cacheStore
+    .getStore()
+    ?.getAgentTemplateAssetsMapCache()
     ?.set(`${pkgName}:${pkgVersion}`, assetsMap);
 }
 

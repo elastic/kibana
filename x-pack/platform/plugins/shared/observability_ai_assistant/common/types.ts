@@ -45,12 +45,6 @@ export interface Message {
   };
 }
 
-export interface TokenCount {
-  prompt: number;
-  completion: number;
-  total: number;
-}
-
 export interface Conversation {
   '@timestamp': string;
   user?: {
@@ -61,7 +55,6 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
-    token_count?: TokenCount;
   };
   systemMessage?: string;
   messages: Message[];
@@ -71,8 +64,8 @@ export interface Conversation {
   public: boolean;
 }
 
-export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string; token_count?: TokenCount; id?: string };
+type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
+  conversation: { title: string; id?: string };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
@@ -100,14 +93,6 @@ export interface Instruction {
   id: string;
   text: string;
 }
-
-export interface AdHocInstruction {
-  id?: string;
-  text: string;
-  instruction_type: 'user_instruction' | 'application_instruction';
-}
-
-export type InstructionOrPlainText = string | Instruction;
 
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
@@ -159,4 +144,9 @@ export interface ObservabilityAIAssistantScreenContext {
   }>;
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
+}
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
 }

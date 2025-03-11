@@ -8,7 +8,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 import { ConfigSchema } from '../config';
@@ -54,6 +54,6 @@ export async function termsEnumSuggestions(
     },
   };
 
-  const { terms } = await esClient.termsEnum({ index, body }, { signal: abortSignal });
+  const { terms } = await esClient.termsEnum({ index, ...body }, { signal: abortSignal });
   return terms;
 }

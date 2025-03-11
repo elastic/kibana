@@ -76,36 +76,34 @@ function searchLatency({
     apm: {
       sources: [{ documentType, rollupInterval }],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...termQuery(FAAS_ID, serverlessId),
-            ...(filters?.filter || []),
-          ],
-          must_not: filters?.must_not || [],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...termQuery(FAAS_ID, serverlessId),
+          ...(filters?.filter || []),
+        ],
+        must_not: filters?.must_not || [],
       },
-      aggs: {
-        latencyTimeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: `${bucketSizeInSeconds}s`,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
-          aggs: getLatencyAggregation(latencyAggregationType, transactionDurationField),
+    },
+    aggs: {
+      latencyTimeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: `${bucketSizeInSeconds}s`,
+          min_doc_count: 0,
+          extended_bounds: { min: startWithOffset, max: endWithOffset },
         },
-        overall_avg_duration: { avg: { field: transactionDurationField } },
+        aggs: getLatencyAggregation(latencyAggregationType, transactionDurationField),
       },
+      overall_avg_duration: { avg: { field: transactionDurationField } },
     },
   };
 

@@ -20,7 +20,7 @@ import {
   fieldTypes as _fieldTypes,
 } from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
-import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -43,7 +43,7 @@ const NESTED_DEPTHS = Array(NESTING_LEVELS)
   .fill(0)
   .map((_, i) => i + 1);
 
-const toAvgSignature = aggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
+const toAvgSignature = aggFunctionDefinitions.find(({ name }) => name === 'avg')!;
 const toInteger = scalarFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
 const toDoubleSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_double')!;
 const toStringSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_string')!;
@@ -1733,7 +1733,7 @@ describe('validation logic', () => {
         getColumnsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
         getPreferences: /Unknown/,
         getFieldsMetadata: /Unknown/,
-        getVariablesByType: /Unknown/,
+        getVariables: /Unknown/,
         canSuggestVariables: /Unknown/,
       };
       return excludedCallback.map((callback) => (contentByCallback as any)[callback]) || [];

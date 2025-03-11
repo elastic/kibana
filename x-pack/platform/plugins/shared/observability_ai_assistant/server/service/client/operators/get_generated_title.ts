@@ -9,8 +9,7 @@ import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
-import { TokenCountEvent } from '../../../../common/conversation_complete';
+import { Message, MessageRole } from '../../../../common';
 import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
@@ -33,7 +32,7 @@ export function getGeneratedTitle({
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
   tracer: LangTracer;
-}): Observable<string | TokenCountEvent> {
+}): Observable<string> {
   return from(
     chat('generate_title', {
       systemMessage:
@@ -84,21 +83,7 @@ export function getGeneratedTitle({
       // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
       title = title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
 
-      const tokenCount: TokenCountEvent | undefined = response.tokens
-        ? {
-            type: StreamingChatResponseEventType.TokenCount,
-            tokens: {
-              completion: response.tokens.completion,
-              prompt: response.tokens.prompt,
-              total: response.tokens.total,
-            },
-          }
-        : undefined;
-
-      const events: Array<string | TokenCountEvent> = [title];
-      if (tokenCount) events.push(tokenCount);
-
-      return from(events); // Emit each event separately
+      return of(title);
     }),
     tap((event) => {
       if (typeof event === 'string') {

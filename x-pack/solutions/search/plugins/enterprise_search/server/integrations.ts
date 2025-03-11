@@ -49,7 +49,7 @@ export const registerEnterpriseSearchIntegrations = (
     icons: [
       {
         type: 'eui',
-        src: 'logoEnterpriseSearch',
+        src: 'logoElasticsearch',
       },
     ],
     shipper: 'search',
