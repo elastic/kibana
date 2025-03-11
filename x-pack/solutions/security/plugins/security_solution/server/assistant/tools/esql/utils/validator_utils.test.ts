@@ -27,7 +27,7 @@ describe('esql self healing validator utils', () => {
     const result = lastMessageWithErrorReport(message, [validateEsqlResult]);
 
     expect(result.content).toContain(message);
-    expect(result.content).toContain('This query has errors:');
+    expect(result.content).toContain('This query has errors that still need to be fixed');
     expect(result.content).toContain('Syntax error');
     expect(result.content).toContain('Unknown index .logs');
   });

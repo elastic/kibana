@@ -61,11 +61,33 @@ describe('inspect index', () => {
     [
       {
         type: 'keyword',
-      },
+      },1,
       {
         type: 'keyword',
       },
     ],
+    [
+        {
+          field1: {
+            type: 'keyword',
+          },
+          field2: {
+            properties: {
+              nested_field: {
+                type: 'keyword',
+              },
+            },
+          },
+        },2,
+        {
+          field1: {
+            type: 'keyword',
+          },
+          field2: {
+            properties: 'Object',
+          },
+        },
+      ],
     [
       {
         field1: {
@@ -78,7 +100,7 @@ describe('inspect index', () => {
             },
           },
         },
-      },
+      },1,
       {
         field1: 'Object',
         field2: 'Object',
@@ -94,7 +116,7 @@ describe('inspect index', () => {
             },
           },
         },
-      },
+      },1,
       {
         field1: 'keyword',
         field2: 'Object',
@@ -102,8 +124,8 @@ describe('inspect index', () => {
     ],
   ])(
     'formatEntriesAtKey input %s returns %s',
-    (mapping: GetEntriesAtKeyMapping, expectedResult: Record<string, string>) => {
-      expect(formatEntriesAtKey(mapping)).toEqual(expectedResult);
+    (mapping: GetEntriesAtKeyMapping, maxDepth: number, expectedResult: Object) => {
+      expect(formatEntriesAtKey(mapping, maxDepth)).toEqual(expectedResult);
     }
   );
 });

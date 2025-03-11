@@ -19,6 +19,6 @@ export const EsqlSelfHealingAnnotation = Annotation.Root({
   }),
   maximumLLMCalls: Annotation<number>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => 30,
+    default: () => 5,
   }),
 });

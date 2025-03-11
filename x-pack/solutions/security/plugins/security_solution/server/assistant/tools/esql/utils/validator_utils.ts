@@ -48,7 +48,7 @@ const formatValidateEsqlResultToHumanReadable = (validateEsqlResult: ValidateEsq
   if (validateEsqlResult.isValid) {
     return 'Query is valid';
   }
-  let errorMessage = 'This query has errors:\n';
+  let errorMessage = 'This query has errors that still need to be fixed:\n';
   if (validateEsqlResult.parsingErrors) {
     errorMessage += `${validateEsqlResult.parsingErrors
       .map((error) => error.message)

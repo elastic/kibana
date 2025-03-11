@@ -74,7 +74,7 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
         indexMapping[indexName] as unknown as GetEntriesAtKeyMapping,
         propertyKey.split('.')
       );
-      const result = formatEntriesAtKey(entriesAtKey);
+      const result = formatEntriesAtKey(entriesAtKey, 4);
 
       return `Object at ${propertyKey} \n${JSON.stringify(result, null, 2)}`;
     },

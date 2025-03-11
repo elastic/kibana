@@ -37,20 +37,14 @@ export const getNlToEsqlAgent = ({
 
     const inferenceMessages = messagesToInference(stateMessages);
 
-    // If we have reached the maximum number of tool calls, we should not allow any more tool calls. The graph should end.
-    const toolAllowed = state.maximumLLMCalls > 0;
-
     const result = (await lastValueFrom(
       naturalLanguageToEsql({
         client: inference.getClient({ request }),
         connectorId,
         functionCalling: 'auto',
         logger,
-        tools: toolAllowed ? toolDefinitionToInference(tools) : undefined,
+        tools: toolDefinitionToInference(tools),
         messages: inferenceMessages.messages,
-        system: toolAllowed
-          ? 'It is very important to use tools to answer the question.'
-          : undefined,
       })
     )) as ChatCompletionMessageEvent;
 

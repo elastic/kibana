@@ -33,12 +33,26 @@ export const getEntriesAtKey = (
   return getEntriesAtKey(mapping[key], keys);
 };
 
-export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping): Record<string, string> => {
+
+
+export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping, maxDepth = 1): string | Record<string, string> => {
   if (mapping === undefined) {
-    return {};
+    return 'undefined';
   }
-  return Object.entries(mapping).reduce((acc, [key, value]) => {
-    acc[key] = typeof value === 'string' ? value : 'Object';
-    return acc;
-  }, {} as Record<string, string>);
+
+  if (typeof mapping === 'string') {
+    return mapping;
+  }
+
+  if (maxDepth <= 0) {
+    return 'Object';
+  }
+
+  const formatted: Record<string, string> = {};
+  // recursivly call
+  Object.keys(mapping).forEach((key) => {
+    formatted[key] = formatEntriesAtKey(mapping[key], maxDepth - 1) as string;
+  });
+
+  return formatted;
 };
