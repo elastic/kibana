@@ -186,7 +186,7 @@ export const stubWorkflowInsightsApiResponse = (endpointId: string) => {
                 list_id: 'endpoint_trusted_apps',
                 name: 'ClamAV',
                 os_types: ['linux'],
-                description: 'Suggested by Security Workflow Insights',
+                description: 'Suggested by Automatic Troubleshooting',
                 tags: ['policy:all'],
               },
             ],

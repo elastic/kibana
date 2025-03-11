@@ -8,7 +8,6 @@ The package is structure as follow:
 ```
 src
  | autocomplete         // => the autocomplete/suggest service logic
- | code_actions         // => the quick fixes service logic
  | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
  | validation           // => the validation logic
 

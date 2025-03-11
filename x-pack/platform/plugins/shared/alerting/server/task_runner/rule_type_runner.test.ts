@@ -10,27 +10,24 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DATE_1970, mockTaskInstance, RULE_ID, RULE_NAME, RULE_TYPE_ID } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { RuleTypeRunner, RuleData } from './rule_type_runner';
+import type { RuleData } from './rule_type_runner';
+import { RuleTypeRunner } from './rule_type_runner';
 import { TaskRunnerTimer } from './task_runner_timer';
 import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
-import { TaskRunnerContext } from './types';
+import type { TaskRunnerContext } from './types';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { publicRuleMonitoringServiceMock } from '../monitoring/rule_monitoring_service.mock';
 import { publicRuleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { wrappedScopedClusterClientMock } from '../lib/wrap_scoped_cluster_client.mock';
-import { NormalizedRuleType } from '../rule_type_registry';
-import {
-  ConcreteTaskInstance,
-  createTaskRunError,
-  TaskErrorSource,
-  TaskStatus,
-} from '@kbn/task-manager-plugin/server';
+import type { NormalizedRuleType } from '../rule_type_registry';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const alertsClient = alertsClientMock.create();
@@ -269,8 +266,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -377,8 +375,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -439,8 +438,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -553,6 +553,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
       expect(alertsClient.processAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -657,6 +659,8 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
       expect(alertsClient.processAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -800,8 +804,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -915,8 +920,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -1024,11 +1030,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
@@ -1130,8 +1134,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -1236,8 +1241,9 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
+      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
         alertDelay: 0,
         ruleRunMetricsStore,
       });

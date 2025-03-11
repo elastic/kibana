@@ -6,7 +6,7 @@
  */
 
 import { getRuleTaskTimeout } from './get_rule_task_timeout';
-import { RulesConfig } from '../config';
+import type { RulesConfig } from '../config';
 
 const ruleTypeId = 'test-rule-type-id';
 const config = {

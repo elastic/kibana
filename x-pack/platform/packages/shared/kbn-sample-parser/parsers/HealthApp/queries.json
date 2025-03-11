@@ -1,0 +1,226 @@
+{
+  "queries": [
+    {
+      "id": "init_environment",
+      "title": "Init Environment",
+      "description": "Returns log messages related to the initialization of the environment.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "initEnviroument",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "init_data_privacy",
+      "title": "Init Data Privacy",
+      "description": "Returns log messages indicating that data privacy has been initialized and is set to true.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "initDataPrivacy the dataPrivacy is true",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "init_user_privacy",
+      "title": "Init User Privacy",
+      "description": "Returns log messages indicating that user privacy has been initialized and is set to true.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "initUserPrivacy the userPrivacy is true",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "start_timer_auto_sync",
+      "title": "Start Timer AutoSync",
+      "description": "Returns log messages indicating that the auto-sync timer has started.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "startTimer start autoSync",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bulk_save_fail_error_code",
+      "title": "Bulk Save Fail Error Code",
+      "description": "Returns log messages indicating a failure in bulk saving health data with an error code.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "insertHiHealthData\\(\\) bulkSaveDetailHiHealthData fail errorCode = .*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "save_one_detail_data_fail",
+      "title": "Save One Detail Data Fail",
+      "description": "Returns log messages indicating a failure in saving one detail health data with specific data and type.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "saveHealthDetailData\\(\\) saveOneDetailData fail hiHealthData = .*,type = .*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "upload_statics_to_db_failed",
+      "title": "Upload Statics to DB Failed",
+      "description": "Returns log messages indicating a failure in uploading statics to the database with a message set to true.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "uploadStaticsToDB failed message=true",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "send_sync_failed_broadcast",
+      "title": "Send Sync Failed Broadcast",
+      "description": "Returns log messages indicating that a sync failed broadcast was sent.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "sendSyncFailedBroadcast",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "screen_off",
+      "title": "Screen Off",
+      "description": "Returns log messages indicating that the screen off action was received.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "onReceive action: android.intent.action.SCREEN_OFF",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "screen_on",
+      "title": "Screen On",
+      "description": "Returns log messages indicating that the screen on action was received.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "onReceive action: android.intent.action.SCREEN_ON",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "process_handle_screen_on",
+      "title": "Process Handle Screen On",
+      "description": "Returns log messages indicating that the process handled a screen on broadcast action.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "processHandleBroadcastAction action:android.intent.action.SCREEN_ON",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "screen_status_unknown",
+      "title": "Screen Status Unknown",
+      "description": "Returns log messages indicating that the screen status is unknown but assumed to be on.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "screen status unknown,think screen on",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

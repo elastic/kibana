@@ -7,20 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
+import { Fields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
 import { SynthtraceEsClient } from '../shared/base_client';
 
-export type SynthGenerator<TFields> =
-  // @ts-expect-error upgrade typescript v4.9.5
+export type SynthGenerator<TFields extends Fields> =
   | SynthtraceGenerator<TFields>
-  // @ts-expect-error upgrade typescript v4.9.5
   | Array<SynthtraceGenerator<TFields>>
   | Readable;
 
-export const withClient = <TFields>(
-  // @ts-expect-error upgrade typescript v4.9.5
-  client: SynthtraceEsClient,
+export const withClient = <TFields extends Fields>(
+  client: SynthtraceEsClient<TFields>,
   generator: SynthGenerator<TFields>
 ) => {
   return {
@@ -29,4 +26,4 @@ export const withClient = <TFields>(
   };
 };
 
-export type ScenarioReturnType<TFields> = ReturnType<typeof withClient<TFields>>;
+export type ScenarioReturnType<TFields extends Fields> = ReturnType<typeof withClient<TFields>>;

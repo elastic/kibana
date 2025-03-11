@@ -1,0 +1,268 @@
+{
+  "queries": [
+    {
+      "id": "startup_trustedinstaller_main_loop",
+      "title": "Startup TrustedInstaller Main Loop",
+      "description": "Returns logs where the TrustedInstaller main loop is starting.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting TrustedInstaller main loop",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_trustedinstaller_finalization",
+      "title": "Startup TrustedInstaller Finalization",
+      "description": "Returns logs where the TrustedInstaller finalization is starting.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting TrustedInstaller finalization",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_trustedinstaller_initialization",
+      "title": "Startup TrustedInstaller Initialization",
+      "description": "Returns logs where the TrustedInstaller initialization is starting.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting TrustedInstaller initialization",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "trustedinstaller_service_start",
+      "title": "TrustedInstaller Service Start",
+      "description": "Returns logs where the TrustedInstaller service starts successfully.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "TrustedInstaller service starts successfully",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "shutdown_trustedinstaller_main_loop",
+      "title": "Shutdown TrustedInstaller Main Loop",
+      "description": "Returns logs where the TrustedInstaller main loop is ending.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Ending TrustedInstaller main loop",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "shutdown_trustedinstaller_finalization",
+      "title": "Shutdown TrustedInstaller Finalization",
+      "description": "Returns logs where the TrustedInstaller finalization is ending.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Ending TrustedInstaller finalization",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "shutdown_trustedinstaller_initialization",
+      "title": "Shutdown TrustedInstaller Initialization",
+      "description": "Returns logs where the TrustedInstaller initialization is ending.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Ending TrustedInstaller initialization",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_manifest_invalid_item",
+      "title": "Error Manifest Invalid Item",
+      "description": "Returns logs where there is an error related to an invalid item in the manifest.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Expecting attribute name \\[HRESULT = .* - CBS_E_MANIFEST_INVALID_ITEM\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_backup_log_cab",
+      "title": "Error Backup Log Cab",
+      "description": "Returns logs where there is an error creating a backup log cab.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Failed to create backup log cab\\. \\[HRESULT = .* - ERROR_INVALID_FUNCTION\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_next_element",
+      "title": "Error Next Element",
+      "description": "Returns logs where there is an error getting the next element.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Failed to get next element \\[HRESULT = .* - CBS_E_MANIFEST_INVALID_ITEM\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_open_package",
+      "title": "Error Open Package",
+      "description": "Returns logs where there is an error opening a package internally.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Failed to internally open package\\. \\[HRESULT = .* - CBS_E_INVALID_PACKAGE\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_sqm_sample_upload",
+      "title": "Error SQM Sample Upload",
+      "description": "Returns logs where there is an error starting a standard sample upload.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "SQM: Failed to start standard sample upload\\. \\[HRESULT = .* - E_FAIL\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_sqm_upload_file_pattern",
+      "title": "Error SQM Upload File Pattern",
+      "description": "Returns logs where there is an error starting an upload with a specific file pattern.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "SQM: Failed to start upload with file pattern: .* flags: .* \\[HRESULT = .* - E_FAIL\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_sqm_unsent_reports",
+      "title": "Warning SQM Unsent Reports",
+      "description": "Returns logs where there is a warning about failing to upload all unsent reports.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "SQM: Warning: Failed to upload all unsent reports\\. \\[HRESULT = .* - E_FAIL\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_unrecognized_package_attribute",
+      "title": "Warning Unrecognized Package Attribute",
+      "description": "Returns logs where there is a warning about an unrecognized packageExtended attribute.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Warning Unrecognized packageExtended attribute",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

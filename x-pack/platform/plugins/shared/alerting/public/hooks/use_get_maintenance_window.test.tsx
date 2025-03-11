@@ -7,7 +7,8 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
+import type { AppMockRenderer } from '../lib/test_utils';
+import { createAppMockRenderer } from '../lib/test_utils';
 import { useGetMaintenanceWindow } from './use_get_maintenance_window';
 
 const mockAddDanger = jest.fn();

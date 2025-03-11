@@ -92,6 +92,7 @@ describe('Lens inline editing helpers', () => {
       createMockStartDependencies() as unknown as LensPluginStartDependencies;
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
+    mockStartDependencies.data.dataViews = dataViews;
     const dataviewSpecArr = [
       {
         id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
@@ -113,7 +114,7 @@ describe('Lens inline editing helpers', () => {
     it('returns the suggestions attributes correctly', async () => {
       const suggestionsAttributes = await getSuggestions(
         query,
-        startDependencies,
+        startDependencies.data,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -129,7 +130,7 @@ describe('Lens inline editing helpers', () => {
       mockSuggestionApi.mockResolvedValueOnce([]);
       const suggestionsAttributes = await getSuggestions(
         query,
-        startDependencies,
+        startDependencies.data,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -145,7 +146,7 @@ describe('Lens inline editing helpers', () => {
       const setErrorsSpy = jest.fn();
       const suggestionsAttributes = await getSuggestions(
         query,
-        startDependencies,
+        startDependencies.data,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,

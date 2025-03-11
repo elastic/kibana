@@ -158,39 +158,6 @@ const updateConversationRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
-const updateConversationTitle = createObservabilityAIAssistantServerRoute({
-  endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/title',
-  params: t.type({
-    path: t.type({
-      conversationId: t.string,
-    }),
-    body: t.type({
-      title: t.string,
-    }),
-  }),
-  security: {
-    authz: {
-      requiredPrivileges: ['ai_assistant'],
-    },
-  },
-  handler: async (resources): Promise<Conversation> => {
-    const { service, request, params } = resources;
-
-    const client = await service.getClient({ request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    const conversation = await client.setTitle({
-      conversationId: params.path.conversationId,
-      title: params.body.title,
-    });
-
-    return Promise.resolve(conversation);
-  },
-});
-
 const deleteConversationRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
   params: t.type({
@@ -216,12 +183,43 @@ const deleteConversationRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const patchConversationRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'PATCH /internal/observability_ai_assistant/conversation/{conversationId}',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+    body: t.partial({
+      public: t.boolean,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.updatePartial({
+      conversationId: params.path.conversationId,
+      updates: params.body,
+    });
+  },
+});
+
 export const conversationRoutes = {
   ...getConversationRoute,
   ...findConversationsRoute,
   ...createConversationRoute,
   ...updateConversationRoute,
-  ...updateConversationTitle,
   ...deleteConversationRoute,
   ...duplicateConversationRoute,
+  ...patchConversationRoute,
 };

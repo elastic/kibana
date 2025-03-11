@@ -7,14 +7,14 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { DisableRuleParams } from './types';
+import type { DisableRuleParams } from './types';
 import { disableRuleParamsSchema } from './schemas';
 
 export async function disableRule(

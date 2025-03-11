@@ -8,12 +8,14 @@
 import { range } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { IRuleTypeAlerts } from '../types';
+import type { IRuleTypeAlerts } from '../types';
+import type {
+  InitializationPromise,
+  ResourceInstallationHelper,
+} from './create_resource_installation_helper';
 import {
   createResourceInstallationHelper,
   errorResult,
-  InitializationPromise,
-  ResourceInstallationHelper,
   successResult,
   calculateDelay,
   getShouldRetry,
@@ -33,8 +35,8 @@ const initFnWithError = async (context: IRuleTypeAlerts, namespace: string, time
 
 const getCommonInitPromise = async (
   resolution: boolean,
-  timeoutMs: number = 1,
-  customLogString: string = ''
+  timeoutMs = 1,
+  customLogString = ''
 ): Promise<InitializationPromise> => {
   if (timeoutMs < 0) {
     throw new Error('fail');
@@ -48,7 +50,7 @@ const getCommonInitPromise = async (
 
 const getContextInitialized = async (
   helper: ResourceInstallationHelper,
-  context: string = 'test1',
+  context = 'test1',
   namespace: string = DEFAULT_NAMESPACE_STRING
 ) => {
   const { result } = await helper.getInitializedContext(context, namespace);

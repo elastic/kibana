@@ -12,7 +12,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { findBackfillRoute } from './find_backfill_route';
-import { FindBackfillResult } from '../../../../application/backfill/methods/find/types';
+import type { FindBackfillResult } from '../../../../application/backfill/methods/find/types';
 
 const rulesClient = rulesClientMock.create();
 

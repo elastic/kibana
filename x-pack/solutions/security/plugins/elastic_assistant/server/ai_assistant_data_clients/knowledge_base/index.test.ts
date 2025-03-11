@@ -332,7 +332,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
           { fully_defined: false, model_id: '', tags: [], input: { field_names: ['content'] } },
         ],
       });
-      mockLoadSecurityLabs.mockRejectedValue(new Error('Installation error'));
+      (getMlNodeCount as jest.Mock).mockRejectedValue(new Error('Installation error'));
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
       await expect(client.setupKnowledgeBase({})).rejects.toThrow(

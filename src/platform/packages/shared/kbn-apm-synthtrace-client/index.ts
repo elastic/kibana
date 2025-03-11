@@ -27,7 +27,7 @@ export { Entity } from './src/lib/entity';
 export { infra, type InfraDocument } from './src/lib/infra';
 export { parseInterval } from './src/lib/interval';
 export { monitoring, type MonitoringDocument } from './src/lib/monitoring';
-export type { Serializable } from './src/lib/serializable';
+export { Serializable } from './src/lib/serializable';
 export { timerange } from './src/lib/timerange';
 export type { Timerange } from './src/lib/timerange';
 export { dedot } from './src/lib/utils/dedot';
