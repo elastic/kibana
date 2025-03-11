@@ -111,7 +111,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(messageAddedEvents.length).to.be(7);
       });
 
-      describe('The first request', () => {
+      describe('First LLM request - Initial tool selection', () => {
         it('exposes the right tools', () => {
           expect(firstRequestBody.tools?.map((t) => t.function.name)).to.eql([
             'query',
