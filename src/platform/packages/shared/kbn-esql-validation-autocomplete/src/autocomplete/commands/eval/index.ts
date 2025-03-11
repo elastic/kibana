@@ -14,6 +14,7 @@ import type { SuggestionRawDefinition } from '../../types';
 import { suggestForExpression } from '../where';
 import { getPosition } from '../where/util';
 import { getNewVariableSuggestion } from '../../factories';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 export async function suggest(
   params: CommandSuggestParams<'eval'>
@@ -36,9 +37,15 @@ export async function suggest(
   });
 
   // EVAL-specific stuff
+
   const positionInExpression = getPosition(params.innerText, expressionRoot);
   if (positionInExpression === 'empty_expression' && !insideAssignment) {
     suggestions.push(getNewVariableSuggestion(params.getSuggestedVariableName()));
+  }
+
+  if (params.getExpressionType(expressionRoot) !== 'unknown') {
+    // complete expression, so suggest the finishing characters
+    suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' });
   }
 
   return suggestions;

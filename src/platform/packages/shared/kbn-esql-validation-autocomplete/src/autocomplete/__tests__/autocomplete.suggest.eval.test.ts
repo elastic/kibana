@@ -219,7 +219,7 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: '(' }
       );
       await assertSuggestions('from a | eval a=round(doubleField) /', [
-        ',',
+        ', ',
         '| ',
         ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
@@ -259,8 +259,9 @@ describe('autocomplete.suggest', () => {
       );
       await assertSuggestions('from a | eval a=round(doubleField),/', [
         'var0 = ',
-        ...getFieldNamesByType('any'),
-        'a',
+        ...getFieldNamesByType('any').map((v) => `${v} `),
+        // Re-enable with https://github.com/elastic/kibana/issues/210639
+        // 'a',
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ]);
       await assertSuggestions('from a | eval a=round(doubleField) + /', [

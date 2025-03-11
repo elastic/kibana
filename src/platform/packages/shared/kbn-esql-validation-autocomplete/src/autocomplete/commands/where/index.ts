@@ -31,11 +31,21 @@ export async function suggest(
   params: CommandSuggestParams<'where'>
 ): Promise<SuggestionRawDefinition[]> {
   const expressionRoot = params.command.args[0] as ESQLSingleAstItem | undefined;
-  return suggestForExpression({
+  const suggestions = await suggestForExpression({
     ...params,
     expressionRoot,
     commandName: 'where',
   });
+
+  // WHERE-specific stuff
+
+  // Is this a complete expression of the right type?
+  // If so, we can call it done and suggest a pipe
+  if (params.getExpressionType(expressionRoot) === 'boolean') {
+    suggestions.push(pipeCompleteItem);
+  }
+
+  return suggestions;
 }
 
 /**
@@ -52,7 +62,6 @@ export async function suggestForExpression({
   innerText,
   getExpressionType,
   getColumnsByType,
-  getSuggestedVariableName,
   previousCommands,
   commandName,
 }: {
@@ -60,11 +69,7 @@ export async function suggestForExpression({
   commandName: string;
 } & Pick<
   CommandSuggestParams<string>,
-  | 'innerText'
-  | 'getExpressionType'
-  | 'getColumnsByType'
-  | 'previousCommands'
-  | 'getSuggestedVariableName'
+  'innerText' | 'getExpressionType' | 'getColumnsByType' | 'previousCommands'
 >): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -199,12 +204,6 @@ export async function suggestForExpression({
       );
 
       break;
-  }
-
-  // Is this a complete expression of the right type?
-  // If so, we can call it done and suggest a pipe
-  if (getExpressionType(expressionRoot) === 'boolean') {
-    suggestions.push(pipeCompleteItem);
   }
 
   /**
