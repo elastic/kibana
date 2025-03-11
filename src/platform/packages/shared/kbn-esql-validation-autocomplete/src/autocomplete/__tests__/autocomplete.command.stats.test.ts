@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQLVariableType } from '@kbn/esql-types';
 import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { ESQLVariableType } from '../../shared/types';
 import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';
 import { roundParameterTypes } from './constants';
@@ -99,12 +98,16 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats by bucket(/', [
-          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date']).map(
+          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']).map(
             (field) => `${field}, `
           ),
-          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
-            scalar: true,
-          }).map((s) => ({ ...s, text: `${s.text},` })),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+            {
+              scalar: true,
+            }
+          ).map((s) => ({ ...s, text: `${s.text},` })),
         ]);
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
@@ -319,17 +322,25 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?_tstart, ?_tend)', [
           // Note there's no space or comma in the suggested field names
-          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
-          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
-            scalar: true,
-          }),
+          ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+            {
+              scalar: true,
+            }
+          ),
         ]);
         await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?_tstart, ?_tend)', [
           // Note there's no space or comma in the suggested field names
-          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
-          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
-            scalar: true,
-          }),
+          ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+            {
+              scalar: true,
+            }
+          ),
         ]);
 
         await assertSuggestions(
@@ -379,7 +390,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [],
+              getVariables: () => [],
               getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
             },
           });
@@ -400,7 +411,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS var0 = /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [
+              getVariables: () => [
                 {
                   key: 'function',
                   value: 'avg',
@@ -427,7 +438,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [],
+              getVariables: () => [],
               getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
             },
           });
@@ -448,7 +459,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY /', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [
+              getVariables: () => [
                 {
                   key: 'field',
                   value: 'clientip',
@@ -475,7 +486,7 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
             callbacks: {
               canSuggestVariables: () => true,
-              getVariablesByType: () => [
+              getVariables: () => [
                 {
                   key: 'interval',
                   value: '1 hour',

@@ -57,69 +57,67 @@ export function getScoresByRecord(
     mlApi.results
       .anomalySearch(
         {
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:record',
-                    },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        {
-                          range: {
-                            timestamp: {
-                              gte: earliestMs,
-                              lte: latestMs,
-                              // @ts-ignore
-                              format: 'epoch_millis',
-                            },
-                          },
-                        },
-                        {
-                          query_string: {
-                            query: jobIdFilterStr,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              detector_index: {
-                terms: {
-                  field: 'detector_index',
-                  order: {
-                    recordScore: 'desc',
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                {
+                  query_string: {
+                    query: 'result_type:record',
                   },
                 },
-                aggs: {
-                  recordScore: {
-                    max: {
-                      field: 'record_score',
+                {
+                  bool: {
+                    must: [
+                      {
+                        range: {
+                          timestamp: {
+                            gte: earliestMs,
+                            lte: latestMs,
+                            // @ts-ignore
+                            format: 'epoch_millis',
+                          },
+                        },
+                      },
+                      {
+                        query_string: {
+                          query: jobIdFilterStr,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            detector_index: {
+              terms: {
+                field: 'detector_index',
+                order: {
+                  recordScore: 'desc',
+                },
+              },
+              aggs: {
+                recordScore: {
+                  max: {
+                    field: 'record_score',
+                  },
+                },
+                byTime: {
+                  date_histogram: {
+                    field: 'timestamp',
+                    fixed_interval: `${intervalMs}ms`,
+                    min_doc_count: 1,
+                    extended_bounds: {
+                      min: earliestMs,
+                      max: latestMs,
                     },
                   },
-                  byTime: {
-                    date_histogram: {
-                      field: 'timestamp',
-                      fixed_interval: `${intervalMs}ms`,
-                      min_doc_count: 1,
-                      extended_bounds: {
-                        min: earliestMs,
-                        max: latestMs,
-                      },
-                    },
-                    aggs: {
-                      recordScore: {
-                        max: {
-                          field: 'record_score',
-                        },
+                  aggs: {
+                    recordScore: {
+                      max: {
+                        field: 'record_score',
                       },
                     },
                   },

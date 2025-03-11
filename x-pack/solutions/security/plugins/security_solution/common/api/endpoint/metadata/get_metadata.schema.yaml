@@ -10,18 +10,43 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
-        - name: query
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
+        - name: kuery
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/Kuery'
+        - name: hostStatuses
           in: query
           required: true
           schema:
-            $ref: './list_metadata.schema.yaml#/components/schemas/ListRequestQuery'
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/HostStatuses'
+        - name: sortField
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
+        - name: sortDirection
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: './list_metadata.schema.yaml#/components/schemas/MetadataListResponse'
 
   /internal/api/endpoint/metadata/transforms:
     get:
@@ -50,10 +75,11 @@ paths:
           required: true
           schema:
             type: string
+            example: 'ed518850-681a-4d60-bb98-e22640cae2a8'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: './list_metadata.schema.yaml#/components/schemas/EndpointMetadataResponse'

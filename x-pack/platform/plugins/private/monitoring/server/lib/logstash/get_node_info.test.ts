@@ -224,8 +224,6 @@ describe('get_logstash_info', () => {
     });
     expect(callWithRequest.mock.calls.length).toBe(1);
     expect(callWithRequest.mock.calls[0].length).toBe(3);
-    expect(callWithRequest.mock.calls[0][2].body.query.bool.filter[0]).toBe(
-      standaloneClusterFilter
-    );
+    expect(callWithRequest.mock.calls[0][2].query.bool.filter[0]).toBe(standaloneClusterFilter);
   });
 });

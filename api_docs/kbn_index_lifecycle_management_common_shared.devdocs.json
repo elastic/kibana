@@ -703,14 +703,6 @@
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
               },
               {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_lifecycle/modal.tsx"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_lifecycle/modal.tsx"
-              },
-              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
               },

@@ -33,6 +33,7 @@ export const GetPackagesRequestSchema = {
     category: schema.maybe(schema.string()),
     prerelease: schema.maybe(schema.boolean()),
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
+    withPackagePoliciesCount: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
 
@@ -121,8 +122,8 @@ export const InstallationInfoSchema = schema.object({
   ),
   latest_executed_state: schema.maybe(
     schema.object({
-      name: schema.string(),
-      started_at: schema.string(),
+      name: schema.maybe(schema.string()),
+      started_at: schema.maybe(schema.string()),
       error: schema.maybe(schema.string()),
     })
   ),
