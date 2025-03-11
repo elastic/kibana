@@ -19,11 +19,7 @@ import { AlertNotFoundError } from '../common/errors/alert_not_found_error';
 export type AlertData = Awaited<ReturnType<AlertsClient['get']>>;
 
 export class InvestigateAlertsClient {
-  private alertsClient: AlertsClient;
-
-  constructor(alertsClient: AlertsClient) {
-    this.alertsClient = alertsClient;
-  }
+  constructor(private alertsClient: AlertsClient) {}
 
   async getAlertById(alertId: string): Promise<AlertData> {
     const indices = (await this.getAlertsIndices()) || [];

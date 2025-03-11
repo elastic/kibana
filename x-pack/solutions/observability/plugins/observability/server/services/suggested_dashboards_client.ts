@@ -21,28 +21,14 @@ import type { InvestigateAlertsClient, AlertData } from './investigate_alerts_cl
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class SuggestedDashboardsClient {
-  private logger: Logger;
   private dashboardsById = new Map<string, Dashboard>();
-  private dashboardClient: IContentClient<Dashboard>;
-  private alertsClient: InvestigateAlertsClient;
-  private alertId: string;
 
-  constructor({
-    logger,
-    dashboardClient,
-    alertsClient,
-    alertId,
-  }: {
-    logger: Logger;
-    dashboardClient: IContentClient<Dashboard>;
-    alertsClient: InvestigateAlertsClient;
-    alertId: string;
-  }) {
-    this.logger = logger;
-    this.dashboardClient = dashboardClient;
-    this.alertsClient = alertsClient;
-    this.alertId = alertId;
-  }
+  constructor(
+    private logger: Logger,
+    private dashboardClient: IContentClient<Dashboard>,
+    private alertsClient: InvestigateAlertsClient,
+    private alertId: string
+  ) {}
 
   async fetchSuggestedDashboards(): Promise<{ suggestedDashboards: RecommendedDashboard[] }> {
     const allRelatedDashboards = new Set<RecommendedDashboard>();
