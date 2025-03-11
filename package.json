@@ -1123,7 +1123,7 @@
     "d3-transition": "^3.0.1",
     "dedent": "^0.7.0",
     "deep-freeze-strict": "^1.1.1",
-    "deepmerge": "^4.2.2",
+    "deepmerge": "^4.3.1",
     "del": "^6.1.0",
     "diff": "^7.0.0",
     "dotenv": "^16.4.5",
