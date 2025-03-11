@@ -139,7 +139,9 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover: { saveQuery: true } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNav {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const statefulSearchBar = component.find(
@@ -152,7 +154,9 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover: { saveQuery: false } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNav {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const statefulSearchBar = component.find(
@@ -250,7 +254,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNav {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
@@ -264,7 +270,9 @@ describe('Discover topnav component', () => {
       props.stateContainer.customizationContext.inlineTopNav.enabled = true;
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNav {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
