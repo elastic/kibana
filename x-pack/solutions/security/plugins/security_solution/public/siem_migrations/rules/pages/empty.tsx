@@ -6,12 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { css } from '@emotion/react';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { useNavigation } from '../../../common/lib/kibana';
 import * as i18n from './translations';
+import { OnboardingCardId, OnboardingTopicId } from '../../../onboarding/constants';
 
 export const EmptyMigrationRulesPage = () => {
   const { navigateTo } = useNavigation();
@@ -31,6 +33,7 @@ export const EmptyMigrationRulesPage = () => {
           min-height: calc(100vh - 240px);
         `}
         justifyContent="center"
+        alignItems="center"
       >
         <EuiFlexItem>
           <EuiEmptyPrompt
@@ -40,9 +43,12 @@ export const EmptyMigrationRulesPage = () => {
               </span>
             }
             actions={
-              <EuiButton color="primary" onClick={navigateToStartMigrationCallback} fill>
+              <SecuritySolutionLinkButton
+                deepLinkId={SecurityPageName.landing}
+                path={`${OnboardingTopicId.siemMigrations}#${OnboardingCardId.siemMigrationsStart}`}
+              >
                 {i18n.TRANSLATED_RULES_EMPTY_PAGE_CTA}
-              </EuiButton>
+              </SecuritySolutionLinkButton>
             }
             iconType={'logoSecurity'}
             body={
