@@ -549,7 +549,7 @@ function buildTree({
           hasInitializedChildren: false,
         };
 
-        // Check if currentNode is a transaction and node is a span without destination
+        // It is missing a destination when a child (currentNode) is a transaction and its parent (node) is a span without destination.
         if (
           currentNode.item.docType === 'transaction' &&
           node.item.docType === 'span' &&
