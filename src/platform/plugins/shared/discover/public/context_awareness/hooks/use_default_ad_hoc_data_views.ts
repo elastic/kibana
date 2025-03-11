@@ -12,10 +12,8 @@ import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { RootProfileState } from './use_root_profile';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import {
-  InternalStateStore,
-  internalStateActions,
-} from '../../application/main/state_management/redux';
+import type { InternalStateStore } from '../../application/main/state_management/redux';
+import { internalStateActions } from '../../application/main/state_management/redux';
 
 /**
  * Hook to retrieve and initialize the default profile ad hoc data views
