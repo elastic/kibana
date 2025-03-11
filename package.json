@@ -923,6 +923,7 @@
     "@kbn/sort-predicates": "link:src/platform/packages/shared/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/platform/plugins/shared/spaces",
     "@kbn/spaces-test-plugin": "link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin",
+    "@kbn/sse-example-plugin": "link:examples/sse_example",
     "@kbn/sse-utils": "link:src/platform/packages/shared/kbn-sse-utils",
     "@kbn/sse-utils-client": "link:src/platform/packages/shared/kbn-sse-utils-client",
     "@kbn/sse-utils-server": "link:src/platform/packages/shared/kbn-sse-utils-server",
