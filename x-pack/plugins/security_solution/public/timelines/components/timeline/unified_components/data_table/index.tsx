@@ -24,7 +24,6 @@ import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_det
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
-import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -431,7 +430,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
   }
 );
 
-export const TimelineDataTable = withDataView<DataTableProps>(TimelineDataTableComponent);
+export const TimelineDataTable = React.memo(TimelineDataTableComponent);
 
 // eslint-disable-next-line import/no-default-export
 export { TimelineDataTable as default };
