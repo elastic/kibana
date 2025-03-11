@@ -75,7 +75,7 @@ export function IdentifierControlForm({
     );
 
     if (initialState) {
-      return initialState.variableName;
+      return `??${initialState.variableName}`;
     }
 
     const variablePrefix = getVariablePrefix(variableType);
@@ -150,7 +150,7 @@ export function IdentifierControlForm({
 
   useEffect(() => {
     const variableExists =
-      esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
+      esqlVariables.some((variable) => variable.key === variableName.replace('??', '')) &&
       !isControlInEditMode;
 
     setFormIsInvalid(!selectedIdentifiers.length || !variableName || variableExists);
@@ -211,12 +211,16 @@ export function IdentifierControlForm({
 
   const onCreateFieldControl = useCallback(async () => {
     const availableOptions = selectedIdentifiers.map((field) => field.label);
+    // removes the double question mark from the variable name
+    const variableNameWithoutQuestionmark = variableName.startsWith('??')
+      ? variableName.slice(2)
+      : variableName;
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || variableName,
-      variableName,
+      title: label || variableNameWithoutQuestionmark,
+      variableName: variableNameWithoutQuestionmark,
       variableType,
       controlType: EsqlControlType.STATIC_VALUES,
       esqlQuery: queryString,

@@ -90,7 +90,7 @@ export function ValueControlForm({
     );
 
     if (initialState) {
-      return initialState.variableName;
+      return `?${initialState.variableName}`;
     }
 
     let variablePrefix = getVariablePrefix(variableType);
@@ -98,7 +98,7 @@ export function ValueControlForm({
     if (valuesField && variableType === ESQLVariableType.VALUES) {
       // variables names can't have special characters, only underscore
       const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
-      variablePrefix = fieldVariableName;
+      variablePrefix = `?${fieldVariableName}`;
     }
 
     return getRecurrentVariableName(variablePrefix, existingVariables);
@@ -295,12 +295,16 @@ export function ValueControlForm({
 
   const onCreateValueControl = useCallback(async () => {
     const availableOptions = selectedValues.map((value) => value.label);
+    // removes the question mark from the variable name
+    const variableNameWithoutQuestionmark = variableName.startsWith('?')
+      ? variableName.slice(1)
+      : variableName;
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || variableName,
-      variableName,
+      title: label || variableNameWithoutQuestionmark,
+      variableName: variableNameWithoutQuestionmark,
       variableType,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,

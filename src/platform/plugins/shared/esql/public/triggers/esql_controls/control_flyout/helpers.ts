@@ -19,7 +19,6 @@ export const updateQueryStringWithVariable = (
   variable: string,
   cursorPosition: monaco.Position
 ) => {
-  const variableName = `?${variable}`;
   const cursorColumn = cursorPosition?.column ?? 0;
   const cursorLine = cursorPosition?.lineNumber ?? 0;
   const lines = queryString.split('\n');
@@ -29,7 +28,7 @@ export const updateQueryStringWithVariable = (
     const queryPartToBeUpdated = queryArray[cursorLine - 1];
     const queryWithVariable = [
       queryPartToBeUpdated.slice(0, cursorColumn - 1),
-      variableName,
+      variable,
       queryPartToBeUpdated.slice(cursorColumn - 1),
     ].join('');
     queryArray[cursorLine - 1] = queryWithVariable;
@@ -38,7 +37,7 @@ export const updateQueryStringWithVariable = (
 
   return [
     queryString.slice(0, cursorColumn - 1),
-    variableName,
+    variable,
     queryString.slice(cursorColumn - 1),
   ].join('');
 };
@@ -69,13 +68,13 @@ export const areValuesIntervalsValid = (values: string[]) => {
 export const getVariablePrefix = (variableType: ESQLVariableType) => {
   switch (variableType) {
     case ESQLVariableType.FIELDS:
-      return 'field';
+      return '??field';
     case ESQLVariableType.FUNCTIONS:
-      return 'function';
+      return '??function';
     case ESQLVariableType.TIME_LITERAL:
-      return 'interval';
+      return '?interval';
     default:
-      return 'variable';
+      return '?variable';
   }
 };
 
@@ -105,8 +104,8 @@ export const getFlyoutStyling = () => {
 
 export const validateVariableName = (variableName: string) => {
   let text = variableName
-    // variable name can only contain letters, numbers and underscores
-    .replace(/[^a-zA-Z0-9_]/g, '');
+    // variable name can only contain letters, numbers, underscores and questionmarks
+    .replace(/[^a-zA-Z0-9_?]/g, '');
   if (text.charAt(0) === '_') {
     text = text.substring(1);
   }
