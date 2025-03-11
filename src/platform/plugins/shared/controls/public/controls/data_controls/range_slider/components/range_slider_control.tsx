@@ -134,8 +134,8 @@ export const RangeSliderControl: FC<Props> = ({
   );
 
   const euiThemeContext = useEuiTheme();
-  const {euiTheme} = euiThemeContext;
-  
+  const { euiTheme } = euiThemeContext;
+
   const styles = rangeSliderControlStyles(euiThemeContext);
 
   const getCommonInputProps = useCallback(

@@ -18,7 +18,7 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
