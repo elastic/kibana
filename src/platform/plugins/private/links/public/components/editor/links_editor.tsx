@@ -67,17 +67,17 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
 const toggleTextOverflowOptions = (layout: LinksLayoutType): EuiButtonGroupOptionProps[] => {
   const options = [
     {
-      id: LINK_TEXT_OVERFLOW_WRAP,
-      label: LinksStrings.editor.linkEditor.getTextOverflowWrapLabel(),
-      'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`,
+      id: LINK_TEXT_OVERFLOW_ELLIPSIS,
+      label: LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel(),
+      'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`,
     },
   ];
 
   if (layout === LINKS_VERTICAL_LAYOUT) {
     options.push({
-      id: LINK_TEXT_OVERFLOW_ELLIPSIS,
-      label: LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel(),
-      'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`,
+      id: LINK_TEXT_OVERFLOW_WRAP,
+      label: LinksStrings.editor.linkEditor.getTextOverflowWrapLabel(),
+      'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`,
     });
   }
 
@@ -250,7 +250,7 @@ const LinksEditor = ({
               idSelected={currentLayout}
               onChange={(id) => {
                 setCurrentLayout(id as LinksLayoutType);
-                setCurrentTextOverflow(LINK_TEXT_OVERFLOW_WRAP);
+                setCurrentTextOverflow(LINK_TEXT_OVERFLOW_ELLIPSIS);
               }}
               legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
             />

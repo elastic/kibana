@@ -14,6 +14,7 @@ import {
   DEFAULT_URL_DRILLDOWN_OPTIONS,
   UrlDrilldownOptions,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { css } from '@emotion/react';
 
 import {
   EXTERNAL_LINK_TYPE,
@@ -21,6 +22,7 @@ import {
   LINKS_VERTICAL_LAYOUT,
   LINK_TEXT_OVERFLOW_WRAP,
   LinksTextOverflowType,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import { ResolvedLink } from '../../types';
@@ -51,7 +53,7 @@ export const ExternalLinkComponent = ({
 
   return (
     <EuiListGroupItem
-      // css={{ minWidth: '50px' }}
+      css={styles(textOverflow)}
       size="s"
       external
       wrapText={textOverflow === LINK_TEXT_OVERFLOW_WRAP}
@@ -90,3 +92,13 @@ export const ExternalLinkComponent = ({
     />
   );
 };
+
+const styles = (textOverflow: LinksTextOverflowType) =>
+  css({
+    ...(textOverflow === LINK_TEXT_OVERFLOW_ELLIPSIS && {
+      '&.linksPanelLink': {
+        maxWidth: '250px',
+        overflow: 'hidden',
+      },
+    }),
+  });

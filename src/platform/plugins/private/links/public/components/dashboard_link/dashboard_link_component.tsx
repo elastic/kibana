@@ -26,7 +26,7 @@ import {
   LinksTextOverflowType,
   LINKS_VERTICAL_LAYOUT,
   LINK_TEXT_OVERFLOW_WRAP,
-  LINK_TEST_OVERFLOW_SCROLL,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
   LinksLayoutType,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
@@ -220,10 +220,9 @@ const styles =
           // add bottom border for current dashboard
           boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
           paddingInline: 0,
-          // minWidth: '50px',
-          ...(textOverflow === LINK_TEST_OVERFLOW_SCROLL && {
+          ...(textOverflow === LINK_TEXT_OVERFLOW_ELLIPSIS && {
             '& .euiListGroupItem__label': {
-              overflowX: 'scroll',
+              maxWidth: '250px',
             },
           }),
         },
