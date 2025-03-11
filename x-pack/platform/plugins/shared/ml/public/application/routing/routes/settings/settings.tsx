@@ -24,14 +24,14 @@ export const settingsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => (
   id: 'settings',
   path: '/',
   title: i18n.translate('xpack.ml.settings.docTitle', {
-    defaultMessage: 'Settings',
+    defaultMessage: 'Anomaly Detection Settings',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate('xpack.ml.settingsLabel', {
-        defaultMessage: 'Machine Learning Settings',
+        defaultMessage: 'Anomaly Detection Settings',
       }),
     },
   ],

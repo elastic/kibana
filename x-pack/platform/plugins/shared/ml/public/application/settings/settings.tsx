@@ -24,7 +24,10 @@ export const Settings: FC = () => {
       <EuiSpacer size="m" />
       <div data-test-subj="mlPageSettings">
         <MlPageHeader>
-          <FormattedMessage id="xpack.ml.settings.title" defaultMessage="Settings" />
+          <FormattedMessage
+            id="xpack.ml.anomalyDetectionSettings.title"
+            defaultMessage="Anomaly Detection Settings"
+          />
         </MlPageHeader>
         <AnomalyDetectionSettings />
       </div>

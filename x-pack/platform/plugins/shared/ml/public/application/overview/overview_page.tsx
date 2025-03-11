@@ -271,8 +271,8 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
     <div data-test-subj="mlStackManagementOverviewPage">
       <MlPageHeader>
         <PageTitle
-          title={i18n.translate('xpack.ml.overview.overviewLabel', {
-            defaultMessage: 'Overview',
+          title={i18n.translate('xpack.ml.management.machineLearningOverview.overviewLabel', {
+            defaultMessage: 'Machine Learning Overview',
           })}
         />
       </MlPageHeader>

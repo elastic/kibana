@@ -26,15 +26,15 @@ const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 export const overviewRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'overview',
   path: '/',
-  title: i18n.translate('xpack.ml.overview.overviewLabel', {
-    defaultMessage: 'Overview',
+  title: i18n.translate('xpack.ml.management.machineLearningOverview.overviewLabel', {
+    defaultMessage: 'Machine Learning Overview',
   }),
   enableDatePicker: true,
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),
     {
-      text: i18n.translate('xpack.ml.overview.overviewBreadcrumbLabel', {
+      text: i18n.translate('xpack.ml.management.machineLearningOverview.overviewLabel', {
         defaultMessage: 'Machine Learning Overview',
       }),
     },

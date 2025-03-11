@@ -109,17 +109,6 @@ export const AnomalyDetectionSettings: FC = () => {
 
   return (
     <Fragment>
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
-            defaultMessage="Anomaly Detection"
-          />
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <EuiTitle size="s">

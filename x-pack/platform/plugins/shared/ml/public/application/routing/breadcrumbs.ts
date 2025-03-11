@@ -71,7 +71,7 @@ export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumb
 
 export const SETTINGS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
-    defaultMessage: 'Machine Learning Settings',
+    defaultMessage: 'Anomaly Detection Settings',
   }),
   appId: 'ad_settings',
   path: '',
