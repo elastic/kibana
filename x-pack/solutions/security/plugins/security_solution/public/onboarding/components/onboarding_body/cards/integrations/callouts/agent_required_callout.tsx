@@ -31,6 +31,7 @@ export const AgentRequiredCallout = React.memo(() => {
   return (
     <CardCallOut
       color="warning"
+      size="s"
       text={
         <FormattedMessage
           id="xpack.securitySolution.onboarding.integrationsCard.callout.completeLabel"
