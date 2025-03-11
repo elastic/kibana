@@ -32,7 +32,7 @@ export class ColorAssignmentMatcher {
       (acc, assignment, i) => {
         assignment.rules.forEach((rule) => {
           const key = getKey(rule);
-          if (key) {
+          if (key !== null) {
             const [index = i, matchCount = 0] = acc.get(key) ?? [];
             acc.set(key, [index, matchCount + 1]);
           }
