@@ -14,9 +14,11 @@ import { discoverServiceMock } from './services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import type { RuntimeStateManager } from '../application/main/state_management/redux';
-import { createRuntimeStateManager } from '../application/main/state_management/redux';
+import {
   createInternalStateStore,
-import { HistoryLocationState } from '../build_services';
+  createRuntimeStateManager,
+} from '../application/main/state_management/redux';
+import type { HistoryLocationState } from '../build_services';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
