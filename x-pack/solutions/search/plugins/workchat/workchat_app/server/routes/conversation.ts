@@ -49,9 +49,18 @@ export const registerConversationRoutes = ({ getServices, router }: RouteDepende
 
       const conversations = await client.list();
 
+      const summaries = conversations.map((conv) => {
+        return {
+          id: conv.id,
+          agentId: conv.agentId,
+          title: conv.title,
+          lastUpdated: conv.lastUpdated,
+        };
+      });
+
       return res.ok<ListConversationResponse>({
         body: {
-          conversations,
+          conversations: summaries,
         },
       });
     }

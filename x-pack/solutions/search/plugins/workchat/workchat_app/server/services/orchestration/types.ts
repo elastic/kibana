@@ -6,8 +6,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ChunkEvent, MessageEvent } from '../../../common/chat_events';
-import type { ConversationEvent } from '../../../common/conversations';
+import type { ChunkEvent, MessageEvent, ToolResultEvent } from '../../../common/chat_events';
+import type { ConversationEvent } from '../../../common/conversation_events';
 
 /**
  * Represents an instance of a configured agent, ready to run.
@@ -26,7 +26,7 @@ export interface AgentRunOptions {
 /**
  * Subsets of chat events the agent can emit
  */
-export type AgentRunEvents = ChunkEvent | MessageEvent;
+export type AgentRunEvents = ChunkEvent | MessageEvent | ToolResultEvent;
 
 /**
  * Output of {@link Agent.run}

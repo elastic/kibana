@@ -11,6 +11,7 @@ import type {
   ChunkEvent,
   ConversationCreatedEvent,
   ConversationUpdatedEvent,
+  ToolResultEvent,
 } from '../chat_events';
 
 export const conversationCreatedEvent = ({
@@ -45,4 +46,8 @@ export const isMessageEvent = (event: ChatEvent): event is MessageEvent => {
 
 export const isChunkEvent = (event: ChatEvent): event is ChunkEvent => {
   return event.type === 'message_chunk';
+};
+
+export const isToolResultEvent = (event: ChatEvent): event is ToolResultEvent => {
+  return event.type === 'tool_result';
 };

@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { ConversationEvent } from '../../../common/conversations';
-import { isMessageEvent } from '../../../common/utils/conversation';
+import {
+  type ConversationEvent,
+  isAssistantMessage,
+  isUserMessage,
+  isToolResult,
+  createAssistantMessage,
+} from '../../../common/conversation_events';
 import type { ChatStatus } from '../hooks/use_chat';
-
-// TODO: maybe composition from ConversationEvent?
-export interface ConversationItem {
-  type: 'message';
-  user: 'user' | 'assistant';
-  loading: boolean;
-  id: string;
-  createdAt: string;
-  content: string;
-}
+import {
+  type ConversationItem,
+  type ToolCallConversationItem,
+  createUserMessageItem,
+  createAssistantMessageItem,
+  createToolCallItem,
+  isAssistantMessageItem,
+  isToolCallItem,
+} from './conversation_items';
 
 /**
  * Utility function preparing the data to display the chat conversation
@@ -29,31 +33,48 @@ export const getChartConversationItems = ({
   conversationEvents: ConversationEvent[];
   chatStatus: ChatStatus;
 }): ConversationItem[] => {
-  const items = conversationEvents.filter(isMessageEvent).map<ConversationItem>((event, index) => {
-    return {
-      type: 'message',
-      user: event.message.type,
-      loading: false,
-      id: event.id,
-      createdAt: event.createdAt,
-      content: event.message.content,
-    };
-  });
+  const toolCallMap = new Map<string, ToolCallConversationItem>();
+
+  const items = conversationEvents.reduce<ConversationItem[]>((list, item) => {
+    if (isUserMessage(item)) {
+      list.push(createUserMessageItem({ message: item }));
+    }
+
+    if (isAssistantMessage(item)) {
+      if (item.content) {
+        list.push(createAssistantMessageItem({ message: item }));
+      }
+      for (const toolCall of item.toolCalls) {
+        const toolCallItem = createToolCallItem({ messageId: item.id, toolCall });
+        toolCallMap.set(toolCallItem.toolCall.toolCallId, toolCallItem);
+        list.push(toolCallItem);
+      }
+    }
+
+    if (isToolResult(item)) {
+      const toolCallItem = toolCallMap.get(item.toolCallId);
+      if (toolCallItem) {
+        toolCallItem.toolResult = item.toolResult;
+      }
+    }
+
+    return list;
+  }, []);
 
   if (chatStatus === 'loading') {
     const lastItem = items[items.length - 1];
-    if (lastItem.user === 'assistant') {
+    if (isAssistantMessageItem(lastItem)) {
+      lastItem.loading = true;
+    } else if (isToolCallItem(lastItem) && !lastItem.toolResult) {
       lastItem.loading = true;
     } else {
       // need to insert loading placeholder
-      items.push({
-        type: 'message',
-        user: 'assistant',
-        loading: true,
-        id: '__placeholder__',
-        createdAt: '',
-        content: '',
-      });
+      items.push(
+        createAssistantMessageItem({
+          message: createAssistantMessage({ content: '' }),
+          loading: true,
+        })
+      );
     }
   }
 

@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { BaseMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
-import type { ConversationEvent, ConversationMessageEvent } from '../../../../common/conversations';
-import { isMessageEvent } from '../../../../common/utils/conversation';
-import { isUserMessage, isAssistantMessage } from '../../../../common/utils/messages';
+import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import {
+  type ConversationEvent,
+  type UserMessage,
+  type AssistantMessage,
+  type ToolResult,
+  isUserMessage,
+  isAssistantMessage,
+  isToolResult,
+} from '../../../../common/conversation_events';
 
 export const conversationEventsToMessages = (events: ConversationEvent[]): BaseMessage[] => {
   return events
     .map((event) => {
-      if (isMessageEvent(event)) {
-        return [messageEventToLangchainMessage(event)];
+      if (isUserMessage(event)) {
+        return [userMessageToLangchain(event)];
+      }
+      if (isAssistantMessage(event)) {
+        return [assistantMessageToLangchain(event)];
+      }
+      if (isToolResult(event)) {
+        return [toolResultToLangchain(event)];
       } else {
         // not handling other types for now.
         return [];
@@ -23,13 +35,24 @@ export const conversationEventsToMessages = (events: ConversationEvent[]): BaseM
     .flat();
 };
 
-export const messageEventToLangchainMessage = (event: ConversationMessageEvent): BaseMessage => {
-  const message = event.message;
-  if (isUserMessage(message)) {
-    return new HumanMessage({ content: message.content });
-  }
-  if (isAssistantMessage(message)) {
-    return new AIMessage({ content: message.content });
-  }
-  throw new Error(`unsupported message type: ${event.message.type}`);
+export const userMessageToLangchain = (message: UserMessage): BaseMessage => {
+  return new HumanMessage({ content: message.content });
+};
+
+export const assistantMessageToLangchain = (message: AssistantMessage): BaseMessage => {
+  return new AIMessage({
+    content: message.content,
+    tool_calls: message.toolCalls.map((toolCall) => {
+      return {
+        id: toolCall.toolCallId,
+        name: toolCall.toolName,
+        args: toolCall.args,
+        type: 'tool_call',
+      };
+    }),
+  });
+};
+
+export const toolResultToLangchain = (message: ToolResult): BaseMessage => {
+  return new ToolMessage({ tool_call_id: message.toolCallId, content: message.toolResult });
 };

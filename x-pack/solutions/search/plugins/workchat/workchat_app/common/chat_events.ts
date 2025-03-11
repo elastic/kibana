@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Message } from './messages';
+import type { UserMessage, AssistantMessage } from './conversation_events';
 
 export interface ChatEventBase {
   type: string;
@@ -16,7 +16,16 @@ export interface ChatEventBase {
  */
 export interface ChunkEvent extends ChatEventBase {
   type: 'message_chunk';
-  text_chunk: string;
+  content_chunk: string;
+  message_id: string;
+}
+
+export interface ToolResultEvent extends ChatEventBase {
+  type: 'tool_result';
+  toolResult: {
+    callId: string;
+    result: string;
+  };
 }
 
 /**
@@ -39,9 +48,12 @@ export interface ConversationUpdatedEvent extends ChatEventBase {
   conversation: ConversationEventChanges;
 }
 
+/**
+ * Emitted when a full message was generated.
+ */
 export interface MessageEvent extends ChatEventBase {
   type: 'message';
-  message: Message;
+  message: UserMessage | AssistantMessage;
 }
 
 export interface ConversationEventChanges {
@@ -53,4 +65,5 @@ export type ChatEvent =
   | ChunkEvent
   | MessageEvent
   | ConversationCreatedEvent
-  | ConversationUpdatedEvent;
+  | ConversationUpdatedEvent
+  | ToolResultEvent;
