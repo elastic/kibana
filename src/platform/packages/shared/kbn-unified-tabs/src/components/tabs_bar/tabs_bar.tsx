@@ -11,30 +11,32 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { Tab } from '../tab';
+import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
 
-export interface TabsBarProps {
+export type TabsBarProps = Pick<
+  TabProps,
+  'getTabMenuItems' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
+> & {
   items: TabItem[];
   selectedItem: TabItem | null;
-  tabContentId: string;
-  onAdd: () => void;
-  onSelect: (item: TabItem) => void;
-  onClose: (item: TabItem) => void;
-}
+  onAdd: () => Promise<void>;
+};
 
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
   tabContentId,
+  getTabMenuItems,
   onAdd,
+  onLabelEdited,
   onSelect,
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
-    defaultMessage: 'New',
+    defaultMessage: 'New session',
   });
 
   return (
@@ -56,8 +58,10 @@ export const TabsBar: React.FC<TabsBarProps> = ({
             item={item}
             isSelected={selectedItem?.id === item.id}
             tabContentId={tabContentId}
+            getTabMenuItems={getTabMenuItems}
+            onLabelEdited={onLabelEdited}
             onSelect={onSelect}
-            onClose={onClose}
+            onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
           />
         </EuiFlexItem>
       ))}
