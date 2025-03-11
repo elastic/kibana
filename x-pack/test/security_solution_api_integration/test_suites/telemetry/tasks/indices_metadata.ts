@@ -48,60 +48,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish data stream events', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
-        const opts = {
+        const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_DATA_STREAM_EVENT],
-          withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
-        };
+          dsName,
+        });
 
-        await waitFor(
-          async () => {
-            const events = await ebtServer
-              .getEvents(Number.MAX_SAFE_INTEGER, opts)
-              .then((result) => result.map((ev) => ev.properties.items))
-              .then((result) => result.flat())
-              .then((result) => result.filter((ev) => (ev as any).datastream_name === dsName));
-
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-            const eventCount = events.length;
-
-            return hasRun && eventCount === 1;
-          },
-          'waitForTaskToRun',
-          logger
-        );
+        expect(events.length).toEqual(1);
       });
 
       it('should publish index stats events', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
-        const opts = {
+        const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_INDEX_STATS_EVENT],
-          withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
-        };
+          index: dsName,
+        });
 
-        // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
-        const regex = new RegExp(`^\.ds-${dsName}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
-        await waitFor(
-          async () => {
-            const events = await ebtServer
-              .getEvents(Number.MAX_SAFE_INTEGER, opts)
-              .then((result) => result.map((ev) => ev.properties.items))
-              .then((result) => result.flat())
-              .then((result) =>
-                result.filter((ev) => regex.test((ev as any).index_name as string))
-              );
-
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-
-            return hasRun && events.length === NUM_INDICES;
-          },
-          'waitForTaskToRun',
-          logger
-        );
+        expect(events.length).toEqual(NUM_INDICES);
       });
     });
 
@@ -120,85 +81,37 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish ilm policy events', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
-        const opts = {
+        const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_ILM_POLICY_EVENT],
-          withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
-        };
+          policyName,
+        });
 
-        await waitFor(
-          async () => {
-            const events = await ebtServer
-              .getEvents(Number.MAX_SAFE_INTEGER, opts)
-              .then((result) => result.map((ev) => ev.properties.items))
-              .then((result) => result.flat())
-              .then((result) => result.filter((ev) => (ev as any).policy_name === policyName));
-
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-
-            return hasRun && events.length === 1;
-          },
-          'waitForTaskToRun',
-          logger
-        );
+        expect(events.length).toEqual(1);
       });
 
       it('should publish ilm stats events', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
-        const opts = {
+        const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_ILM_STATS_EVENT],
-          withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
-        };
+          policyName,
+        });
 
-        await waitFor(
-          async () => {
-            const events = await ebtServer
-              .getEvents(Number.MAX_SAFE_INTEGER, opts)
-              .then((result) => result.map((ev) => ev.properties.items))
-              .then((result) => result.flat())
-              .then((result) => result.filter((ev) => (ev as any).policy_name === policyName));
-
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-
-            return hasRun && events.length === NUM_INDICES;
-          },
-          'waitForTaskToRun',
-          logger
-        );
+        expect(events.length).toEqual(NUM_INDICES);
       });
 
       it('index stats events should have the expected fields', async () => {
-        for (let i = 0; i < 10; i++) {
-          await es.index({
-            index: dsName,
-            body: { '@timestamp': new Date().toISOString(), foo: 'bar', bar: i },
-          });
-        }
+        const numDocs = 10;
 
-        await waitFor(
-          async () => {
-            const count = await es.count({ index: dsName });
+        // Index some docs
+        await indexRandomDocs(dsName, numDocs);
 
-            return count.count === 10;
-          },
-          'waitForTaskToRun',
-          logger
-        );
+        // search docs to increment the stats and also to get a valid id
+        const search = await es.search({
+          index: dsName,
+        });
+        const id = search.hits.hits[0]._id ?? '';
+        const index = search.hits.hits[0]._index;
 
-        let index = '';
-        let id = '';
-        for (let _ = 0; _ < 10; _++) {
-          const search = await es.search({
-            index: dsName,
-          });
-          id = search.hits.hits[0]._id ?? '';
-          index = search.hits.hits[0]._index;
-        }
-
+        // create a doc with a version conflict to increment the failed stats
         await es
           .create({
             index: dsName,
@@ -207,41 +120,14 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .catch((_) => {});
 
+        // delete a doc to increment the deleted stats
         await es.delete({ index, id });
 
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
-        const opts = {
+        const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_INDEX_STATS_EVENT],
-          withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
-        };
-
-        // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
-        const regex = new RegExp(`^\.ds-${dsName}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
-        await waitFor(
-          async () => {
-            const events = await ebtServer
-              .getEvents(Number.MAX_SAFE_INTEGER, opts)
-              .then((result) => result.map((ev) => ev.properties.items))
-              .then((result) => result.flat())
-              .then((result) =>
-                result.filter((ev) => regex.test((ev as any).index_name as string))
-              );
-
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-
-            return hasRun && events.length === NUM_INDICES;
-          },
-          'waitForTaskToRun',
-          logger
-        );
-
-        const events = await ebtServer
-          .getEvents(Number.MAX_SAFE_INTEGER, opts)
-          .then((result) => result.map((ev) => ev.properties.items))
-          .then((result) => result.flat())
-          .then((result) => result.filter((ev) => regex.test((ev as any).index_name as string)));
+          index: dsName,
+        });
+        expect(events.length).toEqual(NUM_INDICES);
 
         expect(
           events.some((ev) => {
@@ -257,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(
           events.some((ev) => {
-            return (ev as any).docs_count_primaries > 1;
+            return (ev as any).docs_count_primaries === numDocs - 1;
           })
         ).toBeTruthy();
 
@@ -275,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(
           events.some((ev) => {
-            return (ev as any).docs_count > 1;
+            return (ev as any).docs_count === numDocs - 1;
           })
         ).toBeTruthy();
 
@@ -287,16 +173,91 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(
           events.some((ev) => {
-            return (ev as any).index_failed_due_to_version_conflict > 0;
+            return (ev as any).index_failed_due_to_version_conflict === 1;
           })
         ).toBeTruthy();
 
         expect(
           events.some((ev) => {
-            return (ev as any).index_failed > 0;
+            return (ev as any).index_failed === 1;
           })
         ).toBeTruthy();
       });
     });
+
+    const indexRandomDocs = async (index: string, count: number) => {
+      for (let i = 0; i < count; i++) {
+        await es.index({
+          index,
+          body: { '@timestamp': new Date().toISOString(), foo: 'bar', bar: i },
+        });
+      }
+
+      await waitFor(
+        async () => {
+          const resp = await es.count({ index });
+
+          return resp.count === count;
+        },
+        'waitForTaskToRun',
+        logger
+      );
+    };
+
+    const launchTaskAndWaitForEvents = async (params: {
+      eventTypes: string[];
+      dsName?: string;
+      policyName?: string;
+      index?: string;
+    }) => {
+      const datastream = params.dsName;
+      const index = params.index;
+      const policy = params.policyName;
+
+      const runAt = await launchTask(TASK_ID, kibanaServer, logger);
+      const opts = {
+        eventTypes: params.eventTypes,
+        withTimeoutMs: 1000,
+        fromTimestamp: new Date().toISOString(),
+      };
+
+      // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
+      const regex = new RegExp(`^\.ds-${index}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
+      let events: any[] = [];
+      await waitFor(
+        async () => {
+          events = await ebtServer
+            .getEvents(Number.MAX_SAFE_INTEGER, opts)
+            .then((result) => result.map((ev) => ev.properties.items))
+            .then((result) => result.flat())
+            .then((result) =>
+              result.filter((ev) => {
+                const event = ev as any;
+                return index === undefined || regex.test(event.index_name as string);
+              })
+            )
+            .then((result) =>
+              result.filter((ev) => {
+                const event = ev as any;
+                return datastream === undefined || event.datastream_name === datastream;
+              })
+            )
+            .then((result) =>
+              result.filter((ev) => {
+                const event = ev as any;
+                return policy === undefined || event.policy_name === policy;
+              })
+            );
+
+          const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+
+          return hasRun && events.length > 0;
+        },
+        'waitForTaskToRun',
+        logger
+      );
+
+      return events;
+    };
   });
 };
