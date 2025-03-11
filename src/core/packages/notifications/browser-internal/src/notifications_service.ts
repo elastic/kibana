@@ -84,7 +84,6 @@ export class NotificationsService {
           ...startDeps,
         }),
       productIntercepts: this.productIntercepts.start({
-        overlays,
         targetDomElement: (() => {
           // create container to mount product intercept dialog into
           const productInterceptContainer = Object.assign(document.createElement('div'), {

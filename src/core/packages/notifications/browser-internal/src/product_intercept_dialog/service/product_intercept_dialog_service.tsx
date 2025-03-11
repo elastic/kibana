@@ -11,11 +11,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
 import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
@@ -26,10 +22,7 @@ interface ProductInterceptServiceSetupDeps {
 
 interface ProductInterceptServiceStartDeps {
   analytics: AnalyticsServiceStart;
-  i18n: I18nStart;
-  overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  rendering: RenderingService;
   targetDomElement: HTMLElement;
 }
 
@@ -45,20 +38,21 @@ export class ProductInterceptDialogService {
 
   public start({
     targetDomElement,
-    ...startDeps
+    rendering,
+    analytics,
   }: ProductInterceptServiceStartDeps): IProductInterceptPublicApi {
-    const { ack, add, get$ } = this.api.start({ ...startDeps });
+    const { ack, add, get$ } = this.api.start({ analytics });
     this.targetDomElement = targetDomElement;
 
     render(
-      <KibanaRenderContextProvider {...startDeps}>
+      rendering.addContext(
         <ProductInterceptDialogManager
           {...{
             productIntercepts$: get$(),
             ackProductIntercept: ack,
           }}
         />
-      </KibanaRenderContextProvider>,
+      ),
       this.targetDomElement
     );
 

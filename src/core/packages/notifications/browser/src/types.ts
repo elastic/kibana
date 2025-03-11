@@ -122,8 +122,10 @@ export interface NotificationCoordinatorPublicApi {
  * that returns an instance that of the notification coordinator that will be bound to the registrar value provided.
  */
 export type NotificationCoordinator = (registrar: string) => NotificationCoordinatorPublicApi;
-interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content' | 'subtitle'> {
-  onNextClick?: () => void;
+
+interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content'> {
+  id: string;
+  onNextClick?: (step: number) => void;
 }
 
 export interface ProductIntercept {
