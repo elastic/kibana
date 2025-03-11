@@ -6,7 +6,6 @@
  */
 
 import React, { useRef } from 'react';
-import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { css } from '@emotion/react';
 import { UseEuiTheme, euiTextTruncate, useEuiTheme, transparentize } from '@elastic/eui';
@@ -118,8 +117,7 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => (
-              // TODO: Delete gphEdge--wrapper and update snapshots
-              <g key={makeEdgeId(edge)} className="gphEdge--wrapper" css={styles.edgeWrapper}>
+              <g key={makeEdgeId(edge)} css={styles.edgeWrapper}>
                 {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                 <line
                   x1={edge.topSrc.kx}
@@ -149,6 +147,7 @@ export function GraphVisualization({
                   className="gphEdge gphEdge--clickable"
                   css={[
                     styles.edge(euiThemeContext, Math.max(edge.width, 15)),
+                    // fill is overridden
                     styles.edgeClickable,
                   ]}
                 />
