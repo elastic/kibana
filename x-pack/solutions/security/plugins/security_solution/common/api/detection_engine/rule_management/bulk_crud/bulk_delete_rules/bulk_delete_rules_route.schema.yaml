@@ -70,7 +70,7 @@ paths:
       deprecated: true
       summary: Delete multiple detection rules
       description: |
-        Deletes multiple rules.
+        Delete detection rules in bulk.
         > warn
         > This API is deprecated and will be removed in Kibana v9.0.
       tags:

@@ -496,7 +496,7 @@ paths:
     post:
       deprecated: true
       description: |
-        Deletes multiple rules.
+        Delete detection rules in bulk.
         > warn
         > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRulesPost
@@ -662,7 +662,8 @@ paths:
               type: array
         description: >
           A JSON array where each element includes the `id` or `rule_id` field
-          of the rule you want to update and the fields you want to modify.
+          of the rule you want to update and the fields you want to be specified
+          in this rule.
 
           > info
 
