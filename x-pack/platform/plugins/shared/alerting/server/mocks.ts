@@ -13,6 +13,7 @@ import {
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { rulesClientMock } from './rules_client.mock';
 import { AlertingServerSetup, AlertingServerStart } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
@@ -168,6 +169,7 @@ const createRuleExecutorServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     alertsClient: publicAlertsClientMock.create(),
+    actionsClient: actionsClientMock.create(),
     getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
     getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
     getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
