@@ -12,8 +12,8 @@ import {
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
@@ -39,13 +39,7 @@ import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';

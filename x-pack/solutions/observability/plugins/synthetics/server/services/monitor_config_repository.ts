@@ -12,6 +12,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import {
@@ -162,25 +163,27 @@ export class MonitorConfigRepository {
     filter?: string;
     showFromAllSpaces?: boolean;
   } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
-    const finder = this.soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
-      type: syntheticsMonitorType,
-      perPage: 5000,
-      search,
-      sortField,
-      sortOrder,
-      fields,
-      filter,
-      searchFields,
-      ...(showFromAllSpaces && { namespaces: ['*'] }),
+    return withApmSpan('get_all_monitors', async () => {
+      const finder = this.soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+        type: syntheticsMonitorType,
+        perPage: 5000,
+        search,
+        sortField,
+        sortOrder,
+        fields,
+        filter,
+        searchFields,
+        ...(showFromAllSpaces && { namespaces: ['*'] }),
+      });
+
+      const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+      for await (const result of finder.find()) {
+        hits.push(...result.saved_objects);
+      }
+
+      finder.close().catch(() => {});
+
+      return hits;
     });
-
-    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
-    for await (const result of finder.find()) {
-      hits.push(...result.saved_objects);
-    }
-
-    finder.close().catch(() => {});
-
-    return hits;
   };
 }
