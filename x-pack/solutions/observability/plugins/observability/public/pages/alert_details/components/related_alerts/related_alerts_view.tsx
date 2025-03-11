@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiSpacer,
+  EuiTableSelectionType,
   EuiText,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -28,7 +29,7 @@ import {
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
 import { isEmpty, map, max, min } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
@@ -71,6 +72,7 @@ export function RelatedAlertsView({ alert }: Props) {
       render: (score: Alert['_score']) => {
         return <EuiBadge color="accent">{numeral(normalizeScore(score)).format('0[.0]')}</EuiBadge>;
       },
+      width: '150',
     },
     {
       field: ALERT_STATUS,
@@ -84,6 +86,7 @@ export function RelatedAlertsView({ alert }: Props) {
         }
         return <EuiBadge color={value === 'active' ? 'danger' : 'success'}>{value}</EuiBadge>;
       },
+      width: '150',
     },
     {
       field: ALERT_RULE_NAME,
@@ -104,6 +107,16 @@ export function RelatedAlertsView({ alert }: Props) {
       },
     },
   ];
+
+  const [selectedAlerts, setSelectedAlerts] = useState<Alert[]>([]);
+  const onSelectionChange = (selected: Alert[]) => {
+    setSelectedAlerts(selected);
+  };
+  const selection: EuiTableSelectionType<Alert> = {
+    onSelectionChange,
+
+    selectable: () => true,
+  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -132,6 +145,8 @@ export function RelatedAlertsView({ alert }: Props) {
         loading={isLoading}
         compressed
         error={isError ? 'Error fetching relevant alerts' : undefined}
+        selection={selection}
+        tableLayout={'auto'}
       />
     </EuiFlexGroup>
   );
