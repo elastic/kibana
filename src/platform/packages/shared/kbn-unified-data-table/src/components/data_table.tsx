@@ -1153,6 +1153,10 @@ export const UnifiedDataTable = ({
   const handleOnScroll = useCallback(
     (event: { scrollTop: number }) => {
       setHasScrolledToBottom((prevHasScrolledToBottom) => {
+        if (loadingState !== DataLoadingState.loaded) {
+          return prevHasScrolledToBottom;
+        }
+
         // We need to manually query the react-window wrapper since EUI doesn't
         // expose outerRef in virtualizationOptions, but we should request it
         const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
@@ -1170,10 +1174,16 @@ export const UnifiedDataTable = ({
         return isScrollable && isScrolledToBottom;
       });
     },
-    [dataGridWrapper]
+    [dataGridWrapper, loadingState]
   );
 
   const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
+
+  useEffect(() => {
+    if (loadingState === DataLoadingState.loadingMore) {
+      setHasScrolledToBottom(false);
+    }
+  }, [loadingState]);
 
   const virtualizationOptions = useMemo(() => {
     const options = {
@@ -1274,7 +1284,7 @@ export const UnifiedDataTable = ({
               data-test-subj="docTable"
               leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
-              pagination={paginationMode === DEFAULT_PAGINATION_MODE ? paginationObj : undefined}
+              pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
               renderCellValue={renderCellValueWithInTableSearchSupport}
               ref={dataGridRef}
               rowCount={rowCount}
@@ -1307,9 +1317,7 @@ export const UnifiedDataTable = ({
               data={data}
               fieldFormats={fieldFormats}
               paginationMode={paginationMode}
-              hasScrolledToBottom={
-                paginationMode !== DEFAULT_PAGINATION_MODE ? hasScrolledToBottom : true
-              }
+              hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
             />
           )}
         {searchTitle && (
