@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import {
-  ALERT_GROUP,
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import type { Alert } from '@kbn/alerting-types';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
+import { i18n } from '@kbn/i18n';
+import {
   ALERT_INSTANCE_ID,
-  ALERT_RULE_TAGS,
-  ALERT_RULE_UUID,
-  ALERT_START,
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
-import dedent from 'dedent';
-import moment from 'moment';
+import { isEmpty, map, max, min } from 'lodash';
 import React from 'react';
-import { TopAlert } from '../../../..';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../../../common/constants';
-import { ObservabilityFields } from '../../../../../common/utils/alerting/types';
+import type { ObservabilityFields } from '../../../../../common/utils/alerting/types';
+import type { TopAlert } from '../../../../typings/alerts';
 import { useKibana } from '../../../../utils/kibana_react';
+import { useBuildRelatedAlertsQuery } from '../../hooks/related_alerts/use_build_related_alerts_query';
 
 interface Props {
   alert: TopAlert<ObservabilityFields>;
@@ -33,127 +45,9 @@ interface Props {
 export function RelatedAlertsView({ alert }: Props) {
   const { services } = useKibana();
 
-  const groups = alert.fields[ALERT_GROUP];
-  const shouldGroups =
-    groups?.map(({ field, value }) => ({
-      bool: {
-        boost: 2.0,
-        must: [
-          { term: { 'kibana.alert.group.field': field } },
-          { term: { 'kibana.alert.group.value': value } },
-        ],
-      },
-    })) ?? [];
-  const shouldRule = alert.fields[ALERT_RULE_UUID]
-    ? [
-        {
-          term: {
-            'kibana.alert.rule.uuid': {
-              value: alert.fields[ALERT_RULE_UUID],
-              boost: 1.0,
-            },
-          },
-        },
-      ]
-    : [];
-  const startDate = moment(alert.fields[ALERT_START]);
-  const tags = alert.fields[ALERT_RULE_TAGS] ?? [];
-  const instanceId = alert.fields[ALERT_INSTANCE_ID]?.split(',') ?? [];
+  const esQuery = useBuildRelatedAlertsQuery({ alert });
 
-  const esQuery: QueryDslQueryContainer = {
-    bool: {
-      filter: [
-        {
-          range: {
-            'kibana.alert.start': {
-              gte: startDate.clone().subtract(6, 'days').toISOString(),
-              lte: startDate.clone().add(3, 'days').toISOString(),
-            },
-          },
-        },
-      ],
-      should: [
-        ...shouldGroups,
-        ...shouldRule,
-        {
-          function_score: {
-            functions: [
-              {
-                exp: {
-                  [ALERT_START]: {
-                    origin: startDate.toISOString(),
-                    scale: '10m',
-                    offset: '10m',
-                    decay: 0.5,
-                  },
-                },
-                weight: 10,
-              },
-              {
-                script_score: {
-                  script: {
-                    source: dedent(`
-                      double jaccardSimilarity(Set a, Set b) {
-                        if (a.size() == 0 || b.size() == 0) return 0.0;
-                        Set intersection = new HashSet(a);
-                        intersection.retainAll(b);
-                        Set union = new HashSet(a);
-                        union.addAll(b);
-                        return (double) intersection.size() / union.size();
-                      }
-                      Set tagsQuery = new HashSet(params.tags);
-                      Set tagsDoc = new HashSet(doc.containsKey('tags.keyword') ? doc['tags.keyword'].values : []);
-                      return jaccardSimilarity(tagsQuery, tagsDoc);
-                    `),
-                    params: {
-                      tags,
-                    },
-                  },
-                },
-                weight: 5,
-              },
-              {
-                script_score: {
-                  script: {
-                    source: dedent(`
-                      double jaccardSimilarity(Set a, Set b) {
-                        if (a.size() == 0 || b.size() == 0) return 0.0;
-                        Set intersection = new HashSet(a);
-                        intersection.retainAll(b);
-                        Set union = new HashSet(a);
-                        union.addAll(b);
-                        return (double) intersection.size() / union.size();
-                      }
-                      Set instanceIdQuery = new HashSet(params.instanceId);
-                      Set instanceIdDoc = new HashSet();
-                      if (doc.containsKey('kibana.alert.instance.id')) {
-                        String instanceIdStr = doc['kibana.alert.instance.id'].value;
-                        if (instanceIdStr != null && !instanceIdStr.isEmpty()) {
-                          StringTokenizer tokenizer = new StringTokenizer(instanceIdStr, ',');
-                          while (tokenizer.hasMoreTokens()) {
-                            instanceIdDoc.add(tokenizer.nextToken());
-                          }
-                        }
-                      }
-
-                      return jaccardSimilarity(instanceIdQuery, instanceIdDoc);
-                    `),
-                    params: {
-                      instanceId,
-                    },
-                  },
-                },
-                weight: 5,
-              },
-            ],
-            boost_mode: 'multiply',
-          },
-        },
-      ],
-    },
-  };
-
-  const { data } = useSearchAlertsQuery({
+  const { data, isLoading, isError } = useSearchAlertsQuery({
     data: services.data,
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
     consumers: observabilityAlertFeatureIds,
@@ -163,19 +57,101 @@ export function RelatedAlertsView({ alert }: Props) {
     sort: [{ _score: { order: 'desc' } }],
   });
 
-  console.dir(data);
+  const scores = map(data?.alerts, '_score');
+  const [minScore, maxScore] = [min(scores), max(scores)];
+  const normalizeScore = (currScore: number) => {
+    if (minScore === undefined || maxScore === undefined) return currScore;
+    return ((currScore - minScore) / (maxScore - minScore)) * 100;
+  };
+
+  const columns: Array<EuiBasicTableColumn<Alert>> = [
+    {
+      field: '_score',
+      name: 'Relevance score',
+      render: (score: Alert['_score']) => {
+        return <EuiBadge color="accent">{numeral(normalizeScore(score)).format('0[.0]')}</EuiBadge>;
+      },
+    },
+    {
+      field: ALERT_STATUS,
+      name: 'Status',
+      render: (_, item: Alert) => {
+        const value = getAlertFieldValue(item, ALERT_STATUS);
+        if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
+          // NOTE: This should only be needed to narrow down the type.
+          // Status should be either "active" or "recovered".
+          return null;
+        }
+        return <EuiBadge color={value === 'active' ? 'danger' : 'success'}>{value}</EuiBadge>;
+      },
+    },
+    {
+      field: ALERT_RULE_NAME,
+      name: 'Rule',
+      truncateText: true,
+      render: (_, item: Alert) => {
+        const ruleCategory = getAlertFieldValue(item, ALERT_RULE_CATEGORY);
+        return <EuiText size="s">{ruleCategory}</EuiText>;
+      },
+    },
+    {
+      field: ALERT_INSTANCE_ID,
+      name: 'Group',
+      truncateText: true,
+      render: (_, item: Alert) => {
+        const instanceId = getAlertFieldValue(item, ALERT_INSTANCE_ID);
+        return <EuiText size="s">{instanceId}</EuiText>;
+      },
+    },
+  ];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiSpacer size="xs" />
-      {data?.alerts?.map((a) => (
-        <EuiFlexItem key={a._id}>
-          <span>
-            {a['kibana.alert.rule.name'] ?? 'alert'} -
-            {a['kibana.alert.instance.id'] ?? 'instanceId'} - Relevance: {a._score}
-          </span>
-        </EuiFlexItem>
-      ))}
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.observability.relatedAlertsView.euiCallOut.relatedAlertsHeuristicsLabel',
+          { defaultMessage: 'Related alerts heuristics' }
+        )}
+        iconType="search"
+      >
+        <p>
+          {i18n.translate('xpack.observability.relatedAlertsView.p.weAreFetchingAlertsLabel', {
+            defaultMessage:
+              "We are fetching relevant alerts to the current alert based on some heuristics. Soon you'll be able to tweaks the weights applied to these heuristics",
+          })}
+        </p>
+      </EuiCallOut>
+
+      <EuiBasicTable
+        tableCaption="Most relevant alerts to the current one"
+        items={data?.alerts ?? []}
+        rowHeader={ALERT_REASON}
+        columns={columns}
+        loading={isLoading}
+        compressed
+        error={isError ? 'Error fetching relevant alerts' : undefined}
+      />
     </EuiFlexGroup>
   );
 }
+
+const getAlertFieldValue = (alert: Alert, fieldName: string) => {
+  // can be updated when working on https://github.com/elastic/kibana/issues/140819
+  const rawValue = alert[fieldName];
+  const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
+
+  if (!isEmpty(value)) {
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return 'Error: Unable to parse JSON value.';
+      }
+    }
+    return value;
+  }
+
+  return '--';
+};
