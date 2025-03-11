@@ -21,6 +21,10 @@ describe('updateSelectedOptions()', () => {
     },
   } as any as FilterGroupHandler;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('Should not do anything if controlIndex is < 0', () => {
     updateSelectedOptions(ALERT_STATUS_ACTIVE, -1, alertFilterControlHandler);
     expect(mockedClearSelections).not.toHaveBeenCalled();
@@ -33,13 +37,13 @@ describe('updateSelectedOptions()', () => {
     expect(mockedSetSelectedOptions).not.toHaveBeenCalled();
   });
 
-  it('Should clear selection if status is ALL', () => {
+  it('Should clear selection if status is all', () => {
     updateSelectedOptions(ALERT_STATUS_ALL, 0, alertFilterControlHandler);
     expect(mockedClearSelections).toHaveBeenCalledTimes(1);
     expect(mockedSetSelectedOptions).not.toHaveBeenCalled();
   });
 
-  it('Should change selected option is status is ACTIVE', () => {
+  it('Should change selected option is status is active', () => {
     updateSelectedOptions(ALERT_STATUS_ACTIVE, 0, alertFilterControlHandler);
     expect(mockedClearSelections).not.toHaveBeenCalled();
     expect(mockedSetSelectedOptions).toHaveBeenCalledTimes(1);
