@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 import { useGlobalHeaderPortal } from '../../../../common/hooks/use_global_header_portal';
@@ -15,7 +15,7 @@ const StyledStickyWrapper = styled.div`
   top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
 `;
 
-export const GlobalKQLHeader = React.memo(() => {
+export const GlobalKQLHeader = memo(() => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (

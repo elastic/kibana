@@ -12,5 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-page-no-data-types",
+    "@kbn/shared-ux-page-solution-nav"
   ]
 }

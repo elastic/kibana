@@ -68,10 +68,10 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
   const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);
   const activePanelNavIdRef = useRef<ActivePanelNav>(null);
 
-  const openPanelNav = (id: string) => {
+  const openPanelNav = useCallback((id: string) => {
     activePanelNavIdRef.current = id;
     setActivePanelNavId(id);
-  };
+  }, []);
 
   const onClosePanelNav = useCallback(() => {
     activePanelNavIdRef.current = null;

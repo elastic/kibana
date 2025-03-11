@@ -9,14 +9,7 @@ import React from 'react';
 import type { RouteProps, RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { Alerts } from './pages/alerts';
-
-const AlertsRoutes = () => (
-  <PluginTemplateWrapper>
-    <Alerts />
-  </PluginTemplateWrapper>
-);
+import { routes as alertsRoutes } from './pages/alerts';
 
 const DetectionsRedirects = ({ location }: RouteComponentProps) =>
   location.pathname === DETECTIONS_PATH ? (
@@ -28,10 +21,7 @@ const DetectionsRedirects = ({ location }: RouteComponentProps) =>
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
-    render: DetectionsRedirects,
+    component: DetectionsRedirects,
   },
-  {
-    path: ALERTS_PATH,
-    component: AlertsRoutes,
-  },
+  ...alertsRoutes,
 ];

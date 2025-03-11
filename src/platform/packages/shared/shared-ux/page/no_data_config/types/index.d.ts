@@ -15,7 +15,7 @@ import type {
   NoDataPageServices,
   NoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-types';
-
+import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 export type NoDataConfigPageKibanaDependencies = NoDataPageKibanaDependencies;
 export type NoDataConfigPageServices = NoDataPageServices;
 export type NoDataConfig = NoDataPageProps;
@@ -31,4 +31,5 @@ export type NoDataConfigPageProps = EuiPageTemplateProps & {
    */
   pageSideBar?: ReactNode;
   pageSideBarProps?: EuiPageSidebarProps;
+  solutionNav?: SolutionNavProps;
 };

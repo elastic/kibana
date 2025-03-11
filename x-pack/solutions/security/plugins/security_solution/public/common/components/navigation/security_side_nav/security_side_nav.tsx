@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
   SolutionSideNav,
@@ -137,7 +137,7 @@ const usePanelBottomOffset = (): string | undefined => {
  * Main security navigation component.
  * It takes the links to render from the generic application `links` configs.
  */
-export const SecuritySideNav: React.FC = () => {
+export const SecuritySideNav: React.FC = memo(() => {
   const items = useSolutionSideNavItems();
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
@@ -157,4 +157,6 @@ export const SecuritySideNav: React.FC = () => {
       tracker={track}
     />
   );
-};
+});
+
+SecuritySideNav.displayName = 'SecuritySideNav';
