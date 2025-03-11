@@ -9,7 +9,7 @@
 
 import { ActionType } from '@kbn/actions-types';
 import { ActionConnector } from '../common/types';
-// import './check_action_type_enabled.scss';
+import './check_action_type_enabled.scss';
 import { configurationCheckResult, getLicenseCheckResult } from './get_license_check_result';
 
 export interface IsEnabledResult {
