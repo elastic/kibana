@@ -14,15 +14,13 @@ import {
 } from '@kbn/actions-plugin/server/mocks';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { InjectActionParamsOpts, injectActionParams } from '../inject_action_params';
-import { RuleTypeParams, SanitizedRule, GetViewInAppRelativeUrlFnOpts } from '../../types';
+import type { InjectActionParamsOpts } from '../inject_action_params';
+import { injectActionParams } from '../inject_action_params';
+import type { RuleTypeParams, SanitizedRule, GetViewInAppRelativeUrlFnOpts } from '../../types';
 import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
-import {
-  ConcreteTaskInstance,
-  TaskErrorSource,
-  TaskPriority,
-} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource, TaskPriority } from '@kbn/task-manager-plugin/server';
 import { RuleNotifyWhen } from '../../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
