@@ -199,7 +199,7 @@ export const useCurrentConversation = ({
   );
 
   const [localSecuritySolutionAssistantConnectorId] = useLocalStorage<string | undefined>(
-    `securitySolution.onboarding.assistantCard.connectorId.default`
+    `securitySolution.onboarding.assistantCard.connectorId.${spaceId}`
   );
 
   const handleOnConversationSelected = useCallback(
