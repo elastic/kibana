@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
+import { defaults, flow } from 'lodash';
 import { Serializable, SerializableArray, SerializableRecord } from '@kbn/utility-types';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { ControlGroupAttributes } from '../../types';
 
 /**
- * Transform functions for controls state.
+ * Transform functions for serialized controls state.
  */
 export const transformControlsState: (
   serializedControlState: string
@@ -53,9 +53,9 @@ export function transformControlExplicitInput(controls: SerializableArray): Seri
 
 // TODO We may want to remove setting defaults in the future
 export function transformControlsSetDefaults(controls: SerializableArray): SerializableArray {
-  return controls.filter(isValidControl).map((control) => ({
-    width: DEFAULT_CONTROL_WIDTH,
-    grow: DEFAULT_CONTROL_GROW,
-    ...control,
-  }));
+  return controls
+    .filter(isValidControl)
+    .map((control) =>
+      defaults(controls, { grow: DEFAULT_CONTROL_GROW, width: DEFAULT_CONTROL_WIDTH })
+    );
 }

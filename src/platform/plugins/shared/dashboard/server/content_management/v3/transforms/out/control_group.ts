@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
+import { defaults, flow } from 'lodash';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
@@ -33,12 +33,11 @@ export const transformControlGroupOut: (
 function transformControlGroupSetDefaults(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
 ) {
-  return {
+  return defaults(controlGroupInput, {
     controlStyle: DEFAULT_CONTROL_LABEL_POSITION,
     chainingSystem: DEFAULT_CONTROL_CHAINING,
     showApplySelections: !DEFAULT_AUTO_APPLY_SELECTIONS,
-    ...controlGroupInput,
-  };
+  });
 }
 
 function transformIgnoreParentSettings(
@@ -53,13 +52,11 @@ function transformIgnoreParentSettings(
   };
 }
 
+// TODO We may want to remove setting defaults in the future
 function transformIgnoreParentSettingsSetDefaults(
   ignoreParentSettings: ParentIgnoreSettings
 ): ParentIgnoreSettings {
-  return {
-    ...DEFAULT_IGNORE_PARENT_SETTINGS,
-    ...ignoreParentSettings,
-  };
+  return defaults(ignoreParentSettings, DEFAULT_IGNORE_PARENT_SETTINGS);
 }
 
 function transformShowApplySelections(
