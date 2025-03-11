@@ -3879,6 +3879,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-assistant-cta@link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-icon@link:x-pack/platform/packages/shared/ai-assistant/icon":
   version "0.0.0"
   uid ""
