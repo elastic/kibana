@@ -97,8 +97,8 @@ export interface GetActionsToScheduleOpts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  activeCurrentAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredCurrentAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  activeAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   throttledSummaryActions?: ThrottledActions;
 }
 
