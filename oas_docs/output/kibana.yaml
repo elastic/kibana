@@ -230,7 +230,11 @@ tags:
   - name: system
     x-displayName: System
     description: |
-      Get information about the system status, resource usage, and installed plugins.
+      Get information about the system status, resource usage, features, and installed plugins.
+  - description: |
+      Get information about the system status, resource usage, features, and installed plugins.
+    name: system
+    x-displayName: System
   - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
     name: upgrade
     x-displayName: Upgrade assistant
@@ -15105,6 +15109,89 @@ paths:
       summary: Create a shared exception list
       tags:
         - Security Exceptions API
+  /api/features:
+    get:
+      description: |
+        Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.
+      operationId: get-features
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getFeaturesExample:
+                  value: |
+                    {
+                      "features": [
+                        {
+                          "name": "tasks",
+                          "description": "Manages task results"
+                        },
+                        {
+                          "name": "security",
+                          "description": "Manages configuration for Security features, such as users and roles"
+                        },
+                        {
+                          "name": "searchable_snapshots",
+                          "description": "Manages caches and configuration for searchable snapshots"
+                        },
+                        {
+                          "name": "logstash_management",
+                          "description": "Enables Logstash Central Management pipeline storage"
+                        },
+                        {
+                          "name": "transform",
+                          "description": "Manages configuration and state for transforms"
+                        },
+                        {
+                          "name": "kibana",
+                          "description": "Manages Kibana configuration and reports"
+                        },
+                        {
+                          "name": "synonyms",
+                          "description": "Manages synonyms"
+                        },
+                        {
+                          "name": "async_search",
+                          "description": "Manages results of async searches"
+                        },
+                        {
+                          "name": "ent_search",
+                          "description": "Manages configuration for Enterprise Search features"
+                        },
+                        {
+                          "name": "machine_learning",
+                          "description": "Provides anomaly detection and forecasting functionality"
+                        },
+                        {
+                          "name": "geoip",
+                          "description": "Manages data related to GeoIP database downloader"
+                        },
+                        {
+                          "name": "watcher",
+                          "description": "Manages Watch definitions and state"
+                        },
+                        {
+                          "name": "fleet",
+                          "description": "Manages configuration for Fleet"
+                        },
+                        {
+                          "name": "enrich",
+                          "description": "Manages data related to Enrich policies"
+                        },
+                        {
+                          "name": "inference_plugin",
+                          "description": "Inference plugin for managing inference services and inference"
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get features
+      tags:
+        - system
+      x-state: Technical Preview
   /api/fleet/agent_download_sources:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
